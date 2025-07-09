@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Brain, Shield, Database, Activity } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const projects = [
   {
@@ -12,7 +13,8 @@ const projects = [
     description: "Built an AI-powered dashboard that helps clinicians review and validate LLM-suggested diagnoses, improving clinical documentation accuracy by 40%.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
-    color: "bg-blue-500"
+    color: "bg-blue-500",
+    path: "/cases/smarterdx"
   },
   {
     id: "prescriberpoint",
@@ -21,7 +23,8 @@ const projects = [
     description: "Designed a machine learning interface that streamlines prior authorization workflows, reducing approval time from days to hours.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
-    color: "bg-green-500"
+    color: "bg-green-500",
+    path: "/cases/prescriberpoint"
   },
   {
     id: "bcgx",
@@ -30,7 +33,8 @@ const projects = [
     description: "Led the UX redesign of pharmaceutical research workflows, improving researcher productivity and reducing time-to-market for new treatments.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: Activity,
-    color: "bg-purple-500"
+    color: "bg-purple-500",
+    path: "/cases/bcgx"
   },
   {
     id: "definitive",
@@ -39,7 +43,8 @@ const projects = [
     description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
-    color: "bg-orange-500"
+    color: "bg-orange-500",
+    path: "/cases/definitive"
   }
 ];
 
@@ -70,7 +75,8 @@ const ProjectCardsSection = () => {
               viewport={{ once: true }}
               whileHover={{ y: -8, rotate: -1 }}
             >
-              <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/20">
+              <Link to={project.path}>
+                <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/20">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className={`p-3 rounded-lg ${project.color}/10 mb-4`}>
@@ -107,7 +113,8 @@ const ProjectCardsSection = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>
-              </Card>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </div>
