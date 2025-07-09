@@ -4,17 +4,17 @@ import { FileText, Globe, Mail } from "lucide-react";
 
 const HeroSection = () => {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 px-4">
+    <section className="min-h-screen flex items-center justify-center bg-primary px-4">
       <div className="text-center max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-primary-foreground">
             Jordan Leahy
           </h1>
-          <h2 className="text-xl md:text-2xl font-medium text-muted-foreground mb-6">
+          <h2 className="font-sans text-xl md:text-2xl font-medium text-accent mb-6">
             Healthcare Product Designer & Strategist
           </h2>
         </motion.div>
@@ -23,7 +23,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed"
+          className="font-sans text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed"
         >
           Designing automation tools for clinical integrity, revenue recovery, and safer care.
         </motion.p>

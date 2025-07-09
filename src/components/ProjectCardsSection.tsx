@@ -50,7 +50,7 @@ const projects = [
 
 const ProjectCardsSection = () => {
   return (
-    <section id="portfolio" className="py-16 px-4 bg-muted/30">
+    <section id="portfolio" className="py-16 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,8 +59,8 @@ const ProjectCardsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold mb-4">Featured Projects</h2>
-          <p className="text-muted-foreground text-lg">
+          <h2 className="font-serif text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
+          <p className="font-sans text-muted-foreground text-lg">
             Case studies showcasing healthcare design innovation
           </p>
         </motion.div>
@@ -76,39 +76,39 @@ const ProjectCardsSection = () => {
               whileHover={{ y: -8, rotate: -1 }}
             >
               <Link to={project.path}>
-                <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/20">
+                <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-accent/20 hover:border-accent">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
-                    <div className={`p-3 rounded-lg ${project.color}/10 mb-4`}>
-                      <project.icon className={`h-6 w-6 text-white`} style={{ color: project.color.replace('bg-', '').replace('-500', '') }} />
+                    <div className="p-3 rounded-lg bg-accent/10 mb-4">
+                      <project.icon className="h-6 w-6 text-accent" />
                     </div>
                     <motion.div
                       whileHover={{ x: 4 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
                     </motion.div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-1">{project.title}</h3>
-                    <p className="text-primary font-medium">{project.company}</p>
+                    <h3 className="font-serif text-xl font-bold mb-1 text-foreground">{project.title}</h3>
+                    <p className="font-sans text-accent font-medium">{project.company}</p>
                   </div>
                 </CardHeader>
                 
                 <CardContent className="pt-0">
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="font-sans text-card-foreground mb-4 leading-relaxed">
                     {project.description}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
+                      <Badge key={tag} variant="secondary" className="font-sans text-xs bg-accent/10 text-accent">
                         {tag}
                       </Badge>
                     ))}
                   </div>
                   
-                  <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                  <Button variant="outline" className="w-full border-accent text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300">
                     View Case Study
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

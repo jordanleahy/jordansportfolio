@@ -6,33 +6,34 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Jordan Leahy Brand Colors */
+    --background: 39 16% 97%; /* Off-White: #F9F7F3 */
+    --foreground: 0 0% 13%; /* Charcoal Black: #222222 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 39 16% 97%; /* Off-White */
+    --card-foreground: 0 0% 13%; /* Charcoal Black */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 39 16% 97%; /* Off-White */
+    --popover-foreground: 0 0% 13%; /* Charcoal Black */
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 172 100% 12%; /* Imperial Green: #003F34 */
+    --primary-foreground: 39 16% 97%; /* Off-White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 45 28% 57%; /* Regal Gold: #C6A55A */
+    --secondary-foreground: 172 100% 12%; /* Imperial Green */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 39 16% 95%; /* Lighter Off-White for subtle backgrounds */
+    --muted-foreground: 0 0% 40%; /* Lighter Charcoal for muted text */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 28% 57%; /* Regal Gold */
+    --accent-foreground: 172 100% 12%; /* Imperial Green */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 39 16% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 39 16% 90%; /* Subtle border based on off-white */
+    --input: 39 16% 95%; /* Input background */
+    --ring: 45 28% 57%; /* Regal Gold for focus rings */
 
     --radius: 0.5rem;
 
@@ -54,33 +55,34 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with Imperial Green dominance */
+    --background: 172 100% 12%; /* Imperial Green background */
+    --foreground: 39 16% 97%; /* Off-White text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 172 80% 15%; /* Slightly lighter Imperial Green */
+    --card-foreground: 39 16% 97%; /* Off-White */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 172 80% 15%; /* Slightly lighter Imperial Green */
+    --popover-foreground: 39 16% 97%; /* Off-White */
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 39 16% 97%; /* Off-White as primary in dark */
+    --primary-foreground: 172 100% 12%; /* Imperial Green */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 45 28% 57%; /* Regal Gold */
+    --secondary-foreground: 172 100% 12%; /* Imperial Green */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 172 60% 20%; /* Muted green */
+    --muted-foreground: 39 16% 80%; /* Muted off-white */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 28% 57%; /* Regal Gold */
+    --accent-foreground: 172 100% 12%; /* Imperial Green */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 39 16% 97%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 172 60% 20%; /* Subtle green border */
+    --input: 172 60% 18%; /* Input background */
+    --ring: 45 28% 57%; /* Regal Gold for focus rings */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

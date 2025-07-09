@@ -12,7 +12,7 @@ const companies = [
 
 const CompaniesSection = () => {
   return (
-    <section className="py-16 px-4 bg-muted/30">
+    <section className="py-16 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -21,8 +21,8 @@ const CompaniesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold mb-4">Trusted by Leading Healthcare Companies</h2>
-          <p className="text-muted-foreground text-lg">
+          <h2 className="font-serif text-3xl font-bold mb-4 text-foreground">Trusted by Leading Healthcare Companies</h2>
+          <p className="font-sans text-muted-foreground text-lg">
             Delivering design excellence across the healthcare ecosystem
           </p>
         </motion.div>
@@ -38,11 +38,11 @@ const CompaniesSection = () => {
               whileHover={{ scale: 1.05, y: -2 }}
               className="group"
             >
-              <div className="bg-card border rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer">
-                <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold text-sm">
+              <div className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer">
+                <div className="w-12 h-12 mx-auto mb-3 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm">
                   {company.logo}
                 </div>
-                <p className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
+                <p className="font-sans text-sm font-medium text-foreground/80 group-hover:text-accent transition-colors">
                   {company.name}
                 </p>
               </div>
