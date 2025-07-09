@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
+import HeroSection from "@/components/HeroSection";
+import CompaniesSection from "@/components/CompaniesSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import ProjectCardsSection from "@/components/ProjectCardsSection";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -62,33 +66,37 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center space-y-6">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Digital Health Events</h1>
-        
-        {user ? (
-          <div className="space-y-4">
-            <p className="text-xl text-muted-foreground">
-              Hello, {user.email}!
+    <div className="min-h-screen bg-background">
+      {/* Admin Bar for authenticated users */}
+      {user && (
+        <div className="fixed top-0 right-0 z-50 p-4">
+          <div className="bg-card border rounded-lg p-3 shadow-lg">
+            <p className="text-sm text-muted-foreground mb-2">
+              Logged in as: {user.email}
             </p>
-            <p className="text-muted-foreground">
-              You are successfully authenticated.
-            </p>
-            <Button onClick={handleSignOut} variant="outline">
+            <Button onClick={handleSignOut} variant="outline" size="sm">
               Sign Out
             </Button>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-xl text-muted-foreground">
-              Please sign in to get started
-            </p>
-            <Link to="/auth">
-              <Button>Sign In / Sign Up</Button>
-            </Link>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Portfolio Content */}
+      <HeroSection />
+      <CompaniesSection />
+      <TestimonialsSection />
+      <ProjectCardsSection />
+
+      {/* Auth Link for non-authenticated users */}
+      {!user && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Link to="/auth">
+            <Button variant="outline" size="sm">
+              Admin Login
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
