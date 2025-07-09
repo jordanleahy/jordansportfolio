@@ -59,8 +59,8 @@ const ProjectCardsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="font-serif text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
-          <p className="font-sans text-muted-foreground text-lg">
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
+          <p className="text-muted-foreground text-lg">
             Case studies showcasing healthcare design innovation
           </p>
         </motion.div>
@@ -90,19 +90,19 @@ const ProjectCardsSection = () => {
                     </motion.div>
                   </div>
                   <div>
-                    <h3 className="font-serif text-xl font-bold mb-1 text-foreground">{project.title}</h3>
-                    <p className="font-sans text-accent font-medium">{project.company}</p>
+                    <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
+                    <p className="text-accent font-medium">{project.company}</p>
                   </div>
                 </CardHeader>
                 
                 <CardContent className="pt-0">
-                  <p className="font-sans text-card-foreground mb-4 leading-relaxed">
+                  <p className="text-card-foreground mb-4 leading-relaxed">
                     {project.description}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="font-sans text-xs bg-primary text-primary-foreground">
+                      <Badge key={tag} variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
                         {tag}
                       </Badge>
                     ))}

@@ -6,91 +6,85 @@
 
 @layer base {
   :root {
-    /* Jordan Leahy Brand Colors */
-    --background: 39 16% 97%; /* Off-White: #F9F7F3 */
-    --foreground: 0 0% 13%; /* Charcoal Black: #222222 */
+    /* Jordan Leahy Brand Colors - Blue Design System */
+    --background: 210 14% 97%; /* Background: #F9FAFB */
+    --foreground: 210 11% 15%; /* Soft Charcoal: #2F2F32 */
 
-    --card: 39 16% 97%; /* Off-White */
-    --card-foreground: 0 0% 13%; /* Charcoal Black */
+    --card: 0 0% 100%; /* Pure white for cards */
+    --card-foreground: 210 11% 15%; /* Soft Charcoal */
 
-    --popover: 39 16% 97%; /* Off-White */
-    --popover-foreground: 0 0% 13%; /* Charcoal Black */
+    --popover: 0 0% 100%; /* Pure white */
+    --popover-foreground: 210 11% 15%; /* Soft Charcoal */
 
-    --primary: 172 100% 12%; /* Imperial Green: #003F34 */
-    --primary-foreground: 39 16% 97%; /* Off-White */
+    --primary: 218 85% 51%; /* Primary Blue: #2A6FDB */
+    --primary-foreground: 210 40% 98%; /* Light text on blue */
 
-    --secondary: 45 28% 57%; /* Regal Gold: #C6A55A */
-    --secondary-foreground: 172 100% 12%; /* Imperial Green */
+    --secondary: 210 14% 92%; /* Light gray for secondary */
+    --secondary-foreground: 210 11% 15%; /* Soft Charcoal */
 
-    --muted: 39 16% 95%; /* Lighter Off-White for subtle backgrounds */
-    --muted-foreground: 0 0% 40%; /* Lighter Charcoal for muted text */
+    --muted: 210 14% 92%; /* Light gray backgrounds */
+    --muted-foreground: 215 16% 47%; /* Steel Gray: #6E7681 */
 
-    --accent: 45 28% 57%; /* Regal Gold */
-    --accent-foreground: 172 100% 12%; /* Imperial Green */
+    --accent: 181 69% 32%; /* Civic Teal: #1D8E8E */
+    --accent-foreground: 210 40% 98%; /* Light text on teal */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 39 16% 97%;
+    --destructive: 0 72% 51%; /* Error Red: #D64545 */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 39 16% 90%; /* Subtle border based on off-white */
-    --input: 39 16% 95%; /* Input background */
-    --ring: 45 28% 57%; /* Regal Gold for focus rings */
+    --border: 214 32% 91%; /* Subtle border */
+    --input: 214 32% 91%; /* Input background */
+    --ring: 218 85% 51%; /* Primary Blue for focus rings */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 210 14% 97%;
+    --sidebar-foreground: 210 11% 15%;
+    --sidebar-primary: 218 85% 51%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 14% 92%;
+    --sidebar-accent-foreground: 210 11% 15%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 218 85% 51%;
   }
 
   .dark {
-    /* Dark mode with Imperial Green dominance */
-    --background: 172 100% 12%; /* Imperial Green background */
-    --foreground: 39 16% 97%; /* Off-White text */
+    /* Dark mode with blue system */
+    --background: 210 11% 15%; /* Soft Charcoal background */
+    --foreground: 210 14% 97%; /* Light text */
 
-    --card: 172 80% 15%; /* Slightly lighter Imperial Green */
-    --card-foreground: 39 16% 97%; /* Off-White */
+    --card: 210 11% 18%; /* Slightly lighter charcoal */
+    --card-foreground: 210 14% 97%; /* Light text */
 
-    --popover: 172 80% 15%; /* Slightly lighter Imperial Green */
-    --popover-foreground: 39 16% 97%; /* Off-White */
+    --popover: 210 11% 18%; /* Slightly lighter charcoal */
+    --popover-foreground: 210 14% 97%; /* Light text */
 
-    --primary: 39 16% 97%; /* Off-White as primary in dark */
-    --primary-foreground: 172 100% 12%; /* Imperial Green */
+    --primary: 218 85% 51%; /* Primary Blue */
+    --primary-foreground: 210 40% 98%; /* Light text on blue */
 
-    --secondary: 45 28% 57%; /* Regal Gold */
-    --secondary-foreground: 172 100% 12%; /* Imperial Green */
+    --secondary: 215 16% 20%; /* Dark gray for secondary */
+    --secondary-foreground: 210 14% 97%; /* Light text */
 
-    --muted: 172 60% 20%; /* Muted green */
-    --muted-foreground: 39 16% 80%; /* Muted off-white */
+    --muted: 215 16% 20%; /* Dark gray backgrounds */
+    --muted-foreground: 215 16% 47%; /* Steel Gray */
 
-    --accent: 45 28% 57%; /* Regal Gold */
-    --accent-foreground: 172 100% 12%; /* Imperial Green */
+    --accent: 181 69% 32%; /* Civic Teal */
+    --accent-foreground: 210 40% 98%; /* Light text on teal */
 
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 39 16% 97%;
+    --destructive: 0 72% 51%; /* Error Red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 172 60% 20%; /* Subtle green border */
-    --input: 172 60% 18%; /* Input background */
-    --ring: 45 28% 57%; /* Regal Gold for focus rings */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 215 16% 20%; /* Subtle dark border */
+    --input: 215 16% 20%; /* Input background */
+    --ring: 218 85% 51%; /* Primary Blue for focus rings */
+    
+    --sidebar-background: 210 11% 15%;
+    --sidebar-foreground: 210 14% 97%;
+    --sidebar-primary: 218 85% 51%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 215 16% 20%;
+    --sidebar-accent-foreground: 210 14% 97%;
+    --sidebar-border: 215 16% 20%;
+    --sidebar-ring: 218 85% 51%;
   }
 }
 

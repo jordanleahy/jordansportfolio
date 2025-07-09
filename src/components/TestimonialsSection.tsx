@@ -36,8 +36,8 @@ const TestimonialsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="font-serif text-3xl font-bold mb-4 text-foreground">What People Say</h2>
-          <p className="font-sans text-muted-foreground text-lg">
+          <h2 className="text-3xl font-bold mb-4 text-foreground">What People Say</h2>
+          <p className="text-muted-foreground text-lg">
             Feedback from colleagues and collaborators
           </p>
         </motion.div>
