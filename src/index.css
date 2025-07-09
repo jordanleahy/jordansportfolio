@@ -33,18 +33,18 @@
 
     --border: 214 32% 91%; /* Subtle border */
     --input: 214 32% 91%; /* Input background */
-    --ring: 218 85% 51%; /* Primary Blue for focus rings */
+    --ring: 210 11% 15%; /* Black for focus rings to match primary */
 
     --radius: 0.5rem;
 
     --sidebar-background: 210 14% 97%;
     --sidebar-foreground: 210 11% 15%;
-    --sidebar-primary: 218 85% 51%;
-    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-primary: 210 11% 15%; /* Black */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on black */
     --sidebar-accent: 210 14% 92%;
     --sidebar-accent-foreground: 210 11% 15%;
     --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 218 85% 51%;
+    --sidebar-ring: 210 11% 15%; /* Black for focus rings */
   }
 
   .dark {
@@ -75,16 +75,16 @@
 
     --border: 215 16% 20%; /* Subtle dark border */
     --input: 215 16% 20%; /* Input background */
-    --ring: 218 85% 51%; /* Primary Blue for focus rings */
+    --ring: 210 11% 15%; /* Black for focus rings to match primary */
     
     --sidebar-background: 210 11% 15%;
     --sidebar-foreground: 210 14% 97%;
-    --sidebar-primary: 218 85% 51%;
-    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-primary: 210 11% 15%; /* Black */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on black */
     --sidebar-accent: 215 16% 20%;
     --sidebar-accent-foreground: 210 14% 97%;
     --sidebar-border: 215 16% 20%;
-    --sidebar-ring: 218 85% 51%;
+    --sidebar-ring: 210 11% 15%; /* Black for focus rings */
   }
 }
 

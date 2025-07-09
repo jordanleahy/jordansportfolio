@@ -108,7 +108,7 @@ const ProjectCardsSection = () => {
                     ))}
                   </div>
                   
-                  <Button variant="outline" className="w-full border-accent text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300">
+                  <Button variant="outline" className="w-full">
                     View Case Study
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
