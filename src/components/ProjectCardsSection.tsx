@@ -102,7 +102,7 @@ const ProjectCardsSection = () => {
                   
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="font-sans text-xs bg-accent/10 text-accent">
+                      <Badge key={tag} variant="secondary" className="font-sans text-xs bg-primary text-primary-foreground">
                         {tag}
                       </Badge>
                     ))}
