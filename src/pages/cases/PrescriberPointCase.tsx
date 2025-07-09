@@ -35,14 +35,9 @@ const PrescriberPointCase = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-4 rounded-xl bg-green-500/10">
-                <Shield className="h-8 w-8 text-green-600" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold mb-2">ML Drug Prior Auth Tool</h1>
-                <p className="text-xl text-muted-foreground">PrescriberPoint</p>
-              </div>
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold mb-2">ML Drug Prior Auth Tool</h1>
+              <p className="text-xl text-muted-foreground">PrescriberPoint</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">
