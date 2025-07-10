@@ -312,18 +312,6 @@ const PrescriberPointCase = () => {
                 <p className="text-muted-foreground">
                   Pre-populates PA forms with patient and clinical data using intelligent templates.
                 </p>
-                
-                {/* Interface Image */}
-                <div className="mt-6">
-                  <img 
-                    src="/lovable-uploads/6c43b3ab-9ad0-409d-9d2a-f9fc4e01d676.png"
-                    alt="Taltz prior authorization interface showing automated letter drafting with patient indication selection and step therapy requirements"
-                    className="w-full rounded-lg border border-border/50 shadow-md"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Live interface showing automated letter drafting for Taltz prior authorization
-                  </p>
-                </div>
               </Card>
 
               <Card className="p-6">
