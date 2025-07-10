@@ -287,7 +287,7 @@ const PrescriberPointCase = () => {
                 <CheckCircle className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-3">2. Medical Requirement Parser</h3>
                 <p className="text-muted-foreground">
-                  NLP-driven extraction of clinical criteria with intelligent form pre-population from EHR data.
+                  Clinical extraction from EHR via FHIR with intelligent recommendations and form population
                 </p>
               </Card>
 
