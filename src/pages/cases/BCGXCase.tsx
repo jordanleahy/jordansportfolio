@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { bcgxCaseData } from "@/data/bcgxCaseData";
 
@@ -192,51 +192,42 @@ const BCGXCase = () => {
       {/* Process */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Design & Strategy Process</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Design Process</h2>
           
           <div className="space-y-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">1. Healthcare Practice Observation</h3>
-                <p className="text-muted-foreground mb-4">
-                  Conducted ethnographic research across 12 healthcare practices, observing staff workflows and pain points in denial management processes.
-                </p>
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm italic">"I spend 3 hours every morning just dealing with insurance denials instead of helping patients."</p>
-                  <p className="text-xs text-muted-foreground mt-2">- Practice Manager, Family Medicine Clinic</p>
-                </div>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">2. Denial Pattern Analysis</h3>
-                <p className="text-muted-foreground">
-                  Analyzed 2,000+ denial cases to identify common rejection reasons, evidence requirements, and successful appeal strategies.
-                </p>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">3. Automated Evidence Platform</h3>
-                <p className="text-muted-foreground">
-                  Designed an intelligent system that automatically extracts relevant clinical evidence from patient records and generates customizable appeal templates.
-                </p>
-              </Card>
-            </motion.div>
+            {bcgxCaseData.process.map((step, index) => {
+              const IconComponent = step.icon === "Eye" ? Eye : step.icon === "BarChart3" ? BarChart3 : Zap;
+              const animationDirection = index % 2 === 0 ? -30 : 30;
+              
+              return (
+                <motion.div
+                  key={step.title}
+                  initial={{ opacity: 0, x: animationDirection }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <IconComponent className="h-6 w-6 text-primary" />
+                      <h3 className="text-xl font-bold">{index + 1}. {step.title}</h3>
+                    </div>
+                    
+                    {step.activities ? (
+                      <ul className="space-y-2 text-muted-foreground">
+                        {step.activities.map((activity, activityIndex) => (
+                          <li key={activityIndex} className="flex items-start">
+                            <span className="text-primary mr-2">•</span>
+                            {activity}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground">{step.description}</p>
+                    )}
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

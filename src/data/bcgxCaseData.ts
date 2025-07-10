@@ -48,17 +48,22 @@ export const bcgxCaseData = {
 
   process: [
     {
-      title: "Healthcare Practice Observation",
-      description: "Conducted ethnographic research across 12 healthcare practices, observing staff workflows and pain points in denial management processes.",
-      quote: "I spend 3 hours every morning just dealing with insurance denials instead of helping patients.",
-      quoteAuthor: "Practice Manager, Family Medicine Clinic"
+      title: "Research & Discovery",
+      icon: "Eye",
+      activities: [
+        "Shadowed denial intake sessions with billing and admin staff",
+        "Conducted interviews with 6 office managers and 4 CDS specialists",
+        "Key insight: \"Sorting through faxed letters and portal PDFs wastes hours each week.\""
+      ]
     },
     {
       title: "Denial Pattern Analysis", 
+      icon: "BarChart3",
       description: "Analyzed 2,000+ denial cases to identify common rejection reasons, evidence requirements, and successful appeal strategies."
     },
     {
       title: "Automated Evidence Platform",
+      icon: "Zap",
       description: "Designed an intelligent system that automatically extracts relevant clinical evidence from patient records and generates customizable appeal templates."
     }
   ],
