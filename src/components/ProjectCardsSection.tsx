@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Database, FileText } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const projects = [
@@ -42,7 +42,7 @@ const projects = [
     company: "Definitive Healthcare",
     description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
-    icon: Database,
+    icon: Workflow,
     color: "bg-orange-500",
     path: "/cases/case2"
   }
