@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 const initialCompanies = [
   { name: "SmarterDx", logo: "SD", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
   { name: "PrescriberPoint", logo: "PP", logoUrl: "/lovable-uploads/873ce045-f694-4990-8de2-acc4f4137e86.png" },
-  { name: "BCG X", logo: "BCG" },
+  { name: "BCG X", logo: "BCG", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
   { name: "Definitive Healthcare", logo: "DH" },
   { name: "RTD Health", logo: "RTD" },
   { name: "Pivot Design", logo: "PD" },
