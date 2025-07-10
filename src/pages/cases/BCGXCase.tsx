@@ -277,9 +277,9 @@ const BCGXCase = () => {
       {/* Outcomes */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Business Impact</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Outcome & Impact</h2>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -319,6 +319,23 @@ const BCGXCase = () => {
               </Card>
             </motion.div>
           </div>
+
+          {/* User Feedback */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Card className="p-8">
+              <h3 className="text-xl font-bold mb-6">User Feedback</h3>
+              <blockquote className="text-lg italic text-muted-foreground mb-4 leading-relaxed">
+                "Having all denials in one place and evidence surfaced automatically saved us hours each week."
+              </blockquote>
+              <p className="text-sm text-muted-foreground">
+                — Maria Lopez, Office Manager, Sunshine Family Clinic
+              </p>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
