@@ -20,8 +20,8 @@ const testimonials = [
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
-    author: "CTO, HTD Health",
-    role: "Technology Leadership"
+    author: "Medical Doctor, PrescriberPoint",
+    role: "Healthcare Provider"
   }
 ];
 
