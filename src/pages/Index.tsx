@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
-import HeroSection from "@/components/HeroSection";
+import HeroParallaxDemo from "@/components/HeroParallaxDemo";
 import CompaniesSection from "@/components/CompaniesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
@@ -87,8 +88,10 @@ const Index = () => {
         </div>
       )}
 
+      {/* Hero Parallax Section */}
+      <HeroParallaxDemo />
+      
       {/* Portfolio Content */}
-      <HeroSection />
       <CompaniesSection />
       <TestimonialsSection />
       <ProjectCardsSection />
