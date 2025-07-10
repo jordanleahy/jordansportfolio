@@ -9,7 +9,7 @@ const testimonials = [
     role: "Product Manager"
   },
   {
-    quote: "Jordan's ability to translate complex healthcare workflows into intuitive user experiences is exceptional.",
+    quote: "Working alongside Jordan at PrescriberPoint was like having a trusted partner who truly understood the value of clear, intuitive information",
     author: "Design Lead, PrescriberPoint",
     role: "Design Leadership"
   },
