@@ -40,7 +40,7 @@ const PrescriberPointCase = () => {
           duration: 0.6
         }}>
             <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization & </h1>
+              <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization </h1>
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
                 <p className="text-lg text-muted-foreground">
                   <strong>Project Summary:</strong> Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
