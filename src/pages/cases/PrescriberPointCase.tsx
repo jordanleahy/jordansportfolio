@@ -40,7 +40,23 @@ const PrescriberPointCase = () => {
           duration: 0.6
         }}>
             <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization </h1>
+              <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization</h1>
+              
+              {/* Hero Image */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50"
+              >
+                <img 
+                  src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
+                  alt="Drug Prior Authorization Workflow showing extraction, parsing, scheduling, drafting, and e-submission steps with formulary rules and letter generation"
+                  className="w-full h-auto object-cover aspect-video"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
+              </motion.div>
+
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
                 <p className="text-lg text-muted-foreground">
                   <strong>Project Summary:</strong> Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
@@ -395,21 +411,22 @@ const PrescriberPointCase = () => {
                 <AlertCircle className="h-8 w-8 text-orange-500 mb-4" />
                 <h3 className="text-xl font-semibold mb-4">Challenges & Solutions</h3>
                 <ul className="text-muted-foreground space-y-2">
-                  <li>• <strong>Edge cases:</strong> Handled complex payer requirement variations through modular design patterns</li>
-                  <li>• <strong>Regulatory concerns:</strong> Built comprehensive audit trails and approval documentation</li>
-                  <li>• <strong>Integration complexity:</strong> Designed flexible APIs for diverse EHR systems</li>
+                  <li>• Handling edge-case requirements across multiple payers required flexible template system</li>
+                  <li>• Integration complexity solved through phased rollout approach</li>
+                  <li>• Regulatory compliance ensured through continuous legal review</li>
+                  <li>• Change management addressed via comprehensive training program</li>
                 </ul>
               </Card>
             </div>
 
             <Card className="p-6 mt-8">
-              <TrendingUp className="h-8 w-8 text-primary mb-4" />
+              <Lightbulb className="h-8 w-8 text-blue-600 mb-4" />
               <h3 className="text-xl font-semibold mb-4">Next Steps & Evolution</h3>
               <ul className="text-muted-foreground space-y-2">
-                <li>• Integrate real-time payer API for live formulary updates</li>
-                <li>• Expand to orthopedic injectables and specialty therapy categories</li>
-                <li>• Develop predictive analytics for denial risk assessment</li>
-                <li>• Build automated appeal generation for denied requests</li>
+                <li>• Integrate real-time payer API connections for dynamic rule updates</li>
+                <li>• Expand coverage to orthopedic injectables and rare disease therapies</li>
+                <li>• Develop predictive analytics for approval likelihood scoring</li>
+                <li>• Create mobile interface for on-the-go PA status monitoring</li>
               </ul>
             </Card>
           </motion.div>
@@ -433,33 +450,33 @@ const PrescriberPointCase = () => {
             <div className="grid md:grid-cols-2 gap-8">
               <Card className="p-6">
                 <Eye className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-semibold mb-3">Design Artifacts</h3>
+                <h3 className="text-xl font-bold mb-3">Design Artifacts</h3>
                 <ul className="text-muted-foreground space-y-2">
-                  <li>• Interactive Figma prototypes</li>
-                  <li>• Annotated wireframes and user flows</li>
+                  <li>• Annotated wireframes showing workflow logic</li>
+                  <li>• Interactive prototype GIFs demonstrating key interactions</li>
+                  <li>• Final UI screens with responsive breakpoints</li>
                   <li>• Component library documentation</li>
-                  <li>• ML prediction interface mockups</li>
                 </ul>
               </Card>
 
               <Card className="p-6">
                 <Target className="h-8 w-8 text-primary mb-4" />
-                <h3 className="text-lg font-semibold mb-3">Process Documentation</h3>
+                <h3 className="text-xl font-bold mb-3">Process Documentation</h3>
                 <ul className="text-muted-foreground space-y-2">
-                  <li>• User journey maps and service blueprints</li>
-                  <li>• Research synthesis and insights</li>
-                  <li>• Usability testing reports</li>
-                  <li>• Design system guidelines</li>
+                  <li>• User journey maps with pain point analysis</li>
+                  <li>• Information architecture flowcharts</li>
+                  <li>• Usability test results and iteration history</li>
+                  <li>• Design system guidelines and tokens</li>
                 </ul>
               </Card>
             </div>
 
-            <div className="bg-muted/50 p-6 rounded-lg mt-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                <em>Note: Detailed design artifacts and interactive prototypes are available upon request due to confidentiality agreements.</em>
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground mb-6">
+                A balanced mix of process documentation (60%) and visual artifacts (40%) demonstrates both strategic thinking and execution excellence.
               </p>
-              <Button variant="outline">
-                Request Design Portfolio
+              <Button size="lg">
+                <a href="#contact">Request Full Case Study Details</a>
               </Button>
             </div>
           </motion.div>
@@ -478,7 +495,7 @@ const PrescriberPointCase = () => {
         }} viewport={{
           once: true
         }}>
-            <h2 className="text-3xl font-bold mb-6">Interested in healthcare workflow optimization?</h2>
+            <h2 className="text-3xl font-bold mb-6">Ready to discuss your healthcare design challenge?</h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg">
                 <a href="#contact">Get in Touch</a>

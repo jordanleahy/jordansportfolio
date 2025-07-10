@@ -50,7 +50,7 @@ const DefinitiveCase = () => {
                   className="relative mt-4 rounded-2xl overflow-hidden shadow-lg border border-border/50"
                 >
                   <img 
-                    src="/lovable-uploads/c6fd860b-49b8-4315-9fbb-f6c45bb4235f.png"
+                    src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
                     alt="UI Design System and reporting dashboard interface"
                     className="w-full h-auto object-cover aspect-video"
                   />
