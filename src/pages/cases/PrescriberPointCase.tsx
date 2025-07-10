@@ -4,16 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, Clock, CheckCircle, AlertCircle, Users, Target, Lightbulb, Eye, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const PrescriberPointCase = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50"
-      >
+      <motion.header initial={{
+      opacity: 0,
+      y: -20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -30,13 +30,17 @@ const PrescriberPointCase = () => {
       {/* 1. Project Snapshot */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 30
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.6
+        }}>
             <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-4">AI Drug Prior Authorization Tool</h1>
+              <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization & </h1>
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
                 <p className="text-lg text-muted-foreground">
                   <strong>Project Summary:</strong> Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
@@ -63,9 +67,7 @@ const PrescriberPointCase = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["#PriorAuth", "#ML", "#Workflow", "#Pharmacy", "#Healthcare"].map((tag) => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
-              ))}
+              {["#PriorAuth", "#ML", "#Workflow", "#Pharmacy", "#Healthcare"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
@@ -74,11 +76,15 @@ const PrescriberPointCase = () => {
       {/* 2. Context & Problem */}
       <section className="py-12 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-6">Context & Problem</h2>
             
             <div className="mb-8">
@@ -109,11 +115,15 @@ const PrescriberPointCase = () => {
       {/* 3. Your Role & Team */}
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-8">My Role & Team</h2>
             
             <div className="grid md:grid-cols-3 gap-8">
@@ -160,11 +170,15 @@ const PrescriberPointCase = () => {
       {/* 4. Design Process */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Design Process</h2>
             
             <div className="space-y-8">
@@ -239,11 +253,15 @@ const PrescriberPointCase = () => {
       {/* 5. Solution & Key Features */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Solution & Key Features</h2>
             
             <div className="grid md:grid-cols-2 gap-8">
@@ -302,11 +320,15 @@ const PrescriberPointCase = () => {
       {/* 6. Outcome & Impact */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Outcome & Impact</h2>
             
             <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -346,11 +368,15 @@ const PrescriberPointCase = () => {
       {/* 7. Reflection & Learnings */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Reflection & Learnings</h2>
             
             <div className="grid md:grid-cols-2 gap-8">
@@ -393,11 +419,15 @@ const PrescriberPointCase = () => {
       {/* 8. Visuals & Artifacts */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Visuals & Artifacts</h2>
             
             <div className="grid md:grid-cols-2 gap-8">
@@ -439,11 +469,15 @@ const PrescriberPointCase = () => {
       {/* CTA */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-6">Interested in healthcare workflow optimization?</h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg">
@@ -458,8 +492,6 @@ const PrescriberPointCase = () => {
           </motion.div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default PrescriberPointCase;
