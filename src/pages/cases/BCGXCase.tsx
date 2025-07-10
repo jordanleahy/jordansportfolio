@@ -2,8 +2,9 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target } from "lucide-react";
 import { Link } from "react-router-dom";
+import { bcgxCaseData } from "@/data/bcgxCaseData";
 
 const BCGXCase = () => {
   return (
@@ -104,6 +105,85 @@ const BCGXCase = () => {
                   Healthcare staff spend 60% of their administrative time on denial resolution instead of patient care activities.
                 </p>
               </Card>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* My Role & Team */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold mb-12 text-center">My Role & Team</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* My Role */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="p-6 h-full">
+                  <User className="h-8 w-8 text-primary mb-4" />
+                  <h3 className="text-xl font-bold mb-4">{bcgxCaseData.roleAndTeam.myRole.title}</h3>
+                  <h4 className="font-semibold text-foreground mb-3">Lead Product Designer</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {bcgxCaseData.roleAndTeam.myRole.details.map((detail, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-primary mr-2">•</span>
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+
+              {/* Team & Stakeholders */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className="p-6 h-full">
+                  <UserCheck className="h-8 w-8 text-primary mb-4" />
+                  <h3 className="text-xl font-bold mb-4">{bcgxCaseData.roleAndTeam.team.title}</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {bcgxCaseData.roleAndTeam.team.details.map((member, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-primary mr-2">•</span>
+                        {member}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+
+              {/* Duration & Scope */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="p-6 h-full">
+                  <Target className="h-8 w-8 text-primary mb-4" />
+                  <h3 className="text-xl font-bold mb-4">{bcgxCaseData.roleAndTeam.duration.title}</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {bcgxCaseData.roleAndTeam.duration.details.map((scope, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-primary mr-2">•</span>
+                        {scope}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
             </div>
           </motion.div>
         </div>

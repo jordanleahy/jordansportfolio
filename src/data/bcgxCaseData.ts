@@ -15,14 +15,35 @@ export const bcgxCaseData = {
   },
 
   roleAndTeam: {
-    myRole: "Lead Product Designer & UX Researcher",
-    team: [
-      "Product Manager",
-      "Engineering Lead", 
-      "Healthcare Domain Expert",
-      "Regulatory Affairs Specialist"
-    ],
-    scope: "End-to-end design of denial management platform, from identification to appeal resolution"
+    myRole: {
+      title: "My Role",
+      details: [
+        "Led UX design for the Prescription Denial Management feature",
+        "Defined workflows for denial intake, evidence capture, and appeal generation", 
+        "Produced hi-fi prototypes and facilitated usability tests",
+        "Coordinated with AI engineers to specify data-extraction prompts"
+      ]
+    },
+    team: {
+      title: "Team & Stakeholders",
+      details: [
+        "Product Manager (1)",
+        "Frontend Engineers (2)", 
+        "Backend & AI Engineers (2)",
+        "Clinical Documentation SME (1)",
+        "QA Lead (1)"
+      ]
+    },
+    duration: {
+      title: "Duration & Scope", 
+      details: [
+        "6-month engagement",
+        "5 major payer integrations",
+        "3 specialty drug categories",
+        "ML prediction model design",
+        "Automated workflow creation"
+      ]
+    }
   },
 
   process: [
