@@ -1223,7 +1223,11 @@ const BlogDetail = () => {
         className="px-4 mb-16"
       >
         <div className="max-w-5xl mx-auto">
-          <div className="aspect-video bg-muted rounded-xl"></div>
+          <img 
+            src="/lovable-uploads/702ae5d0-df0d-43f7-841f-a5269c2fc671.png" 
+            alt="Manual Chart Review Overload in CDI - AI vs Manual Workflow Comparison" 
+            className="w-full aspect-video object-cover rounded-xl shadow-2xl"
+          />
         </div>
       </motion.section>
 
