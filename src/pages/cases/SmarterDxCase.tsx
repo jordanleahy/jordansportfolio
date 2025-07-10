@@ -164,7 +164,7 @@ const SmarterDxCase = () => {
                 <h3 className="text-lg font-semibold mb-3">My Role</h3>
                 <p className="text-muted-foreground mb-2">Staff Product Designer</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• User research & criteria mapping</li>
+                  <li>• User research</li>
                   <li>• Workflow redesign & prototyping</li>
                   <li>• JSON output design for LLM integration</li>
                 </ul>
