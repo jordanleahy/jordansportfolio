@@ -279,7 +279,7 @@ const PrescriberPointCase = () => {
                 <Shield className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-3">1. Formulary Rule Extraction</h3>
                 <p className="text-muted-foreground">
-                  Auto-scans payer lists to flag coverage rules and identifies step-therapy requirements in real-time.
+                  Auto scans payer lists to flag coverage rules and identifies step therapy requirements in real time.
                 </p>
               </Card>
 
