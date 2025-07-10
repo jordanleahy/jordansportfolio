@@ -133,22 +133,16 @@ export const bcgxCaseData = {
     ]
   },
 
-  artifacts: [
-    {
-      title: "User Journey Maps",
-      description: "Comprehensive mapping of denial resolution workflows across different practice types"
-    },
-    {
-      title: "Evidence Extraction Algorithms", 
-      description: "Documentation of AI models for identifying relevant clinical evidence from patient records"
-    },
-    {
-      title: "Appeal Template Library",
-      description: "Curated collection of successful appeal letter templates for various denial reasons"
-    },
-    {
-      title: "Regulatory Compliance Guide",
-      description: "Documentation ensuring platform meets HIPAA and state healthcare regulations"
-    }
-  ]
+  visualsAndArtifacts: {
+    designArtifacts: [
+      "Annotated wireframes (Figma) for each feature",
+      "Component library exports (JSON)",
+      "AI prompt engineering documentation"
+    ],
+    processDocumentation: [
+      "Small-practice workflow maps",
+      "Usability test reports", 
+      "Handoff and QA checklists"
+    ]
+  }
 };
