@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const initialCompanies = [
   { name: "SmarterDx", logo: "SD", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
@@ -114,6 +114,8 @@ const CompaniesSection = () => {
                       src={(company as any).logoUrl} 
                       alt={`${company.name} logo`}
                       className="w-full h-full object-contain"
+                      onLoad={() => console.log(`Logo loaded for ${company.name}:`, (company as any).logoUrl)}
+                      onError={() => console.log(`Logo failed to load for ${company.name}:`, (company as any).logoUrl)}
                     />
                   ) : (
                     company.logo
