@@ -44,7 +44,7 @@ const SmarterDxCase = () => {
                 <Brain className="h-8 w-8 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold mb-2">Improve Sepsis Diagnosis Rates</h1>
+                <h1 className="text-4xl font-bold mb-2">Pre-Bill CDI Validation</h1>
               </div>
             </div>
             
