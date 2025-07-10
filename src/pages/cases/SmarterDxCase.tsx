@@ -83,14 +83,10 @@ const SmarterDxCase = () => {
                   <p className="text-sm text-muted-foreground">March – July 2024</p>
                 </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-muted-foreground mb-2">Keywords</h3>
-                <div className="flex flex-wrap gap-1">
-                  {["Prior Authorization", "Drug Formulary", "Healthcare AI", "Workflow Automation", "E-Submission", "Insurance"].map(tag => 
-                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                  )}
-                </div>
-              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {["PriorAuth", "Formulary", "MedicalRequirements", "Step Therapy", "Reauthorization"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
