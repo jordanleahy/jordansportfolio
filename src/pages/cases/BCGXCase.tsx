@@ -35,14 +35,9 @@ const BCGXCase = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-4 rounded-xl bg-purple-500/10">
-                <Activity className="h-8 w-8 text-purple-600" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold mb-2">Pharma Workflow Redesign</h1>
-                <p className="text-xl text-muted-foreground">BCG X</p>
-              </div>
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold mb-2">Pharma Workflow Redesign</h1>
+              <p className="text-xl text-muted-foreground">BCG X</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">
