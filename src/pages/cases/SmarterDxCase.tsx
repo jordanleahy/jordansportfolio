@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb } from "lucide-react";
+import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 const SmarterDxCase = () => {
   return <div className="min-h-screen bg-background">
@@ -450,6 +450,56 @@ const SmarterDxCase = () => {
                 <li>• Train LLM summarizers using JSON diagnostic outputs</li>
               </ul>
             </Card>
+          </motion.div>
+        </div>
+      </section>
+      
+      {/* Visuals & Artifacts */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
+            <h2 className="text-3xl font-bold mb-12 text-center">Visuals & Artifacts</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <Card className="p-6">
+                <Eye className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">Design Artifacts</h3>
+                <ul className="text-muted-foreground space-y-2">
+                  <li>• Annotated wireframes showing workflow logic</li>
+                  <li>• Interactive prototype GIFs demonstrating key interactions</li>
+                  <li>• Final UI screens with responsive breakpoints</li>
+                  <li>• Component library documentation</li>
+                </ul>
+              </Card>
+
+              <Card className="p-6">
+                <Target className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">Process Documentation</h3>
+                <ul className="text-muted-foreground space-y-2">
+                  <li>• User journey maps with pain point analysis</li>
+                  <li>• Information architecture flowcharts</li>
+                  <li>• Usability test results and iteration history</li>
+                  <li>• Design system guidelines and tokens</li>
+                </ul>
+              </Card>
+            </div>
+
+            <div className="text-center mb-8">
+              <p className="text-muted-foreground text-lg mb-6">
+                A balanced mix of process documentation (60%) and visual artifacts (40%) demonstrates both strategic thinking and execution excellence.
+              </p>
+              <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
+                Request Full Case Study Details
+              </Button>
+            </div>
           </motion.div>
         </div>
       </section>
