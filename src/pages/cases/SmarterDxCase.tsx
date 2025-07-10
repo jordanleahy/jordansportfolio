@@ -58,16 +58,11 @@ const SmarterDxCase = () => {
                 </motion.div>
               </div>
               
-              {/* Project Summary */}
-              <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  Project Summary
-                </h3>
-                <p className="text-sm">
-                  Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
+                <p className="text-lg text-muted-foreground">
+                  <strong>Project Summary:</strong> Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
                 </p>
-              </Card>
+              </div>
             </div>
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
