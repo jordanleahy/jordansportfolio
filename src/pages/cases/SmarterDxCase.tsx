@@ -263,7 +263,7 @@ const SmarterDxCase = () => {
                   <li>• Created 10 iterative versions of the interface</li>
                   <li>• Tested diagnostic clarity with CDS specialists in weekly reviews</li>
                   <li>• Integrated JSON export aligned with LLM summarization format</li>
-                  <li>• Validated scroll-free layout and pinning behavior usability</li>
+                  <li>• Validated scroll free layout and pinning behavior usability</li>
                 </ul>
               </Card>
             </motion.div>
