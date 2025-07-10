@@ -40,9 +40,7 @@ const SmarterDxCase = () => {
           duration: 0.6
         }}>
             <div className="flex items-center gap-4 mb-6">
-              <div className="p-4 rounded-xl bg-blue-500/10">
-                
-              </div>
+              
               <div>
                 <h1 className="text-4xl font-bold mb-2">Pre-Bill CDI Validation</h1>
                 
