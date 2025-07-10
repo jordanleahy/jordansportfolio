@@ -293,9 +293,16 @@ const PrescriberPointCase = () => {
               <Card className="p-6">
                 <Clock className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-3">3. Step-Therapy Checker</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   Visual indicator of prior steps required with timeline tracking and automated renewal alerts.
                 </p>
+                <div className="mt-4 rounded-lg overflow-hidden border border-border/50">
+                  <img 
+                    src="/lovable-uploads/23df69fa-883e-4110-9fa3-0965ad0fa8fb.png" 
+                    alt="Taltz prior authorization interface showing patient indication selection and step therapy requirements" 
+                    className="w-full h-auto" 
+                  />
+                </div>
               </Card>
 
               <Card className="p-6">
