@@ -7,8 +7,137 @@ import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // Mock blog content - replace with real data later
+const cdiAiOpportunityContent = [
+  {
+    type: "hero-section",
+    title: "Manual Chart Review Overload in CDI: The AI Opportunity",
+    subtitle: "How AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue"
+  },
+  {
+    type: "manual-inefficiencies",
+    title: "Manual Work Inefficiencies",
+    stats: [
+      {
+        value: "55%",
+        description: "of CDI pros spend 6–7 hours/day reviewing charts",
+        quote: "I feel like I'm drowning in paperwork instead of focusing on what matters most - patient care quality." 
+      },
+      {
+        value: "70%",
+        description: "of that work is routine and automatable",
+        quote: "So much of what I do daily could be handled by smart technology, freeing me for complex cases."
+      }
+    ]
+  },
+  {
+    type: "bottleneck-impact",
+    title: "Bottleneck Impact",
+    chartData: {
+      timeSpent: [
+        { category: "Chart Review", hours: 6, color: "#ef4444" },
+        { category: "Query Writing", hours: 1.5, color: "#f97316" },
+        { category: "Strategic Analysis", hours: 0.5, color: "#22c55e" }
+      ],
+      missedRevenue: {
+        baseline: 100,
+        withBottlenecks: 75,
+        potential: 125
+      }
+    }
+  },
+  {
+    type: "ai-advantage",
+    title: "The AI Advantage",
+    comparison: {
+      without: {
+        title: "Without AI",
+        steps: [
+          "Manual chart screening",
+          "Time-intensive documentation review", 
+          "Delayed query generation",
+          "Reactive compliance checking"
+        ]
+      },
+      with: {
+        title: "With AI",
+        steps: [
+          "AI-powered chart prioritization",
+          "Automated documentation analysis",
+          "Real-time query suggestions", 
+          "Proactive compliance monitoring"
+        ]
+      }
+    }
+  },
+  {
+    type: "roi-impact",
+    title: "ROI & Real Impact",
+    metrics: [
+      {
+        value: "+5%",
+        label: "Case Mix Index",
+        description: "Improved accuracy in severity documentation leads to better case mix performance",
+        caseStudy: "Regional Medical Center saw CMI increase from 1.42 to 1.49 within 6 months"
+      },
+      {
+        value: "+50%",
+        label: "CDI Productivity", 
+        description: "AI automation allows specialists to review 50% more cases per day",
+        caseStudy: "Mercy Health reduced average chart review time from 45 to 22 minutes"
+      },
+      {
+        value: ">$2M",
+        label: "Net Revenue Gains",
+        description: "Combined productivity and accuracy improvements drive significant revenue increases",
+        caseStudy: "450-bed hospital system achieved $2.3M additional revenue in first year"
+      }
+    ]
+  },
+  {
+    type: "investor-insight",
+    title: "Investor Insight", 
+    marketData: [
+      {
+        metric: "Annual Growth Rate",
+        value: "12.5%",
+        description: "CDI market growing rapidly as hospitals prioritize revenue optimization"
+      },
+      {
+        metric: "Total Market Size",
+        value: "$3.8B",
+        description: "Global CDI software market expected to reach $3.8B by 2028"
+      },
+      {
+        metric: "CFO Priority",
+        value: "90%",
+        description: "of hospital CFOs prioritize CDI technology investments"
+      }
+    ],
+    forecast: {
+      year1: 100,
+      year2: 135,
+      year3: 180
+    }
+  },
+  {
+    type: "closing-cta",
+    title: "Ready to Explore the Opportunity?",
+    description: "Discover detailed market analysis and investment insights in our comprehensive CDI brief",
+    buttonText: "Explore CDI Investment Brief →"
+  }
+];
+
 const getBlogPost = (id: string) => {
   const posts = {
+    "cdi-ai-opportunity": {
+      title: "Manual Chart Review Overload in CDI: The AI Opportunity",
+      subtitle: "How AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue",
+      author: "Jordan Leigh",
+      date: "2024-01-25",
+      readTime: "6 min read",
+      category: "Healthcare Investment",
+      content: cdiAiOpportunityContent
+    },
     "ai-transform-cdi": {
       title: "How Will AI Transform CDI?",
       subtitle: "AI isn't just enhancing Clinical Documentation Integrity — it's reshaping it.",
@@ -675,6 +804,337 @@ const BlogDetail = () => {
                 </motion.li>
               ))}
             </ul>
+          </motion.div>
+        );
+
+      case "hero-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2 }}
+            className="text-center py-20 mb-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-50"></div>
+            <div className="relative z-10">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {block.title}
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground italic max-w-4xl mx-auto">
+                {block.subtitle}
+              </p>
+            </div>
+          </motion.div>
+        );
+
+      case "manual-inefficiencies":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-16"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {block.stats.map((stat: any, statIndex: number) => (
+                <motion.div
+                  key={statIndex}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: statIndex * 0.3 }}
+                  className="group cursor-pointer"
+                >
+                  <Card className="p-8 hover:shadow-xl transition-all duration-500 border-l-4 border-l-primary group-hover:scale-105">
+                    <div className="text-center mb-6">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: statIndex * 0.3 + 0.2, type: "spring" }}
+                        className="text-6xl font-bold text-primary mb-3"
+                      >
+                        {stat.value}
+                      </motion.div>
+                      <p className="text-lg text-muted-foreground mb-4">
+                        {stat.description}
+                      </p>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-muted/50 p-4 rounded-lg">
+                      <p className="italic text-foreground/80 text-center">
+                        "{stat.quote}"
+                      </p>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case "bottleneck-impact":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-20"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <Card className="p-8">
+              <div className="grid md:grid-cols-2 gap-12">
+                {/* Time Spent Chart */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-6">Daily Time Allocation</h3>
+                  <div className="space-y-4">
+                    {block.chartData.timeSpent.map((item: any, itemIndex: number) => (
+                      <motion.div
+                        key={itemIndex}
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${(item.hours / 8) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ delay: itemIndex * 0.2, duration: 1 }}
+                        className="relative"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">{item.category}</span>
+                          <span className="text-sm text-muted-foreground">{item.hours}h</span>
+                        </div>
+                        <div className="w-full bg-muted h-3 rounded-full">
+                          <motion.div
+                            className="h-3 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${(item.hours / 8) * 100}%` }}
+                            viewport={{ once: true }}
+                            transition={{ delay: itemIndex * 0.2, duration: 1 }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Revenue Impact */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-6">Revenue Impact</h3>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center p-4 bg-destructive/5 rounded-lg">
+                      <span>Current Performance</span>
+                      <span className="text-2xl font-bold text-destructive">{block.chartData.missedRevenue.withBottlenecks}%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+                      <span>Baseline</span>
+                      <span className="text-2xl font-bold">{block.chartData.missedRevenue.baseline}%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 bg-green-500/5 rounded-lg">
+                      <span>AI-Enhanced Potential</span>
+                      <span className="text-2xl font-bold text-green-600">{block.chartData.missedRevenue.potential}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        );
+
+      case "ai-advantage":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-20"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Without AI */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className="p-6 h-full border-destructive/20 bg-destructive/5">
+                  <h3 className="text-2xl font-bold mb-6 text-center text-destructive">
+                    {block.comparison.without.title}
+                  </h3>
+                  <div className="space-y-4">
+                    {block.comparison.without.steps.map((step: string, stepIndex: number) => (
+                      <motion.div
+                        key={stepIndex}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 + stepIndex * 0.1 }}
+                        className="flex items-center gap-3 p-3 bg-background/50 rounded-lg"
+                      >
+                        <div className="w-8 h-8 bg-destructive/20 rounded-full flex items-center justify-center text-sm font-bold text-destructive">
+                          {stepIndex + 1}
+                        </div>
+                        <span className="text-foreground/80">{step}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* With AI */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
+                <Card className="p-6 h-full border-green-500/20 bg-green-500/5">
+                  <h3 className="text-2xl font-bold mb-6 text-center text-green-600">
+                    {block.comparison.with.title}
+                  </h3>
+                  <div className="space-y-4">
+                    {block.comparison.with.steps.map((step: string, stepIndex: number) => (
+                      <motion.div
+                        key={stepIndex}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.6 + stepIndex * 0.1 }}
+                        className="flex items-center gap-3 p-3 bg-background/50 rounded-lg"
+                      >
+                        <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center text-sm font-bold text-green-600">
+                          {stepIndex + 1}
+                        </div>
+                        <span className="text-foreground/80">{step}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+            </div>
+          </motion.div>
+        );
+
+      case "roi-impact":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-20"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="space-y-8">
+              {block.metrics.map((metric: any, metricIndex: number) => (
+                <motion.div
+                  key={metricIndex}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: metricIndex * 0.2 }}
+                  className="group cursor-pointer"
+                >
+                  <Card className="p-8 hover:shadow-xl transition-all duration-500 group-hover:scale-[1.02]">
+                    <div className="flex flex-col md:flex-row md:items-center gap-6">
+                      <div className="text-center md:text-left">
+                        <div className="text-5xl font-bold text-primary mb-2">{metric.value}</div>
+                        <div className="text-xl font-semibold mb-3">{metric.label}</div>
+                        <p className="text-muted-foreground leading-relaxed">{metric.description}</p>
+                      </div>
+                      <div className="md:flex-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-muted/50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-foreground/80">
+                            Case Study: {metric.caseStudy}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case "investor-insight":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-20"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            
+            {/* Market Data Cards */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              {block.marketData.map((data: any, dataIndex: number) => (
+                <motion.div
+                  key={dataIndex}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: dataIndex * 0.15 }}
+                >
+                  <Card className="p-6 text-center hover:shadow-lg transition-all duration-300">
+                    <div className="text-4xl font-bold text-primary mb-3">{data.value}</div>
+                    <div className="text-lg font-semibold mb-2">{data.metric}</div>
+                    <p className="text-sm text-muted-foreground">{data.description}</p>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* 3-Year Forecast */}
+            <Card className="p-8">
+              <h3 className="text-xl font-semibold mb-6 text-center">3-Year Market Forecast</h3>
+              <div className="flex justify-between items-end h-32 gap-4">
+                {Object.entries(block.forecast).map(([year, value], forecastIndex) => (
+                  <motion.div
+                    key={year}
+                    initial={{ height: 0 }}
+                    whileInView={{ height: `${(value as number / 180) * 100}%` }}
+                    viewport={{ once: true }}
+                    transition={{ delay: forecastIndex * 0.2, duration: 1 }}
+                    className="flex-1 bg-gradient-to-t from-primary to-primary/60 rounded-t-lg flex items-end justify-center relative"
+                  >
+                    <div className="absolute -top-8 text-sm font-bold text-primary">
+                      {String(value)}%
+                    </div>
+                    <div className="absolute -bottom-8 text-sm text-muted-foreground">
+                      Year {forecastIndex + 1}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
+        );
+
+      case "closing-cta":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-20"
+          >
+            <Card className="p-12 text-center bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+              <h2 className="text-3xl font-bold mb-4">{block.title}</h2>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                {block.description}
+              </p>
+              <Button size="lg" className="text-lg px-8 py-4">
+                {block.buttonText}
+              </Button>
+            </Card>
           </motion.div>
         );
 

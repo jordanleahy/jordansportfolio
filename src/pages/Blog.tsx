@@ -8,13 +8,23 @@ import { Link } from "react-router-dom";
 // Mock blog data - replace with real data later
 const blogPosts = [
   {
+    id: "cdi-ai-opportunity",
+    title: "Manual Chart Review Overload in CDI: The AI Opportunity",
+    excerpt: "Discover how AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue with compelling ROI data.",
+    date: "2024-01-25",
+    readTime: "6 min read",
+    category: "Healthcare Investment",
+    featured: true,
+    image: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png"
+  },
+  {
     id: "ai-transform-cdi",
     title: "How Will AI Transform CDI?",
     excerpt: "AI isn't just enhancing Clinical Documentation Integrity — it's reshaping it. Explore the interactive journey of CDI transformation.",
     date: "2024-01-20",
     readTime: "12 min read",
     category: "Healthcare AI",
-    featured: true,
+    featured: false,
     image: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png"
   },
   {
