@@ -4,16 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Brain, Users, TrendingUp, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const SmarterDxCase = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50"
-      >
+      <motion.header initial={{
+      opacity: 0,
+      y: -20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -30,11 +30,15 @@ const SmarterDxCase = () => {
       {/* Hero Section */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 30
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.6
+        }}>
             <div className="flex items-center gap-4 mb-6">
               <div className="p-4 rounded-xl bg-blue-500/10">
                 <Brain className="h-8 w-8 text-blue-600" />
@@ -56,9 +60,7 @@ const SmarterDxCase = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["#RCM", "#LLM", "#ICD-10", "#Clinical AI"].map((tag) => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
-              ))}
+              {["#RCM", "#LLM", "#ICD-10", "#Clinical AI"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
@@ -67,15 +69,17 @@ const SmarterDxCase = () => {
       {/* Problem Statement */}
       <section className="py-12 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-6">The Challenge</h2>
-            <p className="text-lg leading-relaxed text-muted-foreground">
-              Clinical documentation accuracy directly impacts patient care and hospital revenue. At SmarterDx, physicians were spending 15+ minutes per case manually reviewing AI-suggested diagnoses, creating bottlenecks in an already time-pressed healthcare environment.
-            </p>
+            <p className="text-lg leading-relaxed text-muted-foreground">Clinical documentation accuracy directly impacts patient care and hospital revenue. Physicians were spending 15+ minutes per case manually reviewing AI-suggested diagnoses, creating bottlenecks in an already time-pressed healthcare environment.</p>
           </motion.div>
         </div>
       </section>
@@ -86,11 +90,15 @@ const SmarterDxCase = () => {
           <h2 className="text-3xl font-bold mb-12 text-center">Design Process</h2>
           
           <div className="space-y-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">1. Clinical Research & User Interviews</h3>
                 <p className="text-muted-foreground mb-4">
@@ -103,11 +111,15 @@ const SmarterDxCase = () => {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            x: 30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">2. Journey Mapping & Workflow Analysis</h3>
                 <p className="text-muted-foreground">
@@ -116,11 +128,15 @@ const SmarterDxCase = () => {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
               <Card className="p-6">
                 <h3 className="text-xl font-bold mb-4">3. Rapid Prototyping & Clinical Validation</h3>
                 <p className="text-muted-foreground">
@@ -138,12 +154,17 @@ const SmarterDxCase = () => {
           <h2 className="text-3xl font-bold mb-12 text-center">Impact & Results</h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: 0.1
+          }}>
               <Card className="text-center p-6">
                 <Clock className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-3xl font-bold text-blue-600 mb-2">60%</h3>
@@ -151,12 +172,17 @@ const SmarterDxCase = () => {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: 0.2
+          }}>
               <Card className="text-center p-6">
                 <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-3xl font-bold text-green-600 mb-2">95%</h3>
@@ -164,12 +190,17 @@ const SmarterDxCase = () => {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: 0.3
+          }}>
               <Card className="text-center p-6">
                 <TrendingUp className="h-12 w-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-3xl font-bold text-purple-600 mb-2">$2.1M</h3>
@@ -183,11 +214,15 @@ const SmarterDxCase = () => {
       {/* CTA */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }}>
             <h2 className="text-3xl font-bold mb-6">Ready to discuss your healthcare design challenge?</h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg">
@@ -202,8 +237,6 @@ const SmarterDxCase = () => {
           </motion.div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default SmarterDxCase;
