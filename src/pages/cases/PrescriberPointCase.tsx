@@ -340,28 +340,6 @@ const PrescriberPointCase = () => {
         }}>
             <h2 className="text-3xl font-bold mb-12 text-center">Outcome & Impact</h2>
             
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              <Card className="text-center p-6">
-                <Clock className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-green-600 mb-2">45 min → 12 min</h3>
-                <p className="text-muted-foreground font-semibold">PA Processing Time</p>
-                <p className="text-sm text-muted-foreground mt-2">Reduced average processing time by 73%</p>
-              </Card>
-
-              <Card className="text-center p-6">
-                <CheckCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-blue-600 mb-2">30%</h3>
-                <p className="text-muted-foreground font-semibold">Error Reduction</p>
-                <p className="text-sm text-muted-foreground mt-2">Fewer rejections due to missing criteria</p>
-              </Card>
-
-              <Card className="text-center p-6">
-                <Shield className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-purple-600 mb-2">87%</h3>
-                <p className="text-muted-foreground font-semibold">First-Pass Approval</p>
-                <p className="text-sm text-muted-foreground mt-2">Up from 60% baseline approval rate</p>
-              </Card>
-            </div>
 
             <Card className="p-6">
               <h3 className="text-xl font-semibold mb-4">User Feedback</h3>
