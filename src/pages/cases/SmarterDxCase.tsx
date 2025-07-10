@@ -1,5 +1,3 @@
-
-
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,8 +22,8 @@ const SmarterDxCase = () => {
               Back to Portfolio
             </Button>
           </Link>
-          <Button variant="outline" size="sm">
-            <a href="#contact">Contact Jordan</a>
+          <Button variant="outline" size="sm" asChild>
+            <a href="mailto:?subject=Jordan%20Intro">Contact Jordan</a>
           </Button>
         </div>
       </motion.header>
@@ -537,4 +535,3 @@ const SmarterDxCase = () => {
 };
 
 export default SmarterDxCase;
-
