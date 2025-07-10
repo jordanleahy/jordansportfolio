@@ -1,4 +1,5 @@
 
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -437,7 +438,7 @@ const SmarterDxCase = () => {
                 <h3 className="text-xl font-semibold mb-4">Challenges & Solutions</h3>
                 <ul className="text-muted-foreground space-y-2">
                   <li>• Criteria rules were opaque → solved with diagnostic checklist</li>
-                  <li>• Visualizing time-based data was messy → solved via custom timeline logic</li>
+                  <li>• Visualizing time-based data was messy → solved select & compare</li>
                   <li>• CDS trust in AI suggestions was low → transparency improved through pin-to-compare feature</li>
                 </ul>
               </Card>
@@ -536,3 +537,4 @@ const SmarterDxCase = () => {
 };
 
 export default SmarterDxCase;
+
