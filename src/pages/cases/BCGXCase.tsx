@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3 } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3, Shield, CheckCircle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { bcgxCaseData } from "@/data/bcgxCaseData";
 
@@ -232,40 +232,44 @@ const BCGXCase = () => {
         </div>
       </section>
 
-      {/* Key Innovations */}
+      {/* Solution & Key Features */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Key Design Innovations</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Solution & Key Features</h2>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="p-6 h-full">
-                <Users className="h-8 w-8 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-3">Smart Evidence Extraction</h3>
-                <p className="text-muted-foreground">
-                  AI-powered system that automatically identifies and extracts relevant clinical evidence from patient records, reducing manual review time by 80%.
-                </p>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="p-6 h-full">
-                <Zap className="h-8 w-8 text-yellow-600 mb-4" />
-                <h3 className="text-xl font-bold mb-3">Customizable Appeal Templates</h3>
-                <p className="text-muted-foreground">
-                  Pre-built, editable appeal letter templates based on successful cases, with smart field population from extracted evidence.
-                </p>
-              </Card>
-            </motion.div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {bcgxCaseData.solutionFeatures.map((feature, index) => {
+              const IconComponent = 
+                feature.icon === "Shield" ? Shield :
+                feature.icon === "CheckCircle" ? CheckCircle :
+                feature.icon === "Clock" ? Clock :
+                feature.icon === "TrendingUp" ? TrendingUp :
+                Eye;
+              
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="p-6 h-full">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-primary/10 p-3 rounded-lg flex-shrink-0">
+                        <IconComponent className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold mb-2">{index + 1}. {feature.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

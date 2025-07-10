@@ -68,18 +68,33 @@ export const bcgxCaseData = {
     }
   ],
 
-  solution: {
-    title: "Smart Denial Resolution Platform",
-    description: "An AI-powered platform that identifies prescription denials, automatically gathers supporting clinical evidence, and generates personalized appeal letters, reducing manual effort by 80%.",
-    features: [
-      "Automated denial detection and categorization",
-      "Smart clinical evidence extraction",
-      "Customizable appeal letter templates",
-      "Real-time approval tracking",
-      "Success rate analytics and insights"
-    ],
-    visualDescription: "Dashboard showing denied prescriptions with auto-generated evidence cards and drag-and-drop appeal composer"
-  },
+  solutionFeatures: [
+    {
+      title: "Unified Denial Intake",
+      description: "Consolidates denials from email, portal, fax, and mail into one queue.",
+      icon: "Shield"
+    },
+    {
+      title: "Formulary & Policy Checker",
+      description: "Real-time lookup of payer rules and prior-auth requirements.",
+      icon: "CheckCircle"
+    },
+    {
+      title: "Evidence Card Aggregator",
+      description: "Auto-extracts clinical data points (labs, notes, forms) via AI into editable cards.",
+      icon: "Clock"
+    },
+    {
+      title: "AI-Assisted Appeal Composer",
+      description: "Pre-populates appeal letters with clinical rationale; fully editable rich text.",
+      icon: "TrendingUp"
+    },
+    {
+      title: "Workflow & Follow-Up Tracker",
+      description: "Tracks submission dates, sends reminders, and monitors response status.",
+      icon: "Eye"
+    }
+  ],
 
   outcomes: [
     {
