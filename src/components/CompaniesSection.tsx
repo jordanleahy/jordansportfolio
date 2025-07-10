@@ -87,13 +87,6 @@ const CompaniesSection = () => {
           <p className="text-muted-foreground text-lg">
             Delivering design excellence across the healthcare ecosystem
           </p>
-          <Button 
-            onClick={() => setEditMode(!editMode)}
-            variant="outline"
-            className="mt-4"
-          >
-            {editMode ? "Done Editing" : "Edit Logos"}
-          </Button>
         </motion.div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center max-w-4xl mx-auto">
