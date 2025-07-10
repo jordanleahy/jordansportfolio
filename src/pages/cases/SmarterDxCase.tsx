@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+
 const SmarterDxCase = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
@@ -532,4 +533,5 @@ const SmarterDxCase = () => {
       </section>
     </div>;
 };
+
 export default SmarterDxCase;
