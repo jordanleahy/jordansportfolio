@@ -18,13 +18,13 @@ const projects = [
   },
   {
     id: "case2",
-    title: "Drug Prior Auth and Validation",
+    title: "ML Drug Prior Auth Tool",
     company: "PrescriberPoint",
-    description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#Formulary Navigation", "#Step Therapy", "Reauthorization"],
+    description: "Designed a machine learning interface that streamlines prior authorization workflows, reducing approval time from days to hours.",
+    tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
-    path: "/cases/case2"
+    path: "/cases/prescriberpoint"
   },
   {
     id: "case3",
@@ -38,9 +38,9 @@ const projects = [
   },
   {
     id: "case4",
-    title: "Clinical Ops, workflow management, and for coding and CDI",
+    title: "UI Design System + Reporting",
     company: "Definitive Healthcare",
-    description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
+    description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
