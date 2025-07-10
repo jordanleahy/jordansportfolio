@@ -41,18 +41,31 @@ const SmarterDxCase = () => {
         }}>
             <div className="space-y-6 mb-8">
               <div>
-                <h1 className="text-4xl font-bold mb-2">Sepsis Diagnosis Validation</h1>
-                <p className="text-xl text-muted-foreground">Clinical documentation interface showing diagnostic checklist, timeline-pinned data points, and scroll-free review layout for AI-recommended sepsis opportunities</p>
+                <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization</h1>
+                
+                {/* Hero Image */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="relative mt-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
+                >
+                  <img 
+                    src="/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png"
+                    alt="Drug Prior Authorization workflow interface showing formulary rules, authorization process, and e-submission workflow"
+                    className="w-full h-auto object-cover"
+                  />
+                </motion.div>
               </div>
               
               {/* Project Summary */}
-              <Card className="p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 border-red-200 dark:border-red-800">
+              <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-red-600" />
+                  <Target className="h-5 w-5 text-blue-600" />
                   Project Summary
                 </h3>
                 <p className="text-sm">
-                  Redesigned the internal CDS dashboard to validate AI-flagged sepsis opportunities by surfacing clinical evidence in a structured, scroll-free layout—aiming to improve the diagnosis agree rate from 23% to 42%.
+                  Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
                 </p>
               </Card>
             </div>
@@ -64,7 +77,7 @@ const SmarterDxCase = () => {
                   <p className="font-semibold">Staff Product Designer</p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• End-to-end UX/UI ownership</li>
-                    <li>• Led research, product strategy, and prompt output design</li>
+                    <li>• Led research, product strategy, and workflow design</li>
                   </ul>
                 </div>
               </div>
@@ -78,7 +91,7 @@ const SmarterDxCase = () => {
               <div>
                 <h3 className="font-semibold text-muted-foreground mb-2">Keywords</h3>
                 <div className="flex flex-wrap gap-1">
-                  {["Sepsis", "SIRS Criteria", "CDI", "Clinical Timeline", "Diagnostic Checklist", "AI Recommendation Output"].map(tag => 
+                  {["Prior Authorization", "Drug Formulary", "Healthcare AI", "Workflow Automation", "E-Submission", "Insurance"].map(tag => 
                     <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
                   )}
                 </div>
