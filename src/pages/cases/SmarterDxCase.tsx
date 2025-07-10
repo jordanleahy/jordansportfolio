@@ -87,7 +87,7 @@ const SmarterDxCase = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["PriorAuth", "Formulary", "MedicalRequirements", "Step Therapy", "Reauthorization"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+              {["Pre-Bill", "CDI", "Sepsis"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
