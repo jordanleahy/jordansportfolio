@@ -40,22 +40,24 @@ const SmarterDxCase = () => {
           duration: 0.6
         }}>
             <div className="flex items-center gap-4 mb-6">
-              
+              <div className="p-4 rounded-xl bg-blue-500/10">
+                <Brain className="h-8 w-8 text-blue-600" />
+              </div>
               <div>
                 <h1 className="text-4xl font-bold mb-2">Pre-Bill CDI Validation</h1>
                 
                 {/* Hero Image */}
-                <motion.div initial={{
-                opacity: 0,
-                scale: 0.95
-              }} animate={{
-                opacity: 1,
-                scale: 1
-              }} transition={{
-                duration: 0.8,
-                delay: 0.2
-              }} className="relative mt-4 rounded-2xl overflow-hidden shadow-lg border border-border/50">
-                  <img src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png" alt="Pre-bill CDI validation workflow and interface design" className="w-full h-auto object-cover aspect-video" />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="relative mt-4 rounded-2xl overflow-hidden shadow-lg border border-border/50"
+                >
+                  <img 
+                    src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
+                    alt="Pre-bill CDI validation workflow and interface design"
+                    className="w-full h-auto object-cover aspect-video"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
                 </motion.div>
               </div>
