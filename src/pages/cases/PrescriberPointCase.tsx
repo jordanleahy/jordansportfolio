@@ -319,7 +319,7 @@ const PrescriberPointCase = () => {
                 <Target className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-3">6. E-Submission Workflow</h3>
                 <p className="text-muted-foreground">
-                  One-click send to insurer portal with real-time status tracking and follow-up automation.
+                  One click send to denials & appeals application for PA tracking and resolution
                 </p>
               </Card>
             </div>
