@@ -197,8 +197,8 @@ const PrescriberPointCase = () => {
                   <div>
                     <h3 className="text-xl font-bold mb-3">1. Research & Discovery</h3>
                     <ul className="text-muted-foreground space-y-2 mb-4">
-                      <li>• User interviews with prescribers and non prescribers</li>
-                      <li>• Shadowed 8 physicians through current PA workflows</li>
+                      <li>• User interviews with two dermtalology practices</li>
+                      <li>• Shadowed prescribers and non prescribers through current PA workflows</li>
                       <li>• Competitive audit of existing PA tools</li>
                       <li>• Analysis of payer formulary documentation</li>
                     </ul>
