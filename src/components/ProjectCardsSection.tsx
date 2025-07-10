@@ -17,14 +17,14 @@ const projects = [
     path: "/cases/case1"
   },
   {
-    id: "prescriberpoint",
+    id: "case4",
     title: "ML Drug Prior Auth Tool",
     company: "PrescriberPoint",
     description: "Designed a machine learning interface that streamlines prior authorization workflows, reducing approval time from days to hours.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
-    path: "/cases/prescriberpoint"
+    path: "/cases/case4"
   },
   {
     id: "case3",

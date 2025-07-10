@@ -27,7 +27,7 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/cases/case1" element={<SmarterDxCase />} />
-          <Route path="/cases/prescriberpoint" element={<PrescriberPointCase />} />
+          <Route path="/cases/case4" element={<PrescriberPointCase />} />
           <Route path="/cases/case3" element={<BCGXCase />} />
           <Route path="/cases/case2" element={<DefinitiveCase />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
