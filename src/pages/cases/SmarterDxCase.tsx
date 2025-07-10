@@ -60,7 +60,7 @@ const SmarterDxCase = () => {
               
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-8">
                 <p className="text-lg text-muted-foreground">
-                  <strong>Project Summary:</strong> Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
+                  <strong>Project Summary:</strong> Redesigned the internal CDS dashboard to validate AI-flagged sepsis opportunities by surfacing clinical evidence in a structured, scroll-free layout—aiming to improve the diagnosis agree rate from 23% to 42%.
                 </p>
               </div>
             </div>
