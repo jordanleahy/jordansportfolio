@@ -8,8 +8,8 @@ const ContactSection = () => {
     {
       icon: Mail,
       label: "Email",
-      value: "jordan.leahy@example.com",
-      href: "mailto:jordan.leahy@example.com",
+      value: "Email",
+      href: "mailto:jordanwilliamleahy@gmail.com",
       description: "Best way to reach me"
     },
     {
@@ -96,7 +96,7 @@ const ContactSection = () => {
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <a href="mailto:jordan.leahy@example.com">
+                  <a href="mailto:jordanwilliamleahy@gmail.com">
                     <Mail className="mr-2 h-5 w-5" />
                     Get In Touch
                   </a>
