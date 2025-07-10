@@ -53,7 +53,7 @@ const PrescriberPointCase = () => {
               duration: 0.8,
               delay: 0.2
             }} className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 aspect-[16/9]">
-                <img src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" alt="Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps" className="w-full h-full object-contain" />
+                <img src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" alt="Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
               </motion.div>
 
