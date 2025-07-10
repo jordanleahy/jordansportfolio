@@ -41,7 +41,7 @@ const SmarterDxCase = () => {
         }}>
             <div className="space-y-6 mb-8">
               <div>
-                <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization</h1>
+                <h1 className="text-4xl font-bold mb-4">Pre-bill Validation Dashboard</h1>
                 
                 {/* Hero Image */}
                 <motion.div 
