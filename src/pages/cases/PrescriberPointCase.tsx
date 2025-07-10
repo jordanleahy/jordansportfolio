@@ -233,7 +233,7 @@ const PrescriberPointCase = () => {
                     <ul className="text-muted-foreground space-y-2">
                       <li>• High-fidelity mockups in Figma</li>
                       <li>• Interactive prototypes for letter drafting flow</li>
-                      <li>• Usability tests (N=5) to refine workflows</li>
+                      <li>• Usability tests to refine workflows</li>
                       <li>• A/B testing for ML prediction presentations</li>
                     </ul>
                   </div>
