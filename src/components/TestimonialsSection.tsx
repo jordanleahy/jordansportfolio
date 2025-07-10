@@ -4,7 +4,7 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    quote: "Jordan is the rare designer who can own the research, ship the solution, and explain the ROI to stakeholders.",
+    quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
     author: "Former PM, SmarterDx",
     role: "Product Manager"
   },
