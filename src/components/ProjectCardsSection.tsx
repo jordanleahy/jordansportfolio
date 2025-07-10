@@ -18,7 +18,7 @@ const projects = [
   },
   {
     id: "case4",
-    title: "ML Drug Prior Auth Tool",
+    title: "Drug Prior Auth and Validation",
     company: "PrescriberPoint",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
