@@ -20,7 +20,7 @@ const testimonials = [
   },
   {
     quote: "Jordan's healthcare domain expertise combined with design skills made them invaluable to our team.",
-    author: "CTO, RTD Health",
+    author: "CTO, HTD Health",
     role: "Technology Leadership"
   }
 ];
