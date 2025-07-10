@@ -333,7 +333,7 @@ const PrescriberPointCase = () => {
             >
               <div className="relative rounded-2xl overflow-hidden shadow-lg border border-border/50">
                 <img 
-                  src="/lovable-uploads/5d90b78d-fbbb-435b-9c0d-a1db1ccc23f1.png" 
+                  src="/lovable-uploads/7d2433d2-f435-44d6-8d11-045721be886e.png" 
                   alt="Taltz prior authorization interface showing drug information, dosing, and approval workflow" 
                   className="w-full h-auto object-contain"
                 />
