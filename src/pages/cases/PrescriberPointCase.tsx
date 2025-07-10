@@ -367,7 +367,7 @@ const PrescriberPointCase = () => {
               <h3 className="text-xl font-semibold mb-4">User Feedback</h3>
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-lg italic mb-2">"This tool let me clear 3× more cases per day and actually focus on patient care instead of paperwork."</p>
-                <p className="text-sm text-muted-foreground">- Clinical Decision Support Specialist, Regional Health System</p>
+                <p className="text-sm text-muted-foreground">Amy Glassgow, Clerly Derm</p>
               </div>
             </Card>
           </motion.div>
