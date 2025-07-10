@@ -382,7 +382,7 @@ const PrescriberPointCase = () => {
                 <AlertCircle className="h-8 w-8 text-orange-500 mb-4" />
                 <h3 className="text-xl font-semibold mb-4">Challenges & Solutions</h3>
                 <ul className="text-muted-foreground space-y-2">
-                  <li>• Handling edge-case requirements across multiple payers required flexible template system</li>
+                  <li>• Handling edge case requirements across multiple payers required flexible template system</li>
                   <li>• Integration complexity solved through phased rollout approach</li>
                   <li>• Regulatory compliance ensured through continuous legal review</li>
                   <li>• Change management addressed via comprehensive training program</li>
@@ -394,8 +394,9 @@ const PrescriberPointCase = () => {
               <Lightbulb className="h-8 w-8 text-blue-600 mb-4" />
               <h3 className="text-xl font-semibold mb-4">Next Steps & Evolution</h3>
               <ul className="text-muted-foreground space-y-2">
-                <li>• Integrate real-time payer API connections for dynamic rule updates</li>
-                <li>• Expand coverage to orthopedic injectables and rare disease therapies</li>
+                <li>• Integrate real time payer API connections for dynamic rule updates</li>
+                <li>
+              </li>
                 <li>• Develop predictive analytics for approval likelihood scoring</li>
                 <li>• Create mobile interface for on-the-go PA status monitoring</li>
               </ul>
