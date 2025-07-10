@@ -341,15 +341,11 @@ const BCGXCase = () => {
                   </div>
                   <h3 className="text-xl font-bold">Challenges & Solutions</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {bcgxCaseData.reflection.challengesAndSolutions.map((item, index) => (
-                    <div key={index} className="space-y-2">
-                      <p className="text-sm font-medium text-foreground">
-                        <span className="text-red-600">Challenge:</span> {item.challenge}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        <span className="text-green-600">Solution:</span> {item.solution}
-                      </p>
+                    <div key={index} className="flex items-start">
+                      <span className="text-primary mr-2 mt-1">•</span>
+                      <span className="text-muted-foreground text-sm leading-relaxed">{item}</span>
                     </div>
                   ))}
                 </div>

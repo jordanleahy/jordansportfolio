@@ -121,14 +121,10 @@ export const bcgxCaseData = {
       "AI prompt tuning delivered >85% extraction precision"
     ],
     challengesAndSolutions: [
-      {
-        challenge: "Inconsistent fax and mail formats",
-        solution: "Implemented OCR normalization with manual-review flags"
-      },
-      {
-        challenge: "Balancing automation with manual control", 
-        solution: "Enabled inline editing on all AI-generated outputs"
-      }
+      "Handling edge case requirements across multiple payers required flexible template system",
+      "Integration complexity solved through phased rollout approach",
+      "Regulatory compliance ensured through continuous legal review",
+      "Change management addressed via comprehensive training program"
     ],
     nextSteps: [
       "Extend support to specialty medication denials and pre-bill workflows",
