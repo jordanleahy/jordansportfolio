@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -31,7 +32,7 @@ const projects = [
     title: "Appeals and Denials Resolution",
     company: "BCG X",
     description: "Designed a Drug Denial Resolution application to help medical staff organize and respond to all denial types, including drafting appeal letters.",
-    tags: ["#Pharma", "#Research", "#UX"],
+    tags: ["#ClinicalOps", "#Workflow", "#CDI"],
     icon: Activity,
     color: "bg-purple-500",
     path: "/cases/bcgx"
