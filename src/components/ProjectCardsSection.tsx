@@ -37,14 +37,14 @@ const projects = [
     path: "/cases/bcgx"
   },
   {
-    id: "definitive",
+    id: "case2",
     title: "UI Design System + Reporting",
     company: "Definitive Healthcare",
     description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
-    path: "/cases/definitive"
+    path: "/cases/case2"
   }
 ];
 
