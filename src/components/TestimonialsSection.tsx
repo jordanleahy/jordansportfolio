@@ -5,8 +5,8 @@ import { Quote } from "lucide-react";
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
-    author: "Former PM, SmarterDx",
-    role: "Product Manager"
+    author: "Director of Product, SmarterDx",
+    role: "Product Leadership"
   },
   {
     quote: "Working alongside Jordan at PrescriberPoint was like having a trusted partner who truly understood the value of clear, intuitive information",
