@@ -217,7 +217,7 @@ const SmarterDxCase = () => {
                 <ul className="space-y-2 text-muted-foreground mb-4">
                   <li>• Shadowed CDS specialists during sepsis review</li>
                   <li>• Ran sample validation sessions on real sepsis cases</li>
-                  <li>• Audited AI-triggering rule set</li>
+                  <li>• Audited rule based triggering rule set</li>
                   <li>• Mapped pain points in timeline review and data recall</li>
                 </ul>
                 <div className="bg-muted/50 p-4 rounded-lg">
