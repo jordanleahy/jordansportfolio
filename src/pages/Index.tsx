@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
+import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CompaniesSection from "@/components/CompaniesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
+import BlogTeaser from "@/components/BlogTeaser";
+import ContactSection from "@/components/ContactSection";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -67,9 +70,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <Navigation />
+      
       {/* Admin Bar for authenticated users */}
       {user && (
-        <div className="fixed top-0 right-0 z-50 p-4">
+        <div className="fixed top-4 right-4 z-50">
           <div className="bg-card border rounded-lg p-3 shadow-lg">
             <p className="text-sm text-muted-foreground mb-2">
               Logged in as: {user.email}
@@ -86,10 +92,12 @@ const Index = () => {
       <CompaniesSection />
       <TestimonialsSection />
       <ProjectCardsSection />
+      <BlogTeaser />
+      <ContactSection />
 
       {/* Auth Link for non-authenticated users */}
       {!user && (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-4 right-4 z-30">
           <Link to="/auth">
             <Button variant="outline" size="sm">
               Admin Login

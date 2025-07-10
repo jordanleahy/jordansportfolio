@@ -4,8 +4,8 @@ import { FileText, Globe, Mail } from "lucide-react";
 
 const HeroSection = () => {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="text-center max-w-5xl mx-auto">
+    <section id="hero" className="min-h-screen flex items-center justify-center bg-background px-4 pt-20">
+      <div className="text-center max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -37,16 +37,19 @@ const HeroSection = () => {
           <Button 
             size="lg" 
             className="w-full sm:w-auto"
-            asChild
+            onClick={() => {
+              const element = document.getElementById('projects');
+              if (element) element.scrollIntoView({ behavior: 'smooth' });
+            }}
           >
-            <motion.a
-              href="#resume"
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="flex items-center"
             >
-              <FileText className="mr-2 h-5 w-5" />
-              Resume
-            </motion.a>
+              <Globe className="mr-2 h-5 w-5" />
+              View Projects
+            </motion.div>
           </Button>
           
           <Button 
@@ -56,12 +59,15 @@ const HeroSection = () => {
             asChild
           >
             <motion.a
-              href="#portfolio"
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="flex items-center"
             >
-              <Globe className="mr-2 h-5 w-5" />
-              Portfolio
+              <FileText className="mr-2 h-5 w-5" />
+              Resume
             </motion.a>
           </Button>
           
@@ -69,16 +75,19 @@ const HeroSection = () => {
             size="lg" 
             variant="secondary" 
             className="w-full sm:w-auto"
-            asChild
+            onClick={() => {
+              const element = document.getElementById('contact');
+              if (element) element.scrollIntoView({ behavior: 'smooth' });
+            }}
           >
-            <motion.a
-              href="#contact"
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="flex items-center"
             >
               <Mail className="mr-2 h-5 w-5" />
               Contact
-            </motion.a>
+            </motion.div>
           </Button>
         </motion.div>
       </div>
