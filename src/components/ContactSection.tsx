@@ -15,7 +15,7 @@ const ContactSection = () => {
     {
       icon: Linkedin,
       label: "LinkedIn",
-      value: "linkedin.com/in/jordanleahy",
+      value: "Profile",
       href: "https://linkedin.com/in/jordanleahy",
       description: "Let's connect professionally"
     },
@@ -69,7 +69,7 @@ const ContactSection = () => {
                       rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                       className="text-sm"
                     >
-                      Email
+                       {method.value}
                     </a>
                   </Button>
                 </CardContent>
