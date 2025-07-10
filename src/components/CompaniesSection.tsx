@@ -96,7 +96,7 @@ const CompaniesSection = () => {
           </Button>
         </motion.div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center max-w-4xl mx-auto">
           {companies.map((company, index) => (
             <motion.div
               key={company.name}
@@ -105,9 +105,9 @@ const CompaniesSection = () => {
               transition={{ duration: 0.4, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.05, y: -2 }}
-              className="group relative"
+              className="group relative w-full"
             >
-              <div className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <div className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full">
                 <div className="w-12 h-12 mx-auto mb-3 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm overflow-hidden">
                   {(company as any).logoUrl ? (
                     <img 
