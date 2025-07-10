@@ -43,17 +43,17 @@ const PrescriberPointCase = () => {
               <h1 className="text-4xl font-bold mb-4">Drug Prior Authorization</h1>
               
               {/* Hero Image */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 aspect-video"
-              >
-                <img 
-                  src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
-                  alt="Drug Prior Authorization Workflow showing extraction, parsing, scheduling, drafting, and e-submission steps with formulary rules and letter generation"
-                  className="w-full h-full object-contain"
-                />
+              <motion.div initial={{
+              opacity: 0,
+              scale: 0.95
+            }} animate={{
+              opacity: 1,
+              scale: 1
+            }} transition={{
+              duration: 0.8,
+              delay: 0.2
+            }} className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 aspect-video">
+                <img src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png" alt="Drug Prior Authorization Workflow showing extraction, parsing, scheduling, drafting, and e-submission steps with formulary rules and letter generation" className="w-full h-full object-contain" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
               </motion.div>
 
@@ -105,9 +105,7 @@ const PrescriberPointCase = () => {
             
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">Healthcare Context</h3>
-              <p className="text-lg leading-relaxed text-muted-foreground mb-6">
-                In the complex healthcare RCM environment, clinicians were spending hours manually checking payer formularies and drafting PA letters, leading to delayed patient care and lost revenue. The traditional prior authorization process was fragmented across multiple systems and required extensive manual work.
-              </p>
+              <p className="text-lg leading-relaxed text-muted-foreground mb-6">Prescribers and non-prescribers spent hours manually checking payer formularies and drafting prior-authorization letters, leading to delayed patient care. The traditional prior-authorization process is fragmented across multiple systems and often requires navigating numerous portals.</p>
             </div>
 
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
