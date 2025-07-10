@@ -249,7 +249,8 @@ const PrescriberPointCase = () => {
                       <li>• Design tokens and component library for dev handoff</li>
                       <li>• Documentation for complex interaction patterns</li>
                       <li>• QA support during development and testing</li>
-                      <li>• User training materials and documentation</li>
+                      <li>
+                    </li>
                     </ul>
                   </div>
                 </div>
