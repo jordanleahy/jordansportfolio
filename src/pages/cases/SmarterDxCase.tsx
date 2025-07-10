@@ -394,29 +394,13 @@ const SmarterDxCase = () => {
         }} viewport={{
           once: true
         }}>
-            <div className="space-y-6">
-              <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
-                <h3 className="text-lg font-bold mb-4">User Feedback</h3>
-                <div className="bg-white/50 dark:bg-background/50 p-4 rounded-lg">
-                  <p className="text-sm italic mb-2">"This layout helped me review cases without toggling between tabs. I'm not second-guessing the criteria anymore."</p>
-                  <p className="text-xs text-muted-foreground">— Internal CDS Reviewer</p>
-                </div>
-              </Card>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="text-center p-6">
-                  <Target className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <h3 className="text-3xl font-bold text-green-600 mb-2">42%</h3>
-                  <p className="text-muted-foreground">Target agree rate improvement</p>
-                </Card>
-
-                <Card className="text-center p-6">
-                  <Activity className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-blue-600 mb-2">Adopted internally</h3>
-                  <p className="text-muted-foreground">New framework for complex diagnostic review</p>
-                </Card>
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold mb-4">User Feedback</h3>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-lg italic mb-2">"This layout helped me review cases without toggling between tabs. I'm not second-guessing the criteria anymore."</p>
+                <p className="text-sm text-muted-foreground">Internal CDS Reviewer</p>
               </div>
-            </div>
+            </Card>
           </motion.div>
         </div>
       </section>
