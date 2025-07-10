@@ -145,52 +145,8 @@ const SmarterDxCase = () => {
       </section>
 
       {/* My Role & Team */}
-      <section className="py-16 px-4">
+      <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">My Role & Team</h2>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div initial={{
-            opacity: 0,
-            x: -30
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }}>
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">My Role</h3>
-                <p className="font-semibold text-red-600 mb-3">Staff Product Designer</p>
-                <ul className="space-y-2 text-muted-foreground">
-                  <li>• User research & criteria mapping</li>
-                  <li>• Workflow redesign & prototyping</li>
-                  <li>• JSON output design for LLM integration</li>
-                </ul>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{
-            opacity: 0,
-            x: 30
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }}>
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">Team & Stakeholders</h3>
-                <ul className="space-y-2 text-muted-foreground">
-                  <li>• 2 Clinical Documentation Specialists (CDS)</li>
-                  <li>• 1 Medical Doctor (Sepsis SME)</li>
-                  <li>• 2 AI Engineers</li>
-                  <li>• Product Manager (advisory only)</li>
-                </ul>
-              </Card>
-            </motion.div>
-          </div>
-
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -199,21 +155,44 @@ const SmarterDxCase = () => {
           y: 0
         }} viewport={{
           once: true
-        }} className="mt-8">
-            <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800">
-              <h4 className="text-lg font-bold mb-3">Duration & Scope</h4>
-              <div className="grid md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <strong>4-month engagement</strong>
-                </div>
-                <div>
-                  Redesign of CDS review interface for sepsis
-                </div>
-                <div>
-                  Built diagnostic checklist pattern for SIRS + infection criteria
-                </div>
-              </div>
-            </Card>
+        }}>
+            <h2 className="text-3xl font-bold mb-8">My Role & Team</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <Card className="p-6">
+                <Users className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-3">My Role</h3>
+                <p className="text-muted-foreground mb-2">Staff Product Designer</p>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• User research & criteria mapping</li>
+                  <li>• Workflow redesign & prototyping</li>
+                  <li>• JSON output design for LLM integration</li>
+                </ul>
+              </Card>
+
+              <Card className="p-6">
+                <Users className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-3">Team & Stakeholders</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• 2 Clinical Documentation Specialists (CDS)</li>
+                  <li>• 1 Medical Doctor (Sepsis SME)</li>
+                  <li>• 2 AI Engineers</li>
+                  <li>• Product Manager (advisory only)</li>
+                </ul>
+              </Card>
+
+              <Card className="p-6">
+                <Target className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-3">Duration & Scope</h3>
+                <p className="text-muted-foreground mb-2">4-month engagement</p>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Redesign of CDS review interface for sepsis</li>
+                  <li>• Built diagnostic checklist pattern for SIRS + infection criteria</li>
+                  <li>• LLM integration design</li>
+                  <li>• Clinical workflow optimization</li>
+                </ul>
+              </Card>
+            </div>
           </motion.div>
         </div>
       </section>
