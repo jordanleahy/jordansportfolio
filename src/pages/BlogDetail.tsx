@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Clock, Calendar, Share2, BookmarkPlus, Heart, Brain, MessageSquare, Lightbulb, TrendingUp, DollarSign, Users, AlertTriangle } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import HeroParallaxDemo from "@/components/hero-parallax-demo";
 
 // Mock blog content - replace with real data later
 const cdiAiOpportunityContent = [
@@ -1215,21 +1216,8 @@ const BlogDetail = () => {
         </div>
       </motion.section>
 
-      {/* Featured Image */}
-      <motion.section
-        initial={{ opacity: 0, scale: 1.1 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1 }}
-        className="px-4 mb-16"
-      >
-        <div className="max-w-5xl mx-auto">
-          <img 
-            src="/lovable-uploads/702ae5d0-df0d-43f7-841f-a5269c2fc671.png" 
-            alt="Manual Chart Review Overload in CDI - AI vs Manual Workflow Comparison" 
-            className="w-full aspect-video object-cover rounded-xl shadow-2xl"
-          />
-        </div>
-      </motion.section>
+      {/* Hero Parallax Section */}
+      <HeroParallaxDemo />
 
       {/* Article Content */}
       <article className="px-4 pb-16 overflow-x-hidden">
