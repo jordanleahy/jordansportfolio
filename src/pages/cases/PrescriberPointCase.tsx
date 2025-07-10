@@ -322,6 +322,26 @@ const PrescriberPointCase = () => {
                 </p>
               </Card>
             </div>
+
+            {/* Taltz Prior Authorization Interface */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-12"
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-lg border border-border/50">
+                <img 
+                  src="/lovable-uploads/5d90b78d-fbbb-435b-9c0d-a1db1ccc23f1.png" 
+                  alt="Taltz prior authorization interface showing drug information, dosing, and approval workflow" 
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-4 italic">
+                Taltz prior authorization interface demonstrating automated form population and workflow guidance
+              </p>
+            </motion.div>
           </motion.div>
         </div>
       </section>
