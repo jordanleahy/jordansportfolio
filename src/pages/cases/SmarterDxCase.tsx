@@ -45,40 +45,49 @@ const SmarterDxCase = () => {
                   <Activity className="h-8 w-8 text-red-600" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">Improving Sepsis Diagnosis Review for CDS Specialists</h1>
-                  <p className="text-xl text-muted-foreground">Increasing sepsis diagnosis agree rate from 23% to 42%</p>
+                  <h1 className="text-4xl font-bold mb-2">Sepsis Diagnosis Validation</h1>
+                  <p className="text-xl text-muted-foreground">Clinical documentation interface showing diagnostic checklist, timeline-pinned data points, and scroll-free review layout for AI-recommended sepsis opportunities</p>
                 </div>
               </div>
               
-              {/* Project Snapshot */}
+              {/* Project Summary */}
               <Card className="p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 border-red-200 dark:border-red-800">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Target className="h-5 w-5 text-red-600" />
-                  🖼️ Project Snapshot
+                  Project Summary
                 </h3>
-                <div className="space-y-2 text-sm">
-                  <p><strong>Goal:</strong> Increase the sepsis diagnosis agree rate from 23% to 42% by redesigning the CDS specialist workflow for reviewing AI-recommended sepsis triggers.</p>
-                </div>
+                <p className="text-sm">
+                  Redesigned the internal CDS dashboard to validate AI-flagged sepsis opportunities by surfacing clinical evidence in a structured, scroll-free layout—aiming to improve the diagnosis agree rate from 23% to 42%.
+                </p>
               </Card>
             </div>
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div>
                 <h3 className="font-semibold text-muted-foreground mb-2">My Role</h3>
-                <p>Researcher, Product Designer, and Product Manager</p>
+                <div className="space-y-1">
+                  <p className="font-semibold">Staff Product Designer</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• End-to-end UX/UI ownership</li>
+                    <li>• Led research, product strategy, and prompt output design</li>
+                  </ul>
+                </div>
               </div>
               <div>
                 <h3 className="font-semibold text-muted-foreground mb-2">Timeline</h3>
-                <p>[Add date or duration]</p>
+                <div className="space-y-1">
+                  <p className="font-semibold">4 months</p>
+                  <p className="text-sm text-muted-foreground">March – July 2024</p>
+                </div>
               </div>
               <div>
-                <h3 className="font-semibold text-muted-foreground mb-2">Team</h3>
-                <p>Clinical Documentation Specialists, AI engineering, clinical rules teams</p>
+                <h3 className="font-semibold text-muted-foreground mb-2">Keywords</h3>
+                <div className="flex flex-wrap gap-1">
+                  {["Sepsis", "SIRS Criteria", "CDI", "Clinical Timeline", "Diagnostic Checklist", "AI Recommendation Output"].map(tag => 
+                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {["#Sepsis", "#CDS", "#Clinical AI", "#Healthcare", "#UX Research", "#Diagnostic Interface"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
@@ -96,33 +105,88 @@ const SmarterDxCase = () => {
         }} viewport={{
           once: true
         }}>
-            <h2 className="text-3xl font-bold mb-6">🔍 Problem</h2>
-            <div className="space-y-4">
-              <p className="text-lg leading-relaxed text-muted-foreground">
-                <strong>Sepsis</strong> — defined as SIRS (Systemic Inflammatory Response Syndrome) plus suspected infection — is the #1 denied primary diagnosis across U.S. hospitals.
-              </p>
-              <p className="text-lg leading-relaxed text-muted-foreground">
-                Despite our AI system flagging sepsis opportunities, only <strong className="text-red-600">23% of recommendations were agreed upon by CDS specialists.</strong>
-              </p>
-              <div className="bg-muted/50 p-6 rounded-lg">
-                <h4 className="font-semibold mb-3">Why?</h4>
-                <ul className="space-y-2 text-muted-foreground">
-                  <li>• Generic interfaces lacked contextual clinical evidence</li>
-                  <li>• CDSs had to mentally recall criteria or search across screens</li>
-                  <li>• Key events like BiPAP placement, Op Note timestamps, or vitals weren't tied to trigger logic</li>
-                  <li>• The current interface forced manual cross-checking, often with scrolling and external references</li>
-                </ul>
+            <h2 className="text-3xl font-bold mb-6">Context & Problem</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-xl font-bold mb-3">Healthcare Context</h4>
+                <p className="text-lg leading-relaxed text-muted-foreground">
+                  Sepsis is defined as SIRS (Systemic Inflammatory Response Syndrome) plus suspicion of infection. It is the most commonly denied primary diagnosis across U.S. hospitals. Yet, validating sepsis manually is cognitively demanding and error-prone—especially when multiple criteria must be remembered and justified.
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="text-xl font-bold mb-3">Problem Statement</h4>
+                <p className="text-lg leading-relaxed text-muted-foreground mb-4">
+                  CDS specialists were relying on memory and fragmented data to validate sepsis recommendations—leading to:
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• <strong className="text-red-600">Low agree rates (23%)</strong></li>
+                      <li>• Missed revenue opportunities due to denials</li>
+                    </ul>
+                  </div>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Inefficient workflows filled with manual cross-checking</li>
+                      <li>• High cognitive load and review fatigue</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Research & Discovery */}
+      {/* My Role & Team */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">🧪 Research & Discovery</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">My Role & Team</h2>
           
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">My Role</h3>
+                <p className="font-semibold text-red-600 mb-3">Staff Product Designer</p>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• User research & criteria mapping</li>
+                  <li>• Workflow redesign & prototyping</li>
+                  <li>• JSON output design for LLM integration</li>
+                </ul>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            x: 30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">Team & Stakeholders</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• 2 Clinical Documentation Specialists (CDS)</li>
+                  <li>• 1 Medical Doctor (Sepsis SME)</li>
+                  <li>• 2 AI Engineers</li>
+                  <li>• Product Manager (advisory only)</li>
+                </ul>
+              </Card>
+            </motion.div>
+          </div>
+
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -131,129 +195,232 @@ const SmarterDxCase = () => {
           y: 0
         }} viewport={{
           once: true
-        }}>
-            <Card className="p-6">
-              <p className="text-muted-foreground mb-6">
-                I led user research with our internal CDS specialists, including:
-              </p>
-              <ul className="space-y-3 text-muted-foreground mb-6">
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  Sample review exercises using current workflows
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  Mapping how they interpret SIRS, infection evidence, and timelines
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  Identifying friction points in the review, validation, and decision process
-                </li>
-              </ul>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">💡 Critical Insight:</h4>
-                <p className="text-blue-800 dark:text-blue-200">
-                  CDS specialists were relying on memory to validate sepsis — despite the complexity of criteria. They needed a visual diagnostic aid, not just raw data dumps.
-                </p>
+        }} className="mt-8">
+            <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800">
+              <h4 className="text-lg font-bold mb-3">Duration & Scope</h4>
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <strong>4-month engagement</strong>
+                </div>
+                <div>
+                  Redesign of CDS review interface for sepsis
+                </div>
+                <div>
+                  Built diagnostic checklist pattern for SIRS + infection criteria
+                </div>
               </div>
             </Card>
           </motion.div>
         </div>
       </section>
 
-      {/* Solution */}
+      {/* Design Process */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">🧠 Solution: Diagnostic Criteria Argument Model</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Design Process</h2>
           
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} viewport={{
-          once: true
-        }}>
-            <Card className="p-6 mb-8">
-              <p className="text-lg text-muted-foreground mb-6">
-                I created a new diagnostic checklist model that visually walks the reviewer through why a sepsis recommendation might be valid — surfacing key SIRS signs, infection suspicion, and interventions in one scroll-free view.
-              </p>
-              
-              <h4 className="text-xl font-bold mb-4">Key Design Decisions</h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs">📍</span>
-                    </div>
-                    <div>
-                      <strong>Pin-to-compare feature</strong> to contrast data points (e.g. temperature vs. WBC spike)
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs">🧬</span>
-                    </div>
-                    <div>
-                      <strong>Timeline-based data placement:</strong> When was BiPAP added? When did vitals spike?
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs">🧠</span>
-                    </div>
-                    <div>
-                      <strong>Top-right Criteria Chips:</strong> Display SIRS + infection flags instantly
-                    </div>
-                  </div>
+          <div className="space-y-8">
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">1. Research & Discovery</h3>
+                <ul className="space-y-2 text-muted-foreground mb-4">
+                  <li>• Shadowed CDS specialists during sepsis review</li>
+                  <li>• Ran sample validation sessions on real sepsis cases</li>
+                  <li>• Audited AI-triggering rule set</li>
+                  <li>• Mapped pain points in timeline review and data recall</li>
+                </ul>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm italic">"I have to memorize the criteria every time and double-check the vitals. It's exhausting."</p>
+                  <p className="text-xs text-muted-foreground mt-2">— CDS Specialist, Internal Team</p>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs">📦</span>
-                    </div>
-                    <div>
-                      <strong>Collapsible op note panels</strong> to reduce cognitive load
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs">🧪</span>
-                    </div>
-                    <div>
-                      <strong>Diagnostic JSON Output:</strong> Structured for prompt engineering in future LLM integrations
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
 
-            <Card className="p-6">
-              <h4 className="text-xl font-bold mb-4">🧪 Iterative Process</h4>
-              <p className="text-muted-foreground mb-4">Over 10 iterations, I tested and refined:</p>
-              <div className="grid md:grid-cols-2 gap-4">
+            <motion.div initial={{
+            opacity: 0,
+            x: 30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">2. Ideation & Concepting</h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Data grouping strategies</li>
-                  <li>• Compact, scroll-free layouts</li>
+                  <li>• Designed diagnostic checklist model to anchor reasoning</li>
+                  <li>• Timeline prototypes for visualizing BiPAP, Op Note timestamps</li>
+                  <li>• Created chip-based filters for quick navigation</li>
+                  <li>• Drafted pin-to-compare interactions for data evidence</li>
+                  <li>• Explored multiple layouts to reduce scrolling and noise</li>
                 </ul>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">3. Prototyping & Validation</h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Evidence hierarchy (labs vs. notes vs. imaging)</li>
-                  <li>• Interaction micro-patterns (pinning, filtering, hovering tooltips)</li>
+                  <li>• Created 10 iterative versions of the interface</li>
+                  <li>• Tested diagnostic clarity with CDS specialists in weekly reviews</li>
+                  <li>• Integrated JSON export aligned with LLM summarization format</li>
+                  <li>• Validated scroll-free layout and pinning behavior usability</li>
                 </ul>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4 italic">
-                Each round involved feedback loops with CDSs and clinical AI reviewers.
-              </p>
-            </Card>
-          </motion.div>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            x: 30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6">
+                <h3 className="text-xl font-bold mb-4">4. Iteration & Handoff</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Created scalable component library for diagnostic UI</li>
+                  <li>• Delivered annotated wireframes and dev-ready JSON schemas</li>
+                  <li>• Created design documentation for AI integration</li>
+                  <li>• Supported QA with UI testing across known case types</li>
+                </ul>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Outcomes */}
+      {/* Solution & Key Features */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">✅ Outcome</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Solution & Key Features</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{ delay: 0.1 }}>
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <Target className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-bold">Diagnostic Criteria Checklist</h3>
+                </div>
+                <p className="text-muted-foreground">Structured top-right display showing met/missing SIRS and infection criteria with color-coded status chips.</p>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{ delay: 0.2 }}>
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <Activity className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-bold">Scroll-Free Data View</h3>
+                </div>
+                <p className="text-muted-foreground">All relevant vitals, labs, and interventions displayed within a single viewport to speed up case validation.</p>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{ delay: 0.3 }}>
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-bold">Timeline-Embedded Evidence</h3>
+                </div>
+                <p className="text-muted-foreground">Visualizes when key actions (e.g., BiPAP, Op Notes) occurred relative to vitals and symptoms.</p>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{ delay: 0.4 }}>
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                    <Users className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-bold">Pin-to-Compare Interaction</h3>
+                </div>
+                <p className="text-muted-foreground">Allows CDS to pin two data points (e.g., temp + WBC) for side-by-side clinical reasoning.</p>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{ delay: 0.5 }}>
+              <Card className="p-6 md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-bold">JSON Criteria Output</h3>
+                </div>
+                <p className="text-muted-foreground">Machine-readable output of diagnostic validation model for downstream use in LLM prompts and reporting.</p>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Outcome & Impact */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Outcome & Impact</h2>
           
           <motion.div initial={{
           opacity: 0,
@@ -265,37 +432,24 @@ const SmarterDxCase = () => {
           once: true
         }}>
             <div className="space-y-6">
-              <Card className="p-6">
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    Final interface supported scroll-free evidence review
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    Reduced time-to-agreement on valid sepsis cases
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    Provided a clear audit trail for denials
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    Laid foundation for LLM prompt-driven summarization via JSON exports
-                  </li>
-                </ul>
+              <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+                <h3 className="text-lg font-bold mb-4">User Feedback</h3>
+                <div className="bg-white/50 dark:bg-background/50 p-4 rounded-lg">
+                  <p className="text-sm italic mb-2">"This layout helped me review cases without toggling between tabs. I'm not second-guessing the criteria anymore."</p>
+                  <p className="text-xs text-muted-foreground">— Internal CDS Reviewer</p>
+                </div>
               </Card>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <Card className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+                <Card className="text-center p-6">
                   <Target className="h-12 w-12 text-green-600 mx-auto mb-4" />
                   <h3 className="text-3xl font-bold text-green-600 mb-2">42%</h3>
-                  <p className="text-muted-foreground">🎯 Target agree rate improvement</p>
+                  <p className="text-muted-foreground">Target agree rate improvement</p>
                 </Card>
 
-                <Card className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800">
+                <Card className="text-center p-6">
                   <Activity className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-blue-600 mb-2">🚀 Adopted internally</h3>
+                  <h3 className="text-lg font-bold text-blue-600 mb-2">Adopted internally</h3>
                   <p className="text-muted-foreground">New framework for complex diagnostic review</p>
                 </Card>
               </div>
@@ -304,10 +458,63 @@ const SmarterDxCase = () => {
         </div>
       </section>
 
-      {/* Tools & Stack */}
+      {/* Reflection & Learnings */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Reflection & Learnings</h2>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div initial={{
+            opacity: 0,
+            x: -30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6 h-full">
+                <h3 className="text-xl font-bold mb-4 text-green-600">What Went Well</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Iteration with real CDSs validated design early</li>
+                  <li>• JSON export unlocked future LLM integration use cases</li>
+                  <li>• Compact layout reduced review fatigue</li>
+                </ul>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{
+            opacity: 0,
+            x: 30
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
+              <Card className="p-6 h-full">
+                <h3 className="text-xl font-bold mb-4 text-orange-600">Challenges & Solutions</h3>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div>
+                    <strong>Criteria rules were opaque</strong> → solved with diagnostic checklist
+                  </div>
+                  <div>
+                    <strong>Visualizing time-based data was messy</strong> → solved via custom timeline logic
+                  </div>
+                  <div>
+                    <strong>CDS trust in AI suggestions was low</strong> → transparency improved through pin-to-compare feature
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Next Steps & Evolution */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">🧰 Tools & Stack</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">Next Steps & Evolution</h2>
           
           <motion.div initial={{
           opacity: 0,
@@ -319,46 +526,27 @@ const SmarterDxCase = () => {
           once: true
         }}>
             <Card className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div>
-                      <strong>Figma</strong>
-                      <p className="text-sm text-muted-foreground">UI/UX design and prototyping</p>
-                    </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Activity className="h-6 w-6 text-blue-600" />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                      <Brain className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <strong>FigJam</strong>
-                      <p className="text-sm text-muted-foreground">Workflow and criteria mapping</p>
-                    </div>
-                  </div>
+                  <h4 className="font-semibold mb-2">Real-time Integration</h4>
+                  <p className="text-sm text-muted-foreground">Integrate real-time vitals and labs feed from EMR</p>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                      <Microscope className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div>
-                      <strong>JSON Schema design</strong>
-                      <p className="text-sm text-muted-foreground">Criteria export</p>
-                    </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="h-6 w-6 text-purple-600" />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                      <TrendingUp className="h-4 w-4 text-orange-600" />
-                    </div>
-                    <div>
-                      <strong>OpenAI Collaboration</strong>
-                      <p className="text-sm text-muted-foreground">Prompt engineers for future LLM iteration</p>
-                    </div>
+                  <h4 className="font-semibold mb-2">Expand Scope</h4>
+                  <p className="text-sm text-muted-foreground">Expand checklist model to other complex diagnoses (e.g., ARF)</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Brain className="h-6 w-6 text-green-600" />
                   </div>
+                  <h4 className="font-semibold mb-2">LLM Training</h4>
+                  <p className="text-sm text-muted-foreground">Train LLM summarizers using JSON diagnostic outputs</p>
                 </div>
               </div>
             </Card>
