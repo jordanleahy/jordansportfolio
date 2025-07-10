@@ -10,8 +10,8 @@ const testimonials = [
   },
   {
     quote: "Working alongside Jordan at PrescriberPoint was like having a trusted partner who truly understood the value of clear, intuitive information",
-    author: "Design Lead, PrescriberPoint",
-    role: "Design Leadership"
+    author: "Clinical Operations Lead, PrescriberPoint",
+    role: "Clinical Operations"
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
