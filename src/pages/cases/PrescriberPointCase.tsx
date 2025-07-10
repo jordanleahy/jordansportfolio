@@ -75,11 +75,6 @@ const PrescriberPointCase = () => {
                 <p>6 months</p>
                 <p className="text-sm text-muted-foreground">March - October 2022</p>
               </div>
-              <div>
-                <h3 className="font-semibold text-muted-foreground mb-2">Company</h3>
-                <p>PrescriberPoint</p>
-                <p className="text-sm text-muted-foreground">Healthcare technology</p>
-              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
