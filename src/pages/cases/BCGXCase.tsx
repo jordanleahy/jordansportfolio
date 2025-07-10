@@ -278,48 +278,6 @@ const BCGXCase = () => {
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">Outcome & Impact</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="text-center p-6">
-                <TrendingUp className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-green-600 mb-2">85%</h3>
-                <p className="text-muted-foreground">Reduction in time spent on denial resolution</p>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="text-center p-6">
-                <Activity className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-purple-600 mb-2">92%</h3>
-                <p className="text-muted-foreground">First-time appeal success rate</p>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="text-center p-6">
-                <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-blue-600 mb-2">40%</h3>
-                <p className="text-muted-foreground">Increase in practice revenue recovery</p>
-              </Card>
-            </motion.div>
-          </div>
-
           {/* User Feedback */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
