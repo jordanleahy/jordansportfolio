@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/cases/smarterdx" element={<SmarterDxCase />} />
+          <Route path="/cases/case1" element={<SmarterDxCase />} />
           <Route path="/cases/prescriberpoint" element={<PrescriberPointCase />} />
           <Route path="/cases/bcgx" element={<BCGXCase />} />
           <Route path="/cases/definitive" element={<DefinitiveCase />} />

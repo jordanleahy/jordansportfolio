@@ -7,14 +7,14 @@ import { Link } from "react-router-dom";
 
 const projects = [
   {
-    id: "smarterdx",
+    id: "case1",
     title: "CDI Clinical Reasoning Dashboard",
     company: "SmarterDx",
     description: "Built an AI-powered dashboard that helps clinicians review and validate LLM-suggested diagnoses, improving clinical documentation accuracy by 40%.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
-    path: "/cases/smarterdx"
+    path: "/cases/case1"
   },
   {
     id: "prescriberpoint",
