@@ -296,7 +296,7 @@ const SmarterDxCase = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">Solution & Key Features</h2>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-8">
             <motion.div initial={{
             opacity: 0,
             y: 20
@@ -306,13 +306,9 @@ const SmarterDxCase = () => {
           }} viewport={{
             once: true
           }} transition={{ delay: 0.1 }}>
-              <Card className="p-6 h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <Target className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-bold">Diagnostic Criteria Checklist</h3>
-                </div>
+              <Card className="p-6">
+                <Target className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">1. Diagnostic Criteria Checklist</h3>
                 <p className="text-muted-foreground">Structured top-right display showing met/missing SIRS and infection criteria with color-coded status chips.</p>
               </Card>
             </motion.div>
@@ -326,13 +322,9 @@ const SmarterDxCase = () => {
           }} viewport={{
             once: true
           }} transition={{ delay: 0.2 }}>
-              <Card className="p-6 h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <Activity className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="text-lg font-bold">Scroll-Free Data View</h3>
-                </div>
+              <Card className="p-6">
+                <Activity className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">2. Scroll-Free Data View</h3>
                 <p className="text-muted-foreground">All relevant vitals, labs, and interventions displayed within a single viewport to speed up case validation.</p>
               </Card>
             </motion.div>
@@ -346,13 +338,9 @@ const SmarterDxCase = () => {
           }} viewport={{
             once: true
           }} transition={{ delay: 0.3 }}>
-              <Card className="p-6 h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="text-lg font-bold">Timeline-Embedded Evidence</h3>
-                </div>
+              <Card className="p-6">
+                <Clock className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">3. Timeline-Embedded Evidence</h3>
                 <p className="text-muted-foreground">Visualizes when key actions (e.g., BiPAP, Op Notes) occurred relative to vitals and symptoms.</p>
               </Card>
             </motion.div>
@@ -366,13 +354,9 @@ const SmarterDxCase = () => {
           }} viewport={{
             once: true
           }} transition={{ delay: 0.4 }}>
-              <Card className="p-6 h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <Users className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <h3 className="text-lg font-bold">Pin-to-Compare Interaction</h3>
-                </div>
+              <Card className="p-6">
+                <Users className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">4. Pin-to-Compare Interaction</h3>
                 <p className="text-muted-foreground">Allows CDS to pin two data points (e.g., temp + WBC) for side-by-side clinical reasoning.</p>
               </Card>
             </motion.div>
@@ -386,13 +370,9 @@ const SmarterDxCase = () => {
           }} viewport={{
             once: true
           }} transition={{ delay: 0.5 }}>
-              <Card className="p-6 md:col-span-2">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-bold">JSON Criteria Output</h3>
-                </div>
+              <Card className="p-6">
+                <FileText className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-xl font-bold mb-3">5. JSON Criteria Output</h3>
                 <p className="text-muted-foreground">Machine-readable output of diagnostic validation model for downstream use in LLM prompts and reporting.</p>
               </Card>
             </motion.div>
