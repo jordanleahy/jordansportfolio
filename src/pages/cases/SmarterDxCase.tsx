@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -121,7 +122,7 @@ const SmarterDxCase = () => {
                   <div>
                     <h4 className="font-semibold text-destructive mb-2">Problem Statement</h4>
                     <p className="text-muted-foreground mb-4">
-                      CDS specialists were relying on memory and fragmented data to validate sepsis recommendations—leading to:
+                      CDS specialists were relying on memory and fragmented data to validate sepsis recommendations, leading to:
                     </p>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-muted/50 p-4 rounded-lg">
