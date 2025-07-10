@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap, Clock, Target, Lightbulb, Brain, TestTube, Package, Image, MessageSquareQuote, CheckCircle, AlertTriangle, MapPin, BookOpen, FileText, Workflow } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, Clock, Target, Lightbulb, Brain, TestTube, Package, Image, MessageSquareQuote, CheckCircle, AlertTriangle, MapPin, BookOpen, FileText, Workflow, Inbox, Search, FileCheck, PenTool, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const BCGXCase = () => {
@@ -35,8 +35,8 @@ const BCGXCase = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-5xl font-bold mb-4">BCGX Digital Therapeutics Platform</h1>
-            <p className="text-xl text-muted-foreground mb-8">Streamlined drug discovery workflows connecting global research teams through intelligent collaboration tools</p>
+            <h1 className="text-5xl font-bold mb-4">Denial and Appeal Management</h1>
+            <p className="text-xl text-muted-foreground mb-8">AI-powered prescription denial dashboard with evidence cards and appeal composer</p>
           </motion.div>
         </div>
       </section>
@@ -52,7 +52,7 @@ const BCGXCase = () => {
           >
             <img 
               src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
-              alt="BCGX Digital Therapeutics Platform - Unified research workflow interface"
+              alt="Denial and Appeal Management Dashboard - Prescription denials listing with clinical evidence extraction and appeal composer"
               className="w-full h-auto object-cover aspect-video"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
@@ -66,7 +66,7 @@ const BCGXCase = () => {
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-2">📝 Project Summary</h3>
               <p className="text-muted-foreground mb-8">
-                Designed an integrated digital platform for BCGX that unified disparate research systems, enabling real-time collaboration across global pharmaceutical teams and reducing drug development timelines by 25%.
+                Denial and Appeal Management automates identification and resolution of prescription claim denials by aggregating clinical evidence and generating editable appeal letters—accelerating reimbursement for small healthcare practices.
               </p>
             </div>
             
@@ -76,28 +76,28 @@ const BCGXCase = () => {
                   <Users className="h-4 w-4 text-primary" />
                   <h3 className="font-semibold text-muted-foreground">👤 My Role</h3>
                 </div>
-                <p>Lead Product Designer & UX Strategist</p>
+                <p>Lead Product Designer</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="h-4 w-4 text-primary" />
                   <h3 className="font-semibold text-muted-foreground">🕒 Timeline</h3>
                 </div>
-                <p>August 2021 – March 2022</p>
+                <p>April 2024 – July 2025</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="h-4 w-4 text-primary" />
                   <h3 className="font-semibold text-muted-foreground">📐 Scope</h3>
                 </div>
-                <p>End-to-end platform redesign</p>
+                <p>End-to-end denial management feature</p>
               </div>
             </div>
 
             <div>
               <h3 className="font-semibold text-muted-foreground mb-3">🏷️ Tags/Keywords</h3>
               <div className="flex flex-wrap gap-2">
-                {["#DigitalTherapeutics", "#DrugDiscovery", "#CollaborationPlatform", "#ResearchWorkflows", "#PharmaTech"].map((tag) => (
+                {["#CDI", "#RCM", "#AI", "#UX", "#RX"].map((tag) => (
                   <Badge key={tag} variant="secondary">{tag}</Badge>
                 ))}
               </div>
@@ -119,7 +119,7 @@ const BCGXCase = () => {
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">Healthcare Context</h3>
               <p className="text-lg leading-relaxed text-muted-foreground mb-6">
-                BCGX, a leading pharmaceutical research organization, operates across 15 countries with over 2,000 researchers working on breakthrough digital therapeutics. The fragmented nature of their research infrastructure was creating significant bottlenecks in the drug discovery process, where time-to-market directly impacts patient access to life-saving treatments.
+                Small healthcare practices routinely receive claim denials through a mix of channels—email notifications, payer portals, faxed letters, and postal mail—without a unified intake system. Staff must manually gather each denial notice, decipher different formats, assemble the correct supporting documents (e.g., clinical notes, lab results, prior-auth forms), and then track submission and follow-up status across disparate tools.
               </p>
             </div>
 
@@ -129,7 +129,7 @@ const BCGXCase = () => {
                 <div>
                   <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2">🔺 Problem Statement</h4>
                   <p className="text-red-800 dark:text-red-200">
-                    Research teams were experiencing 30% longer development cycles due to disconnected systems, resulting in $50M+ monthly opportunity costs and reduced collaboration efficiency across global teams.
+                    This fragmented, manual process leads to missed denials and appeals—up to 15% of cases fall through the cracks—causing average reimbursement delays of 10–15 days and undue administrative burden on small practice teams.
                   </p>
                 </div>
               </div>
@@ -154,13 +154,12 @@ const BCGXCase = () => {
                   <Users className="h-6 w-6 text-primary" />
                   <h3 className="text-xl font-bold">👤 My Role</h3>
                 </div>
-                <p className="font-semibold mb-3">Lead Product Designer & UX Strategist</p>
+                <p className="font-semibold mb-3">Lead Product Designer</p>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• End-to-end UX strategy and design leadership</li>
-                  <li>• Cross-functional stakeholder management</li>
-                  <li>• User research and behavioral analysis</li>
-                  <li>• Design system architecture</li>
-                  <li>• Usability testing and validation</li>
+                  <li>• Led UX design for the Prescription Denial Management feature</li>
+                  <li>• Defined workflows for denial intake, evidence capture, and appeal generation</li>
+                  <li>• Produced hi-fi prototypes and facilitated usability tests</li>
+                  <li>• Coordinated with AI engineers to specify data-extraction prompts</li>
                 </ul>
               </div>
 
@@ -171,12 +170,12 @@ const BCGXCase = () => {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-semibold">Core Team (8 members)</p>
-                    <p className="text-sm text-muted-foreground">Product Manager, 2 UX Researchers, 4 Engineers, Clinical Advisor</p>
+                    <p className="font-semibold">Core Team (7 members)</p>
+                    <p className="text-sm text-muted-foreground">Product Manager (1), Frontend Engineers (2), Backend & AI Engineers (2), Clinical Documentation SME (1), QA Lead (1)</p>
                   </div>
                   <div>
                     <p className="font-semibold">Key Stakeholders</p>
-                    <p className="text-sm text-muted-foreground">Research Directors, IT Leadership, Regulatory Affairs, Global Site Coordinators</p>
+                    <p className="text-sm text-muted-foreground">Office Managers, Billing Specialists, CDS Specialists, Practice Administrators</p>
                   </div>
                 </div>
               </div>
@@ -188,16 +187,16 @@ const BCGXCase = () => {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-semibold">8-month engagement</p>
-                    <p className="text-sm text-muted-foreground">Discovery through post-launch optimization</p>
+                    <p className="font-semibold">15-month engagement</p>
+                    <p className="text-sm text-muted-foreground">April 2024 through July 2025</p>
                   </div>
                   <div>
-                    <p className="font-semibold">Platform Coverage</p>
-                    <p className="text-sm text-muted-foreground">Complete workflow redesign spanning 5 core research modules</p>
+                    <p className="font-semibold">Feature Coverage</p>
+                    <p className="text-sm text-muted-foreground">End-to-end UX from discovery through launch</p>
                   </div>
                   <div>
                     <p className="font-semibold">Complexity: High</p>
-                    <p className="text-sm text-muted-foreground">Enterprise-grade integration with legacy systems</p>
+                    <p className="text-sm text-muted-foreground">Multi-channel intake, AI-driven data extraction</p>
                   </div>
                 </div>
               </div>
@@ -228,19 +227,19 @@ const BCGXCase = () => {
                     <div>
                       <h3 className="text-xl font-bold mb-4">💡 1. Research & Discovery</h3>
                       <p className="text-muted-foreground mb-4">
-                        Conducted comprehensive ethnographic research across 5 countries, observing 40+ researchers in their natural work environments. Utilized contextual inquiry, stakeholder interviews, and workflow analysis to understand collaboration patterns and system inefficiencies.
+                        Shadowed denial intake sessions with billing and admin staff. Conducted interviews with 6 office managers and 4 CDS specialists to understand the fragmented intake process across multiple channels.
                       </p>
                       <div className="bg-muted/50 p-4 rounded-lg mb-4">
                         <h4 className="font-semibold mb-2">Key Research Methods:</h4>
                         <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Global site visits and shadowing sessions</li>
-                          <li>• Stakeholder journey mapping workshops</li>
-                          <li>• System audit and technical architecture review</li>
+                          <li>• Denial intake session shadowing with billing staff</li>
+                          <li>• Interviews with office managers and CDS specialists</li>
+                          <li>• Multi-channel workflow analysis and documentation audit</li>
                         </ul>
                       </div>
                       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <p className="text-sm italic">"I have the same conversation 6 times with different teams because our systems don't talk to each other."</p>
-                        <p className="text-xs text-muted-foreground mt-2">- Senior Research Scientist, Oncology Division</p>
+                        <p className="text-sm italic">"Sorting through faxed letters and portal PDFs wastes hours each week."</p>
+                        <p className="text-xs text-muted-foreground mt-2">- Office Manager, interviewed during discovery</p>
                       </div>
                     </div>
                   </div>
@@ -258,14 +257,14 @@ const BCGXCase = () => {
                     <div>
                       <h3 className="text-xl font-bold mb-4">🧠 2. Ideation & Concepting</h3>
                       <p className="text-muted-foreground mb-4">
-                        Mapped the complete drug discovery journey from target identification to clinical trials, identifying 23 critical handoff points where information was lost or duplicated. Created comprehensive information architecture and feature prioritization framework.
+                        Mapped "denial → evidence → appeal" flow for small-practice workflows. Prioritized unified intake and automated document grouping. Designed "evidence card" concept to surface lab values, notes, and prior-auth forms.
                       </p>
                       <div className="bg-muted/50 p-4 rounded-lg">
                         <h4 className="font-semibold mb-2">Deliverables:</h4>
                         <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Cross-functional journey maps and service blueprints</li>
-                          <li>• Information architecture and navigation strategy</li>
-                          <li>• Feature prioritization matrix based on user impact</li>
+                          <li>• Denial-to-appeal workflow maps for small practices</li>
+                          <li>• Evidence card interaction design and information architecture</li>
+                          <li>• Feature prioritization matrix based on administrative impact</li>
                         </ul>
                       </div>
                     </div>
@@ -284,14 +283,14 @@ const BCGXCase = () => {
                     <div>
                       <h3 className="text-xl font-bold mb-4">🧪 3. Prototyping & Validation</h3>
                       <p className="text-muted-foreground mb-4">
-                        Developed interactive prototypes for key workflow scenarios and conducted iterative usability testing with global research teams. Validated design decisions through A/B testing and performance metrics analysis.
+                        Built interactive Figma prototypes for intake queue, evidence cards, and appeal composer. Ran 7 moderated usability tests, iterating on missing-document alerts. Validated AI-extracted summaries against manual curation in A/B tests.
                       </p>
                       <div className="bg-muted/50 p-4 rounded-lg">
                         <h4 className="font-semibold mb-2">Validation Methods:</h4>
                         <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Moderated usability sessions with 25+ researchers</li>
-                          <li>• A/B testing of collaboration features</li>
-                          <li>• Performance benchmarking against existing workflows</li>
+                          <li>• Moderated usability sessions with 7 office managers</li>
+                          <li>• A/B testing of AI-extracted summaries vs manual curation</li>
+                          <li>• Performance benchmarking against existing manual processes</li>
                         </ul>
                       </div>
                     </div>
@@ -348,12 +347,12 @@ const BCGXCase = () => {
                 <Card className="p-6 h-full border-l-4 border-l-blue-500">
                   <div className="flex items-start gap-3">
                     <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-                      <Users className="h-6 w-6 text-blue-600" />
+                      <Inbox className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Smart Collaboration Hub</h3>
+                      <h3 className="text-xl font-bold mb-3">🟦 Unified Denial Intake</h3>
                       <p className="text-muted-foreground">
-                        AI-powered recommendation engine that surfaces relevant experts, similar research, and potential collaboration opportunities based on project context and research domains.
+                        Consolidates denials from email, portal, fax, and mail into one queue with automated categorization and priority sorting.
                       </p>
                     </div>
                   </div>
@@ -369,12 +368,12 @@ const BCGXCase = () => {
                 <Card className="p-6 h-full border-l-4 border-l-yellow-500">
                   <div className="flex items-start gap-3">
                     <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg">
-                      <Zap className="h-6 w-6 text-yellow-600" />
+                      <Search className="h-6 w-6 text-yellow-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Automated Documentation</h3>
+                      <h3 className="text-xl font-bold mb-3">🟦 Formulary & Policy Checker</h3>
                       <p className="text-muted-foreground">
-                        Intelligent capture of lab results, meeting notes, and research insights that automatically generates regulatory-compliant documentation and version control.
+                        Real-time lookup of payer rules and prior-auth requirements with automated compliance verification.
                       </p>
                     </div>
                   </div>
@@ -390,12 +389,12 @@ const BCGXCase = () => {
                 <Card className="p-6 h-full border-l-4 border-l-green-500">
                   <div className="flex items-start gap-3">
                     <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
-                      <Workflow className="h-6 w-6 text-green-600" />
+                      <FileCheck className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Unified Workflow Engine</h3>
+                      <h3 className="text-xl font-bold mb-3">🟦 Evidence Card Aggregator</h3>
                       <p className="text-muted-foreground">
-                        Streamlined research pipeline that connects lab data, collaboration tools, and regulatory documentation, reducing context switching by 60%.
+                        Auto-extracts clinical data points (labs, notes, forms) via AI into editable cards for easy evidence review.
                       </p>
                     </div>
                   </div>
@@ -411,12 +410,12 @@ const BCGXCase = () => {
                 <Card className="p-6 h-full border-l-4 border-l-purple-500">
                   <div className="flex items-start gap-3">
                     <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
-                      <Target className="h-6 w-6 text-purple-600" />
+                      <PenTool className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Real-time Progress Tracking</h3>
+                      <h3 className="text-xl font-bold mb-3">🟦 AI-Assisted Appeal Composer</h3>
                       <p className="text-muted-foreground">
-                        Dynamic dashboards providing visibility into research milestones, resource allocation, and cross-team dependencies across global operations.
+                        Pre-populates appeal letters with clinical rationale; fully editable rich text with regulatory compliance checking.
                       </p>
                     </div>
                   </div>
@@ -432,33 +431,12 @@ const BCGXCase = () => {
                 <Card className="p-6 h-full border-l-4 border-l-red-500">
                   <div className="flex items-start gap-3">
                     <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-lg">
-                      <Brain className="h-6 w-6 text-red-600" />
+                      <Bell className="h-6 w-6 text-red-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Intelligent Knowledge Base</h3>
+                      <h3 className="text-xl font-bold mb-3">🟦 Workflow & Follow-Up Tracker</h3>
                       <p className="text-muted-foreground">
-                        Machine learning-powered research repository that automatically categorizes findings and surfaces relevant historical data and precedents.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-              >
-                <Card className="p-6 h-full border-l-4 border-l-indigo-500">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg">
-                      <Activity className="h-6 w-6 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-3">🟦 Regulatory Compliance Assistant</h3>
-                      <p className="text-muted-foreground">
-                        Automated compliance checking and documentation generation that ensures all research activities meet FDA and international regulatory standards.
+                        Tracks submission dates, sends automated reminders, and monitors response status across all appeals.
                       </p>
                     </div>
                   </div>
@@ -487,11 +465,11 @@ const BCGXCase = () => {
                 <Card className="p-4">
                   <img 
                     src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
-                    alt="BCGX Digital Therapeutics Platform main dashboard showing unified research workflow interface"
+                    alt="Denial and Appeal Management Dashboard showing unified denial intake, evidence cards, and appeal composer interface"
                     className="w-full h-auto rounded-lg"
                   />
                   <p className="text-sm text-muted-foreground mt-3">
-                    Main dashboard interface showing the unified research workflow with collaboration hub, progress tracking, and intelligent recommendations
+                    Unified denial intake dashboard with evidence card aggregation and AI-assisted appeal composition workflow
                   </p>
                 </Card>
               </div>
@@ -517,10 +495,10 @@ const BCGXCase = () => {
                   <h3 className="text-xl font-semibold mb-4">🗣️ User Feedback</h3>
                   <Card className="p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                     <blockquote className="text-lg italic text-green-900 dark:text-green-100 mb-3">
-                      "The new platform has transformed how our global teams collaborate. What used to take weeks of coordination now happens seamlessly in real-time. We're finally able to focus on the science instead of fighting with systems."
+                      "Having all denials in one place and evidence surfaced automatically saved us hours each week."
                     </blockquote>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      - Dr. Sarah Chen, Director of Digital Therapeutics Research, BCGX Global
+                      - Maria Lopez, Office Manager, Sunshine Family Clinic
                     </p>
                   </Card>
                 </div>
@@ -536,9 +514,9 @@ const BCGXCase = () => {
               >
                 <Card className="text-center p-6 border-t-4 border-t-green-500">
                   <TrendingUp className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <h3 className="text-3xl font-bold text-green-600 mb-2">25%</h3>
-                  <p className="text-muted-foreground font-medium">Faster time-to-market for new compounds</p>
-                  <p className="text-sm text-muted-foreground mt-2">Reduced development cycles from 18 to 13.5 months average</p>
+                  <h3 className="text-3xl font-bold text-green-600 mb-2">40%</h3>
+                  <p className="text-muted-foreground font-medium">Reduction in denial processing time</p>
+                  <p className="text-sm text-muted-foreground mt-2">For small healthcare practices using the new workflow</p>
                 </Card>
               </motion.div>
 
@@ -550,9 +528,9 @@ const BCGXCase = () => {
               >
                 <Card className="text-center p-6 border-t-4 border-t-purple-500">
                   <Activity className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                  <h3 className="text-3xl font-bold text-purple-600 mb-2">65%</h3>
-                  <p className="text-muted-foreground font-medium">Increase in cross-team collaboration</p>
-                  <p className="text-sm text-muted-foreground mt-2">Measured by inter-departmental project participation</p>
+                  <h3 className="text-3xl font-bold text-purple-600 mb-2">30%</h3>
+                  <p className="text-muted-foreground font-medium">Increase in first-pass appeal approval rate</p>
+                  <p className="text-sm text-muted-foreground mt-2">Measured against baseline manual appeal process</p>
                 </Card>
               </motion.div>
 
@@ -564,9 +542,9 @@ const BCGXCase = () => {
               >
                 <Card className="text-center p-6 border-t-4 border-t-blue-500">
                   <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="text-3xl font-bold text-blue-600 mb-2">90%</h3>
-                  <p className="text-muted-foreground font-medium">Research team satisfaction score</p>
-                  <p className="text-sm text-muted-foreground mt-2">Post-implementation survey results</p>
+                  <h3 className="text-3xl font-bold text-blue-600 mb-2">$500K</h3>
+                  <p className="text-muted-foreground font-medium">Annual revenue recovery</p>
+                  <p className="text-sm text-muted-foreground mt-2">15% decrease in missed appeals, recovering lost revenue</p>
                 </Card>
               </motion.div>
             </div>
@@ -592,16 +570,13 @@ const BCGXCase = () => {
                 </div>
                 <div className="space-y-4">
                   <Card className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <p className="text-sm"><strong>Global stakeholder alignment:</strong> Successfully navigated complex organizational politics across 15 countries through structured workshops and continuous communication.</p>
+                    <p className="text-sm"><strong>Early SME involvement:</strong> Engaging clinical documentation specialists from the start ensured accuracy across all intake channels and evidence extraction processes.</p>
                   </Card>
                   <Card className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <p className="text-sm"><strong>User-centered approach:</strong> Ethnographic research provided deep insights that directly informed design decisions and prevented costly feature misalignment.</p>
+                    <p className="text-sm"><strong>Modular evidence cards:</strong> The scalable evidence card design adapted seamlessly to various document types and clinical data formats.</p>
                   </Card>
                   <Card className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <p className="text-sm"><strong>Iterative validation:</strong> Continuous testing with real researchers throughout the design process ensured high adoption rates and user satisfaction.</p>
-                  </Card>
-                  <Card className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <p className="text-sm"><strong>Technical integration success:</strong> Close collaboration with engineering teams resulted in seamless integration with legacy systems without data loss.</p>
+                    <p className="text-sm"><strong>AI prompt tuning:</strong> Iterative prompt engineering achieved &gt;85% extraction precision, significantly reducing manual review requirements.</p>
                   </Card>
                 </div>
               </div>
