@@ -9,7 +9,7 @@ const initialCompanies = [
   { name: "SmarterDx", logo: "SD", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
   { name: "PrescriberPoint", logo: "PP", logoUrl: "/lovable-uploads/873ce045-f694-4990-8de2-acc4f4137e86.png" },
   { name: "BCG X", logo: "BCG", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
-  { name: "Definitive Healthcare", logo: "DH" },
+  { name: "Definitive Healthcare", logo: "DH", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
   { name: "RTD Health", logo: "RTD" },
   { name: "Pivot Design", logo: "PD" },
   { name: "Epic Systems", logo: "EPIC" }
