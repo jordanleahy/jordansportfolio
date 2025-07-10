@@ -8,13 +8,23 @@ import { Link } from "react-router-dom";
 // Mock blog data - replace with real data later
 const blogPosts = [
   {
+    id: "ai-transform-cdi",
+    title: "How Will AI Transform CDI?",
+    excerpt: "AI isn't just enhancing Clinical Documentation Integrity — it's reshaping it. Explore the interactive journey of CDI transformation.",
+    date: "2024-01-20",
+    readTime: "12 min read",
+    category: "Healthcare AI",
+    featured: true,
+    image: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png"
+  },
+  {
     id: "design-systems-at-scale",
     title: "Building Design Systems at Scale",
     excerpt: "How we created a unified design language across 50+ product teams and reduced design debt by 40%.",
     date: "2024-01-15",
     readTime: "8 min read",
     category: "Design Systems",
-    featured: true,
+    featured: false,
     image: "/placeholder.svg"
   },
   {

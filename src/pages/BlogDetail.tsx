@@ -1,13 +1,161 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Calendar, Share2, BookmarkPlus, Heart } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Clock, Calendar, Share2, BookmarkPlus, Heart, Brain, MessageSquare, Lightbulb, TrendingUp, DollarSign, Users, AlertTriangle } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // Mock blog content - replace with real data later
 const getBlogPost = (id: string) => {
   const posts = {
+    "ai-transform-cdi": {
+      title: "How Will AI Transform CDI?",
+      subtitle: "AI isn't just enhancing Clinical Documentation Integrity — it's reshaping it.",
+      date: "2024-01-20",
+      readTime: "12 min read",
+      category: "Healthcare AI",
+      author: "Healthcare Innovation Team",
+      content: [
+        {
+          type: "hero-title",
+          content: "How Will AI Transform CDI?",
+          subtitle: "AI isn't just enhancing CDI — it's reshaping it."
+        },
+        {
+          type: "pain-points",
+          title: "Today's Pain Points",
+          points: [
+            {
+              title: "Manual Chart Review Overload",
+              description: "CDI specialists spend 70% of their time on routine chart reviews that could be automated",
+              severity: "high"
+            },
+            {
+              title: "Late-Stage Detection",
+              description: "Critical documentation gaps discovered only after discharge, missing revenue opportunities",
+              severity: "critical"
+            },
+            {
+              title: "Inconsistent Query Quality",
+              description: "Variations in query specificity and clinical accuracy across different specialists",
+              severity: "medium"
+            },
+            {
+              title: "Documentation-Reality Disconnect",
+              description: "Gaps between what was documented and what was clinically true, affecting quality scores",
+              severity: "critical"
+            }
+          ]
+        },
+        {
+          type: "ai-solutions",
+          title: "What AI Will Do Differently",
+          solutions: [
+            {
+              step: 1,
+              title: "Intelligent Chart Prioritization",
+              description: "AI algorithms will analyze patient records in real-time, scoring and ranking cases by documentation risk and revenue impact.",
+              icon: "brain"
+            },
+            {
+              step: 2,
+              title: "Automated Query Generation",
+              description: "Context-aware AI will draft precise clinical queries based on documentation patterns and medical necessity criteria.",
+              icon: "message-square"
+            },
+            {
+              step: 3,
+              title: "Real-Time Documentation Guidance",
+              description: "Embedded AI assistants will provide live suggestions to physicians during documentation, preventing gaps before they occur.",
+              icon: "lightbulb"
+            },
+            {
+              step: 4,
+              title: "Predictive Quality Analytics",
+              description: "Machine learning models will forecast quality outcomes and identify process improvements before issues impact scores.",
+              icon: "trending-up"
+            }
+          ]
+        },
+        {
+          type: "operations-impact",
+          title: "What This Means for CDI Operations",
+          impacts: [
+            {
+              icon: "clock",
+              title: "Time Reallocation",
+              before: "70% routine review, 30% complex cases",
+              after: "20% routine oversight, 80% strategic analysis"
+            },
+            {
+              icon: "dollar-sign",
+              title: "Revenue Impact",
+              before: "$2-4M annual missed revenue per hospital",
+              after: "15-25% improvement in case mix index accuracy"
+            },
+            {
+              icon: "trending-up",
+              title: "Quality Outcomes",
+              before: "Reactive quality management",
+              after: "Proactive quality optimization with predictive insights"
+            },
+            {
+              icon: "users",
+              title: "Team Evolution",
+              before: "CDI specialists as chart reviewers",
+              after: "CDI specialists as clinical documentation strategists"
+            }
+          ]
+        },
+        {
+          type: "industry-leaders",
+          title: "Who's Leading This Today?",
+          companies: [
+            {
+              name: "Nuance",
+              description: "Dragon Medical One with AI-powered clinical documentation",
+              focus: "Real-time speech recognition and clinical intelligence"
+            },
+            {
+              name: "3M",
+              description: "360 Encompass System with predictive analytics",
+              focus: "Computer-assisted coding and quality analytics"
+            },
+            {
+              name: "Optum",
+              description: "CDI solutions with machine learning capabilities",
+              focus: "Risk adjustment and documentation optimization"
+            },
+            {
+              name: "Dolbey",
+              description: "Fusion CAC with natural language processing",
+              focus: "Automated coding and clinical documentation improvement"
+            }
+          ],
+          citations: [
+            "AHIMA: 'AI in Health Information Management' - 2024",
+            "Healthcare Financial Management: 'CDI Technology Trends' - 2024",
+            "Journal of AHIMA: 'Future of Clinical Documentation' - 2023"
+          ]
+        },
+        {
+          type: "visual-break",
+          quote: "AI won't replace CDI specialists — it will elevate them from chart reviewers to clinical documentation strategists."
+        },
+        {
+          type: "tldr",
+          title: "TL;DR",
+          points: [
+            "AI will automate 70% of routine CDI tasks, freeing specialists for strategic work",
+            "Real-time documentation guidance will prevent gaps before they occur",
+            "Predictive analytics will transform CDI from reactive to proactive",
+            "Early adopters are already seeing 15-25% improvements in case mix accuracy",
+            "The future CDI specialist will be a clinical documentation strategist, not just a chart reviewer"
+          ]
+        }
+      ]
+    },
     "design-systems-at-scale": {
       title: "Building Design Systems at Scale",
       subtitle: "How we created a unified design language across 50+ product teams and reduced design debt by 40%",
@@ -264,6 +412,269 @@ const BlogDetail = () => {
                 </div>
               </motion.div>
             ))}
+          </motion.div>
+        );
+
+      case "hero-title":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2 }}
+            className="text-center py-16 mb-16 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl"
+          >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {block.content}
+            </h1>
+            <p className="text-2xl text-muted-foreground italic">
+              {block.subtitle}
+            </p>
+          </motion.div>
+        );
+
+      case "pain-points":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-16"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="grid gap-6">
+              {block.points.map((point: any, pointIndex: number) => (
+                <motion.div
+                  key={pointIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: pointIndex * 0.2 }}
+                  className="group cursor-pointer"
+                >
+                  <Card className="p-6 hover:shadow-lg transition-all duration-300 border-l-4 border-l-destructive">
+                    <div className="flex items-start gap-4">
+                      <div className={`p-2 rounded-full ${
+                        point.severity === 'critical' ? 'bg-destructive/10' :
+                        point.severity === 'high' ? 'bg-orange-500/10' : 'bg-yellow-500/10'
+                      }`}>
+                        <AlertTriangle className={`h-5 w-5 ${
+                          point.severity === 'critical' ? 'text-destructive' :
+                          point.severity === 'high' ? 'text-orange-500' : 'text-yellow-500'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold mb-2">{point.title}</h3>
+                        <p className="text-muted-foreground group-hover:text-foreground transition-colors">
+                          {point.description}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case "ai-solutions":
+        const getIcon = (iconName: string) => {
+          switch (iconName) {
+            case 'brain': return Brain;
+            case 'message-square': return MessageSquare;
+            case 'lightbulb': return Lightbulb;
+            case 'trending-up': return TrendingUp;
+            default: return Brain;
+          }
+        };
+
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-16"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="grid gap-8">
+              {block.solutions.map((solution: any, solutionIndex: number) => {
+                const IconComponent = getIcon(solution.icon);
+                return (
+                  <motion.div
+                    key={solutionIndex}
+                    initial={{ opacity: 0, x: solutionIndex % 2 === 0 ? -30 : 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: solutionIndex * 0.2 }}
+                  >
+                    <Card className="p-8 hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-start gap-6">
+                        <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full">
+                          <div className="text-2xl font-bold text-primary mr-2">
+                            {solution.step}
+                          </div>
+                          <IconComponent className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-semibold mb-3">{solution.title}</h3>
+                          <p className="text-lg text-muted-foreground leading-relaxed">
+                            {solution.description}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      case "operations-impact":
+        const getImpactIcon = (iconName: string) => {
+          switch (iconName) {
+            case 'clock': return Clock;
+            case 'dollar-sign': return DollarSign;
+            case 'trending-up': return TrendingUp;
+            case 'users': return Users;
+            default: return Clock;
+          }
+        };
+
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-16"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {block.impacts.map((impact: any, impactIndex: number) => {
+                const IconComponent = getImpactIcon(impact.icon);
+                return (
+                  <motion.div
+                    key={impactIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: impactIndex * 0.15 }}
+                  >
+                    <Card className="p-6 h-full hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-center gap-3 mb-4">
+                        <IconComponent className="h-6 w-6 text-primary" />
+                        <h3 className="text-xl font-semibold">{impact.title}</h3>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-destructive/5 rounded-lg border border-destructive/20">
+                          <p className="text-sm text-muted-foreground mb-1">Before:</p>
+                          <p className="text-foreground">{impact.before}</p>
+                        </div>
+                        <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+                          <p className="text-sm text-muted-foreground mb-1">With AI:</p>
+                          <p className="text-foreground">{impact.after}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      case "industry-leaders":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="my-16"
+          >
+            <h2 className="text-3xl font-bold mb-8 text-center">{block.title}</h2>
+            
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              {block.companies.map((company: any, companyIndex: number) => (
+                <motion.div
+                  key={companyIndex}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: companyIndex * 0.1 }}
+                >
+                  <Card className="p-6 h-full hover:shadow-lg transition-all duration-300">
+                    <h3 className="text-xl font-bold mb-2 text-primary">{company.name}</h3>
+                    <p className="text-muted-foreground mb-3">{company.description}</p>
+                    <p className="text-sm font-medium text-foreground">{company.focus}</p>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-muted/30 p-6 rounded-lg"
+            >
+              <h4 className="font-semibold mb-3">Sources:</h4>
+              <ul className="space-y-2">
+                {block.citations.map((citation: string, citationIndex: number) => (
+                  <li key={citationIndex} className="text-sm text-muted-foreground">
+                    • {citation}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </motion.div>
+        );
+
+      case "visual-break":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 1.05 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="my-20 py-16 px-8 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl text-center"
+          >
+            <blockquote className="text-2xl md:text-3xl font-medium italic text-foreground/90 leading-relaxed">
+              &ldquo;{block.quote}&rdquo;
+            </blockquote>
+          </motion.div>
+        );
+
+      case "tldr":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-16 p-8 bg-primary/5 rounded-2xl border border-primary/20"
+          >
+            <h2 className="text-2xl font-bold mb-6 text-center">{block.title}</h2>
+            <ul className="space-y-4">
+              {block.points.map((point: string, pointIndex: number) => (
+                <motion.li
+                  key={pointIndex}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: pointIndex * 0.1 }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-2 h-2 bg-primary rounded-full mt-3 flex-shrink-0"></div>
+                  <span className="text-lg leading-relaxed">{point}</span>
+                </motion.li>
+              ))}
+            </ul>
           </motion.div>
         );
 
