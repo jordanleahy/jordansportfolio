@@ -40,7 +40,7 @@ const projects = [
     id: "case2",
     title: "UI Design System + Reporting",
     company: "Definitive Healthcare",
-    description: "Clinical Ops, workflow management, and for coding and CDI and reporting interface that standardized user experience across 15+ healthcare data products.",
+    description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
