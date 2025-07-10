@@ -12,7 +12,8 @@ const initialCompanies = [
   { name: "Definitive Healthcare", logo: "DH" },
   { name: "RTD Health", logo: "RTD" },
   { name: "Pivot Design", logo: "PD" },
-  { name: "Epic Systems", logo: "EPIC" }
+  { name: "Epic Systems", logo: "EPIC" },
+  { name: "New Company", logo: "NC", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" }
 ];
 
 const CompaniesSection = () => {
