@@ -111,7 +111,7 @@ const SmarterDxCase = () => {
               <div>
                 <h4 className="text-xl font-bold mb-3">Healthcare Context</h4>
                 <p className="text-lg leading-relaxed text-muted-foreground">
-                  Sepsis is defined as SIRS (Systemic Inflammatory Response Syndrome) plus suspicion of infection. It is the most commonly denied primary diagnosis across U.S. hospitals. Yet, validating sepsis manually is cognitively demanding and error-prone—especially when multiple criteria must be remembered and justified.
+                  Sepsis is defined as SIRS (Systemic Inflammatory Response Syndrome) plus suspicion of infection. It is the most commonly denied primary diagnosis across U.S. hospitals. Yet, validating sepsis manually is cognitively demanding and error-prone especially when multiple criteria must be remembered and justified.
                 </p>
               </div>
               
