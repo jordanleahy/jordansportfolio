@@ -684,7 +684,7 @@ const BlogDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden" style={{ touchAction: 'pan-y' }}>
       {/* Reading Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-primary z-50 origin-left"
@@ -768,8 +768,8 @@ const BlogDetail = () => {
       </motion.section>
 
       {/* Article Content */}
-      <article className="px-4 pb-16">
-        <div className="max-w-3xl mx-auto">
+      <article className="px-4 pb-16 overflow-x-hidden">
+        <div className="max-w-3xl mx-auto w-full">
           {post.content.map((block: any, index: number) => 
             renderContent(block, index)
           )}
