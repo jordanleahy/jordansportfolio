@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope } from "lucide-react";
+import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 const SmarterDxCase = () => {
   return <div className="min-h-screen bg-background">
@@ -114,23 +114,28 @@ const SmarterDxCase = () => {
                 </p>
               </div>
               
-              <div>
-                <h4 className="text-xl font-bold mb-3">Problem Statement</h4>
-                <p className="text-lg leading-relaxed text-muted-foreground mb-4">
-                  CDS specialists were relying on memory and fragmented data to validate sepsis recommendations—leading to:
-                </p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <ul className="space-y-2 text-muted-foreground">
-                      <li>• <strong className="text-red-600">Low agree rates (23%)</strong></li>
-                      <li>• Missed revenue opportunities due to denials</li>
-                    </ul>
-                  </div>
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <ul className="space-y-2 text-muted-foreground">
-                      <li>• Inefficient workflows filled with manual cross-checking</li>
-                      <li>• High cognitive load and review fatigue</li>
-                    </ul>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-6 w-6 text-destructive mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-destructive mb-2">Problem Statement</h4>
+                    <p className="text-muted-foreground mb-4">
+                      CDS specialists were relying on memory and fragmented data to validate sepsis recommendations—leading to:
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <ul className="space-y-2 text-muted-foreground">
+                          <li>• <strong className="text-red-600">Low agree rates (23%)</strong></li>
+                          <li>• Missed revenue opportunities due to denials</li>
+                        </ul>
+                      </div>
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <ul className="space-y-2 text-muted-foreground">
+                          <li>• Inefficient workflows filled with manual cross-checking</li>
+                          <li>• High cognitive load and review fatigue</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
