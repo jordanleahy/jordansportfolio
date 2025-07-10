@@ -20,7 +20,7 @@ const projects = [
     id: "prescriberpoint",
     title: "Drug Prior Authorization and Validation",
     company: "PrescriberPoint",
-    description: "Designed a machine learning interface that streamlines prior authorization workflows, reducing approval time from days to hours.",
+    description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
