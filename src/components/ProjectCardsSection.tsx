@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Database, Activity } from "lucide-react";
+import { ArrowRight, Brain, Shield, Database, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const projects = [
@@ -32,7 +32,7 @@ const projects = [
     company: "BCG X",
     description: "Designed a denial and appeal resolution application for managing drug denials, including the drafting of templates and sending to payer.",
     tags: ["#Pharma", "#Research", "#UX"],
-    icon: Activity,
+    icon: FileText,
     color: "bg-purple-500",
     path: "/cases/case3"
   },
