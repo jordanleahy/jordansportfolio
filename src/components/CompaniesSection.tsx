@@ -12,7 +12,7 @@ const initialCompanies = [
   { name: "Definitive Healthcare", logo: "DH", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
   { name: "HTD Health", logo: "HTD", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
   
-  { name: "Epic Systems", logo: "EPIC" }
+  
 ];
 
 const CompaniesSection = () => {
