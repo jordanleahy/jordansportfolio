@@ -52,8 +52,8 @@ const PrescriberPointCase = () => {
             }} transition={{
               duration: 0.8,
               delay: 0.2
-            }} className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 aspect-[16/9]">
-                <img src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" alt="Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps" className="w-full h-full object-cover" />
+            }} className="relative mb-8 rounded-2xl overflow-hidden shadow-lg border border-border/50 aspect-video">
+                <img src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" alt="Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps" className="w-full h-full object-contain" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
               </motion.div>
 
@@ -197,7 +197,7 @@ const PrescriberPointCase = () => {
                   <div>
                     <h3 className="text-xl font-bold mb-3">1. Research & Discovery</h3>
                     <ul className="text-muted-foreground space-y-2 mb-4">
-                      <li>• User interviews with 10 CDS specialists</li>
+                      <li>• User interviews with prescribers and non prescribers</li>
                       <li>• Shadowed 8 physicians through current PA workflows</li>
                       <li>• Competitive audit of existing PA tools</li>
                       <li>• Analysis of payer formulary documentation</li>
@@ -324,19 +324,20 @@ const PrescriberPointCase = () => {
             </div>
 
             {/* Taltz Prior Authorization Interface */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-12"
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            duration: 0.6,
+            delay: 0.3
+          }} className="mt-12">
               <div className="relative rounded-2xl overflow-hidden shadow-lg border border-border/50">
-                <img 
-                  src="/lovable-uploads/7d2433d2-f435-44d6-8d11-045721be886e.png" 
-                  alt="Taltz prior authorization interface showing drug information, dosing, and approval workflow" 
-                  className="w-full h-auto object-contain"
-                />
+                <img src="/lovable-uploads/7d2433d2-f435-44d6-8d11-045721be886e.png" alt="Taltz prior authorization interface showing drug information, dosing, and approval workflow" className="w-full h-auto object-contain" />
               </div>
               <p className="text-center text-sm text-muted-foreground mt-4 italic">
                 Taltz prior authorization interface demonstrating automated form population and workflow guidance
