@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle } from "lucide-react";
+import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
 const SmarterDxCase = () => {
   return <div className="min-h-screen bg-background">
@@ -408,61 +408,6 @@ const SmarterDxCase = () => {
       {/* Reflection & Learnings */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Reflection & Learnings</h2>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <motion.div initial={{
-            opacity: 0,
-            x: -30
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }}>
-              <Card className="p-6 h-full">
-                <h3 className="text-xl font-bold mb-4 text-green-600">What Went Well</h3>
-                <ul className="space-y-2 text-muted-foreground">
-                  <li>• Iteration with real CDSs validated design early</li>
-                  <li>• JSON export unlocked future LLM integration use cases</li>
-                  <li>• Compact layout reduced review fatigue</li>
-                </ul>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{
-            opacity: 0,
-            x: 30
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }}>
-              <Card className="p-6 h-full">
-                <h3 className="text-xl font-bold mb-4 text-orange-600">Challenges & Solutions</h3>
-                <div className="space-y-3 text-sm text-muted-foreground">
-                  <div>
-                    <strong>Criteria rules were opaque</strong> → solved with diagnostic checklist
-                  </div>
-                  <div>
-                    <strong>Visualizing time-based data was messy</strong> → solved via custom timeline logic
-                  </div>
-                  <div>
-                    <strong>CDS trust in AI suggestions was low</strong> → transparency improved through pin-to-compare feature
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Next Steps & Evolution */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Next Steps & Evolution</h2>
-          
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -472,30 +417,38 @@ const SmarterDxCase = () => {
         }} viewport={{
           once: true
         }}>
-            <Card className="p-6">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Activity className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Real-time Integration</h4>
-                  <p className="text-sm text-muted-foreground">Integrate real-time vitals and labs feed from EMR</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Expand Scope</h4>
-                  <p className="text-sm text-muted-foreground">Expand checklist model to other complex diagnoses (e.g., ARF)</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Brain className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h4 className="font-semibold mb-2">LLM Training</h4>
-                  <p className="text-sm text-muted-foreground">Train LLM summarizers using JSON diagnostic outputs</p>
-                </div>
-              </div>
+            <h2 className="text-3xl font-bold mb-12 text-center">Reflection & Learnings</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="p-6">
+                <CheckCircle className="h-8 w-8 text-green-600 mb-4" />
+                <h3 className="text-xl font-semibold mb-4">What Went Well</h3>
+                <ul className="text-muted-foreground space-y-2">
+                  <li>• Iteration with real CDSs validated design early</li>
+                  <li>• JSON export unlocked future LLM integration use cases</li>
+                  <li>• Compact layout reduced review fatigue</li>
+                </ul>
+              </Card>
+
+              <Card className="p-6">
+                <AlertCircle className="h-8 w-8 text-orange-500 mb-4" />
+                <h3 className="text-xl font-semibold mb-4">Challenges & Solutions</h3>
+                <ul className="text-muted-foreground space-y-2">
+                  <li>• Criteria rules were opaque → solved with diagnostic checklist</li>
+                  <li>• Visualizing time-based data was messy → solved via custom timeline logic</li>
+                  <li>• CDS trust in AI suggestions was low → transparency improved through pin-to-compare feature</li>
+                </ul>
+              </Card>
+            </div>
+
+            <Card className="p-6 mt-8">
+              <Lightbulb className="h-8 w-8 text-blue-600 mb-4" />
+              <h3 className="text-xl font-semibold mb-4">Next Steps & Evolution</h3>
+              <ul className="text-muted-foreground space-y-2">
+                <li>• Integrate real-time vitals and labs feed from EMR</li>
+                <li>• Expand checklist model to other complex diagnoses (e.g., ARF)</li>
+                <li>• Train LLM summarizers using JSON diagnostic outputs</li>
+              </ul>
             </Card>
           </motion.div>
         </div>
