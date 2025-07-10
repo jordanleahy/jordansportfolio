@@ -7,44 +7,44 @@ import { Link } from "react-router-dom";
 
 const projects = [
   {
-    id: "smarterdx",
+    id: "case1",
     title: "CDI Clinical Reasoning Dashboard",
     company: "SmarterDx",
-    description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
+    description: "Built an AI-powered dashboard that helps clinicians review and validate LLM-suggested diagnoses, improving clinical documentation accuracy by 40%.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
-    path: "/cases/smarterdx"
+    path: "/cases/case1"
   },
   {
-    id: "prescriberpoint",
-    title: "Drug Prior Authorization and Validation",
+    id: "case2",
+    title: "Drug Prior Auth and Validation",
     company: "PrescriberPoint",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#ML", "#Workflow"],
+    tags: ["#PriorAuth", "#Formulary Navigation", "#Step Therapy", "Reauthorization"],
     icon: Shield,
     color: "bg-green-500",
-    path: "/cases/prescriberpoint"
+    path: "/cases/case2"
   },
   {
-    id: "bcgx",
-    title: "Appeals and Denials Resolution",
+    id: "case3",
+    title: "Pharma Workflow Redesign",
     company: "BCG X",
-    description: "Designed a Drug Denial Resolution application to help medical staff organize and respond to all denial types, including drafting appeal letters.",
+    description: "Led the UX redesign of pharmaceutical research workflows, improving researcher productivity and reducing time-to-market for new treatments.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: Activity,
     color: "bg-purple-500",
-    path: "/cases/bcgx"
+    path: "/cases/case3"
   },
   {
-    id: "definitive",
-    title: "UI Design System + Reporting",
+    id: "case4",
+    title: "Clinical Ops, workflow management, and for coding and CDI",
     company: "Definitive Healthcare",
-    description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
+    description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
-    path: "/cases/definitive"
+    path: "/cases/case4"
   }
 ];
 
