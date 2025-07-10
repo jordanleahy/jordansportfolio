@@ -281,7 +281,7 @@ const SmarterDxCase = () => {
                 <h3 className="text-xl font-bold mb-4">4. Iteration & Handoff</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Created scalable component library for diagnostic UI</li>
-                  <li>• Delivered annotated wireframes and dev-ready JSON schemas</li>
+                  <li>• Delivered annotated wireframes and dev ready JSON schemas</li>
                   <li>• Created design documentation for AI integration</li>
                   <li>• Supported QA with UI testing across known case types</li>
                 </ul>
