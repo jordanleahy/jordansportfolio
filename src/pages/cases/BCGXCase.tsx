@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3, Shield, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3, Shield, CheckCircle, Clock, AlertTriangle, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
 import { bcgxCaseData } from "@/data/bcgxCaseData";
 
@@ -292,6 +292,93 @@ const BCGXCase = () => {
               <p className="text-sm text-muted-foreground">
                 — Maria Lopez, Office Manager, Sunshine Family Clinic
               </p>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Reflection & Learnings */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Reflection & Learnings</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {/* What Went Well */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-bold">What Went Well</h3>
+                </div>
+                <ul className="space-y-3">
+                  {bcgxCaseData.reflection.whatWentWell.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-primary mr-2 mt-1">•</span>
+                      <span className="text-muted-foreground text-sm leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </motion.div>
+
+            {/* Challenges & Solutions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-orange-100 p-2 rounded-lg">
+                    <AlertTriangle className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="text-xl font-bold">Challenges & Solutions</h3>
+                </div>
+                <div className="space-y-4">
+                  {bcgxCaseData.reflection.challengesAndSolutions.map((item, index) => (
+                    <div key={index} className="space-y-2">
+                      <p className="text-sm font-medium text-foreground">
+                        <span className="text-red-600">Challenge:</span> {item.challenge}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <span className="text-green-600">Solution:</span> {item.solution}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Next Steps & Evolution */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <Lightbulb className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold">Next Steps & Evolution</h3>
+              </div>
+              <ul className="space-y-3">
+                {bcgxCaseData.reflection.nextSteps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-primary mr-2 mt-1">•</span>
+                    <span className="text-muted-foreground text-sm leading-relaxed">{step}</span>
+                  </li>
+                ))}
+              </ul>
             </Card>
           </motion.div>
         </div>

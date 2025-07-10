@@ -116,24 +116,24 @@ export const bcgxCaseData = {
 
   reflection: {
     whatWentWell: [
-      "Deep healthcare domain research led to breakthrough insights",
-      "Strong collaboration with regulatory affairs ensured compliance",
-      "Iterative testing with real practices validated design decisions"
+      "Early SME involvement ensured accuracy across intake channels",
+      "Modular \"evidence cards\" scaled to various document types", 
+      "AI prompt tuning delivered >85% extraction precision"
     ],
-    challenges: [
-      "Complex regulatory requirements for healthcare documentation",
-      "Integrating with diverse practice management systems",
-      "Balancing automation with healthcare professional oversight"
-    ],
-    solutions: [
-      "Created modular compliance framework for different state regulations",
-      "Developed universal API connectors for major EHR systems", 
-      "Implemented human-in-the-loop verification for critical decisions"
+    challengesAndSolutions: [
+      {
+        challenge: "Inconsistent fax and mail formats",
+        solution: "Implemented OCR normalization with manual-review flags"
+      },
+      {
+        challenge: "Balancing automation with manual control", 
+        solution: "Enabled inline editing on all AI-generated outputs"
+      }
     ],
     nextSteps: [
-      "Expand to specialty medication denials",
-      "Add predictive denial prevention features",
-      "Integrate with major insurance portals for real-time status"
+      "Extend support to specialty medication denials and pre-bill workflows",
+      "Integrate with native mobile app for on-the-go triage",
+      "Add payer-specific appeal templates and automated follow-up reminders"
     ]
   },
 
