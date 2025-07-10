@@ -69,7 +69,7 @@ const ContactSection = () => {
                       rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                       className="text-sm"
                     >
-                      this Email
+                      Email
                     </a>
                   </Button>
                 </CardContent>
