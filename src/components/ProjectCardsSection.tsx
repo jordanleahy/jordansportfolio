@@ -17,7 +17,7 @@ const projects = [
     path: "/cases/case1"
   },
   {
-    id: "case2",
+    id: "prescriberpoint",
     title: "ML Drug Prior Auth Tool",
     company: "PrescriberPoint",
     description: "Designed a machine learning interface that streamlines prior authorization workflows, reducing approval time from days to hours.",
@@ -27,24 +27,24 @@ const projects = [
     path: "/cases/prescriberpoint"
   },
   {
-    id: "case3",
+    id: "bcgx",
     title: "Pharma Workflow Redesign",
     company: "BCG X",
     description: "Led the UX redesign of pharmaceutical research workflows, improving researcher productivity and reducing time-to-market for new treatments.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: Activity,
     color: "bg-purple-500",
-    path: "/cases/case3"
+    path: "/cases/bcgx"
   },
   {
-    id: "case4",
+    id: "definitive",
     title: "UI Design System + Reporting",
     company: "Definitive Healthcare",
     description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
-    path: "/cases/case4"
+    path: "/cases/definitive"
   }
 ];
 
