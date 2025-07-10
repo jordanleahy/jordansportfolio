@@ -30,7 +30,7 @@ const projects = [
     id: "case3",
     title: "Denial and Appeal Resolution",
     company: "BCG X",
-    description: "I designed a denial and appeal resolution application for managing drug denials, including the drafting of templates and sending to payer.",
+    description: "Designed a denial and appeal resolution application for managing drug denials, including the drafting of templates and sending to payer.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: Activity,
     color: "bg-purple-500",
