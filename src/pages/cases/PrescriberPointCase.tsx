@@ -200,7 +200,7 @@ const PrescriberPointCase = () => {
                       <li>• User interviews with two dermtalology practices</li>
                       <li>• Shadowed prescribers and non prescribers through current PA workflows</li>
                       <li>• Competitive audit of existing PA tools</li>
-                      <li>• Analysis of payer formulary documentation</li>
+                      <li>• Analysis of payer formulary documentation via MMIT API</li>
                     </ul>
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <p className="text-sm italic">"I spend more time fighting insurance than treating patients."</p>
