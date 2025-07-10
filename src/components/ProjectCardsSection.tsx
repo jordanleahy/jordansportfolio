@@ -30,7 +30,7 @@ const projects = [
     id: "case3",
     title: "Denial and appeal resolution",
     company: "BCG X",
-    description: "Led the UX redesign of pharmaceutical research workflows, improving researcher productivity and reducing time-to-market for new treatments.",
+    description: "I designed a denial and appeal resolution application for managing drug denials, including the drafting of templates and sending to payer.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: Activity,
     color: "bg-purple-500",
