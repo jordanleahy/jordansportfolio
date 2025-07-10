@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3, Shield, CheckCircle, Clock, AlertTriangle, Lightbulb } from "lucide-react";
+import { ArrowLeft, Activity, Users, TrendingUp, Zap, User, UserCheck, Target, Eye, BarChart3, Shield, CheckCircle, Clock, AlertCircle, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
 import { bcgxCaseData } from "@/data/bcgxCaseData";
 
@@ -311,7 +311,7 @@ const BCGXCase = () => {
             >
               <Card className="p-6 h-full">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-green-100 p-2 rounded-lg">
+                  <div className="bg-green-500/10 p-2 rounded-full">
                     <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
                   <h3 className="text-xl font-bold">What Went Well</h3>
@@ -336,8 +336,8 @@ const BCGXCase = () => {
             >
               <Card className="p-6 h-full">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-orange-100 p-2 rounded-lg">
-                    <AlertTriangle className="h-6 w-6 text-orange-600" />
+                  <div className="bg-orange-500/10 p-2 rounded-full">
+                    <AlertCircle className="h-6 w-6 text-orange-600" />
                   </div>
                   <h3 className="text-xl font-bold">Challenges & Solutions</h3>
                 </div>
@@ -366,7 +366,7 @@ const BCGXCase = () => {
           >
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="bg-blue-100 p-2 rounded-lg">
+                <div className="bg-blue-500/10 p-2 rounded-full">
                   <Lightbulb className="h-6 w-6 text-blue-600" />
                 </div>
                 <h3 className="text-xl font-bold">Next Steps & Evolution</h3>
