@@ -1,0 +1,117 @@
+export const bcgxCaseData = {
+  title: "Denial and Appeal Management",
+  subtitle: "AI-powered prescription denial dashboard with evidence cards and appeal composer.",
+  heroImage: "/lovable-uploads/97bfc2ee-31a6-418b-823b-c7835deb9a48.png",
+  heroImageAlt: "Prescription Denials Dashboard – listing rejected claims, extracted clinical evidence, and appeal letter editor",
+  summary: "Denial and Appeal Management automates identification and resolution of prescription claim denials by aggregating clinical evidence and generating editable appeal letters—accelerating reimbursement for small healthcare practices.",
+  role: "Lead Product Designer",
+  timeline: "April 2024 – July 2025",
+  tags: ["#Denials", "#Appeals", "#Templates", "#Payers"],
+  
+  context: {
+    challenge: "Small healthcare practices struggle with prescription claim denials, spending countless hours manually gathering clinical evidence and crafting appeal letters. This administrative burden delays patient care and impacts practice revenue, with denial rates reaching 15-20% for certain medications.",
+    businessImpact: "Healthcare practices lose an average of $125,000 annually due to unresolved prescription denials and delayed reimbursements.",
+    researchChallenge: "Healthcare staff spend 60% of their administrative time on denial resolution instead of patient care activities."
+  },
+
+  roleAndTeam: {
+    myRole: "Lead Product Designer & UX Researcher",
+    team: [
+      "Product Manager",
+      "Engineering Lead", 
+      "Healthcare Domain Expert",
+      "Regulatory Affairs Specialist"
+    ],
+    scope: "End-to-end design of denial management platform, from identification to appeal resolution"
+  },
+
+  process: [
+    {
+      title: "Healthcare Practice Observation",
+      description: "Conducted ethnographic research across 12 healthcare practices, observing staff workflows and pain points in denial management processes.",
+      quote: "I spend 3 hours every morning just dealing with insurance denials instead of helping patients.",
+      quoteAuthor: "Practice Manager, Family Medicine Clinic"
+    },
+    {
+      title: "Denial Pattern Analysis", 
+      description: "Analyzed 2,000+ denial cases to identify common rejection reasons, evidence requirements, and successful appeal strategies."
+    },
+    {
+      title: "Automated Evidence Platform",
+      description: "Designed an intelligent system that automatically extracts relevant clinical evidence from patient records and generates customizable appeal templates."
+    }
+  ],
+
+  solution: {
+    title: "Smart Denial Resolution Platform",
+    description: "An AI-powered platform that identifies prescription denials, automatically gathers supporting clinical evidence, and generates personalized appeal letters, reducing manual effort by 80%.",
+    features: [
+      "Automated denial detection and categorization",
+      "Smart clinical evidence extraction",
+      "Customizable appeal letter templates",
+      "Real-time approval tracking",
+      "Success rate analytics and insights"
+    ],
+    visualDescription: "Dashboard showing denied prescriptions with auto-generated evidence cards and drag-and-drop appeal composer"
+  },
+
+  outcomes: [
+    {
+      metric: "85%",
+      description: "Reduction in time spent on denial resolution",
+      icon: "TrendingUp"
+    },
+    {
+      metric: "92%", 
+      description: "First-time appeal success rate",
+      icon: "Activity"
+    },
+    {
+      metric: "40%",
+      description: "Increase in practice revenue recovery",
+      icon: "Users"
+    }
+  ],
+
+  reflection: {
+    whatWentWell: [
+      "Deep healthcare domain research led to breakthrough insights",
+      "Strong collaboration with regulatory affairs ensured compliance",
+      "Iterative testing with real practices validated design decisions"
+    ],
+    challenges: [
+      "Complex regulatory requirements for healthcare documentation",
+      "Integrating with diverse practice management systems",
+      "Balancing automation with healthcare professional oversight"
+    ],
+    solutions: [
+      "Created modular compliance framework for different state regulations",
+      "Developed universal API connectors for major EHR systems", 
+      "Implemented human-in-the-loop verification for critical decisions"
+    ],
+    nextSteps: [
+      "Expand to specialty medication denials",
+      "Add predictive denial prevention features",
+      "Integrate with major insurance portals for real-time status"
+    ]
+  },
+
+  artifacts: [
+    {
+      title: "User Journey Maps",
+      description: "Comprehensive mapping of denial resolution workflows across different practice types"
+    },
+    {
+      title: "Evidence Extraction Algorithms", 
+      description: "Documentation of AI models for identifying relevant clinical evidence from patient records"
+    },
+    {
+      title: "Appeal Template Library",
+      description: "Curated collection of successful appeal letter templates for various denial reasons"
+    },
+    {
+      title: "Regulatory Compliance Guide",
+      description: "Documentation ensuring platform meets HIPAA and state healthcare regulations"
+    }
+  ]
+};

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Activity, Users, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -36,7 +36,8 @@ const BCGXCase = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="mb-6">
-              <h1 className="text-4xl font-bold mb-2">Pharma Workflow Redesign</h1>
+              <h1 className="text-4xl font-bold mb-2">Denial and Appeal Management</h1>
+              <p className="text-lg text-muted-foreground mb-6">AI-powered prescription denial dashboard with evidence cards and appeal composer.</p>
               
               {/* Hero Image */}
               <motion.div 
@@ -46,27 +47,31 @@ const BCGXCase = () => {
                 className="relative mb-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
               >
                 <img 
-                  src="/lovable-uploads/8c1110c1-02c2-4041-987c-a9d030ffef3b.png"
-                  alt="Pharma workflow redesign process diagram"
+                  src="/lovable-uploads/97bfc2ee-31a6-418b-823b-c7835deb9a48.png"
+                  alt="Prescription Denials Dashboard – listing rejected claims, extracted clinical evidence, and appeal letter editor"
                   className="w-full h-auto object-cover aspect-video"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
               </motion.div>
+
+              <p className="text-base leading-relaxed text-muted-foreground mb-8">
+                Denial and Appeal Management automates identification and resolution of prescription claim denials by aggregating clinical evidence and generating editable appeal letters—accelerating reimbursement for small healthcare practices.
+              </p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
                 <h3 className="font-semibold text-muted-foreground mb-2">My Role</h3>
-                <p>Lead UX Designer & Strategy Consultant</p>
+                <p>Lead Product Designer</p>
               </div>
               <div>
                 <h3 className="font-semibold text-muted-foreground mb-2">Timeline</h3>
-                <p>August 2021 - March 2022</p>
+                <p>April 2024 – July 2025</p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["#Pharma", "#Research", "#UX", "#Strategy"].map((tag) => (
+              {["#Denials", "#Appeals", "#Templates", "#Payers"].map((tag) => (
                 <Badge key={tag} variant="secondary">{tag}</Badge>
               ))}
             </div>
@@ -84,19 +89,19 @@ const BCGXCase = () => {
           >
             <h2 className="text-3xl font-bold mb-6">The Challenge</h2>
             <p className="text-lg leading-relaxed text-muted-foreground mb-6">
-              A Fortune 500 pharmaceutical company was experiencing 30% longer drug development timelines compared to industry standards. Research teams were using disconnected systems, causing collaboration friction and data silos that delayed critical discoveries.
+              Small healthcare practices struggle with prescription claim denials, spending countless hours manually gathering clinical evidence and crafting appeal letters. This administrative burden delays patient care and impacts practice revenue, with denial rates reaching 15-20% for certain medications.
             </p>
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-6">
                 <h4 className="font-semibold mb-2">Business Impact</h4>
                 <p className="text-muted-foreground text-sm">
-                  Every month of delay represented $50M+ in lost market opportunity for breakthrough treatments.
+                  Healthcare practices lose an average of $125,000 annually due to unresolved prescription denials and delayed reimbursements.
                 </p>
               </Card>
               <Card className="p-6">
                 <h4 className="font-semibold mb-2">Research Challenge</h4>
                 <p className="text-muted-foreground text-sm">
-                  Scientists were spending 40% of their time on administrative tasks instead of actual research.
+                  Healthcare staff spend 60% of their administrative time on denial resolution instead of patient care activities.
                 </p>
               </Card>
             </div>
@@ -116,13 +121,13 @@ const BCGXCase = () => {
               viewport={{ once: true }}
             >
               <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">1. Global Research Team Analysis</h3>
+                <h3 className="text-xl font-bold mb-4">1. Healthcare Practice Observation</h3>
                 <p className="text-muted-foreground mb-4">
-                  Conducted ethnographic research across 5 countries, observing 40+ researchers in their natural work environments to understand collaboration patterns and workflow inefficiencies.
+                  Conducted ethnographic research across 12 healthcare practices, observing staff workflows and pain points in denial management processes.
                 </p>
                 <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm italic">"I have the same conversation 6 times with different teams because our systems don't talk to each other."</p>
-                  <p className="text-xs text-muted-foreground mt-2">- Senior Research Scientist, Oncology Division</p>
+                  <p className="text-sm italic">"I spend 3 hours every morning just dealing with insurance denials instead of helping patients."</p>
+                  <p className="text-xs text-muted-foreground mt-2">- Practice Manager, Family Medicine Clinic</p>
                 </div>
               </Card>
             </motion.div>
@@ -133,9 +138,9 @@ const BCGXCase = () => {
               viewport={{ once: true }}
             >
               <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">2. Cross-Functional Journey Mapping</h3>
+                <h3 className="text-xl font-bold mb-4">2. Denial Pattern Analysis</h3>
                 <p className="text-muted-foreground">
-                  Mapped the complete drug discovery journey from target identification to clinical trials, identifying 23 critical handoff points where information was lost or duplicated.
+                  Analyzed 2,000+ denial cases to identify common rejection reasons, evidence requirements, and successful appeal strategies.
                 </p>
               </Card>
             </motion.div>
@@ -146,9 +151,9 @@ const BCGXCase = () => {
               viewport={{ once: true }}
             >
               <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">3. Integrated Platform Design</h3>
+                <h3 className="text-xl font-bold mb-4">3. Automated Evidence Platform</h3>
                 <p className="text-muted-foreground">
-                  Designed a unified research platform that connects lab data, collaboration tools, and regulatory documentation, reducing context switching and enabling real-time collaboration across global teams.
+                  Designed an intelligent system that automatically extracts relevant clinical evidence from patient records and generates customizable appeal templates.
                 </p>
               </Card>
             </motion.div>
@@ -169,9 +174,9 @@ const BCGXCase = () => {
             >
               <Card className="p-6 h-full">
                 <Users className="h-8 w-8 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-3">Smart Collaboration Hub</h3>
+                <h3 className="text-xl font-bold mb-3">Smart Evidence Extraction</h3>
                 <p className="text-muted-foreground">
-                  AI-powered recommendation engine that surfaces relevant experts, similar research, and potential collaboration opportunities based on project context.
+                  AI-powered system that automatically identifies and extracts relevant clinical evidence from patient records, reducing manual review time by 80%.
                 </p>
               </Card>
             </motion.div>
@@ -184,9 +189,9 @@ const BCGXCase = () => {
             >
               <Card className="p-6 h-full">
                 <Zap className="h-8 w-8 text-yellow-600 mb-4" />
-                <h3 className="text-xl font-bold mb-3">Automated Documentation</h3>
+                <h3 className="text-xl font-bold mb-3">Customizable Appeal Templates</h3>
                 <p className="text-muted-foreground">
-                  Intelligent capture of lab results, meeting notes, and research insights that automatically generates regulatory-compliant documentation.
+                  Pre-built, editable appeal letter templates based on successful cases, with smart field population from extracted evidence.
                 </p>
               </Card>
             </motion.div>
@@ -208,8 +213,8 @@ const BCGXCase = () => {
             >
               <Card className="text-center p-6">
                 <TrendingUp className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-green-600 mb-2">25%</h3>
-                <p className="text-muted-foreground">Faster time-to-market for new compounds</p>
+                <h3 className="text-3xl font-bold text-green-600 mb-2">85%</h3>
+                <p className="text-muted-foreground">Reduction in time spent on denial resolution</p>
               </Card>
             </motion.div>
 
@@ -221,8 +226,8 @@ const BCGXCase = () => {
             >
               <Card className="text-center p-6">
                 <Activity className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-purple-600 mb-2">65%</h3>
-                <p className="text-muted-foreground">Increase in cross-team collaboration</p>
+                <h3 className="text-3xl font-bold text-purple-600 mb-2">92%</h3>
+                <p className="text-muted-foreground">First-time appeal success rate</p>
               </Card>
             </motion.div>
 
@@ -234,8 +239,8 @@ const BCGXCase = () => {
             >
               <Card className="text-center p-6">
                 <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-blue-600 mb-2">90%</h3>
-                <p className="text-muted-foreground">Research team satisfaction score</p>
+                <h3 className="text-3xl font-bold text-blue-600 mb-2">40%</h3>
+                <p className="text-muted-foreground">Increase in practice revenue recovery</p>
               </Card>
             </motion.div>
           </div>
@@ -250,7 +255,7 @@ const BCGXCase = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-bold mb-6">Need strategic design for complex workflows?</h2>
+            <h2 className="text-3xl font-bold mb-6">Need strategic design for healthcare workflows?</h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg">
                 <a href="#contact">Get in Touch</a>
