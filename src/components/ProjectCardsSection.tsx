@@ -10,7 +10,7 @@ const projects = [
     id: "smarterdx",
     title: "CDI Clinical Reasoning Dashboard",
     company: "SmarterDx",
-    description: "Built an AI-powered dashboard that helps clinicians review and validate LLM-suggested diagnoses, improving clinical documentation accuracy by 40%.",
+    description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
