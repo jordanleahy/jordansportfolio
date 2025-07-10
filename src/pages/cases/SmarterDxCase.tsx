@@ -40,14 +40,9 @@ const SmarterDxCase = () => {
           duration: 0.6
         }}>
             <div className="space-y-6 mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-4 rounded-xl bg-red-500/10">
-                  <Activity className="h-8 w-8 text-red-600" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold mb-2">Sepsis Diagnosis Validation</h1>
-                  <p className="text-xl text-muted-foreground">Clinical documentation interface showing diagnostic checklist, timeline-pinned data points, and scroll-free review layout for AI-recommended sepsis opportunities</p>
-                </div>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Sepsis Diagnosis Validation</h1>
+                <p className="text-xl text-muted-foreground">Clinical documentation interface showing diagnostic checklist, timeline-pinned data points, and scroll-free review layout for AI-recommended sepsis opportunities</p>
               </div>
               
               {/* Project Summary */}
