@@ -67,7 +67,7 @@ const PrescriberPointCase = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["#PriorAuth", "#ML", "#Workflow", "#Pharmacy", "#Healthcare"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+              {["PriorAuth", "Formulary", "MedicalRequirements", "Step Therapy", "Reauthorization"].map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
           </motion.div>
         </div>
