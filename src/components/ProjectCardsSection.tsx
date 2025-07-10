@@ -38,7 +38,7 @@ const projects = [
   },
   {
     id: "case2",
-    title: "Clinical Ops, workflow management, and for coding and CDI",
+    title: "Clinical ops workflow managemen for coding and CDI",
     company: "Definitive Healthcare",
     description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
