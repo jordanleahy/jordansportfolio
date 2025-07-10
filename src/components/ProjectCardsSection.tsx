@@ -40,7 +40,7 @@ const projects = [
     id: "case2",
     title: "UI Design System + Reporting",
     company: "Definitive Healthcare",
-    description: "Created a comprehensive design system and reporting interface that standardized user experience across 15+ healthcare data products.",
+    description: "Clinical Ops, workflow management, and for coding and CDI and reporting interface that standardized user experience across 15+ healthcare data products.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Database,
     color: "bg-orange-500",
