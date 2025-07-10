@@ -37,7 +37,6 @@ const BCGXCase = () => {
           >
             <div className="mb-6">
               <h1 className="text-4xl font-bold mb-2">Pharma Workflow Redesign</h1>
-              <p className="text-xl text-muted-foreground">BCG X</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">

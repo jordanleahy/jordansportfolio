@@ -41,7 +41,6 @@ const SmarterDxCase = () => {
               </div>
               <div>
                 <h1 className="text-4xl font-bold mb-2">LLM Diagnosis Dashboard</h1>
-                <p className="text-xl text-muted-foreground">SmarterDx</p>
               </div>
             </div>
             

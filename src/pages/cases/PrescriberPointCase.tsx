@@ -37,7 +37,6 @@ const PrescriberPointCase = () => {
           >
             <div className="mb-6">
               <h1 className="text-4xl font-bold mb-2">ML Drug Prior Auth Tool</h1>
-              <p className="text-xl text-muted-foreground">PrescriberPoint</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">

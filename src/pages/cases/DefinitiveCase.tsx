@@ -41,7 +41,6 @@ const DefinitiveCase = () => {
               </div>
               <div>
                 <h1 className="text-4xl font-bold mb-2">UI Design System + Reporting</h1>
-                <p className="text-xl text-muted-foreground">Definitive Healthcare</p>
               </div>
             </div>
             
