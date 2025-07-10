@@ -51,8 +51,8 @@ const SmarterDxCase = () => {
                   className="relative mt-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
                 >
                   <img 
-                    src="/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png"
-                    alt="Drug Prior Authorization workflow interface showing formulary rules, authorization process, and e-submission workflow"
+                    src="/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png"
+                    alt="Sepsis diagnosis interface showing patient data, SIRS criteria, infection markers, and clinical decision support"
                     className="w-full h-auto object-cover"
                   />
                 </motion.div>
