@@ -91,7 +91,6 @@ const ProjectCardsSection = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
-                    <p className="text-accent font-medium">{project.company}</p>
                   </div>
                 </CardHeader>
                 
