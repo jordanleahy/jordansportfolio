@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
 import SmarterDxCase from "./pages/cases/SmarterDxCase";
 import PrescriberPointCase from "./pages/cases/PrescriberPointCase";
 import BCGXCase from "./pages/cases/BCGXCase";
@@ -22,6 +24,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/cases/smarterdx" element={<SmarterDxCase />} />
           <Route path="/cases/prescriberpoint" element={<PrescriberPointCase />} />
           <Route path="/cases/bcgx" element={<BCGXCase />} />
