@@ -14,7 +14,7 @@ const testimonials = [
     role: "Design Leadership"
   },
   {
-    quote: "Working with Jordan was transformative for our product team. They brought both strategic thinking and execution excellence.",
+    quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
     author: "VP Product, BCG X",
     role: "VP Product"
   },
