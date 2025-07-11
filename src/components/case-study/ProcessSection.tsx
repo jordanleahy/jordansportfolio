@@ -34,11 +34,11 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-8">
-                  <div className="flex flex-col md:flex-row md:items-start md:gap-6">
-                    <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 md:flex-shrink-0 w-12 h-12 flex items-center justify-center">
-                      <IconComponent className="h-8 w-8 text-primary" />
+                  <div className="flex flex-col">
+                    <div className="p-3 bg-primary/10 rounded-lg mb-4 w-12 h-12 flex items-center justify-center">
+                      <IconComponent className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="w-full md:flex-1">
+                    <div className="w-full">
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
                       {step.image && (
                         <div className="mb-4">

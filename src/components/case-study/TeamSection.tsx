@@ -32,9 +32,9 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-6 h-full">
-                  <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-4">
-                    <div className="p-2 bg-primary/10 rounded-lg mb-3 md:mb-0 w-9 h-9 flex items-center justify-center">
-                      <IconComponent className="h-5 w-5 text-primary" />
+                  <div className="flex flex-col">
+                    <div className="p-3 bg-primary/10 rounded-lg mb-4 w-12 h-12 flex items-center justify-center">
+                      <IconComponent className="h-6 w-6 text-primary" />
                     </div>
                     <div className="w-full">
                       <h3 className="text-xl font-bold mb-2">{member.title}</h3>
