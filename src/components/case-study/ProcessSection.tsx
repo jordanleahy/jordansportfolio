@@ -42,10 +42,10 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
                       {step.image && (
                         <div className="mb-4">
-                          <img 
+                           <img 
                             src={step.image} 
                             alt={`${step.title} illustration`}
-                            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                            className="w-full max-w-md rounded-lg shadow-lg"
                           />
                         </div>
                       )}
