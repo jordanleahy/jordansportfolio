@@ -7,6 +7,7 @@ export interface ProcessStep {
     text: string;
     author: string;
   };
+  image?: string;
 }
 
 export interface Challenge {

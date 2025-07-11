@@ -57,6 +57,15 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                           <footer className="text-sm mt-1">— {step.quote.author}</footer>
                         </blockquote>
                       )}
+                      {step.image && (
+                        <div className="mt-4">
+                          <img 
+                            src={step.image} 
+                            alt={`${step.title} illustration`}
+                            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>
