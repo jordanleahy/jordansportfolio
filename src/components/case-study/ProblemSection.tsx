@@ -22,6 +22,15 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
           <div className="grid md:grid-cols-2 gap-6">
             {challenges.map((challenge, index) => (
               <div key={index}>
+                {challenge.title === "Clinical Impact" && (
+                  <div className="mb-6">
+                    <img 
+                      src="/lovable-uploads/cd122851-7533-4359-91a4-37ade8b9c3b8.png" 
+                      alt="Sepsis diagnosis review system showing denial risk and clinical criteria"
+                      className="w-full rounded-lg shadow-lg"
+                    />
+                  </div>
+                )}
                 <Card className="p-6">
                   <h4 className="font-semibold mb-2">{challenge.title}</h4>
                   <ul className="space-y-2">
