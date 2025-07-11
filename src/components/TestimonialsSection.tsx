@@ -15,7 +15,7 @@ const testimonials = [
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
-    author: "VP Product, Revenue Cycle Solutions",
+    author: "Senior Partner, Pharma Innovation",
     role: "VP Product"
   },
   {
