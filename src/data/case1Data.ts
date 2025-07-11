@@ -80,16 +80,16 @@ export const case1Data: CaseStudyData = {
     {
       icon: "Eye",
       title: "1. Clinical Research & Discovery",
-      description: "Deep dive into sepsis detection workflows and pain points",
+      description: "Deep dive into CDI workflows for sepsis validation and documentation challenges",
       items: [
-        "Shadowed ICU teams during sepsis cases",
-        "Analyzed 500+ patient records for patterns", 
-        "Interviewed 12 critical care specialists",
-        "Mapped current diagnostic decision trees"
+        "Shadowed internal CDI members during real-time reviews",
+        "Audited multiple sepsis patient charts", 
+        "Interviewed Clinical Documentation Specialists and Physician Advisors",
+        "Mapped common criteria used in real-world sepsis queries and validations"
       ],
       quote: {
-        text: "Every minute matters with sepsis. We need systems that think as fast as we do.",
-        author: "Dr. Sarah Chen, ICU Director"
+        text: "Every minute matters for CDI teams during inpatient stays. We need tools that help us validate diagnoses with confidence and speed.",
+        author: "Internal CDS, Inpatient Documentation Team"
       }
     },
     {
