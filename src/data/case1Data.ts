@@ -14,24 +14,24 @@ export const case1Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "Sepsis kills 1 in 5 hospital patients globally, yet early detection remains challenging due to complex criteria and time-sensitive decision making. Healthcare teams needed a system that could predict sepsis risk while seamlessly integrating into existing clinical workflows.",
+  problemDescription: "Sepsis remains one of the most frequently denied diagnoses in inpatient coding reviews. Despite its clinical complexity, documentation often fails to meet payer expectations or align with coding guidelines. CDI teams struggle to validate sepsis due to inconsistent clinical indicators, lack of provider clarity, and fragmented evidence across the chart. A system is needed to support real-time review of sepsis triggers, align with clinical and coding criteria, and integrate smoothly into existing workflows.",
   challenges: [
     {
       type: 'problem',
       title: 'Clinical Impact',
       items: [
-        "1 in 5 hospital deaths caused by sepsis",
-        "6-hour window for optimal treatment",
-        "Complex multi-criteria diagnosis process"
+        "One of the most commonly denied inpatient diagnoses",
+        "Often lacks clear alignment with Sepsis-3 or SIRS criteria",
+        "High financial and quality impact when denied or downcoded"
       ]
     },
     {
       type: 'need',
       title: 'Design Challenges',
       items: [
-        "Real-time data visualization complexity",
-        "Alert fatigue from false positives",
-        "Integration with existing EMR systems"
+        "Fragmented documentation across vitals, labs, and notes",
+        "Cognitive overload validating clinical criteria under time pressure",
+        "Inconsistent provider terminology and unclear diagnostic intent"
       ]
     }
   ],
