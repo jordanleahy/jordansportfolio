@@ -139,7 +139,7 @@ export const case1Data: CaseStudyData = {
     },
     {
       icon: "TrendingUp",
-      title: "Predictive Analytics Dashboard",
+      title: "Data dense visualization",
       description: "Interactive data visualization showing patient risk trajectory and key clinical markers over time."
     },
     {
