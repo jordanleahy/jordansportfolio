@@ -8,8 +8,8 @@ export const case3Data: CaseStudyData = {
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "8 months",
-  timelineDetails: "January - September 2023",
+  timeline: "5 months",
+  timelineDetails: "January - May 2025",
   tags: ["Denial Management", "Appeals", "Revenue Cycle", "Healthcare AI"],
   
   // Problem Section
