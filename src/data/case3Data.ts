@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Denial and Appeal Management",
-  description: "Designed an AI-powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
+  description: "Designed an AI powered denial management platform that automates claim review, generates targeted appeal letters, and creates payer follow ups to reduce denial rates and accelerate revenue recovery for healthcare practices.",
   heroImage: "/lovable-uploads/35c7ab82-d7d8-4975-8b1a-eb02163724b7.png",
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
