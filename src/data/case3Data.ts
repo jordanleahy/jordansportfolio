@@ -96,6 +96,7 @@ export const case3Data: CaseStudyData = {
       icon: "Lightbulb",
       title: "2. Ideation & Concepting",
       description: "Collaborative workshops to prioritize features and define user flows",
+      image: "/lovable-uploads/3e1c498e-aaa3-49a7-a2ee-5c4b772223fb.png",
       items: [
         "User journey mapping for denial to resolution workflow",
         "Feature prioritization workshops with stakeholders",
