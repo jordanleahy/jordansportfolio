@@ -9,7 +9,7 @@ export const case1Data: CaseStudyData = {
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
   timeline: "6 months",
-  timelineDetails: "March - September 2023",
+  timelineDetails: "March - May 2024",
   tags: ["Sepsis Detection", "Clinical AI", "Patient Safety", "Healthcare Dashboard"],
   
   // Problem Section
