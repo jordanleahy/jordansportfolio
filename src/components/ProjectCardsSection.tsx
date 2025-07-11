@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const projects = [
   {
     id: "case1",
-    title: "Pre-bill CDI Validation Dashboard",
+    title: "Inpatient Revenue Cycle Management",
     company: "Healthcare Analytics",
     description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
