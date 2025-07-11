@@ -108,7 +108,8 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Target",
       title: "3. Prototyping & Validation",
-      description: "Rapid prototyping and user testing to validate design decisions", 
+      description: "Rapid prototyping and user testing to validate design decisions",
+      image: "/lovable-uploads/dfaaf33d-9dd1-4c76-8be2-bba0c4b46d98.png",
       items: [
         "Interactive Figma prototypes for core workflows",
         "Usability testing with billing staff",
