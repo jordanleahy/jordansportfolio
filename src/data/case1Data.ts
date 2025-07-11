@@ -135,7 +135,7 @@ export const case1Data: CaseStudyData = {
     {
       icon: "Activity",
       title: "SIRS Criteria Monitoring",
-      description: "Automated tracking of Systemic Inflammatory Response Syndrome indicators with visual trend analysis."
+      description: "Instant data analysis if SIRS was present in first 48 hours"
     },
     {
       icon: "TrendingUp",
