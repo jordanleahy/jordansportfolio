@@ -64,11 +64,10 @@ export const case1Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "6-month engagement",
+      description: "3-month scope",
       items: [
-        "3 hospital pilot programs",
+        "2 hospital pilot programs",
         "Real-time ML model integration",
-        "EMR system compatibility",
         "Clinical validation studies"
       ]
     }
