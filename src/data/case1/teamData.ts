@@ -31,7 +31,7 @@ export const teamData = {
       description: "3-month scope",
       items: [
         "2 hospital pilot programs",
-        "Real-time ML model integration",
+        "Real time ML model integration",
         "Clinical validation studies"
       ]
     }
