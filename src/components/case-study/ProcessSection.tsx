@@ -40,6 +40,15 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                     </div>
                     <div className="w-full md:flex-1">
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
+                      {step.image && (
+                        <div className="mb-4">
+                          <img 
+                            src={step.image} 
+                            alt={`${step.title} illustration`}
+                            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                          />
+                        </div>
+                      )}
                       <p className="text-muted-foreground mb-4">{step.description}</p>
                       {step.items && (
                         <ul className="space-y-2 mb-4">
@@ -56,15 +65,6 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                           "{step.quote.text}"
                           <footer className="text-sm mt-1">— {step.quote.author}</footer>
                         </blockquote>
-                      )}
-                      {step.image && (
-                        <div className="mt-4">
-                          <img 
-                            src={step.image} 
-                            alt={`${step.title} illustration`}
-                            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
-                          />
-                        </div>
                       )}
                     </div>
                   </div>
