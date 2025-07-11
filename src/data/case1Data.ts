@@ -107,7 +107,6 @@ export const case1Data: CaseStudyData = {
       description: "Iterative testing with medical professionals", 
       items: [
         "High-fidelity interactive prototypes",
-        "Usability testing in simulated ICU environment",
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
       ]
