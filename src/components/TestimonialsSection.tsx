@@ -5,23 +5,23 @@ import { Quote } from "lucide-react";
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
-    author: "Director of Product, CDI Revenue Cycle Manager",
-    role: "Product Leadership"
+    author: "CDI Revenue Cycle Management",
+    role: "Director of Product"
   },
   {
     quote: "Working alongside Jordan was like having a trusted partner who truly understood the value of clear, data dense, medical information display.",
-    author: "Clinical Operations Lead, Drug Prior Authorization and Appeals Management",
-    role: "Clinical Operations"
+    author: "Drug Prior Authorization and Appeals Management",
+    role: "Clinical Operations Lead"
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
-    author: "Senior Partner, Pharma Innovation",
-    role: "VP Product"
+    author: "Pharma Innovation",
+    role: "Senior Partner & Design Director"
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
-    author: "Medical Doctor, Drug Prior Authorization and Appeals Management",
-    role: "Healthcare Provider"
+    author: "Drug Prior Authorization and Appeals Management",
+    role: "Medical Doctor"
   }
 ];
 
