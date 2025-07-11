@@ -21,17 +21,28 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
           <p className="text-lg leading-relaxed text-muted-foreground mb-6">{description}</p>
           <div className="grid md:grid-cols-2 gap-6">
             {challenges.map((challenge, index) => (
-              <Card key={index} className="p-6">
-                <h4 className="font-semibold mb-2">{challenge.title}</h4>
-                <ul className="space-y-2">
-                  {challenge.items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="text-muted-foreground text-sm flex items-start gap-2">
-                      <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
+              <div key={index}>
+                <Card className="p-6">
+                  <h4 className="font-semibold mb-2">{challenge.title}</h4>
+                  <ul className="space-y-2">
+                    {challenge.items.map((item, itemIndex) => (
+                      <li key={itemIndex} className="text-muted-foreground text-sm flex items-start gap-2">
+                        <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+                {challenge.title === "Design Challenges" && (
+                  <div className="mt-6">
+                    <img 
+                      src="/lovable-uploads/33fa38f7-39a9-445e-aa58-4031125e0692.png" 
+                      alt="CDI specialist reviewing sepsis validation criteria on dashboard interface"
+                      className="w-full rounded-lg shadow-lg"
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </motion.div>
