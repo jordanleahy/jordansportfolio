@@ -3,13 +3,13 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case4Data: CaseStudyData = {
   // Hero Section
   title: "Prior Authorization Workflow",
-  description: "AI-powered prior authorization workflow system that streamlined drug approval processes by automating formulary rule identification, medical requirements, and insurance communications.",
+  description: "AI powered drug prior authorization workflow system that streamlined approval processes by automating formulary rule identification, medical requirements, and insurance communications.",
   heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
   roleDetails: "Workflow design & user research lead",
-  timeline: "10 months",
-  timelineDetails: "May 2023 - March 2024",
+  timeline: "6 months",
+  timelineDetails: "May 2022 - Nov 2022",
   tags: ["Prior Authorization", "Healthcare Workflow", "AI Automation", "Insurance Integration"],
   
   // Problem Section
@@ -20,7 +20,7 @@ export const case4Data: CaseStudyData = {
       type: 'problem',
       title: 'Process Inefficiency',
       items: [
-        "2-3 weeks average approval time",
+        "2 - 3 days average approval time",
         "60% of prior authorizations require multiple submissions",
         "78% of providers report PA as major workflow burden"
       ]
@@ -29,9 +29,9 @@ export const case4Data: CaseStudyData = {
       type: 'need',
       title: 'Design Challenges',
       items: [
-        "Complex multi-step approval workflows",
-        "Integration with multiple insurance systems",
-        "Real-time formulary rule interpretation"
+        "Complex multi step approval workflows",
+        "Integration with multiple payer, PBM, pharmacy systems",
+        "Real time formulary rule interpretation"
       ]
     }
   ],
@@ -45,7 +45,7 @@ export const case4Data: CaseStudyData = {
       items: [
         "Prior authorization workflow research",
         "Multi-stakeholder user journey mapping", 
-        "AI-assisted interface design",
+        "AI assisted interface design",
         "Insurance integration UX strategy"
       ]
     },
@@ -56,20 +56,19 @@ export const case4Data: CaseStudyData = {
       items: [
         "2 Healthcare Workflow Specialists",
         "4 Backend Engineers",
-        "2 ML Engineers", 
-        "1 Insurance Domain Expert",
+        "1 ML Engineer", 
         "Product Manager"
       ]
     },
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "10-month development",
+      description: "6 month timeline",
       items: [
-        "8 major insurance provider integrations",
-        "AI formulary rule extraction system",
+        "8 major formulary integrations",
+        "AI rule extraction system",
         "Automated letter generation workflow",
-        "Real-time approval tracking dashboard"
+        "Approval tracking dashboard"
       ]
     }
   ],
@@ -82,25 +81,24 @@ export const case4Data: CaseStudyData = {
       title: "1. Workflow Analysis & Research",
       description: "Deep dive into prior authorization processes and stakeholder pain points",
       items: [
-        "Shadowed pharmacy and clinical staff workflows",
-        "Analyzed 300+ prior authorization cases", 
+        "Shadowed NPs and MA workflows",
+        "Analyzed 10 fomulary rule sets", 
         "Interviewed insurance reviewers and providers",
         "Mapped current manual approval processes"
       ],
       quote: {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
-        author: "Dr. Lisa Park, Clinical Pharmacist"
+        author: "Dr. Lisa Park, NP"
       }
     },
     {
       icon: "Lightbulb",
-      title: "2. AI-Assisted Workflow Design",
+      title: "2. AI Assisted Workflow Design",
       description: "Designing intelligent automation while maintaining human oversight",
       items: [
         "AI decision point identification and design",
-        "Human-in-the-loop validation workflows",
-        "Exception handling and escalation paths", 
-        "Multi-insurance provider interface standardization"
+        "Human in the loop validation workflows",
+        "Exception handling and escalation paths"
       ]
     },
     {
@@ -109,9 +107,9 @@ export const case4Data: CaseStudyData = {
       description: "Iterative testing with healthcare providers and insurance reviewers", 
       items: [
         "Interactive workflow prototypes with real data",
-        "Usability testing with pharmacy staff",
-        "Insurance reviewer feedback sessions",
-        "Clinical accuracy validation testing"
+        "Usability testing with prescribers and non-prescribers staff",
+        "MA reviewer feedback sessions",
+        "Formulary accuracy validation testing"
       ]
     },
     {
@@ -119,10 +117,9 @@ export const case4Data: CaseStudyData = {
       title: "4. Implementation & Optimization",
       description: "Production deployment and continuous improvement based on real usage",
       items: [
-        "Phased rollout across multiple health systems",
+        "Phased rollout across small florida dermatology practices",
         "Performance monitoring and optimization",
-        "User feedback integration and iteration",
-        "Insurance integration testing and validation"
+        "User feedback integration and iteration"
       ]
     }
   ],
@@ -133,7 +130,7 @@ export const case4Data: CaseStudyData = {
     {
       icon: "Shield",
       title: "Smart Rule Extraction", 
-      description: "AI-powered analysis of insurance formulary documents to automatically identify prior authorization requirements."
+      description: "AI powered analysis of insurance formulary documents to automatically identify prior authorization requirements."
     },
     {
       icon: "Clock",
@@ -142,18 +139,14 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "CheckCircle",
-      title: "Real-time Status Tracking",
-      description: "Live monitoring of approval status with proactive notifications and next-step recommendations."
+      title: "Status Tracking",
+      description: "Monitoring of approval status with proactive notifications and next-step recommendations."
     },
-    {
-      icon: "Users", 
-      title: "Multi-Provider Integration",
-      description: "Seamless connectivity with major insurance providers through standardized API integrations."
-    },
+
     {
       icon: "Target",
       title: "Clinical Decision Support",
-      description: "Evidence-based alternative medication suggestions when prior authorization is denied or delayed."
+      description: "Evidence based alternative medication suggestions when prior authorization is denied or delayed."
     },
     {
       icon: "TrendingUp",
@@ -165,8 +158,8 @@ export const case4Data: CaseStudyData = {
   // Outcomes Section
   outcomesTitle: "Outcomes",
   userFeedback: {
-    quote: "We went from 3 weeks to 3 days for prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
-    author: "Maria Gonzalez, Pharmacy Director"
+    quote: "We went from 3 weeks to 3 days for specialty medication prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
+    author: "Maria Gonzalez, Medical Practice Manager"
   },
 
   // Reflection Section  
