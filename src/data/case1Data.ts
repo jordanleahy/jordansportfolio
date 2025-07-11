@@ -188,7 +188,6 @@ export const case1Data: CaseStudyData = {
       title: 'Next Steps',
       items: [
         "Expand to additional infection prediction models",
-        "Integrate with wearable device monitoring",
         "Develop pediatric sepsis detection capabilities", 
         "Add predictive antibiotic resistance modeling"
       ]
