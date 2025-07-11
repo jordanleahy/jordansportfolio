@@ -7,6 +7,7 @@ import {
   useSpring,
   MotionValue,
 } from "framer-motion";
+import { OptimizedImage } from "./optimized-image";
 
 export const HeroParallax = ({
   products,
@@ -141,12 +142,13 @@ export const ProductCard = ({
         href={product.link}
         className="block group-hover/product:shadow-2xl"
       >
-        <img
+        <OptimizedImage
           src={product.thumbnail}
-          height="600"
-          width="600"
-          className="object-cover object-left-top absolute h-full w-full inset-0"
           alt={product.title}
+          aspectRatio="4/3"
+          className="object-cover object-left-top absolute h-full w-full inset-0"
+          width={600}
+          height={600}
         />
       </a>
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/product:opacity-80 bg-black pointer-events-none"></div>
