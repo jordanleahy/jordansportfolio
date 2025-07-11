@@ -49,7 +49,7 @@ export const ReflectionSection = ({ title, reflections }: ReflectionSectionProps
                   <ul className="space-y-2">
                     {reflection.items.map((item, itemIndex) => (
                       <li key={itemIndex} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <IconComponent className={`h-4 w-4 ${iconColor} mt-0.5 flex-shrink-0`} />
+                        <span className="w-1 h-1 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
                         {item}
                       </li>
                     ))}
