@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const SmarterDxCase = () => {
+const Case1 = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <motion.header initial={{
@@ -534,4 +534,4 @@ const SmarterDxCase = () => {
     </div>;
 };
 
-export default SmarterDxCase;
+export default Case1;

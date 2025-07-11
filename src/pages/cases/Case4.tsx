@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, Clock, CheckCircle, AlertCircle, Users, Target, Lightbulb, Eye, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-const PrescriberPointCase = () => {
+const Case4 = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <motion.header initial={{
@@ -505,4 +505,4 @@ const PrescriberPointCase = () => {
       </section>
     </div>;
 };
-export default PrescriberPointCase;
+export default Case4;

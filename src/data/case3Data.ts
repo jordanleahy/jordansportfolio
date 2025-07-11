@@ -1,6 +1,6 @@
 import { CaseStudyData } from "@/types/caseStudy";
 
-export const bcgxCaseData: CaseStudyData = {
+export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Denial and Appeal Management",
   description: "Designed an AI-powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
@@ -219,5 +219,5 @@ export const bcgxCaseData: CaseStudyData = {
   },
 
   // CTA
-  ctaTitle: "Ready to streamline your revenue cycle with intelligent automation?"
+  ctaTitle: "Ready to transform healthcare operations with intelligent automation?"
 };

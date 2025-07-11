@@ -9,7 +9,7 @@ const projects = [
   {
     id: "case1",
     title: "Pre-bill CDI Validation Dashboard",
-    company: "SmarterDx",
+    company: "Healthcare Analytics",
     description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
@@ -19,7 +19,7 @@ const projects = [
   {
     id: "case4",
     title: "Drug Prior Auth and Validation",
-    company: "PrescriberPoint",
+    company: "Digital Health Platform",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
@@ -29,7 +29,7 @@ const projects = [
   {
     id: "case3",
     title: "Denial and Appeal Resolution",
-    company: "BCG X",
+    company: "Revenue Cycle Solutions",
     description: "Designed a denial and appeal resolution application for managing drug denials, including the drafting of templates and sending to payer.",
     tags: ["#Pharma", "#Research", "#UX"],
     icon: FileText,
@@ -39,7 +39,7 @@ const projects = [
   {
     id: "case2",
     title: "Clinical Ops Workflow Management for Coding and CDI",
-    company: "Definitive Healthcare",
+    company: "Medical Intelligence",
     description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
     tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
     icon: Workflow,

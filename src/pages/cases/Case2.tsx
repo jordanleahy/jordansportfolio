@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Database, Palette, BarChart3, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const DefinitiveCase = () => {
+const Case2 = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -277,4 +277,4 @@ const DefinitiveCase = () => {
   );
 };
 
-export default DefinitiveCase;
+export default Case2;

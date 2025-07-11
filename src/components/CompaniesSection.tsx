@@ -6,11 +6,11 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const initialCompanies = [
-  { name: "SmarterDx", logo: "SD", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
-  { name: "PrescriberPoint", logo: "PP", logoUrl: "/lovable-uploads/873ce045-f694-4990-8de2-acc4f4137e86.png" },
-  { name: "BCG X", logo: "BCG", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
-  { name: "Definitive Healthcare", logo: "DH", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
-  { name: "HTD Health", logo: "HTD", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
+  { name: "Healthcare Analytics", logo: "HA", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
+  { name: "Digital Health Platform", logo: "DH", logoUrl: "/lovable-uploads/873ce045-f694-4990-8de2-acc4f4137e86.png" },
+  { name: "Revenue Cycle Solutions", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
+  { name: "Medical Intelligence", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
+  { name: "Clinical Operations", logo: "CO", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
   
   
 ];

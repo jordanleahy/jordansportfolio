@@ -5,22 +5,22 @@ import { Quote } from "lucide-react";
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
-    author: "Director of Product, SmarterDx",
+    author: "Director of Product, Healthcare Analytics",
     role: "Product Leadership"
   },
   {
-    quote: "Working alongside Jordan at PrescriberPoint was like having a trusted partner who truly understood the value of clear, intuitive information",
-    author: "Clinical Operations Lead, PrescriberPoint",
+    quote: "Working alongside Jordan at Digital Health Platform was like having a trusted partner who truly understood the value of clear, intuitive information",
+    author: "Clinical Operations Lead, Digital Health Platform",
     role: "Clinical Operations"
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
-    author: "VP Product, BCG X",
+    author: "VP Product, Revenue Cycle Solutions",
     role: "VP Product"
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
-    author: "Medical Doctor, PrescriberPoint",
+    author: "Medical Doctor, Digital Health Platform",
     role: "Healthcare Provider"
   }
 ];

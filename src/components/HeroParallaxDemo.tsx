@@ -28,7 +28,7 @@ export const products = [
     thumbnail: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   },
   {
-    title: "SmarterDx Healthcare Analytics",
+    title: "Healthcare Analytics Platform",
     link: "/cases/case1",
     thumbnail: "/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png",
   },
