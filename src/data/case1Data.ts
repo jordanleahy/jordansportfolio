@@ -129,7 +129,7 @@ export const case1Data: CaseStudyData = {
   features: [
     {
       icon: "Brain",
-      title: "AI-Powered Risk Assessment", 
+      title: "Sepsis Only Data Validation Dashboard", 
       description: "Real-time sepsis probability scoring using machine learning algorithms trained on thousands of patient cases."
     },
     {
