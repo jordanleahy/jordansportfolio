@@ -33,7 +33,7 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
               >
                 <Card className="p-6 h-full">
                   <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-4">
-                    <div className="p-2 bg-primary/10 rounded-lg mb-3 md:mb-0 w-fit">
+                    <div className="p-2 bg-primary/10 rounded-lg mb-3 md:mb-0 w-9 h-9 flex items-center justify-center">
                       <IconComponent className="h-5 w-5 text-primary" />
                     </div>
                     <div className="w-full">
