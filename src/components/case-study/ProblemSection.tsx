@@ -47,7 +47,7 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
                     <img 
                       src="/lovable-uploads/33fa38f7-39a9-445e-aa58-4031125e0692.png" 
                       alt="CDI specialist reviewing sepsis validation criteria on dashboard interface"
-                      className="w-full rounded-lg shadow-lg"
+                      className="w-full rounded-lg shadow-lg mx-auto"
                     />
                   </div>
                 )}
