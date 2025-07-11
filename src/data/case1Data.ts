@@ -104,7 +104,7 @@ export const case1Data: CaseStudyData = {
     {
       icon: "Target",
       title: "3. Prototype & Clinical Testing",
-      description: "Iterative testing with medical professionals", 
+      description: "Iterative testing with CDI staff", 
       items: [
         "High-fidelity interactive prototypes",
         "A/B testing of alert mechanisms",
