@@ -34,21 +34,12 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-8">
-                  <div className="flex flex-col">
-                    <div className="p-3 bg-primary/10 rounded-lg mb-4 w-12 h-12 flex items-center justify-center">
+                  <div className="flex flex-col md:flex-row md:gap-8">
+                    <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 w-12 h-12 flex items-center justify-center md:self-start">
                       <IconComponent className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="w-full">
+                    <div className="flex-1 md:order-1">
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
-                      {step.image && (
-                        <div className="mb-4">
-                           <img 
-                            src={step.image} 
-                            alt={`${step.title} illustration`}
-                            className="w-full max-w-md rounded-lg shadow-lg"
-                          />
-                        </div>
-                      )}
                       <p className="text-muted-foreground mb-4">{step.description}</p>
                       {step.items && (
                         <ul className="space-y-2 mb-4">
@@ -67,6 +58,15 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                         </blockquote>
                       )}
                     </div>
+                    {step.image && (
+                      <div className="mb-4 md:mb-0 md:w-80 md:flex-shrink-0 md:order-2">
+                        <img 
+                          src={step.image} 
+                          alt={`${step.title} illustration`}
+                          className="w-full rounded-lg shadow-lg"
+                        />
+                      </div>
+                    )}
                   </div>
                 </Card>
               </motion.div>
