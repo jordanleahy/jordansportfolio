@@ -100,7 +100,8 @@ export const case1Data: CaseStudyData = {
         "Real-time data visualization concepts",
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
-      ]
+      ],
+      image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png"
     },
     {
       icon: "Target",
