@@ -35,7 +35,7 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
               >
                 <Card className="p-8">
                   <div className="flex flex-col md:flex-row md:items-start md:gap-6">
-                    <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 md:flex-shrink-0">
+                    <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 md:flex-shrink-0 w-12 h-12 flex items-center justify-center">
                       <IconComponent className="h-8 w-8 text-primary" />
                     </div>
                     <div className="w-full md:flex-1">
