@@ -82,7 +82,7 @@ export const case3Data: CaseStudyData = {
       title: "1. Research & Discovery",
       description: "Deep dive into revenue cycle workflows and denial management pain points",
       items: [
-        "Shadowed billing specialists internally.",
+        "Shadowed coding and appeal specialists internally.",
         "Analyzed 50+ denial cases across different payers", 
         "Mapped current appeal workflow inefficiencies",
         "Competitive analysis of existing RCM tools"
