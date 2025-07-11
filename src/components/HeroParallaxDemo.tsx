@@ -24,7 +24,7 @@ export const products = [
   },
   {
     title: "Clinical Ops Workflow Management",
-    link: "/cases/case2",
+    link: "/cases/case1",
     thumbnail: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   },
   {
@@ -39,7 +39,7 @@ export const products = [
   },
   {
     title: "AI-Powered CDI Tools",
-    link: "/cases/case2",
+    link: "/cases/case1",
     thumbnail: "/lovable-uploads/873ce045-f694-4990-8de2-acc4f4137e86.png",
   },
   {
@@ -59,7 +59,7 @@ export const products = [
   },
   {
     title: "Revenue Cycle Management",
-    link: "/cases/case2",
+    link: "/cases/case1",
     thumbnail: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png",
   },
   {
@@ -79,7 +79,7 @@ export const products = [
   },
   {
     title: "Clinical Operations Dashboard",
-    link: "/cases/case2",
+    link: "/cases/case1",
     thumbnail: "/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png",
   },
 ];

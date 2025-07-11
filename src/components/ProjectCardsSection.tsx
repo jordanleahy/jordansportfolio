@@ -35,16 +35,6 @@ const projects = [
     icon: FileText,
     color: "bg-purple-500",
     path: "/cases/case3"
-  },
-  {
-    id: "case2",
-    title: "Clinical Ops Workflow Management for Coding and CDI",
-    company: "Medical Intelligence",
-    description: "Designed a human-in-the-loop AI solution to empower clinical operations by streamlining workflow management for coding and CDI case opportunities.",
-    tags: ["#DesignSystem", "#Analytics", "#Healthcare"],
-    icon: Workflow,
-    color: "bg-orange-500",
-    path: "/cases/case2"
   }
 ];
 
