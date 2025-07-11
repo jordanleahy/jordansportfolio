@@ -1,138 +1,210 @@
-export const bcgxCaseData = {
-  title: "Denial and Appeal Management",
-  subtitle: "AI-powered prescription denial dashboard with evidence cards and appeal composer.",
-  heroImage: "/lovable-uploads/97bfc2ee-31a6-418b-823b-c7835deb9a48.png",
-  heroImageAlt: "Prescription Denials Dashboard – listing rejected claims, extracted clinical evidence, and appeal letter editor",
-  summary: "Denial and Appeal Management automates identification and resolution of prescription claim denials by aggregating clinical evidence and generating editable appeal letters—accelerating reimbursement for small healthcare practices.",
-  role: "Lead Product Designer",
-  timeline: "April 2024 – July 2025",
-  tags: ["#Denials", "#Appeals", "#Templates", "#Payers"],
-  
-  context: {
-    challenge: "Small healthcare practices struggle with prescription claim denials, spending countless hours manually gathering clinical evidence and crafting appeal letters. This administrative burden delays patient care and impacts practice revenue, with denial rates reaching 15-20% for certain medications.",
-    businessImpact: "Healthcare practices lose an average of $125,000 annually due to unresolved prescription denials and delayed reimbursements.",
-    researchChallenge: "Healthcare staff spend 60% of their administrative time on denial resolution instead of patient care activities."
-  },
+import { CaseStudyData } from "@/types/caseStudy";
 
-  roleAndTeam: {
-    myRole: {
+export const bcgxCaseData: CaseStudyData = {
+  // Hero Section
+  title: "Denial and Appeal Management",
+  description: "Designed an AI-powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
+  heroImage: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png",
+  heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
+  role: "Senior Product Designer", 
+  roleDetails: "End-to-end UX/UI ownership",
+  timeline: "8 months",
+  timelineDetails: "January - September 2023",
+  tags: ["Denial Management", "Appeals", "Revenue Cycle", "Healthcare AI"],
+  
+  // Problem Section
+  problemTitle: "The Challenge",
+  problemDescription: "Healthcare practices face an average 15% claim denial rate, with manual appeal processes taking 45-60 days per case. Small practices often lack dedicated staff to handle complex appeals, resulting in $2.3B in lost revenue annually across the healthcare system.",
+  challenges: [
+    {
+      type: 'problem',
+      title: 'Business Impact',
+      items: [
+        "45-60 day average appeal resolution time",
+        "15% average claim denial rate", 
+        "$2.3B annual lost revenue industry-wide"
+      ]
+    },
+    {
+      type: 'need',
+      title: 'Research Challenges',
+      items: [
+        "Complex payer-specific denial patterns",
+        "Manual evidence gathering from patient records",
+        "Inconsistent appeal letter quality and success rates"
+      ]
+    }
+  ],
+
+  // Team Section
+  teamMembers: [
+    {
+      icon: "Users",
       title: "My Role",
-      details: [
-        "Led UX design for the Prescription Denial Management feature",
-        "Defined workflows for denial intake, evidence capture, and appeal generation", 
-        "Produced hi-fi prototypes and facilitated usability tests",
-        "Coordinated with AI engineers to specify data-extraction prompts"
+      description: "Senior Product Designer",
+      items: [
+        "User research & workflow analysis",
+        "Information architecture & wireframing", 
+        "Prototype development & testing",
+        "Design system creation"
       ]
     },
-    team: {
+    {
+      icon: "Users", 
       title: "Team & Stakeholders",
-      details: [
-        "Product Manager (1)",
-        "Frontend Engineers (2)", 
-        "Backend & AI Engineers (2)",
-        "Clinical Documentation SME (1)",
-        "QA Lead (1)"
+      description: "",
+      items: [
+        "2 Revenue Cycle Specialists",
+        "3 Software Engineers",
+        "1 ML Engineer", 
+        "1 Healthcare Compliance Expert",
+        "Product Manager"
       ]
     },
-    duration: {
+    {
+      icon: "Target",
       title: "Duration & Scope", 
-      details: [
-        "6-month engagement",
+      description: "8-month engagement",
+      items: [
         "5 major payer integrations",
-        "3 specialty drug categories",
+        "12 common denial categories",
         "ML prediction model design",
         "Automated workflow creation"
       ]
     }
-  },
+  ],
 
-  process: [
+  // Process Section
+  processTitle: "Design Process",
+  processSteps: [
     {
-      title: "Research & Discovery",
       icon: "Eye",
-      activities: [
-        "Shadowed denial intake sessions with billing and admin staff",
-        "Conducted interviews with 6 office managers and 4 CDS specialists",
-        "Key insight: \"Sorting through faxed letters and portal PDFs wastes hours each week.\""
+      title: "1. Research & Discovery",
+      description: "Deep dive into revenue cycle workflows and denial management pain points",
+      items: [
+        "Shadowed billing specialists at 3 healthcare practices",
+        "Analyzed 200+ denial cases across different payers", 
+        "Mapped current appeal workflow inefficiencies",
+        "Competitive analysis of existing RCM tools"
+      ],
+      quote: {
+        text: "Every denied claim is a puzzle with different pieces. We need better tools to solve them faster.",
+        author: "Revenue Cycle Manager, Primary Care Practice"
+      }
+    },
+    {
+      icon: "Lightbulb",
+      title: "2. Ideation & Concepting",
+      description: "Collaborative workshops to prioritize features and define user flows",
+      items: [
+        "User journey mapping for denial-to-resolution workflow",
+        "Feature prioritization workshops with stakeholders",
+        "Information architecture for complex appeal data", 
+        "Wireframe iterations for dashboard and case views"
       ]
     },
     {
-      title: "Denial Pattern Analysis", 
-      icon: "BarChart3",
-      description: "Analyzed 2,000+ denial cases to identify common rejection reasons, evidence requirements, and successful appeal strategies."
+      icon: "Target",
+      title: "3. Prototyping & Validation",
+      description: "Rapid prototyping and user testing to validate design decisions", 
+      items: [
+        "Interactive Figma prototypes for core workflows",
+        "Usability testing with billing staff",
+        "A/B testing for appeal letter generation UI",
+        "Validation sessions with revenue cycle experts"
+      ]
     },
     {
-      title: "Automated Evidence Platform",
-      icon: "Zap",
-      description: "Designed an intelligent system that automatically extracts relevant clinical evidence from patient records and generates customizable appeal templates."
+      icon: "CheckCircle", 
+      title: "4. Iteration & Handoff",
+      description: "Design refinement and comprehensive documentation for development",
+      items: [
+        "Component library and design tokens",
+        "Detailed interaction specifications",
+        "User acceptance criteria documentation",
+        "QA support throughout development sprints"
+      ]
     }
   ],
 
-  solutionFeatures: [
+  // Solution Section
+  solutionTitle: "Solution & Key Features",
+  features: [
     {
-      title: "Unified Denial Intake",
-      description: "Consolidates denials from email, portal, fax, and mail into one queue.",
-      icon: "Shield"
+      icon: "Brain",
+      title: "AI-Powered Claim Analysis", 
+      description: "Automatically identifies denial reasons and extracts relevant patient data for targeted appeals."
     },
     {
-      title: "Formulary & Policy Checker",
-      description: "Real-time lookup of payer rules and prior-auth requirements.",
-      icon: "CheckCircle"
+      icon: "FileText",
+      title: "Smart Appeal Generation",
+      description: "Generates personalized appeal letters using payer-specific templates and clinical evidence."
     },
     {
-      title: "Evidence Card Aggregator",
-      description: "Auto-extracts clinical data points (labs, notes, forms) via AI into editable cards.",
-      icon: "Clock"
+      icon: "TrendingUp",
+      title: "Payer Pattern Recognition",
+      description: "Tracks denial trends and payer behavior to improve future claim submission strategies."
     },
     {
-      title: "AI-Assisted Appeal Composer",
-      description: "Pre-populates appeal letters with clinical rationale; fully editable rich text.",
-      icon: "TrendingUp"
+      icon: "Clock", 
+      title: "Automated Follow-up",
+      description: "Intelligent scheduling and tracking of appeal deadlines with automatic status updates."
     },
     {
-      title: "Workflow & Follow-Up Tracker",
-      description: "Tracks submission dates, sends reminders, and monitors response status.",
-      icon: "Eye"
+      icon: "Shield",
+      title: "Compliance Monitoring",
+      description: "Ensures all appeals meet regulatory requirements and payer-specific guidelines."
+    },
+    {
+      icon: "Users",
+      title: "Team Collaboration", 
+      description: "Workflow management tools that coordinate between billing, clinical, and administrative staff."
     }
   ],
 
-  outcomes: [
-    {
-      metric: "85%",
-      description: "Reduction in time spent on denial resolution",
-      icon: "TrendingUp"
-    },
-    {
-      metric: "92%", 
-      description: "First-time appeal success rate",
-      icon: "Activity"
-    },
-    {
-      metric: "40%",
-      description: "Increase in practice revenue recovery",
-      icon: "Users"
-    }
-  ],
-
-  reflection: {
-    whatWentWell: [
-      "Early SME involvement ensured accuracy across intake channels",
-      "Modular \"evidence cards\" scaled to various document types", 
-      "AI prompt tuning delivered >85% extraction precision"
-    ],
-    challengesAndSolutions: [
-      "Handling edge case requirements across multiple payers required flexible template system",
-      "Integration complexity solved through phased rollout approach",
-      "Regulatory compliance ensured through continuous legal review",
-      "Change management addressed via comprehensive training program"
-    ],
-    nextSteps: [
-      "Extend support to specialty medication denials and pre-bill workflows",
-      "Integrate with native mobile app for on-the-go triage",
-      "Add payer-specific appeal templates and automated follow-up reminders"
-    ]
+  // Outcomes Section
+  outcomesTitle: "Outcomes",
+  userFeedback: {
+    quote: "This platform cut our appeal processing time from weeks to days. We're recovering 40% more revenue from previously denied claims.",
+    author: "Sarah Chen, Practice Administrator"
   },
 
+  // Reflection Section  
+  reflectionTitle: "Reflection & Learnings",
+  reflections: [
+    {
+      type: 'success',
+      title: 'What Went Well',
+      items: [
+        "Strong stakeholder engagement led to accurate requirements gathering",
+        "Iterative design process prevented major usability issues", 
+        "Early prototype validation saved significant development time",
+        "Cross-functional collaboration improved solution quality"
+      ]
+    },
+    {
+      type: 'challenge',
+      title: 'Challenges', 
+      items: [
+        "Complex regulatory requirements created design constraints",
+        "Payer API limitations required creative workflow solutions",
+        "Balancing automation with user control in AI features",
+        "Managing technical debt while adding new functionality"
+      ]
+    },
+    {
+      type: 'learning',
+      title: 'Next Steps',
+      items: [
+        "Expand to additional payer integrations and denial categories",
+        "Implement predictive analytics for proactive claim management",
+        "Develop mobile interface for on-the-go case management", 
+        "Add advanced reporting and ROI tracking capabilities"
+      ]
+    }
+  ],
+
+  // Visuals & Artifacts
   visualsAndArtifacts: {
     designArtifacts: [
       "Annotated wireframes (Figma) for each feature",
@@ -141,8 +213,11 @@ export const bcgxCaseData = {
     ],
     processDocumentation: [
       "Small-practice workflow maps",
-      "Usability test reports", 
+      "Usability test reports",
       "Handoff and QA checklists"
     ]
-  }
+  },
+
+  // CTA
+  ctaTitle: "Ready to streamline your revenue cycle with intelligent automation?"
 };
