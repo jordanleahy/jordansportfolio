@@ -10,7 +10,7 @@ export const products = [
   {
     title: "Pre-bill CDI Validation Dashboard",
     link: "/cases/case1",
-    thumbnail: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png",
+    thumbnail: "/lovable-uploads/f8bdf34c-98f3-483b-9033-2c28bda929cd.png",
   },
   {
     title: "Drug Prior Auth and Validation",
