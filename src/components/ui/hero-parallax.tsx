@@ -109,7 +109,7 @@ export const Header = () => {
         Jordan Leahy <br /> Product Design Engineer
       </h1>
       <p className="max-w-2xl text-base md:text-xl mt-8 text-muted-foreground drop-shadow-sm">
-        My primary focus identify reptitive manual tasks in RCM and automatiting with AI and great desgin. 
+        My primary focus is identifying repetitive manual tasks in the revenue cycle and automating them using AI and thoughtful, user-centered design. 
       </p>
     </div>
   );
