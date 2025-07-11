@@ -178,7 +178,6 @@ export const case1Data: CaseStudyData = {
       type: 'challenge',
       title: 'Challenges', 
       items: [
-        "Balancing sensitivity vs. specificity in alert design",
         "EMR integration complexity required creative solutions",
         "Managing clinical validation timelines and requirements",
         "Addressing varying workflows across different hospital units"
