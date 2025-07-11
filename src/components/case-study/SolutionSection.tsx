@@ -34,8 +34,8 @@ export const SolutionSection = ({ title, features }: SolutionSectionProps) => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-6 h-full">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg flex-shrink-0">
+                  <div className="flex flex-col">
+                    <div className="bg-primary/10 p-3 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
                       <IconComponent className="h-6 w-6 text-primary" />
                     </div>
                     <div>
