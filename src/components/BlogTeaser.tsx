@@ -7,14 +7,6 @@ import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 // Mock blog posts - in real app, these would come from your data source
 const blogPosts = [
   {
-    id: "designing-for-healthcare-workflows",
-    title: "Designing for Complex Healthcare Workflows",
-    excerpt: "How to balance user needs with regulatory requirements in healthcare product design.",
-    publishedAt: "2024-01-15",
-    readTime: "8 min read",
-    category: "Design Process"
-  },
-  {
     id: "data-visualization-best-practices",
     title: "Data Visualization Best Practices for Healthcare",
     excerpt: "Making complex medical data accessible and actionable for healthcare professionals.",
