@@ -143,11 +143,6 @@ export const case1Data: CaseStudyData = {
       description: "Interactive data visualization showing patient risk trajectory and key clinical markers over time."
     },
     {
-      icon: "Clock", 
-      title: "Smart Alert System",
-      description: "Intelligent notifications that minimize alert fatigue while ensuring critical cases are never missed."
-    },
-    {
       icon: "Shield",
       title: "Clinical Decision Support",
       description: "Evidence-based treatment recommendations integrated directly into the physician workflow."
