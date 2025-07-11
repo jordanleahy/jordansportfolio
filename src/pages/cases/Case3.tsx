@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { case3Data } from "@/data/case3Data";
 import { iconMap } from "@/utils/iconMap";
 import { useEffect } from "react";
+import { Helmet } from 'react-helmet-async';
 
 const Case3 = () => {
   // Scroll to top when component mounts
@@ -15,6 +16,18 @@ const Case3 = () => {
   }, []);
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Denial and Appeal Management - Case Study | Jordan's Portfolio</title>
+        <meta name="description" content="AI-powered denial management platform case study. Automated claim review, appeal letter generation, and payer response tracking to reduce denial rates and accelerate revenue recovery." />
+        <meta property="og:title" content="Denial and Appeal Management - Healthcare AI Case Study" />
+        <meta property="og:description" content="AI-powered denial management platform that automates claim review and generates targeted appeal letters for healthcare practices." />
+        <meta property="og:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Denial and Appeal Management - Healthcare AI Case Study" />
+        <meta name="twitter:description" content="AI-powered denial management platform that automates claim review and generates targeted appeal letters for healthcare practices." />
+        <meta name="twitter:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" />
+      </Helmet>
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}

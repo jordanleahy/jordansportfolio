@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Brain, Users, TrendingUp, Clock, Target, Activity, FileText, Microscope, AlertCircle, CheckCircle, Lightbulb, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Helmet } from 'react-helmet-async';
 
 const Case1 = () => {
   // Scroll to top when component mounts
@@ -12,6 +13,18 @@ const Case1 = () => {
     window.scrollTo(0, 0);
   }, []);
   return <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Sepsis Prediction System - Case Study | Jordan's Portfolio</title>
+        <meta name="description" content="AI-powered sepsis prediction system case study. Learn how we designed an early detection dashboard that improved patient outcomes through real-time SIRS monitoring and clinical decision support." />
+        <meta property="og:title" content="Sepsis Prediction System - Healthcare AI Case Study" />
+        <meta property="og:description" content="AI-powered sepsis prediction system that improved patient outcomes through real-time monitoring and clinical decision support." />
+        <meta property="og:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sepsis Prediction System - Healthcare AI Case Study" />
+        <meta name="twitter:description" content="AI-powered sepsis prediction system that improved patient outcomes through real-time monitoring and clinical decision support." />
+        <meta name="twitter:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png" />
+      </Helmet>
       {/* Header */}
       <motion.header initial={{
       opacity: 0,

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, Clock, CheckCircle, AlertCircle, Users, Target, Lightbulb, Eye, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Helmet } from 'react-helmet-async';
 
 const Case4 = () => {
   // Scroll to top when component mounts
@@ -12,6 +13,18 @@ const Case4 = () => {
     window.scrollTo(0, 0);
   }, []);
   return <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Prior Authorization Workflow - Case Study | Jordan's Portfolio</title>
+        <meta name="description" content="AI-powered prior authorization workflow system. Streamlined drug approval process by automating formulary rule identification, medical requirements, and letter drafting for insurance companies." />
+        <meta property="og:title" content="Prior Authorization Workflow - Healthcare AI Case Study" />
+        <meta property="og:description" content="AI-powered prior authorization system that streamlines drug approval workflows and automates insurance communications." />
+        <meta property="og:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Prior Authorization Workflow - Healthcare AI Case Study" />
+        <meta name="twitter:description" content="AI-powered prior authorization system that streamlines drug approval workflows and automates insurance communications." />
+        <meta name="twitter:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png" />
+      </Helmet>
       {/* Header */}
       <motion.header initial={{
       opacity: 0,
