@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Upload, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { uploadImage } from "@/utils/imageUpload";
 
 const initialCompanies = [
   { name: "CDI RCM", logo: "SD", logoUrl: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png" },
@@ -22,23 +22,21 @@ const CompaniesSection = () => {
 
   const handleLogoUpload = async (companyName: string, file: File) => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `company-logos/${companyName.toLowerCase().replace(/\s+/g, '-')}.${fileExt}`;
+      const fileName = `${companyName.toLowerCase().replace(/\s+/g, '-')}`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('general')
-        .upload(fileName, file, { upsert: true });
+      const logoUrl = await uploadImage(file, {
+        folder: 'company-logos',
+        fileName
+      });
 
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('general')
-        .getPublicUrl(fileName);
+      if (!logoUrl) {
+        throw new Error('Upload failed');
+      }
 
       setCompanies(prev => 
         prev.map(company => 
           company.name === companyName 
-            ? { ...company, logoUrl: data.publicUrl }
+            ? { ...company, logoUrl }
             : company
         )
       );
