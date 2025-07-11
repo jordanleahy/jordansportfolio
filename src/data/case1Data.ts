@@ -98,8 +98,7 @@ export const case1Data: CaseStudyData = {
       items: [
         "Real-time data visualization concepts",
         "Alert hierarchy and notification design",
-        "Integration with existing EMR workflows", 
-        "Mobile and desktop responsive layouts"
+        "Hosted sepsis workshop"
       ]
     },
     {
