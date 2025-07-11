@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Denial and Appeal Management",
-  description: "Designed an AI-powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
+  description: "Designed an AI powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
   heroImage: "/lovable-uploads/35c7ab82-d7d8-4975-8b1a-eb02163724b7.png",
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
@@ -14,7 +14,7 @@ export const case3Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "Healthcare practices face an average 15% claim denial rate, with manual appeal processes taking 45-60 days per case. Small practices often lack dedicated staff to handle complex appeals, resulting in $2.3B in lost revenue annually across the healthcare system.",
+  problemDescription: "Healthcare practices face an average 15% claim denial rate, with manual appeal processes taking 45-60 days per case. Small practices often lack dedicated staff to handle complex appeals, resulting in $20B spent tyring to overturn denials.",
   challenges: [
     {
       type: 'problem',
@@ -29,7 +29,7 @@ export const case3Data: CaseStudyData = {
       type: 'need',
       title: 'Research Challenges',
       items: [
-        "Complex payer-specific denial patterns",
+        "Complex payer specific denial patterns",
         "Manual evidence gathering from patient records",
         "Inconsistent appeal letter quality and success rates"
       ]
@@ -64,11 +64,11 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "8-month engagement",
+      description: "4 month timeline",
       items: [
         "5 major payer integrations",
-        "12 common denial categories",
-        "ML prediction model design",
+        "Top denial templates",
+        "ML prediction tempalte design",
         "Automated workflow creation"
       ]
     }
@@ -82,14 +82,14 @@ export const case3Data: CaseStudyData = {
       title: "1. Research & Discovery",
       description: "Deep dive into revenue cycle workflows and denial management pain points",
       items: [
-        "Shadowed billing specialists at 3 healthcare practices",
-        "Analyzed 200+ denial cases across different payers", 
+        "Shadowed billing specialists internally.",
+        "Analyzed 50+ denial cases across different payers", 
         "Mapped current appeal workflow inefficiencies",
         "Competitive analysis of existing RCM tools"
       ],
       quote: {
         text: "Every denied claim is a puzzle with different pieces. We need better tools to solve them faster.",
-        author: "Revenue Cycle Manager, Primary Care Practice"
+        author: "Revenue Cycle Manager, Internal Manager"
       }
     },
     {
@@ -97,7 +97,7 @@ export const case3Data: CaseStudyData = {
       title: "2. Ideation & Concepting",
       description: "Collaborative workshops to prioritize features and define user flows",
       items: [
-        "User journey mapping for denial-to-resolution workflow",
+        "User journey mapping for denial to resolution workflow",
         "Feature prioritization workshops with stakeholders",
         "Information architecture for complex appeal data", 
         "Wireframe iterations for dashboard and case views"
@@ -132,7 +132,7 @@ export const case3Data: CaseStudyData = {
   features: [
     {
       icon: "Brain",
-      title: "AI-Powered Claim Analysis", 
+      title: "AI Powered Claim Analysis", 
       description: "Automatically identifies denial reasons and extracts relevant patient data for targeted appeals."
     },
     {
@@ -147,13 +147,13 @@ export const case3Data: CaseStudyData = {
     },
     {
       icon: "Clock", 
-      title: "Automated Follow-up",
+      title: "Automated Follow Up",
       description: "Intelligent scheduling and tracking of appeal deadlines with automatic status updates."
     },
     {
       icon: "Shield",
       title: "Compliance Monitoring",
-      description: "Ensures all appeals meet regulatory requirements and payer-specific guidelines."
+      description: "Ensures all appeals meet regulatory requirements and payer specific guidelines."
     },
     {
       icon: "Users",
@@ -165,8 +165,8 @@ export const case3Data: CaseStudyData = {
   // Outcomes Section
   outcomesTitle: "Outcomes",
   userFeedback: {
-    quote: "This platform cut our appeal processing time from weeks to days. We're recovering 40% more revenue from previously denied claims.",
-    author: "Sarah Chen, Practice Administrator"
+    quote: "This platform cut our appeal processing time from 30 minutes to 10 minutes.",
+    author: "Internal appeal writer"
   },
 
   // Reflection Section  
@@ -179,7 +179,7 @@ export const case3Data: CaseStudyData = {
         "Strong stakeholder engagement led to accurate requirements gathering",
         "Iterative design process prevented major usability issues", 
         "Early prototype validation saved significant development time",
-        "Cross-functional collaboration improved solution quality"
+        "Cross functional collaboration improved solution quality"
       ]
     },
     {
@@ -187,7 +187,7 @@ export const case3Data: CaseStudyData = {
       title: 'Challenges', 
       items: [
         "Complex regulatory requirements created design constraints",
-        "Payer API limitations required creative workflow solutions",
+        "Legacy API limitations required creative workflow solutions",
         "Balancing automation with user control in AI features",
         "Managing technical debt while adding new functionality"
       ]
@@ -198,7 +198,7 @@ export const case3Data: CaseStudyData = {
       items: [
         "Expand to additional payer integrations and denial categories",
         "Implement predictive analytics for proactive claim management",
-        "Develop mobile interface for on-the-go case management", 
+        "Develop mobile interface for on the go case management", 
         "Add advanced reporting and ROI tracking capabilities"
       ]
     }
