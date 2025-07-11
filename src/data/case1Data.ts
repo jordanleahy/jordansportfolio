@@ -54,7 +54,7 @@ export const case1Data: CaseStudyData = {
       title: "Team & Stakeholders",
       description: "",
       items: [
-        "3 Critical Care Physicians",
+        "2 CDI Specialist",
         "2 Data Scientists",
         "4 Frontend Engineers", 
         "1 Clinical Informaticist",
