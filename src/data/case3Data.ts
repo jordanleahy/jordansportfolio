@@ -121,6 +121,7 @@ export const case3Data: CaseStudyData = {
       icon: "CheckCircle", 
       title: "4. Iteration & Handoff",
       description: "Design refinement and comprehensive documentation for development",
+      image: "/lovable-uploads/8558410b-841e-412e-a8ce-ef6084e9a684.png",
       items: [
         "Component library and design tokens",
         "Detailed interaction specifications",
