@@ -130,7 +130,7 @@ export const case1Data: CaseStudyData = {
     {
       icon: "Brain",
       title: "Sepsis Only Data Validation Dashboard", 
-      description: "Real-time sepsis probability scoring using machine learning algorithms trained on thousands of patient cases."
+      description: "Each ICD-10 primary diagnosis recommendation must have its own ui, not a generic view"
     },
     {
       icon: "Activity",
