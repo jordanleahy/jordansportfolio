@@ -43,7 +43,7 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
                   </ul>
                 </Card>
                 {challenge.title === "Design Challenges" && (
-                  <div className="mt-6 -mx-4 md:-mx-8 lg:-mx-16 xl:-mx-32">
+                  <div className="mt-6 md:-mx-8 lg:-mx-16 xl:-mx-32">
                     <img 
                       src="/lovable-uploads/33fa38f7-39a9-445e-aa58-4031125e0692.png" 
                       alt="CDI specialist reviewing sepsis validation criteria on dashboard interface"
