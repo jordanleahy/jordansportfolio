@@ -6,8 +6,13 @@ import { ArrowLeft, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom";
 import { case3Data } from "@/data/case3Data";
 import { iconMap } from "@/utils/iconMap";
+import { useEffect } from "react";
 
 const Case3 = () => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}

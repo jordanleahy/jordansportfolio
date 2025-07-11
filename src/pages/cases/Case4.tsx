@@ -4,7 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, Clock, CheckCircle, AlertCircle, Users, Target, Lightbulb, Eye, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+
 const Case4 = () => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <motion.header initial={{
