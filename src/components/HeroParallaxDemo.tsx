@@ -60,7 +60,7 @@ export const products = [
   {
     title: "Revenue Cycle Management",
     link: "/cases/case1",
-    thumbnail: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png",
+    thumbnail: "/lovable-uploads/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png",
   },
   {
     title: "Healthcare UX Design",
