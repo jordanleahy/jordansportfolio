@@ -8,7 +8,7 @@ export const case3Data: CaseStudyData = {
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "8 months",
+  timeline: "4 months",
   timelineDetails: "January - April 2025",
   tags: ["Denial Management", "Appeals", "Revenue Cycle", "Healthcare AI"],
   
@@ -64,7 +64,7 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "8-month engagement",
+      description: "4-month engagement",
       items: [
         "5 major payer integrations",
         "12 common denial categories",
