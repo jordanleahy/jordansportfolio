@@ -59,7 +59,7 @@ export const HeroParallax = ({
       className="h-[150vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
       {/* Gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/85 to-background/95 z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/92 to-background/98 z-10 pointer-events-none" />
       <Header />
       <motion.div
         style={{
