@@ -81,6 +81,7 @@ export const case3Data: CaseStudyData = {
       icon: "Eye",
       title: "1. Research & Discovery",
       description: "Deep dive into revenue cycle workflows and denial management pain points",
+      image: "/lovable-uploads/f8bdf34c-98f3-483b-9033-2c28bda929cd.png",
       items: [
         "Shadowed coding and appeal specialists internally.",
         "Analyzed 50+ denial cases across different payers", 
