@@ -2,7 +2,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 
 export const case4Data: CaseStudyData = {
   // Hero Section
-  title: "Prior Authorization Workflow",
+  title: "Prior Authorization Eligibility",
   description: "AI powered drug prior authorization workflow system that streamlined approval processes by automating formulary rule identification, medical requirements, and insurance communications.",
   heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
