@@ -56,7 +56,7 @@ export const case1Data: CaseStudyData = {
       items: [
         "2 CDI Specialist",
         "2 Data Scientists",
-        "4 Frontend Engineers", 
+        "4 Engineers", 
         "1 Clinical Informaticist",
         "Product Manager"
       ]
