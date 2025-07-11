@@ -123,7 +123,8 @@ export const case1Data: CaseStudyData = {
         "Clinical workflow integration testing",
         "Performance monitoring and optimization",
         "Post-deployment user feedback integration"
-      ]
+      ],
+      image: "/lovable-uploads/865c082a-34b7-47d5-b45a-2385c872ed49.png"
     }
   ],
 
