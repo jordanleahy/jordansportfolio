@@ -5,12 +5,12 @@ import { Quote } from "lucide-react";
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
-    author: "Director of Product, Healthcare Analytics",
+    author: "Director of Product, CDI Revenue Cycle Manager",
     role: "Product Leadership"
   },
   {
-    quote: "Working alongside Jordan at Digital Health Platform was like having a trusted partner who truly understood the value of clear, intuitive information",
-    author: "Clinical Operations Lead, Digital Health Platform",
+    quote: "Working alongside Jordan was like having a trusted partner who truly understood the value of clear, data dense, medical information display.",
+    author: "Clinical Operations Lead, Drug Prior Authorization and Appeals Management",
     role: "Clinical Operations"
   },
   {
@@ -20,7 +20,7 @@ const testimonials = [
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
-    author: "Medical Doctor, Digital Health Platform",
+    author: "Medical Doctor, Drug Prior Authorization and Appeals Management",
     role: "Healthcare Provider"
   }
 ];
