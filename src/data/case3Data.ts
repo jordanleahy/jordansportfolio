@@ -3,13 +3,13 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Denial and Appeal Management",
-  description: "Designed an AI powered denial management platform that automates claim review, generates targeted appeal letters, and creates payer follow ups to reduce denial rates and accelerate revenue recovery for healthcare practices.",
+  description: "Designed an AI-powered denial management platform that automates claim review, generates targeted appeal letters, and tracks payer response patterns to reduce denial rates and accelerate revenue recovery for healthcare practices.",
   heroImage: "/lovable-uploads/35c7ab82-d7d8-4975-8b1a-eb02163724b7.png",
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "4 months",
-  timelineDetails: "January - April 2025",
+  timeline: "8 months",
+  timelineDetails: "January - September 2023",
   tags: ["Denial Management", "Appeals", "Revenue Cycle", "Healthcare AI"],
   
   // Problem Section
@@ -22,7 +22,7 @@ export const case3Data: CaseStudyData = {
       items: [
         "45-60 day average appeal resolution time",
         "15% average claim denial rate", 
-        "$2.3B annual lost revenue industry-wide"
+        "$20B annual lost spent pursuing denials"
       ]
     },
     {
@@ -64,7 +64,7 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "4-month engagement",
+      description: "8-month engagement",
       items: [
         "5 major payer integrations",
         "12 common denial categories",
