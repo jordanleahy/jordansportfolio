@@ -58,6 +58,8 @@ export const HeroParallax = ({
       ref={ref}
       className="h-[150vh] py-20 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d]"
     >
+      {/* Gradient overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/85 to-background/95 z-10 pointer-events-none" />
       <Header />
       <motion.div
         style={{
@@ -102,11 +104,11 @@ export const HeroParallax = ({
 
 export const Header = () => {
   return (
-    <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0">
-      <h1 className="text-2xl md:text-7xl font-bold text-foreground">
+    <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 z-20">
+      <h1 className="text-2xl md:text-7xl font-bold text-foreground drop-shadow-sm">
         Jordan Leahy <br /> Healthcare Product Designer
       </h1>
-      <p className="max-w-2xl text-base md:text-xl mt-8 text-muted-foreground">
+      <p className="max-w-2xl text-base md:text-xl mt-8 text-muted-foreground drop-shadow-sm">
         I design data-dense healthcare tools that reduce denials, improve agree rates, and make operations faster—from Figma to production, with results that scale.
       </p>
     </div>
