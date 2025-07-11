@@ -111,7 +111,8 @@ export const case1Data: CaseStudyData = {
         "High-fidelity interactive prototypes",
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
-      ]
+      ],
+      image: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png"
     },
     {
       icon: "CheckCircle", 
