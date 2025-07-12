@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
+import BlogEditor from "./pages/BlogEditor";
 import Case1 from "./pages/cases/Case1";
 import Case4 from "./pages/cases/Case4";
 import Case3 from "./pages/cases/Case3";
@@ -28,6 +29,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogDetail />} />
+              <Route path="/blog-editor" element={<BlogEditor />} />
+              <Route path="/blog-editor/:id" element={<BlogEditor />} />
               <Route path="/cases/case1" element={<Case1 />} />
               <Route path="/cases/case4" element={<Case4 />} />
               <Route path="/cases/case3" element={<Case3 />} />

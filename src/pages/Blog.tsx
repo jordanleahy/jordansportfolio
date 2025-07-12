@@ -2,15 +2,18 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, ArrowRight, Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BlogService } from "@/services/blogService";
 import type { BlogPost } from "@/types/blog";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -24,7 +27,13 @@ const Blog = () => {
       }
     };
 
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
     fetchPosts();
+    checkUser();
   }, []);
 
   const featuredPost = blogPosts.find(post => post.featured);
@@ -56,9 +65,19 @@ const Blog = () => {
               Back to Portfolio
             </Button>
           </Link>
-          <Button variant="outline" size="sm">
-            <a href="#contact">Contact Jordan</a>
-          </Button>
+          <div className="flex items-center gap-2">
+            {user && (
+              <Link to="/blog-editor">
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Post
+                </Button>
+              </Link>
+            )}
+            <Button variant="outline" size="sm">
+              <a href="#contact">Contact Jordan</a>
+            </Button>
+          </div>
         </div>
       </motion.header>
 
@@ -95,7 +114,16 @@ const Blog = () => {
                       <div className="aspect-video bg-muted"></div>
                     </div>
                     <div className="md:w-1/2 p-8">
-                      <Badge className="mb-4">{featuredPost.category}</Badge>
+                      <div className="flex items-start justify-between mb-4">
+                        <Badge>{featuredPost.category}</Badge>
+                        {user && (
+                          <Link to={`/blog-editor/${featuredPost.slug}`}>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                       <h2 className="text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
                         {featuredPost.hero_headline}
                       </h2>
@@ -154,7 +182,16 @@ const Blog = () => {
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
                     <div className="aspect-video bg-muted"></div>
                     <CardContent className="p-6">
-                      <Badge className="mb-3" variant="secondary">{post.category}</Badge>
+                      <div className="flex items-start justify-between mb-3">
+                        <Badge variant="secondary">{post.category}</Badge>
+                        {user && (
+                          <Link to={`/blog-editor/${post.slug}`}>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                       <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
                         {post.hero_headline}
                       </h3>
