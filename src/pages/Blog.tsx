@@ -8,13 +8,23 @@ import { Link } from "react-router-dom";
 // Mock blog data - replace with real data later
 const blogPosts = [
   {
+    id: "why-cdi-needs-ai-now",
+    title: "Why CDI Needs AI Now",
+    excerpt: "AI is the lifeline for overworked CDI teams struggling to keep up. CDI teams face more charts, fewer staff, and ever-changing payer rules.",
+    date: "2024-02-01",
+    readTime: "2 min read",
+    category: "CDI",
+    featured: true,
+    image: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png"
+  },
+  {
     id: "cdi-ai-opportunity",
     title: "Manual Chart Review Overload in CDI: The AI Opportunity",
     excerpt: "Discover how AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue with compelling ROI data.",
     date: "2024-01-25",
     readTime: "6 min read",
     category: "Healthcare Investment",
-    featured: true,
+    featured: false,
     image: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png"
   },
   {

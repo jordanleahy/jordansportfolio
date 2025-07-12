@@ -129,6 +129,87 @@ const cdiAiOpportunityContent = [
 
 const getBlogPost = (id: string) => {
   const posts = {
+    "why-cdi-needs-ai-now": {
+      title: "Why CDI Needs AI Now",
+      subtitle: "AI is the lifeline for overworked CDI teams struggling to keep up.",
+      author: "Jordan Leigh",
+      date: "2024-02-01",
+      readTime: "2 min read",
+      category: "CDI",
+      content: [
+        {
+          type: "hero-section",
+          title: "Why CDI Needs AI Now",
+          subtitle: "AI is the lifeline for overworked CDI teams struggling to keep up.",
+          description: "CDI teams face more charts, fewer staff, and ever-changing payer rules. AI can't replace clinical expertise—but it can prioritize urgent cases, reduce manual audits, and help hospitals capture accurate revenue.",
+          readTime: "2 min",
+          category: "CDI",
+          badge: "NEW"
+        },
+        {
+          type: "pressure-section",
+          title: "The Pressure Is Real",
+          content: "Hospitals are flooded with documentation. CDI teams must review thousands of charts weekly—yet many are short-staffed and navigating shifting payer criteria. Manual processes can't scale. Missed DRGs cost revenue. Query delays slow billing. And accuracy? It suffers.",
+          takeaway: "The current workload is unsustainable without automation."
+        },
+        {
+          type: "ai-triage-section",
+          title: "AI Can Triage and Prioritize",
+          content: "Imagine AI flagging charts likely to contain missed MCCs or DRG shifts. Trained on historical data, AI tools surface high-impact cases for review. This makes CDI teams faster, smarter, and more focused.",
+          takeaway: "AI enables proactive, high-value chart selection.",
+          cta: "Try This Now →"
+        },
+        {
+          type: "human-focus-section",
+          title: "It's Not About Replacing Humans",
+          content: "AI doesn't decide—people do. But AI organizes data, identifies gaps, and aligns chart details with payer rules. It's a fast, intelligent second set of eyes that frees CDSs to focus on what matters.",
+          takeaway: "AI helps clinicians do more with less, without replacing judgment."
+        },
+        {
+          type: "tldr-section",
+          title: "TL;DR",
+          subtitle: "Quick Summary",
+          points: [
+            "📊 CDI teams face crushing chart volumes",
+            "🔄 Manual audits can't keep up with payer changes",
+            "⚙️ AI helps prioritize high-impact cases",
+            "👩‍⚕️ CDSs still validate—AI supports",
+            "💰 Improved DRG accuracy = better revenue"
+          ]
+        },
+        {
+          type: "deep-dive-section",
+          title: "Deep Dive: From Volume to Value",
+          expandable: true,
+          content: "AI tools that surface documentation gaps or key indicators for complex diagnoses (e.g., respiratory failure or sepsis) shift the CDS role from scavenger to validator. This reduces burnout and increases throughput. Some hospitals report 30–40% time savings per case, enabling small teams to handle more cases accurately. AI helps move CDI from reactive review to proactive value generation."
+        },
+        {
+          type: "try-it-section",
+          title: "Try It in Your Org",
+          content: "Start with tools that support:",
+          points: [
+            "DRG prioritization",
+            "AI-assisted queries", 
+            "Automated documentation gap detection"
+          ],
+          actions: [
+            { type: "copy", text: "Copy This" },
+            { type: "share", text: "Share: LinkedIn | X | WhatsApp" },
+            { type: "comment", text: "Leave a comment or reply via DM" }
+          ]
+        },
+        {
+          type: "adaptations-section",
+          title: "Adaptations Available",
+          content: "Let me know if you want this adapted to:",
+          options: [
+            "✅ Concurrent CDI",
+            "✅ Pre-bill audits", 
+            "✅ Carousel visual format for social"
+          ]
+        }
+      ]
+    },
     "cdi-ai-opportunity": {
       title: "Manual Chart Review Overload in CDI: The AI Opportunity",
       subtitle: "How AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue",
@@ -1134,6 +1215,218 @@ const BlogDetail = () => {
               <Button size="lg" className="text-lg px-8 py-4">
                 {block.buttonText}
               </Button>
+            </Card>
+          </motion.div>
+        );
+
+      case "hero-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <Badge className="mb-2">{block.category}</Badge>
+                {block.badge && <Badge variant="secondary">{block.badge}</Badge>}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">{block.title}</h1>
+              <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
+                {block.subtitle}
+              </p>
+              <p className="text-lg text-foreground/80 mb-8 max-w-3xl mx-auto">
+                {block.description}
+              </p>
+              <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  🔍 Read in {block.readTime}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      case "pressure-section":
+      case "ai-triage-section":
+      case "human-focus-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-12"
+          >
+            <Card className="p-8">
+              <h2 className="text-3xl font-bold mb-6">{block.title}</h2>
+              <p className="text-lg leading-relaxed mb-6 text-foreground/90">
+                {block.content}
+              </p>
+              {block.takeaway && (
+                <div className="bg-primary/10 p-4 rounded-lg border-l-4 border-primary">
+                  <div className="flex items-start gap-2">
+                    <Lightbulb className="h-5 w-5 text-primary mt-0.5" />
+                    <p className="font-medium">
+                      <span className="text-primary">Takeaway:</span> {block.takeaway}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {block.cta && (
+                <div className="mt-6">
+                  <Button variant="outline" className="hover:bg-primary/5">
+                    {block.cta}
+                  </Button>
+                </div>
+              )}
+            </Card>
+          </motion.div>
+        );
+
+      case "tldr-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-12"
+          >
+            <Card className="p-8 bg-muted/30">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">📌</span>
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold">{block.title}</h2>
+                  <p className="text-muted-foreground">{block.subtitle}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {block.points.map((point: string, pointIndex: number) => (
+                  <motion.div
+                    key={pointIndex}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: pointIndex * 0.1 }}
+                    className="flex items-center gap-3 text-lg"
+                  >
+                    <span>{point}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
+        );
+
+      case "deep-dive-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-12"
+          >
+            <Card className="p-8">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold mb-2">🔍 {block.title}</h2>
+                <p className="text-sm text-muted-foreground mb-4">Click to expand this section if needed</p>
+              </div>
+              <details className="group">
+                <summary className="cursor-pointer text-primary hover:text-primary/80 font-medium mb-4">
+                  Click to expand deep dive →
+                </summary>
+                <div className="pt-4 border-t border-muted">
+                  <p className="text-lg leading-relaxed text-foreground/90">
+                    {block.content}
+                  </p>
+                </div>
+              </details>
+            </Card>
+          </motion.div>
+        );
+
+      case "try-it-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-12"
+          >
+            <Card className="p-8 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
+              <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+                🚀 {block.title}
+              </h2>
+              <p className="text-lg mb-6">{block.content}</p>
+              <div className="space-y-3 mb-8">
+                {block.points.map((point: string, pointIndex: number) => (
+                  <motion.div
+                    key={pointIndex}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: pointIndex * 0.1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    <span>{point}</span>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {block.actions.map((action: any, actionIndex: number) => (
+                  <Button
+                    key={actionIndex}
+                    variant={actionIndex === 0 ? "default" : "outline"}
+                    size="sm"
+                  >
+                    {action.text}
+                  </Button>
+                ))}
+              </div>
+              <div className="mt-6 pt-6 border-t border-muted">
+                <p className="text-sm text-muted-foreground">
+                  🔗 Share: LinkedIn | X | WhatsApp<br />
+                  💬 Leave a comment or reply via DM
+                </p>
+              </div>
+            </Card>
+          </motion.div>
+        );
+
+      case "adaptations-section":
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="my-12"
+          >
+            <Card className="p-8 border-dashed border-2">
+              <p className="text-lg mb-4">{block.content}</p>
+              <div className="space-y-2">
+                {block.options.map((option: string, optionIndex: number) => (
+                  <motion.div
+                    key={optionIndex}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: optionIndex * 0.1 }}
+                    className="text-lg"
+                  >
+                    {option}
+                  </motion.div>
+                ))}
+              </div>
             </Card>
           </motion.div>
         );
