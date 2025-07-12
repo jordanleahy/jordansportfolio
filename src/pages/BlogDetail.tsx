@@ -1,11 +1,16 @@
+import React, { Suspense, lazy } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BlogPost } from "@/types/blog";
 import { BlogService } from "@/services/blogService";
-import { BlogTemplate } from "@/components/blog/BlogTemplate";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
+
+// Lazy load heavy BlogTemplate component
+const BlogTemplate = lazy(() => import("@/components/blog/BlogTemplate").then(module => ({ 
+  default: module.BlogTemplate 
+})));
 
 const BlogDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -103,7 +108,18 @@ const BlogDetail = () => {
     return <Navigate to="/blog" replace />;
   }
 
-  return <BlogTemplate post={post} />;
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading blog post...</p>
+        </div>
+      </div>
+    }>
+      <BlogTemplate post={post} />
+    </Suspense>
+  );
 };
 
 export default BlogDetail;
