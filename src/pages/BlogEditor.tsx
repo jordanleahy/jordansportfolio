@@ -219,32 +219,40 @@ const BlogEditor = () => {
               {existingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant={formData.status === 'published' ? 'default' : 'secondary'}>
-              {formData.status}
-            </Badge>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handleSave(false)}
-              disabled={saving}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Draft
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => handleSave(true)}
-              disabled={saving}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Publish
-            </Button>
-          </div>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Status and Actions */}
+        <div className="mb-6 p-4 border rounded-lg bg-card">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-medium text-muted-foreground">Post Status:</h2>
+              <Badge variant={formData.status === 'published' ? 'default' : 'secondary'}>
+                {formData.status}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleSave(false)}
+                disabled={saving}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Save Draft
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => handleSave(true)}
+                disabled={saving}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Publish
+              </Button>
+            </div>
+          </div>
+        </div>
         <Tabs defaultValue="hero" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="hero">Hero</TabsTrigger>
