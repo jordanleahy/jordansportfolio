@@ -206,6 +206,445 @@ export type Database = {
         }
         Relationships: []
       }
+      formd_submission: {
+        Row: {
+          accessionnumber: string
+          created_at: string
+          file_num: number | null
+          filing_date: string | null
+          over100issuerflag: boolean | null
+          over100personsflag: boolean | null
+          schemaversion: string | null
+          sic_code: string | null
+          submissiontype: string | null
+          testorlive: string | null
+          updated_at: string
+        }
+        Insert: {
+          accessionnumber: string
+          created_at?: string
+          file_num?: number | null
+          filing_date?: string | null
+          over100issuerflag?: boolean | null
+          over100personsflag?: boolean | null
+          schemaversion?: string | null
+          sic_code?: string | null
+          submissiontype?: string | null
+          testorlive?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accessionnumber?: string
+          created_at?: string
+          file_num?: number | null
+          filing_date?: string | null
+          over100issuerflag?: boolean | null
+          over100personsflag?: boolean | null
+          schemaversion?: string | null
+          sic_code?: string | null
+          submissiontype?: string | null
+          testorlive?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      issuers: {
+        Row: {
+          accessionnumber: string
+          cik: string | null
+          city: string | null
+          created_at: string
+          entityname: string | null
+          entitytype: string | null
+          entitytypeotherdesc: string | null
+          id: string
+          is_primaryissuer_flag: boolean | null
+          issuer_seq_key: number | null
+          issuerphonenumber: string | null
+          jurisdictionofinc: string | null
+          stateorcountry: string | null
+          stateorcountrydescription: string | null
+          street1: string | null
+          street2: string | null
+          updated_at: string
+          yearofinc_value_entered: number | null
+          zipcode: string | null
+        }
+        Insert: {
+          accessionnumber: string
+          cik?: string | null
+          city?: string | null
+          created_at?: string
+          entityname?: string | null
+          entitytype?: string | null
+          entitytypeotherdesc?: string | null
+          id?: string
+          is_primaryissuer_flag?: boolean | null
+          issuer_seq_key?: number | null
+          issuerphonenumber?: string | null
+          jurisdictionofinc?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          yearofinc_value_entered?: number | null
+          zipcode?: string | null
+        }
+        Update: {
+          accessionnumber?: string
+          cik?: string | null
+          city?: string | null
+          created_at?: string
+          entityname?: string | null
+          entitytype?: string | null
+          entitytypeotherdesc?: string | null
+          id?: string
+          is_primaryissuer_flag?: boolean | null
+          issuer_seq_key?: number | null
+          issuerphonenumber?: string | null
+          jurisdictionofinc?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          yearofinc_value_entered?: number | null
+          zipcode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issuers_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: false
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
+      offerings: {
+        Row: {
+          accessionnumber: string
+          aggregatenetassetvaluerange: string | null
+          authorizedrepresentative: string | null
+          buscombclarificationofresp: string | null
+          created_at: string
+          descriptionofothertype: string | null
+          federalexemptions_items_list: string | null
+          finderfeeclarificationofresp: string | null
+          findersfee_dollaramount: number | null
+          findersfee_isestimate: boolean | null
+          grossproceedsused_clarofresp: string | null
+          grossproceedsused_dollaramount: number | null
+          grossproceedsused_isestimate: boolean | null
+          industrygrouptype: string | null
+          investmentfundtype: string | null
+          is40act: boolean | null
+          isamendment: boolean | null
+          isbusinesscombinationtrans: boolean | null
+          isdebttype: boolean | null
+          isequitytype: boolean | null
+          ismineralpropertytype: boolean | null
+          isoptiontoacquiretype: boolean | null
+          isothertype: boolean | null
+          ispooledinvestmentfundtype: boolean | null
+          issecuritytobeacquiredtype: boolean | null
+          istenantincommontype: boolean | null
+          minimuminvestmentaccepted: number | null
+          morethanoneyear: boolean | null
+          over100recipientflag: boolean | null
+          previousaccessionnumber: string | null
+          revenuerange: string | null
+          sale_date: string | null
+          salescomm_dollaramount: number | null
+          salescomm_isestimate: boolean | null
+          totalamountsold: number | null
+          totalofferingamount: number | null
+          totalremaining: number | null
+          updated_at: string
+          yettooccur: boolean | null
+        }
+        Insert: {
+          accessionnumber: string
+          aggregatenetassetvaluerange?: string | null
+          authorizedrepresentative?: string | null
+          buscombclarificationofresp?: string | null
+          created_at?: string
+          descriptionofothertype?: string | null
+          federalexemptions_items_list?: string | null
+          finderfeeclarificationofresp?: string | null
+          findersfee_dollaramount?: number | null
+          findersfee_isestimate?: boolean | null
+          grossproceedsused_clarofresp?: string | null
+          grossproceedsused_dollaramount?: number | null
+          grossproceedsused_isestimate?: boolean | null
+          industrygrouptype?: string | null
+          investmentfundtype?: string | null
+          is40act?: boolean | null
+          isamendment?: boolean | null
+          isbusinesscombinationtrans?: boolean | null
+          isdebttype?: boolean | null
+          isequitytype?: boolean | null
+          ismineralpropertytype?: boolean | null
+          isoptiontoacquiretype?: boolean | null
+          isothertype?: boolean | null
+          ispooledinvestmentfundtype?: boolean | null
+          issecuritytobeacquiredtype?: boolean | null
+          istenantincommontype?: boolean | null
+          minimuminvestmentaccepted?: number | null
+          morethanoneyear?: boolean | null
+          over100recipientflag?: boolean | null
+          previousaccessionnumber?: string | null
+          revenuerange?: string | null
+          sale_date?: string | null
+          salescomm_dollaramount?: number | null
+          salescomm_isestimate?: boolean | null
+          totalamountsold?: number | null
+          totalofferingamount?: number | null
+          totalremaining?: number | null
+          updated_at?: string
+          yettooccur?: boolean | null
+        }
+        Update: {
+          accessionnumber?: string
+          aggregatenetassetvaluerange?: string | null
+          authorizedrepresentative?: string | null
+          buscombclarificationofresp?: string | null
+          created_at?: string
+          descriptionofothertype?: string | null
+          federalexemptions_items_list?: string | null
+          finderfeeclarificationofresp?: string | null
+          findersfee_dollaramount?: number | null
+          findersfee_isestimate?: boolean | null
+          grossproceedsused_clarofresp?: string | null
+          grossproceedsused_dollaramount?: number | null
+          grossproceedsused_isestimate?: boolean | null
+          industrygrouptype?: string | null
+          investmentfundtype?: string | null
+          is40act?: boolean | null
+          isamendment?: boolean | null
+          isbusinesscombinationtrans?: boolean | null
+          isdebttype?: boolean | null
+          isequitytype?: boolean | null
+          ismineralpropertytype?: boolean | null
+          isoptiontoacquiretype?: boolean | null
+          isothertype?: boolean | null
+          ispooledinvestmentfundtype?: boolean | null
+          issecuritytobeacquiredtype?: boolean | null
+          istenantincommontype?: boolean | null
+          minimuminvestmentaccepted?: number | null
+          morethanoneyear?: boolean | null
+          over100recipientflag?: boolean | null
+          previousaccessionnumber?: string | null
+          revenuerange?: string | null
+          sale_date?: string | null
+          salescomm_dollaramount?: number | null
+          salescomm_isestimate?: boolean | null
+          totalamountsold?: number | null
+          totalofferingamount?: number | null
+          totalremaining?: number | null
+          updated_at?: string
+          yettooccur?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offerings_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: true
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
+      recipients: {
+        Row: {
+          accessionnumber: string
+          associatedbdcrdnumber: string | null
+          associatedbdname: string | null
+          city: string | null
+          created_at: string
+          descriptions_list: string | null
+          foreignsolicitation: boolean | null
+          id: string
+          recipient_seq_key: number | null
+          recipientcrdnumber: string | null
+          recipientname: string | null
+          stateorcountry: string | null
+          stateorcountrydescription: string | null
+          states_or_value_list: string | null
+          street1: string | null
+          street2: string | null
+          updated_at: string
+          zipcode: string | null
+        }
+        Insert: {
+          accessionnumber: string
+          associatedbdcrdnumber?: string | null
+          associatedbdname?: string | null
+          city?: string | null
+          created_at?: string
+          descriptions_list?: string | null
+          foreignsolicitation?: boolean | null
+          id?: string
+          recipient_seq_key?: number | null
+          recipientcrdnumber?: string | null
+          recipientname?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          states_or_value_list?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Update: {
+          accessionnumber?: string
+          associatedbdcrdnumber?: string | null
+          associatedbdname?: string | null
+          city?: string | null
+          created_at?: string
+          descriptions_list?: string | null
+          foreignsolicitation?: boolean | null
+          id?: string
+          recipient_seq_key?: number | null
+          recipientcrdnumber?: string | null
+          recipientname?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          states_or_value_list?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipients_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: false
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
+      related_persons: {
+        Row: {
+          accessionnumber: string
+          city: string | null
+          created_at: string
+          firstname: string | null
+          id: string
+          lastname: string | null
+          middlename: string | null
+          relatedperson_seq_key: number | null
+          relationship_1: string | null
+          relationship_2: string | null
+          relationship_3: string | null
+          relationshipclarification: string | null
+          stateorcountry: string | null
+          stateorcountrydescription: string | null
+          street1: string | null
+          street2: string | null
+          updated_at: string
+          zipcode: string | null
+        }
+        Insert: {
+          accessionnumber: string
+          city?: string | null
+          created_at?: string
+          firstname?: string | null
+          id?: string
+          lastname?: string | null
+          middlename?: string | null
+          relatedperson_seq_key?: number | null
+          relationship_1?: string | null
+          relationship_2?: string | null
+          relationship_3?: string | null
+          relationshipclarification?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Update: {
+          accessionnumber?: string
+          city?: string | null
+          created_at?: string
+          firstname?: string | null
+          id?: string
+          lastname?: string | null
+          middlename?: string | null
+          relatedperson_seq_key?: number | null
+          relationship_1?: string | null
+          relationship_2?: string | null
+          relationship_3?: string | null
+          relationshipclarification?: string | null
+          stateorcountry?: string | null
+          stateorcountrydescription?: string | null
+          street1?: string | null
+          street2?: string | null
+          updated_at?: string
+          zipcode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "related_persons_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: false
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
+      signatures: {
+        Row: {
+          accessionnumber: string
+          created_at: string
+          id: string
+          issuername: string | null
+          nameofsigner: string | null
+          signature_seq_key: number | null
+          signaturedate: string | null
+          signaturename: string | null
+          signaturetitle: string | null
+          updated_at: string
+        }
+        Insert: {
+          accessionnumber: string
+          created_at?: string
+          id?: string
+          issuername?: string | null
+          nameofsigner?: string | null
+          signature_seq_key?: number | null
+          signaturedate?: string | null
+          signaturename?: string | null
+          signaturetitle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accessionnumber?: string
+          created_at?: string
+          id?: string
+          issuername?: string | null
+          nameofsigner?: string | null
+          signature_seq_key?: number | null
+          signaturedate?: string | null
+          signaturename?: string | null
+          signaturetitle?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signatures_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: false
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
