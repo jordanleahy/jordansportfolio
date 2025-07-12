@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          category: string
+          created_at: string
+          cta_text: string
+          cta_url: string | null
+          deep_dive_content: string | null
+          deep_dive_title: string | null
+          featured: boolean
+          hero_badge: string | null
+          hero_headline: string
+          hero_image_url: string | null
+          hero_subhead: string
+          hero_video_url: string | null
+          id: string
+          intro_content: string
+          meta_description: string
+          meta_keywords: string[] | null
+          meta_title: string
+          published_at: string | null
+          read_time: number | null
+          share_enabled: boolean
+          slug: string
+          status: string
+          tags: string[] | null
+          tldr_bullets: Json
+          tldr_title: string
+          updated_at: string
+          user_id: string
+          visual_sections: Json
+          word_count: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          cta_text: string
+          cta_url?: string | null
+          deep_dive_content?: string | null
+          deep_dive_title?: string | null
+          featured?: boolean
+          hero_badge?: string | null
+          hero_headline: string
+          hero_image_url?: string | null
+          hero_subhead: string
+          hero_video_url?: string | null
+          id?: string
+          intro_content: string
+          meta_description: string
+          meta_keywords?: string[] | null
+          meta_title: string
+          published_at?: string | null
+          read_time?: number | null
+          share_enabled?: boolean
+          slug: string
+          status?: string
+          tags?: string[] | null
+          tldr_bullets: Json
+          tldr_title?: string
+          updated_at?: string
+          user_id: string
+          visual_sections: Json
+          word_count?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          cta_text?: string
+          cta_url?: string | null
+          deep_dive_content?: string | null
+          deep_dive_title?: string | null
+          featured?: boolean
+          hero_badge?: string | null
+          hero_headline?: string
+          hero_image_url?: string | null
+          hero_subhead?: string
+          hero_video_url?: string | null
+          id?: string
+          intro_content?: string
+          meta_description?: string
+          meta_keywords?: string[] | null
+          meta_title?: string
+          published_at?: string | null
+          read_time?: number | null
+          share_enabled?: boolean
+          slug?: string
+          status?: string
+          tags?: string[] | null
+          tldr_bullets?: Json
+          tldr_title?: string
+          updated_at?: string
+          user_id?: string
+          visual_sections?: Json
+          word_count?: number | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           capacity: number | null
@@ -115,7 +211,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_tldr_bullets: {
+        Args: { bullets: Json }
+        Returns: boolean
+      }
+      validate_visual_sections: {
+        Args: { sections: Json }
+        Returns: boolean
+      }
     }
     Enums: {
       detection_method: "manual" | "voice_pattern" | "hybrid"

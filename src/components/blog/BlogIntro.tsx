@@ -1,0 +1,24 @@
+import { motion } from "framer-motion";
+
+interface BlogIntroProps {
+  content: string;
+  className?: string;
+}
+
+export const BlogIntro = ({ content, className = "" }: BlogIntroProps) => {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6 }}
+      className={`max-w-3xl mx-auto px-4 py-8 ${className}`}
+    >
+      <div className="prose prose-lg max-w-none">
+        <p className="text-lg md:text-xl leading-relaxed text-foreground/90 first-letter:text-4xl first-letter:font-bold first-letter:text-primary first-letter:mr-1 first-letter:float-left first-letter:leading-none first-letter:mt-1">
+          {content}
+        </p>
+      </div>
+    </motion.section>
+  );
+};
