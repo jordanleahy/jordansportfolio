@@ -18,6 +18,7 @@ const BlogEditor = lazy(() => import("./pages/BlogEditor"));
 const Case1 = lazy(() => import("./pages/cases/Case1"));
 const Case4 = lazy(() => import("./pages/cases/Case4"));
 const Case3 = lazy(() => import("./pages/cases/Case3"));
+const SEC = lazy(() => import("./pages/SEC"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -97,6 +98,7 @@ const App = () => (
                   <Route path="/cases/case1" element={<Case1 />} />
                   <Route path="/cases/case4" element={<Case4 />} />
                   <Route path="/cases/case3" element={<Case3 />} />
+                  <Route path="/sec" element={<SEC />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

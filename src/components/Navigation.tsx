@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Briefcase, User, BookOpen, Mail } from "lucide-react";
+import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3 } from "lucide-react";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -100,6 +100,15 @@ const Navigation = () => {
                   <BookOpen size={16} className="mr-2" />
                   Blog
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/sec")}
+                  className="ml-2"
+                >
+                  <BarChart3 size={16} className="mr-2" />
+                  SEC
+                </Button>
               </div>
             </div>
 
@@ -147,6 +156,18 @@ const Navigation = () => {
                 >
                   <BookOpen size={16} className="mr-2" />
                   Blog
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigate("/sec");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full justify-start mt-1"
+                >
+                  <BarChart3 size={16} className="mr-2" />
+                  SEC Dashboard
                 </Button>
               </div>
             </motion.div>
