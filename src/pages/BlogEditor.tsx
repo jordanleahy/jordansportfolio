@@ -9,10 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { BlogService } from "@/services/blogService";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { useBlogPost, useCreateBlogPost, useUpdateBlogPost } from "@/hooks/useBlogQueries";
 
 // Debounce utility
 const useDebounce = (callback: Function, delay: number) => {
@@ -370,9 +370,13 @@ const BlogEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  
+  // TanStack Query hooks
+  const { data: existingPost, isLoading: loading } = useBlogPost(id);
+  const createPostMutation = useCreateBlogPost();
+  const updatePostMutation = useUpdateBlogPost();
+  
   const [saving, setSaving] = useState(false);
-  const [existingPost, setExistingPost] = useState<BlogPost | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<BlogPostInput>({
@@ -414,53 +418,35 @@ const BlogEditor = () => {
 
   const [slug, setSlug] = useState("");
 
-  // Load existing post for editing
+  // Initialize form data when existing post loads
   useEffect(() => {
-    if (id) {
-      const loadPost = async () => {
-        try {
-          setLoading(true);
-          const post = await BlogService.getPostBySlug(id);
-          if (post) {
-            setExistingPost(post);
-            setFormData({
-              hero_headline: post.hero_headline,
-              hero_subhead: post.hero_subhead,
-              hero_image_url: post.hero_image_url || "",
-              hero_video_url: post.hero_video_url || "",
-              hero_badge: post.hero_badge || "",
-              intro_content: post.intro_content,
-              visual_sections: post.visual_sections as VisualSectionInput[],
-              tldr_title: post.tldr_title,
-              tldr_bullets: post.tldr_bullets as string[],
-              deep_dive_title: post.deep_dive_title || "",
-              deep_dive_content: post.deep_dive_content || "",
-              cta_text: post.cta_text,
-              cta_url: post.cta_url || "",
-              meta_title: post.meta_title,
-              meta_description: post.meta_description,
-              meta_keywords: (post.meta_keywords as string[]) || [],
-              category: post.category,
-              tags: (post.tags as string[]) || [],
-              featured: post.featured,
-              share_enabled: post.share_enabled,
-              status: post.status as "draft" | "published" | "archived"
-            });
-            setSlug(post.slug);
-          }
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: "Failed to load blog post",
-            variant: "destructive"
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadPost();
+    if (existingPost) {
+      setFormData({
+        hero_headline: existingPost.hero_headline,
+        hero_subhead: existingPost.hero_subhead,
+        hero_image_url: existingPost.hero_image_url || "",
+        hero_video_url: existingPost.hero_video_url || "",
+        hero_badge: existingPost.hero_badge || "",
+        intro_content: existingPost.intro_content,
+        visual_sections: existingPost.visual_sections as VisualSectionInput[],
+        tldr_title: existingPost.tldr_title,
+        tldr_bullets: existingPost.tldr_bullets as string[],
+        deep_dive_title: existingPost.deep_dive_title || "",
+        deep_dive_content: existingPost.deep_dive_content || "",
+        cta_text: existingPost.cta_text,
+        cta_url: existingPost.cta_url || "",
+        meta_title: existingPost.meta_title,
+        meta_description: existingPost.meta_description,
+        meta_keywords: (existingPost.meta_keywords as string[]) || [],
+        category: existingPost.category,
+        tags: (existingPost.tags as string[]) || [],
+        featured: existingPost.featured,
+        share_enabled: existingPost.share_enabled,
+        status: existingPost.status as "draft" | "published" | "archived"
+      });
+      setSlug(existingPost.slug);
     }
-  }, [id, toast]);
+  }, [existingPost]);
 
   // Performance optimized event handlers with useCallback
   const handleInputChange = useCallback((field: keyof BlogPostInput, value: any) => {
@@ -526,7 +512,7 @@ const BlogEditor = () => {
     }
   }, [formData, debouncedAutoSave, existingPost]);
 
-  const handleSave = async (shouldPublish = false) => {
+  const handleSave = useCallback(async (shouldPublish = false) => {
     try {
       setSaving(true);
       
@@ -545,31 +531,26 @@ const BlogEditor = () => {
         status: shouldPublish ? "published" : formData.status
       };
 
-      let result;
       if (existingPost) {
-        result = await BlogService.updatePost(existingPost.id, postData);
+        const result = await updatePostMutation.mutateAsync({
+          id: existingPost.id,
+          data: postData
+        });
+        // Navigate to the updated slug if it changed
+        if (result.slug !== existingPost.slug) {
+          navigate(`/blog-editor/${result.slug}`);
+        }
       } else {
-        result = await BlogService.createPost(postData);
-      }
-
-      toast({
-        title: "Success",
-        description: `Blog post ${shouldPublish ? 'published' : 'saved'} successfully`
-      });
-
-      if (!existingPost) {
+        const result = await createPostMutation.mutateAsync(postData);
         navigate(`/blog-editor/${result.slug}`);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save blog post",
-        variant: "destructive"
-      });
+      // Error handling is done in the mutation hooks
+      console.error('Save error:', error);
     } finally {
       setSaving(false);
     }
-  };
+  }, [formData, slug, existingPost, updatePostMutation, createPostMutation, navigate]);
 
   if (loading) {
     return (

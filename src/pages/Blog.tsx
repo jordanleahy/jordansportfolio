@@ -5,36 +5,36 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Calendar, ArrowRight, Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BlogService } from "@/services/blogService";
+import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
 import type { BlogPost } from "@/types/blog";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 const Blog = () => {
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  
+  // Use TanStack Query for blog posts
+  const { 
+    data: blogPosts = [], 
+    isLoading: loading, 
+    error
+  } = usePublishedBlogPosts();
+  
+  const prefetchBlogPost = usePrefetchBlogPost();
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const posts = await BlogService.getAllPublishedPosts();
-        setBlogPosts(posts);
-      } catch (error) {
-        console.error("Error fetching blog posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
 
-    fetchPosts();
     checkUser();
   }, []);
+
+  // Handle prefetching on hover for performance
+  const handleMouseEnter = (slug: string) => {
+    prefetchBlogPost(slug);
+  };
 
   const featuredPost = blogPosts.find(post => post.featured);
   const otherPosts = blogPosts.filter(post => !post.featured);
@@ -107,7 +107,10 @@ const Blog = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Link to={`/blog/${featuredPost.id}`}>
+              <Link 
+                to={`/blog/${featuredPost.id}`}
+                onMouseEnter={() => handleMouseEnter(featuredPost.slug)}
+              >
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                   <div className="md:flex">
                     <div className="md:w-1/2">
@@ -178,7 +181,10 @@ const Blog = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link to={`/blog/${post.id}`}>
+                <Link 
+                  to={`/blog/${post.id}`}
+                  onMouseEnter={() => handleMouseEnter(post.slug)}
+                >
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
                     <div className="aspect-video bg-muted"></div>
                     <CardContent className="p-6">
