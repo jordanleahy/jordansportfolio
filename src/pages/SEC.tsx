@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Filter, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { User, Session } from "@supabase/supabase-js";
+import Navigation from "@/components/Navigation";
 import { SummaryCards } from "@/components/sec/SummaryCards";
 import { OfferingsTable } from "@/components/sec/OfferingsTable";
 import { FilterSidebar } from "@/components/sec/FilterSidebar";
 import { CompanyModal } from "@/components/sec/CompanyModal";
 import { DateRangePicker } from "@/components/sec/DateRangePicker";
-import { Button } from "@/components/ui/button";
-import { Filter, X } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const SEC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState({
@@ -21,6 +29,56 @@ const SEC = () => {
     amountRange: [0, 100000000] as [number, number],
     searchQuery: ""
   });
+  const { toast } = useToast();
+
+  // Auth state management
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -30,8 +88,25 @@ const SEC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background">
+        {/* Navigation */}
+        <Navigation />
+        
+        {/* Admin Bar for authenticated users */}
+        {user && (
+          <div className="fixed top-20 right-4 z-50">
+            <div className="bg-card border rounded-lg p-3 shadow-lg">
+              <p className="text-sm text-muted-foreground mb-2">
+                Logged in as: {user.email}
+              </p>
+              <Button onClick={handleSignOut} variant="outline" size="sm">
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
-        <div className="border-b bg-card">
+        <div className="border-b bg-card pt-16">{/* Add padding-top for fixed nav */}
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
@@ -100,6 +175,16 @@ const SEC = () => {
           company={selectedCompany}
           onClose={() => setSelectedCompany(null)}
         />
+        {/* Auth Link for non-authenticated users */}
+        {!user && (
+          <div className="fixed bottom-4 right-4 z-30">
+            <Link to="/auth">
+              <Button variant="outline" size="sm">
+                Admin Login
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </>
   );
