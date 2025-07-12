@@ -4,84 +4,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Mock blog data - replace with real data later
-const blogPosts = [
-  {
-    id: "why-cdi-needs-ai-now",
-    title: "Why CDI Needs AI Now",
-    excerpt: "AI is the lifeline for overworked CDI teams struggling to keep up. CDI teams face more charts, fewer staff, and ever-changing payer rules.",
-    date: "2024-02-01",
-    readTime: "2 min read",
-    category: "CDI",
-    featured: true,
-    image: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png"
-  },
-  {
-    id: "cdi-ai-opportunity",
-    title: "Manual Chart Review Overload in CDI: The AI Opportunity",
-    excerpt: "Discover how AI can revolutionize CDI by reducing manual burdens and boosting hospital revenue with compelling ROI data.",
-    date: "2024-01-25",
-    readTime: "6 min read",
-    category: "Healthcare Investment",
-    featured: false,
-    image: "/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png"
-  },
-  {
-    id: "ai-transform-cdi",
-    title: "How Will AI Transform CDI?",
-    excerpt: "AI isn't just enhancing Clinical Documentation Integrity — it's reshaping it. Explore the interactive journey of CDI transformation.",
-    date: "2024-01-20",
-    readTime: "12 min read",
-    category: "Healthcare AI",
-    featured: false,
-    image: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png"
-  },
-  {
-    id: "design-systems-at-scale",
-    title: "Building Design Systems at Scale",
-    excerpt: "How we created a unified design language across 50+ product teams and reduced design debt by 40%.",
-    date: "2024-01-15",
-    readTime: "8 min read",
-    category: "Design Systems",
-    featured: false,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "ai-ux-research",
-    title: "AI-Powered UX Research: The Future is Here",
-    excerpt: "Exploring how artificial intelligence is transforming user research methodologies and accelerating insights.",
-    date: "2024-01-10",
-    readTime: "6 min read",
-    category: "AI & Research",
-    featured: false,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "mobile-first-healthcare",
-    title: "Mobile-First Design in Healthcare",
-    excerpt: "Lessons learned from designing patient-centered mobile experiences in regulated environments.",
-    date: "2024-01-05",
-    readTime: "10 min read",
-    category: "Healthcare UX",
-    featured: false,
-    image: "/placeholder.svg"
-  },
-  {
-    id: "inclusive-design-practices",
-    title: "Inclusive Design: Beyond Accessibility",
-    excerpt: "Creating products that work for everyone, not just the majority. Real examples from enterprise software.",
-    date: "2023-12-28",
-    readTime: "7 min read",
-    category: "Inclusive Design",
-    featured: false,
-    image: "/placeholder.svg"
-  }
-];
+import { useEffect, useState } from "react";
+import { BlogService } from "@/services/blogService";
+import type { BlogPost } from "@/types/blog";
 
 const Blog = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const posts = await BlogService.getAllPublishedPosts();
+        setBlogPosts(posts);
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   const featuredPost = blogPosts.find(post => post.featured);
   const otherPosts = blogPosts.filter(post => !post.featured);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,15 +97,15 @@ const Blog = () => {
                     <div className="md:w-1/2 p-8">
                       <Badge className="mb-4">{featuredPost.category}</Badge>
                       <h2 className="text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
-                        {featuredPost.title}
+                        {featuredPost.hero_headline}
                       </h2>
                       <p className="text-muted-foreground mb-6 leading-relaxed">
-                        {featuredPost.excerpt}
+                        {featuredPost.hero_subhead}
                       </p>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {new Date(featuredPost.date).toLocaleDateString('en-US', { 
+                          {new Date(featuredPost.published_at || featuredPost.created_at).toLocaleDateString('en-US', { 
                             month: 'long', 
                             day: 'numeric', 
                             year: 'numeric' 
@@ -155,7 +113,7 @@ const Blog = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {featuredPost.readTime}
+                          {featuredPost.read_time ? `${featuredPost.read_time} min read` : 'Quick read'}
                         </div>
                       </div>
                       <div className="flex items-center text-primary font-medium group-hover:gap-3 transition-all">
@@ -198,22 +156,22 @@ const Blog = () => {
                     <CardContent className="p-6">
                       <Badge className="mb-3" variant="secondary">{post.category}</Badge>
                       <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-                        {post.title}
+                        {post.hero_headline}
                       </h3>
                       <p className="text-muted-foreground mb-4 leading-relaxed">
-                        {post.excerpt}
+                        {post.hero_subhead}
                       </p>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {new Date(post.date).toLocaleDateString('en-US', { 
+                          {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric' 
                           })}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {post.readTime}
+                          {post.read_time ? `${post.read_time} min read` : 'Quick read'}
                         </div>
                       </div>
                     </CardContent>
