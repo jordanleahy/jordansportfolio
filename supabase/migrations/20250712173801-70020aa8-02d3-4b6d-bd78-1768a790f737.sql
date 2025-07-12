@@ -1,0 +1,76 @@
+-- Insert the "Why CDI Needs AI Now" blog post with correct hero_subhead
+INSERT INTO public.blog_posts (
+  user_id,
+  slug,
+  status,
+  featured,
+  category,
+  tags,
+  hero_headline,
+  hero_subhead,
+  hero_image_url,
+  hero_badge,
+  intro_content,
+  visual_sections,
+  tldr_title,
+  tldr_bullets,
+  deep_dive_title,
+  deep_dive_content,
+  cta_text,
+  cta_url,
+  share_enabled,
+  meta_title,
+  meta_description,
+  meta_keywords,
+  published_at,
+  read_time,
+  word_count
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  'why-cdi-needs-ai-now',
+  'published',
+  true,
+  'CDI',
+  ARRAY['AI', 'Healthcare', 'CDI', 'Automation'],
+  'Why CDI Needs AI Now',
+  'AI is the lifeline for overworked CDI teams struggling to keep up',
+  '/lovable-uploads/b040919d-eb34-428f-ba71-3ee1aba6596b.png',
+  'NEW',
+  'CDI teams face more charts, fewer staff, and ever-changing payer rules. AI can''t replace clinical expertise—but it can prioritize urgent cases, reduce manual audits, and help hospitals capture accurate revenue.',
+  '[
+    {
+      "headline": "The Pressure Is Real",
+      "content": "Hospitals are flooded with documentation. CDI teams must review thousands of charts weekly—yet many are short-staffed and navigating shifting payer criteria. Manual processes can''t scale. Missed DRGs cost revenue. Query delays slow billing. And accuracy? It suffers. The current workload is unsustainable without automation support.",
+      "image_url": "/lovable-uploads/8558410b-841e-412e-a8ce-ef6084e9a684.png",
+      "cta_text": "Learn More",
+      "cta_url": "#pressure"
+    },
+    {
+      "headline": "AI Can Triage and Prioritize",
+      "content": "Imagine AI flagging charts likely to contain missed MCCs or DRG shifts. Trained on historical data, AI tools surface high-impact cases for review. This makes CDI teams faster, smarter, and more focused. AI enables proactive, high-value chart selection instead of reactive manual review processes.",
+      "image_url": "/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png",
+      "cta_text": "Try This Now",
+      "cta_url": "#ai-triage"
+    },
+    {
+      "headline": "It''s Not About Replacing Humans",
+      "content": "AI doesn''t decide—people do. But AI organizes data, identifies gaps, and aligns chart details with payer rules. It''s a fast, intelligent second set of eyes that frees CDSs to focus on what matters. AI helps clinicians do more with less, without replacing clinical judgment and expertise.",
+      "image_url": "/lovable-uploads/cd122851-7533-4359-91a4-37ade8b9c3b8.png",
+      "cta_text": "Explore Further",
+      "cta_url": "#human-focus"
+    }
+  ]'::jsonb,
+  'TL;DR',
+  '["📊 CDI teams face crushing chart volumes", "🔄 Manual audits can''t keep up with payer changes", "⚙️ AI helps prioritize high-impact cases", "👩‍⚕️ CDSs still validate—AI supports", "💰 Improved DRG accuracy = better revenue"]'::jsonb,
+  'Deep Dive: From Volume to Value',
+  'AI tools that surface documentation gaps or key indicators for complex diagnoses (e.g., respiratory failure or sepsis) shift the CDS role from scavenger to validator. This reduces burnout and increases throughput. Some hospitals report 30–40% time savings per case, enabling small teams to handle more cases accurately. AI helps move CDI from reactive review to proactive value generation.',
+  'Transform Your CDI Process',
+  'https://jordanleigh.dev/contact',
+  true,
+  'Why CDI Needs AI Now - Jordan Leigh',
+  'AI is the lifeline for overworked CDI teams struggling to keep up. Learn how AI can prioritize urgent cases, reduce manual audits, and help hospitals capture accurate revenue.',
+  ARRAY['CDI', 'Artificial Intelligence', 'Healthcare Technology', 'Clinical Documentation', 'Hospital Revenue', 'Medical AI'],
+  '2024-02-01T00:00:00Z',
+  2,
+  450
+);
