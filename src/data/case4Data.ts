@@ -2,8 +2,8 @@ import { CaseStudyData } from "@/types/caseStudy";
 
 export const case4Data: CaseStudyData = {
   // Hero Section
-  title: "Prior Authorization Eligibility",
-  description: "AI powered drug prior authorization workflow system that streamlined approval processes by automating formulary rule identification, medical requirements, and insurance communications.",
+  title: "Prior Authorization Workflow System: UX Case Study - Healthcare AI Automation",
+  description: "How I designed an AI-powered prior authorization system that reduced approval time from 3 weeks to 3 days, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
   heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
