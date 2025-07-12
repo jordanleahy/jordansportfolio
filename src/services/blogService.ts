@@ -88,6 +88,66 @@ export class BlogService {
     })) as unknown as BlogPost[];
   }
 
+  static async getNextBlogPost(currentSlug: string): Promise<BlogPost | null> {
+    // First get the current post's published_at date
+    const { data: currentPost, error: currentError } = await supabase
+      .from('blog_posts')
+      .select('published_at')
+      .eq('slug', currentSlug)
+      .eq('status', 'published')
+      .maybeSingle();
+
+    if (currentError || !currentPost) {
+      return null;
+    }
+
+    // Find the next published post after this one
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .eq('status', 'published')
+      .gt('published_at', currentPost.published_at)
+      .order('published_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to fetch next blog post:', error.message);
+      return null;
+    }
+
+    // If no next post found, get the first (oldest) published post
+    if (!data) {
+      const { data: firstPost, error: firstError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (firstError || !firstPost) {
+        return null;
+      }
+
+      return {
+        ...firstPost,
+        visual_sections: firstPost.visual_sections as unknown as VisualSection[],
+        tldr_bullets: firstPost.tldr_bullets as unknown as string[],
+        meta_keywords: firstPost.meta_keywords as unknown as string[] | undefined,
+        tags: firstPost.tags as unknown as string[] | undefined
+      } as unknown as BlogPost;
+    }
+
+    return {
+      ...data,
+      visual_sections: data.visual_sections as unknown as VisualSection[],
+      tldr_bullets: data.tldr_bullets as unknown as string[],
+      meta_keywords: data.meta_keywords as unknown as string[] | undefined,
+      tags: data.tags as unknown as string[] | undefined
+    } as unknown as BlogPost;
+  }
+
   static async createPost(postInput: BlogPostInput): Promise<BlogPost> {
     // Validate input
     const validatedPost = BlogPostSchema.parse(postInput);

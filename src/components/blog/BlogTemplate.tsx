@@ -1,4 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect } from "react";
 import { BlogPost } from "@/types/blog";
 import { BlogHero } from "./BlogHero";
 import { BlogIntro } from "./BlogIntro";
@@ -6,10 +7,12 @@ import { BlogVisualSection } from "./BlogVisualSection";
 import { BlogTLDR } from "./BlogTLDR";
 import { BlogDeepDive } from "./BlogDeepDive";
 import { BlogCTAShare } from "./BlogCTAShare";
+import { BlogNextPost } from "./BlogNextPost";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2, BookmarkPlus, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { BlogService } from "@/services/blogService";
 
 interface BlogTemplateProps {
   post: BlogPost;
@@ -18,12 +21,27 @@ interface BlogTemplateProps {
 
 export const BlogTemplate = ({ post, className = "" }: BlogTemplateProps) => {
   const { scrollYProgress } = useScroll();
+  const [nextPost, setNextPost] = useState<BlogPost | null>(null);
   
   // Reading progress bar
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   
   // Parallax effect for hero
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
+
+  // Fetch next blog post
+  useEffect(() => {
+    const fetchNextPost = async () => {
+      try {
+        const next = await BlogService.getNextBlogPost(post.slug);
+        setNextPost(next);
+      } catch (error) {
+        console.error('Failed to fetch next post:', error);
+      }
+    };
+
+    fetchNextPost();
+  }, [post.slug]);
 
   const handleHeroClick = () => {
     const introElement = document.getElementById('blog-intro');
@@ -151,6 +169,9 @@ export const BlogTemplate = ({ post, className = "" }: BlogTemplateProps) => {
           title={post.meta_title}
           url={window.location.href}
         />
+
+        {/* 7. Next Blog Post Preview */}
+        <BlogNextPost nextPost={nextPost} />
       </article>
 
       {/* Article Schema.org JSON-LD */}
