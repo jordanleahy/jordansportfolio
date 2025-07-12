@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { ProcessStep } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface ProcessSectionProps {
   title: string;
@@ -60,9 +61,10 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                     </div>
                     {step.image && (
                       <div className="mb-4 md:mb-0 md:w-80 md:flex-shrink-0 md:order-2">
-                        <img 
+                        <OptimizedImage 
                           src={step.image} 
                           alt={`${step.title} illustration`}
+                          aspectRatio="4/3"
                           className="w-full rounded-lg shadow-lg"
                         />
                       </div>
