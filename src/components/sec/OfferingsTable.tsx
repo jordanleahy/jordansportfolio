@@ -205,8 +205,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 offerings.map((offering: any) => (
                   <TableRow 
                     key={offering.accessionnumber}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => onCompanySelect(offering)}
+                    className="hover:bg-muted/50"
                   >
                     <TableCell className="font-medium">
                       <div>
