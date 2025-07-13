@@ -59,7 +59,7 @@ const HeroSection = () => {
             asChild
           >
             <motion.a
-              href="/resume.pdf"
+              href="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//2025_Jordan%20Leahy%20Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
