@@ -16,13 +16,10 @@ export class SecService {
     page = 1, 
     pageSize = 50
   ): Promise<PaginatedResponse<any>> {
+    // Build the base query without joins first
     let query = supabase
       .from('offerings')
-      .select(`
-        *,
-        issuers(*),
-        formd_submission(*)
-      `)
+      .select('*', { count: 'exact' })
       .order('sale_date', { ascending: false });
 
     // Apply filters
@@ -50,35 +47,75 @@ export class SecService {
       query = query.in('industrygrouptype', filters.industries);
     }
 
-    // Search across multiple fields
     if (filters.searchQuery) {
-      const searchTerm = `%${filters.searchQuery}%`;
-      query = query.or(`
-        issuers.entityname.ilike.${searchTerm},
-        issuers.cik.ilike.${searchTerm},
-        accessionnumber.ilike.${searchTerm}
-      `);
+      query = query.or(`industrygrouptype.ilike.%${filters.searchQuery}%,descriptionofothertype.ilike.%${filters.searchQuery}%`);
     }
-
-    // Get total count for pagination
-    const { count } = await supabase
-      .from('offerings')
-      .select('*', { count: 'exact', head: true });
 
     // Apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
-    const { data, error } = await query.range(from, to);
+    const { data: offerings, error, count } = await query.range(from, to);
 
     if (error) {
       console.error('Error fetching offerings:', error);
       throw new Error(`Failed to fetch offerings: ${error.message}`);
     }
 
+    if (!offerings || offerings.length === 0) {
+      return {
+        data: [],
+        count: 0,
+        total: count || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      };
+    }
+
+    // Manually fetch related data for each offering
+    const accessionnumbers = offerings.map(o => o.accessionnumber);
+    
+    // Get all issuers for these offerings
+    const { data: allIssuers } = await supabase
+      .from('issuers')
+      .select('*')
+      .in('accessionnumber', accessionnumbers);
+
+    // Get all signatures for these offerings
+    const { data: allSignatures } = await supabase
+      .from('signatures')
+      .select('*')
+      .in('accessionnumber', accessionnumbers);
+
+    // Group the related data by accessionnumber
+    const issuersByAccessionnumber = new Map();
+    const signaturesByAccessionnumber = new Map();
+
+    allIssuers?.forEach(issuer => {
+      if (!issuersByAccessionnumber.has(issuer.accessionnumber)) {
+        issuersByAccessionnumber.set(issuer.accessionnumber, []);
+      }
+      issuersByAccessionnumber.get(issuer.accessionnumber).push(issuer);
+    });
+
+    allSignatures?.forEach(signature => {
+      if (!signaturesByAccessionnumber.has(signature.accessionnumber)) {
+        signaturesByAccessionnumber.set(signature.accessionnumber, []);
+      }
+      signaturesByAccessionnumber.get(signature.accessionnumber).push(signature);
+    });
+
+    // Combine the data
+    const enrichedOfferings = offerings.map(offering => ({
+      ...offering,
+      issuers: issuersByAccessionnumber.get(offering.accessionnumber) || [],
+      signatures: signaturesByAccessionnumber.get(offering.accessionnumber) || []
+    }));
+
     return {
-      data: data || [],
-      count: data?.length || 0,
+      data: enrichedOfferings,
+      count: enrichedOfferings.length,
       total: count || 0,
       page,
       pageSize,
@@ -88,16 +125,10 @@ export class SecService {
 
   // Get single offering with all details
   static async getOfferingDetail(accessionnumber: string): Promise<any | null> {
-    const { data, error } = await supabase
+    // Get the main offering
+    const { data: offering, error } = await supabase
       .from('offerings')
-      .select(`
-        *,
-        issuers(*),
-        signatures(*),
-        related_persons(*),
-        recipients(*),
-        formd_submission(*)
-      `)
+      .select('*')
       .eq('accessionnumber', accessionnumber)
       .maybeSingle();
 
@@ -106,7 +137,33 @@ export class SecService {
       throw new Error(`Failed to fetch offering detail: ${error.message}`);
     }
 
-    return data;
+    if (!offering) {
+      return null;
+    }
+
+    // Get related data manually
+    const [
+      { data: issuers },
+      { data: signatures },
+      { data: relatedPersons },
+      { data: recipients },
+      { data: formSubmission }
+    ] = await Promise.all([
+      supabase.from('issuers').select('*').eq('accessionnumber', accessionnumber),
+      supabase.from('signatures').select('*').eq('accessionnumber', accessionnumber),
+      supabase.from('related_persons').select('*').eq('accessionnumber', accessionnumber),
+      supabase.from('recipients').select('*').eq('accessionnumber', accessionnumber),
+      supabase.from('formd_submission').select('*').eq('accessionnumber', accessionnumber).maybeSingle()
+    ]);
+
+    return {
+      ...offering,
+      issuers: issuers || [],
+      signatures: signatures || [],
+      related_persons: relatedPersons || [],
+      recipients: recipients || [],
+      formd_submission: formSubmission
+    };
   }
 
   // Get distinct industries for filter dropdown
