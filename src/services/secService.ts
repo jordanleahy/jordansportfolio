@@ -206,11 +206,12 @@ export class SecService {
         return isNaN(num) ? 0 : num;
       };
 
-      // More efficient query - only get what we need and filter at database level
+      // More efficient query - get ALL data since it only changes quarterly
       const { data: offeringsData, error } = await supabase
         .from('offerings')
         .select('totalofferingamount, sale_date, industrygrouptype')
-        .not('totalofferingamount', 'is', null);
+        .not('totalofferingamount', 'is', null)
+        .limit(10000); // Ensure we get all data - increase if needed
 
       if (error) {
         console.error('Database error:', error);
