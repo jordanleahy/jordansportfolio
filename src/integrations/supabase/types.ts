@@ -358,6 +358,7 @@ export type Database = {
           grossproceedsused_clarofresp: string | null
           grossproceedsused_dollaramount: number | null
           grossproceedsused_isestimate: boolean | null
+          hasnonaccreditedinvestors: boolean | null
           industrygrouptype: string | null
           investmentfundtype: string | null
           is40act: boolean | null
@@ -373,13 +374,16 @@ export type Database = {
           istenantincommontype: boolean | null
           minimuminvestmentaccepted: number | null
           morethanoneyear: boolean | null
+          numbernonaccreditedinvestors: number | null
           over100recipientflag: boolean | null
           previousaccessionnumber: string | null
           revenuerange: string | null
           sale_date: string | null
+          salesamtclarificationofresp: string | null
           salescomm_dollaramount: number | null
           salescomm_isestimate: boolean | null
           totalamountsold: number | null
+          totalnumberalreadyinvested: number | null
           totalofferingamount: number | null
           totalremaining: number | null
           updated_at: string
@@ -399,6 +403,7 @@ export type Database = {
           grossproceedsused_clarofresp?: string | null
           grossproceedsused_dollaramount?: number | null
           grossproceedsused_isestimate?: boolean | null
+          hasnonaccreditedinvestors?: boolean | null
           industrygrouptype?: string | null
           investmentfundtype?: string | null
           is40act?: boolean | null
@@ -414,13 +419,16 @@ export type Database = {
           istenantincommontype?: boolean | null
           minimuminvestmentaccepted?: number | null
           morethanoneyear?: boolean | null
+          numbernonaccreditedinvestors?: number | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
           sale_date?: string | null
+          salesamtclarificationofresp?: string | null
           salescomm_dollaramount?: number | null
           salescomm_isestimate?: boolean | null
           totalamountsold?: number | null
+          totalnumberalreadyinvested?: number | null
           totalofferingamount?: number | null
           totalremaining?: number | null
           updated_at?: string
@@ -440,6 +448,7 @@ export type Database = {
           grossproceedsused_clarofresp?: string | null
           grossproceedsused_dollaramount?: number | null
           grossproceedsused_isestimate?: boolean | null
+          hasnonaccreditedinvestors?: boolean | null
           industrygrouptype?: string | null
           investmentfundtype?: string | null
           is40act?: boolean | null
@@ -455,13 +464,16 @@ export type Database = {
           istenantincommontype?: boolean | null
           minimuminvestmentaccepted?: number | null
           morethanoneyear?: boolean | null
+          numbernonaccreditedinvestors?: number | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
           sale_date?: string | null
+          salesamtclarificationofresp?: string | null
           salescomm_dollaramount?: number | null
           salescomm_isestimate?: boolean | null
           totalamountsold?: number | null
+          totalnumberalreadyinvested?: number | null
           totalofferingamount?: number | null
           totalremaining?: number | null
           updated_at?: string
