@@ -198,39 +198,6 @@ const SEC = () => {
           </div>
         </div>
 
-        {/* Quick Reports */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-sm font-medium text-muted-foreground">Quick Reports:</h3>
-            {!isCurrentlyTechReport ? (
-              <Button 
-                onClick={handleApplyTechReport}
-                variant="default"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Tech Companies Under $5M
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Tech Report Active
-                </Badge>
-                <Button 
-                  onClick={handleClearTechReport}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  Clear
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* Summary Cards */}
         <div className="container mx-auto px-4 py-6">
