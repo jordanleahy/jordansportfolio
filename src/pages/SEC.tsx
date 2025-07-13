@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Filter, X } from "lucide-react";
+import { Filter, X, TrendingUp, RotateCcw } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,8 @@ import { OfferingsTable } from "@/components/sec/OfferingsTable";
 import { FilterSidebar } from "@/components/sec/FilterSidebar";
 import { CompanyModal } from "@/components/sec/CompanyModal";
 import { DateRangePicker } from "@/components/sec/DateRangePicker";
+import { Badge } from "@/components/ui/badge";
+import { startOfQuarter, subQuarters, endOfQuarter } from "date-fns";
 
 const SEC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -29,7 +31,54 @@ const SEC = () => {
     amountRange: [0, 100000000] as [number, number],
     searchQuery: ""
   });
+  const [activeTechReport, setActiveTechReport] = useState(false);
   const { toast } = useToast();
+
+  // Tech report preset configuration
+  const techReportConfig = {
+    industries: ["Other Technology", "Biotechnology", "Computers", "Telecommunications"],
+    amountRange: [0, 5000000] as [number, number],
+    searchQuery: ""
+  };
+
+  const techReportDateRange = {
+    from: startOfQuarter(subQuarters(new Date(), 1)), // Previous quarter start
+    to: endOfQuarter(new Date()) // Current quarter end
+  };
+
+  const handleApplyTechReport = () => {
+    setFilters(techReportConfig);
+    setDateRange(techReportDateRange);
+    setActiveTechReport(true);
+    toast({
+      title: "Tech Report Applied",
+      description: "Showing tech companies that raised under $5M in the last 2 quarters.",
+    });
+  };
+
+  const handleClearTechReport = () => {
+    setFilters({
+      industries: [],
+      amountRange: [0, 100000000],
+      searchQuery: ""
+    });
+    setDateRange({
+      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      to: new Date()
+    });
+    setActiveTechReport(false);
+    toast({
+      title: "Filters Cleared",
+      description: "Tech report has been cleared. Showing all data.",
+    });
+  };
+
+  // Check if current filters match tech report
+  const isCurrentlyTechReport = activeTechReport || (
+    JSON.stringify(filters.industries.sort()) === JSON.stringify(techReportConfig.industries.sort()) &&
+    filters.amountRange[0] === techReportConfig.amountRange[0] &&
+    filters.amountRange[1] === techReportConfig.amountRange[1]
+  );
 
   // Auth state management
   useEffect(() => {
@@ -135,11 +184,48 @@ const SEC = () => {
                       filters={filters}
                       onFiltersChange={setFilters}
                       onClose={() => setIsFilterOpen(false)}
+                      activeTechReport={isCurrentlyTechReport}
+                      onApplyTechReport={handleApplyTechReport}
+                      onClearTechReport={handleClearTechReport}
                     />
                   </SheetContent>
                 </Sheet>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Quick Reports */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Quick Reports:</h3>
+            {!isCurrentlyTechReport ? (
+              <Button 
+                onClick={handleApplyTechReport}
+                variant="default"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Tech Companies Under $5M
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Tech Report Active
+                </Badge>
+                <Button 
+                  onClick={handleClearTechReport}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Clear
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -156,6 +242,9 @@ const SEC = () => {
               <FilterSidebar 
                 filters={filters}
                 onFiltersChange={setFilters}
+                activeTechReport={isCurrentlyTechReport}
+                onApplyTechReport={handleApplyTechReport}
+                onClearTechReport={handleClearTechReport}
               />
             </div>
 
