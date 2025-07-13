@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Building2, DollarSign, Calendar } from "lucide-react";
-import { useSummaryStats } from "@/hooks/useSecQueries";
+import { useSummaryStats, useInvalidateSecQueries } from "@/hooks/useSecQueries";
 
 interface SummaryCardsProps {
   filters: any;
 }
 
 export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
-  const { data: summaryData, isLoading, error } = useSummaryStats();
+  const { data: summaryData, isLoading, error, refetch } = useSummaryStats();
+  const { invalidateSummaryStats } = useInvalidateSecQueries();
+
+  // Force refresh on mount to clear any stale cache
+  useEffect(() => {
+    invalidateSummaryStats();
+    refetch();
+  }, [invalidateSummaryStats, refetch]);
 
   // Default to zeros if no data
   const stats = {
