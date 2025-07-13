@@ -109,13 +109,37 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-32" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-10 w-full sm:w-80" />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {[...Array(5)].map((_, i) => (
+                      <TableHead key={i}>
+                        <Skeleton className="h-4 w-24" />
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(8)].map((_, i) => (
+                    <TableRow key={i}>
+                      {[...Array(5)].map((_, j) => (
+                        <TableCell key={j}>
+                          <Skeleton className="h-4 w-full" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>

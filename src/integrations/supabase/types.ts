@@ -745,6 +745,10 @@ export type Database = {
       }
     }
     Functions: {
+      refresh_offerings_view: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       validate_tldr_bullets: {
         Args: { bullets: Json }
         Returns: boolean
