@@ -32,6 +32,9 @@ export class SecService {
     page = 1, 
     pageSize = 50
   ): Promise<PaginatedResponse<any>> {
+    console.log('🔍 DEBUG: Starting getOfferings with filters:', filters);
+    console.log('🔍 DEBUG: Page:', page, 'PageSize:', pageSize);
+    
     // Build the base query - use simple select first, then join manually
     let query = supabase
       .from('offerings')
@@ -39,6 +42,8 @@ export class SecService {
 
     // Apply default filters if enabled
     if (filters.useDefaultFilters) {
+      console.log('🔍 DEBUG: Applying default filters (tech + fully raised)');
+      
       // 1. Technology/Computer industry filter
       query = query.or('industrygrouptype.ilike.%Technology%,industrygrouptype.ilike.%Computer%');
       
@@ -100,12 +105,25 @@ export class SecService {
     
     const { data: offerings, error, count } = await query.range(from, to);
 
+    console.log('🔍 DEBUG: Initial DB query results:');
+    console.log('  - Error:', error);
+    console.log('  - Count:', count);
+    console.log('  - Offerings length:', offerings?.length || 0);
+    console.log('  - Sample offering:', offerings?.[0] ? {
+      accessionnumber: offerings[0].accessionnumber,
+      industrygrouptype: offerings[0].industrygrouptype,
+      totalofferingamount: offerings[0].totalofferingamount,
+      totalamountsold: offerings[0].totalamountsold,
+      totalremaining: offerings[0].totalremaining
+    } : 'No offerings found');
+
     if (error) {
       console.error('Error fetching offerings:', error);
       throw new Error(`Failed to fetch offerings: ${error.message}`);
     }
 
     if (!offerings || offerings.length === 0) {
+      console.log('🔍 DEBUG: No offerings found from initial query - returning empty result');
       return {
         data: [],
         count: 0,
@@ -139,6 +157,12 @@ export class SecService {
         .in('accessionnumber', accessionnumbers)
     ]);
 
+    console.log('🔍 DEBUG: Related data fetched:');
+    console.log('  - Issuers data error:', issuersData.error);
+    console.log('  - Issuers count:', issuersData.data?.length || 0);
+    console.log('  - Signatures data error:', signaturesData.error);
+    console.log('  - Signatures count:', signaturesData.data?.length || 0);
+
     // Manually join the data
     const enrichedOfferings = offerings.map(offering => ({
       ...offering,
@@ -146,10 +170,40 @@ export class SecService {
       signatures: signaturesData.data?.filter(s => s.accessionnumber === offering.accessionnumber) || []
     }));
 
+    console.log('🔍 DEBUG: After manual joins:');
+    console.log('  - Enriched offerings count:', enrichedOfferings.length);
+    console.log('  - Sample enriched offering:', enrichedOfferings[0] ? {
+      accessionnumber: enrichedOfferings[0].accessionnumber,
+      hasIssuers: enrichedOfferings[0].issuers.length > 0,
+      hasSignatures: enrichedOfferings[0].signatures.length > 0,
+      issuerName: enrichedOfferings[0].issuers[0]?.entityname || 'No issuer'
+    } : 'No enriched offerings');
+
     // Apply filters
     let filteredOfferings = enrichedOfferings;
     
     if (filters.useDefaultFilters) {
+      console.log('🔍 DEBUG: Applying client-side default filters');
+      
+      // Debug each offering before filtering
+      console.log('🔍 DEBUG: Sample offerings before filtering:');
+      enrichedOfferings.slice(0, 3).forEach((offering, idx) => {
+        const hasIssuer = offering.issuers.length > 0;
+        const isFullyRaised = offering.totalremaining === 0 || 
+          (offering.totalamountsold && offering.totalofferingamount && 
+           offering.totalamountsold >= offering.totalofferingamount);
+        
+        console.log(`  Offering ${idx + 1}:`, {
+          accessionnumber: offering.accessionnumber,
+          hasIssuer,
+          isFullyRaised,
+          totalremaining: offering.totalremaining,
+          totalamountsold: offering.totalamountsold,
+          totalofferingamount: offering.totalofferingamount,
+          passesFilter: hasIssuer && isFullyRaised
+        });
+      });
+      
       filteredOfferings = filteredOfferings.filter(offering => {
         // Must have issuer data
         const hasIssuer = offering.issuers.length > 0;
@@ -161,9 +215,17 @@ export class SecService {
         
         return hasIssuer && isFullyRaised;
       });
+      
+      console.log('🔍 DEBUG: After client-side filtering:');
+      console.log('  - Filtered offerings count:', filteredOfferings.length);
+      console.log('  - Filter reduction:', enrichedOfferings.length - filteredOfferings.length, 'offerings removed');
     }
     
     const finalOfferings = filteredOfferings;
+    
+    console.log('🔍 DEBUG: Final result:');
+    console.log('  - Final offerings count:', finalOfferings.length);
+    console.log('  - Returning to UI...');
 
     return {
       data: finalOfferings,
