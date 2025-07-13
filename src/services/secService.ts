@@ -194,7 +194,7 @@ export class SecService {
     return industries.filter(Boolean);
   }
 
-  // Get summary statistics with improved data parsing
+  // Get summary statistics with improved data parsing and performance
   static async getSummaryStats(): Promise<SecSummaryStats> {
     try {
       // Parse numeric amounts safely, excluding 'Indefinite' and other non-numeric values
@@ -206,51 +206,56 @@ export class SecService {
         return isNaN(num) ? 0 : num;
       };
 
-      // Direct calculation - no RPC needed since we handle data parsing
+      // More efficient query - only get what we need and filter at database level
       const { data: offeringsData, error } = await supabase
         .from('offerings')
-        .select('totalofferingamount, sale_date, industrygrouptype');
+        .select('totalofferingamount, sale_date, industrygrouptype')
+        .not('totalofferingamount', 'is', null);
 
       if (error) {
+        console.error('Database error:', error);
         throw error;
       }
 
-      const validOfferings = offeringsData.filter(item => item.totalofferingamount);
-      const numericOfferings = validOfferings.filter(item => parseAmount(item.totalofferingamount) > 0);
+      console.log('Total rows from DB:', offeringsData?.length || 0);
+      
+      // Filter for numeric offerings more efficiently
+      const numericOfferings = offeringsData?.filter(item => {
+        const amount = parseAmount(item.totalofferingamount);
+        return amount > 0;
+      }) || [];
+      
+      console.log('Valid numeric offerings:', numericOfferings.length);
       
       const totalOfferings = numericOfferings.length;
       const totalAmount = numericOfferings.reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
       const averageAmount = totalOfferings > 0 ? totalAmount / totalOfferings : 0;
 
-      // This month's data
+      // This month's data - more efficient filtering
       const thisMonth = new Date();
       thisMonth.setDate(1);
       const thisMonthStr = thisMonth.toISOString().split('T')[0];
       
-      const thisMonthOfferings = validOfferings.filter(item => 
+      const thisMonthData = numericOfferings.filter(item => 
         item.sale_date && item.sale_date >= thisMonthStr
-      ).length;
+      );
       
-      const thisMonthAmount = validOfferings
-        .filter(item => item.sale_date && item.sale_date >= thisMonthStr)
-        .reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
+      const thisMonthOfferings = thisMonthData.length;
+      const thisMonthAmount = thisMonthData.reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
 
-      // Top industries calculation
+      // Top industries calculation - use Map for better performance
       const industryMap = new Map<string, { count: number; totalAmount: number }>();
       
-      validOfferings.forEach(item => {
+      numericOfferings.forEach(item => {
         if (!item.industrygrouptype) return;
         
         const industry = item.industrygrouptype;
         const amount = parseAmount(item.totalofferingamount);
         
-        if (!industryMap.has(industry)) {
-          industryMap.set(industry, { count: 0, totalAmount: 0 });
-        }
-        
-        const current = industryMap.get(industry)!;
+        const current = industryMap.get(industry) || { count: 0, totalAmount: 0 };
         current.count++;
         current.totalAmount += amount;
+        industryMap.set(industry, current);
       });
 
       const topIndustries: IndustryStats[] = Array.from(industryMap.entries())
@@ -263,7 +268,7 @@ export class SecService {
         .sort((a, b) => b.totalAmount - a.totalAmount)
         .slice(0, 5);
 
-      return {
+      const result = {
         totalOfferings,
         totalAmount,
         averageAmount,
@@ -271,6 +276,9 @@ export class SecService {
         thisMonthAmount,
         topIndustries
       };
+
+      console.log('Summary stats result:', result);
+      return result;
     } catch (error: any) {
       console.error('Error fetching summary stats:', error);
       throw new Error(`Failed to fetch summary statistics: ${error.message}`);
