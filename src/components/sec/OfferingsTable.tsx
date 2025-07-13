@@ -184,11 +184,11 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                     <TableCell className="font-medium">
                       <div>
                         <div className="font-semibold">
-                          {offering.issuer?.entityname || 'Unknown Company'}
+                          {offering.issuers?.[0]?.entityname || 'Unknown Company'}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {offering.issuer?.city && offering.issuer?.stateorcountrydescription 
-                            ? `${offering.issuer.city}, ${offering.issuer.stateorcountrydescription}`
+                          {offering.issuers?.[0]?.city && offering.issuers?.[0]?.stateorcountrydescription 
+                            ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}`
                             : 'Location not specified'
                           }
                         </div>
