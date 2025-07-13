@@ -48,13 +48,6 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
       trend: stats.totalAmount > 0 ? "Real SEC data" : "No data available"
     },
     {
-      title: "This Month",
-      value: stats.thisMonthOfferings.toLocaleString(),
-      icon: TrendingUp,
-      description: "New filings this month",
-      trend: stats.thisMonthOfferings > 0 ? "Real SEC data" : "No data available"
-    },
-    {
       title: "Average Raise",
       value: formatCurrency(stats.averageAmount),
       icon: Calendar,
@@ -65,8 +58,8 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-4 w-20" />
@@ -83,7 +76,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {cards.map((card, index) => {
         const Icon = card.icon;
         return (
