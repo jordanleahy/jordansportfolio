@@ -42,12 +42,13 @@ export class SecService {
       // 1. Technology/Computer industry filter
       query = query.or('industrygrouptype.ilike.%Technology%,industrygrouptype.ilike.%Computer%');
       
-      // 2. Fully raised filter (amount sold >= offering amount OR remaining = 0)
+      // 2. Ensure we have the required fields for "fully raised" filter
       query = query
-        .filter('totalofferingamount', 'not.eq', 'Indefinite')
         .filter('totalofferingamount', 'not.is', null)
-        .filter('totalamountsold', 'not.is', null)
-        .or('totalremaining.eq.0,totalamountsold.gte.totalofferingamount');
+        .filter('totalamountsold', 'not.is', null);
+        
+      // 3. Apply "fully raised" filter using a simpler approach
+      // Note: We'll apply this filter client-side for now due to Supabase query complexity
     }
 
     // Apply sorting - handle special cases for related table sorting
@@ -143,10 +144,24 @@ export class SecService {
       signatures: signaturesData.data?.filter(s => s.accessionnumber === offering.accessionnumber) || []
     }));
 
-    // Filter out offerings without US issuers when using default filters
-    const finalOfferings = filters.useDefaultFilters 
-      ? enrichedOfferings.filter(offering => offering.issuers.length > 0)
-      : enrichedOfferings;
+    // Apply filters
+    let filteredOfferings = enrichedOfferings;
+    
+    if (filters.useDefaultFilters) {
+      filteredOfferings = filteredOfferings.filter(offering => {
+        // Must have US issuers
+        const hasUSIssuer = offering.issuers.length > 0;
+        
+        // Must be "fully raised" - amount sold >= offering amount OR remaining = 0
+        const isFullyRaised = offering.totalremaining === 0 || 
+          (offering.totalamountsold && offering.totalofferingamount && 
+           offering.totalamountsold >= offering.totalofferingamount);
+        
+        return hasUSIssuer && isFullyRaised;
+      });
+    }
+    
+    const finalOfferings = filteredOfferings;
 
     return {
       data: finalOfferings,
