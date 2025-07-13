@@ -234,16 +234,6 @@ const SEC = () => {
           company={selectedCompany}
           onClose={() => setSelectedCompany(null)}
         />
-        {/* Auth Link for non-authenticated users */}
-        {!user && (
-          <div className="fixed bottom-4 right-4 z-30">
-            <Link to="/auth">
-              <Button variant="outline" size="sm">
-                Admin Login
-              </Button>
-            </Link>
-          </div>
-        )}
       </div>
     </>
   );
