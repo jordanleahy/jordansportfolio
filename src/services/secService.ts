@@ -184,15 +184,16 @@ export class SecService {
     return industries.filter(Boolean);
   }
 
-  // Get summary statistics with optimized query
+  // Get summary statistics with improved data parsing
   static async getSummaryStats(): Promise<SecSummaryStats> {
     try {
-      // Parse numeric amounts safely
+      // Parse numeric amounts safely, excluding 'Indefinite' and other non-numeric values
       const parseAmount = (amount: any): number => {
         if (!amount) return 0;
-        const str = String(amount).toLowerCase();
-        if (str === 'indefinite' || str === 'unlimited' || isNaN(Number(amount))) return 0;
-        return Number(amount);
+        const str = String(amount).toLowerCase().trim();
+        if (str === 'indefinite' || str === 'unlimited' || str === '') return 0;
+        const num = Number(amount);
+        return isNaN(num) ? 0 : num;
       };
 
       // Direct calculation - no RPC needed since we handle data parsing
@@ -205,8 +206,10 @@ export class SecService {
       }
 
       const validOfferings = offeringsData.filter(item => item.totalofferingamount);
-      const totalOfferings = validOfferings.length;
-      const totalAmount = validOfferings.reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
+      const numericOfferings = validOfferings.filter(item => parseAmount(item.totalofferingamount) > 0);
+      
+      const totalOfferings = numericOfferings.length;
+      const totalAmount = numericOfferings.reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
       const averageAmount = totalOfferings > 0 ? totalAmount / totalOfferings : 0;
 
       // This month's data

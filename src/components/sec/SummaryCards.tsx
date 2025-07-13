@@ -34,10 +34,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
 
   const cards = [
     {
-      title: "Total Offerings",
+      title: "SEC Filings",
       value: stats.totalOfferings.toLocaleString(),
       icon: Building2,
-      description: "SEC filings tracked",
+      description: "Valid numeric filings",
       trend: stats.totalOfferings > 0 ? "Real SEC data" : "No data available"
     },
     {
