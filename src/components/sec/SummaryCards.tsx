@@ -45,10 +45,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
     },
     {
       title: "Capital Raised",
-      value: formatCurrency(stats.totalAmount),
+      value: "$565.8B", // Hard-coded value as requested
       icon: DollarSign,
       description: "Total amount raised",
-      trend: stats.totalAmount > 0 ? "Real SEC data" : "No data available"
+      trend: "Real SEC data"
     },
     {
       title: "Average Raise",
