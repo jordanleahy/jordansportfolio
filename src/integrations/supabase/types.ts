@@ -215,7 +215,7 @@ export type Database = {
           over100issuerflag: boolean | null
           over100personsflag: boolean | null
           schemaversion: string | null
-          sic_code: string | null
+          sic_code: number | null
           submissiontype: string | null
           testorlive: string | null
           updated_at: string
@@ -228,7 +228,7 @@ export type Database = {
           over100issuerflag?: boolean | null
           over100personsflag?: boolean | null
           schemaversion?: string | null
-          sic_code?: string | null
+          sic_code?: number | null
           submissiontype?: string | null
           testorlive?: string | null
           updated_at?: string
@@ -241,7 +241,7 @@ export type Database = {
           over100issuerflag?: boolean | null
           over100personsflag?: boolean | null
           schemaversion?: string | null
-          sic_code?: string | null
+          sic_code?: number | null
           submissiontype?: string | null
           testorlive?: string | null
           updated_at?: string
@@ -251,7 +251,7 @@ export type Database = {
       issuers: {
         Row: {
           accessionnumber: string
-          cik: string | null
+          cik: number | null
           city: string | null
           created_at: string
           edgar_previousname_1: string | null
@@ -279,7 +279,7 @@ export type Database = {
         }
         Insert: {
           accessionnumber: string
-          cik?: string | null
+          cik?: number | null
           city?: string | null
           created_at?: string
           edgar_previousname_1?: string | null
@@ -307,7 +307,7 @@ export type Database = {
         }
         Update: {
           accessionnumber?: string
-          cik?: string | null
+          cik?: number | null
           city?: string | null
           created_at?: string
           edgar_previousname_1?: string | null
@@ -374,7 +374,7 @@ export type Database = {
           istenantincommontype: boolean | null
           minimuminvestmentaccepted: number | null
           morethanoneyear: boolean | null
-          numbernonaccreditedinvestors: string | null
+          numbernonaccreditedinvestors: number | null
           over100recipientflag: boolean | null
           previousaccessionnumber: string | null
           revenuerange: string | null
@@ -383,7 +383,7 @@ export type Database = {
           salescomm_dollaramount: number | null
           salescomm_isestimate: boolean | null
           totalamountsold: number | null
-          totalnumberalreadyinvested: string | null
+          totalnumberalreadyinvested: number | null
           totalofferingamount: number | null
           totalremaining: number | null
           updated_at: string
@@ -419,7 +419,7 @@ export type Database = {
           istenantincommontype?: boolean | null
           minimuminvestmentaccepted?: number | null
           morethanoneyear?: boolean | null
-          numbernonaccreditedinvestors?: string | null
+          numbernonaccreditedinvestors?: number | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
@@ -428,7 +428,7 @@ export type Database = {
           salescomm_dollaramount?: number | null
           salescomm_isestimate?: boolean | null
           totalamountsold?: number | null
-          totalnumberalreadyinvested?: string | null
+          totalnumberalreadyinvested?: number | null
           totalofferingamount?: number | null
           totalremaining?: number | null
           updated_at?: string
@@ -464,7 +464,7 @@ export type Database = {
           istenantincommontype?: boolean | null
           minimuminvestmentaccepted?: number | null
           morethanoneyear?: boolean | null
-          numbernonaccreditedinvestors?: string | null
+          numbernonaccreditedinvestors?: number | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
@@ -473,7 +473,7 @@ export type Database = {
           salescomm_dollaramount?: number | null
           salescomm_isestimate?: boolean | null
           totalamountsold?: number | null
-          totalnumberalreadyinvested?: string | null
+          totalnumberalreadyinvested?: number | null
           totalofferingamount?: number | null
           totalremaining?: number | null
           updated_at?: string
@@ -492,7 +492,7 @@ export type Database = {
       recipients: {
         Row: {
           accessionnumber: string
-          associatedbdcrdnumber: string | null
+          associatedbdcrdnumber: number | null
           associatedbdname: string | null
           city: string | null
           created_at: string
@@ -500,7 +500,7 @@ export type Database = {
           foreignsolicitation: boolean | null
           id: string
           recipient_seq_key: number | null
-          recipientcrdnumber: string | null
+          recipientcrdnumber: number | null
           recipientname: string | null
           stateorcountry: string | null
           stateorcountrydescription: string | null
@@ -512,7 +512,7 @@ export type Database = {
         }
         Insert: {
           accessionnumber: string
-          associatedbdcrdnumber?: string | null
+          associatedbdcrdnumber?: number | null
           associatedbdname?: string | null
           city?: string | null
           created_at?: string
@@ -520,7 +520,7 @@ export type Database = {
           foreignsolicitation?: boolean | null
           id?: string
           recipient_seq_key?: number | null
-          recipientcrdnumber?: string | null
+          recipientcrdnumber?: number | null
           recipientname?: string | null
           stateorcountry?: string | null
           stateorcountrydescription?: string | null
@@ -532,7 +532,7 @@ export type Database = {
         }
         Update: {
           accessionnumber?: string
-          associatedbdcrdnumber?: string | null
+          associatedbdcrdnumber?: number | null
           associatedbdname?: string | null
           city?: string | null
           created_at?: string
@@ -540,7 +540,7 @@ export type Database = {
           foreignsolicitation?: boolean | null
           id?: string
           recipient_seq_key?: number | null
-          recipientcrdnumber?: string | null
+          recipientcrdnumber?: number | null
           recipientname?: string | null
           stateorcountry?: string | null
           stateorcountrydescription?: string | null
