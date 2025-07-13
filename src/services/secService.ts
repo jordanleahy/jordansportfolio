@@ -208,17 +208,33 @@ export class SecService {
         // Must have issuer data
         const hasIssuer = offering.issuers.length > 0;
         
-        // Must be "fully raised" - amount sold >= offering amount OR remaining = 0
-        const isFullyRaised = offering.totalremaining === 0 || 
-          (offering.totalamountsold && offering.totalofferingamount && 
-           offering.totalamountsold >= offering.totalofferingamount);
+        // Updated logic: Show companies that have SOME activity (not just fully raised)
+        // This includes companies that are actively raising OR have completed raising
+        const hasRaisingActivity = 
+          // Has made some progress (sold > 0) OR
+          (offering.totalamountsold && offering.totalamountsold > 0) ||
+          // Is fully raised (remaining = 0) OR  
+          offering.totalremaining === 0 ||
+          // Has a valid offering amount (showing intent to raise)
+          (offering.totalofferingamount && offering.totalofferingamount > 0);
         
-        return hasIssuer && isFullyRaised;
+        return hasIssuer && hasRaisingActivity;
       });
       
-      console.log('🔍 DEBUG: After client-side filtering:');
+      console.log('🔍 DEBUG: After client-side filtering (Updated Logic):');
       console.log('  - Filtered offerings count:', filteredOfferings.length);
       console.log('  - Filter reduction:', enrichedOfferings.length - filteredOfferings.length, 'offerings removed');
+      
+      // If still no results, let's try a more permissive filter for debugging
+      if (filteredOfferings.length === 0) {
+        console.log('🔍 DEBUG: No results with activity filter, trying permissive filter...');
+        filteredOfferings = enrichedOfferings.filter(offering => {
+          const hasIssuer = offering.issuers.length > 0;
+          const hasValidAmounts = offering.totalofferingamount && offering.totalofferingamount > 0;
+          return hasIssuer && hasValidAmounts;
+        });
+        console.log('🔍 DEBUG: Permissive filter results:', filteredOfferings.length);
+      }
     }
     
     const finalOfferings = filteredOfferings;
