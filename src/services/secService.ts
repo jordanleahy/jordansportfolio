@@ -37,6 +37,19 @@ export class SecService {
       .from('offerings')
       .select('*', { count: 'exact' });
 
+    // Apply default filters if enabled
+    if (filters.useDefaultFilters) {
+      // 1. Technology/Computer industry filter
+      query = query.or('industrygrouptype.ilike.%Technology%,industrygrouptype.ilike.%Computer%');
+      
+      // 2. Fully raised filter (amount sold >= offering amount OR remaining = 0)
+      query = query
+        .filter('totalofferingamount', 'not.eq', 'Indefinite')
+        .filter('totalofferingamount', 'not.is', null)
+        .filter('totalamountsold', 'not.is', null)
+        .or('totalremaining.eq.0,totalamountsold.gte.totalofferingamount');
+    }
+
     // Apply sorting - handle special cases for related table sorting
     if (filters.sortField && filters.sortDirection) {
       const sortField = getSortField(filters.sortField);
@@ -56,7 +69,7 @@ export class SecService {
       query = query.order('sale_date', { ascending: false });
     }
 
-    // Apply filters
+    // Apply user filters (these override defaults when specified)
 
     if (filters.industry) {
       query = query.eq('industrygrouptype', filters.industry);
@@ -105,11 +118,18 @@ export class SecService {
     // Now fetch related issuers and signatures for the offerings
     const accessionnumbers = offerings.map(o => o.accessionnumber);
     
+    let issuersQuery = supabase
+      .from('issuers')
+      .select('accessionnumber, entityname, city, stateorcountrydescription, stateorcountry')
+      .in('accessionnumber', accessionnumbers);
+
+    // 3. US companies filter for default view
+    if (filters.useDefaultFilters) {
+      issuersQuery = issuersQuery.or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountrydescription.ilike.%United States%');
+    }
+
     const [issuersData, signaturesData] = await Promise.all([
-      supabase
-        .from('issuers')
-        .select('accessionnumber, entityname, city, stateorcountrydescription')
-        .in('accessionnumber', accessionnumbers),
+      issuersQuery,
       supabase
         .from('signatures')
         .select('accessionnumber, nameofsigner')
@@ -123,9 +143,14 @@ export class SecService {
       signatures: signaturesData.data?.filter(s => s.accessionnumber === offering.accessionnumber) || []
     }));
 
+    // Filter out offerings without US issuers when using default filters
+    const finalOfferings = filters.useDefaultFilters 
+      ? enrichedOfferings.filter(offering => offering.issuers.length > 0)
+      : enrichedOfferings;
+
     return {
-      data: enrichedOfferings,
-      count: enrichedOfferings.length,
+      data: finalOfferings,
+      count: finalOfferings.length,
       total: count || 0,
       page,
       pageSize,

@@ -153,6 +153,7 @@ export interface OfferingFilters {
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   fullySold?: boolean; // Filter for companies where offering amount equals amount sold
+  useDefaultFilters?: boolean; // Apply default US tech companies that fully raised
 }
 
 // Pagination types

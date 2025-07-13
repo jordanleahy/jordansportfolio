@@ -24,8 +24,25 @@ const SEC = () => {
   const [filters, setFilters] = useState({
     industries: [] as string[],
     searchQuery: "",
-    fullySold: false
+    fullySold: false,
+    useDefaultFilters: true // Start with default view
   });
+  const [isDefaultView, setIsDefaultView] = useState(true);
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters({ ...newFilters, useDefaultFilters: false });
+    setIsDefaultView(false);
+  };
+
+  const handleResetToDefault = () => {
+    setFilters({
+      industries: [],
+      searchQuery: "",
+      fullySold: false,
+      useDefaultFilters: true
+    });
+    setIsDefaultView(true);
+  };
   const { toast } = useToast();
 
   // Auth state management
@@ -111,9 +128,22 @@ const SEC = () => {
                 <p className="text-muted-foreground mt-2">
                   Track offerings, capital raises, and company insights from SEC filings
                 </p>
+                {isDefaultView && (
+                  <div className="flex items-center gap-2 mt-3">
+                    <Badge variant="secondary" className="text-sm">
+                      Default View: US Tech Companies (Fully Raised)
+                    </Badge>
+                  </div>
+                )}
               </div>
               
               <div className="flex items-center gap-3">
+                {!isDefaultView && (
+                  <Button variant="outline" size="sm" onClick={handleResetToDefault}>
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset to Default
+                  </Button>
+                )}
                 {/* Mobile Filter Toggle */}
                 <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                   <SheetTrigger asChild>
@@ -125,9 +155,22 @@ const SEC = () => {
                   <SheetContent side="left" className="w-80">
                     <FilterSidebar 
                       filters={filters}
-                      onFiltersChange={setFilters}
+                      onFiltersChange={handleFiltersChange}
                       onClose={() => setIsFilterOpen(false)}
                     />
+                    {!isDefaultView && (
+                      <div className="mt-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleResetToDefault}
+                          className="w-full"
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Reset to Default View
+                        </Button>
+                      </div>
+                    )}
                   </SheetContent>
                 </Sheet>
               </div>
@@ -148,8 +191,21 @@ const SEC = () => {
             <div className="hidden lg:block w-80 flex-shrink-0">
               <FilterSidebar 
                 filters={filters}
-                onFiltersChange={setFilters}
+                onFiltersChange={handleFiltersChange}
               />
+              {!isDefaultView && (
+                <div className="mt-4 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleResetToDefault}
+                    className="w-full"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset to Default View
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Main Table */}
