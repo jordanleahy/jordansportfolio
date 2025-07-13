@@ -187,10 +187,35 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {offerings.length === 0 ? (
+              {error ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-red-500">
+                    <div>
+                      <p className="font-semibold">Error loading SEC offerings</p>
+                      <p className="text-sm mt-1">{error.message}</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => window.location.reload()}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : offerings.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No SEC offerings found. Import data to get started.
+                    <div>
+                      <p className="font-semibold">No SEC offerings found</p>
+                      <p className="text-sm mt-1">
+                        {filters.useDefaultFilters 
+                          ? "No US tech companies with fully raised funding found. Try adjusting your filters."
+                          : "Import data or adjust your search criteria to see results."
+                        }
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (

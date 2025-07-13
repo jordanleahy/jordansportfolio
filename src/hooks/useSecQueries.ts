@@ -23,8 +23,18 @@ export const useOfferings = (
   return useQuery({
     queryKey: secKeys.offeringsList(filters, page, pageSize),
     queryFn: () => SecService.getOfferings(filters, page, pageSize),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 2,
+    staleTime: 1000 * 60 * 2, // 2 minutes for faster updates
+    retry: (failureCount, error: any) => {
+      // Log errors for debugging
+      console.error(`Query failed (attempt ${failureCount + 1}):`, error);
+      
+      // Don't retry server errors, but retry network issues
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('network')) {
+        return failureCount < 3;
+      }
+      return failureCount < 1; // Single retry for other errors
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     refetchOnWindowFocus: false,
   });
 };
