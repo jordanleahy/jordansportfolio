@@ -17,13 +17,14 @@ import {
   ArrowUpDown, 
   ArrowUp, 
   ArrowDown, 
-  Mail, 
+  Eye, 
   ExternalLink,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
 import { useOfferings } from "@/hooks/useSecQueries";
 import type { OfferingFilters } from "@/types/sec";
+import { OfferingDetailModal } from "./OfferingDetailModal";
 
 interface OfferingsTableProps {
   dateRange: {
@@ -43,6 +44,8 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   const [sortField, setSortField] = useState("sale_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedOffering, setSelectedOffering] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 20;
 
   // Build filters including search, date range, and sorting
@@ -242,10 +245,11 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                           variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onCompanySelect(offering);
+                            setSelectedOffering(offering);
+                            setIsModalOpen(true);
                           }}
                         >
-                          <Mail className="h-4 w-4 mr-1" />
+                          <Eye className="h-4 w-4 mr-1" />
                           View Details
                         </Button>
                       </div>
@@ -287,6 +291,15 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
           </div>
         </div>
       </CardContent>
+
+      <OfferingDetailModal
+        offering={selectedOffering}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedOffering(null);
+        }}
+      />
     </Card>
   );
 };

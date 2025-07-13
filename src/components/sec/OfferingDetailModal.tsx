@@ -1,0 +1,344 @@
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Building2, 
+  DollarSign, 
+  Calendar, 
+  MapPin, 
+  User, 
+  FileText,
+  Phone,
+  Mail
+} from "lucide-react";
+
+interface OfferingDetailModalProps {
+  offering: any;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
+  offering,
+  isOpen,
+  onClose,
+}) => {
+  if (!offering) return null;
+
+  const formatCurrency = (amount: number | string) => {
+    if (!amount) return 'Not disclosed';
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(numAmount)) return 'Not disclosed';
+    
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(numAmount);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Not specified';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const issuer = offering.issuers?.[0];
+  const signature = offering.signatures?.[0];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Building2 className="h-5 w-5" />
+            {issuer?.entityname || 'Unknown Company'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Company Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Company Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Company Name</label>
+                <p className="font-semibold">{issuer?.entityname || 'Not specified'}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Entity Type</label>
+                <p>{issuer?.entitytype || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">CIK Number</label>
+                <p className="font-mono text-sm">{issuer?.cik || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Jurisdiction of Incorporation</label>
+                <p>{issuer?.jurisdictionofinc || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Year of Incorporation</label>
+                <p>{issuer?.yearofinc_value_entered || 'Not specified'}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Address Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Address Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Street Address</label>
+                <p>{issuer?.street1 || 'Not specified'}</p>
+                {issuer?.street2 && <p>{issuer.street2}</p>}
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">City</label>
+                <p>{issuer?.city || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">State/Country</label>
+                <p>{issuer?.stateorcountrydescription || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">ZIP Code</label>
+                <p>{issuer?.zipcode || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
+                <p>{issuer?.issuerphonenumber || 'Not specified'}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Offering Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Offering Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Total Offering Amount</label>
+                <p className="text-lg font-semibold text-green-600">
+                  {formatCurrency(offering.totalofferingamount)}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Amount Sold</label>
+                <p className="font-semibold">{formatCurrency(offering.totalamountsold)}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Amount Remaining</label>
+                <p className="font-semibold">{formatCurrency(offering.totalremaining)}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Minimum Investment</label>
+                <p>{formatCurrency(offering.minimuminvestmentaccepted)}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Industry</label>
+                <div className="mt-1">
+                  <Badge variant="secondary">
+                    {offering.industrygrouptype || 'Other'}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Filing Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Filing Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Accession Number</label>
+                <p className="font-mono text-sm">{offering.accessionnumber}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Date of First Sale</label>
+                <p>{formatDate(offering.sale_date)}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Federal Exemptions</label>
+                <p>{offering.federalexemptions_items_list || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Is Amendment</label>
+                <Badge variant={offering.isamendment ? "destructive" : "secondary"}>
+                  {offering.isamendment ? "Yes" : "No"}
+                </Badge>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Revenue Range</label>
+                <p>{offering.revenuerange || 'Not specified'}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security Types */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Types</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {offering.isequitytype && (
+                  <Badge variant="outline">Equity</Badge>
+                )}
+                {offering.isdebttype && (
+                  <Badge variant="outline">Debt</Badge>
+                )}
+                {offering.ispooledinvestmentfundtype && (
+                  <Badge variant="outline">Pooled Investment Fund</Badge>
+                )}
+                {offering.ismineralpropertytype && (
+                  <Badge variant="outline">Mineral Property</Badge>
+                )}
+                {offering.istenantincommontype && (
+                  <Badge variant="outline">Tenant-in-Common</Badge>
+                )}
+                {offering.issecuritytobeacquiredtype && (
+                  <Badge variant="outline">Security to be Acquired</Badge>
+                )}
+                {offering.isoptiontoacquiretype && (
+                  <Badge variant="outline">Option to Acquire</Badge>
+                )}
+                {offering.isothertype && (
+                  <Badge variant="outline">Other</Badge>
+                )}
+                {!offering.isequitytype && !offering.isdebttype && !offering.ispooledinvestmentfundtype && 
+                 !offering.ismineralpropertytype && !offering.istenantincommontype && 
+                 !offering.issecuritytobeacquiredtype && !offering.isoptiontoacquiretype && 
+                 !offering.isothertype && (
+                  <p className="text-muted-foreground">No security types specified</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Authorized Representative */}
+          {signature && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Authorized Representative
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Name</label>
+                  <p className="font-semibold">{signature.nameofsigner || 'Not specified'}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Signature Name</label>
+                  <p>{signature.signaturename || 'Not specified'}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Title</label>
+                  <p>{signature.signaturetitle || 'Not specified'}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Signature Date</label>
+                  <p>{formatDate(signature.signaturedate)}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Additional Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Has Non-Accredited Investors</label>
+                <Badge variant={offering.hasnonaccreditedinvestors ? "destructive" : "secondary"}>
+                  {offering.hasnonaccreditedinvestors ? "Yes" : "No"}
+                </Badge>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Number of Non-Accredited Investors</label>
+                <p>{offering.numbernonaccreditedinvestors || 'Not specified'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">More Than One Year</label>
+                <Badge variant={offering.morethanoneyear ? "secondary" : "outline"}>
+                  {offering.morethanoneyear ? "Yes" : "No"}
+                </Badge>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Total Number Already Invested</label>
+                <p>{offering.totalnumberalreadyinvested || 'Not specified'}</p>
+              </div>
+            </div>
+
+            {offering.descriptionofothertype && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Description of Other Type</label>
+                <p className="text-sm bg-muted p-3 rounded-md">{offering.descriptionofothertype}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </DialogContent>
+    </Dialog>
+  );
+};
