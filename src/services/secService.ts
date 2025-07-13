@@ -124,9 +124,11 @@ export class SecService {
       .select('accessionnumber, entityname, city, stateorcountrydescription, stateorcountry')
       .in('accessionnumber', accessionnumbers);
 
-    // 3. US companies filter for default view
+    // For default filters, we'll be more flexible with US companies
+    // Many companies might not have proper country codes set
     if (filters.useDefaultFilters) {
-      issuersQuery = issuersQuery.or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountrydescription.ilike.%United States%');
+      // Don't restrict by geography for now - focus on tech + fully raised
+      // issuersQuery = issuersQuery.or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountrydescription.ilike.%United States%');
     }
 
     const [issuersData, signaturesData] = await Promise.all([
@@ -149,15 +151,15 @@ export class SecService {
     
     if (filters.useDefaultFilters) {
       filteredOfferings = filteredOfferings.filter(offering => {
-        // Must have US issuers
-        const hasUSIssuer = offering.issuers.length > 0;
+        // Must have issuer data
+        const hasIssuer = offering.issuers.length > 0;
         
         // Must be "fully raised" - amount sold >= offering amount OR remaining = 0
         const isFullyRaised = offering.totalremaining === 0 || 
           (offering.totalamountsold && offering.totalofferingamount && 
            offering.totalamountsold >= offering.totalofferingamount);
         
-        return hasUSIssuer && isFullyRaised;
+        return hasIssuer && isFullyRaised;
       });
     }
     

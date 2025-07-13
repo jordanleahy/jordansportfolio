@@ -680,7 +680,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mv_offerings_enriched: {
+        Row: {
+          accessionnumber: string | null
+          aggregatenetassetvaluerange: string | null
+          authorizedrepresentative: string | null
+          buscombclarificationofresp: string | null
+          company_city: string | null
+          company_location: string | null
+          company_name: string | null
+          country_code: string | null
+          created_at: string | null
+          descriptionofothertype: string | null
+          federalexemptions_items_list: string | null
+          finderfeeclarificationofresp: string | null
+          findersfee_dollaramount: number | null
+          findersfee_isestimate: boolean | null
+          grossproceedsused_clarofresp: string | null
+          grossproceedsused_dollaramount: number | null
+          grossproceedsused_isestimate: boolean | null
+          hasnonaccreditedinvestors: boolean | null
+          industrygrouptype: string | null
+          investmentfundtype: string | null
+          is_fully_raised: boolean | null
+          is_us_company: boolean | null
+          is40act: boolean | null
+          isamendment: boolean | null
+          isbusinesscombinationtrans: boolean | null
+          isdebttype: boolean | null
+          isequitytype: boolean | null
+          ismineralpropertytype: boolean | null
+          isoptiontoacquiretype: boolean | null
+          isothertype: boolean | null
+          ispooledinvestmentfundtype: boolean | null
+          issecuritytobeacquiredtype: boolean | null
+          istenantincommontype: boolean | null
+          minimuminvestmentaccepted: number | null
+          morethanoneyear: boolean | null
+          numbernonaccreditedinvestors: number | null
+          over100recipientflag: boolean | null
+          previousaccessionnumber: string | null
+          primary_signer: string | null
+          revenuerange: string | null
+          sale_date: string | null
+          salesamtclarificationofresp: string | null
+          salescomm_dollaramount: number | null
+          salescomm_isestimate: boolean | null
+          totalamountsold: number | null
+          totalnumberalreadyinvested: number | null
+          totalofferingamount: number | null
+          totalremaining: number | null
+          updated_at: string | null
+          yettooccur: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offerings_accessionnumber_fkey"
+            columns: ["accessionnumber"]
+            isOneToOne: true
+            referencedRelation: "formd_submission"
+            referencedColumns: ["accessionnumber"]
+          },
+        ]
+      }
     }
     Functions: {
       validate_tldr_bullets: {
