@@ -184,51 +184,52 @@ export class SecService {
     return industries.filter(Boolean);
   }
 
-  // Get summary statistics
+  // Get summary statistics with optimized query
   static async getSummaryStats(): Promise<SecSummaryStats> {
     try {
-      // Get total offerings and amount
-      const { data: totalData, error: totalError } = await supabase
+      // Parse numeric amounts safely
+      const parseAmount = (amount: any): number => {
+        if (!amount) return 0;
+        const str = String(amount).toLowerCase();
+        if (str === 'indefinite' || str === 'unlimited' || isNaN(Number(amount))) return 0;
+        return Number(amount);
+      };
+
+      // Direct calculation - no RPC needed since we handle data parsing
+      const { data: offeringsData, error } = await supabase
         .from('offerings')
-        .select('totalofferingamount')
-        .not('totalofferingamount', 'is', null);
+        .select('totalofferingamount, sale_date, industrygrouptype');
 
-      if (totalError) throw totalError;
+      if (error) {
+        throw error;
+      }
 
-      const totalOfferings = totalData.length;
-      const totalAmount = totalData.reduce((sum, item) => sum + (item.totalofferingamount || 0), 0);
+      const validOfferings = offeringsData.filter(item => item.totalofferingamount);
+      const totalOfferings = validOfferings.length;
+      const totalAmount = validOfferings.reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
       const averageAmount = totalOfferings > 0 ? totalAmount / totalOfferings : 0;
 
-      // Get this month's data
+      // This month's data
       const thisMonth = new Date();
-      thisMonth.setDate(1); // First day of month
+      thisMonth.setDate(1);
       const thisMonthStr = thisMonth.toISOString().split('T')[0];
+      
+      const thisMonthOfferings = validOfferings.filter(item => 
+        item.sale_date && item.sale_date >= thisMonthStr
+      ).length;
+      
+      const thisMonthAmount = validOfferings
+        .filter(item => item.sale_date && item.sale_date >= thisMonthStr)
+        .reduce((sum, item) => sum + parseAmount(item.totalofferingamount), 0);
 
-      const { data: monthData, error: monthError } = await supabase
-        .from('offerings')
-        .select('totalofferingamount')
-        .gte('sale_date', thisMonthStr)
-        .not('totalofferingamount', 'is', null);
-
-      if (monthError) throw monthError;
-
-      const thisMonthOfferings = monthData.length;
-      const thisMonthAmount = monthData.reduce((sum, item) => sum + (item.totalofferingamount || 0), 0);
-
-      // Get top industries
-      const { data: industryData, error: industryError } = await supabase
-        .from('offerings')
-        .select('industrygrouptype, totalofferingamount')
-        .not('industrygrouptype', 'is', null)
-        .not('totalofferingamount', 'is', null);
-
-      if (industryError) throw industryError;
-
+      // Top industries calculation
       const industryMap = new Map<string, { count: number; totalAmount: number }>();
       
-      industryData.forEach(item => {
+      validOfferings.forEach(item => {
+        if (!item.industrygrouptype) return;
+        
         const industry = item.industrygrouptype;
-        const amount = item.totalofferingamount || 0;
+        const amount = parseAmount(item.totalofferingamount);
         
         if (!industryMap.has(industry)) {
           industryMap.set(industry, { count: 0, totalAmount: 0 });

@@ -62,7 +62,8 @@ export const useSummaryStats = () => {
   return useQuery({
     queryKey: secKeys.summaryStats(),
     queryFn: SecService.getSummaryStats,
-    staleTime: 1000 * 60 * 15, // 15 minutes
+    staleTime: 1000 * 60 * 30, // 30 minutes for dashboard stats
+    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
     retry: 2,
     refetchOnWindowFocus: false,
   });
