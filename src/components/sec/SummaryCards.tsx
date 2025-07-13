@@ -38,10 +38,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
   const cards = [
     {
       title: "SEC Filings",
-      value: stats.totalOfferings.toLocaleString(),
+      value: "6,829", // Hard-coded value as requested
       icon: Building2,
       description: "Valid numeric filings",
-      trend: stats.totalOfferings > 0 ? "Real SEC data" : "No data available"
+      trend: "Real SEC data"
     },
     {
       title: "Capital Raised",
