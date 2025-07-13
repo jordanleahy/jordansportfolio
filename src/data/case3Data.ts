@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Healthcare Denial Management Platform: UX Case Study - AI-Powered Revenue Recovery",
-  description: "How I designed an AI-powered denial management platform that reduced claim appeal processing time by 67% and increased approval rates by 45%. Explore the UX research, design process, and impact on healthcare revenue cycle management, featuring automated claim analysis and intelligent appeal generation.",
+  description: "How I designed an AI-powered denial management platform that reduced claim appeal processing time by 10 minutes. Explore the UX research, design process, and impact on healthcare revenue cycle management, featuring automated claim analysis and intelligent appeal generation.",
   heroImage: "/lovable-uploads/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png",
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
