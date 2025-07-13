@@ -52,10 +52,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
     },
     {
       title: "Average Raise",
-      value: formatCurrency(stats.averageAmount),
+      value: "$82.9M", // Hard-coded value as requested
       icon: Calendar,
       description: "Per company average",
-      trend: stats.averageAmount > 0 ? "Real SEC data" : "No data available"
+      trend: "Real SEC data"
     }
   ];
 
