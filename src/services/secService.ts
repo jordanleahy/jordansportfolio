@@ -59,22 +59,6 @@ export class SecService {
 
     // Apply filters
 
-    // Apply amount filters - handle both string and numeric values
-    if (filters.minAmount !== undefined) {
-      query = query.filter('totalofferingamount', 'not.eq', 'Indefinite')
-                   .filter('totalofferingamount', 'not.is', null);
-      // Add a condition to filter numeric values only
-      if (filters.minAmount > 0) {
-        query = query.gte('totalofferingamount::numeric', filters.minAmount);
-      }
-    }
-
-    if (filters.maxAmount !== undefined && filters.maxAmount < 100000000) {
-      query = query.filter('totalofferingamount', 'not.eq', 'Indefinite')
-                   .filter('totalofferingamount', 'not.is', null)
-                   .lte('totalofferingamount::numeric', filters.maxAmount);
-    }
-
     if (filters.industry) {
       query = query.eq('industrygrouptype', filters.industry);
     }

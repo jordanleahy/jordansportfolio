@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, Filter, RotateCcw, TrendingUp } from "lucide-react";
@@ -13,8 +12,8 @@ import { useIndustries } from "@/hooks/useSecQueries";
 interface FilterSidebarProps {
   filters: {
     industries: string[];
-    amountRange: [number, number];
     searchQuery: string;
+    fullySold?: boolean;
   };
   onFiltersChange: (filters: any) => void;
   onClose?: () => void;
@@ -69,27 +68,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
-  const handleAmountRangeChange = (value: [number, number]) => {
-    setLocalFilters({
-      ...localFilters,
-      amountRange: value
-    });
-  };
-
   const handleSearchChange = (value: string) => {
     setLocalFilters({
       ...localFilters,
       searchQuery: value
     });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'compact',
-      maximumFractionDigits: 1
-    }).format(amount);
   };
 
   const applyFilters = () => {
@@ -100,16 +83,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const resetFilters = () => {
     const resetFilters = {
       industries: [],
-      amountRange: [0, 100000000] as [number, number],
-      searchQuery: ""
+      searchQuery: "",
+      fullySold: false
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
   };
 
   const hasActiveFilters = localFilters.industries.length > 0 || 
-    localFilters.amountRange[0] > 0 || 
-    localFilters.amountRange[1] < 100000000 ||
     localFilters.searchQuery.length > 0;
 
   return (
@@ -156,7 +137,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               className="w-full flex items-center gap-2 justify-start"
             >
               <TrendingUp className="h-4 w-4" />
-              Tech Companies Under $5M
+              Tech Companies
             </Button>
           ) : (
             <div className="flex items-center justify-between p-2 border rounded-md bg-secondary/20">
@@ -227,60 +208,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               ))}
             </div>
           )}
-        </div>
-
-        <Separator />
-
-        {/* Amount Range Filter */}
-        <div className="space-y-4">
-          <Label className="text-sm font-semibold">Amount Raised Range</Label>
-          
-          <div className="px-2">
-            <Slider
-              value={localFilters.amountRange}
-              onValueChange={handleAmountRangeChange}
-              max={100000000}
-              step={100000}
-              className="w-full"
-            />
-          </div>
-          
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>{formatCurrency(localFilters.amountRange[0])}</span>
-            <span>{formatCurrency(localFilters.amountRange[1])}</span>
-          </div>
-
-          {/* Manual Input */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="min-amount" className="text-xs">Min Amount</Label>
-              <Input
-                id="min-amount"
-                type="number"
-                placeholder="0"
-                value={localFilters.amountRange[0]}
-                onChange={(e) => handleAmountRangeChange([
-                  parseInt(e.target.value) || 0,
-                  localFilters.amountRange[1]
-                ])}
-                className="h-8"
-              />
-            </div>
-            <div>
-              <Label htmlFor="max-amount" className="text-xs">Max Amount</Label>
-              <Input
-                id="max-amount"
-                type="number"
-                placeholder="100000000"
-                value={localFilters.amountRange[1]}
-                onChange={(e) => handleAmountRangeChange([
-                  localFilters.amountRange[0],
-                  parseInt(e.target.value) || 100000000
-                ])}
-                className="h-8"
-              />
-            </div>
-          </div>
         </div>
 
         <Separator />

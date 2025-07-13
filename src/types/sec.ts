@@ -147,8 +147,6 @@ export interface OfferingDetail extends OfferingWithIssuer {
 
 // Filter and search types
 export interface OfferingFilters {
-  minAmount?: number;
-  maxAmount?: number;
   industry?: string;
   industries?: string[];
   searchQuery?: string;

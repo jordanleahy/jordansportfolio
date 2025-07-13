@@ -23,7 +23,6 @@ const SEC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     industries: [] as string[],
-    amountRange: [0, 100000000] as [number, number],
     searchQuery: "",
     fullySold: false
   });
@@ -33,7 +32,6 @@ const SEC = () => {
   // Tech report preset configuration
   const techReportConfig = {
     industries: ["Other Technology", "Biotechnology", "Computers", "Telecommunications"],
-    amountRange: [0, 5000000] as [number, number],
     searchQuery: "",
     fullySold: true
   };
@@ -44,14 +42,13 @@ const SEC = () => {
     setActiveTechReport(true);
     toast({
       title: "Tech Report Applied",
-      description: "Showing fully funded tech companies (offering amount = amount sold) under $5M.",
+      description: "Showing fully funded tech companies.",
     });
   };
 
   const handleClearTechReport = () => {
     setFilters({
       industries: [],
-      amountRange: [0, 100000000],
       searchQuery: "",
       fullySold: false
     });
@@ -65,8 +62,7 @@ const SEC = () => {
   // Check if current filters match tech report
   const isCurrentlyTechReport = activeTechReport || (
     JSON.stringify(filters.industries.sort()) === JSON.stringify(techReportConfig.industries.sort()) &&
-    filters.amountRange[0] === techReportConfig.amountRange[0] &&
-    filters.amountRange[1] === techReportConfig.amountRange[1]
+    filters.fullySold === techReportConfig.fullySold
   );
 
   // Auth state management
