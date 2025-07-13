@@ -31,12 +31,20 @@ export class SecService {
         .lte('sale_date', endDate);
     }
 
+    // Apply amount filters - handle both string and numeric values
     if (filters.minAmount !== undefined) {
-      query = query.gte('totalofferingamount', filters.minAmount);
+      query = query.filter('totalofferingamount', 'not.eq', 'Indefinite')
+                   .filter('totalofferingamount', 'not.is', null);
+      // Add a condition to filter numeric values only
+      if (filters.minAmount > 0) {
+        query = query.gte('totalofferingamount::numeric', filters.minAmount);
+      }
     }
 
-    if (filters.maxAmount !== undefined) {
-      query = query.lte('totalofferingamount', filters.maxAmount);
+    if (filters.maxAmount !== undefined && filters.maxAmount < 100000000) {
+      query = query.filter('totalofferingamount', 'not.eq', 'Indefinite')
+                   .filter('totalofferingamount', 'not.is', null)
+                   .lte('totalofferingamount::numeric', filters.maxAmount);
     }
 
     if (filters.industry) {

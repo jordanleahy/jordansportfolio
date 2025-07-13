@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, Filter, RotateCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useIndustries } from "@/hooks/useSecQueries";
 
 interface FilterSidebarProps {
   filters: {
@@ -25,20 +26,30 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onClose 
 }) => {
   const [localFilters, setLocalFilters] = useState(filters);
+  const { data: industriesData, isLoading: industriesLoading } = useIndustries();
 
-  const industries = [
-    "Technology",
-    "Healthcare", 
-    "Financial Services",
-    "Energy",
-    "Retail",
+  // Use real industries from database, fallback to hardcoded list
+  const industries = industriesData || [
+    "Pooled Investment Fund",
+    "Other",
+    "Other Technology", 
+    "Commercial",
+    "Other Real Estate",
+    "Residential",
+    "Other Health Care",
+    "Investing",
+    "Biotechnology",
+    "Other Banking and Financial Services",
+    "REITS and Finance",
+    "Insurance",
+    "Oil and Gas",
+    "Business Services",
     "Manufacturing",
-    "Real Estate",
-    "Media & Entertainment",
-    "Transportation",
-    "Education",
-    "Food & Beverage",
-    "Telecommunications"
+    "Retailing",
+    "Pharmaceuticals",
+    "Other Energy",
+    "Restaurants",
+    "Agriculture"
   ];
 
   const handleIndustryToggle = (industry: string) => {
@@ -56,6 +67,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     setLocalFilters({
       ...localFilters,
       amountRange: value
+    });
+  };
+
+  const handleSearchChange = (value: string) => {
+    setLocalFilters({
+      ...localFilters,
+      searchQuery: value
     });
   };
 
@@ -85,10 +103,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const hasActiveFilters = localFilters.industries.length > 0 || 
     localFilters.amountRange[0] > 0 || 
-    localFilters.amountRange[1] < 100000000;
+    localFilters.amountRange[1] < 100000000 ||
+    localFilters.searchQuery.length > 0;
 
   return (
-    <Card className="h-fit">
+    <Card className="h-fit relative z-10 bg-background border shadow-sm">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -120,6 +139,19 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Search Filter */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Search</Label>
+          <Input
+            placeholder="Search companies, industries..."
+            value={localFilters.searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full"
+          />
+        </div>
+
+        <Separator />
+
         {/* Industry Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Industry</Label>

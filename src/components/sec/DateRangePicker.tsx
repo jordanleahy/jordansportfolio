@@ -98,7 +98,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="end">
+      <PopoverContent className="w-auto p-0 bg-background border shadow-lg z-50" align="end">
         <div className="flex">
           {/* Presets */}
           <div className="border-r">
