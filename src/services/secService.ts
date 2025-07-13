@@ -20,8 +20,8 @@ export class SecService {
       .from('offerings')
       .select(`
         *,
-        issuers!inner(*),
-        formd_submission!inner(*)
+        issuers(*),
+        formd_submission(*)
       `)
       .order('sale_date', { ascending: false });
 
