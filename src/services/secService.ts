@@ -26,10 +26,12 @@ export class SecService {
       .order('sale_date', { ascending: false });
 
     // Apply filters
-    if (filters.startDate && filters.endDate) {
+    if (filters.dateFrom || filters.dateTo) {
+      const startDate = filters.dateFrom ? filters.dateFrom.toISOString().split('T')[0] : '1900-01-01';
+      const endDate = filters.dateTo ? filters.dateTo.toISOString().split('T')[0] : '2100-12-31';
       query = query
-        .gte('sale_date', filters.startDate)
-        .lte('sale_date', filters.endDate);
+        .gte('sale_date', startDate)
+        .lte('sale_date', endDate);
     }
 
     if (filters.minAmount !== undefined) {

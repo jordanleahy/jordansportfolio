@@ -22,6 +22,8 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import { useOfferings } from "@/hooks/useSecQueries";
+import type { OfferingFilters } from "@/types/sec";
 
 interface OfferingsTableProps {
   dateRange: {
@@ -38,66 +40,24 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   onCompanySelect 
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState("dateOfFirstSale");
+  const [sortField, setSortField] = useState("sale_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Mock data for now
-  const mockOfferings = [
-    {
-      id: "1",
-      companyName: "TechCorp Industries",
-      amountRaised: 15000000,
-      dateOfFirstSale: "2024-01-15",
-      industry: "Technology",
-      founder: "Sarah Johnson",
-      status: "Active",
-      location: "San Francisco, CA"
-    },
-    {
-      id: "2", 
-      companyName: "BioMed Solutions",
-      amountRaised: 25000000,
-      dateOfFirstSale: "2024-01-10",
-      industry: "Healthcare",
-      founder: "Dr. Michael Chen",
-      status: "Active",
-      location: "Boston, MA"
-    },
-    {
-      id: "3",
-      companyName: "GreenEnergy Co",
-      amountRaised: 45000000,
-      dateOfFirstSale: "2024-01-08",
-      industry: "Energy",
-      founder: "Amanda Rodriguez",
-      status: "Active", 
-      location: "Austin, TX"
-    },
-    {
-      id: "4",
-      companyName: "FinTech Innovations",
-      amountRaised: 8500000,
-      dateOfFirstSale: "2024-01-05",
-      industry: "Financial Services",
-      founder: "David Kim",
-      status: "Active",
-      location: "New York, NY"
-    },
-    {
-      id: "5",
-      companyName: "RetailNext Platform",
-      amountRaised: 12000000,
-      dateOfFirstSale: "2024-01-03",
-      industry: "Retail",
-      founder: "Lisa Wang",
-      status: "Active",
-      location: "Seattle, WA"
-    }
-  ];
+  // Build filters including search and date range
+  const queryFilters: OfferingFilters = {
+    ...filters,
+    searchQuery: searchQuery || undefined,
+    dateFrom: dateRange.from,
+    dateTo: dateRange.to,
+  };
 
-  const isLoading = false;
+  const { data: offeringsData, isLoading, error } = useOfferings(queryFilters, currentPage, itemsPerPage);
+
+  const offerings = offeringsData?.data || [];
+  const totalItems = offeringsData?.total || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -132,14 +92,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
       <ArrowDown className="ml-2 h-4 w-4" />;
   };
 
-  const filteredData = mockOfferings.filter(offering =>
-    offering.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    offering.industry.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
   if (isLoading) {
     return (
@@ -215,43 +168,67 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.map((offering) => (
-                <TableRow 
-                  key={offering.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onCompanySelect(offering)}
-                >
-                  <TableCell className="font-medium">
-                    <div>
-                      <div className="font-semibold">{offering.companyName}</div>
-                      <div className="text-sm text-muted-foreground">{offering.location}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold text-green-600">
-                    {formatCurrency(offering.amountRaised)}
-                  </TableCell>
-                  <TableCell>{formatDate(offering.dateOfFirstSale)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{offering.industry}</Badge>
-                  </TableCell>
-                  <TableCell>{offering.founder}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onCompanySelect(offering);
-                        }}
-                      >
-                        <Mail className="h-4 w-4 mr-1" />
-                        Contact
-                      </Button>
-                    </div>
+              {offerings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No SEC offerings found. Import data to get started.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                offerings.map((offering: any) => (
+                  <TableRow 
+                    key={offering.accessionnumber}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => onCompanySelect(offering)}
+                  >
+                    <TableCell className="font-medium">
+                      <div>
+                        <div className="font-semibold">
+                          {offering.issuer?.entityname || 'Unknown Company'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {offering.issuer?.city && offering.issuer?.stateorcountrydescription 
+                            ? `${offering.issuer.city}, ${offering.issuer.stateorcountrydescription}`
+                            : 'Location not specified'
+                          }
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold text-green-600">
+                      {offering.totalofferingamount 
+                        ? formatCurrency(offering.totalofferingamount) 
+                        : 'Not disclosed'
+                      }
+                    </TableCell>
+                    <TableCell>
+                      {offering.sale_date ? formatDate(offering.sale_date) : 'Not specified'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {offering.industrygrouptype || 'Other'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {offering.signatures?.[0]?.nameofsigner || 'Not specified'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCompanySelect(offering);
+                          }}
+                        >
+                          <Mail className="h-4 w-4 mr-1" />
+                          View Details
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -259,7 +236,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t">
           <div className="text-sm text-muted-foreground">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} entries
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} entries
           </div>
           <div className="flex items-center gap-2">
             <Button

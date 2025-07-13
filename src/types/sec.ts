@@ -147,8 +147,8 @@ export interface OfferingDetail extends OfferingWithIssuer {
 
 // Filter and search types
 export interface OfferingFilters {
-  startDate?: string;
-  endDate?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
   minAmount?: number;
   maxAmount?: number;
   industry?: string;

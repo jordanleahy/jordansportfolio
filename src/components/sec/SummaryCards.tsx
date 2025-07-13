@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Building2, DollarSign, Calendar } from "lucide-react";
+import { useSummaryStats } from "@/hooks/useSecQueries";
 
 interface SummaryCardsProps {
   dateRange: {
@@ -12,15 +13,15 @@ interface SummaryCardsProps {
 }
 
 export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }) => {
-  // Mock data for now
-  const summaryData = {
-    totalOfferings: 1247,
-    totalCapitalRaised: 890000000,
-    uniqueCompanies: 892,
-    avgRaise: 714000
-  };
+  const { data: summaryData, isLoading, error } = useSummaryStats();
 
-  const isLoading = false; // Will be connected to real data later
+  // Default to zeros if no data
+  const stats = {
+    totalOfferings: summaryData?.totalOfferings || 0,
+    totalAmount: summaryData?.totalAmount || 0,
+    averageAmount: summaryData?.averageAmount || 0,
+    thisMonthOfferings: summaryData?.thisMonthOfferings || 0
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -34,31 +35,31 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
   const cards = [
     {
       title: "Total Offerings",
-      value: summaryData.totalOfferings.toLocaleString(),
+      value: stats.totalOfferings.toLocaleString(),
       icon: Building2,
       description: "SEC filings tracked",
-      trend: "+12% from last period"
+      trend: stats.totalOfferings > 0 ? "Real SEC data" : "No data available"
     },
     {
       title: "Capital Raised",
-      value: formatCurrency(summaryData.totalCapitalRaised),
+      value: formatCurrency(stats.totalAmount),
       icon: DollarSign,
       description: "Total amount raised",
-      trend: "+18% from last period"
+      trend: stats.totalAmount > 0 ? "Real SEC data" : "No data available"
     },
     {
-      title: "Unique Companies",
-      value: summaryData.uniqueCompanies.toLocaleString(),
+      title: "This Month",
+      value: stats.thisMonthOfferings.toLocaleString(),
       icon: TrendingUp,
-      description: "Companies with filings",
-      trend: "+8% from last period"
+      description: "New filings this month",
+      trend: stats.thisMonthOfferings > 0 ? "Real SEC data" : "No data available"
     },
     {
       title: "Average Raise",
-      value: formatCurrency(summaryData.avgRaise),
+      value: formatCurrency(stats.averageAmount),
       icon: Calendar,
       description: "Per company average",
-      trend: "+5% from last period"
+      trend: stats.averageAmount > 0 ? "Real SEC data" : "No data available"
     }
   ];
 
@@ -98,7 +99,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }
               <p className="text-xs text-muted-foreground mt-1">
                 {card.description}
               </p>
-              <p className="text-xs text-green-600 mt-1 font-medium">
+              <p className={`text-xs mt-1 font-medium ${card.trend.includes('No data') ? 'text-muted-foreground' : 'text-blue-600'}`}>
                 {card.trend}
               </p>
             </CardContent>
