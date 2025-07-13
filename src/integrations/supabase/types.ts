@@ -210,7 +210,7 @@ export type Database = {
         Row: {
           accessionnumber: string
           created_at: string
-          file_num: number | null
+          file_num: string | null
           filing_date: string | null
           over100issuerflag: boolean | null
           over100personsflag: boolean | null
@@ -223,7 +223,7 @@ export type Database = {
         Insert: {
           accessionnumber: string
           created_at?: string
-          file_num?: number | null
+          file_num?: string | null
           filing_date?: string | null
           over100issuerflag?: boolean | null
           over100personsflag?: boolean | null
@@ -236,7 +236,7 @@ export type Database = {
         Update: {
           accessionnumber?: string
           created_at?: string
-          file_num?: number | null
+          file_num?: string | null
           filing_date?: string | null
           over100issuerflag?: boolean | null
           over100personsflag?: boolean | null
@@ -254,12 +254,18 @@ export type Database = {
           cik: string | null
           city: string | null
           created_at: string
+          edgar_previousname_1: string | null
+          edgar_previousname_2: string | null
+          edgar_previousname_3: string | null
           entityname: string | null
           entitytype: string | null
           entitytypeotherdesc: string | null
           id: string
           is_primaryissuer_flag: boolean | null
-          issuer_seq_key: number | null
+          issuer_previousname_1: string | null
+          issuer_previousname_2: string | null
+          issuer_previousname_3: string | null
+          issuer_seq_key: string | null
           issuerphonenumber: string | null
           jurisdictionofinc: string | null
           stateorcountry: string | null
@@ -267,7 +273,8 @@ export type Database = {
           street1: string | null
           street2: string | null
           updated_at: string
-          yearofinc_value_entered: number | null
+          yearofinc_timespan_choice: string | null
+          yearofinc_value_entered: string | null
           zipcode: string | null
         }
         Insert: {
@@ -275,12 +282,18 @@ export type Database = {
           cik?: string | null
           city?: string | null
           created_at?: string
+          edgar_previousname_1?: string | null
+          edgar_previousname_2?: string | null
+          edgar_previousname_3?: string | null
           entityname?: string | null
           entitytype?: string | null
           entitytypeotherdesc?: string | null
           id?: string
           is_primaryissuer_flag?: boolean | null
-          issuer_seq_key?: number | null
+          issuer_previousname_1?: string | null
+          issuer_previousname_2?: string | null
+          issuer_previousname_3?: string | null
+          issuer_seq_key?: string | null
           issuerphonenumber?: string | null
           jurisdictionofinc?: string | null
           stateorcountry?: string | null
@@ -288,7 +301,8 @@ export type Database = {
           street1?: string | null
           street2?: string | null
           updated_at?: string
-          yearofinc_value_entered?: number | null
+          yearofinc_timespan_choice?: string | null
+          yearofinc_value_entered?: string | null
           zipcode?: string | null
         }
         Update: {
@@ -296,12 +310,18 @@ export type Database = {
           cik?: string | null
           city?: string | null
           created_at?: string
+          edgar_previousname_1?: string | null
+          edgar_previousname_2?: string | null
+          edgar_previousname_3?: string | null
           entityname?: string | null
           entitytype?: string | null
           entitytypeotherdesc?: string | null
           id?: string
           is_primaryissuer_flag?: boolean | null
-          issuer_seq_key?: number | null
+          issuer_previousname_1?: string | null
+          issuer_previousname_2?: string | null
+          issuer_previousname_3?: string | null
+          issuer_seq_key?: string | null
           issuerphonenumber?: string | null
           jurisdictionofinc?: string | null
           stateorcountry?: string | null
@@ -309,7 +329,8 @@ export type Database = {
           street1?: string | null
           street2?: string | null
           updated_at?: string
-          yearofinc_value_entered?: number | null
+          yearofinc_timespan_choice?: string | null
+          yearofinc_value_entered?: string | null
           zipcode?: string | null
         }
         Relationships: [
