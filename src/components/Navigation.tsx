@@ -107,7 +107,7 @@ const Navigation = () => {
                   className="ml-2"
                 >
                   <BarChart3 size={16} className="mr-2" />
-                  SEC
+                  Q2 Form D
                 </Button>
               </div>
             </div>
