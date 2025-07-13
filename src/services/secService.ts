@@ -32,20 +32,16 @@ export class SecService {
     page = 1, 
     pageSize = 50
   ): Promise<PaginatedResponse<any>> {
-    // Build the base query first
+    // Build the base query - use simple select first, then join manually
     let query = supabase
       .from('offerings')
-      .select(`
-        *,
-        issuers:issuers(entityname, city, stateorcountrydescription),
-        signatures:signatures(nameofsigner)
-      `, { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     // Apply sorting - handle special cases for related table sorting
     if (filters.sortField && filters.sortDirection) {
       const sortField = getSortField(filters.sortField);
       if (filters.sortField === 'companyName') {
-        // For company name, we need to sort by a joined field, so we'll handle this client-side for now
+        // For company name, we'll handle this client-side since we need manual joins
         query = query.order('sale_date', { ascending: false });
       } else if (filters.sortField === 'amountRaised') {
         // Handle numeric sorting for amount - filter out non-numeric first
@@ -116,48 +112,29 @@ export class SecService {
         total: count || 0,
         page,
         pageSize,
-        totalPages: Math.ceil((count || 0) / pageSize)
+        totalPages: 0
       };
     }
 
-    // Manually fetch related data for each offering
+    // Now fetch related issuers and signatures for the offerings
     const accessionnumbers = offerings.map(o => o.accessionnumber);
     
-    // Get all issuers for these offerings
-    const { data: allIssuers } = await supabase
-      .from('issuers')
-      .select('*')
-      .in('accessionnumber', accessionnumbers);
+    const [issuersData, signaturesData] = await Promise.all([
+      supabase
+        .from('issuers')
+        .select('accessionnumber, entityname, city, stateorcountrydescription')
+        .in('accessionnumber', accessionnumbers),
+      supabase
+        .from('signatures')
+        .select('accessionnumber, nameofsigner')
+        .in('accessionnumber', accessionnumbers)
+    ]);
 
-    // Get all signatures for these offerings
-    const { data: allSignatures } = await supabase
-      .from('signatures')
-      .select('*')
-      .in('accessionnumber', accessionnumbers);
-
-    // Group the related data by accessionnumber
-    const issuersByAccessionnumber = new Map();
-    const signaturesByAccessionnumber = new Map();
-
-    allIssuers?.forEach(issuer => {
-      if (!issuersByAccessionnumber.has(issuer.accessionnumber)) {
-        issuersByAccessionnumber.set(issuer.accessionnumber, []);
-      }
-      issuersByAccessionnumber.get(issuer.accessionnumber).push(issuer);
-    });
-
-    allSignatures?.forEach(signature => {
-      if (!signaturesByAccessionnumber.has(signature.accessionnumber)) {
-        signaturesByAccessionnumber.set(signature.accessionnumber, []);
-      }
-      signaturesByAccessionnumber.get(signature.accessionnumber).push(signature);
-    });
-
-    // Combine the data
+    // Manually join the data
     const enrichedOfferings = offerings.map(offering => ({
       ...offering,
-      issuers: issuersByAccessionnumber.get(offering.accessionnumber) || [],
-      signatures: signaturesByAccessionnumber.get(offering.accessionnumber) || []
+      issuers: issuersData.data?.filter(i => i.accessionnumber === offering.accessionnumber) || [],
+      signatures: signaturesData.data?.filter(s => s.accessionnumber === offering.accessionnumber) || []
     }));
 
     return {
