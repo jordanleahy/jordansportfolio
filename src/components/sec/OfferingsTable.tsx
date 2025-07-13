@@ -184,13 +184,12 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                   </Button>
                 </TableHead>
                 <TableHead>Founder/Executive</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {offerings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No SEC offerings found. Import data to get started.
                   </TableCell>
                 </TableRow>
@@ -198,7 +197,11 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 offerings.map((offering: any) => (
                   <TableRow 
                     key={offering.accessionnumber}
-                    className="hover:bg-muted/50"
+                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setSelectedOffering(offering);
+                      setIsModalOpen(true);
+                    }}
                   >
                     <TableCell className="font-medium">
                       <div>
@@ -229,22 +232,6 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                     </TableCell>
                     <TableCell>
                       {offering.signatures?.[0]?.nameofsigner || 'Not specified'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedOffering(offering);
-                            setIsModalOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Details
-                        </Button>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))
