@@ -7,7 +7,23 @@ import type {
   PaginatedResponse,
   SecSummaryStats,
   IndustryStats
-} from "@/types/sec";
+ } from "@/types/sec";
+
+// Helper function to map frontend sort fields to database fields
+const getSortField = (field: string): string => {
+  switch (field) {
+    case 'companyName':
+      return 'entityname'; // Will be used with issuer join
+    case 'amountRaised':
+      return 'totalofferingamount';
+    case 'dateOfFirstSale':
+      return 'sale_date';
+    case 'industry':
+      return 'industrygrouptype';
+    default:
+      return 'sale_date';
+  }
+};
 
 export class SecService {
   // Get paginated offerings with filters
@@ -16,11 +32,34 @@ export class SecService {
     page = 1, 
     pageSize = 50
   ): Promise<PaginatedResponse<any>> {
-    // Build the base query without joins first
+    // Build the base query first
     let query = supabase
       .from('offerings')
-      .select('*', { count: 'exact' })
-      .order('sale_date', { ascending: false });
+      .select(`
+        *,
+        issuers:issuers(entityname, city, stateorcountrydescription),
+        signatures:signatures(nameofsigner)
+      `, { count: 'exact' });
+
+    // Apply sorting - handle special cases for related table sorting
+    if (filters.sortField && filters.sortDirection) {
+      const sortField = getSortField(filters.sortField);
+      if (filters.sortField === 'companyName') {
+        // For company name, we need to sort by a joined field, so we'll handle this client-side for now
+        query = query.order('sale_date', { ascending: false });
+      } else if (filters.sortField === 'amountRaised') {
+        // Handle numeric sorting for amount - filter out non-numeric first
+        query = query
+          .filter('totalofferingamount', 'not.eq', 'Indefinite')
+          .filter('totalofferingamount', 'not.is', null)
+          .order('totalofferingamount', { ascending: filters.sortDirection === 'asc' });
+      } else {
+        query = query.order(sortField, { ascending: filters.sortDirection === 'asc' });
+      }
+    } else {
+      // Default sort by sale_date descending
+      query = query.order('sale_date', { ascending: false });
+    }
 
     // Apply filters
     if (filters.dateFrom || filters.dateTo) {

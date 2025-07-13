@@ -45,17 +45,30 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Build filters including search and date range
+  // Build filters including search, date range, and sorting
   const queryFilters: OfferingFilters = {
     ...filters,
     searchQuery: searchQuery || undefined,
     dateFrom: dateRange.from,
     dateTo: dateRange.to,
+    sortField: sortField,
+    sortDirection: sortDirection,
   };
 
   const { data: offeringsData, isLoading, error } = useOfferings(queryFilters, currentPage, itemsPerPage);
 
-  const offerings = offeringsData?.data || [];
+  let offerings = offeringsData?.data || [];
+  
+  // Handle client-side sorting for company name (since it's a joined field)
+  if (sortField === "companyName" && offerings.length > 0) {
+    offerings = [...offerings].sort((a, b) => {
+      const nameA = a.issuers?.[0]?.entityname || '';
+      const nameB = b.issuers?.[0]?.entityname || '';
+      const comparison = nameA.localeCompare(nameB);
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }
+  
   const totalItems = offeringsData?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -83,13 +96,15 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
       setSortField(field);
       setSortDirection("desc");
     }
+    // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const getSortIcon = (field: string) => {
-    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />;
     return sortDirection === "asc" ? 
-      <ArrowUp className="ml-2 h-4 w-4" /> : 
-      <ArrowDown className="ml-2 h-4 w-4" />;
+      <ArrowUp className="ml-2 h-4 w-4 text-primary" /> : 
+      <ArrowDown className="ml-2 h-4 w-4 text-primary" />;
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -136,7 +151,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("companyName")}
-                    className="h-auto p-0 font-semibold"
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
                     Company Name
                     {getSortIcon("companyName")}
@@ -146,7 +161,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("amountRaised")}
-                    className="h-auto p-0 font-semibold"
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
                     Amount Raised
                     {getSortIcon("amountRaised")}
@@ -156,13 +171,22 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("dateOfFirstSale")}
-                    className="h-auto p-0 font-semibold"
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
                     Date of First Sale
                     {getSortIcon("dateOfFirstSale")}
                   </Button>
                 </TableHead>
-                <TableHead>Industry</TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort("industry")}
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
+                  >
+                    Industry
+                    {getSortIcon("industry")}
+                  </Button>
+                </TableHead>
                 <TableHead>Founder/Executive</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>

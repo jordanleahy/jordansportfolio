@@ -154,6 +154,8 @@ export interface OfferingFilters {
   industry?: string;
   industries?: string[];
   searchQuery?: string;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface DateRange {
