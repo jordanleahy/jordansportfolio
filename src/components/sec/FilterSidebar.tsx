@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { X, Filter, RotateCcw, TrendingUp } from "lucide-react";
+import { X, Filter, RotateCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useIndustries } from "@/hooks/useSecQueries";
 
@@ -17,18 +17,12 @@ interface FilterSidebarProps {
   };
   onFiltersChange: (filters: any) => void;
   onClose?: () => void;
-  activeTechReport?: boolean;
-  onApplyTechReport?: () => void;
-  onClearTechReport?: () => void;
 }
 
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({ 
   filters, 
   onFiltersChange, 
-  onClose,
-  activeTechReport = false,
-  onApplyTechReport,
-  onClearTechReport
+  onClose
 }) => {
   const [localFilters, setLocalFilters] = useState(filters);
   const { data: industriesData, isLoading: industriesLoading } = useIndustries();
@@ -126,38 +120,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-6">
-        {/* Quick Presets */}
-        <div className="space-y-3">
-          <Label className="text-sm font-semibold">Quick Presets</Label>
-          {!activeTechReport ? (
-            <Button 
-              onClick={onApplyTechReport}
-              variant="outline"
-              size="sm"
-              className="w-full flex items-center gap-2 justify-start"
-            >
-              <TrendingUp className="h-4 w-4" />
-              Tech Companies
-            </Button>
-          ) : (
-            <div className="flex items-center justify-between p-2 border rounded-md bg-secondary/20">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Tech Report Active</span>
-              </div>
-              <Button 
-                onClick={onClearTechReport}
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        <Separator />
         {/* Search Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Search</Label>

@@ -26,44 +26,7 @@ const SEC = () => {
     searchQuery: "",
     fullySold: false
   });
-  const [activeTechReport, setActiveTechReport] = useState(false);
   const { toast } = useToast();
-
-  // Tech report preset configuration
-  const techReportConfig = {
-    industries: ["Other Technology", "Biotechnology", "Computers", "Telecommunications"],
-    searchQuery: "",
-    fullySold: true
-  };
-
-
-  const handleApplyTechReport = () => {
-    setFilters(techReportConfig);
-    setActiveTechReport(true);
-    toast({
-      title: "Tech Report Applied",
-      description: "Showing fully funded tech companies.",
-    });
-  };
-
-  const handleClearTechReport = () => {
-    setFilters({
-      industries: [],
-      searchQuery: "",
-      fullySold: false
-    });
-    setActiveTechReport(false);
-    toast({
-      title: "Filters Cleared",
-      description: "Tech report has been cleared. Showing all data.",
-    });
-  };
-
-  // Check if current filters match tech report
-  const isCurrentlyTechReport = activeTechReport || (
-    JSON.stringify(filters.industries.sort()) === JSON.stringify(techReportConfig.industries.sort()) &&
-    filters.fullySold === techReportConfig.fullySold
-  );
 
   // Auth state management
   useEffect(() => {
@@ -164,9 +127,6 @@ const SEC = () => {
                       filters={filters}
                       onFiltersChange={setFilters}
                       onClose={() => setIsFilterOpen(false)}
-                      activeTechReport={isCurrentlyTechReport}
-                      onApplyTechReport={handleApplyTechReport}
-                      onClearTechReport={handleClearTechReport}
                     />
                   </SheetContent>
                 </Sheet>
@@ -189,9 +149,6 @@ const SEC = () => {
               <FilterSidebar 
                 filters={filters}
                 onFiltersChange={setFilters}
-                activeTechReport={isCurrentlyTechReport}
-                onApplyTechReport={handleApplyTechReport}
-                onClearTechReport={handleClearTechReport}
               />
             </div>
 
