@@ -113,8 +113,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     localFilters.searchQuery.length > 0;
 
   return (
-    <Card className="h-fit relative z-10 bg-background border shadow-sm">
-      <CardHeader>
+    <Card className="flex flex-col h-full relative z-10 bg-background border shadow-sm">
+      <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
@@ -144,7 +144,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="flex-1 overflow-y-auto space-y-6">
         {/* Quick Presets */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Quick Presets</Label>
@@ -193,7 +193,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         {/* Industry Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Industry</Label>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
+          <div className="space-y-2">
             {industries.map((industry) => (
               <div key={industry} className="flex items-center space-x-2">
                 <Checkbox
