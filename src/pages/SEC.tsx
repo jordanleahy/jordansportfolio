@@ -29,7 +29,8 @@ const SEC = () => {
   const [filters, setFilters] = useState({
     industries: [] as string[],
     amountRange: [0, 100000000] as [number, number],
-    searchQuery: ""
+    searchQuery: "",
+    fullySold: false
   });
   const [activeTechReport, setActiveTechReport] = useState(false);
   const { toast } = useToast();
@@ -38,7 +39,8 @@ const SEC = () => {
   const techReportConfig = {
     industries: ["Other Technology", "Biotechnology", "Computers", "Telecommunications"],
     amountRange: [0, 5000000] as [number, number],
-    searchQuery: ""
+    searchQuery: "",
+    fullySold: true
   };
 
   const techReportDateRange = {
@@ -52,7 +54,7 @@ const SEC = () => {
     setActiveTechReport(true);
     toast({
       title: "Tech Report Applied",
-      description: "Showing tech companies that raised under $5M in the last 2 quarters.",
+      description: "Showing fully funded tech companies (offering amount = amount sold) under $5M.",
     });
   };
 
@@ -60,7 +62,8 @@ const SEC = () => {
     setFilters({
       industries: [],
       amountRange: [0, 100000000],
-      searchQuery: ""
+      searchQuery: "",
+      fullySold: false
     });
     setDateRange({
       from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),

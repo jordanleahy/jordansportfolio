@@ -94,6 +94,16 @@ export class SecService {
       query = query.or(`industrygrouptype.ilike.%${filters.searchQuery}%,descriptionofothertype.ilike.%${filters.searchQuery}%`);
     }
 
+    // Filter for fully sold companies (offering amount equals amount sold)
+    if (filters.fullySold) {
+      query = query
+        .filter('totalofferingamount', 'not.eq', 'Indefinite')
+        .filter('totalofferingamount', 'not.is', null)
+        .filter('totalamountsold', 'not.eq', 'Indefinite')
+        .filter('totalamountsold', 'not.is', null)
+        .filter('totalofferingamount', 'eq', 'totalamountsold');
+    }
+
     // Apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;

@@ -156,6 +156,7 @@ export interface OfferingFilters {
   searchQuery?: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
+  fullySold?: boolean; // Filter for companies where offering amount equals amount sold
 }
 
 export interface DateRange {
