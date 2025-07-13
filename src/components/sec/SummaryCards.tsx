@@ -5,14 +5,10 @@ import { TrendingUp, Building2, DollarSign, Calendar } from "lucide-react";
 import { useSummaryStats } from "@/hooks/useSecQueries";
 
 interface SummaryCardsProps {
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
   filters: any;
 }
 
-export const SummaryCards: React.FC<SummaryCardsProps> = ({ dateRange, filters }) => {
+export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
   const { data: summaryData, isLoading, error } = useSummaryStats();
 
   // Default to zeros if no data

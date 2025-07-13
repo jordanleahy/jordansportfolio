@@ -147,8 +147,6 @@ export interface OfferingDetail extends OfferingWithIssuer {
 
 // Filter and search types
 export interface OfferingFilters {
-  dateFrom?: Date;
-  dateTo?: Date;
   minAmount?: number;
   maxAmount?: number;
   industry?: string;
@@ -157,11 +155,6 @@ export interface OfferingFilters {
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   fullySold?: boolean; // Filter for companies where offering amount equals amount sold
-}
-
-export interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
 }
 
 // Pagination types

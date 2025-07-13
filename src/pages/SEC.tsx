@@ -12,9 +12,8 @@ import { SummaryCards } from "@/components/sec/SummaryCards";
 import { OfferingsTable } from "@/components/sec/OfferingsTable";
 import { FilterSidebar } from "@/components/sec/FilterSidebar";
 import { CompanyModal } from "@/components/sec/CompanyModal";
-import { DateRangePicker } from "@/components/sec/DateRangePicker";
 import { Badge } from "@/components/ui/badge";
-import { startOfQuarter, subQuarters, endOfQuarter } from "date-fns";
+
 
 const SEC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -22,10 +21,6 @@ const SEC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    to: new Date()
-  });
   const [filters, setFilters] = useState({
     industries: [] as string[],
     amountRange: [0, 100000000] as [number, number],
@@ -43,14 +38,9 @@ const SEC = () => {
     fullySold: true
   };
 
-  const techReportDateRange = {
-    from: startOfQuarter(subQuarters(new Date(), 1)), // Previous quarter start
-    to: endOfQuarter(new Date()) // Current quarter end
-  };
 
   const handleApplyTechReport = () => {
     setFilters(techReportConfig);
-    setDateRange(techReportDateRange);
     setActiveTechReport(true);
     toast({
       title: "Tech Report Applied",
@@ -64,10 +54,6 @@ const SEC = () => {
       amountRange: [0, 100000000],
       searchQuery: "",
       fullySold: false
-    });
-    setDateRange({
-      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      to: new Date()
     });
     setActiveTechReport(false);
     toast({
@@ -169,11 +155,6 @@ const SEC = () => {
               </div>
               
               <div className="flex items-center gap-3">
-                <DateRangePicker 
-                  dateRange={dateRange}
-                  onDateRangeChange={setDateRange}
-                />
-                
                 {/* Mobile Filter Toggle */}
                 <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                   <SheetTrigger asChild>
@@ -201,7 +182,7 @@ const SEC = () => {
 
         {/* Summary Cards */}
         <div className="container mx-auto px-4 py-6">
-          <SummaryCards dateRange={dateRange} filters={filters} />
+          <SummaryCards filters={filters} />
         </div>
 
         {/* Main Content */}
@@ -221,7 +202,6 @@ const SEC = () => {
             {/* Main Table */}
             <div className="flex-1 min-w-0">
               <OfferingsTable 
-                dateRange={dateRange}
                 filters={filters}
                 onCompanySelect={setSelectedCompany}
               />

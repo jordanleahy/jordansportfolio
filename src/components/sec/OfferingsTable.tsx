@@ -27,16 +27,11 @@ import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 
 interface OfferingsTableProps {
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
   filters: any;
   onCompanySelect: (company: any) => void;
 }
 
 export const OfferingsTable: React.FC<OfferingsTableProps> = ({ 
-  dateRange, 
   filters, 
   onCompanySelect 
 }) => {
@@ -48,12 +43,10 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 20;
 
-  // Build filters including search, date range, and sorting
+  // Build filters including search and sorting
   const queryFilters: OfferingFilters = {
     ...filters,
     searchQuery: searchQuery || undefined,
-    dateFrom: dateRange.from,
-    dateTo: dateRange.to,
     sortField: sortField,
     sortDirection: sortDirection,
   };
