@@ -44,11 +44,11 @@ export class SecService {
         // For company name, we'll handle this client-side since we need manual joins
         query = query.order('sale_date', { ascending: false });
       } else if (filters.sortField === 'amountRaised') {
-        // Handle numeric sorting for amount - filter out non-numeric first
+        // Handle numeric sorting for amount - cast to numeric for proper sorting
         query = query
           .filter('totalofferingamount', 'not.eq', 'Indefinite')
           .filter('totalofferingamount', 'not.is', null)
-          .order('totalofferingamount', { ascending: filters.sortDirection === 'asc' });
+          .order('totalofferingamount::numeric', { ascending: filters.sortDirection === 'asc' });
       } else {
         query = query.order(sortField, { ascending: filters.sortDirection === 'asc' });
       }
