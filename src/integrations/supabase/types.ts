@@ -353,10 +353,10 @@ export type Database = {
           descriptionofothertype: string | null
           federalexemptions_items_list: string | null
           finderfeeclarificationofresp: string | null
-          findersfee_dollaramount: number | null
+          findersfee_dollaramount: string | null
           findersfee_isestimate: boolean | null
           grossproceedsused_clarofresp: string | null
-          grossproceedsused_dollaramount: number | null
+          grossproceedsused_dollaramount: string | null
           grossproceedsused_isestimate: boolean | null
           hasnonaccreditedinvestors: boolean | null
           industrygrouptype: string | null
@@ -372,20 +372,20 @@ export type Database = {
           ispooledinvestmentfundtype: boolean | null
           issecuritytobeacquiredtype: boolean | null
           istenantincommontype: boolean | null
-          minimuminvestmentaccepted: number | null
+          minimuminvestmentaccepted: string | null
           morethanoneyear: boolean | null
-          numbernonaccreditedinvestors: number | null
+          numbernonaccreditedinvestors: string | null
           over100recipientflag: boolean | null
           previousaccessionnumber: string | null
           revenuerange: string | null
           sale_date: string | null
           salesamtclarificationofresp: string | null
-          salescomm_dollaramount: number | null
+          salescomm_dollaramount: string | null
           salescomm_isestimate: boolean | null
-          totalamountsold: number | null
-          totalnumberalreadyinvested: number | null
-          totalofferingamount: number | null
-          totalremaining: number | null
+          totalamountsold: string | null
+          totalnumberalreadyinvested: string | null
+          totalofferingamount: string | null
+          totalremaining: string | null
           updated_at: string
           yettooccur: boolean | null
         }
@@ -398,10 +398,10 @@ export type Database = {
           descriptionofothertype?: string | null
           federalexemptions_items_list?: string | null
           finderfeeclarificationofresp?: string | null
-          findersfee_dollaramount?: number | null
+          findersfee_dollaramount?: string | null
           findersfee_isestimate?: boolean | null
           grossproceedsused_clarofresp?: string | null
-          grossproceedsused_dollaramount?: number | null
+          grossproceedsused_dollaramount?: string | null
           grossproceedsused_isestimate?: boolean | null
           hasnonaccreditedinvestors?: boolean | null
           industrygrouptype?: string | null
@@ -417,20 +417,20 @@ export type Database = {
           ispooledinvestmentfundtype?: boolean | null
           issecuritytobeacquiredtype?: boolean | null
           istenantincommontype?: boolean | null
-          minimuminvestmentaccepted?: number | null
+          minimuminvestmentaccepted?: string | null
           morethanoneyear?: boolean | null
-          numbernonaccreditedinvestors?: number | null
+          numbernonaccreditedinvestors?: string | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
           sale_date?: string | null
           salesamtclarificationofresp?: string | null
-          salescomm_dollaramount?: number | null
+          salescomm_dollaramount?: string | null
           salescomm_isestimate?: boolean | null
-          totalamountsold?: number | null
-          totalnumberalreadyinvested?: number | null
-          totalofferingamount?: number | null
-          totalremaining?: number | null
+          totalamountsold?: string | null
+          totalnumberalreadyinvested?: string | null
+          totalofferingamount?: string | null
+          totalremaining?: string | null
           updated_at?: string
           yettooccur?: boolean | null
         }
@@ -443,10 +443,10 @@ export type Database = {
           descriptionofothertype?: string | null
           federalexemptions_items_list?: string | null
           finderfeeclarificationofresp?: string | null
-          findersfee_dollaramount?: number | null
+          findersfee_dollaramount?: string | null
           findersfee_isestimate?: boolean | null
           grossproceedsused_clarofresp?: string | null
-          grossproceedsused_dollaramount?: number | null
+          grossproceedsused_dollaramount?: string | null
           grossproceedsused_isestimate?: boolean | null
           hasnonaccreditedinvestors?: boolean | null
           industrygrouptype?: string | null
@@ -462,20 +462,20 @@ export type Database = {
           ispooledinvestmentfundtype?: boolean | null
           issecuritytobeacquiredtype?: boolean | null
           istenantincommontype?: boolean | null
-          minimuminvestmentaccepted?: number | null
+          minimuminvestmentaccepted?: string | null
           morethanoneyear?: boolean | null
-          numbernonaccreditedinvestors?: number | null
+          numbernonaccreditedinvestors?: string | null
           over100recipientflag?: boolean | null
           previousaccessionnumber?: string | null
           revenuerange?: string | null
           sale_date?: string | null
           salesamtclarificationofresp?: string | null
-          salescomm_dollaramount?: number | null
+          salescomm_dollaramount?: string | null
           salescomm_isestimate?: boolean | null
-          totalamountsold?: number | null
-          totalnumberalreadyinvested?: number | null
-          totalofferingamount?: number | null
-          totalremaining?: number | null
+          totalamountsold?: string | null
+          totalnumberalreadyinvested?: string | null
+          totalofferingamount?: string | null
+          totalremaining?: string | null
           updated_at?: string
           yettooccur?: boolean | null
         }
