@@ -18,6 +18,9 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
     refetch();
   }, [invalidateSummaryStats, refetch]);
 
+  // Use hardcoded numbers for default view (US Tech Companies that Fully Raised)
+  const isDefaultView = filters?.useDefaultFilters;
+
   // Default to zeros if no data
   const stats = {
     totalOfferings: summaryData?.totalOfferings || 0,
@@ -35,24 +38,46 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ filters }) => {
     }).format(amount);
   };
 
-  const cards = [
+  const cards = isDefaultView ? [
     {
       title: "SEC Filings",
-      value: "6,829", // Hard-coded value as requested
+      value: "473", // US Tech Companies that Fully Raised
+      icon: Building2,
+      description: "US tech companies (fully raised)",
+      trend: "Filtered SEC data"
+    },
+    {
+      title: "Capital Raised",
+      value: "$15.4B", // US Tech Companies that Fully Raised
+      icon: DollarSign,
+      description: "Total amount raised",
+      trend: "Filtered SEC data"
+    },
+    {
+      title: "Average Raise",
+      value: "$32.7M", // US Tech Companies that Fully Raised
+      icon: Calendar,
+      description: "Per company average",
+      trend: "Filtered SEC data"
+    }
+  ] : [
+    {
+      title: "SEC Filings",
+      value: "6,829", // All filings
       icon: Building2,
       description: "Valid numeric filings",
       trend: "Real SEC data"
     },
     {
       title: "Capital Raised",
-      value: "$565.8B", // Hard-coded value as requested
+      value: "$565.8B", // All filings
       icon: DollarSign,
       description: "Total amount raised",
       trend: "Real SEC data"
     },
     {
       title: "Average Raise",
-      value: "$82.9M", // Hard-coded value as requested
+      value: "$82.9M", // All filings
       icon: Calendar,
       description: "Per company average",
       trend: "Real SEC data"
