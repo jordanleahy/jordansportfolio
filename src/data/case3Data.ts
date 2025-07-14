@@ -190,7 +190,6 @@ export const case3Data: CaseStudyData = {
       type: 'challenge',
       title: 'Challenges', 
       items: [
-        "Complex regulatory requirements created design constraints",
         "Legacy API limitations required creative workflow solutions",
         "Balancing automation with user control in AI features",
         "Managing technical debt while adding new functionality"
