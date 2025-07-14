@@ -113,7 +113,7 @@ export const case4Data: CaseStudyData = {
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
       ],
-      image: "photo-1498050108023-c5249f4df085"
+      image: "/lovable-uploads/7c66c0d1-d5cb-4bd5-b500-d00e94c531ef.png"
     },
     {
       icon: "CheckCircle", 
