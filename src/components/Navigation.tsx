@@ -94,20 +94,20 @@ const Navigation = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("/blog")}
+                  onClick={() => navigate("/sec")}
                   className="ml-4"
                 >
-                  <BookOpen size={16} className="mr-2" />
-                  Blog
+                  <BarChart3 size={16} className="mr-2" />
+                  Q2 Form D
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("/sec")}
+                  onClick={() => navigate("/blog")}
                   className="ml-2"
                 >
-                  <BarChart3 size={16} className="mr-2" />
-                  Q2 Form D
+                  <BookOpen size={16} className="mr-2" />
+                  Blog
                 </Button>
               </div>
             </div>
@@ -149,25 +149,25 @@ const Navigation = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    navigate("/blog");
+                    navigate("/sec");
                     setIsMobileMenuOpen(false);
                   }}
                   className="w-full justify-start mt-2"
                 >
-                  <BookOpen size={16} className="mr-2" />
-                  Blog
+                  <BarChart3 size={16} className="mr-2" />
+                  Q2 Form D
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    navigate("/sec");
+                    navigate("/blog");
                     setIsMobileMenuOpen(false);
                   }}
                   className="w-full justify-start mt-1"
                 >
-                  <BarChart3 size={16} className="mr-2" />
-                  SEC Dashboard
+                  <BookOpen size={16} className="mr-2" />
+                  Blog
                 </Button>
               </div>
             </motion.div>
