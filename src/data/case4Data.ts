@@ -139,7 +139,7 @@ export const case4Data: CaseStudyData = {
     {
       icon: "Clock",
       title: "Medical Requirements",
-      description: "Intelligent drafting of prior authorization requests using patient data and medical justification templates."
+      description: "Identification of all medical requirements for drug authorization."
     },
     {
       icon: "CheckCircle",
