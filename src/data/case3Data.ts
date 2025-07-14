@@ -154,7 +154,7 @@ export const case3Data: CaseStudyData = {
     },
     {
       icon: "Shield",
-      title: "Compliance Monitoring",
+      title: "Custom Template Library",
       description: "Ensures all appeals meet regulatory requirements and payer specific guidelines."
     },
     {
