@@ -98,7 +98,8 @@ export const case4Data: CaseStudyData = {
         "AI decision point identification and design",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
-      ]
+      ],
+      image: "/lovable-uploads/d49a8c86-6a16-4da5-945a-8b2635d99e69.png"
     },
     {
       icon: "Target",
