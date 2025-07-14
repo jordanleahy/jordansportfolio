@@ -34,16 +34,6 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
                     ))}
                   </ul>
                 </Card>
-                {challenge.title === "Clinical Impact" && (
-                  <div className="md:-mx-8 lg:-mx-16 xl:-mx-32">
-                    <OptimizedImage 
-                      src="/lovable-uploads/cd122851-7533-4359-91a4-37ade8b9c3b8.png" 
-                      alt="Sepsis diagnosis review system showing denial risk and clinical criteria"
-                      aspectRatio="16/10"
-                      className="w-full rounded-lg shadow-lg"
-                    />
-                  </div>
-                )}
               </div>
             ))}
           </div>
