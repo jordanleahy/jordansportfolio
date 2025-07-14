@@ -1,0 +1,25 @@
+export type PostStatus = 'draft' | 'scheduled' | 'published';
+
+export interface SocialMediaPost {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  image_16_9_url?: string | null;
+  image_3_4_url?: string | null;
+  status: PostStatus;
+  scheduled_date?: string | null;
+  platform_tags?: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSocialMediaPost {
+  title: string;
+  description: string;
+  image_16_9_url?: string;
+  image_3_4_url?: string;
+  status?: PostStatus;
+  scheduled_date?: string;
+  platform_tags?: string[];
+}

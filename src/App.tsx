@@ -19,6 +19,7 @@ const Case1 = lazy(() => import("./pages/cases/Case1"));
 const Case4 = lazy(() => import("./pages/cases/Case4"));
 const Case3 = lazy(() => import("./pages/cases/Case3"));
 const SEC = lazy(() => import("./pages/SEC"));
+const Calendar = lazy(() => import("./pages/Calendar"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -99,6 +100,7 @@ const App = () => (
                   <Route path="/cases/case4" element={<Case4 />} />
                   <Route path="/cases/case3" element={<Case3 />} />
                   <Route path="/sec" element={<SEC />} />
+                  <Route path="/calendar" element={<Calendar />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

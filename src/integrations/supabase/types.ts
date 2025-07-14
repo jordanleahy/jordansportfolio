@@ -678,6 +678,48 @@ export type Database = {
           },
         ]
       }
+      social_media_posts: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_16_9_url: string | null
+          image_3_4_url: string | null
+          platform_tags: Json | null
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["post_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image_16_9_url?: string | null
+          image_3_4_url?: string | null
+          platform_tags?: Json | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_16_9_url?: string | null
+          image_3_4_url?: string | null
+          platform_tags?: Json | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       mv_offerings_enriched: {
@@ -761,6 +803,7 @@ export type Database = {
     Enums: {
       detection_method: "manual" | "voice_pattern" | "hybrid"
       event_status: "upcoming" | "in-progress" | "completed" | "cancelled"
+      post_status: "draft" | "scheduled" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -890,6 +933,7 @@ export const Constants = {
     Enums: {
       detection_method: ["manual", "voice_pattern", "hybrid"],
       event_status: ["upcoming", "in-progress", "completed", "cancelled"],
+      post_status: ["draft", "scheduled", "published"],
     },
   },
 } as const
