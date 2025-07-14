@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           cta_text: string
           cta_url: string | null
+          day: number | null
           deep_dive_content: string | null
           deep_dive_title: string | null
           featured: boolean
@@ -51,6 +52,7 @@ export type Database = {
           created_at?: string
           cta_text: string
           cta_url?: string | null
+          day?: number | null
           deep_dive_content?: string | null
           deep_dive_title?: string | null
           featured?: boolean
@@ -82,6 +84,7 @@ export type Database = {
           created_at?: string
           cta_text?: string
           cta_url?: string | null
+          day?: number | null
           deep_dive_content?: string | null
           deep_dive_title?: string | null
           featured?: boolean
@@ -681,6 +684,7 @@ export type Database = {
       social_media_posts: {
         Row: {
           created_at: string
+          day: number | null
           description: string
           id: string
           image_16_9_url: string | null
@@ -694,6 +698,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          day?: number | null
           description: string
           id?: string
           image_16_9_url?: string | null
@@ -707,6 +712,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          day?: number | null
           description?: string
           id?: string
           image_16_9_url?: string | null
