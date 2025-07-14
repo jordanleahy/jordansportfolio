@@ -55,8 +55,7 @@ export const case3Data: CaseStudyData = {
       description: "",
       items: [
         "2 Revenue Cycle Specialists",
-        "3 Software Engineers",
-        "1 ML Engineer", 
+        "3 Software Engineers", 
         "1 Healthcare Compliance Expert",
         "Product Manager"
       ]
