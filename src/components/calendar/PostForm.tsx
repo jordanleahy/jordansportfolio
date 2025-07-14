@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
 import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
 interface PostFormProps {
@@ -20,6 +21,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
     status: 'draft',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +47,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
         description: '',
         status: 'draft',
       });
+      setIsOpen(false);
       onPostCreated();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -59,11 +62,17 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create New Social Media Post</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="w-full">
+          <Plus className="mr-2 h-4 w-4" />
+          Create New Post
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create New Social Media Post</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -125,7 +134,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
             {isSubmitting ? 'Creating...' : 'Create Post'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 };
