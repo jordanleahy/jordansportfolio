@@ -28,6 +28,9 @@ const Navigation = () => {
   const scrollToSection = (sectionId: string) => {
     if (sectionId === "hero") {
       window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (sectionId === "about") {
+      // Open LinkedIn profile in new tab when About is clicked
+      window.open("https://www.linkedin.com/in/jordanleahy/", "_blank");
     } else {
       const element = document.getElementById(sectionId);
       if (element) {
