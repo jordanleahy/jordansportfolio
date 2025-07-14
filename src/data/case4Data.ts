@@ -4,7 +4,7 @@ export const case4Data: CaseStudyData = {
   // Hero Section
   title: "Prior Authorization Workflow System: UX Case Study - Healthcare AI Automation",
   description: "How I designed an ML & LLM powered prior authorization system that reduced approval time from 3 days to 5 minutes, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
-  heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
+  heroImage: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
   roleDetails: "Workflow design & user research lead",
@@ -90,7 +90,7 @@ export const case4Data: CaseStudyData = {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park, NP"
       },
-      image: "/lovable-uploads/50dcd2f1-ee08-4212-8913-c8fbe7df89af.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/50dcd2f1-ee08-4212-8913-c8fbe7df89af.png"
     },
     {
       icon: "Lightbulb",
@@ -101,7 +101,7 @@ export const case4Data: CaseStudyData = {
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ],
-      image: "/lovable-uploads/6178eef1-7329-431e-a756-8d62bd36e0e5.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/6178eef1-7329-431e-a756-8d62bd36e0e5.png"
     },
     {
       icon: "Target",
@@ -113,7 +113,7 @@ export const case4Data: CaseStudyData = {
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
       ],
-      image: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png"
     },
     {
       icon: "CheckCircle", 
@@ -124,7 +124,7 @@ export const case4Data: CaseStudyData = {
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
       ],
-      image: "/lovable-uploads/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png"
     }
   ],
 

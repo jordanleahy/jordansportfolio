@@ -4,7 +4,7 @@ export const case3Data: CaseStudyData = {
   // Hero Section
   title: "Denial and Appeal Resolution",
   description: "How I designed an AI-powered denial management platform that reduced claim appeal processing time by 10 minutes. Explore the UX research, design process, and impact on healthcare revenue cycle management, featuring automated claim analysis and intelligent appeal generation.",
-  heroImage: "/lovable-uploads/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png",
+  heroImage: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png",
   heroImageAlt: "Denial and Appeal Management dashboard showing claim analysis and appeal workflow",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
@@ -79,7 +79,7 @@ export const case3Data: CaseStudyData = {
       icon: "Eye",
       title: "1. Research & Discovery",
       description: "Deep dive into revenue cycle workflows and denial management pain points",
-      image: "/lovable-uploads/f8bdf34c-98f3-483b-9033-2c28bda929cd.png",
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/f8bdf34c-98f3-483b-9033-2c28bda929cd.png",
       items: [
         "Shadowed coding and appeal specialists internally.",
         "Analyzed 50+ denial cases across different payers", 
@@ -95,7 +95,7 @@ export const case3Data: CaseStudyData = {
       icon: "Lightbulb",
       title: "2. Ideation & Concepting",
       description: "Collaborative workshops to prioritize features and define user flows",
-      image: "/lovable-uploads/3e1c498e-aaa3-49a7-a2ee-5c4b772223fb.png",
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/3e1c498e-aaa3-49a7-a2ee-5c4b772223fb.png",
       items: [
         "User journey mapping for denial to resolution workflow",
         "Feature prioritization workshops with stakeholders",
@@ -107,7 +107,7 @@ export const case3Data: CaseStudyData = {
       icon: "Target",
       title: "3. Prototyping & Validation",
       description: "Rapid prototyping and user testing to validate design decisions",
-      image: "/lovable-uploads/dfaaf33d-9dd1-4c76-8be2-bba0c4b46d98.png",
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/dfaaf33d-9dd1-4c76-8be2-bba0c4b46d98.png",
       items: [
         "Interactive Figma prototypes for core workflows",
         "Usability testing with billing staff",
@@ -119,7 +119,7 @@ export const case3Data: CaseStudyData = {
       icon: "CheckCircle", 
       title: "4. Iteration & Handoff",
       description: "Design refinement and comprehensive documentation for development",
-      image: "/lovable-uploads/8558410b-841e-412e-a8ce-ef6084e9a684.png",
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/8558410b-841e-412e-a8ce-ef6084e9a684.png",
       items: [
         "Component library and design tokens",
         "Detailed interaction specifications",

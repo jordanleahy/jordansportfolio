@@ -17,7 +17,7 @@ export const processData = {
         text: "Every minute matters for CDI teams during inpatient stays. We need tools that help us validate diagnoses with confidence and speed.",
         author: "Internal CDS, Inpatient Documentation Team"
       },
-      image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png"
     },
     {
       icon: "Lightbulb",
@@ -28,7 +28,7 @@ export const processData = {
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
       ],
-      image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/1301a9f1-c906-4800-a572-38f921f717bf.png"
     },
     {
       icon: "Target",
@@ -39,7 +39,7 @@ export const processData = {
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
       ],
-      image: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/e9e1093f-623d-4331-a500-749e8c9108c3.png"
     },
     {
       icon: "CheckCircle", 
@@ -51,7 +51,7 @@ export const processData = {
         "Performance monitoring and optimization",
         "Post-deployment user feedback integration"
       ],
-      image: "/lovable-uploads/865c082a-34b7-47d5-b45a-2385c872ed49.png"
+      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/case-studies/865c082a-34b7-47d5-b45a-2385c872ed49.png"
     }
   ] as ProcessStep[],
 };
