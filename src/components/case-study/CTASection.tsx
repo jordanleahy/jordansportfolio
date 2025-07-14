@@ -19,7 +19,7 @@ export const CTASection = ({ title }: CTASectionProps) => {
           <h2 className="text-3xl md:text-4xl font-bold mb-8">{title}</h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <a href="#contact">Start a Project</a>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=jordanwilliamleahy@gmail.com&su=Project%20Inquiry" target="_blank" rel="noopener noreferrer">Start a Project</a>
             </Button>
             <Button variant="outline" size="lg" asChild>
               <Link to="/">View More Work</Link>
