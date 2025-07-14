@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
 import { socialMediaService } from '@/services/socialMediaService';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles, Loader2 } from 'lucide-react';
 import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
 interface PostFormProps {
@@ -22,6 +23,8 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingField, setGeneratingField] = useState<string>('');
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,6 +64,69 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
     }
   };
 
+  const generateContent = async (type: 'title' | 'description' | 'complete', prompt?: string) => {
+    if (!prompt && type !== 'complete') {
+      toast({
+        title: "Input Required",
+        description: "Please provide a topic or description to generate content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratingField(type);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          prompt: prompt || `Generate ${type} for: ${formData.title || formData.description || 'a social media post'}`,
+          type: type
+        }
+      });
+
+      if (error) throw error;
+
+      if (type === 'complete' && data.title && data.description) {
+        setFormData(prev => ({
+          ...prev,
+          title: data.title,
+          description: data.description
+        }));
+        toast({
+          title: "Content Generated",
+          description: "Both title and description have been generated with AI.",
+        });
+      } else if (data.content) {
+        setFormData(prev => ({
+          ...prev,
+          [type]: data.content
+        }));
+        toast({
+          title: "Content Generated",
+          description: `AI-generated ${type} has been added.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+      setGeneratingField('');
+    }
+  };
+
+  const handleGenerateFromPrompt = () => {
+    const prompt = window.prompt("Describe your post topic or content:");
+    if (prompt) {
+      generateContent('complete', prompt);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -72,17 +138,53 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Social Media Post</DialogTitle>
+          <div className="flex gap-2 mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGenerateFromPrompt}
+              disabled={isGenerating}
+              className="flex-1"
+            >
+              {isGenerating && generatingField === 'complete' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Generate with AI
+            </Button>
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Title</label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter post title"
-                required
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter post title"
+                  required
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const topic = formData.description || window.prompt("What's your post about?");
+                    if (topic) generateContent('title', topic);
+                  }}
+                  disabled={isGenerating}
+                  title="Generate title with AI"
+                >
+                  {isGenerating && generatingField === 'title' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Status</label>
@@ -103,7 +205,27 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium">Description</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const topic = formData.title || window.prompt("What's your post about?");
+                  if (topic) generateContent('description', topic);
+                }}
+                disabled={isGenerating}
+                title="Generate description with AI"
+              >
+                {isGenerating && generatingField === 'description' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                <span className="ml-1 hidden sm:inline">AI</span>
+              </Button>
+            </div>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
