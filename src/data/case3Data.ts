@@ -55,8 +55,8 @@ export const case3Data: CaseStudyData = {
       description: "",
       items: [
         "2 Validation Analyst",
-        "2 Appeal Writer"
-        "3 Software Engineers", 
+        "2 Appeal Writer",
+        "3 Software Engineers",
         "Product Manager"
       ]
     },
