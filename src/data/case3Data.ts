@@ -45,8 +45,7 @@ export const case3Data: CaseStudyData = {
       items: [
         "User research & workflow analysis",
         "Information architecture & wireframing", 
-        "Prototype development & testing",
-        "Design system creation"
+        "Prototype development & testing"
       ]
     },
     {
