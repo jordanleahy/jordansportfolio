@@ -162,7 +162,7 @@ export const case4Data: CaseStudyData = {
   // Outcomes Section
   outcomesTitle: "Outcomes",
   userFeedback: {
-    quote: "We went from 3 weeks to 3 days for specialty medication prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
+    quote: "We went from 3 days to 5 minutes for specialty medication prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
     author: "Maria Gonzalez, Medical Practice Manager"
   },
 
