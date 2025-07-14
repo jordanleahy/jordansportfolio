@@ -144,7 +144,7 @@ export const case3Data: CaseStudyData = {
     },
     {
       icon: "TrendingUp",
-      title: "Grouped Assignment",
+      title: "Payer Group Assignment",
       description: "Better group of denials based on follow up response such as call, portal or mail."
     },
     {
