@@ -21,6 +21,7 @@ export const case4Data: CaseStudyData = {
       title: 'Process Inefficiency',
       items: [
         "2 - 3 days average approval time",
+        "60% of prior authorizations require multiple submissions",
         "78% of providers report PA as major workflow burden"
       ]
     },
@@ -29,8 +30,8 @@ export const case4Data: CaseStudyData = {
       title: 'Design Challenges',
       items: [
         "Complex multi step approval workflows",
-        "Formulary rules, adapting to clinical workflows"
-      
+        "Integration with multiple payer, PBM, pharmacy systems",
+        "Real time formulary rule interpretation"
       ]
     }
   ],
@@ -92,10 +93,10 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "Lightbulb",
-      title: "2. AI Assisted Workflow Design",
+      title: "2. ML/LLM Assisted Workflow Design",
       description: "Designing intelligent automation while maintaining human oversight",
       items: [
-        "AI decision point identification and design",
+        "What should ML do vs what should LLM do",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ]
