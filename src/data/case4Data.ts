@@ -154,7 +154,7 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "TrendingUp",
-      title: "Download and Set to Payer", 
+      title: "Download and Send to Payer", 
       description: "Comprehensive insights into approval rates, processing times, and optimization opportunities."
     }
   ],
