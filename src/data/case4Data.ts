@@ -55,7 +55,7 @@ export const case4Data: CaseStudyData = {
       description: "",
       items: [
         "2 Healthcare Workflow Specialists",
-        "4 Backend Engineers",
+        "4 Engineers",
         "1 ML Engineer", 
         "Product Manager"
       ]
