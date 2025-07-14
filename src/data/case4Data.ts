@@ -143,7 +143,7 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "CheckCircle",
-      title: "Status Tracking",
+      title: "Step Therapy Requirements",
       description: "Monitoring of approval status with proactive notifications and next-step recommendations."
     },
 
