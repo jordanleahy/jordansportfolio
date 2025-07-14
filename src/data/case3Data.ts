@@ -68,7 +68,7 @@ export const case3Data: CaseStudyData = {
       items: [
         "5 major payer integrations",
         "Top denial templates",
-        "ML prediction tempalte design",
+        "ML prediction template design",
         "Automated workflow creation"
       ]
     }
