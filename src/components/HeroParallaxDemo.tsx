@@ -41,7 +41,7 @@ export const products = [
   {
     title: "AI-Powered CDI Tools",
     link: "/cases/case1",
-    thumbnail: getStorageImageUrl("873ce045-f694-4990-8de2-acc4f4137e86.png"),
+    thumbnail: "/lovable-uploads/4380ae80-9e2b-46a2-adbf-63b2cae372e3.png",
   },
   {
     title: "Prior Authorization Workflow",
