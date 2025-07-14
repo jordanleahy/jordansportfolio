@@ -7,7 +7,7 @@ const ContactSection = () => {
     icon: Mail,
     label: "Email",
     value: "Email",
-    href: "mailto:jordanwilliamleahy@gmail.com",
+    href: "mailto:jordanwilliamleahy@gmail.com?subject=Project Inquiry&body=Hi Jordan, I would like to confirm my intent to discuss a potential project opportunity.",
     description: "Best way to reach me"
   }, {
     icon: Linkedin,
@@ -97,7 +97,7 @@ const ContactSection = () => {
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <a href="mailto:jordanwilliamleahy@gmail.com">
+                  <a href="mailto:jordanwilliamleahy@gmail.com?subject=Project Inquiry&body=Hi Jordan, I would like to confirm my intent to discuss a potential project opportunity.">
                     <Mail className="mr-2 h-5 w-5" />
                     Get In Touch
                   </a>
