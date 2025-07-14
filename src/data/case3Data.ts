@@ -162,7 +162,7 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Users",
       title: "Team Collaboration", 
-      description: "Workflow management tools that coordinate between billing, clinical, and administrative staff."
+      description: "Workflow management for all denial management and appeal package creation users."
     }
   ],
 
