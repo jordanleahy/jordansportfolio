@@ -54,9 +54,9 @@ export const case3Data: CaseStudyData = {
       title: "Team & Stakeholders",
       description: "",
       items: [
-        "2 Revenue Cycle Specialists",
+        "2 Validation Analyst",
+        "2 Appeal Writer"
         "3 Software Engineers", 
-        "1 Healthcare Compliance Expert",
         "Product Manager"
       ]
     },
