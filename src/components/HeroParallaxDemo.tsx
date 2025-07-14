@@ -51,7 +51,7 @@ export const products = [
   {
     title: "Healthcare Data Visualization",
     link: "/cases/case3",
-    thumbnail: getStorageImageUrl("b040919d-eb34-428f-ba71-3ee1aba6596b.png"),
+    thumbnail: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//Day%201%20What%20Is%20Clinical%20Documentation%20Integrity%20%20169.png",
   },
   {
     title: "Clinical Decision Support",

@@ -63,7 +63,7 @@ export const migrateHeroParallaxImages = async () => {
     '8558410b-841e-412e-a8ce-ef6084e9a684.png',
     '873ce045-f694-4990-8de2-acc4f4137e86.png',
     '9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png',
-    'b040919d-eb34-428f-ba71-3ee1aba6596b.png',
+    'Day%201%20What%20Is%20Clinical%20Documentation%20Integrity%20%20169.png',
     'd16887ac-0992-4a5a-84f5-043c66a1acd3.png',
     'ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png',
     '8c1110c1-02c2-4041-987c-a9d030ffef3b.png',
