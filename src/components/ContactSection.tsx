@@ -65,7 +65,16 @@ const ContactSection = () => {
                   <h3 className="font-bold text-foreground mb-2">{method.label}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{method.description}</p>
                   <Button variant="outline" size="sm" asChild className="w-full">
-                    <a href={method.href} target={method.href.startsWith('http') ? '_blank' : undefined} rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="text-sm">
+                    <a 
+                      href={method.href} 
+                      onClick={method.href.startsWith('mailto:') ? (e) => {
+                        e.preventDefault();
+                        window.open('https://mail.google.com/mail/?view=cm&fs=1&to=jordanwilliamleahy@gmail.com&su=Lets%20chat%20RCM', '_blank');
+                      } : undefined}
+                      target={method.href.startsWith('http') ? '_blank' : undefined} 
+                      rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined} 
+                      className="text-sm"
+                    >
                        {method.value}
                     </a>
                   </Button>
