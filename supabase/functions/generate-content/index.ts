@@ -16,6 +16,7 @@ serve(async (req) => {
 
   try {
     const { prompt, type } = await req.json();
+    console.log('Received request:', { type, promptLength: prompt?.length });
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -32,6 +33,9 @@ serve(async (req) => {
         break;
       case 'complete':
         systemPrompt = 'You are a social media expert. Generate both a catchy title (under 60 characters) and an engaging description (100-200 characters with hashtags) for a social media post. Format your response as JSON with "title" and "description" fields.';
+        break;
+      case 'image_prompt':
+        systemPrompt = 'You are an AI image prompt specialist. Create detailed, specific prompts for generating high-quality images based on the user requirements. Focus on visual composition, style, colors, and technical specifications.';
         break;
       default:
         systemPrompt = 'You are a helpful social media content assistant.';
@@ -61,6 +65,7 @@ serve(async (req) => {
 
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
+    console.log('Generated content length:', generatedContent?.length);
 
     // Try to parse as JSON for complete type, otherwise return as text
     let result;
@@ -75,6 +80,8 @@ serve(async (req) => {
           description: lines.slice(1).join(' ').trim() || 'Generated description'
         };
       }
+    } else if (type === 'image_prompt') {
+      result = { generatedText: generatedContent };
     } else {
       result = { content: generatedContent };
     }

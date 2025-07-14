@@ -86,9 +86,18 @@ Please create a complete, ready-to-use prompt for generating a 16:9 healthcare v
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
+      console.log('Function response:', data);
       const generatedText = data.generatedText;
+      
+      if (!generatedText) {
+        throw new Error('No generated text received from function');
+      }
+      
       setGeneratedPrompt(generatedText);
 
       // Cache the generated prompt in the database

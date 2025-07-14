@@ -30,14 +30,24 @@ export const socialMediaService = {
   },
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
+    console.log('Updating post:', { id, updates });
+    
     const { data, error } = await supabase
       .from('social_media_posts')
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Update error:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error(`Post with id ${id} not found`);
+    }
+    
     return data;
   },
 
