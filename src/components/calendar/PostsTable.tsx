@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Copy, Trash2, ImageIcon } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2 } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePromptModal } from './ImagePromptModal';
+import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostsTableProps {
@@ -17,6 +18,8 @@ interface PostsTableProps {
 
 export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPostId, setUploadingPostId] = useState<string | null>(null);
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -83,6 +86,82 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     });
   };
 
+  const handleImageUpload = async (postId: string, file: File) => {
+    setUploadingPostId(postId);
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${postId}_16_9_${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      // Update the post with the new image URL
+      await socialMediaService.updatePost(postId, {
+        image_16_9_url: publicUrl
+      });
+
+      toast({
+        title: "Image uploaded",
+        description: "16:9 image has been successfully uploaded.",
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPostId(null);
+    }
+  };
+
+  const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      handleImageUpload(postId, file);
+    }
+    // Reset the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
   if (posts.length === 0) {
     return (
       <Card>
@@ -105,6 +184,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>16:9 Image</TableHead>
+              <TableHead>16:9 Upload</TableHead>
               <TableHead>3:4 Image</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
@@ -142,6 +222,30 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         <ImageIcon className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileSelect(post.id, e)}
+                      className="hidden"
+                      id={`upload-${post.id}`}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => document.getElementById(`upload-${post.id}`)?.click()}
+                      disabled={uploadingPostId === post.id}
+                      title="Upload 16:9 image"
+                    >
+                      {uploadingPostId === post.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                 </TableCell>
                 <TableCell>
