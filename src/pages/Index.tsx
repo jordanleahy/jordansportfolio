@@ -12,6 +12,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
+import { ImageMigration } from "@/components/ImageMigration";
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
@@ -79,7 +80,7 @@ const Index = () => {
       
       {/* Admin Bar for authenticated users */}
       {user && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50 space-y-2">
           <div className="bg-card border rounded-lg p-3 shadow-lg">
             <p className="text-sm text-muted-foreground mb-2">
               Logged in as: {user.email}
@@ -88,6 +89,7 @@ const Index = () => {
               Sign Out
             </Button>
           </div>
+          <ImageMigration />
         </div>
       )}
 
