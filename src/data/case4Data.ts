@@ -124,7 +124,7 @@ export const case4Data: CaseStudyData = {
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
       ],
-      image: "/lovable-uploads/7c66c0d1-d5cb-4bd5-b500-d00e94c531ef.png"
+      image: "/lovable-uploads/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png"
     }
   ],
 
