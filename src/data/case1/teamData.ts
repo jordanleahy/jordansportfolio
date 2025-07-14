@@ -22,7 +22,7 @@ export const teamData = {
         "2 Data Scientists",
         "4 Engineers", 
         "1 Clinical Informaticist",
-        "Product Manager"
+        "MD Cofounder"
       ]
     },
     {
