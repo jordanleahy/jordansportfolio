@@ -199,7 +199,6 @@ export const case3Data: CaseStudyData = {
       type: 'learning',
       title: 'Next Steps',
       items: [
-        "Expand to additional payer integrations and denial categories",
         "Implement predictive analytics for proactive claim management",
         "Add advanced reporting and ROI tracking capabilities"
       ]
