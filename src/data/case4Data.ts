@@ -89,7 +89,8 @@ export const case4Data: CaseStudyData = {
       quote: {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park, NP"
-      }
+      },
+      image: "/lovable-uploads/50dcd2f1-ee08-4212-8913-c8fbe7df89af.png"
     },
     {
       icon: "Lightbulb",
@@ -99,7 +100,8 @@ export const case4Data: CaseStudyData = {
         "AI decision point identification and design",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
-      ]
+      ],
+      image: "/lovable-uploads/6178eef1-7329-431e-a756-8d62bd36e0e5.png"
     },
     {
       icon: "Target",
@@ -110,7 +112,8 @@ export const case4Data: CaseStudyData = {
         "Usability testing with prescribers and non-prescribers staff",
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
-      ]
+      ],
+      image: "/lovable-uploads/762c3624-2485-4556-b7c7-63709fc409aa.png"
     },
     {
       icon: "CheckCircle", 
@@ -120,7 +123,8 @@ export const case4Data: CaseStudyData = {
         "Phased rollout across small florida dermatology practices",
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
-      ]
+      ],
+      image: "/lovable-uploads/7c66c0d1-d5cb-4bd5-b500-d00e94c531ef.png"
     }
   ],
 
