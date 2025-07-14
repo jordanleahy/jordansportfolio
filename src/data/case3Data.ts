@@ -213,7 +213,7 @@ export const case3Data: CaseStudyData = {
       "AI prompt engineering documentation"
     ],
     processDocumentation: [
-      "Small-practice workflow maps",
+      "Call payer workflow",
       "Usability test reports",
       "Handoff and QA checklists"
     ]
