@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Trash2, ImageIcon } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
+import { ImagePromptModal } from './ImagePromptModal';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostsTableProps {
@@ -16,6 +17,15 @@ interface PostsTableProps {
 
 export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
+  const [imagePromptModal, setImagePromptModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+  }>({
+    isOpen: false,
+    title: '',
+    description: ''
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -57,6 +67,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleGenerateImagePrompt = (post: SocialMediaPost) => {
+    setImagePromptModal({
+      isOpen: true,
+      title: post.title,
+      description: post.description
+    });
   };
 
   if (posts.length === 0) {
@@ -101,14 +119,24 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {post.image_16_9_url && (
-                    <OptimizedImage
-                      src={post.image_16_9_url}
-                      alt="16:9 Image"
-                      aspectRatio="16/9"
-                      className="w-20 h-auto rounded border"
-                    />
-                  )}
+                  <div 
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => handleGenerateImagePrompt(post)}
+                    title="Click to generate image prompt"
+                  >
+                    {post.image_16_9_url ? (
+                      <OptimizedImage
+                        src={post.image_16_9_url}
+                        alt="16:9 Image"
+                        aspectRatio="16/9"
+                        className="w-20 h-auto rounded border"
+                      />
+                    ) : (
+                      <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   {post.image_3_4_url && (
@@ -153,6 +181,13 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
           </TableBody>
         </Table>
       </CardContent>
+      
+      <ImagePromptModal
+        isOpen={imagePromptModal.isOpen}
+        onClose={() => setImagePromptModal({ isOpen: false, title: '', description: '' })}
+        title={imagePromptModal.title}
+        description={imagePromptModal.description}
+      />
     </Card>
   );
 };

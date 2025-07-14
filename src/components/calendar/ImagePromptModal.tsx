@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Copy, Check, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface ImagePromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description: string;
+}
+
+const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
+Healthcare Vector Illustration Generator
+
+🎯 Project Goal
+Create text prompts that generate flat, modern vector illustrations used in healthcare-RCM storytelling, training materials, and executive summaries. Prompts should produce clean, trustworthy visuals with an informative tone—supporting clarity around coding workflows, audit processes, and documentation quality.
+
+✍️ Prompt Format (Template)
+"A healthcare-style vector illustration showing [USER INPUT SCENE] in a clinical or office setting. The design should reflect the same tone and style as corporate infographics—clean, clear, and visually educational."
+
+Focus on the scene, setting, and layout, not on narrative backstory or detailed character attributes.
+
+🧩 Example Scene Elements
+- EHR/chart review screens, audit flags, code sets (#ICD-10, #CPT)
+- Clinicians or coders at desks, laptops, clipboards
+- Document stacks, magnifying-glass icons, checkmarks/x-marks
+- Dashboards with metrics (e.g., "Denial Rate," "Pre-bill Accuracy")
+- Clocks or timers indicating turnaround
+- Hospital corridors, office partitions, meeting rooms
+
+✅ Updated Visual Style & Layout Guidance
+
+🎨 Color Palette
+Use a professional healthcare palette—bright but not neon:
+- Sky Blue for backgrounds and headers
+- Teal-Green for positive indicators and highlights
+- Burnt Orange for warnings or flags
+- Rich Gray for text, outlines, and neutral elements
+- Deep Navy for shadows and key iconography
+
+🧱 Style Details
+- Flat vector design only
+- No gradients, no textures, no outlines
+- Minimal soft shadows for element separation
+- Simplified, geometric shapes for people and objects
+- No photorealism—keep forms schematic and iconographic
+
+🏙️ Composition & Scene Layout
+- **Foreground:** Primary action (e.g., coder reviewing a flagged chart) centered and prominent
+- **Mid-ground:** Supporting elements (dashboards, document icons, audit alerts)
+- **Background:** Abstracted clinic/office environment—desks, partitions, simple window shapes
+- **Iconography:** Embed symbols (checkmarks, clocks, alert triangles) naturally—don't float them arbitrarily
+
+📐 Aspect Ratio & Safe Zone
+- **Safe Zone:** Keep all critical elements—text, icons, human figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
+- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
+
+export const ImagePromptModal = ({ isOpen, onClose, title, description }: ImagePromptModalProps) => {
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const generateImagePrompt = async () => {
+    setIsGenerating(true);
+    try {
+      const userContent = `Title: ${title}\nDescription: ${description}`;
+      
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          prompt: `${HEALTHCARE_SYSTEM_PROMPT}
+
+Based on the following content, create a detailed image generation prompt that follows the healthcare vector illustration guidelines above:
+
+${userContent}
+
+Please create a complete, ready-to-use prompt for generating a 16:9 healthcare vector illustration that incorporates the title and description provided. The prompt should include specific visual elements, color palette, composition details, and ensure all elements stay within the safe zone for proper cropping.`,
+          type: 'image_prompt'
+        }
+      });
+
+      if (error) throw error;
+
+      setGeneratedPrompt(data.generatedText);
+    } catch (error) {
+      console.error('Error generating image prompt:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate image prompt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopied(true);
+      toast({
+        title: "Prompt copied",
+        description: "Image prompt has been copied to clipboard. You can now paste it into OpenAI's image creator.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy prompt to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    if (isOpen && !generatedPrompt && !isGenerating) {
+      generateImagePrompt();
+    }
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setGeneratedPrompt('');
+      setCopied(false);
+    }
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Healthcare Image Prompt Generator</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            <p><strong>Post Title:</strong> {title}</p>
+            <p><strong>Description:</strong> {description}</p>
+          </div>
+          
+          {isGenerating ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin mr-2" />
+              <span>Generating healthcare image prompt...</span>
+            </div>
+          ) : generatedPrompt ? (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Generated Image Prompt:</label>
+                <Textarea
+                  value={generatedPrompt}
+                  readOnly
+                  className="min-h-[300px] mt-2 font-mono text-sm"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Copy this prompt and paste it into OpenAI's image creator to generate your healthcare vector illustration.
+                </p>
+                <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy Prompt
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center p-8">
+              <Button onClick={generateImagePrompt}>Generate Image Prompt</Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
