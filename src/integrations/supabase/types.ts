@@ -686,6 +686,7 @@ export type Database = {
           created_at: string
           day: number | null
           description: string
+          generated_image_prompt: string | null
           id: string
           image_16_9_url: string | null
           image_3_4_url: string | null
@@ -700,6 +701,7 @@ export type Database = {
           created_at?: string
           day?: number | null
           description: string
+          generated_image_prompt?: string | null
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null
@@ -714,6 +716,7 @@ export type Database = {
           created_at?: string
           day?: number | null
           description?: string
+          generated_image_prompt?: string | null
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null

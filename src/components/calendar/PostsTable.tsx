@@ -19,12 +19,16 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
+    postId: string;
     title: string;
     description: string;
+    cachedPrompt?: string | null;
   }>({
     isOpen: false,
+    postId: '',
     title: '',
-    description: ''
+    description: '',
+    cachedPrompt: null
   });
 
   const getStatusColor = (status: string) => {
@@ -72,8 +76,10 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const handleGenerateImagePrompt = (post: SocialMediaPost) => {
     setImagePromptModal({
       isOpen: true,
+      postId: post.id,
       title: post.title,
-      description: post.description
+      description: post.description,
+      cachedPrompt: post.generated_image_prompt
     });
   };
 
@@ -184,9 +190,17 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       
       <ImagePromptModal
         isOpen={imagePromptModal.isOpen}
-        onClose={() => setImagePromptModal({ isOpen: false, title: '', description: '' })}
+        onClose={() => setImagePromptModal({ 
+          isOpen: false, 
+          postId: '', 
+          title: '', 
+          description: '', 
+          cachedPrompt: null 
+        })}
         title={imagePromptModal.title}
         description={imagePromptModal.description}
+        postId={imagePromptModal.postId}
+        cachedPrompt={imagePromptModal.cachedPrompt}
       />
     </Card>
   );

@@ -5,12 +5,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { socialMediaService } from '@/services/socialMediaService';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   description: string;
+  postId: string;
+  cachedPrompt?: string | null;
 }
 
 const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
@@ -59,7 +62,7 @@ Use a professional healthcare palette—bright but not neon:
 - **Safe Zone:** Keep all critical elements—text, icons, human figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
 - **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
 
-export const ImagePromptModal = ({ isOpen, onClose, title, description }: ImagePromptModalProps) => {
+export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt }: ImagePromptModalProps) => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -85,7 +88,18 @@ Please create a complete, ready-to-use prompt for generating a 16:9 healthcare v
 
       if (error) throw error;
 
-      setGeneratedPrompt(data.generatedText);
+      const generatedText = data.generatedText;
+      setGeneratedPrompt(generatedText);
+
+      // Cache the generated prompt in the database
+      try {
+        await socialMediaService.updatePost(postId, {
+          generated_image_prompt: generatedText
+        });
+      } catch (cacheError) {
+        console.error('Error caching prompt:', cacheError);
+        // Don't show error to user since main functionality worked
+      }
     } catch (error) {
       console.error('Error generating image prompt:', error);
       toast({
@@ -117,10 +131,16 @@ Please create a complete, ready-to-use prompt for generating a 16:9 healthcare v
   };
 
   React.useEffect(() => {
-    if (isOpen && !generatedPrompt && !isGenerating) {
-      generateImagePrompt();
+    if (isOpen) {
+      if (cachedPrompt) {
+        // Use cached prompt if available
+        setGeneratedPrompt(cachedPrompt);
+      } else if (!generatedPrompt && !isGenerating) {
+        // Generate new prompt if no cache and no current prompt
+        generateImagePrompt();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, cachedPrompt]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -159,9 +179,16 @@ Please create a complete, ready-to-use prompt for generating a 16:9 healthcare v
               </div>
               
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Copy this prompt and paste it into OpenAI's image creator to generate your healthcare vector illustration.
-                </p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Copy this prompt and paste it into OpenAI's image creator to generate your healthcare vector illustration.
+                  </p>
+                  {cachedPrompt && (
+                    <p className="text-xs text-green-600">
+                      ✓ Using cached prompt (no API call needed)
+                    </p>
+                  )}
+                </div>
                 <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
                   {copied ? (
                     <>
