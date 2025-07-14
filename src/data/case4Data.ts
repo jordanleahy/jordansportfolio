@@ -54,8 +54,9 @@ export const case4Data: CaseStudyData = {
       title: "Team & Stakeholders",
       description: "",
       items: [
-        "3 Prescribers and Non-prescribers",
-        "4 Software Engineers",
+        "2 Healthcare Workflow Specialists",
+        "4 Backend Engineers",
+        "1 ML Engineer", 
         "Product Manager"
       ]
     },
@@ -88,8 +89,7 @@ export const case4Data: CaseStudyData = {
       quote: {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park, NP"
-      },
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d"
+      }
     },
     {
       icon: "Lightbulb",
@@ -99,8 +99,7 @@ export const case4Data: CaseStudyData = {
         "AI decision point identification and design",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
-      ],
-      image: "/lovable-uploads/6464711c-6f2f-4db8-9c90-62e2540e1a36.png"
+      ]
     },
     {
       icon: "Target",
@@ -111,8 +110,7 @@ export const case4Data: CaseStudyData = {
         "Usability testing with prescribers and non-prescribers staff",
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
-      ],
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085"
+      ]
     },
     {
       icon: "CheckCircle", 
@@ -122,8 +120,7 @@ export const case4Data: CaseStudyData = {
         "Phased rollout across small florida dermatology practices",
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
-      ],
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"
+      ]
     }
   ],
 
@@ -132,28 +129,28 @@ export const case4Data: CaseStudyData = {
   features: [
     {
       icon: "Shield",
-      title: "Smart Rule Extraction", 
-      description: "AI powered analysis of insurance formulary documents to automatically identify prior authorization requirements."
+      title: " Formulary Rules Identification", 
+      description: "Identification of the correct formulary, which queues up medical requirements, step therapy, and reauthorization of the requirements."
     },
     {
       icon: "Clock",
-      title: "Automated Letter Generation",
-      description: "Intelligent drafting of prior authorization requests using patient data and medical justification templates."
+      title: "Medical Requirements",
+      description: "Patient diagnosis and medical requirements required for authorization of the drug."
     },
     {
       icon: "CheckCircle",
-      title: "Status Tracking",
-      description: "Monitoring of approval status with proactive notifications and next-step recommendations."
+      title: "Step Therapy Requirements",
+      description: "Allows HCP to understand what therapy's a patient must fail before insurance will pay for prescribed drug."
     },
 
     {
       icon: "Target",
-      title: "Clinical Decision Support",
-      description: "Evidence based alternative medication suggestions when prior authorization is denied or delayed."
+      title: "Reauthorizaton Dates",
+      description: "Automated notification of when reauthorization is required to allow for new prior authorization."
     },
     {
       icon: "TrendingUp",
-      title: "Analytics & Reporting", 
+      title: "Download and Submit", 
       description: "Comprehensive insights into approval rates, processing times, and optimization opportunities."
     }
   ],
