@@ -138,7 +138,7 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "Clock",
-      title: "Automated Letter Generation",
+      title: "Medical Requirements",
       description: "Intelligent drafting of prior authorization requests using patient data and medical justification templates."
     },
     {
