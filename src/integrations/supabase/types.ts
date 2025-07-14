@@ -793,6 +793,10 @@ export type Database = {
       }
     }
     Functions: {
+      insert_cdi_content: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
