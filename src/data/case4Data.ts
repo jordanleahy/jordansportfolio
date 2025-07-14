@@ -150,7 +150,7 @@ export const case4Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Reauthorization Dates",
-      description: "Evidence based alternative medication suggestions when prior authorization is denied or delayed."
+      description: "Reauthorization notification dates to prior authorization renewal."
     },
     {
       icon: "TrendingUp",
