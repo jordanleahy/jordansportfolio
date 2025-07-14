@@ -134,7 +134,7 @@ export const case3Data: CaseStudyData = {
   features: [
     {
       icon: "Brain",
-      title: "AI Powered Claim Analysis", 
+      title: "Call Payer Interface", 
       description: "Automatically identifies denial reasons and extracts relevant patient data for targeted appeals."
     },
     {
