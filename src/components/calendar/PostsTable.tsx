@@ -208,7 +208,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   <div 
                     className="cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() => handleGenerateImagePrompt(post)}
-                    title="Click to generate image prompt"
+                    title="Click to generate 16:9 aspect ratio image prompt"
                   >
                     {post.image_16_9_url ? (
                       <OptimizedImage
@@ -220,6 +220,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     ) : (
                       <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                         <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground ml-1">16:9</span>
                       </div>
                     )}
                   </div>
