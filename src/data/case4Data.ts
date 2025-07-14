@@ -133,7 +133,7 @@ export const case4Data: CaseStudyData = {
   features: [
     {
       icon: "Shield",
-      title: "Smart Rule Extraction", 
+      title: "Formulary Identification", 
       description: "AI powered analysis of insurance formulary documents to automatically identify prior authorization requirements."
     },
     {
