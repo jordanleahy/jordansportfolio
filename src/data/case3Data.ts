@@ -66,7 +66,7 @@ export const case3Data: CaseStudyData = {
       title: "Duration & Scope", 
       description: "4 month timeline",
       items: [
-        "5 major payer integrations",
+        "Denial and appeal management UI",
         "Top denial templates",
         "ML prediction template design",
         "Automated workflow creation"
