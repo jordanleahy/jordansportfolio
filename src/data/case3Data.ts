@@ -135,7 +135,7 @@ export const case3Data: CaseStudyData = {
     {
       icon: "Brain",
       title: "Call Payer Interface", 
-      description: "Automatically identifies denial reasons and extracts relevant patient data for targeted appeals."
+      description: "Custom interface when a HCP needs to call the payer to confirm they received the documents, take notes, and understand next steps based on insurance representative."
     },
     {
       icon: "FileText",
