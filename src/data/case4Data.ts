@@ -20,8 +20,7 @@ export const case4Data: CaseStudyData = {
       type: 'problem',
       title: 'Process Inefficiency',
       items: [
-        "2 - 3 days average response time for $$$ drugs",
-        "60% of prior authorizations require multiple submissions",
+        "2 - 3 days average approval time",
         "78% of providers report PA as major workflow burden"
       ]
     },
@@ -30,8 +29,8 @@ export const case4Data: CaseStudyData = {
       title: 'Design Challenges',
       items: [
         "Complex multi step approval workflows",
-        "Integration with multiple payer, PBM, pharmacy systems",
-        "Real time formulary rule interpretation"
+        "Formulary rules, adapting to clinical workflows"
+      
       ]
     }
   ],
