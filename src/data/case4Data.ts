@@ -99,7 +99,7 @@ export const case4Data: CaseStudyData = {
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ],
-      image: "/lovable-uploads/d49a8c86-6a16-4da5-945a-8b2635d99e69.png"
+      image: "/lovable-uploads/3168fa39-1b9f-4e31-8e1c-8c5e23b9446b.png"
     },
     {
       icon: "Target",
