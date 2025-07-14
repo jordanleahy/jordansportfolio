@@ -201,7 +201,6 @@ export const case3Data: CaseStudyData = {
       items: [
         "Expand to additional payer integrations and denial categories",
         "Implement predictive analytics for proactive claim management",
-        "Develop mobile interface for on the go case management", 
         "Add advanced reporting and ROI tracking capabilities"
       ]
     }
