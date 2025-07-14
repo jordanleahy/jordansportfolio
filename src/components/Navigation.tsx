@@ -112,6 +112,7 @@ const Navigation = () => {
                   size="sm"
                   onClick={() => navigate("/blog")}
                   className="ml-2"
+                  disabled
                 >
                   <BookOpen size={16} className="mr-2" />
                   Blog
