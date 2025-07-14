@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case4Data: CaseStudyData = {
   // Hero Section
   title: "Prior Authorization Workflow System: UX Case Study - Healthcare AI Automation",
-  description: "How I designed an AI-powered prior authorization system that reduced approval time from 3 weeks to 3 days, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
+  description: "How I designed an ML & LLM powered prior authorization system that reduced approval time from 3 days to 5 minutes, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
   heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
@@ -89,8 +89,7 @@ export const case4Data: CaseStudyData = {
       quote: {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park, NP"
-      },
-      image: "/lovable-uploads/58259f22-166e-4c2f-9fae-f2aac40605a3.png"
+      }
     },
     {
       icon: "Lightbulb",
@@ -100,8 +99,7 @@ export const case4Data: CaseStudyData = {
         "AI decision point identification and design",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
-      ],
-      image: "/lovable-uploads/d408c4ad-7778-44b2-9a15-d45ef41cb243.png"
+      ]
     },
     {
       icon: "Target",
@@ -112,8 +110,7 @@ export const case4Data: CaseStudyData = {
         "Usability testing with prescribers and non-prescribers staff",
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
-      ],
-      image: "/lovable-uploads/7c66c0d1-d5cb-4bd5-b500-d00e94c531ef.png"
+      ]
     },
     {
       icon: "CheckCircle", 
@@ -123,8 +120,7 @@ export const case4Data: CaseStudyData = {
         "Phased rollout across small florida dermatology practices",
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
-      ],
-      image: "/lovable-uploads/6178eef1-7329-431e-a756-8d62bd36e0e5.png"
+      ]
     }
   ],
 
@@ -133,28 +129,28 @@ export const case4Data: CaseStudyData = {
   features: [
     {
       icon: "Shield",
-      title: " Formulary Rules Identification", 
-      description: "Identification of the correct formulary, which queues up medical requirements, step therapy, and reauthorization of the requirements."
+      title: "Smart Rule Extraction", 
+      description: "AI powered analysis of insurance formulary documents to automatically identify prior authorization requirements."
     },
     {
       icon: "Clock",
-      title: "Medical Requirements",
-      description: "Patient diagnosis and medical requirements required for authorization of the drug."
+      title: "Automated Letter Generation",
+      description: "Intelligent drafting of prior authorization requests using patient data and medical justification templates."
     },
     {
       icon: "CheckCircle",
-      title: "Step Therapy Requirements",
-      description: "Allows HCP to understand what therapy's a patient must fail before insurance will pay for prescribed drug."
+      title: "Status Tracking",
+      description: "Monitoring of approval status with proactive notifications and next-step recommendations."
     },
 
     {
       icon: "Target",
-      title: "Reauthorizaton Dates",
-      description: "Automated notification of when reauthorization is required to allow for new prior authorization."
+      title: "Clinical Decision Support",
+      description: "Evidence based alternative medication suggestions when prior authorization is denied or delayed."
     },
     {
       icon: "TrendingUp",
-      title: "Download and Submit", 
+      title: "Analytics & Reporting", 
       description: "Comprehensive insights into approval rates, processing times, and optimization opportunities."
     }
   ],
@@ -162,7 +158,7 @@ export const case4Data: CaseStudyData = {
   // Outcomes Section
   outcomesTitle: "Outcomes",
   userFeedback: {
-    quote: "We went from 3 days to 5 minutes for specialty medication prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
+    quote: "We went from 3 weeks to 3 days for specialty medication prior authorizations. Our patients get their medications faster, and our staff can focus on patient care instead of paperwork.",
     author: "Maria Gonzalez, Medical Practice Manager"
   },
 
