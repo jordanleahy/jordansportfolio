@@ -155,7 +155,7 @@ export const case4Data: CaseStudyData = {
     {
       icon: "TrendingUp",
       title: "Download and Send to Payer", 
-      description: "Comprehensive insights into approval rates, processing times, and optimization opportunities."
+      description: "Download prior authorization documents to send via mail, fax, or portal."
     }
   ],
 
