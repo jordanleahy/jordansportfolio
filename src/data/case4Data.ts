@@ -144,7 +144,7 @@ export const case4Data: CaseStudyData = {
     {
       icon: "CheckCircle",
       title: "Step Therapy Requirements",
-      description: "Monitoring of approval status with proactive notifications and next-step recommendations."
+      description: "Drugs the patient must try and fail first before insurance will pay for the prescribed drug."
     },
 
     {
