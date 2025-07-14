@@ -71,7 +71,7 @@ export const products = [
   {
     title: "Medical Coding Tools",
     link: "/cases/case4",
-    thumbnail: getStorageImageUrl("8c1110c1-02c2-4041-987c-a9d030ffef3b.png"),
+    thumbnail: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/hero-parallax/8c1110c1-02c2-4041-987c-a9d030ffef3b.png",
   },
   {
     title: "Healthcare Analytics Platform",
