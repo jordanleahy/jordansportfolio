@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case4Data: CaseStudyData = {
   // Hero Section
   title: "Prior Authorization Workflow System: UX Case Study - Healthcare AI Automation",
-  description: "How I designed an AI-powered prior authorization system that reduced approval time from 3 weeks to 3 days, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
+  description: "How I designed ML & LLM powered prior authorization system that reduced approval time from 3 weeks to 3 days, improving patient access to medications. Discover the UX research methodology, workflow design process, and impact on healthcare efficiency through intelligent formulary rule automation and insurance integration.",
   heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
@@ -93,10 +93,10 @@ export const case4Data: CaseStudyData = {
     },
     {
       icon: "Lightbulb",
-      title: "2. ML/LLM Assisted Workflow Design",
+      title: "2. AI Assisted Workflow Design",
       description: "Designing intelligent automation while maintaining human oversight",
       items: [
-        "What should ML do vs what should LLM do",
+        "AI decision point identification and design",
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ]
