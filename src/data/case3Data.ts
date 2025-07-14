@@ -146,7 +146,7 @@ export const case3Data: CaseStudyData = {
     },
     {
       icon: "TrendingUp",
-      title: "Payer Pattern Recognition",
+      title: "Grouped Assignment",
       description: "Tracks denial trends and payer behavior to improve future claim submission strategies."
     },
     {
