@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Copy, Trash2, ImageIcon, Upload, Loader2 } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePromptModal } from './ImagePromptModal';
@@ -184,7 +184,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>16:9 Image</TableHead>
-              <TableHead>16:9 Upload</TableHead>
               <TableHead>3:4 Image</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
@@ -205,27 +204,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div 
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => handleGenerateImagePrompt(post)}
-                    title="Click to generate 16:9 aspect ratio image prompt"
-                  >
-                    {post.image_16_9_url ? (
-                      <OptimizedImage
-                        src={post.image_16_9_url}
-                        alt="16:9 Image"
-                        aspectRatio="16/9"
-                        className="w-20 h-auto rounded border"
-                      />
-                    ) : (
-                      <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground ml-1">16:9</span>
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
                   <div className="flex items-center gap-2">
                     <input
                       type="file"
@@ -234,19 +212,31 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       className="hidden"
                       id={`upload-${post.id}`}
                     />
-                    <Button
-                      size="sm"
-                      variant="outline"
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => document.getElementById(`upload-${post.id}`)?.click()}
-                      disabled={uploadingPostId === post.id}
-                      title="Upload 16:9 image"
+                      title="Click to upload 16:9 image"
                     >
-                      {uploadingPostId === post.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                      {post.image_16_9_url ? (
+                        <OptimizedImage
+                          src={post.image_16_9_url}
+                          alt="16:9 Image"
+                          aspectRatio="16/9"
+                          className="w-20 h-auto rounded border"
+                        />
                       ) : (
-                        <Upload className="h-4 w-4" />
+                        <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                          {uploadingPostId === post.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <>
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground ml-1">16:9</span>
+                            </>
+                          )}
+                        </div>
                       )}
-                    </Button>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -269,6 +259,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleGenerateImagePrompt(post)}
+                      title="Generate image prompt"
+                    >
+                      <Lightbulb className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
