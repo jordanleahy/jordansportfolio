@@ -181,6 +181,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Day</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>16:9 Image</TableHead>
@@ -191,8 +192,11 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {posts.map((post) => (
+            {posts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
               <TableRow key={post.id}>
+                <TableCell className="font-medium">
+                  {post.day || '-'}
+                </TableCell>
                 <TableCell className="font-medium max-w-xs">
                   <div className="truncate" title={post.title}>
                     {post.title}

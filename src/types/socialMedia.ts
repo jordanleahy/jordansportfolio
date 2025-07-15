@@ -5,6 +5,7 @@ export interface SocialMediaPost {
   user_id: string;
   title: string;
   description: string;
+  day?: number | null;
   image_16_9_url?: string | null;
   image_3_4_url?: string | null;
   status: PostStatus;
@@ -18,6 +19,7 @@ export interface SocialMediaPost {
 export interface CreateSocialMediaPost {
   title: string;
   description: string;
+  day?: number;
   image_16_9_url?: string;
   image_3_4_url?: string;
   status?: PostStatus;
