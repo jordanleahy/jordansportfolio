@@ -36,36 +36,36 @@ export const WatermarkCanvas: React.FC<WatermarkCanvasProps> = ({
           // Draw the original image
           ctx.drawImage(img, 0, 0);
 
-          // Add watermark
-          const fontSize = Math.max(16, Math.min(img.width * 0.03, 32));
+          // Add subtle center watermark
+          const fontSize = Math.max(14, Math.min(img.width * 0.025, 28));
           ctx.font = `${fontSize}px Arial`;
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.lineWidth = 1;
-
+          
           // Measure text to center it
           const textMetrics = ctx.measureText(watermarkText);
           const textWidth = textMetrics.width;
-          const textHeight = fontSize;
+          
+          // Position at center
+          const centerX = img.width / 2;
+          const centerY = img.height / 2;
 
-          // Position at bottom center
-          const x = (img.width - textWidth) / 2;
-          const y = img.height - 20;
-
-          // Add background rectangle
-          const padding = 8;
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.fillRect(
-            x - padding,
-            y - textHeight - padding / 2,
-            textWidth + padding * 2,
-            textHeight + padding
-          );
-
-          // Add watermark text
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillText(watermarkText, x, y);
-          ctx.strokeText(watermarkText, x, y);
+          // Save context for rotation
+          ctx.save();
+          
+          // Rotate 15 degrees for diagonal effect
+          ctx.translate(centerX, centerY);
+          ctx.rotate(-15 * Math.PI / 180);
+          
+          // Set very subtle styling
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+          ctx.lineWidth = 0.5;
+          
+          // Draw watermark text at origin (now rotated center)
+          ctx.fillText(watermarkText, -textWidth / 2, fontSize / 3);
+          ctx.strokeText(watermarkText, -textWidth / 2, fontSize / 3);
+          
+          // Restore context
+          ctx.restore();
 
           // Convert canvas to blob
           canvas.toBlob(
