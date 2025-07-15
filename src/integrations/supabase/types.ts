@@ -690,6 +690,7 @@ export type Database = {
           id: string
           image_16_9_url: string | null
           image_3_4_url: string | null
+          image_4_3_url: string | null
           image_9_16_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
@@ -706,6 +707,7 @@ export type Database = {
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null
+          image_4_3_url?: string | null
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
@@ -722,6 +724,7 @@ export type Database = {
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null
+          image_4_3_url?: string | null
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null

@@ -22,13 +22,15 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const file916InputRef = useRef<HTMLInputElement>(null);
   const file34InputRef = useRef<HTMLInputElement>(null);
+  const file43InputRef = useRef<HTMLInputElement>(null);
   const [uploadingPostId, setUploadingPostId] = useState<string | null>(null);
   const [uploading916PostId, setUploading916PostId] = useState<string | null>(null);
   const [uploading34PostId, setUploading34PostId] = useState<string | null>(null);
+  const [uploading43PostId, setUploading43PostId] = useState<string | null>(null);
   const [showWatermarkModal, setShowWatermarkModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<'16_9' | '9_16' | '3_4'>('16_9');
+  const [uploadType, setUploadType] = useState<'16_9' | '9_16' | '3_4' | '4_3'>('16_9');
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -272,6 +274,65 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  const handleImage43Upload = async (postId: string, file: File) => {
+    setUploading43PostId(postId);
+    try {
+      // Find the post to get its title
+      const post = posts.find(p => p.id === postId);
+      
+      // Sanitize the title for use as filename
+      const sanitizeTitle = (title: string) => {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .trim()
+          .replace(/\s+/g, '_') // Replace spaces with underscores
+          .substring(0, 50); // Limit length
+      };
+      
+      const fileExt = file.name.split('.').pop();
+      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
+      const baseName = sanitizedTitle || postId; // Fallback to postId if sanitization fails
+      const fileName = `${baseName}_4_3_${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      // Update the post with the new image URL
+      await socialMediaService.updatePost(postId, {
+        image_4_3_url: publicUrl
+      });
+
+      toast({
+        title: "Image uploaded",
+        description: "4:3 image has been successfully uploaded.",
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error uploading 4:3 image:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload 4:3 image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading43PostId(null);
+    }
+  };
+
 
   const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -381,6 +442,42 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  const handleFile43Select = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show watermark modal instead of direct upload
+      const post = posts.find(p => p.id === postId);
+      setSelectedPost(post || null);
+      setSelectedFile(file);
+      setUploadType('4_3');
+      setShowWatermarkModal(true);
+    }
+    // Reset the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
   const handleWatermarkedUpload = (watermarkedFile: File) => {
     if (!selectedPost) return;
 
@@ -388,8 +485,10 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       handleImageUpload(selectedPost.id, watermarkedFile);
     } else if (uploadType === '9_16') {
       handleImage916Upload(selectedPost.id, watermarkedFile);
-    } else {
+    } else if (uploadType === '3_4') {
       handleImage34Upload(selectedPost.id, watermarkedFile);
+    } else {
+      handleImage43Upload(selectedPost.id, watermarkedFile);
     }
   };
 
@@ -418,6 +517,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>16:9 Image</TableHead>
               <TableHead>9:16 Image</TableHead>
               <TableHead>3:4 Image</TableHead>
+              <TableHead>4:3 Image</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Actions</TableHead>
@@ -540,6 +640,42 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                             <div className="flex flex-col items-center">
                               <ImageIcon className="h-4 w-4 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground">3:4</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFile43Select(post.id, e)}
+                      className="hidden"
+                      id={`upload-43-${post.id}`}
+                    />
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => document.getElementById(`upload-43-${post.id}`)?.click()}
+                      title="Click to upload 4:3 image"
+                    >
+                      {post.image_4_3_url ? (
+                        <OptimizedImage
+                          src={post.image_4_3_url}
+                          alt="4:3 Image"
+                          aspectRatio="4/3"
+                          className="w-20 h-auto rounded border"
+                        />
+                      ) : (
+                        <div className="w-20 h-16 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                          {uploading43PostId === post.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <div className="flex flex-col items-center">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">4:3</span>
                             </div>
                           )}
                         </div>
