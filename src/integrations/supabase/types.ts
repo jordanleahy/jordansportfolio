@@ -683,6 +683,7 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          category: string
           created_at: string
           day: number | null
           description: string
@@ -700,6 +701,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
           day?: number | null
           description: string
@@ -717,6 +719,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string
           day?: number | null
           description?: string

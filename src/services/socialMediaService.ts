@@ -2,14 +2,20 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SocialMediaPost, CreateSocialMediaPost } from "@/types/socialMedia";
 
 export const socialMediaService = {
-  async getAllPosts(): Promise<SocialMediaPost[]> {
-    const { data, error } = await supabase
+  async getAllPosts(category?: 'cdi' | 'contracts'): Promise<SocialMediaPost[]> {
+    let query = supabase
       .from('social_media_posts')
       .select('*')
       .order('created_at', { ascending: false });
 
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
-    return data || [];
+    return (data || []) as SocialMediaPost[];
   },
 
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
@@ -20,13 +26,14 @@ export const socialMediaService = {
       .from('social_media_posts')
       .insert({
         ...post,
+        category: post.category || 'cdi',
         user_id: user.id,
       })
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as SocialMediaPost;
   },
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
@@ -48,7 +55,7 @@ export const socialMediaService = {
       throw new Error(`Post with id ${id} not found`);
     }
     
-    return data;
+    return data as SocialMediaPost;
   },
 
   async deletePost(id: string): Promise<void> {

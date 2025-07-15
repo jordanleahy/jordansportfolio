@@ -14,13 +14,15 @@ import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
 interface PostFormProps {
   onPostCreated: () => void;
+  category?: 'cdi' | 'contracts';
 }
 
-export const PostForm = ({ onPostCreated }: PostFormProps) => {
+export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => {
   const [formData, setFormData] = useState<CreateSocialMediaPost>({
     title: '',
     description: '',
     status: 'draft',
+    category,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +53,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
         title: '',
         description: '',
         status: 'draft',
+        category,
       });
       setIsOpen(false);
       onPostCreated();

@@ -5,12 +5,15 @@ import { PostsTable } from '@/components/calendar/PostsTable';
 import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 export default function Calendar() {
-  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
+  const [cdiPosts, setCdiPosts] = useState<SocialMediaPost[]>([]);
+  const [contractsPosts, setContractsPosts] = useState<SocialMediaPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('cdi');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -19,7 +22,7 @@ export default function Calendar() {
       (event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          loadPosts();
+          loadAllPosts();
         } else {
           setIsLoading(false);
         }
@@ -30,7 +33,7 @@ export default function Calendar() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadPosts();
+        loadAllPosts();
       } else {
         setIsLoading(false);
       }
@@ -39,10 +42,14 @@ export default function Calendar() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadPosts = async () => {
+  const loadAllPosts = async () => {
     try {
-      const postsData = await socialMediaService.getAllPosts();
-      setPosts(postsData);
+      const [cdiData, contractsData] = await Promise.all([
+        socialMediaService.getAllPosts('cdi'),
+        socialMediaService.getAllPosts('contracts')
+      ]);
+      setCdiPosts(cdiData);
+      setContractsPosts(contractsData);
     } catch (error) {
       console.error('Error loading posts:', error);
       toast({
@@ -52,6 +59,34 @@ export default function Calendar() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadCdiPosts = async () => {
+    try {
+      const cdiData = await socialMediaService.getAllPosts('cdi');
+      setCdiPosts(cdiData);
+    } catch (error) {
+      console.error('Error loading CDI posts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load CDI posts.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadContractsPosts = async () => {
+    try {
+      const contractsData = await socialMediaService.getAllPosts('contracts');
+      setContractsPosts(contractsData);
+    } catch (error) {
+      console.error('Error loading Contracts posts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load Contracts posts.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -77,10 +112,22 @@ export default function Calendar() {
           </p>
         </div>
 
-        <div className="space-y-8">
-          <PostForm onPostCreated={loadPosts} />
-          <PostsTable posts={posts} onPostsChange={loadPosts} />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="cdi">CDI</TabsTrigger>
+            <TabsTrigger value="contracts">Contracts</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="cdi" className="space-y-8">
+            <PostForm onPostCreated={loadCdiPosts} category="cdi" />
+            <PostsTable posts={cdiPosts} onPostsChange={loadCdiPosts} />
+          </TabsContent>
+
+          <TabsContent value="contracts" className="space-y-8">
+            <PostForm onPostCreated={loadContractsPosts} category="contracts" />
+            <PostsTable posts={contractsPosts} onPostsChange={loadContractsPosts} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ export interface SocialMediaPost {
   scheduled_date?: string | null;
   platform_tags?: any;
   generated_image_prompt?: string | null;
+  category: 'cdi' | 'contracts';
   created_at: string;
   updated_at: string;
 }
@@ -30,4 +31,5 @@ export interface CreateSocialMediaPost {
   scheduled_date?: string;
   platform_tags?: string[];
   generated_image_prompt?: string;
+  category?: 'cdi' | 'contracts';
 }
