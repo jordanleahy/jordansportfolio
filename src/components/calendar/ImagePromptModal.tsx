@@ -125,10 +125,6 @@ Please create a complete, ready-to-use prompt for generating a 16:9 healthcare v
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
-      toast({
-        title: "Prompt copied",
-        description: "Image prompt has been copied to clipboard. You can now paste it into OpenAI's image creator.",
-      });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast({
