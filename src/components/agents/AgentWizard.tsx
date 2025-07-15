@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,6 +62,9 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
   const [newTag, setNewTag] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [slugError, setSlugError] = useState('');
+  const [isValidatingSlug, setIsValidatingSlug] = useState(false);
+  
+  const debouncedSlug = useDebounce(formData.slug, 500);
 
   const steps = [
     'Basic Info',
@@ -78,9 +82,13 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
     checkAuth();
   }, []);
 
-  const validateSlug = async (slug: string) => {
-    if (!slug || isEditing) return;
+  const validateSlug = useCallback(async (slug: string) => {
+    if (!slug || isEditing) {
+      setSlugError('');
+      return true;
+    }
     
+    setIsValidatingSlug(true);
     try {
       const { data, error } = await supabase
         .from('agents')
@@ -99,14 +107,24 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
       }
     } catch (error) {
       console.error('Error validating slug:', error);
+      setSlugError('Failed to validate slug');
       return false;
+    } finally {
+      setIsValidatingSlug(false);
     }
-  };
+  }, [isEditing]);
 
-  const updateFormData = async (field: keyof CreateAgentData, value: any) => {
+  // Debounced slug validation effect
+  useEffect(() => {
+    if (debouncedSlug && !isEditing) {
+      validateSlug(debouncedSlug);
+    }
+  }, [debouncedSlug, validateSlug, isEditing]);
+
+  const updateFormData = useCallback((field: keyof CreateAgentData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Auto-generate and validate slug from name
+    // Auto-generate slug from name
     if (field === 'name' && !isEditing) {
       const slug = value.toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -114,16 +132,8 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
         .replace(/-+/g, '-')
         .trim();
       setFormData(prev => ({ ...prev, slug }));
-      if (slug) {
-        await validateSlug(slug);
-      }
     }
-    
-    // Validate slug directly when changed
-    if (field === 'slug' && !isEditing) {
-      await validateSlug(value);
-    }
-  };
+  }, [isEditing]);
 
   const addExamplePrompt = () => {
     if (newExamplePrompt.trim()) {
@@ -163,26 +173,29 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
     }
   };
 
-  const isStepValid = (step: number) => {
-    switch (step) {
-      case 0:
-        return formData.name && 
-               formData.slug && 
-               !slugError &&
-               formData.name.length >= 3 &&
-               formData.slug.length >= 3;
-      case 1:
-        return formData.system_prompt && formData.system_prompt.length >= 50;
-      case 2:
-        return formData.model && 
-               formData.temperature !== undefined && 
-               formData.max_tokens &&
-               formData.max_tokens >= 100 && 
-               formData.max_tokens <= 4000;
-      default:
-        return true;
-    }
-  };
+  const isStepValid = useMemo(() => {
+    return (step: number) => {
+      switch (step) {
+        case 0:
+          return formData.name && 
+                 formData.slug && 
+                 !slugError &&
+                 !isValidatingSlug &&
+                 formData.name.length >= 3 &&
+                 formData.slug.length >= 3;
+        case 1:
+          return formData.system_prompt && formData.system_prompt.length >= 50;
+        case 2:
+          return formData.model && 
+                 formData.temperature !== undefined && 
+                 formData.max_tokens &&
+                 formData.max_tokens >= 100 && 
+                 formData.max_tokens <= 4000;
+        default:
+          return true;
+      }
+    };
+  }, [formData, slugError, isValidatingSlug]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -212,16 +225,26 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
               
               <div>
                 <Label htmlFor="slug">URL Slug</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => updateFormData('slug', e.target.value)}
-                  placeholder="rcm-denials-coach"
-                  disabled={isEditing}
-                  className={slugError ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) => updateFormData('slug', e.target.value)}
+                    placeholder="rcm-denials-coach"
+                    disabled={isEditing || isValidatingSlug}
+                    className={slugError ? 'border-red-500' : ''}
+                  />
+                  {isValidatingSlug && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    </div>
+                  )}
+                </div>
                 {slugError && (
                   <p className="text-sm text-red-500 mt-1">{slugError}</p>
+                )}
+                {!slugError && !isValidatingSlug && formData.slug && !isEditing && (
+                  <p className="text-sm text-green-600 mt-1">✓ Slug is available</p>
                 )}
               </div>
               
