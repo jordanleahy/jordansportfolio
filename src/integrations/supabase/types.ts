@@ -812,6 +812,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_contracts_content: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
