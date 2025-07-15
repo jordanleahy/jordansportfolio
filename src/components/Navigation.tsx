@@ -3,12 +3,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsAuthenticated(!!session?.user);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -117,15 +135,17 @@ const Navigation = () => {
                   <BookOpen size={16} className="mr-2" />
                   Blog
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/calendar")}
-                  className="ml-2"
-                >
-                  <Calendar size={16} className="mr-2" />
-                  Calendar
-                </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/calendar")}
+                    className="ml-2"
+                  >
+                    <Calendar size={16} className="mr-2" />
+                    Calendar
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -186,18 +206,20 @@ const Navigation = () => {
                   <BookOpen size={16} className="mr-2" />
                   Blog
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    navigate("/calendar");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full justify-start mt-1"
-                >
-                  <Calendar size={16} className="mr-2" />
-                  Calendar
-                </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigate("/calendar");
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start mt-1"
+                  >
+                    <Calendar size={16} className="mr-2" />
+                    Calendar
+                  </Button>
+                )}
               </div>
             </motion.div>
           )}
