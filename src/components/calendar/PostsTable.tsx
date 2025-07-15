@@ -89,9 +89,23 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const handleImageUpload = async (postId: string, file: File) => {
     setUploadingPostId(postId);
     try {
-      // Create a unique filename
+      // Find the post to get its title
+      const post = posts.find(p => p.id === postId);
+      
+      // Sanitize the title for use as filename
+      const sanitizeTitle = (title: string) => {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .trim()
+          .replace(/\s+/g, '_') // Replace spaces with underscores
+          .substring(0, 50); // Limit length
+      };
+      
       const fileExt = file.name.split('.').pop();
-      const fileName = `${postId}_16_9_${Date.now()}.${fileExt}`;
+      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
+      const baseName = sanitizedTitle || postId; // Fallback to postId if sanitization fails
+      const fileName = `${baseName}_16_9_${Date.now()}.${fileExt}`;
       
       // Upload to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
