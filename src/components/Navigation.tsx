@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar } from "lucide-react";
+import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
@@ -27,6 +27,11 @@ const Navigation = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -135,15 +140,44 @@ const Navigation = () => {
                   <BookOpen size={16} className="mr-2" />
                   Blog
                 </Button>
-                {isAuthenticated && (
+                {isAuthenticated ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/calendar")}
+                      className="ml-2"
+                    >
+                      <Calendar size={16} className="mr-2" />
+                      Calendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/agents")}
+                      className="ml-2"
+                    >
+                      Agents
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSignOut}
+                      className="ml-2"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/calendar")}
+                    onClick={() => navigate("/auth")}
                     className="ml-2"
                   >
-                    <Calendar size={16} className="mr-2" />
-                    Calendar
+                    <LogIn size={16} className="mr-2" />
+                    Login
                   </Button>
                 )}
               </div>
@@ -206,18 +240,56 @@ const Navigation = () => {
                   <BookOpen size={16} className="mr-2" />
                   Blog
                 </Button>
-                {isAuthenticated && (
+                {isAuthenticated ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate("/calendar");
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      <Calendar size={16} className="mr-2" />
+                      Calendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate("/agents");
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      Agents
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      navigate("/calendar");
+                      navigate("/auth");
                       setIsMobileMenuOpen(false);
                     }}
                     className="w-full justify-start mt-1"
                   >
-                    <Calendar size={16} className="mr-2" />
-                    Calendar
+                    <LogIn size={16} className="mr-2" />
+                    Login
                   </Button>
                 )}
               </div>
