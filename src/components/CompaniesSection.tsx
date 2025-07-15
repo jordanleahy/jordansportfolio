@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImage } from "@/utils/imageUpload";
 
 const initialCompanies = [
-  { name: "Revenue Cycle Management", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//Day%201%20What%20Is%20Clinical%20Documentation%20Integrity%20%20169.png" },
+  { name: "Revenue Cycle Management", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg" },
   { name: "Prior Authorization", logo: "DH", logoUrl: "/lovable-uploads/4380ae80-9e2b-46a2-adbf-63b2cae372e3.png" },
   { name: "Pharma Innovation", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
   { name: "Claims Intelligence", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
