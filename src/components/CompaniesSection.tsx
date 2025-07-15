@@ -7,7 +7,7 @@ import { uploadImage } from "@/utils/imageUpload";
 
 const initialCompanies = [
   { name: "Revenue Cycle Management", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg" },
-  { name: "Prior Authorization", logo: "DH", logoUrl: "/lovable-uploads/4380ae80-9e2b-46a2-adbf-63b2cae372e3.png" },
+  { name: "Prior Authorization", logo: "DH", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg" },
   { name: "Pharma Innovation", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
   { name: "Claims Intelligence", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
   { name: "Digital Health Agency", logo: "CO", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
