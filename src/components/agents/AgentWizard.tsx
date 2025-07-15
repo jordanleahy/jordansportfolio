@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +59,8 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
 
   const [newExamplePrompt, setNewExamplePrompt] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [slugError, setSlugError] = useState('');
 
   const steps = [
     'Basic Info',
@@ -67,10 +70,43 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
     'Review'
   ];
 
-  const updateFormData = (field: keyof CreateAgentData, value: any) => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const validateSlug = async (slug: string) => {
+    if (!slug || isEditing) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('slug')
+        .eq('slug', slug)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setSlugError('This slug is already taken');
+        return false;
+      } else {
+        setSlugError('');
+        return true;
+      }
+    } catch (error) {
+      console.error('Error validating slug:', error);
+      return false;
+    }
+  };
+
+  const updateFormData = async (field: keyof CreateAgentData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Auto-generate slug from name
+    // Auto-generate and validate slug from name
     if (field === 'name' && !isEditing) {
       const slug = value.toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -78,6 +114,14 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
         .replace(/-+/g, '-')
         .trim();
       setFormData(prev => ({ ...prev, slug }));
+      if (slug) {
+        await validateSlug(slug);
+      }
+    }
+    
+    // Validate slug directly when changed
+    if (field === 'slug' && !isEditing) {
+      await validateSlug(value);
     }
   };
 
@@ -122,11 +166,19 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
   const isStepValid = (step: number) => {
     switch (step) {
       case 0:
-        return formData.name && formData.slug;
+        return formData.name && 
+               formData.slug && 
+               !slugError &&
+               formData.name.length >= 3 &&
+               formData.slug.length >= 3;
       case 1:
-        return formData.system_prompt && formData.system_prompt.length > 50;
+        return formData.system_prompt && formData.system_prompt.length >= 50;
       case 2:
-        return formData.model && formData.temperature !== undefined && formData.max_tokens;
+        return formData.model && 
+               formData.temperature !== undefined && 
+               formData.max_tokens &&
+               formData.max_tokens >= 100 && 
+               formData.max_tokens <= 4000;
       default:
         return true;
     }
@@ -166,7 +218,11 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
                   onChange={(e) => updateFormData('slug', e.target.value)}
                   placeholder="rcm-denials-coach"
                   disabled={isEditing}
+                  className={slugError ? 'border-red-500' : ''}
                 />
+                {slugError && (
+                  <p className="text-sm text-red-500 mt-1">{slugError}</p>
+                )}
               </div>
               
               <div>
@@ -400,6 +456,18 @@ export const AgentWizard = ({ agent, onCancel }: AgentWizardProps) => {
         return null;
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+          <p className="text-muted-foreground mb-4">Please log in to create agents.</p>
+          <Button onClick={() => navigate('/auth')}>Login</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
