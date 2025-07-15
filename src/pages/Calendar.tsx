@@ -6,7 +6,6 @@ import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 export default function Calendar() {
@@ -91,28 +90,6 @@ export default function Calendar() {
     }
   };
 
-  const insertContractsContent = async () => {
-    try {
-      const { error } = await supabase.rpc('insert_contracts_content');
-      if (error) throw error;
-      
-      toast({
-        title: "Success",
-        description: "Contracts content has been added successfully!",
-      });
-      
-      // Reload contracts posts to show the new data
-      await loadContractsPosts();
-    } catch (error) {
-      console.error('Error inserting contracts content:', error);
-      toast({
-        title: "Error",
-        description: "Failed to insert contracts content.",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -147,16 +124,6 @@ export default function Calendar() {
           </TabsContent>
 
           <TabsContent value="contracts" className="space-y-8">
-            <div className="flex justify-between items-center">
-              <div></div>
-              <Button 
-                onClick={insertContractsContent}
-                variant="outline"
-                size="sm"
-              >
-                Load Sample Contracts Data
-              </Button>
-            </div>
             <PostForm onPostCreated={loadContractsPosts} category="contracts" />
             <PostsTable posts={contractsPosts} onPostsChange={loadContractsPosts} />
           </TabsContent>
