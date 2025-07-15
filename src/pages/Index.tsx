@@ -78,20 +78,7 @@ const Index = () => {
       {/* Navigation */}
       <Navigation />
       
-      {/* Admin Bar for authenticated users */}
-      {user && (
-        <div className="fixed top-4 right-4 z-50 space-y-2">
-          <div className="bg-card border rounded-lg p-3 shadow-lg">
-            <p className="text-sm text-muted-foreground mb-2">
-              Logged in as: {user.email}
-            </p>
-            <Button onClick={handleSignOut} variant="outline" size="sm">
-              Sign Out
-            </Button>
-          </div>
-          
-        </div>
-      )}
+      
 
       {/* Hero Parallax Section */}
       <Suspense fallback={
