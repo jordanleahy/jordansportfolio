@@ -6,6 +6,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ImagePreviewModal } from './ImagePreviewModal';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -30,6 +31,7 @@ export const PostCard = ({
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showImageUploads, setShowImageUploads] = useState(false);
+  const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -82,7 +84,8 @@ export const PostCard = ({
             <OptimizedImage
               src={imageUrl}
               alt={`${label} for ${post.title}`}
-              className="w-full h-16 object-cover rounded border"
+              className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setPreviewImage({ url: imageUrl, alt: `${label} for ${post.title}` })}
             />
           </div>
         )}
@@ -223,31 +226,45 @@ export const PostCard = ({
               <OptimizedImage
                 src={post.image_16_9_url}
                 alt="16:9 image"
-                className="h-12 w-auto rounded border flex-shrink-0"
+                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
               />
             )}
             {post.image_9_16_url && (
               <OptimizedImage
                 src={post.image_9_16_url}
                 alt="9:16 image"
-                className="h-12 w-auto rounded border flex-shrink-0"
+                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
               />
             )}
             {post.image_3_4_url && (
               <OptimizedImage
                 src={post.image_3_4_url}
                 alt="3:4 image"
-                className="h-12 w-auto rounded border flex-shrink-0"
+                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
               />
             )}
             {post.image_4_3_url && (
               <OptimizedImage
                 src={post.image_4_3_url}
                 alt="4:3 image"
-                className="h-12 w-auto rounded border flex-shrink-0"
+                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
               />
             )}
           </div>
+        )}
+
+        {/* Image Preview Modal */}
+        {previewImage && (
+          <ImagePreviewModal
+            isOpen={true}
+            onClose={() => setPreviewImage(null)}
+            imageUrl={previewImage.url}
+            imageAlt={previewImage.alt}
+          />
         )}
       </CardContent>
     </Card>
