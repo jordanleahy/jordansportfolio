@@ -40,12 +40,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     title: string;
     description: string;
     cachedPrompt?: string | null;
+    category?: 'cdi' | 'contracts';
   }>({
     isOpen: false,
     postId: '',
     title: '',
     description: '',
-    cachedPrompt: null
+    cachedPrompt: null,
+    category: 'cdi'
   });
 
   const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
@@ -110,7 +112,8 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       postId: post.id,
       title: post.title,
       description: post.description,
-      cachedPrompt: post.generated_image_prompt
+      cachedPrompt: post.generated_image_prompt,
+      category: post.category
     });
   };
 
@@ -591,12 +594,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
             postId: '', 
             title: '', 
             description: '', 
-            cachedPrompt: null 
+            cachedPrompt: null,
+            category: 'cdi'
           })}
           title={imagePromptModal.title}
           description={imagePromptModal.description}
           postId={imagePromptModal.postId}
           cachedPrompt={imagePromptModal.cachedPrompt}
+          category={imagePromptModal.category}
         />
 
         <ImageWatermarkModal
@@ -840,12 +845,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
           postId: '', 
           title: '', 
           description: '', 
-          cachedPrompt: null 
+          cachedPrompt: null,
+          category: 'cdi'
         })}
         title={imagePromptModal.title}
         description={imagePromptModal.description}
         postId={imagePromptModal.postId}
         cachedPrompt={imagePromptModal.cachedPrompt}
+        category={imagePromptModal.category}
       />
 
       <ImageWatermarkModal
