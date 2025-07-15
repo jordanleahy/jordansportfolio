@@ -12,7 +12,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
-import { ImageMigration } from "@/components/ImageMigration";
+
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
@@ -89,7 +89,7 @@ const Index = () => {
               Sign Out
             </Button>
           </div>
-          <ImageMigration />
+          
         </div>
       )}
 
