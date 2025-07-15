@@ -8,6 +8,7 @@ import { ImageUploadCard } from './ImageUploadCard';
 import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Plus, Sparkles, Loader2 } from 'lucide-react';
 import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
@@ -26,6 +27,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingField, setGeneratingField] = useState<string>('');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +137,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
           Create New Post
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={`${isMobile ? 'max-w-full h-full sm:max-w-4xl sm:h-auto' : 'max-w-4xl'} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>Create New Social Media Post</DialogTitle>
           <div className="flex gap-2 mt-4">
@@ -144,19 +146,19 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
               variant="outline"
               onClick={handleGenerateFromPrompt}
               disabled={isGenerating}
-              className="flex-1"
+              className={`${isMobile ? 'flex-1 h-12 text-base' : 'flex-1'}`}
             >
               {isGenerating && generatingField === 'complete' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Generate with AI
+              {isMobile ? 'Generate Post with AI' : 'Generate with AI'}
             </Button>
           </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-4`}>
             <div>
               <label className="block text-sm font-medium mb-2">Title</label>
               <div className="flex gap-2">
@@ -170,19 +172,21 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   onClick={() => {
                     const topic = formData.description || window.prompt("What's your post about?");
                     if (topic) generateContent('title', topic);
                   }}
                   disabled={isGenerating}
                   title="Generate title with AI"
+                  className={isMobile ? "h-10 px-4" : ""}
                 >
                   {isGenerating && generatingField === 'title' ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Sparkles className="h-4 w-4" />
                   )}
+                  {isMobile && <span className="ml-2">AI</span>}
                 </Button>
               </div>
             </div>
@@ -210,20 +214,21 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size={isMobile ? "default" : "sm"}
                 onClick={() => {
                   const topic = formData.title || window.prompt("What's your post about?");
                   if (topic) generateContent('description', topic);
                 }}
                 disabled={isGenerating}
                 title="Generate description with AI"
+                className={isMobile ? "h-10 px-4" : ""}
               >
                 {isGenerating && generatingField === 'description' ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                <span className="ml-1 hidden sm:inline">AI</span>
+                <span className="ml-1">AI</span>
               </Button>
             </div>
             <Textarea
@@ -235,7 +240,7 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
             <ImageUploadCard
               title="16:9 Image"
               aspectRatio="16/9"
@@ -252,7 +257,11 @@ export const PostForm = ({ onPostCreated }: PostFormProps) => {
             />
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className={`w-full ${isMobile ? 'h-12 text-base' : ''}`}
+          >
             {isSubmitting ? 'Creating...' : 'Create Post'}
           </Button>
         </form>

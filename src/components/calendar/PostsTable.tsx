@@ -7,8 +7,10 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ImagePromptModal } from './ImagePromptModal';
 import { ImageWatermarkModal } from './ImageWatermarkModal';
+import { PostCard } from './PostCard';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -19,6 +21,7 @@ interface PostsTableProps {
 
 export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const file916InputRef = useRef<HTMLInputElement>(null);
   const file34InputRef = useRef<HTMLInputElement>(null);
@@ -492,6 +495,47 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  // Create unified file select handler for mobile cards
+  const handleMobileFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show watermark modal
+      const post = posts.find(p => p.id === postId);
+      setSelectedPost(post || null);
+      setSelectedFile(file);
+      setUploadType(type);
+      setShowWatermarkModal(true);
+    }
+  };
+
+  // Create upload states object for mobile cards
+  const uploadingStates = {
+    [`${uploadingPostId}_16_9`]: !!uploadingPostId,
+    [`${uploading916PostId}_9_16`]: !!uploading916PostId,
+    [`${uploading34PostId}_3_4`]: !!uploading34PostId,
+    [`${uploading43PostId}_4_3`]: !!uploading43PostId,
+  };
+
   if (posts.length === 0) {
     return (
       <Card>
@@ -502,6 +546,55 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     );
   }
 
+  // Mobile layout with cards
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Your Posts</h2>
+          <span className="text-sm text-muted-foreground">{posts.length} posts</span>
+        </div>
+        
+        <div className="space-y-3">
+          {posts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onCopy={handleCopyContent}
+              onDelete={handleDeletePost}
+              onGeneratePrompt={handleGenerateImagePrompt}
+              onFileSelect={handleMobileFileSelect}
+              uploadingStates={uploadingStates}
+            />
+          ))}
+        </div>
+
+        <ImagePromptModal
+          isOpen={imagePromptModal.isOpen}
+          onClose={() => setImagePromptModal({ 
+            isOpen: false, 
+            postId: '', 
+            title: '', 
+            description: '', 
+            cachedPrompt: null 
+          })}
+          title={imagePromptModal.title}
+          description={imagePromptModal.description}
+          postId={imagePromptModal.postId}
+          cachedPrompt={imagePromptModal.cachedPrompt}
+        />
+
+        <ImageWatermarkModal
+          isOpen={showWatermarkModal}
+          onClose={() => setShowWatermarkModal(false)}
+          file={selectedFile}
+          onConfirm={handleWatermarkedUpload}
+        />
+      </div>
+    );
+  }
+
+  // Desktop layout with table
   return (
     <Card>
       <CardHeader>
