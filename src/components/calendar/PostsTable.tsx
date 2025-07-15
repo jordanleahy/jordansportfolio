@@ -8,6 +8,7 @@ import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb } from 'lucide-reac
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePromptModal } from './ImagePromptModal';
+import { ImageWatermarkModal } from './ImageWatermarkModal';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -21,6 +22,10 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPostId, setUploadingPostId] = useState<string | null>(null);
   const [uploading916PostId, setUploading916PostId] = useState<string | null>(null);
+  const [showWatermarkModal, setShowWatermarkModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState<'16_9' | '9_16'>('16_9');
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -205,36 +210,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
-  const handleFile916Select = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file",
-          description: "Please select an image file.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      handleImage916Upload(postId, file);
-    }
-    // Reset the input
-    if (event.target) {
-      event.target.value = '';
-    }
-  };
 
   const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -259,11 +234,62 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         return;
       }
 
-      handleImageUpload(postId, file);
+      // Show watermark modal instead of direct upload
+      const post = posts.find(p => p.id === postId);
+      setSelectedPost(post || null);
+      setSelectedFile(file);
+      setUploadType('16_9');
+      setShowWatermarkModal(true);
     }
     // Reset the input
     if (event.target) {
       event.target.value = '';
+    }
+  };
+
+  const handleFile916Select = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show watermark modal instead of direct upload
+      const post = posts.find(p => p.id === postId);
+      setSelectedPost(post || null);
+      setSelectedFile(file);
+      setUploadType('9_16');
+      setShowWatermarkModal(true);
+    }
+    // Reset the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleWatermarkedUpload = (watermarkedFile: File) => {
+    if (!selectedPost) return;
+
+    if (uploadType === '16_9') {
+      handleImageUpload(selectedPost.id, watermarkedFile);
+    } else {
+      handleImage916Upload(selectedPost.id, watermarkedFile);
     }
   };
 
@@ -450,6 +476,13 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         description={imagePromptModal.description}
         postId={imagePromptModal.postId}
         cachedPrompt={imagePromptModal.cachedPrompt}
+      />
+
+      <ImageWatermarkModal
+        isOpen={showWatermarkModal}
+        onClose={() => setShowWatermarkModal(false)}
+        file={selectedFile}
+        onConfirm={handleWatermarkedUpload}
       />
     </Card>
   );
