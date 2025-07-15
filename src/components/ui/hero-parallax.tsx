@@ -107,7 +107,7 @@ export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 z-20">
       <h1 className="text-2xl md:text-7xl font-bold text-foreground drop-shadow-sm">
-        Jordan Leahy <br /> Product Design Engineer
+        Jordan Leahy <br /> Lead Product Designer
       </h1>
       <p className="max-w-2xl text-base md:text-xl mt-8 text-muted-foreground drop-shadow-sm">
        I'm focused on identifying repetitive manual tasks in revenue cycle and automating them using AI and thoughtful, user-centered design. 
