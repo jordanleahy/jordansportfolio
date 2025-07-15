@@ -690,6 +690,7 @@ export type Database = {
           id: string
           image_16_9_url: string | null
           image_3_4_url: string | null
+          image_9_16_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
           status: Database["public"]["Enums"]["post_status"]
@@ -705,6 +706,7 @@ export type Database = {
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null
+          image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           status?: Database["public"]["Enums"]["post_status"]
@@ -720,6 +722,7 @@ export type Database = {
           id?: string
           image_16_9_url?: string | null
           image_3_4_url?: string | null
+          image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           status?: Database["public"]["Enums"]["post_status"]

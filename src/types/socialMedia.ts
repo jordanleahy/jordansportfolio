@@ -7,6 +7,7 @@ export interface SocialMediaPost {
   description: string;
   day?: number | null;
   image_16_9_url?: string | null;
+  image_9_16_url?: string | null;
   image_3_4_url?: string | null;
   status: PostStatus;
   scheduled_date?: string | null;
@@ -21,6 +22,7 @@ export interface CreateSocialMediaPost {
   description: string;
   day?: number;
   image_16_9_url?: string;
+  image_9_16_url?: string;
   image_3_4_url?: string;
   status?: PostStatus;
   scheduled_date?: string;

@@ -20,6 +20,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPostId, setUploadingPostId] = useState<string | null>(null);
+  const [uploading916PostId, setUploading916PostId] = useState<string | null>(null);
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -145,6 +146,96 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  const handleImage916Upload = async (postId: string, file: File) => {
+    setUploading916PostId(postId);
+    try {
+      // Find the post to get its title
+      const post = posts.find(p => p.id === postId);
+      
+      // Sanitize the title for use as filename
+      const sanitizeTitle = (title: string) => {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .trim()
+          .replace(/\s+/g, '_') // Replace spaces with underscores
+          .substring(0, 50); // Limit length
+      };
+      
+      const fileExt = file.name.split('.').pop();
+      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
+      const baseName = sanitizedTitle || postId; // Fallback to postId if sanitization fails
+      const fileName = `${baseName}_9_16_${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      // Update the post with the new image URL
+      await socialMediaService.updatePost(postId, {
+        image_9_16_url: publicUrl
+      });
+
+      toast({
+        title: "Image uploaded",
+        description: "9:16 image has been successfully uploaded.",
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error uploading 9:16 image:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload 9:16 image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading916PostId(null);
+    }
+  };
+
+  const handleFile916Select = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      handleImage916Upload(postId, file);
+    }
+    // Reset the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
   const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -199,6 +290,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>16:9 Image</TableHead>
+              <TableHead>9:16 Image</TableHead>
               <TableHead>3:4 Image</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
@@ -251,6 +343,42 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                               <ImageIcon className="h-4 w-4 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground ml-1">16:9</span>
                             </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFile916Select(post.id, e)}
+                      className="hidden"
+                      id={`upload-916-${post.id}`}
+                    />
+                    <div 
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
+                      title="Click to upload 9:16 image"
+                    >
+                      {post.image_9_16_url ? (
+                        <OptimizedImage
+                          src={post.image_9_16_url}
+                          alt="9:16 Image"
+                          aspectRatio="9/16"
+                          className="w-12 h-auto rounded border"
+                        />
+                      ) : (
+                        <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                          {uploading916PostId === post.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <div className="flex flex-col items-center">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">9:16</span>
+                            </div>
                           )}
                         </div>
                       )}
