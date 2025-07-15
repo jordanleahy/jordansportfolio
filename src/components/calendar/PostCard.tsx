@@ -15,6 +15,7 @@ interface PostCardProps {
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   uploadingStates: {
     [key: string]: boolean;
   };
@@ -26,6 +27,7 @@ export const PostCard = ({
   onDelete, 
   onGeneratePrompt, 
   onFileSelect, 
+  onStatusChange,
   uploadingStates 
 }: PostCardProps) => {
   const { toast } = useToast();
@@ -99,7 +101,18 @@ export const PostCard = ({
         <div className="flex justify-between items-start gap-3">
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
-            <Badge className={`${getStatusColor(post.status)} mt-2 text-xs`}>
+            <Badge 
+              className={`${getStatusColor(post.status)} mt-2 text-xs cursor-pointer hover:opacity-80 transition-opacity`}
+              onClick={() => {
+                if (post.status === 'draft') {
+                  onStatusChange(post.id, 'published');
+                  toast({
+                    title: "Status Updated",
+                    description: "Post marked as published",
+                  });
+                }
+              }}
+            >
               {post.status}
             </Badge>
           </div>

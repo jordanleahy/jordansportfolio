@@ -48,6 +48,20 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     cachedPrompt: null
   });
 
+  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
+    try {
+      await socialMediaService.updatePost(postId, { status: newStatus });
+      onPostsChange();
+    } catch (error) {
+      console.error('Error updating post status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update post status",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -564,6 +578,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               onDelete={handleDeletePost}
               onGeneratePrompt={handleGenerateImagePrompt}
               onFileSelect={handleMobileFileSelect}
+              onStatusChange={handleStatusChange}
               uploadingStates={uploadingStates}
             />
           ))}
