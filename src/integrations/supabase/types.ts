@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          avatar_url: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          example_prompts: Json | null
+          id: string
+          is_active: boolean
+          max_tokens: number | null
+          model: string
+          name: string
+          slug: string
+          system_prompt: string
+          tags: string[] | null
+          temperature: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          example_prompts?: Json | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number | null
+          model?: string
+          name: string
+          slug: string
+          system_prompt: string
+          tags?: string[] | null
+          temperature?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          example_prompts?: Json | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number | null
+          model?: string
+          name?: string
+          slug?: string
+          system_prompt?: string
+          tags?: string[] | null
+          temperature?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           category: string
