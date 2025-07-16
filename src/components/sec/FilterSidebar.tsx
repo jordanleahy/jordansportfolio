@@ -69,6 +69,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   // Max Raised ranges - specific ranges requested by user
   const maxRaisedRanges = [
+    "Less than $250K",
+    "$250K - $500K", 
+    "$500K - $1M",
+    "$1M - $2M",
     "$2MM - $5MM",
     "$5MM - $10MM"
   ];
