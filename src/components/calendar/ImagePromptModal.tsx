@@ -14,7 +14,7 @@ interface ImagePromptModalProps {
   description: string;
   postId: string;
   cachedPrompt?: string | null;
-  category?: 'cdi' | 'contracts' | 'forms';
+  category?: 'cdi' | 'contracts' | 'forms' | 'coding ai';
 }
 
 const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
