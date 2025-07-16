@@ -649,8 +649,24 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                 </TableCell>
                 <TableCell className="max-w-sm">
                   <div className="truncate" title={post.description}>
-                    {post.description}
+                    {post.description.length > 100 ? post.description.substring(0, 100) + '...' : post.description}
                   </div>
+                  {post.description.length > 100 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 mt-1 text-xs text-primary"
+                      onClick={() => {
+                        // Show full description in a simple alert for now - could be enhanced with a modal
+                        toast({
+                          title: post.title,
+                          description: post.description,
+                        });
+                      }}
+                    >
+                      Read more
+                    </Button>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -797,7 +813,18 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(post.status)}>
+                  <Badge 
+                    className={`${getStatusColor(post.status)} cursor-pointer hover:opacity-80 transition-opacity`}
+                    onClick={() => {
+                      if (post.status === 'draft') {
+                        handleStatusChange(post.id, 'published');
+                        toast({
+                          title: "Status Updated",
+                          description: "Post marked as published",
+                        });
+                      }
+                    }}
+                  >
                     {post.status}
                   </Badge>
                 </TableCell>
@@ -811,8 +838,10 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       variant="outline"
                       onClick={() => handleGenerateImagePrompt(post)}
                       title="Generate image prompt"
+                      className="flex items-center gap-1"
                     >
                       <Lightbulb className="h-4 w-4" />
+                      <span className="hidden lg:inline">Generate Prompt</span>
                     </Button>
                     <Button
                       size="sm"
