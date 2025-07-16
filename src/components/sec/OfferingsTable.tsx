@@ -66,8 +66,16 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
     });
   }
   
-  const totalItems = offeringsData?.total || 0;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  
+  // Use actual filtered results count instead of database total
+  const actualResultsCount = offerings.length;
+  const totalItems = offeringsData?.count || actualResultsCount; // Use count from filtered results
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  // Calculate display range based on actual results
+  const displayedStart = actualResultsCount > 0 ? startIndex + 1 : 0;
+  const displayedEnd = Math.min(startIndex + actualResultsCount, startIndex + itemsPerPage);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -110,7 +118,6 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
       <ArrowDown className="ml-2 h-4 w-4 text-primary" />;
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
 
   if (isLoading) {
     return (
@@ -328,7 +335,11 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t">
           <div className="text-sm text-muted-foreground">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} entries
+            {actualResultsCount > 0 ? (
+              `Showing ${displayedStart} to ${displayedEnd} of ${totalItems} entries`
+            ) : (
+              'No entries found'
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
