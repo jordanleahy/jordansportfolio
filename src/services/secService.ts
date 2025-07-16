@@ -34,7 +34,7 @@ export class SecService {
     page = 1, 
     pageSize = 50
   ): Promise<PaginatedResponse<any>> {
-    console.log('🔍 DEBUG: Starting getOfferings with filters:', filters);
+    console.log('🔍 DEBUG: Starting getOfferings with filters:', JSON.stringify(filters, null, 2));
     console.log('🔍 DEBUG: Page:', page, 'PageSize:', pageSize);
     
     // Build the base query - use simple select first, then join manually
@@ -112,8 +112,13 @@ export class SecService {
       query = query.in('industrygrouptype', filters.industries);
     }
 
-    if (filters.searchQuery) {
-      query = query.or(`industrygrouptype.ilike.%${filters.searchQuery}%,descriptionofothertype.ilike.%${filters.searchQuery}%`);
+    // Handle search query - fix the weird object issue
+    const serverSearchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
+                       ((filters.searchQuery as any)?.value || '');
+    
+    if (serverSearchQuery && serverSearchQuery.trim()) {
+      console.log('🔍 DEBUG: Applying search query:', serverSearchQuery);
+      query = query.or(`industrygrouptype.ilike.%${serverSearchQuery}%,descriptionofothertype.ilike.%${serverSearchQuery}%`);
     }
 
     // Filter for fully sold companies (offering amount equals amount sold)
@@ -242,8 +247,12 @@ export class SecService {
       console.log('  - Percentage kept:', Math.round((filteredOfferings.length / enrichedOfferings.length) * 100) + '%');
     }
     
+    console.log('🔍 DEBUG: Before client-side filters - Current count:', filteredOfferings.length);
+    
     // Apply amount range filtering
     if (filters.amountRanges && filters.amountRanges.length > 0) {
+      console.log('🔍 DEBUG: Applying amount range filters:', filters.amountRanges);
+      const beforeCount = filteredOfferings.length;
       filteredOfferings = filteredOfferings.filter(offering => {
         const amount = offering.totalofferingamount;
         if (!amount || String(amount) === 'Indefinite') return false;
@@ -266,10 +275,13 @@ export class SecService {
           }
         });
       });
+      console.log('🔍 DEBUG: After amount range filter:', beforeCount, '->', filteredOfferings.length);
     }
     
     // Apply max raised filtering (based on amount sold)
     if (filters.maxRaisedRanges && filters.maxRaisedRanges.length > 0) {
+      console.log('🔍 DEBUG: Applying amount sold filters:', filters.maxRaisedRanges);
+      const beforeCount = filteredOfferings.length;
       filteredOfferings = filteredOfferings.filter(offering => {
         const amount = offering.totalamountsold;
         if (!amount || String(amount) === 'Indefinite') return false;
@@ -277,7 +289,7 @@ export class SecService {
         const numAmount = Number(amount);
         if (isNaN(numAmount)) return false;
         
-        return filters.maxRaisedRanges!.some(range => {
+        const matches = filters.maxRaisedRanges!.some(range => {
           switch (range) {
             case "Less than $250K":
               return numAmount < 250000;
@@ -295,17 +307,48 @@ export class SecService {
               return false;
           }
         });
+        
+        if (matches) {
+          console.log(`🔍 DEBUG: Match found for amount $${numAmount} with ranges:`, filters.maxRaisedRanges);
+        }
+        
+        return matches;
       });
+      console.log('🔍 DEBUG: After amount sold filter:', beforeCount, '->', filteredOfferings.length);
     }
     
     // Apply state filtering
     if (filters.states && filters.states.length > 0) {
+      console.log('🔍 DEBUG: Applying state filters:', filters.states);
+      const beforeCount = filteredOfferings.length;
       filteredOfferings = filteredOfferings.filter(offering => {
         return offering.issuers.some((issuer: any) => {
           const issuerState = issuer.stateorcountry;
           return issuerState && filters.states!.includes(issuerState);
         });
       });
+      console.log('🔍 DEBUG: After state filter:', beforeCount, '->', filteredOfferings.length);
+    }
+    
+    // Apply search filtering on company names (client-side since we need issuer data)
+    const clientSearchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
+                       ((filters.searchQuery as any)?.value || '');
+    if (clientSearchQuery && clientSearchQuery.trim()) {
+      console.log('🔍 DEBUG: Applying client-side search for company names:', clientSearchQuery);
+      const beforeCount = filteredOfferings.length;
+      filteredOfferings = filteredOfferings.filter(offering => {
+        // Search in company names
+        const companyNameMatch = offering.issuers.some((issuer: any) => 
+          issuer.entityname && issuer.entityname.toLowerCase().includes(clientSearchQuery.toLowerCase())
+        );
+        
+        // Search in industry (already done server-side, but include for completeness)
+        const industryMatch = offering.industrygrouptype && 
+          offering.industrygrouptype.toLowerCase().includes(clientSearchQuery.toLowerCase());
+          
+        return companyNameMatch || industryMatch;
+      });
+      console.log('🔍 DEBUG: After search filter:', beforeCount, '->', filteredOfferings.length);
     }
     
     const finalOfferings = filteredOfferings;
