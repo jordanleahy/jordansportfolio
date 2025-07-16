@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -22,14 +23,54 @@ import {
 interface OfferingDetailModalProps {
   offering: any;
   isOpen: boolean;
+  isLoading?: boolean;
   onClose: () => void;
 }
 
 export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
   offering,
   isOpen,
+  isLoading = false,
   onClose,
 }) => {
+  if (!isOpen) return null;
+  
+  if (isLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Building2 className="h-5 w-5" />
+              <Skeleton className="h-6 w-48" />
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-5 w-32" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j}>
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <Skeleton className="h-5 w-full" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   if (!offering) return null;
 
   const formatCurrency = (amount: number | string) => {

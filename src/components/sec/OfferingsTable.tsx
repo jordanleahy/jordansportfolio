@@ -22,7 +22,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { useOfferings } from "@/hooks/useSecQueries";
+import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 
@@ -39,7 +39,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   const [sortField, setSortField] = useState("sale_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedOffering, setSelectedOffering] = useState<any>(null);
+  const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 20;
 
@@ -52,6 +52,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   };
 
   const { data: offeringsData, isLoading, error } = useOfferings(queryFilters, currentPage, itemsPerPage);
+  const { data: selectedOfferingDetail, isLoading: isDetailLoading } = useOfferingDetail(selectedOfferingId || undefined);
 
   let offerings = offeringsData?.data || [];
   
@@ -248,7 +249,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                     key={offering.accessionnumber}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={() => {
-                      setSelectedOffering(offering);
+                      setSelectedOfferingId(offering.accessionnumber);
                       setIsModalOpen(true);
                     }}
                   >
@@ -321,11 +322,12 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
       </CardContent>
 
       <OfferingDetailModal
-        offering={selectedOffering}
+        offering={selectedOfferingDetail}
         isOpen={isModalOpen}
+        isLoading={isDetailLoading}
         onClose={() => {
           setIsModalOpen(false);
-          setSelectedOffering(null);
+          setSelectedOfferingId(null);
         }}
       />
     </Card>
