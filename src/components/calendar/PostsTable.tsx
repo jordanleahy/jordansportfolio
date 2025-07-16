@@ -4,12 +4,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ImagePromptModal } from './ImagePromptModal';
 import { ImageWatermarkModal } from './ImageWatermarkModal';
+import { ImagePreviewModal } from '@/components/ui/image-preview-modal';
 import { PostCard } from './PostCard';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -49,6 +51,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     cachedPrompt: null,
     category: 'cdi'
   });
+  const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
 
   const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
     try {
@@ -683,12 +686,18 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       title="Click to upload 16:9 image"
                     >
                       {post.image_16_9_url ? (
-                        <OptimizedImage
-                          src={post.image_16_9_url}
-                          alt="16:9 Image"
-                          aspectRatio="16/9"
-                          className="w-20 h-auto rounded border"
-                        />
+                        <ImageHoverOverlay
+                          onUpload={() => document.getElementById(`upload-${post.id}`)?.click()}
+                          onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                          imageUrl={post.image_16_9_url}
+                        >
+                          <OptimizedImage
+                            src={post.image_16_9_url}
+                            alt="16:9 Image"
+                            aspectRatio="16/9"
+                            className="w-20 h-auto rounded border cursor-pointer"
+                          />
+                        </ImageHoverOverlay>
                       ) : (
                         <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                           {uploadingPostId === post.id ? (
@@ -718,13 +727,19 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
                       title="Click to upload 9:16 image"
                     >
-                      {post.image_9_16_url ? (
-                        <OptimizedImage
-                          src={post.image_9_16_url}
-                          alt="9:16 Image"
-                          aspectRatio="9/16"
-                          className="w-12 h-auto rounded border"
-                        />
+                       {post.image_9_16_url ? (
+                        <ImageHoverOverlay
+                          onUpload={() => document.getElementById(`upload-916-${post.id}`)?.click()}
+                          onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
+                          imageUrl={post.image_9_16_url}
+                        >
+                          <OptimizedImage
+                            src={post.image_9_16_url}
+                            alt="9:16 Image"
+                            aspectRatio="9/16"
+                            className="w-12 h-auto rounded border cursor-pointer"
+                          />
+                        </ImageHoverOverlay>
                       ) : (
                         <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                           {uploading916PostId === post.id ? (
@@ -754,13 +769,19 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       onClick={() => document.getElementById(`upload-34-${post.id}`)?.click()}
                       title="Click to upload 3:4 image"
                     >
-                      {post.image_3_4_url ? (
-                        <OptimizedImage
-                          src={post.image_3_4_url}
-                          alt="3:4 Image"
-                          aspectRatio="3/4"
-                          className="w-16 h-auto rounded border"
-                        />
+                       {post.image_3_4_url ? (
+                        <ImageHoverOverlay
+                          onUpload={() => document.getElementById(`upload-34-${post.id}`)?.click()}
+                          onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                          imageUrl={post.image_3_4_url}
+                        >
+                          <OptimizedImage
+                            src={post.image_3_4_url}
+                            alt="3:4 Image"
+                            aspectRatio="3/4"
+                            className="w-16 h-auto rounded border cursor-pointer"
+                          />
+                        </ImageHoverOverlay>
                       ) : (
                         <div className="w-16 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                           {uploading34PostId === post.id ? (
@@ -790,13 +811,19 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       onClick={() => document.getElementById(`upload-43-${post.id}`)?.click()}
                       title="Click to upload 4:3 image"
                     >
-                      {post.image_4_3_url ? (
-                        <OptimizedImage
-                          src={post.image_4_3_url}
-                          alt="4:3 Image"
-                          aspectRatio="4/3"
-                          className="w-20 h-auto rounded border"
-                        />
+                       {post.image_4_3_url ? (
+                        <ImageHoverOverlay
+                          onUpload={() => document.getElementById(`upload-43-${post.id}`)?.click()}
+                          onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
+                          imageUrl={post.image_4_3_url}
+                        >
+                          <OptimizedImage
+                            src={post.image_4_3_url}
+                            alt="4:3 Image"
+                            aspectRatio="4/3"
+                            className="w-20 h-auto rounded border cursor-pointer"
+                          />
+                        </ImageHoverOverlay>
                       ) : (
                         <div className="w-20 h-16 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                           {uploading43PostId === post.id ? (
@@ -890,6 +917,15 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         file={selectedFile}
         onConfirm={handleWatermarkedUpload}
       />
+
+      {previewImage && (
+        <ImagePreviewModal
+          isOpen={!!previewImage}
+          onClose={() => setPreviewImage(null)}
+          imageUrl={previewImage.url}
+          alt={previewImage.alt}
+        />
+      )}
     </Card>
   );
 };

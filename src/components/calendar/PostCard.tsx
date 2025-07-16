@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -236,36 +237,60 @@ export const PostCard = ({
         {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url) && !showImageUploads && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
-              <OptimizedImage
-                src={post.image_16_9_url}
-                alt="16:9 image"
-                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
-              />
+              <ImageHoverOverlay
+                onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                imageUrl={post.image_16_9_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <OptimizedImage
+                  src={post.image_16_9_url}
+                  alt="16:9 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </ImageHoverOverlay>
             )}
             {post.image_9_16_url && (
-              <OptimizedImage
-                src={post.image_9_16_url}
-                alt="9:16 image"
-                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
-              />
+              <ImageHoverOverlay
+                onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
+                imageUrl={post.image_9_16_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <OptimizedImage
+                  src={post.image_9_16_url}
+                  alt="9:16 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </ImageHoverOverlay>
             )}
             {post.image_3_4_url && (
-              <OptimizedImage
-                src={post.image_3_4_url}
-                alt="3:4 image"
-                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
-              />
+              <ImageHoverOverlay
+                onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                imageUrl={post.image_3_4_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <OptimizedImage
+                  src={post.image_3_4_url}
+                  alt="3:4 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </ImageHoverOverlay>
             )}
             {post.image_4_3_url && (
-              <OptimizedImage
-                src={post.image_4_3_url}
-                alt="4:3 image"
-                className="h-12 w-auto rounded border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
-              />
+              <ImageHoverOverlay
+                onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
+                imageUrl={post.image_4_3_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <OptimizedImage
+                  src={post.image_4_3_url}
+                  alt="4:3 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </ImageHoverOverlay>
             )}
           </div>
         )}
