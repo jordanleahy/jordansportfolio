@@ -184,7 +184,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                     onClick={() => handleSort("amountRaised")}
                     className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
-                    Amount Raised
+                    Raise Target
                     {getSortIcon("amountRaised")}
                   </Button>
                 </TableHead>
