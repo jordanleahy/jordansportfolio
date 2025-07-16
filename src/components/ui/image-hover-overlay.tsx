@@ -28,17 +28,45 @@ export const ImageHoverOverlay = ({
 }: ImageHoverOverlayProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (imageUrl && onDownload) {
       onDownload();
     } else if (imageUrl) {
-      // Default download behavior
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = imageUrl.split('/').pop() || 'image';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        // Fetch the image as a blob
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        
+        // Create a blob URL
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        
+        // Extract filename from URL or use a default
+        const urlParts = imageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1] || 'image.jpg';
+        link.download = filename;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up blob URL
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (error) {
+        console.error('Error downloading image:', error);
+        // Fallback to simple link download
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = imageUrl.split('/').pop() || 'image.jpg';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
   };
 
