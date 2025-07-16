@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Building2, 
   DollarSign, 
@@ -17,7 +18,10 @@ import {
   User, 
   FileText,
   Phone,
-  Mail
+  Mail,
+  Users,
+  Briefcase,
+  UserCheck
 } from "lucide-react";
 
 interface OfferingDetailModalProps {
@@ -336,6 +340,183 @@ export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
             </Card>
           )}
         </div>
+
+        <Separator className="my-6" />
+
+        {/* People Information Tabs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              People Involved
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="executives" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="executives" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Executives & Insiders
+                </TabsTrigger>
+                <TabsTrigger value="brokers" className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4" />
+                  Broker-Dealers
+                </TabsTrigger>
+                <TabsTrigger value="individuals" className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  Individual Brokers
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="executives" className="mt-4">
+                <div className="space-y-4">
+                  {offering.related_persons && offering.related_persons.length > 0 ? (
+                    offering.related_persons.map((person: any, index: number) => (
+                      <Card key={index} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Name</label>
+                            <p className="font-semibold">
+                              {[person.firstname, person.middlename, person.lastname]
+                                .filter(Boolean)
+                                .join(' ') || 'Not specified'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Relationship</label>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {person.relationship_1 && (
+                                <Badge variant="outline">{person.relationship_1}</Badge>
+                              )}
+                              {person.relationship_2 && (
+                                <Badge variant="outline">{person.relationship_2}</Badge>
+                              )}
+                              {person.relationship_3 && (
+                                <Badge variant="outline">{person.relationship_3}</Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Address</label>
+                            <p className="text-sm">
+                              {[person.street1, person.street2, person.city, person.stateorcountrydescription, person.zipcode]
+                                .filter(Boolean)
+                                .join(', ') || 'Not specified'}
+                            </p>
+                          </div>
+                          {person.relationshipclarification && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Clarification</label>
+                              <p className="text-sm">{person.relationshipclarification}</p>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No executive information available</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="brokers" className="mt-4">
+                <div className="space-y-4">
+                  {offering.recipients && offering.recipients.length > 0 ? (
+                    offering.recipients
+                      .filter((recipient: any) => !recipient.recipientcrdnumber) // Broker-dealers typically don't have individual CRD numbers
+                      .map((recipient: any, index: number) => (
+                        <Card key={index} className="p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Name</label>
+                              <p className="font-semibold">{recipient.recipientname || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Associated BD Name</label>
+                              <p>{recipient.associatedbdname || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Associated BD CRD</label>
+                              <p className="font-mono text-sm">{recipient.associatedbdcrdnumber || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Address</label>
+                              <p className="text-sm">
+                                {[recipient.street1, recipient.street2, recipient.city, recipient.stateorcountrydescription, recipient.zipcode]
+                                  .filter(Boolean)
+                                  .join(', ') || 'Not specified'}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Foreign Solicitation</label>
+                              <Badge variant={recipient.foreignsolicitation ? "secondary" : "outline"}>
+                                {recipient.foreignsolicitation ? "Yes" : "No"}
+                              </Badge>
+                            </div>
+                            {recipient.descriptions_list && (
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Descriptions</label>
+                                <p className="text-sm">{recipient.descriptions_list}</p>
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No broker-dealer information available</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="individuals" className="mt-4">
+                <div className="space-y-4">
+                  {offering.recipients && offering.recipients.length > 0 ? (
+                    offering.recipients
+                      .filter((recipient: any) => recipient.recipientcrdnumber) // Individual brokers have CRD numbers
+                      .map((recipient: any, index: number) => (
+                        <Card key={index} className="p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Name</label>
+                              <p className="font-semibold">{recipient.recipientname || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">CRD Number</label>
+                              <p className="font-mono text-sm">{recipient.recipientcrdnumber}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Associated BD Name</label>
+                              <p>{recipient.associatedbdname || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Associated BD CRD</label>
+                              <p className="font-mono text-sm">{recipient.associatedbdcrdnumber || 'Not specified'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Address</label>
+                              <p className="text-sm">
+                                {[recipient.street1, recipient.street2, recipient.city, recipient.stateorcountrydescription, recipient.zipcode]
+                                  .filter(Boolean)
+                                  .join(', ') || 'Not specified'}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Foreign Solicitation</label>
+                              <Badge variant={recipient.foreignsolicitation ? "secondary" : "outline"}>
+                                {recipient.foreignsolicitation ? "Yes" : "No"}
+                              </Badge>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No individual broker information available</p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         <Separator className="my-6" />
 
