@@ -7,6 +7,7 @@ import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Navigation from '@/components/Navigation';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 type CategoryType = 'cdi' | 'contracts' | 'forms';
@@ -113,7 +114,8 @@ export default function Calendar() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
+      <Navigation />
+      <div className="container mx-auto py-20 px-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold tracking-tight">Social Media Calendar</h1>
           <p className="text-muted-foreground mt-2">
