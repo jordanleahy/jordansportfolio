@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { X, Filter, RotateCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useIndustries } from "@/hooks/useSecQueries";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface FilterSidebarProps {
   filters: {
@@ -26,14 +27,18 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onFiltersChange, 
   onClose
 }) => {
-  const [localFilters, setLocalFilters] = useState({
-    industries: [],
-    searchQuery: "",
-    fullySold: false,
-    amountRanges: [],
-    states: [],
-    ...filters
-  });
+  const [searchQuery, setSearchQuery] = useState(filters.searchQuery || "");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Update filters immediately for non-search changes, debounced for search
+  useEffect(() => {
+    if (debouncedSearchQuery !== filters.searchQuery) {
+      onFiltersChange({
+        ...filters,
+        searchQuery: debouncedSearchQuery
+      });
+    }
+  }, [debouncedSearchQuery]);
 
   // Technology-focused industries only
   const techIndustries = [
@@ -71,46 +76,38 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   ];
 
   const handleIndustryToggle = (industry: string) => {
-    const updatedIndustries = localFilters.industries.includes(industry)
-      ? localFilters.industries.filter(i => i !== industry)
-      : [...localFilters.industries, industry];
+    const updatedIndustries = filters.industries.includes(industry)
+      ? filters.industries.filter(i => i !== industry)
+      : [...filters.industries, industry];
     
-    setLocalFilters({
-      ...localFilters,
+    onFiltersChange({
+      ...filters,
       industries: updatedIndustries
     });
   };
 
   const handleSearchChange = (value: string) => {
-    setLocalFilters({
-      ...localFilters,
-      searchQuery: value
-    });
-  };
-
-  const applyFilters = () => {
-    onFiltersChange(localFilters);
-    onClose?.();
+    setSearchQuery(value);
   };
 
   const handleAmountRangeToggle = (range: string) => {
-    const updatedRanges = localFilters.amountRanges?.includes(range)
-      ? localFilters.amountRanges.filter(r => r !== range)
-      : [...(localFilters.amountRanges || []), range];
+    const updatedRanges = filters.amountRanges?.includes(range)
+      ? filters.amountRanges.filter(r => r !== range)
+      : [...(filters.amountRanges || []), range];
     
-    setLocalFilters({
-      ...localFilters,
+    onFiltersChange({
+      ...filters,
       amountRanges: updatedRanges
     });
   };
 
   const handleStateToggle = (stateCode: string) => {
-    const updatedStates = localFilters.states?.includes(stateCode)
-      ? localFilters.states.filter(s => s !== stateCode)
-      : [...(localFilters.states || []), stateCode];
+    const updatedStates = filters.states?.includes(stateCode)
+      ? filters.states.filter(s => s !== stateCode)
+      : [...(filters.states || []), stateCode];
     
-    setLocalFilters({
-      ...localFilters,
+    onFiltersChange({
+      ...filters,
       states: updatedStates
     });
   };
@@ -121,16 +118,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       searchQuery: "",
       fullySold: false,
       amountRanges: [],
-      states: []
+      states: [],
+      useDefaultFilters: false
     };
-    setLocalFilters(resetFilters);
+    setSearchQuery("");
     onFiltersChange(resetFilters);
   };
 
-  const hasActiveFilters = localFilters.industries.length > 0 || 
-    localFilters.searchQuery.length > 0 ||
-    (localFilters.amountRanges?.length || 0) > 0 ||
-    (localFilters.states?.length || 0) > 0;
+  const hasActiveFilters = filters.industries.length > 0 || 
+    searchQuery.length > 0 ||
+    (filters.amountRanges?.length || 0) > 0 ||
+    (filters.states?.length || 0) > 0;
 
   return (
     <Card className="flex flex-col h-full relative z-10 bg-background border shadow-sm">
@@ -170,7 +168,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <Label className="text-sm font-semibold">Search</Label>
           <Input
             placeholder="Search companies, industries..."
-            value={localFilters.searchQuery}
+            value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full"
           />
@@ -186,7 +184,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <div key={industry} className="flex items-center space-x-2">
                 <Checkbox
                   id={industry}
-                  checked={localFilters.industries.includes(industry)}
+                  checked={filters.industries.includes(industry)}
                   onCheckedChange={() => handleIndustryToggle(industry)}
                 />
                 <Label 
@@ -200,9 +198,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
           
           {/* Selected Industries */}
-          {localFilters.industries.length > 0 && (
+          {filters.industries.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {localFilters.industries.map((industry) => (
+              {filters.industries.map((industry) => (
                 <Badge 
                   key={industry} 
                   variant="secondary" 
@@ -227,7 +225,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <div key={range} className="flex items-center space-x-2">
                 <Checkbox
                   id={range}
-                  checked={localFilters.amountRanges?.includes(range) || false}
+                  checked={filters.amountRanges?.includes(range) || false}
                   onCheckedChange={() => handleAmountRangeToggle(range)}
                 />
                 <Label 
@@ -241,9 +239,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
           
           {/* Selected Amount Ranges */}
-          {(localFilters.amountRanges?.length || 0) > 0 && (
+          {(filters.amountRanges?.length || 0) > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {localFilters.amountRanges?.map((range) => (
+              {filters.amountRanges?.map((range) => (
                 <Badge 
                   key={range} 
                   variant="secondary" 
@@ -268,7 +266,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <div key={state.code} className="flex items-center space-x-2">
                 <Checkbox
                   id={state.code}
-                  checked={localFilters.states?.includes(state.code) || false}
+                  checked={filters.states?.includes(state.code) || false}
                   onCheckedChange={() => handleStateToggle(state.code)}
                 />
                 <Label 
@@ -282,9 +280,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
           
           {/* Selected States */}
-          {(localFilters.states?.length || 0) > 0 && (
+          {(filters.states?.length || 0) > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {localFilters.states?.map((stateCode) => {
+              {filters.states?.map((stateCode) => {
                 const state = states.find(s => s.code === stateCode);
                 return (
                   <Badge 
@@ -302,21 +300,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           )}
         </div>
 
-        <Separator />
-
-        {/* Apply Filters Button */}
-        <Button 
-          onClick={applyFilters} 
-          className="w-full"
-          disabled={!hasActiveFilters && JSON.stringify(localFilters) === JSON.stringify(filters)}
-        >
-          Apply Filters
-        </Button>
-        
         {hasActiveFilters && (
-          <p className="text-xs text-muted-foreground text-center">
-            {localFilters.industries.length} industries, {localFilters.amountRanges?.length || 0} amounts, {localFilters.states?.length || 0} states selected
-          </p>
+          <>
+            <Separator />
+            <p className="text-xs text-muted-foreground text-center">
+              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.states?.length || 0} states selected
+            </p>
+          </>
         )}
       </CardContent>
     </Card>
