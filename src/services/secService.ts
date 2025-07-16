@@ -80,27 +80,8 @@ export class SecService {
         .filter('totalamountsold', 'not.is', null);
     }
 
-    // Apply sorting - handle special cases for related table sorting
-    if (filters.sortField && filters.sortDirection) {
-      const sortField = getSortField(filters.sortField);
-      if (filters.sortField === 'companyName') {
-        // For company name, we'll handle this client-side since we need manual joins
-        query = query.order('sale_date', { ascending: false });
-      } else if (filters.sortField === 'amountRaised') {
-        // Handle numeric sorting for amount - now properly numeric columns
-        query = query
-          .filter('totalofferingamount', 'not.is', null)
-          .order('totalofferingamount', { ascending: filters.sortDirection === 'asc' });
-      } else if (filters.sortField === 'amountSold') {
-        // Handle numeric sorting for amount sold
-        query = query.order('totalamountsold', { ascending: filters.sortDirection === 'asc' });
-      } else {
-        query = query.order(sortField, { ascending: filters.sortDirection === 'asc' });
-      }
-    } else {
-      // Default sort by sale_date descending
-      query = query.order('sale_date', { ascending: false });
-    }
+    // Simple default sorting - all custom sorting is handled client-side
+    query = query.order('sale_date', { ascending: false });
 
     // Apply user filters (these override defaults when specified)
 

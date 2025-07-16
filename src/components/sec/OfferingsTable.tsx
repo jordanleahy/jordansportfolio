@@ -56,12 +56,54 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
 
   let offerings = offeringsData?.data || [];
   
-  // Handle client-side sorting for company name (since it's a joined field)
-  if (sortField === "companyName" && offerings.length > 0) {
+  // Handle client-side sorting for fields that need special handling
+  if (offerings.length > 0) {
     offerings = [...offerings].sort((a, b) => {
-      const nameA = a.issuers?.[0]?.entityname || '';
-      const nameB = b.issuers?.[0]?.entityname || '';
-      const comparison = nameA.localeCompare(nameB);
+      let comparison = 0;
+      
+      switch (sortField) {
+        case "companyName":
+          const nameA = a.issuers?.[0]?.entityname || '';
+          const nameB = b.issuers?.[0]?.entityname || '';
+          comparison = nameA.localeCompare(nameB);
+          break;
+          
+        case "percentRaised":
+          const percentA = a.totalofferingamount && a.totalamountsold ? 
+            (a.totalamountsold / a.totalofferingamount) * 100 : 0;
+          const percentB = b.totalofferingamount && b.totalamountsold ? 
+            (b.totalamountsold / b.totalofferingamount) * 100 : 0;
+          comparison = percentA - percentB;
+          break;
+          
+        case "amountRaised":
+          const amountA = Number(a.totalofferingamount) || 0;
+          const amountB = Number(b.totalofferingamount) || 0;
+          comparison = amountA - amountB;
+          break;
+          
+        case "amountSold":
+          const soldA = Number(a.totalamountsold) || 0;
+          const soldB = Number(b.totalamountsold) || 0;
+          comparison = soldA - soldB;
+          break;
+          
+        case "dateOfFirstSale":
+          const dateA = new Date(a.sale_date || 0).getTime();
+          const dateB = new Date(b.sale_date || 0).getTime();
+          comparison = dateA - dateB;
+          break;
+          
+        case "industry":
+          const industryA = a.industrygrouptype || '';
+          const industryB = b.industrygrouptype || '';
+          comparison = industryA.localeCompare(industryB);
+          break;
+          
+        default:
+          return 0;
+      }
+      
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }
