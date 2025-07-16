@@ -109,19 +109,6 @@ const SEC = () => {
         {/* Navigation */}
         <Navigation />
         
-        {/* Admin Bar for authenticated users */}
-        {user && (
-          <div className="fixed top-20 right-4 z-50">
-            <div className="bg-card border rounded-lg p-3 shadow-lg">
-              <p className="text-sm text-muted-foreground mb-2">
-                Logged in as: {user.email}
-              </p>
-              <Button onClick={handleSignOut} variant="outline" size="sm">
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* Header */}
         <div className="border-b bg-card pt-16">{/* Add padding-top for fixed nav */}
