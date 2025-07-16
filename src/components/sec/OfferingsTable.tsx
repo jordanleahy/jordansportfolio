@@ -78,6 +78,12 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
     }).format(amount);
   };
 
+  const formatPercentage = (amountSold: number, totalOffering: number) => {
+    if (!amountSold || !totalOffering || totalOffering === 0) return 'N/A';
+    const percentage = (amountSold / totalOffering) * 100;
+    return `${percentage.toFixed(1)}%`;
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -121,7 +127,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(7)].map((_, i) => (
                       <TableHead key={i}>
                         <Skeleton className="h-4 w-24" />
                       </TableHead>
@@ -131,7 +137,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 <TableBody>
                   {[...Array(8)].map((_, i) => (
                     <TableRow key={i}>
-                      {[...Array(5)].map((_, j) => (
+                      {[...Array(7)].map((_, j) => (
                         <TableCell key={j}>
                           <Skeleton className="h-4 w-full" />
                         </TableCell>
@@ -201,6 +207,16 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 <TableHead>
                   <Button
                     variant="ghost"
+                    onClick={() => handleSort("percentRaised")}
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
+                  >
+                    % Raised
+                    {getSortIcon("percentRaised")}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
                     onClick={() => handleSort("dateOfFirstSale")}
                     className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
@@ -224,7 +240,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-red-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-red-500">
                     <div>
                       <p className="font-semibold">Error loading SEC offerings</p>
                       <p className="text-sm mt-1">{error.message}</p>
@@ -241,7 +257,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 </TableRow>
               ) : offerings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     <div>
                       <p className="font-semibold">No SEC offerings found</p>
                       <p className="text-sm mt-1">
@@ -287,6 +303,9 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                         ? formatCurrency(offering.totalamountsold) 
                         : 'Not disclosed'
                       }
+                    </TableCell>
+                    <TableCell className="font-semibold text-purple-600">
+                      {formatPercentage(offering.totalamountsold, offering.totalofferingamount)}
                     </TableCell>
                     <TableCell>
                       {offering.sale_date ? formatDate(offering.sale_date) : 'Not specified'}
