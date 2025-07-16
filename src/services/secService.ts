@@ -267,7 +267,7 @@ export class SecService {
             case "$500k - $2MM":
               return numAmount >= 500000 && numAmount <= 2000000;
             case "$2MM - $5MM":
-              return numAmount > 2000000 && numAmount <= 5000000;
+              return numAmount >= 2000000 && numAmount <= 5000000;
             case "$5MM+":
               return numAmount > 5000000;
             default:
