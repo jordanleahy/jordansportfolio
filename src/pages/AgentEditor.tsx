@@ -5,7 +5,9 @@ import { AgentWizard } from '@/components/agents/AgentWizard';
 export default function AgentEditor() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { data: agent, isLoading } = useAgent(slug === 'new' ? '' : slug!);
+  
+  // Only fetch agent data if we're editing an existing agent
+  const { data: agent, isLoading } = useAgent(slug === 'new' ? undefined : slug!);
 
   const handleCancel = () => {
     if (slug === 'new') {
@@ -15,6 +17,7 @@ export default function AgentEditor() {
     }
   };
 
+  // Show loading only when editing an existing agent
   if (isLoading && slug !== 'new') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,7 +29,8 @@ export default function AgentEditor() {
     );
   }
 
-  if (slug !== 'new' && !agent) {
+  // Show not found only when editing an existing agent that doesn't exist
+  if (slug !== 'new' && !isLoading && !agent) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

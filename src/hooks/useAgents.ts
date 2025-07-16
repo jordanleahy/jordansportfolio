@@ -18,10 +18,12 @@ export const useAgents = () => {
   });
 };
 
-export const useAgent = (slug: string) => {
+export const useAgent = (slug?: string) => {
   return useQuery({
     queryKey: ['agent', slug],
     queryFn: async () => {
+      if (!slug) return null;
+      
       const { data, error } = await supabase
         .from('agents')
         .select('*')
