@@ -133,13 +133,19 @@ export default function Calendar() {
           onValueChange={(value) => setActiveTab(value as CategoryType)} 
           className="space-y-8"
         >
-          <TabsList className={`grid w-full grid-cols-${availableCategories.length}`}>
-            {availableCategories.map((category) => (
-              <TabsTrigger key={category} value={category} className="capitalize">
-                {category}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex w-max min-w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+              {availableCategories.map((category) => (
+                <TabsTrigger 
+                  key={category} 
+                  value={category} 
+                  className="capitalize whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-sm"
+                >
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {availableCategories.map((category) => (
             <TabsContent key={category} value={category} className="space-y-8">
