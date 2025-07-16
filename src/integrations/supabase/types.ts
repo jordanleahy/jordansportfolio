@@ -865,6 +865,10 @@ export type Database = {
       }
     }
     Functions: {
+      insert_category_content: {
+        Args: { category_name: string; posts_data: Json }
+        Returns: number
+      }
       insert_cdi_content: {
         Args: Record<PropertyKey, never>
         Returns: undefined

@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { PostForm } from '@/components/calendar/PostForm';
 import { PostsTable } from '@/components/calendar/PostsTable';
+import { JsonImportDialog } from '@/components/calendar/JsonImportDialog';
 import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
+type CategoryType = 'cdi' | 'contracts' | 'forms';
+
 export default function Calendar() {
-  const [cdiPosts, setCdiPosts] = useState<SocialMediaPost[]>([]);
-  const [contractsPosts, setContractsPosts] = useState<SocialMediaPost[]>([]);
+  const [postsByCategory, setPostsByCategory] = useState<Record<string, SocialMediaPost[]>>({});
+  const [availableCategories, setAvailableCategories] = useState<CategoryType[]>(['cdi', 'contracts']);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('cdi');
+  const [activeTab, setActiveTab] = useState<CategoryType>('cdi');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,14 +45,19 @@ export default function Calendar() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadAllPosts = async () => {
+  const loadAllCategories = async () => {
     try {
-      const [cdiData, contractsData] = await Promise.all([
-        socialMediaService.getAllPosts('cdi'),
-        socialMediaService.getAllPosts('contracts')
-      ]);
-      setCdiPosts(cdiData);
-      setContractsPosts(contractsData);
+      const categories = await socialMediaService.getAvailableCategories();
+      const allCategories = ['cdi', 'contracts', ...categories.filter(c => c !== 'cdi' && c !== 'contracts')] as CategoryType[];
+      setAvailableCategories(allCategories);
+      
+      // Load posts for all categories
+      const postsData: Record<string, SocialMediaPost[]> = {};
+      for (const category of allCategories) {
+        const posts = await socialMediaService.getAllPosts(category as any);
+        postsData[category] = posts;
+      }
+      setPostsByCategory(postsData);
     } catch (error) {
       console.error('Error loading posts:', error);
       toast({
@@ -62,32 +70,33 @@ export default function Calendar() {
     }
   };
 
-  const loadCdiPosts = async () => {
+  const loadAllPosts = async () => {
+    await loadAllCategories();
+  };
+
+  const loadCategoryPosts = async (category: CategoryType) => {
     try {
-      const cdiData = await socialMediaService.getAllPosts('cdi');
-      setCdiPosts(cdiData);
+      const posts = await socialMediaService.getAllPosts(category as any);
+      setPostsByCategory(prev => ({
+        ...prev,
+        [category]: posts
+      }));
     } catch (error) {
-      console.error('Error loading CDI posts:', error);
+      console.error(`Error loading ${category} posts:`, error);
       toast({
         title: "Error",
-        description: "Failed to load CDI posts.",
+        description: `Failed to load ${category} posts.`,
         variant: "destructive",
       });
     }
   };
 
-  const loadContractsPosts = async () => {
-    try {
-      const contractsData = await socialMediaService.getAllPosts('contracts');
-      setContractsPosts(contractsData);
-    } catch (error) {
-      console.error('Error loading Contracts posts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load Contracts posts.",
-        variant: "destructive",
-      });
-    }
+  const handleImportComplete = async () => {
+    await loadAllCategories();
+    toast({
+      title: "Categories Updated",
+      description: "Available categories have been refreshed after import.",
+    });
   };
 
   if (isLoading) {
@@ -112,21 +121,36 @@ export default function Calendar() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cdi">CDI</TabsTrigger>
-            <TabsTrigger value="contracts">Contracts</TabsTrigger>
+        <div className="flex justify-between items-center mb-8">
+          <div></div>
+          <JsonImportDialog onImportComplete={handleImportComplete} />
+        </div>
+
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(value) => setActiveTab(value as CategoryType)} 
+          className="space-y-8"
+        >
+          <TabsList className={`grid w-full grid-cols-${availableCategories.length}`}>
+            {availableCategories.map((category) => (
+              <TabsTrigger key={category} value={category} className="capitalize">
+                {category}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value="cdi" className="space-y-8">
-            <PostForm onPostCreated={loadCdiPosts} category="cdi" />
-            <PostsTable posts={cdiPosts} onPostsChange={loadCdiPosts} />
-          </TabsContent>
-
-          <TabsContent value="contracts" className="space-y-8">
-            <PostForm onPostCreated={loadContractsPosts} category="contracts" />
-            <PostsTable posts={contractsPosts} onPostsChange={loadContractsPosts} />
-          </TabsContent>
+          {availableCategories.map((category) => (
+            <TabsContent key={category} value={category} className="space-y-8">
+              <PostForm 
+                onPostCreated={() => loadCategoryPosts(category)} 
+                category={category as any} 
+              />
+              <PostsTable 
+                posts={postsByCategory[category] || []} 
+                onPostsChange={() => loadCategoryPosts(category)} 
+              />
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
     </div>

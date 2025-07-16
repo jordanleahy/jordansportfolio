@@ -40,7 +40,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     title: string;
     description: string;
     cachedPrompt?: string | null;
-    category?: 'cdi' | 'contracts';
+    category?: 'cdi' | 'contracts' | 'forms';
   }>({
     isOpen: false,
     postId: '',

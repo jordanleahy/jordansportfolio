@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SocialMediaPost, CreateSocialMediaPost } from "@/types/socialMedia";
 
 export const socialMediaService = {
-  async getAllPosts(category?: 'cdi' | 'contracts'): Promise<SocialMediaPost[]> {
+  async getAllPosts(category?: 'cdi' | 'contracts' | 'forms'): Promise<SocialMediaPost[]> {
     let query = supabase
       .from('social_media_posts')
       .select('*')
@@ -65,5 +65,33 @@ export const socialMediaService = {
       .eq('id', id);
 
     if (error) throw error;
+  },
+
+  async bulkImportPosts(category: string, posts: Array<{
+    day?: number;
+    title: string;
+    description: string;
+    theme?: string;
+    status?: 'draft' | 'scheduled' | 'published';
+  }>): Promise<number> {
+    const { data, error } = await supabase
+      .rpc('insert_category_content', {
+        category_name: category,
+        posts_data: posts
+      });
+
+    if (error) throw error;
+    return data || 0;
+  },
+
+  async getAvailableCategories(): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('social_media_posts')
+      .select('category');
+
+    if (error) throw error;
+    
+    const categories = [...new Set((data || []).map((item: any) => item.category as string))];
+    return categories.filter(Boolean);
   }
 };
