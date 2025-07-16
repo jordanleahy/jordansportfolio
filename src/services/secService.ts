@@ -274,6 +274,28 @@ export class SecService {
       });
     }
     
+    // Apply max raised filtering (same logic but for offering amount)
+    if (filters.maxRaisedRanges && filters.maxRaisedRanges.length > 0) {
+      filteredOfferings = filteredOfferings.filter(offering => {
+        const amount = offering.totalofferingamount;
+        if (!amount || String(amount) === 'Indefinite') return false;
+        
+        const numAmount = Number(amount);
+        if (isNaN(numAmount)) return false;
+        
+        return filters.maxRaisedRanges!.some(range => {
+          switch (range) {
+            case "$2MM - $5MM":
+              return numAmount >= 2000000 && numAmount <= 5000000;
+            case "$5MM - $10MM":
+              return numAmount > 5000000 && numAmount <= 10000000;
+            default:
+              return false;
+          }
+        });
+      });
+    }
+    
     // Apply state filtering
     if (filters.states && filters.states.length > 0) {
       filteredOfferings = filteredOfferings.filter(offering => {

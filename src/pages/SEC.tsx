@@ -26,6 +26,7 @@ const SEC = () => {
     searchQuery: "",
     fullySold: false,
     amountRanges: [] as string[],
+    maxRaisedRanges: [] as string[],
     states: [] as string[],
     useDefaultFilters: true // Start with default view
   });
@@ -42,6 +43,7 @@ const SEC = () => {
       searchQuery: "",
       fullySold: false,
       amountRanges: [],
+      maxRaisedRanges: [],
       states: [],
       useDefaultFilters: true
     });

@@ -16,6 +16,7 @@ interface FilterSidebarProps {
     searchQuery: string;
     fullySold?: boolean;
     amountRanges?: string[];
+    maxRaisedRanges?: string[];
     states?: string[];
   };
   onFiltersChange: (filters: any) => void;
@@ -66,6 +67,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     "$5MM+"
   ];
 
+  // Max Raised ranges - specific ranges requested by user
+  const maxRaisedRanges = [
+    "$2MM - $5MM",
+    "$5MM - $10MM"
+  ];
+
   // States
   const states = [
     { code: "NY", name: "New York" },
@@ -101,6 +108,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     });
   };
 
+  const handleMaxRaisedToggle = (range: string) => {
+    const updatedRanges = filters.maxRaisedRanges?.includes(range)
+      ? filters.maxRaisedRanges.filter(r => r !== range)
+      : [...(filters.maxRaisedRanges || []), range];
+    
+    onFiltersChange({
+      ...filters,
+      maxRaisedRanges: updatedRanges
+    });
+  };
+
   const handleStateToggle = (stateCode: string) => {
     const updatedStates = filters.states?.includes(stateCode)
       ? filters.states.filter(s => s !== stateCode)
@@ -118,6 +136,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       searchQuery: "",
       fullySold: false,
       amountRanges: [],
+      maxRaisedRanges: [],
       states: [],
       useDefaultFilters: false
     };
@@ -128,6 +147,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const hasActiveFilters = filters.industries.length > 0 || 
     searchQuery.length > 0 ||
     (filters.amountRanges?.length || 0) > 0 ||
+    (filters.maxRaisedRanges?.length || 0) > 0 ||
     (filters.states?.length || 0) > 0;
 
   return (
@@ -258,6 +278,47 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         <Separator />
 
+        {/* Max Raised Filter */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Max Raised</Label>
+          <div className="space-y-2">
+            {maxRaisedRanges.map((range) => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`max-${range}`}
+                  checked={filters.maxRaisedRanges?.includes(range) || false}
+                  onCheckedChange={() => handleMaxRaisedToggle(range)}
+                />
+                <Label 
+                  htmlFor={`max-${range}`} 
+                  className="text-sm font-normal cursor-pointer flex-1"
+                >
+                  {range}
+                </Label>
+              </div>
+            ))}
+          </div>
+          
+          {/* Selected Max Raised Ranges */}
+          {(filters.maxRaisedRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {filters.maxRaisedRanges?.map((range) => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer"
+                  onClick={() => handleMaxRaisedToggle(range)}
+                >
+                  {range}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
         {/* State Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">State</Label>
@@ -304,7 +365,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <>
             <Separator />
             <p className="text-xs text-muted-foreground text-center">
-              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.states?.length || 0} states selected
+              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} max raised, {filters.states?.length || 0} states selected
             </p>
           </>
         )}
