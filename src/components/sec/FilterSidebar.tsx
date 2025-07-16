@@ -14,6 +14,8 @@ interface FilterSidebarProps {
     industries: string[];
     searchQuery: string;
     fullySold?: boolean;
+    amountRanges?: string[];
+    states?: string[];
   };
   onFiltersChange: (filters: any) => void;
   onClose?: () => void;
@@ -24,31 +26,48 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onFiltersChange, 
   onClose
 }) => {
-  const [localFilters, setLocalFilters] = useState(filters);
-  const { data: industriesData, isLoading: industriesLoading } = useIndustries();
+  const [localFilters, setLocalFilters] = useState({
+    industries: [],
+    searchQuery: "",
+    fullySold: false,
+    amountRanges: [],
+    states: [],
+    ...filters
+  });
 
-  // Use real industries from database, fallback to hardcoded list
-  const industries = industriesData || [
-    "Pooled Investment Fund",
-    "Other",
-    "Other Technology", 
-    "Commercial",
-    "Other Real Estate",
-    "Residential",
-    "Other Health Care",
-    "Investing",
+  // Technology-focused industries only
+  const techIndustries = [
+    "Other Technology",
+    "Computer Software", 
     "Biotechnology",
-    "Other Banking and Financial Services",
-    "REITS and Finance",
-    "Insurance",
-    "Oil and Gas",
-    "Business Services",
-    "Manufacturing",
-    "Retailing",
-    "Pharmaceuticals",
-    "Other Energy",
-    "Restaurants",
-    "Agriculture"
+    "Computer Hardware",
+    "Internet",
+    "Software",
+    "Technology",
+    "Telecommunications",
+    "Computer Services",
+    "Electronics",
+    "Information Technology",
+    "Media & Entertainment",
+    "FinTech",
+    "E-commerce"
+  ];
+
+  // Amount ranges
+  const amountRanges = [
+    "Less than $500k",
+    "$500k - $2MM",
+    "$2MM - $5MM", 
+    "$5MM+"
+  ];
+
+  // States
+  const states = [
+    { code: "NY", name: "New York" },
+    { code: "NJ", name: "New Jersey" },
+    { code: "IL", name: "Illinois" },
+    { code: "CA", name: "California" },
+    { code: "TN", name: "Tennessee" }
   ];
 
   const handleIndustryToggle = (industry: string) => {
@@ -74,18 +93,44 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     onClose?.();
   };
 
+  const handleAmountRangeToggle = (range: string) => {
+    const updatedRanges = localFilters.amountRanges?.includes(range)
+      ? localFilters.amountRanges.filter(r => r !== range)
+      : [...(localFilters.amountRanges || []), range];
+    
+    setLocalFilters({
+      ...localFilters,
+      amountRanges: updatedRanges
+    });
+  };
+
+  const handleStateToggle = (stateCode: string) => {
+    const updatedStates = localFilters.states?.includes(stateCode)
+      ? localFilters.states.filter(s => s !== stateCode)
+      : [...(localFilters.states || []), stateCode];
+    
+    setLocalFilters({
+      ...localFilters,
+      states: updatedStates
+    });
+  };
+
   const resetFilters = () => {
     const resetFilters = {
       industries: [],
       searchQuery: "",
-      fullySold: false
+      fullySold: false,
+      amountRanges: [],
+      states: []
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
   };
 
   const hasActiveFilters = localFilters.industries.length > 0 || 
-    localFilters.searchQuery.length > 0;
+    localFilters.searchQuery.length > 0 ||
+    (localFilters.amountRanges?.length || 0) > 0 ||
+    (localFilters.states?.length || 0) > 0;
 
   return (
     <Card className="flex flex-col h-full relative z-10 bg-background border shadow-sm">
@@ -135,9 +180,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Industry Filter */}
         <div className="space-y-3">
-          <Label className="text-sm font-semibold">Industry</Label>
+          <Label className="text-sm font-semibold">Technology Industry</Label>
           <div className="space-y-2">
-            {industries.map((industry) => (
+            {techIndustries.map((industry) => (
               <div key={industry} className="flex items-center space-x-2">
                 <Checkbox
                   id={industry}
@@ -174,6 +219,91 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         <Separator />
 
+        {/* Amount Range Filter */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Amount Raised</Label>
+          <div className="space-y-2">
+            {amountRanges.map((range) => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox
+                  id={range}
+                  checked={localFilters.amountRanges?.includes(range) || false}
+                  onCheckedChange={() => handleAmountRangeToggle(range)}
+                />
+                <Label 
+                  htmlFor={range} 
+                  className="text-sm font-normal cursor-pointer flex-1"
+                >
+                  {range}
+                </Label>
+              </div>
+            ))}
+          </div>
+          
+          {/* Selected Amount Ranges */}
+          {(localFilters.amountRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {localFilters.amountRanges?.map((range) => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer"
+                  onClick={() => handleAmountRangeToggle(range)}
+                >
+                  {range}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* State Filter */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">State</Label>
+          <div className="space-y-2">
+            {states.map((state) => (
+              <div key={state.code} className="flex items-center space-x-2">
+                <Checkbox
+                  id={state.code}
+                  checked={localFilters.states?.includes(state.code) || false}
+                  onCheckedChange={() => handleStateToggle(state.code)}
+                />
+                <Label 
+                  htmlFor={state.code} 
+                  className="text-sm font-normal cursor-pointer flex-1"
+                >
+                  {state.name} ({state.code})
+                </Label>
+              </div>
+            ))}
+          </div>
+          
+          {/* Selected States */}
+          {(localFilters.states?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {localFilters.states?.map((stateCode) => {
+                const state = states.find(s => s.code === stateCode);
+                return (
+                  <Badge 
+                    key={stateCode} 
+                    variant="secondary" 
+                    className="text-xs cursor-pointer"
+                    onClick={() => handleStateToggle(stateCode)}
+                  >
+                    {state?.name || stateCode}
+                    <X className="ml-1 h-3 w-3" />
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
         {/* Apply Filters Button */}
         <Button 
           onClick={applyFilters} 
@@ -185,7 +315,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         
         {hasActiveFilters && (
           <p className="text-xs text-muted-foreground text-center">
-            {localFilters.industries.length} industries selected
+            {localFilters.industries.length} industries, {localFilters.amountRanges?.length || 0} amounts, {localFilters.states?.length || 0} states selected
           </p>
         )}
       </CardContent>

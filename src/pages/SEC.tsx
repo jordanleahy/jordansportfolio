@@ -25,6 +25,8 @@ const SEC = () => {
     industries: [] as string[],
     searchQuery: "",
     fullySold: false,
+    amountRanges: [] as string[],
+    states: [] as string[],
     useDefaultFilters: true // Start with default view
   });
   const [isDefaultView, setIsDefaultView] = useState(true);
@@ -39,6 +41,8 @@ const SEC = () => {
       industries: [],
       searchQuery: "",
       fullySold: false,
+      amountRanges: [],
+      states: [],
       useDefaultFilters: true
     });
     setIsDefaultView(true);

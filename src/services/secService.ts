@@ -99,6 +99,9 @@ export class SecService {
         .filter('totalofferingamount', 'eq', 'totalamountsold');
     }
 
+    // Amount range filtering will be done client-side after fetching issuers
+    // State filtering will also be done client-side after fetching issuers with location data
+
     // Apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -235,6 +238,42 @@ export class SecService {
         });
         console.log('🔍 DEBUG: Permissive filter results:', filteredOfferings.length);
       }
+    }
+    
+    // Apply amount range filtering
+    if (filters.amountRanges && filters.amountRanges.length > 0) {
+      filteredOfferings = filteredOfferings.filter(offering => {
+        const amount = offering.totalofferingamount;
+        if (!amount || String(amount) === 'Indefinite') return false;
+        
+        const numAmount = Number(amount);
+        if (isNaN(numAmount)) return false;
+        
+        return filters.amountRanges!.some(range => {
+          switch (range) {
+            case "Less than $500k":
+              return numAmount < 500000;
+            case "$500k - $2MM":
+              return numAmount >= 500000 && numAmount <= 2000000;
+            case "$2MM - $5MM":
+              return numAmount > 2000000 && numAmount <= 5000000;
+            case "$5MM+":
+              return numAmount > 5000000;
+            default:
+              return false;
+          }
+        });
+      });
+    }
+    
+    // Apply state filtering
+    if (filters.states && filters.states.length > 0) {
+      filteredOfferings = filteredOfferings.filter(offering => {
+        return offering.issuers.some((issuer: any) => {
+          const issuerState = issuer.stateorcountry;
+          return issuerState && filters.states!.includes(issuerState);
+        });
+      });
     }
     
     const finalOfferings = filteredOfferings;
