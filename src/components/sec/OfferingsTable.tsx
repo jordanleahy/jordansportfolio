@@ -56,52 +56,21 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
 
   let offerings = offeringsData?.data || [];
   
-  // Handle client-side sorting for fields that need special handling
-  if (offerings.length > 0) {
+  // Only do client-side sorting for fields that need joined data or special calculation
+  if (offerings.length > 0 && (sortField === "companyName" || sortField === "percentRaised")) {
     offerings = [...offerings].sort((a, b) => {
       let comparison = 0;
       
-      switch (sortField) {
-        case "companyName":
-          const nameA = a.issuers?.[0]?.entityname || '';
-          const nameB = b.issuers?.[0]?.entityname || '';
-          comparison = nameA.localeCompare(nameB);
-          break;
-          
-        case "percentRaised":
-          const percentA = a.totalofferingamount && a.totalamountsold ? 
-            (a.totalamountsold / a.totalofferingamount) * 100 : 0;
-          const percentB = b.totalofferingamount && b.totalamountsold ? 
-            (b.totalamountsold / b.totalofferingamount) * 100 : 0;
-          comparison = percentA - percentB;
-          break;
-          
-        case "amountRaised":
-          const amountA = Number(a.totalofferingamount) || 0;
-          const amountB = Number(b.totalofferingamount) || 0;
-          comparison = amountA - amountB;
-          break;
-          
-        case "amountSold":
-          const soldA = Number(a.totalamountsold) || 0;
-          const soldB = Number(b.totalamountsold) || 0;
-          comparison = soldA - soldB;
-          break;
-          
-        case "dateOfFirstSale":
-          const dateA = new Date(a.sale_date || 0).getTime();
-          const dateB = new Date(b.sale_date || 0).getTime();
-          comparison = dateA - dateB;
-          break;
-          
-        case "industry":
-          const industryA = a.industrygrouptype || '';
-          const industryB = b.industrygrouptype || '';
-          comparison = industryA.localeCompare(industryB);
-          break;
-          
-        default:
-          return 0;
+      if (sortField === "companyName") {
+        const nameA = a.issuers?.[0]?.entityname || '';
+        const nameB = b.issuers?.[0]?.entityname || '';
+        comparison = nameA.localeCompare(nameB);
+      } else if (sortField === "percentRaised") {
+        const percentA = a.totalofferingamount && a.totalamountsold ? 
+          (a.totalamountsold / a.totalofferingamount) * 100 : 0;
+        const percentB = b.totalofferingamount && b.totalamountsold ? 
+          (b.totalamountsold / b.totalofferingamount) * 100 : 0;
+        comparison = percentA - percentB;
       }
       
       return sortDirection === "asc" ? comparison : -comparison;
@@ -110,12 +79,12 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   
   const startIndex = (currentPage - 1) * itemsPerPage;
   
-  // Use actual filtered results count instead of database total
+  // Use proper pagination with total database count for navigation
   const actualResultsCount = offerings.length;
-  const totalItems = offeringsData?.count || actualResultsCount; // Use count from filtered results
+  const totalItems = offeringsData?.total || 0; // Use total database count for pagination
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   
-  // Calculate display range based on actual results
+  // Calculate display range based on actual results shown
   const displayedStart = actualResultsCount > 0 ? startIndex + 1 : 0;
   const displayedEnd = Math.min(startIndex + actualResultsCount, startIndex + itemsPerPage);
 
