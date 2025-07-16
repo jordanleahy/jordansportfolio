@@ -38,7 +38,10 @@ export class SecService {
     // Build the base query - use simple select first, then join manually
     let query = supabase
       .from('offerings')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      // Only show offerings where amount sold > 0 for better data quality
+      .filter('totalamountsold', 'not.is', null)
+      .gt('totalamountsold', 0);
 
     // Apply default filters if enabled
     if (filters.useDefaultFilters) {
