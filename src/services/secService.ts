@@ -47,18 +47,32 @@ export class SecService {
 
     // Apply default filters if enabled
     if (filters.useDefaultFilters) {
-      console.log('🔍 DEBUG: Applying default filters (tech + fully raised)');
+      console.log('🔍 DEBUG: Applying default filters (specific tech industries only)');
       
-      // 1. Technology/Computer industry filter
-      query = query.or('industrygrouptype.ilike.%Technology%,industrygrouptype.ilike.%Computer%');
+      // Only show specific technology industries - no broad matching
+      const allowedTechIndustries = [
+        "Other Technology",
+        "Computer Software", 
+        "Biotechnology",
+        "Computer Hardware",
+        "Internet",
+        "Software",
+        "Technology",
+        "Telecommunications",
+        "Computer Services",
+        "Electronics",
+        "Information Technology",
+        "Media & Entertainment",
+        "FinTech",
+        "E-commerce"
+      ];
       
-      // 2. Ensure we have the required fields for "fully raised" filter
+      query = query.in('industrygrouptype', allowedTechIndustries);
+        
+      // Ensure we have the required fields for filtering
       query = query
         .filter('totalofferingamount', 'not.is', null)
         .filter('totalamountsold', 'not.is', null);
-        
-      // 3. Apply "fully raised" filter using a simpler approach
-      // Note: We'll apply this filter client-side for now due to Supabase query complexity
     }
 
     // Apply sorting - handle special cases for related table sorting
