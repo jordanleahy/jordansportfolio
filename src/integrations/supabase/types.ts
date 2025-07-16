@@ -865,6 +865,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_coding_ai_data_for_user: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
       insert_category_content: {
         Args: { category_name: string; posts_data: Json }
         Returns: number
