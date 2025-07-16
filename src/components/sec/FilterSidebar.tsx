@@ -280,7 +280,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Max Raised Filter */}
         <div className="space-y-3">
-          <Label className="text-sm font-semibold">Max Raised</Label>
+          <Label className="text-sm font-semibold">Amount Sold</Label>
           <div className="space-y-2">
             {maxRaisedRanges.map((range) => (
               <div key={range} className="flex items-center space-x-2">
@@ -365,7 +365,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <>
             <Separator />
             <p className="text-xs text-muted-foreground text-center">
-              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} max raised, {filters.states?.length || 0} states selected
+              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} amount sold, {filters.states?.length || 0} states selected
             </p>
           </>
         )}

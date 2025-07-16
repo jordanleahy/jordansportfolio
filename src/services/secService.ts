@@ -268,10 +268,10 @@ export class SecService {
       });
     }
     
-    // Apply max raised filtering (same logic but for offering amount)
+    // Apply max raised filtering (based on amount sold)
     if (filters.maxRaisedRanges && filters.maxRaisedRanges.length > 0) {
       filteredOfferings = filteredOfferings.filter(offering => {
-        const amount = offering.totalofferingamount;
+        const amount = offering.totalamountsold;
         if (!amount || String(amount) === 'Indefinite') return false;
         
         const numAmount = Number(amount);
