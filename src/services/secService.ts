@@ -16,6 +16,8 @@ const getSortField = (field: string): string => {
       return 'entityname'; // Will be used with issuer join
     case 'amountRaised':
       return 'totalofferingamount';
+    case 'amountSold':
+      return 'totalamountsold';
     case 'dateOfFirstSale':
       return 'sale_date';
     case 'industry':
@@ -70,6 +72,9 @@ export class SecService {
         query = query
           .filter('totalofferingamount', 'not.is', null)
           .order('totalofferingamount', { ascending: filters.sortDirection === 'asc' });
+      } else if (filters.sortField === 'amountSold') {
+        // Handle numeric sorting for amount sold
+        query = query.order('totalamountsold', { ascending: filters.sortDirection === 'asc' });
       } else {
         query = query.order(sortField, { ascending: filters.sortDirection === 'asc' });
       }

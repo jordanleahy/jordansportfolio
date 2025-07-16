@@ -191,6 +191,16 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 <TableHead>
                   <Button
                     variant="ghost"
+                    onClick={() => handleSort("amountSold")}
+                    className="h-auto p-0 font-semibold hover:bg-muted/50"
+                  >
+                    Amount Sold
+                    {getSortIcon("amountSold")}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
                     onClick={() => handleSort("dateOfFirstSale")}
                     className="h-auto p-0 font-semibold hover:bg-muted/50"
                   >
@@ -214,7 +224,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-red-500">
+                  <TableCell colSpan={6} className="text-center py-8 text-red-500">
                     <div>
                       <p className="font-semibold">Error loading SEC offerings</p>
                       <p className="text-sm mt-1">{error.message}</p>
@@ -231,7 +241,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                 </TableRow>
               ) : offerings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     <div>
                       <p className="font-semibold">No SEC offerings found</p>
                       <p className="text-sm mt-1">
@@ -269,6 +279,12 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
                     <TableCell className="font-semibold text-green-600">
                       {offering.totalofferingamount 
                         ? formatCurrency(offering.totalofferingamount) 
+                        : 'Not disclosed'
+                      }
+                    </TableCell>
+                    <TableCell className="font-semibold text-blue-600">
+                      {offering.totalamountsold 
+                        ? formatCurrency(offering.totalamountsold) 
                         : 'Not disclosed'
                       }
                     </TableCell>
