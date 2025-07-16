@@ -20,7 +20,7 @@ export const case4Data: CaseStudyData = {
       type: 'problem',
       title: 'Process Inefficiency',
       items: [
-        "2 - 3 days average approval time",
+        "2 - 3 days average response time",
         "60% of prior authorizations require multiple submissions",
         "78% of providers report PA as major workflow burden"
       ]
