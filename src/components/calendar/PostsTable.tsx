@@ -825,7 +825,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       }
                     }}
                   >
-                    {post.status}
+                    {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
                   </Badge>
                 </TableCell>
                 <TableCell>

@@ -113,7 +113,7 @@ export const PostCard = ({
                 }
               }}
             >
-              {post.status}
+              {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
             </Badge>
           </div>
           <div className="flex gap-1">
