@@ -183,10 +183,6 @@ const SEC = () => {
         </div>
 
 
-        {/* Summary Cards */}
-        <div className="container mx-auto px-4 py-6">
-          <SummaryCards filters={filters} />
-        </div>
 
         {/* Main Content */}
         <div className="container mx-auto px-4 pb-8">
