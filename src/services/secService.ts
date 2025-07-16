@@ -165,14 +165,11 @@ export class SecService {
     let issuersQuery = supabase
       .from('issuers')
       .select('accessionnumber, entityname, city, stateorcountrydescription, stateorcountry')
-      .in('accessionnumber', accessionnumbers);
+      .in('accessionnumber', accessionnumbers)
+      // Only include US companies - filter out international addresses
+      .or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountry.in.(AL,AK,AZ,AR,CA,CO,CT,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,DC)');
 
-    // For default filters, we'll be more flexible with US companies
-    // Many companies might not have proper country codes set
-    if (filters.useDefaultFilters) {
-      // Don't restrict by geography for now - focus on tech + fully raised
-      // issuersQuery = issuersQuery.or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountrydescription.ilike.%United States%');
-    }
+    // Additional client-side filtering will ensure we only show US tech companies
 
     const [issuersData, signaturesData] = await Promise.all([
       issuersQuery,
@@ -204,62 +201,44 @@ export class SecService {
       issuerName: enrichedOfferings[0].issuers[0]?.entityname || 'No issuer'
     } : 'No enriched offerings');
 
-    // Apply filters
+    // Apply filters - now with stricter US-only and tech-only filtering
     let filteredOfferings = enrichedOfferings;
     
     if (filters.useDefaultFilters) {
-      console.log('🔍 DEBUG: Applying client-side default filters');
-      
-      // Debug each offering before filtering
-      console.log('🔍 DEBUG: Sample offerings before filtering:');
-      enrichedOfferings.slice(0, 3).forEach((offering, idx) => {
-        const hasIssuer = offering.issuers.length > 0;
-        const isFullyRaised = offering.totalremaining === 0 || 
-          (offering.totalamountsold && offering.totalofferingamount && 
-           offering.totalamountsold >= offering.totalofferingamount);
-        
-        console.log(`  Offering ${idx + 1}:`, {
-          accessionnumber: offering.accessionnumber,
-          hasIssuer,
-          isFullyRaised,
-          totalremaining: offering.totalremaining,
-          totalamountsold: offering.totalamountsold,
-          totalofferingamount: offering.totalofferingamount,
-          passesFilter: hasIssuer && isFullyRaised
-        });
-      });
+      console.log('🔍 DEBUG: Applying client-side default filters (US tech companies only)');
       
       filteredOfferings = filteredOfferings.filter(offering => {
-        // Must have issuer data
-        const hasIssuer = offering.issuers.length > 0;
+        // Must have issuer data AND be US-based
+        const hasUSIssuer = offering.issuers.length > 0 && 
+          offering.issuers.some((issuer: any) => {
+            const state = issuer.stateorcountry;
+            const description = issuer.stateorcountrydescription;
+            
+            // Check if it's a US state code or US-related description
+            const usStateCodes = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
+            
+            return state === 'US' || 
+                   state === 'United States' || 
+                   usStateCodes.includes(state) ||
+                   (description && (
+                     description.toLowerCase().includes('united states') ||
+                     description.toLowerCase().includes('usa') ||
+                     usStateCodes.includes(description)
+                   ));
+          });
         
-        // Updated logic: Show companies that have SOME activity (not just fully raised)
-        // This includes companies that are actively raising OR have completed raising
+        // Has raising activity (same as before)
         const hasRaisingActivity = 
-          // Has made some progress (sold > 0) OR
           (offering.totalamountsold && offering.totalamountsold > 0) ||
-          // Is fully raised (remaining = 0) OR  
           offering.totalremaining === 0 ||
-          // Has a valid offering amount (showing intent to raise)
           (offering.totalofferingamount && offering.totalofferingamount > 0);
         
-        return hasIssuer && hasRaisingActivity;
+        return hasUSIssuer && hasRaisingActivity;
       });
       
-      console.log('🔍 DEBUG: After client-side filtering (Updated Logic):');
+      console.log('🔍 DEBUG: After client-side filtering (US Tech Only):');
       console.log('  - Filtered offerings count:', filteredOfferings.length);
-      console.log('  - Filter reduction:', enrichedOfferings.length - filteredOfferings.length, 'offerings removed');
-      
-      // If still no results, let's try a more permissive filter for debugging
-      if (filteredOfferings.length === 0) {
-        console.log('🔍 DEBUG: No results with activity filter, trying permissive filter...');
-        filteredOfferings = enrichedOfferings.filter(offering => {
-          const hasIssuer = offering.issuers.length > 0;
-          const hasValidAmounts = offering.totalofferingamount && offering.totalofferingamount > 0;
-          return hasIssuer && hasValidAmounts;
-        });
-        console.log('🔍 DEBUG: Permissive filter results:', filteredOfferings.length);
-      }
+      console.log('  - Filter reduction:', enrichedOfferings.length - filteredOfferings.length, 'offerings removed (non-US or non-active)');
     }
     
     // Apply amount range filtering
