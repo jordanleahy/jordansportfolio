@@ -41,7 +41,7 @@ export const OfferingsTable: React.FC<OfferingsTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const itemsPerPage = 20;
+  const itemsPerPage = 100;
 
   // Build filters including search and sorting
   const queryFilters: OfferingFilters = {
