@@ -78,11 +78,11 @@ export const ImageHoverOverlay = ({
     >
       {children}
       
-      {/* Desktop hover overlay - hidden on mobile */}
+      {/* Desktop floating tooltip icons - hidden on mobile */}
       <div
         className={cn(
-          "absolute inset-0 bg-black/50 flex items-center justify-center gap-2 transition-opacity duration-200 hidden md:flex",
-          isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+          "absolute top-2 right-2 flex flex-col gap-1 transition-all duration-300 hidden md:flex z-10",
+          isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
         )}
       >
         {showUpload && onUpload && (
@@ -93,7 +93,10 @@ export const ImageHoverOverlay = ({
               e.stopPropagation();
               onUpload();
             }}
-            className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-black"
+            className={cn(
+              "h-8 w-8 p-0 bg-black/80 hover:bg-black text-white shadow-lg rounded-full transition-all duration-200",
+              isHovered ? "delay-75" : ""
+            )}
           >
             <Upload className="h-4 w-4" />
           </Button>
@@ -107,7 +110,10 @@ export const ImageHoverOverlay = ({
               e.stopPropagation();
               onView();
             }}
-            className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-black"
+            className={cn(
+              "h-8 w-8 p-0 bg-black/80 hover:bg-black text-white shadow-lg rounded-full transition-all duration-200",
+              isHovered ? "delay-100" : ""
+            )}
           >
             <Eye className="h-4 w-4" />
           </Button>
@@ -121,7 +127,10 @@ export const ImageHoverOverlay = ({
               e.stopPropagation();
               handleDownload();
             }}
-            className="h-8 w-8 p-0 bg-white/90 hover:bg-white text-black"
+            className={cn(
+              "h-8 w-8 p-0 bg-black/80 hover:bg-black text-white shadow-lg rounded-full transition-all duration-200",
+              isHovered ? "delay-150" : ""
+            )}
           >
             <Download className="h-4 w-4" />
           </Button>
