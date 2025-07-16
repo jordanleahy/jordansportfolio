@@ -49,7 +49,7 @@ export class SecService {
     if (filters.useDefaultFilters) {
       console.log('🔍 DEBUG: Applying default filters (specific tech industries only)');
       
-      // Only show specific technology industries - no broad matching
+      // Only show specific technology industries - but be more permissive
       const allowedTechIndustries = [
         "Other Technology",
         "Computer Software", 
@@ -67,7 +67,12 @@ export class SecService {
         "E-commerce"
       ];
       
-      query = query.in('industrygrouptype', allowedTechIndustries);
+      // Use broader filtering - include partial matches for technology
+      query = query.or(
+        allowedTechIndustries.map(industry => 
+          `industrygrouptype.ilike.%${industry}%`
+        ).join(',') + ',industrygrouptype.ilike.%Technology%,industrygrouptype.ilike.%Software%,industrygrouptype.ilike.%Computer%'
+      );
         
       // Ensure we have the required fields for filtering
       query = query
@@ -165,9 +170,8 @@ export class SecService {
     let issuersQuery = supabase
       .from('issuers')
       .select('accessionnumber, entityname, city, stateorcountrydescription, stateorcountry')
-      .in('accessionnumber', accessionnumbers)
-      // Only include US companies - filter out international addresses
-      .or('stateorcountry.eq.US,stateorcountry.eq.United States,stateorcountry.in.(AL,AK,AZ,AR,CA,CO,CT,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,DC)');
+      .in('accessionnumber', accessionnumbers);
+      // Removed strict US filtering from database level - will handle client-side for more control
 
     // Additional client-side filtering will ensure we only show US tech companies
 
@@ -201,44 +205,41 @@ export class SecService {
       issuerName: enrichedOfferings[0].issuers[0]?.entityname || 'No issuer'
     } : 'No enriched offerings');
 
-    // Apply filters - now with stricter US-only and tech-only filtering
+    // Apply filters - simplified for better results
     let filteredOfferings = enrichedOfferings;
     
     if (filters.useDefaultFilters) {
-      console.log('🔍 DEBUG: Applying client-side default filters (US tech companies only)');
+      console.log('🔍 DEBUG: Applying simplified client-side filtering');
       
       filteredOfferings = filteredOfferings.filter(offering => {
-        // Must have issuer data AND be US-based
-        const hasUSIssuer = offering.issuers.length > 0 && 
-          offering.issuers.some((issuer: any) => {
-            const state = issuer.stateorcountry;
-            const description = issuer.stateorcountrydescription;
-            
-            // Check if it's a US state code or US-related description
-            const usStateCodes = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
-            
-            return state === 'US' || 
-                   state === 'United States' || 
-                   usStateCodes.includes(state) ||
-                   (description && (
-                     description.toLowerCase().includes('united states') ||
-                     description.toLowerCase().includes('usa') ||
-                     usStateCodes.includes(description)
-                   ));
-          });
+        // Must have issuer data
+        const hasIssuer = offering.issuers.length > 0;
         
-        // Has raising activity (same as before)
-        const hasRaisingActivity = 
+        // Simple US check - be more permissive to get more results
+        const hasUSIssuer = offering.issuers.some((issuer: any) => {
+          const state = issuer.stateorcountry;
+          const description = issuer.stateorcountrydescription;
+          
+          // More permissive US checking
+          return !state || // Include if no state data (don't exclude unknowns)
+                 state === 'US' || 
+                 state === 'United States' || 
+                 state?.length === 2 || // Assume 2-letter codes are US states
+                 (description && description.toLowerCase().includes('united states'));
+        });
+        
+        // Has some fundraising activity
+        const hasActivity = 
           (offering.totalamountsold && offering.totalamountsold > 0) ||
-          offering.totalremaining === 0 ||
           (offering.totalofferingamount && offering.totalofferingamount > 0);
         
-        return hasUSIssuer && hasRaisingActivity;
+        return hasIssuer && hasUSIssuer && hasActivity;
       });
       
-      console.log('🔍 DEBUG: After client-side filtering (US Tech Only):');
-      console.log('  - Filtered offerings count:', filteredOfferings.length);
-      console.log('  - Filter reduction:', enrichedOfferings.length - filteredOfferings.length, 'offerings removed (non-US or non-active)');
+      console.log('🔍 DEBUG: After simplified filtering:');
+      console.log('  - Original count:', enrichedOfferings.length);
+      console.log('  - Filtered count:', filteredOfferings.length);
+      console.log('  - Percentage kept:', Math.round((filteredOfferings.length / enrichedOfferings.length) * 100) + '%');
     }
     
     // Apply amount range filtering
