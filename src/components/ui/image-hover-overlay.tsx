@@ -81,7 +81,7 @@ export const ImageHoverOverlay = ({
       {/* Desktop floating tooltip icons - hidden on mobile */}
       <div
         className={cn(
-          "absolute top-2 right-2 flex flex-col gap-1 transition-all duration-300 hidden md:flex z-10",
+          "absolute top-2 right-2 flex flex-row gap-1 transition-all duration-300 hidden md:flex z-10",
           isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
         )}
       >
