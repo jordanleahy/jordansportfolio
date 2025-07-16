@@ -279,8 +279,16 @@ export class SecService {
         
         return filters.maxRaisedRanges!.some(range => {
           switch (range) {
+            case "Less than $250K":
+              return numAmount < 250000;
+            case "$250K - $500K":
+              return numAmount >= 250000 && numAmount <= 500000;
+            case "$500K - $1M":
+              return numAmount > 500000 && numAmount <= 1000000;
+            case "$1M - $2M":
+              return numAmount > 1000000 && numAmount <= 2000000;
             case "$2MM - $5MM":
-              return numAmount >= 2000000 && numAmount <= 5000000;
+              return numAmount > 2000000 && numAmount <= 5000000;
             case "$5MM - $10MM":
               return numAmount > 5000000 && numAmount <= 10000000;
             default:
