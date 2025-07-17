@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import VideoUploadCard from './VideoUploadCard';
@@ -38,7 +38,8 @@ export const PostCard = ({
 }: PostCardProps) => {
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showImageUploads, setShowImageUploads] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
+  const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
 
   const getStatusColor = (status: string) => {
@@ -166,84 +167,103 @@ export const PostCard = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onGeneratePrompt(post)}
-            className="flex-1"
+            className="w-full"
           >
             <Lightbulb className="h-4 w-4 mr-2" />
             Generate Prompt
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowImageUploads(!showImageUploads)}
-            className="flex-1"
-          >
-            <ImageIcon className="h-4 w-4 mr-2" />
-            Images
-            {showImageUploads ? (
-              <ChevronUp className="h-4 w-4 ml-1" />
-            ) : (
-              <ChevronDown className="h-4 w-4 ml-1" />
-            )}
-          </Button>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPhotos(!showPhotos)}
+              className="flex-1"
+            >
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Photos
+              {showPhotos ? (
+                <ChevronUp className="h-4 w-4 ml-1" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-1" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowVideos(!showVideos)}
+              className="flex-1"
+            >
+              <Video className="h-4 w-4 mr-2" />
+              Videos
+              {showVideos ? (
+                <ChevronUp className="h-4 w-4 ml-1" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-1" />
+              )}
+            </Button>
+          </div>
         </div>
 
-        {/* Image Upload Section */}
-        {showImageUploads && (
+        {/* Photos Section */}
+        {showPhotos && (
           <div className="border-t pt-4">
-            <Tabs defaultValue="16_9" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="16_9" className="text-xs">16:9</TabsTrigger>
-                <TabsTrigger value="9_16" className="text-xs">16:9 Vid</TabsTrigger>
-                <TabsTrigger value="3_4" className="text-xs">3:4</TabsTrigger>
-                <TabsTrigger value="4_3" className="text-xs">3:4 Vid</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="16_9" className="mt-3">
-                <ImageUploadButton 
-                  type="16_9" 
-                  label="Landscape (16:9)" 
-                  isUploading={uploadingStates[`${post.id}_16_9`] || false} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="9_16" className="mt-3">
-                <VideoUploadCard
-                  title="16:9 Video"
-                  aspectRatio="16/9"
-                  videoUrl={post.image_16_9_video_url || undefined}
-                  onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
-                  onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
-                />
-              </TabsContent>
-              
-              <TabsContent value="3_4" className="mt-3">
-                <ImageUploadButton 
-                  type="3_4" 
-                  label="Social (3:4)" 
-                  isUploading={uploadingStates[`${post.id}_3_4`] || false} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="4_3" className="mt-3">
-                <VideoUploadCard
-                  title="3:4 Video"
-                  aspectRatio="3/4"
-                  videoUrl={post.image_3_4_video_url || undefined}
-                  onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
-                  onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
-                />
-              </TabsContent>
-            </Tabs>
+            <h4 className="text-sm font-medium mb-3">Photo Uploads</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <ImageUploadButton 
+                type="16_9" 
+                label="Landscape (16:9)" 
+                isUploading={uploadingStates[`${post.id}_16_9`] || false} 
+              />
+              <ImageUploadButton 
+                type="9_16" 
+                label="Portrait (9:16)" 
+                isUploading={uploadingStates[`${post.id}_9_16`] || false} 
+              />
+              <ImageUploadButton 
+                type="3_4" 
+                label="Social (3:4)" 
+                isUploading={uploadingStates[`${post.id}_3_4`] || false} 
+              />
+              <ImageUploadButton 
+                type="4_3" 
+                label="Standard (4:3)" 
+                isUploading={uploadingStates[`${post.id}_4_3`] || false} 
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Videos Section */}
+        {showVideos && (
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-3">Video Uploads</h4>
+            <div className="grid grid-cols-1 gap-3">
+              <VideoUploadCard
+                title="16:9 Video (Landscape)"
+                aspectRatio="16/9"
+                videoUrl={post.image_16_9_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
+                onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
+              />
+              <VideoUploadCard
+                title="3:4 Video (Portrait)"
+                aspectRatio="3/4"
+                videoUrl={post.image_3_4_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
+                onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
+              />
+            </div>
           </div>
         )}
 
         {/* Media Previews - Show any existing images or videos */}
-        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url) && !showImageUploads && (
+        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url) && !showPhotos && !showVideos && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
