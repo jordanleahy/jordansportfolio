@@ -38,22 +38,36 @@ serve(async (req: Request) => {
     // Convert audio file to array buffer for Cloudinary upload
     const audioArrayBuffer = await audioFile.arrayBuffer();
     
-    // Create form data for Cloudinary upload (signed upload)
-    const cloudinaryFormData = new FormData();
-    cloudinaryFormData.append('file', new Blob([audioArrayBuffer], { type: audioFile.type }), audioFile.name);
-    cloudinaryFormData.append('resource_type', 'video');
-    
     // Create authentication for signed upload
     const timestamp = Math.round(Date.now() / 1000);
-    const paramsToSign = `resource_type=video&timestamp=${timestamp}`;
+    
+    // Parameters for signature (alphabetically sorted, excluding file and api_key)
+    const params = {
+      resource_type: 'video',
+      timestamp: timestamp.toString()
+    };
+    
+    // Create string to sign (alphabetically sorted parameters)
+    const sortedParams = Object.keys(params)
+      .sort()
+      .map(key => `${key}=${params[key]}`)
+      .join('&');
+    
+    console.log('String to sign:', sortedParams);
     
     // Generate signature using crypto
     const encoder = new TextEncoder();
-    const data = encoder.encode(paramsToSign + cloudinaryApiSecret);
+    const data = encoder.encode(sortedParams + cloudinaryApiSecret);
     const hashBuffer = await crypto.subtle.digest('SHA-1', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
+    console.log('Generated signature:', signature);
+
+    // Create form data for Cloudinary upload (signed upload)
+    const cloudinaryFormData = new FormData();
+    cloudinaryFormData.append('file', new Blob([audioArrayBuffer], { type: audioFile.type }), audioFile.name);
+    cloudinaryFormData.append('resource_type', 'video');
     cloudinaryFormData.append('api_key', cloudinaryApiKey);
     cloudinaryFormData.append('timestamp', timestamp.toString());
     cloudinaryFormData.append('signature', signature);
