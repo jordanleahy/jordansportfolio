@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import VideoUploadCard from './VideoUploadCard';
@@ -179,7 +179,7 @@ export const PostCard = ({
             <Lightbulb className="h-4 w-4" />
           </Button>
           
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -207,6 +207,14 @@ export const PostCard = ({
               ) : (
                 <ChevronDown className="h-4 w-4 ml-1" />
               )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              Blog
             </Button>
           </div>
         </div>
