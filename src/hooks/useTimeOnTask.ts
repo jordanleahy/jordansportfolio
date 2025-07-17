@@ -174,13 +174,16 @@ export const useTimeOnTask = () => {
   const submitGuess = (guess: number) => {
     setUserGuess(guess);
     saveSession();
-    // Reset for next session
-    setIsStopped(false);
-    setIsActive(true);
-    setUserGuess(null);
-    sessionStartRef.current = Date.now();
-    setCurrentSessionTime(0);
-    startTimer();
+    
+    // Show the time for a moment, then reset for next session
+    setTimeout(() => {
+      setIsStopped(false);
+      setIsActive(true);
+      setUserGuess(null);
+      sessionStartRef.current = Date.now();
+      setCurrentSessionTime(0);
+      startTimer();
+    }, 3000); // Show actual time for 3 seconds
   };
 
   const resetData = () => {
