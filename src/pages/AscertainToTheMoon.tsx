@@ -23,7 +23,7 @@ const AscertainToTheMoon = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
             {/* Video Section */}
             <Card className="bg-transparent border-none shadow-none">
-              <CardContent className="p-0">
+              <CardContent className="p-0 space-y-4">
                 <AspectRatio ratio={9/16}>
                   <video 
                     className="w-full h-full object-cover rounded-lg"
@@ -37,6 +37,7 @@ const AscertainToTheMoon = () => {
                     Your browser does not support the video tag.
                   </video>
                 </AspectRatio>
+                <TimeOnTaskTimer />
               </CardContent>
             </Card>
 
@@ -86,10 +87,6 @@ const AscertainToTheMoon = () => {
             </Card>
           </div>
 
-          {/* Time on Task Timer */}
-          <div className="mb-12">
-            <TimeOnTaskTimer />
-          </div>
 
           {/* Google Calendar Scheduling */}
           <Card className="mt-8">
