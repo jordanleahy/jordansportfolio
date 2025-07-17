@@ -124,6 +124,14 @@ serve(async (req) => {
       auth: {
         autoRefreshToken: false,
         persistSession: false
+      },
+      db: {
+        schema: 'public'
+      },
+      global: {
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`
+        }
       }
     });
 
@@ -396,47 +404,124 @@ async function filterNewJobs(jobs: ScrapedJob[], supabase: any): Promise<Scraped
 }
 
 async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
-  console.log(`[INSERT] Attempting to insert ${jobs.length} jobs`);
+  console.log(`[INSERT] Starting insertion process for ${jobs.length} jobs`);
   
   if (jobs.length === 0) {
     console.log('[INSERT] No jobs to insert');
     return;
   }
-  
-  // Prepare job data for insertion
-  const jobData = jobs.map(job => ({
-    title: job.title,
-    company: job.company,
-    platform: job.platform,
-    location: job.location,
-    date_posted: job.date_posted,
-    application_url: job.application_url,
-    description: job.description,
-    job_type: 'Full-time',
-    is_active: true,
-    scraped_at: new Date().toISOString()
-  }));
 
-  console.log('[INSERT] Sample job data:', JSON.stringify(jobData[0], null, 2));
-
+  // First, let's test if we can even connect to the database
+  console.log('[INSERT] Testing database connection...');
   try {
+    const { data: healthCheck, error: healthError } = await supabase
+      .from('jobs')
+      .select('count')
+      .limit(1);
+    
+    console.log('[INSERT] Database connection test result:', { data: healthCheck, error: healthError });
+    
+    if (healthError) {
+      console.error('[INSERT] Database connection failed:', healthError);
+      throw new Error(`Database connection failed: ${healthError.message}`);
+    }
+  } catch (error) {
+    console.error('[INSERT] Database connection test threw error:', error);
+    throw error;
+  }
+
+  // Check current job count before insertion
+  console.log('[INSERT] Checking current job count...');
+  try {
+    const { data: currentJobs, error: countError } = await supabase
+      .from('jobs')
+      .select('id', { count: 'exact' });
+    
+    console.log('[INSERT] Current jobs in database:', { 
+      count: currentJobs?.length || 0, 
+      error: countError,
+      sampleIds: currentJobs?.slice(0, 3)?.map(j => j.id) || []
+    });
+  } catch (error) {
+    console.error('[INSERT] Failed to get current job count:', error);
+  }
+
+  // Prepare job data for insertion
+  const jobData = jobs.map((job, index) => {
+    const data = {
+      title: job.title,
+      company: job.company,
+      platform: job.platform,
+      location: job.location,
+      date_posted: job.date_posted,
+      application_url: job.application_url,
+      description: job.description,
+      job_type: 'Full-time',
+      is_active: true,
+      scraped_at: new Date().toISOString()
+    };
+    
+    if (index === 0) {
+      console.log('[INSERT] Sample job data being inserted:', JSON.stringify(data, null, 2));
+    }
+    
+    return data;
+  });
+
+  // Attempt insertion with detailed logging
+  console.log('[INSERT] Starting database insertion...');
+  console.log('[INSERT] Service role key prefix:', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.substring(0, 20) + '...');
+  
+  try {
+    const insertStart = Date.now();
     const { data, error } = await supabase
       .from('jobs')
       .insert(jobData)
       .select();
+    
+    const insertDuration = Date.now() - insertStart;
+    
+    console.log('[INSERT] Insertion completed in', insertDuration, 'ms');
+    console.log('[INSERT] Insertion result:', { 
+      dataLength: data?.length || 0, 
+      error: error,
+      firstJobId: data?.[0]?.id || 'none'
+    });
 
     if (error) {
-      console.error('[INSERT] Error inserting jobs:', error);
+      console.error('[INSERT] Insertion error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       throw error;
     }
 
-    console.log(`[INSERT] Successfully inserted ${data?.length || 0} jobs`);
-    if (data?.[0]) {
-      console.log('[INSERT] First inserted job ID:', data[0].id);
+    if (!data || data.length === 0) {
+      console.error('[INSERT] No data returned from insertion - this indicates a problem');
+      throw new Error('No data returned from successful insertion');
     }
+
+    console.log(`[INSERT] SUCCESS! Inserted ${data.length} jobs out of ${jobData.length} attempted`);
+    
+    // Verify the jobs were actually inserted by querying again
+    console.log('[INSERT] Verifying insertion by re-querying...');
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('jobs')
+      .select('id, title, company')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    
+    console.log('[INSERT] Verification query result:', {
+      count: verifyData?.length || 0,
+      error: verifyError,
+      recentJobs: verifyData?.map(j => ({ id: j.id, title: j.title, company: j.company })) || []
+    });
     
   } catch (error) {
-    console.error('[INSERT] Failed to insert jobs:', error);
+    console.error('[INSERT] Insertion process failed:', error);
+    console.error('[INSERT] Error stack:', error.stack);
     throw error;
   }
 }
