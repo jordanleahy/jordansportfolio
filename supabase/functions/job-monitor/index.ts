@@ -403,70 +403,7 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     return;
   }
   
-  // Test service role authentication first
-  try {
-    console.log('[INSERT] Testing service role authentication...');
-    
-    // First, let's try a simple select to test connection
-    const { data: testData, error: testError } = await supabase
-      .from('jobs')
-      .select('count(*)')
-      .limit(1);
-    
-    if (testError) {
-      console.error('[INSERT] Service role SELECT test failed:', testError);
-      throw new Error(`Service role authentication failed: ${testError.message}`);
-    }
-    
-    console.log('[INSERT] Service role SELECT test passed');
-    
-    // Test a simple INSERT with minimal data
-    console.log('[INSERT] Testing service role INSERT capability...');
-    const testJob = {
-      title: 'Test Job - Service Role',
-      company: 'Test Company',
-      platform: 'test',
-      location: 'Remote',
-      date_posted: new Date().toISOString().split('T')[0],
-      application_url: `https://example.com/test-${Date.now()}`,
-      description: 'This is a test job to verify service role insertion works',
-      job_type: 'Full-time',
-      is_active: true
-    };
-    
-    const { data: insertTestData, error: insertTestError } = await supabase
-      .from('jobs')
-      .insert([testJob])
-      .select();
-    
-    if (insertTestError) {
-      console.error('[INSERT] Service role INSERT test failed:', insertTestError);
-      console.error('[INSERT] Error details:', {
-        code: insertTestError.code,
-        message: insertTestError.message,
-        details: insertTestError.details,
-        hint: insertTestError.hint
-      });
-      throw new Error(`Service role INSERT failed: ${insertTestError.message}`);
-    }
-    
-    console.log('[INSERT] Service role INSERT test passed! Inserted test job:', insertTestData[0]);
-    
-    // If test passed, delete the test job and proceed with real insertions
-    if (insertTestData?.[0]?.id) {
-      await supabase
-        .from('jobs')
-        .delete()
-        .eq('id', insertTestData[0].id);
-      console.log('[INSERT] Test job cleaned up');
-    }
-    
-  } catch (error) {
-    console.error('[INSERT] Service role authentication test failed:', error);
-    throw error;
-  }
-  
-  // Prepare real job data
+  // Prepare job data for insertion
   const jobData = jobs.map(job => ({
     title: job.title,
     company: job.company,
@@ -476,11 +413,11 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     application_url: job.application_url,
     description: job.description,
     job_type: 'Full-time',
-    is_active: true
+    is_active: true,
+    scraped_at: new Date().toISOString()
   }));
 
-  console.log('[INSERT] Proceeding with real job insertions...');
-  console.log('[INSERT] First job to insert:', JSON.stringify(jobData[0], null, 2));
+  console.log('[INSERT] Sample job data:', JSON.stringify(jobData[0], null, 2));
 
   try {
     const { data, error } = await supabase
@@ -489,25 +426,17 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
       .select();
 
     if (error) {
-      console.error('[INSERT] Real job insertion failed:', error);
-      console.error('[INSERT] Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
+      console.error('[INSERT] Error inserting jobs:', error);
       throw error;
     }
 
-    console.log(`[INSERT] SUCCESS! Inserted ${jobs.length} jobs`);
-    console.log('[INSERT] First inserted job:', data?.[0] ? {
-      id: data[0].id,
-      title: data[0].title,
-      company: data[0].company
-    } : 'No data returned');
+    console.log(`[INSERT] Successfully inserted ${data?.length || 0} jobs`);
+    if (data?.[0]) {
+      console.log('[INSERT] First inserted job ID:', data[0].id);
+    }
     
   } catch (error) {
-    console.error('[INSERT] Final insertion attempt failed:', error);
+    console.error('[INSERT] Failed to insert jobs:', error);
     throw error;
   }
 }
