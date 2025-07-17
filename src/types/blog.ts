@@ -55,9 +55,9 @@ export interface BlogPost {
 export interface VisualSection {
   headline: string;
   content: string;
-  image_url: string;
-  cta_text?: string;
-  cta_url?: string;
+  image_url?: string | null;
+  cta_text?: string | null;
+  cta_url?: string | null;
 }
 
 // Zod validation schemas
@@ -68,9 +68,9 @@ export const VisualSectionSchema = z.object({
   content: z.string()
     .min(300, "Content must be 60-80 words (min 300 chars)")
     .max(480, "Content must be 60-80 words (max 480 chars)"),
-  image_url: z.string().url("Must be a valid image URL"),
-  cta_text: z.string().optional(),
-  cta_url: z.string().url().optional(),
+  image_url: z.string().url("Must be a valid image URL").nullable().optional(),
+  cta_text: z.string().nullable().optional(),
+  cta_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
 });
 
 export const BlogPostSchema = z.object({
@@ -81,8 +81,8 @@ export const BlogPostSchema = z.object({
   hero_subhead: z.string()
     .min(80, "Subhead must be 15-25 words (min 80 chars)")
     .max(150, "Subhead must be 15-25 words (max 150 chars)"),
-  hero_image_url: z.string().url().optional(),
-  hero_video_url: z.string().url().optional(),
+  hero_image_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
+  hero_video_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
   hero_badge: z.string().max(20).optional(),
   
   // Intro Section
@@ -108,7 +108,7 @@ export const BlogPostSchema = z.object({
   
   // CTA & Share Section
   cta_text: z.string().min(1, "CTA text is required"),
-  cta_url: z.string().url().optional(),
+  cta_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
   share_enabled: z.boolean().default(true),
   
   // SEO Metadata

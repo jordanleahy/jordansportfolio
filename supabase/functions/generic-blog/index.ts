@@ -65,23 +65,23 @@ Generate a JSON response with the following structure:
     {
       "headline": "Section 1 headline (5-6 words)",
       "content": "Content that breaks down part of the main concept (60-80 words)",
-      "image_url": null,
-      "cta_text": null,
-      "cta_url": null
+      "image_url": "",
+      "cta_text": "",
+      "cta_url": ""
     },
     {
       "headline": "Section 2 headline (5-6 words)", 
       "content": "Content that explores another aspect (60-80 words)",
-      "image_url": null,
-      "cta_text": null,
-      "cta_url": null
+      "image_url": "",
+      "cta_text": "",
+      "cta_url": ""
     },
     {
       "headline": "Section 3 headline (5-6 words)",
       "content": "Content that provides practical insights (60-80 words)", 
-      "image_url": null,
-      "cta_text": null,
-      "cta_url": null
+      "image_url": "",
+      "cta_text": "",
+      "cta_url": ""
     }
   ],
   "tldr_bullets": [
@@ -217,6 +217,7 @@ Requirements:
         category: blogPostInput.category,
         tags: blogPostInput.tags,
         cta_text: blogPostInput.cta_text,
+        cta_url: null,
         slug: slug,
         status: 'draft',
         word_count: 0, // Will be calculated later
