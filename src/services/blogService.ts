@@ -220,8 +220,25 @@ export class BlogService {
   }
 
   static async updatePost(id: string, postInput: Partial<BlogPostInput>): Promise<BlogPost> {
+    // Clean URL fields before validation
+    const cleanedInput = { ...postInput };
+    
+    // Handle empty string URLs by converting to null
+    if (cleanedInput.hero_video_url === "") cleanedInput.hero_video_url = null;
+    if (cleanedInput.cta_url === "") cleanedInput.cta_url = null;
+    
+    // Handle visual sections URL fields
+    if (cleanedInput.visual_sections) {
+      cleanedInput.visual_sections = cleanedInput.visual_sections.map(section => ({
+        ...section,
+        image_url: section.image_url === "" ? null : section.image_url,
+        cta_url: section.cta_url === "" ? null : section.cta_url,
+        cta_text: section.cta_text === "" ? null : section.cta_text,
+      }));
+    }
+
     // Validate input
-    const validatedPost = BlogPostSchema.partial().parse(postInput);
+    const validatedPost = BlogPostSchema.partial().parse(cleanedInput);
     
     // Recalculate computed fields if content changed
     let updateData: any = { ...validatedPost };
