@@ -62,67 +62,48 @@ export interface VisualSection {
 
 // Zod validation schemas
 export const VisualSectionSchema = z.object({
-  headline: z.string()
-    .min(3, "Headline too short")
-    .max(40, "Headline must be max 6 words (~40 chars)"),
-  content: z.string()
-    .min(300, "Content must be 60-80 words (min 300 chars)")
-    .max(480, "Content must be 60-80 words (max 480 chars)"),
-  image_url: z.string().url("Must be a valid image URL").nullable().optional(),
+  headline: z.string().optional(),
+  content: z.string().optional(),
+  image_url: z.string().nullable().optional(),
   cta_text: z.string().nullable().optional(),
-  cta_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
+  cta_url: z.string().nullable().optional(),
 });
 
 export const BlogPostSchema = z.object({
-  // Hero Section - Strict validation
-  hero_headline: z.string()
-    .min(5, "Headline too short")
-    .max(60, "Headline must be max 8 words (~60 chars)"),
-  hero_subhead: z.string()
-    .min(80, "Subhead must be 15-25 words (min 80 chars)")
-    .max(150, "Subhead must be 15-25 words (max 150 chars)"),
-  hero_image_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
-  hero_video_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
-  hero_badge: z.string().max(20).optional(),
+  // Hero Section - Minimal validation
+  hero_headline: z.string().optional(),
+  hero_subhead: z.string().optional(),
+  hero_image_url: z.string().nullable().optional(),
+  hero_video_url: z.string().nullable().optional(),
+  hero_badge: z.string().optional(),
   
   // Intro Section
-  intro_content: z.string()
-    .min(250, "Intro must be 50-75 words (min 250 chars)")
-    .max(450, "Intro must be 50-75 words (max 450 chars)"),
+  intro_content: z.string().optional(),
   
-  // Visual Sections - Exactly 3 required
-  visual_sections: z.array(VisualSectionSchema)
-    .length(3, "Must have exactly 3 visual sections"),
+  // Visual Sections - Optional
+  visual_sections: z.array(VisualSectionSchema).optional(),
   
   // TL;DR Section
   tldr_title: z.string().default("TL;DR"),
-  tldr_bullets: z.array(z.string().min(10).max(100))
-    .min(3, "Must have at least 3 bullets")
-    .max(5, "Must have at most 5 bullets"),
+  tldr_bullets: z.array(z.string()).optional(),
   
   // Optional Deep Dive
   deep_dive_title: z.string().optional(),
-  deep_dive_content: z.string()
-    .max(1500, "Deep dive must be max 250 words (~1500 chars)")
-    .optional(),
+  deep_dive_content: z.string().optional(),
   
   // CTA & Share Section
-  cta_text: z.string().min(1, "CTA text is required"),
-  cta_url: z.union([z.string().url(), z.literal("")]).nullable().optional(),
+  cta_text: z.string().optional(),
+  cta_url: z.string().nullable().optional(),
   share_enabled: z.boolean().default(true),
   
   // SEO Metadata
-  meta_title: z.string()
-    .min(10, "Meta title too short")
-    .max(60, "Meta title must be max 60 characters"),
-  meta_description: z.string()
-    .min(50, "Meta description too short")
-    .max(155, "Meta description must be max 155 characters"),
+  meta_title: z.string().optional(),
+  meta_description: z.string().optional(),
   meta_keywords: z.array(z.string()).optional(),
   
   // Technical fields
   featured: z.boolean().default(false),
-  category: z.string().min(1, "Category is required"),
+  category: z.string().default("general"),
   tags: z.array(z.string()).optional(),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
 });

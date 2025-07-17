@@ -197,7 +197,15 @@ export class BlogService {
       slug,
       word_count: wordCount,
       read_time: readTime,
-      published_at: validatedPost.status === 'published' ? new Date().toISOString() : null
+      published_at: validatedPost.status === 'published' ? new Date().toISOString() : null,
+      hero_headline: validatedPost.hero_headline || '',
+      hero_subhead: validatedPost.hero_subhead || '',
+      intro_content: validatedPost.intro_content || '',
+      cta_text: validatedPost.cta_text || '',
+      meta_title: validatedPost.meta_title || '',
+      meta_description: validatedPost.meta_description || '',
+      tldr_bullets: validatedPost.tldr_bullets || [],
+      visual_sections: validatedPost.visual_sections || []
     };
 
     const { data, error } = await supabase
