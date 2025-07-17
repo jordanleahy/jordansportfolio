@@ -2,10 +2,8 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-
 const AscertainToTheMoon = () => {
-  return (
-    <>
+  return <>
       <Helmet>
         <title>Cover Letter - Ascertain to the Moon</title>
         <meta name="description" content="A personal cover letter and introduction" />
@@ -15,12 +13,8 @@ const AscertainToTheMoon = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-              Welcome to the Moon
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              A personal cover letter and introduction
-            </p>
+            
+            
           </div>
 
           {/* Video Section */}
@@ -92,21 +86,15 @@ const AscertainToTheMoon = () => {
             </CardHeader>
             <CardContent>
               {/* Google Calendar Appointment Scheduling begin */}
-              <iframe 
-                src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true" 
-                style={{ border: 0 }} 
-                width="100%" 
-                height="600" 
-                frameBorder="0"
-              />
+              <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true" style={{
+                border: 0
+              }} width="100%" height="600" frameBorder="0" />
               {/* end Google Calendar Appointment Scheduling */}
             </CardContent>
           </Card>
         </div>
       </div>
     </PageLayout>
-    </>
-  );
+    </>;
 };
-
 export default AscertainToTheMoon;
