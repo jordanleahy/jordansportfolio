@@ -183,15 +183,19 @@ Requirements:
       throw new Error('Invalid authorization token');
     }
 
-    // Generate slug from title
+    // Generate unique slug from title
     const generateSlug = (title: string): string => {
-      return title
+      const baseSlug = title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim()
-        .substring(0, 50);
+        .substring(0, 40); // Leave room for timestamp
+      
+      // Add timestamp to ensure uniqueness
+      const timestamp = Date.now();
+      return `${baseSlug}-${timestamp}`;
     };
 
     const slug = generateSlug(blogPostInput.hero_headline);
