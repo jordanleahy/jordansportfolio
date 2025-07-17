@@ -10,6 +10,7 @@ import { useAdminAllBlogPosts, useAdminDraftBlogPosts } from "@/hooks/useAdminBl
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Navigation from "@/components/Navigation";
 
 const AdminBlog = () => {
   const navigate = useNavigate();
@@ -156,26 +157,10 @@ const AdminBlog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/blog')}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Blog
-            </Button>
-            <h1 className="text-lg font-semibold">Blog Administration</h1>
-          </div>
-          <Link to="/blog-editor">
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              New Post
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <Navigation />
+      <div className="pt-16">
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
         <Tabs defaultValue="all" className="space-y-6">
           <TabsList>
             <TabsTrigger value="all">All Posts ({allPosts.length})</TabsTrigger>
@@ -212,6 +197,7 @@ const AdminBlog = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );

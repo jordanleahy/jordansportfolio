@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Calendar, ArrowRight, Plus, Edit, Settings } from "lucide-react";
+import { Clock, Calendar, ArrowRight, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
@@ -10,6 +10,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import Navigation from "@/components/Navigation";
 
 const Blog = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -54,47 +55,10 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50"
-      >
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Portfolio
-            </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            {user && (
-              <>
-                <Link to="/blog-editor">
-                  <Button variant="outline" size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Post
-                  </Button>
-                </Link>
-                {isAdmin && (
-                  <Link to="/admin/blog">
-                    <Button variant="outline" size="sm">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-              </>
-            )}
-            <Button variant="outline" size="sm">
-              <a href="#contact">Contact Jordan</a>
-            </Button>
-          </div>
-        </div>
-      </motion.header>
+      <Navigation />
 
       {/* Hero Section */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 pt-24">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

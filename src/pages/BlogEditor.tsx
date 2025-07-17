@@ -13,6 +13,7 @@ import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost } from "@/hooks/useBlogQueries";
+import Navigation from "@/components/Navigation";
 
 // Debounce utility
 const useDebounce = (callback: Function, delay: number) => {
@@ -626,22 +627,9 @@ const handleSave = useCallback(async (shouldPublish = false) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/blog')}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Blog
-            </Button>
-            <h1 className="text-lg font-semibold">
-              {existingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
-            </h1>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <Navigation />
+      <div className="pt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Status and Actions */}
         <div className="mb-6 p-4 border rounded-lg bg-card">
           <div className="flex items-center justify-between">
@@ -738,6 +726,7 @@ const handleSave = useCallback(async (shouldPublish = false) => {
             <SettingsSection formData={formData} handleInputChange={handleInputChange} />
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );

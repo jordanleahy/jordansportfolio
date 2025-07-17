@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Navigation from "@/components/Navigation";
 
 // Lazy load heavy BlogTemplate component
 const BlogTemplate = lazy(() => import("@/components/blog/BlogTemplate").then(module => ({ 
@@ -25,7 +26,8 @@ const BlogDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <Navigation />
+        <div className="max-w-6xl mx-auto px-4 py-8 pt-24">
           <Card className="p-8">
             <div className="space-y-6">
               <Skeleton className="h-8 w-3/4" />
@@ -43,7 +45,9 @@ const BlogDetail = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="flex-1 flex items-center justify-center pt-16">
         <div className="text-center space-y-4 max-w-md mx-auto px-4">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
           <h2 className="text-2xl font-bold">Failed to load blog post</h2>
@@ -57,6 +61,7 @@ const BlogDetail = () => {
             </Button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -66,16 +71,21 @@ const BlogDetail = () => {
   }
 
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading blog post...</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-16">
+        <Suspense fallback={
+          <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Loading blog post...</p>
+            </div>
+          </div>
+        }>
+          <BlogTemplate post={post} />
+        </Suspense>
       </div>
-    }>
-      <BlogTemplate post={post} />
-    </Suspense>
+    </div>
   );
 };
 
