@@ -1031,7 +1031,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       className="flex items-center gap-1"
                     >
                       <Lightbulb className="h-4 w-4" />
-                      <span className="hidden lg:inline">Generate Prompt</span>
                     </Button>
                     <Button
                       size="sm"

@@ -176,8 +176,7 @@ export const PostCard = ({
             onClick={() => onGeneratePrompt(post)}
             className="w-full"
           >
-            <Lightbulb className="h-4 w-4 mr-2" />
-            Generate Prompt
+            <Lightbulb className="h-4 w-4" />
           </Button>
           
           <div className="flex gap-2">
