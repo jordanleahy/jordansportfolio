@@ -23,10 +23,10 @@ const ATS_CONFIGS = {
     baseUrl: '',
   },
   workable: {
-    jobListSelector: '[data-ui="job"]',
-    titleSelector: '[data-ui="job-title"]',
-    locationSelector: '[data-ui="job-location"]',
-    linkSelector: 'a',
+    jobListSelector: 'li.whr-item',
+    titleSelector: 'h3.whr-title',
+    locationSelector: 'ul.whr-info li.whr-location',
+    linkSelector: 'h3.whr-title a',
     baseUrl: '',
   },
   bamboohr: {
