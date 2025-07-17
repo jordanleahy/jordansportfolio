@@ -370,7 +370,29 @@ async function filterNewJobs(jobs: ScrapedJob[], supabase: any): Promise<Scraped
 }
 
 async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
-  console.log(`Attempting to insert ${jobs.length} jobs`);
+  console.log(`[INSERT] Attempting to insert ${jobs.length} jobs`);
+  
+  if (jobs.length === 0) {
+    console.log('[INSERT] No jobs to insert');
+    return;
+  }
+  
+  // Test database connection first
+  try {
+    const { data: testQuery, error: testError } = await supabase
+      .from('jobs')
+      .select('count(*)')
+      .limit(1);
+    
+    if (testError) {
+      console.error('[INSERT] Database connection test failed:', testError);
+      throw testError;
+    }
+    console.log('[INSERT] Database connection successful');
+  } catch (error) {
+    console.error('[INSERT] Failed to connect to database:', error);
+    throw error;
+  }
   
   const jobData = jobs.map(job => ({
     title: job.title,
@@ -384,21 +406,29 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     is_active: true
   }));
 
-  console.log('Job data to insert:', JSON.stringify(jobData, null, 2));
+  console.log('[INSERT] Job data prepared:', JSON.stringify(jobData.slice(0, 2), null, 2)); // Log first 2 jobs only
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .insert(jobData)
-    .select();
+  try {
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert(jobData)
+      .select();
 
-  if (error) {
-    console.error('Error inserting jobs:', error);
-    console.error('Error details:', JSON.stringify(error, null, 2));
+    if (error) {
+      console.error('[INSERT] Database insert error:', error);
+      console.error('[INSERT] Error code:', error.code);
+      console.error('[INSERT] Error message:', error.message);
+      console.error('[INSERT] Error details:', error.details);
+      throw error;
+    }
+
+    console.log(`[INSERT] Successfully inserted ${jobs.length} new jobs`);
+    console.log('[INSERT] First inserted job:', data?.[0] ? JSON.stringify(data[0], null, 2) : 'No data returned');
+    
+  } catch (error) {
+    console.error('[INSERT] Unexpected error during insertion:', error);
     throw error;
   }
-
-  console.log(`Successfully inserted ${jobs.length} new jobs`);
-  console.log('Inserted data:', JSON.stringify(data, null, 2));
 }
 
 async function updateMonitoringState(
