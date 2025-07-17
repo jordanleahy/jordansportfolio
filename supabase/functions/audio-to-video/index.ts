@@ -37,21 +37,15 @@ serve(async (req: Request) => {
 
     // Convert audio file to array buffer for Cloudinary upload
     const audioArrayBuffer = await audioFile.arrayBuffer();
-    const audioData = new Uint8Array(audioArrayBuffer);
-
-    // Create form data for Cloudinary upload
+    
+    // Create form data for Cloudinary upload (signed upload)
     const cloudinaryFormData = new FormData();
-    cloudinaryFormData.append('file', new Blob([audioData], { type: audioFile.type }));
-    cloudinaryFormData.append('upload_preset', 'unsigned'); // You may need to set this up in Cloudinary
+    cloudinaryFormData.append('file', new Blob([audioArrayBuffer], { type: audioFile.type }), audioFile.name);
     cloudinaryFormData.append('resource_type', 'video');
     
-    // Add transformations to create video with waveform visualization
-    const transformation = 'f_mp4,fl_waveform,c_scale,w_1280,h_720,b_black,ac_aac,vc_h264';
-    cloudinaryFormData.append('transformation', transformation);
-
-    // Create authentication string for Cloudinary
+    // Create authentication for signed upload
     const timestamp = Math.round(Date.now() / 1000);
-    const paramsToSign = `timestamp=${timestamp}&upload_preset=unsigned`;
+    const paramsToSign = `resource_type=video&timestamp=${timestamp}`;
     
     // Generate signature using crypto
     const encoder = new TextEncoder();
@@ -64,7 +58,7 @@ serve(async (req: Request) => {
     cloudinaryFormData.append('timestamp', timestamp.toString());
     cloudinaryFormData.append('signature', signature);
 
-    console.log('Uploading to Cloudinary for video generation...');
+    console.log('Uploading audio to Cloudinary...');
 
     // Upload to Cloudinary
     const cloudinaryResponse = await fetch(
@@ -87,23 +81,36 @@ serve(async (req: Request) => {
     const cloudinaryResult = await cloudinaryResponse.json();
     console.log('Cloudinary upload successful, public_id:', cloudinaryResult.public_id);
 
-    // Construct the video URL with transformations
-    const videoUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/video/upload/${transformation}/${cloudinaryResult.public_id}.mp4`;
+    // Generate video with waveform using Cloudinary's transformation URL
+    const videoUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/video/upload/f_mp4,fl_waveform,c_scale,w_1280,h_720,b_black,ac_aac,vc_h264/${cloudinaryResult.public_id}.mp4`;
     
-    console.log('Video URL generated:', videoUrl);
+    console.log('Generated video URL:', videoUrl);
+
+    // Wait a moment for Cloudinary to process the transformation
+    console.log('Waiting for Cloudinary processing...');
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Download the processed video from Cloudinary
+    console.log('Downloading processed video from Cloudinary...');
     const videoResponse = await fetch(videoUrl);
     if (!videoResponse.ok) {
-      console.error('Failed to download video from Cloudinary');
-      return new Response('Failed to download processed video', { 
-        status: 500, 
-        headers: corsHeaders 
-      });
+      console.error('Failed to download video from Cloudinary, status:', videoResponse.status);
+      // Try without waveform as fallback
+      const fallbackUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/video/upload/f_mp4,c_scale,w_1280,h_720,b_black,ac_aac,vc_h264/${cloudinaryResult.public_id}.mp4`;
+      console.log('Trying fallback URL:', fallbackUrl);
+      const fallbackResponse = await fetch(fallbackUrl);
+      if (!fallbackResponse.ok) {
+        return new Response('Failed to download processed video from Cloudinary', { 
+          status: 500, 
+          headers: corsHeaders 
+        });
+      }
+      const videoArrayBuffer = await fallbackResponse.arrayBuffer();
+      var videoUint8Array = new Uint8Array(videoArrayBuffer);
+    } else {
+      const videoArrayBuffer = await videoResponse.arrayBuffer();
+      var videoUint8Array = new Uint8Array(videoArrayBuffer);
     }
-
-    const videoArrayBuffer = await videoResponse.arrayBuffer();
-    const videoUint8Array = new Uint8Array(videoArrayBuffer);
 
     console.log('Video downloaded from Cloudinary, size:', videoUint8Array.length);
 
