@@ -99,7 +99,15 @@ serve(async (req) => {
       throw new Error('Missing required environment variables');
     }
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('[AUTH] Service key length:', supabaseServiceKey.length);
+    console.log('[AUTH] Service key starts with:', supabaseServiceKey.substring(0, 20) + '...');
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
 
     console.log('Starting job monitoring process...');
 
