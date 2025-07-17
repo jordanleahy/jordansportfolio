@@ -39,18 +39,6 @@ const AscertainToTheMoon = () => {
               </CardContent>
             </Card>
 
-            {/* QR Code Section */}
-            <div className="flex justify-center mb-6">
-              <div className="text-center">
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(window.location.href)}`}
-                  alt="QR Code for this page"
-                  className="mx-auto mb-2 rounded-lg"
-                />
-                <p className="text-xs text-muted-foreground">Scan to view this page</p>
-              </div>
-            </div>
-
             {/* Cover Letter Content */}
             <Card>
               <CardContent className="p-8">
