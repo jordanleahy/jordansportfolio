@@ -30,11 +30,11 @@ const ATS_CONFIGS = {
     baseUrl: '',
   },
   bamboohr: {
-    jobListSelector: '.BambooHR-ATS-Jobs-Item',
-    titleSelector: '.BambooHR-ATS-Jobs-Item-Title',
-    locationSelector: '.BambooHR-ATS-Jobs-Item-Location',
+    jobListSelector: '.opening',
+    titleSelector: 'a',
+    locationSelector: '.location',
     linkSelector: 'a',
-    baseUrl: '',
+    baseUrl: 'https://boards.greenhouse.io',
   },
   smartrecruiters: {
     jobListSelector: '.openings-job',
@@ -205,6 +205,48 @@ function parseJobsWithRegex(html, config, targetName) {
       if (title && title.length > 2 && isRecentJob(dateText)) {
         jobs.push({ title, location, link, dateText, company });
         console.log(`Found Workable job: "${title}" at "${company}" in "${location}"`);
+      }
+    }
+  } else if (config.platform === 'bamboohr' || config.platform === 'greenhouse') {
+    // Handle BambooHR (which uses embedded Greenhouse) and direct Greenhouse
+    const openingPattern = /<div[^>]*class="[^"]*opening[^"]*"[^>]*>(.*?)<\/div>/gs;
+    const openingMatches = [...html.matchAll(openingPattern)];
+    console.log(`Found ${openingMatches.length} ${config.platform} opening containers`);
+    
+    for (const match of openingMatches) {
+      const openingHtml = match[1];
+      
+      // Extract title from the <a> tag
+      const titleMatch = openingHtml.match(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/s);
+      if (!titleMatch) continue;
+      
+      const link = titleMatch[1];
+      const title = titleMatch[2].replace(/<[^>]*>/g, '').trim();
+      
+      // Extract location
+      const locationMatch = openingHtml.match(/<span[^>]*class="[^"]*location[^"]*"[^>]*>(.*?)<\/span>/s);
+      const location = locationMatch ? locationMatch[1].replace(/<[^>]*>/g, '').trim() : 'Remote';
+      
+      // Extract department/team
+      const teamMatch = openingHtml.match(/<span[^>]*class="[^"]*team[^"]*"[^>]*>(.*?)<\/span>/s);
+      const team = teamMatch ? teamMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+      
+      // Create full URL for BambooHR/Greenhouse links
+      let fullUrl = link;
+      if (link.startsWith('/')) {
+        fullUrl = `${atsConfig.baseUrl}${link}`;
+      }
+      
+      if (title && title.length > 2) {
+        const jobData = { 
+          title, 
+          location, 
+          link: fullUrl, 
+          dateText: '', // Greenhouse doesn't always show dates in listings
+          team 
+        };
+        jobs.push(jobData);
+        console.log(`Found ${config.platform} job: "${title}" in "${location}" (${team})`);
       }
     }
   } else {
