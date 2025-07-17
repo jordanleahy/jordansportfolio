@@ -61,19 +61,6 @@ export const TimeOnTaskTimer: React.FC = () => {
               </div>}
           </div>
           
-          <div className="text-center">
-            <div className="text-2xl font-mono font-bold text-foreground">
-              {formatTime(totalTime)}
-            </div>
-            <div className="text-sm text-muted-foreground">Total Time</div>
-          </div>
-          
-          <div className="text-center">
-            <div className="text-2xl font-mono font-bold text-foreground">
-              {sessionCount}
-            </div>
-            <div className="text-sm text-muted-foreground">Sessions</div>
-          </div>
         </div>
         
         {sessionCount > 0 && <div className="pt-2 border-t border-muted-foreground/10">
