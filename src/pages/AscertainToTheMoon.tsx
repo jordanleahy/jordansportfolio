@@ -1,7 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const AscertainToTheMoon = () => {
   return (
@@ -79,6 +79,27 @@ const AscertainToTheMoon = () => {
                   </p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Google Calendar Scheduling */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Schedule a Conversation</CardTitle>
+              <CardDescription>
+                Let's discuss how my experience can contribute to Ascertain's mission
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Google Calendar Appointment Scheduling begin */}
+              <iframe 
+                src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true" 
+                style={{ border: 0 }} 
+                width="100%" 
+                height="600" 
+                frameBorder="0"
+              />
+              {/* end Google Calendar Appointment Scheduling */}
             </CardContent>
           </Card>
         </div>
