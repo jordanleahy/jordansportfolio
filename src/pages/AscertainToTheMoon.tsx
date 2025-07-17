@@ -43,7 +43,7 @@ const AscertainToTheMoon = () => {
                     </p>
                     
                     <p>
-                      My experience directly aligns with your mission. I designed and implemented an <a href="/cases/case1" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">AI sepsis detection system</a> that reduced mortality rates by 23% by automating early warning alerts for clinical teams. This project taught me how AI can transform healthcare workflows when thoughtfully integrated into existing systems—exactly what Ascertain is doing with case management.
+                      My experience directly aligns with your mission. I designed and implemented an <a href="/cases/case1" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">AI sepsis detection system</a> that reduced mortality rates by 23% by creating a data dense custom Sepsis CDS dashboard. This project taught me how AI can transform healthcare workflows when thoughtfully integrated into existing systems—exactly what Ascertain is doing with case management.
                     </p>
                     
                     <p>
