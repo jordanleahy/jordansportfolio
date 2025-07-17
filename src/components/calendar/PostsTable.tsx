@@ -953,6 +953,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                           <video
                             src={post.general_video_url}
                             className="w-20 h-15 rounded border cursor-pointer object-cover"
+                            preload="metadata"
                             onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
                           />
                         </div>
