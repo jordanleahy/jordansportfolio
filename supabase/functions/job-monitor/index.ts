@@ -1,104 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
-import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.43/deno-dom-wasm.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface ATSConfig {
-  platform: string;
-  selector: string;
-  titleSelector?: string;
-  companySelector?: string;
-  locationSelector?: string;
-  dateSelector?: string;
-  linkSelector?: string;
-}
-
-interface JobTarget {
-  id: string;
-  name: string;
-  url: string;
-  ats_platform: string;
-  selector: string;
-  is_active: boolean;
-}
-
-interface ScrapedJob {
-  title: string;
-  company: string;
-  location: string;
-  date_posted: string;
-  application_url: string;
-  description: string;
-  platform: string;
-  target_id: string;
-}
-
-const ATS_CONFIGS: Record<string, ATSConfig> = {
-  greenhouse: {
-    platform: 'greenhouse',
-    selector: '.opening, .job-post, .job-listing',
-    titleSelector: '.opening a, .job-title, h3 a, .posting-btn-submit a',
-    companySelector: '.company-name, .company, .posting-company, [data-company]',
-    locationSelector: '.location, .job-location, .posting-location',
-    dateSelector: '.posted-date, .posting-date, .job-date',
-    linkSelector: 'a, .posting-btn-submit'
-  },
-  lever: {
-    platform: 'lever',
-    selector: '.posting, .job-posting, .position',
-    titleSelector: '.posting-title h5, .job-title, .position-title, a h5',
-    companySelector: '.posting-company, .company-name, .company',
-    locationSelector: '.posting-categories .location, .location, .job-location',
-    dateSelector: '.posting-date, .job-date',
-    linkSelector: 'a'
-  },
-  workable: {
-    platform: 'workable',
-    selector: '.job-item, .job-listing, .job-card',
-    titleSelector: '.job-title, .title, h3',
-    companySelector: '.company-name, .company, .employer',
-    locationSelector: '.job-location, .location',
-    dateSelector: '.job-date, .date',
-    linkSelector: 'a'
-  },
-  smartrecruiters: {
-    platform: 'smartrecruiters',
-    selector: '.jobposting-list-item, .job-item, .opening',
-    titleSelector: '.job-title, .title, .posting-title',
-    companySelector: '.company-name, .company, .employer-name',
-    locationSelector: '.job-location, .location',
-    dateSelector: '.job-date, .posting-date',
-    linkSelector: 'a'
-  },
-  bamboohr: {
-    platform: 'bamboohr',
-    selector: '.job-card, .job-listing, .opening',
-    titleSelector: '.job-title, .title',
-    companySelector: '.company-name, .company',
-    locationSelector: '.job-location, .location',
-    dateSelector: '.job-posted, .date',
-    linkSelector: 'a'
-  }
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Max-Age': '86400'
 };
 
 serve(async (req) => {
+  console.log('[START] Job monitor function called with method:', req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Max-Age': '86400'
-      } 
-    });
+    console.log('[CORS] Handling OPTIONS request');
+    return new Response(null, { headers: corsHeaders });
   }
 
   // Add health check endpoint
   if (req.method === 'GET') {
+    console.log('[HEALTH] Health check requested');
     return new Response(
       JSON.stringify({ 
         status: 'healthy', 
@@ -110,121 +31,98 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    console.log('[INIT] Starting job monitoring process...');
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing required environment variables');
+      throw new Error('Missing Supabase environment variables');
     }
     
-    console.log('[AUTH] Supabase URL:', supabaseUrl);
-    console.log('[AUTH] Service key length:', supabaseServiceKey.length);
-    console.log('[AUTH] Service key starts with:', supabaseServiceKey.substring(0, 30) + '...');
+    console.log('[AUTH] Creating Supabase client...');
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Test basic database connectivity
+    console.log('[TEST] Testing database connection...');
+    const { data: testData, error: testError } = await supabase
+      .from('jobs')
+      .select('count')
+      .limit(1);
     
-    // Create a simplified supabase client focused on service role access
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
+    if (testError) {
+      console.error('[TEST] Database test failed:', testError);
+      throw new Error(`Database connection failed: ${testError.message}`);
+    }
+    
+    console.log('[TEST] Database connection successful');
+
+    // Insert a single test job to verify insertion works
+    console.log('[INSERT] Attempting to insert test job...');
+    const testJob = {
+      title: `Test Job ${new Date().toISOString()}`,
+      company: 'Test Company',
+      platform: 'job-monitor',
+      location: 'Remote',
+      date_posted: new Date().toISOString().split('T')[0],
+      application_url: `https://example.com/test-${Date.now()}`,
+      description: 'Test job inserted by job-monitor function',
+      job_type: 'Full-time',
+      is_active: true
+    };
+
+    const { data: insertData, error: insertError } = await supabase
+      .from('jobs')
+      .insert([testJob])
+      .select();
+
+    if (insertError) {
+      console.error('[INSERT] Insert failed:', insertError);
+      throw new Error(`Job insertion failed: ${insertError.message}`);
+    }
+
+    console.log('[INSERT] Successfully inserted test job:', insertData?.[0]?.id);
+
+    // Verify the job was inserted
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('jobs')
+      .select('id, title')
+      .eq('platform', 'job-monitor')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    console.log('[VERIFY] Verification result:', {
+      count: verifyData?.length || 0,
+      error: verifyError?.message || 'none',
+      jobs: verifyData?.map(j => ({ id: j.id, title: j.title })) || []
     });
 
-    // Test the service role connection immediately
-    console.log('[AUTH] Testing service role connection...');
-    try {
-      const { data: authTest, error: authError } = await supabase.auth.getUser();
-      console.log('[AUTH] Auth test result:', { user: authTest?.user?.id || 'none', error: authError?.message || 'none' });
-    } catch (e) {
-      console.log('[AUTH] Auth test threw:', e.message);
-    }
+    const response = {
+      success: true,
+      message: 'Job monitor test completed successfully',
+      testJobInserted: !!insertData?.[0],
+      testJobId: insertData?.[0]?.id,
+      verificationCount: verifyData?.length || 0
+    };
 
-    // Test a simple database operation
-    try {
-      const { data: dbTest, error: dbError } = await supabase
-        .from('jobs')
-        .select('count')
-        .limit(1);
-      console.log('[AUTH] Database test result:', { count: dbTest?.length || 0, error: dbError?.message || 'none' });
-    } catch (e) {
-      console.log('[AUTH] Database test threw:', e.message);
-    }
-
-    console.log('Starting job monitoring process...');
-
-    // Get active job targets
-    const { data: targets, error: targetsError } = await supabase
-      .from('job_targets')
-      .select('*')
-      .eq('is_active', true);
-
-    if (targetsError) {
-      throw targetsError;
-    }
-
-    if (!targets || targets.length === 0) {
-      console.log('No active job targets found');
-      return new Response(
-        JSON.stringify({ success: true, message: 'No active targets to monitor' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    let totalNewJobs = 0;
-    const results = [];
-
-    for (const target of targets) {
-      console.log(`Processing target: ${target.name}`);
-      
-      try {
-        const newJobs = await scrapeJobsFromTarget(target, supabase);
-        totalNewJobs += newJobs.length;
-        
-        // Update monitoring state
-        await updateMonitoringState(target.id, newJobs.length, null, supabase);
-        
-        results.push({
-          target: target.name,
-          newJobs: newJobs.length,
-          success: true
-        });
-
-        console.log(`Found ${newJobs.length} new jobs from ${target.name}`);
-        
-      } catch (error) {
-        console.error(`Error processing target ${target.name}:`, error);
-        
-        // Update monitoring state with error
-        await updateMonitoringState(target.id, 0, error.message, supabase);
-        
-        results.push({
-          target: target.name,
-          newJobs: 0,
-          success: false,
-          error: error.message
-        });
-      }
-    }
-
-    console.log(`Job monitoring completed. Total new jobs: ${totalNewJobs}`);
+    console.log('[SUCCESS] Returning response:', response);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Job monitoring completed successfully. Found ${totalNewJobs} new jobs.`,
-        totalNewJobs,
-        results
-      }),
+      JSON.stringify(response),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('Error in job-monitor function:', error);
+    console.error('[ERROR] Job monitor function failed:', error);
+    
+    const errorResponse = {
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    };
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || 'Unknown error occurred',
-        stack: error.stack 
-      }),
+      JSON.stringify(errorResponse),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -232,378 +130,3 @@ serve(async (req) => {
     );
   }
 });
-
-async function scrapeJobsFromTarget(target: JobTarget, supabase: any): Promise<ScrapedJob[]> {
-  try {
-    console.log(`Scraping ${target.url} with platform ${target.ats_platform}`);
-    
-    const response = await fetch(target.url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-
-    if (!response.ok) {
-      console.log(`Failed to fetch ${target.url}, status: ${response.status}`);
-      return generateFallbackJobs(target);
-    }
-
-    const html = await response.text();
-    console.log(`HTML length: ${html.length} characters`);
-    
-    const jobs = await parseJobsFromHTML(html, target);
-    console.log(`Parsed ${jobs.length} jobs from HTML`);
-
-    // Enhanced filtering for design and related roles across all companies
-    const relevantJobs = jobs.filter(job => {
-      const title = job.title.toLowerCase();
-      const description = job.description.toLowerCase();
-      
-      // Design roles
-      const designTerms = [
-        'product designer', 'ux designer', 'ui designer', 'visual designer',
-        'interaction designer', 'design lead', 'senior designer', 'staff designer',
-        'principal designer', 'design manager', 'design director', 'head of design',
-        'design system', 'brand designer', 'graphic designer', 'web designer',
-        'user experience', 'user interface', 'design researcher', 'service designer'
-      ];
-      
-      // Tech/Product roles that might be relevant
-      const productTerms = [
-        'product manager', 'frontend', 'front-end', 'full stack', 'fullstack',
-        'react', 'vue', 'angular', 'typescript', 'javascript', 'web developer'
-      ];
-      
-      const isRelevant = designTerms.some(term => title.includes(term) || description.includes(term)) ||
-                        productTerms.some(term => title.includes(term) || description.includes(term));
-      
-      if (isRelevant) {
-        console.log(`Job "${job.title}" at ${job.company} passed filter`);
-      }
-      
-      return isRelevant;
-    });
-
-    console.log(`${relevantJobs.length} jobs passed filtering out of ${jobs.length} total`);
-
-    // Check which jobs are new (not already in database)
-    const newJobs = await filterNewJobs(relevantJobs, supabase);
-    console.log(`${newJobs.length} jobs are new out of ${relevantJobs.length} relevant jobs`);
-
-    // Insert new jobs into database
-    if (newJobs.length > 0) {
-      await insertJobs(newJobs, supabase);
-    }
-
-    return newJobs;
-
-  } catch (error) {
-    console.error(`Error scraping ${target.name}:`, error);
-    return generateFallbackJobs(target);
-  }
-}
-
-async function parseJobsFromHTML(html: string, target: JobTarget): Promise<ScrapedJob[]> {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  
-  if (!doc) {
-    throw new Error('Failed to parse HTML');
-  }
-
-  const config = ATS_CONFIGS[target.ats_platform] || ATS_CONFIGS.greenhouse;
-  const jobElements = doc.querySelectorAll(target.selector || config.selector);
-  console.log(`Found ${jobElements.length} job elements using selector: ${target.selector || config.selector}`);
-  
-  const jobs: ScrapedJob[] = [];
-
-  jobElements.forEach(element => {
-    try {
-      const titleElement = element.querySelector(config.titleSelector || 'a, .title, h3, h4, h5');
-      const locationElement = element.querySelector(config.locationSelector || '.location, .job-location');
-      const linkElement = element.querySelector(config.linkSelector || 'a');
-      const companyElement = element.querySelector(config.companySelector || '.company, .company-name');
-
-      const title = titleElement?.textContent?.trim() || 'Unknown Position';
-      const location = locationElement?.textContent?.trim() || 'Remote';
-      const href = linkElement?.getAttribute('href') || '';
-      
-      // Extract company name from various sources
-      let company = companyElement?.textContent?.trim();
-      
-      // If no company found in element, try to extract from URL or other attributes
-      if (!company) {
-        // Try to get company from URL path
-        if (href.includes('/jobs/')) {
-          const urlParts = href.split('/');
-          const companyIndex = urlParts.findIndex(part => part === 'jobs') - 1;
-          if (companyIndex >= 0) {
-            company = urlParts[companyIndex];
-          }
-        }
-        
-        // Try data attributes
-        if (!company) {
-          company = element.getAttribute('data-company') || 
-                   element.getAttribute('data-employer') ||
-                   linkElement?.getAttribute('data-company');
-        }
-        
-        // Last resort: try to find in link text or nearby elements
-        if (!company) {
-          const parentText = element.parentElement?.textContent || element.textContent || '';
-          const companyMatch = parentText.match(/at\s+([A-Za-z0-9\s&-]+)(?:\s|$)/i);
-          company = companyMatch?.[1]?.trim();
-        }
-      }
-      
-      // Clean up company name
-      if (company) {
-        company = company.replace(/\s*\([^)]*\)/g, '').trim(); // Remove parentheses content
-        company = company.replace(/\s*-\s*.*$/, '').trim(); // Remove everything after dash
-        company = company.replace(/^at\s+/i, '').trim(); // Remove "at " prefix
-      }
-      
-      // Fallback company name
-      if (!company || company.length < 2) {
-        company = 'Various Companies';
-      }
-      
-      // Construct full URL
-      let applicationUrl = href;
-      if (href && !href.startsWith('http')) {
-        const baseUrl = new URL(target.url).origin;
-        applicationUrl = new URL(href, baseUrl).toString();
-      }
-
-      if (title && applicationUrl && title !== 'Unknown Position') {
-        jobs.push({
-          title,
-          company,
-          location,
-          date_posted: new Date().toISOString().split('T')[0],
-          application_url: applicationUrl,
-          description: `${title} position at ${company}. This role was found on ${target.ats_platform} job board. Apply through the company's career page for full details.`,
-          platform: target.ats_platform,
-          target_id: target.id
-        });
-      }
-    } catch (error) {
-      console.error('Error parsing job element:', error);
-    }
-  });
-
-  return jobs;
-}
-
-function extractCompanyFromTarget(targetName: string): string {
-  // For ATS-wide scraping, we don't extract company from target name anymore
-  // This function is kept for backwards compatibility but returns a generic name
-  return 'Multiple Companies';
-}
-
-async function filterNewJobs(jobs: ScrapedJob[], supabase: any): Promise<ScrapedJob[]> {
-  if (jobs.length === 0) return [];
-
-  const applicationUrls = jobs.map(job => job.application_url);
-  
-  const { data: existingJobs } = await supabase
-    .from('jobs')
-    .select('application_url')
-    .in('application_url', applicationUrls);
-
-  const existingUrls = new Set(existingJobs?.map((job: any) => job.application_url) || []);
-  
-  return jobs.filter(job => !existingUrls.has(job.application_url));
-}
-
-async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
-  console.log(`[INSERT] Starting insertion process for ${jobs.length} jobs`);
-  
-  if (jobs.length === 0) {
-    console.log('[INSERT] No jobs to insert');
-    return;
-  }
-
-  // First, let's test if we can even connect to the database
-  console.log('[INSERT] Testing database connection...');
-  try {
-    const { data: healthCheck, error: healthError } = await supabase
-      .from('jobs')
-      .select('count')
-      .limit(1);
-    
-    console.log('[INSERT] Database connection test result:', { data: healthCheck, error: healthError });
-    
-    if (healthError) {
-      console.error('[INSERT] Database connection failed:', healthError);
-      throw new Error(`Database connection failed: ${healthError.message}`);
-    }
-  } catch (error) {
-    console.error('[INSERT] Database connection test threw error:', error);
-    throw error;
-  }
-
-  // Check current job count before insertion
-  console.log('[INSERT] Checking current job count...');
-  try {
-    const { data: currentJobs, error: countError } = await supabase
-      .from('jobs')
-      .select('id', { count: 'exact' });
-    
-    console.log('[INSERT] Current jobs in database:', { 
-      count: currentJobs?.length || 0, 
-      error: countError,
-      sampleIds: currentJobs?.slice(0, 3)?.map(j => j.id) || []
-    });
-  } catch (error) {
-    console.error('[INSERT] Failed to get current job count:', error);
-  }
-
-  // Prepare job data for insertion
-  const jobData = jobs.map((job, index) => {
-    const data = {
-      title: job.title,
-      company: job.company,
-      platform: job.platform,
-      location: job.location,
-      date_posted: job.date_posted,
-      application_url: job.application_url,
-      description: job.description,
-      job_type: 'Full-time',
-      is_active: true,
-      scraped_at: new Date().toISOString()
-    };
-    
-    if (index === 0) {
-      console.log('[INSERT] Sample job data being inserted:', JSON.stringify(data, null, 2));
-    }
-    
-    return data;
-  });
-
-  // Attempt insertion with detailed logging
-  console.log('[INSERT] Starting database insertion...');
-  console.log('[INSERT] Service role key prefix:', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.substring(0, 20) + '...');
-  
-  try {
-    const insertStart = Date.now();
-    const { data, error } = await supabase
-      .from('jobs')
-      .insert(jobData)
-      .select();
-    
-    const insertDuration = Date.now() - insertStart;
-    
-    console.log('[INSERT] Insertion completed in', insertDuration, 'ms');
-    console.log('[INSERT] Insertion result:', { 
-      dataLength: data?.length || 0, 
-      error: error,
-      firstJobId: data?.[0]?.id || 'none'
-    });
-
-    if (error) {
-      console.error('[INSERT] Insertion error details:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
-      throw error;
-    }
-
-    if (!data || data.length === 0) {
-      console.error('[INSERT] No data returned from insertion - this indicates a problem');
-      throw new Error('No data returned from successful insertion');
-    }
-
-    console.log(`[INSERT] SUCCESS! Inserted ${data.length} jobs out of ${jobData.length} attempted`);
-    
-    // Verify the jobs were actually inserted by querying again
-    console.log('[INSERT] Verifying insertion by re-querying...');
-    const { data: verifyData, error: verifyError } = await supabase
-      .from('jobs')
-      .select('id, title, company')
-      .order('created_at', { ascending: false })
-      .limit(5);
-    
-    console.log('[INSERT] Verification query result:', {
-      count: verifyData?.length || 0,
-      error: verifyError,
-      recentJobs: verifyData?.map(j => ({ id: j.id, title: j.title, company: j.company })) || []
-    });
-    
-  } catch (error) {
-    console.error('[INSERT] Insertion process failed:', error);
-    console.error('[INSERT] Error stack:', error.stack);
-    throw error;
-  }
-}
-
-async function updateMonitoringState(
-  targetId: string, 
-  jobCount: number, 
-  error: string | null, 
-  supabase: any
-): Promise<void> {
-  const updateData: any = {
-    last_scraped_at: new Date().toISOString(),
-    last_job_count: jobCount
-  };
-
-  if (error) {
-    updateData.error_count = 1; // Increment would be better but this is simpler
-    updateData.last_error = error;
-  } else {
-    updateData.error_count = 0;
-    updateData.last_error = null;
-  }
-
-  const { error: upsertError } = await supabase
-    .from('job_monitoring_state')
-    .upsert({
-      target_id: targetId,
-      ...updateData
-    }, {
-      onConflict: 'target_id'
-    });
-
-  if (upsertError) {
-    console.error('Error updating monitoring state:', upsertError);
-  }
-}
-
-function generateFallbackJobs(target: JobTarget): ScrapedJob[] {
-  console.log(`Generating fallback jobs for ${target.name}`);
-  
-  // For ATS-wide targets, generate multiple fallback jobs from different companies
-  const companies = ['TechStart Inc', 'Design Labs', 'Innovation Co', 'Creative Corp', 'Product Studio'];
-  const positions = [
-    'Senior Product Designer',
-    'Product Designer', 
-    'UX Designer',
-    'UI/UX Designer',
-    'Design Lead'
-  ];
-
-  const fallbackJobs: ScrapedJob[] = [];
-  
-  // Generate 2-3 fallback jobs
-  for (let i = 0; i < Math.min(3, Math.floor(Math.random() * 3) + 1); i++) {
-    const randomCompany = companies[Math.floor(Math.random() * companies.length)];
-    const randomPosition = positions[Math.floor(Math.random() * positions.length)];
-    
-    fallbackJobs.push({
-      title: randomPosition,
-      company: randomCompany,
-      location: ['Remote', 'San Francisco, CA', 'New York, NY', 'Austin, TX'][Math.floor(Math.random() * 4)],
-      date_posted: new Date().toISOString().split('T')[0],
-      application_url: `${target.url}?fallback=true&job=${i}`,
-      description: `${randomPosition} position at ${randomCompany}. We're looking for a talented designer to join our team. This is a fallback job generated when the actual ${target.ats_platform} scraping encountered issues.`,
-      platform: target.ats_platform,
-      target_id: target.id
-    });
-  }
-  
-  return fallbackJobs;
-}
