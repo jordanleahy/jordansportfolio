@@ -23,6 +23,7 @@ const Calendar = lazy(() => import("./pages/Calendar"));
 const Agents = lazy(() => import("./pages/Agents"));
 const AgentChat = lazy(() => import("./pages/AgentChat"));
 const AgentEditor = lazy(() => import("./pages/AgentEditor"));
+const JobWatcher = lazy(() => import("./pages/JobWatcher"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -108,6 +109,7 @@ const App = () => (
                   <Route path="/agents/new" element={<AgentEditor />} />
                   <Route path="/agents/:slug" element={<AgentChat />} />
                   <Route path="/agents/:slug/edit" element={<AgentEditor />} />
+                  <Route path="/jobs" element={<JobWatcher />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
