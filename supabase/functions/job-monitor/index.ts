@@ -117,23 +117,37 @@ serve(async (req) => {
       throw new Error('Missing required environment variables');
     }
     
+    console.log('[AUTH] Supabase URL:', supabaseUrl);
     console.log('[AUTH] Service key length:', supabaseServiceKey.length);
-    console.log('[AUTH] Service key starts with:', supabaseServiceKey.substring(0, 20) + '...');
+    console.log('[AUTH] Service key starts with:', supabaseServiceKey.substring(0, 30) + '...');
     
+    // Create a simplified supabase client focused on service role access
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
-      },
-      db: {
-        schema: 'public'
-      },
-      global: {
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`
-        }
       }
     });
+
+    // Test the service role connection immediately
+    console.log('[AUTH] Testing service role connection...');
+    try {
+      const { data: authTest, error: authError } = await supabase.auth.getUser();
+      console.log('[AUTH] Auth test result:', { user: authTest?.user?.id || 'none', error: authError?.message || 'none' });
+    } catch (e) {
+      console.log('[AUTH] Auth test threw:', e.message);
+    }
+
+    // Test a simple database operation
+    try {
+      const { data: dbTest, error: dbError } = await supabase
+        .from('jobs')
+        .select('count')
+        .limit(1);
+      console.log('[AUTH] Database test result:', { count: dbTest?.length || 0, error: dbError?.message || 'none' });
+    } catch (e) {
+      console.log('[AUTH] Database test threw:', e.message);
+    }
 
     console.log('Starting job monitoring process...');
 
