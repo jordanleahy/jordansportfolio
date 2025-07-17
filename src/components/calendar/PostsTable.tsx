@@ -221,8 +221,8 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       });
 
       toast({
-        title: "Image uploaded",
-        description: "9:16 image has been successfully uploaded.",
+        title: "Video uploaded",
+        description: "16:9 video has been successfully uploaded.",
       });
 
       onPostsChange();
@@ -230,7 +230,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       console.error('Error uploading 9:16 image:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload 9:16 image. Please try again.",
+        description: "Failed to upload 16:9 video. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -339,8 +339,8 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       });
 
       toast({
-        title: "Image uploaded",
-        description: "4:3 image has been successfully uploaded.",
+        title: "Video uploaded",
+        description: "3:4 video has been successfully uploaded.",
       });
 
       onPostsChange();
@@ -348,7 +348,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       console.error('Error uploading 4:3 image:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload 4:3 image. Please try again.",
+        description: "Failed to upload 3:4 video. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -631,9 +631,9 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>16:9 Image</TableHead>
-              <TableHead>9:16 Image</TableHead>
+              <TableHead>16:9 Vid</TableHead>
               <TableHead>3:4 Image</TableHead>
-              <TableHead>4:3 Image</TableHead>
+              <TableHead>3:4 Vid</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Actions</TableHead>
@@ -725,17 +725,17 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     <div 
                       className="cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
-                      title="Click to upload 9:16 image"
+                      title="Click to upload 16:9 video"
                     >
                        {post.image_9_16_url ? (
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-916-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
+                          onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
                           imageUrl={post.image_9_16_url}
                         >
                           <OptimizedImage
                             src={post.image_9_16_url}
-                            alt="9:16 Image"
+                            alt="16:9 Video"
                             aspectRatio="9/16"
                             className="w-12 h-auto rounded border cursor-pointer"
                           />
@@ -747,7 +747,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                           ) : (
                             <div className="flex flex-col items-center">
                               <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">9:16</span>
+                              <span className="text-xs text-muted-foreground">16:9 Vid</span>
                             </div>
                           )}
                         </div>
@@ -809,17 +809,17 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     <div 
                       className="cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => document.getElementById(`upload-43-${post.id}`)?.click()}
-                      title="Click to upload 4:3 image"
+                      title="Click to upload 3:4 video"
                     >
                        {post.image_4_3_url ? (
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-43-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
+                          onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
                           imageUrl={post.image_4_3_url}
                         >
                           <OptimizedImage
                             src={post.image_4_3_url}
-                            alt="4:3 Image"
+                            alt="3:4 Video"
                             aspectRatio="4/3"
                             className="w-20 h-auto rounded border cursor-pointer"
                           />
@@ -831,7 +831,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                           ) : (
                             <div className="flex flex-col items-center">
                               <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">4:3</span>
+                              <span className="text-xs text-muted-foreground">3:4 Vid</span>
                             </div>
                           )}
                         </div>

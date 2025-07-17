@@ -193,9 +193,9 @@ export const PostCard = ({
             <Tabs defaultValue="16_9" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="16_9" className="text-xs">16:9</TabsTrigger>
-                <TabsTrigger value="9_16" className="text-xs">9:16</TabsTrigger>
+                <TabsTrigger value="9_16" className="text-xs">16:9 Vid</TabsTrigger>
                 <TabsTrigger value="3_4" className="text-xs">3:4</TabsTrigger>
-                <TabsTrigger value="4_3" className="text-xs">4:3</TabsTrigger>
+                <TabsTrigger value="4_3" className="text-xs">3:4 Vid</TabsTrigger>
               </TabsList>
               
               <TabsContent value="16_9" className="mt-3">
@@ -209,7 +209,7 @@ export const PostCard = ({
               <TabsContent value="9_16" className="mt-3">
                 <ImageUploadButton 
                   type="9_16" 
-                  label="Portrait (9:16)" 
+                  label="Portrait (16:9 Vid)" 
                   isUploading={uploadingStates[`${post.id}_9_16`] || false} 
                 />
               </TabsContent>
@@ -225,7 +225,7 @@ export const PostCard = ({
               <TabsContent value="4_3" className="mt-3">
                 <ImageUploadButton 
                   type="4_3" 
-                  label="Standard (4:3)" 
+                  label="Standard (3:4 Vid)" 
                   isUploading={uploadingStates[`${post.id}_4_3`] || false} 
                 />
               </TabsContent>
@@ -252,14 +252,14 @@ export const PostCard = ({
             )}
             {post.image_9_16_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "9:16 image for " + post.title })}
+                onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
                 imageUrl={post.image_9_16_url}
                 showUpload={false}
                 className="flex-shrink-0"
               >
                 <OptimizedImage
                   src={post.image_9_16_url}
-                  alt="9:16 image"
+                  alt="16:9 video"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>
@@ -280,14 +280,14 @@ export const PostCard = ({
             )}
             {post.image_4_3_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "4:3 image for " + post.title })}
+                onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
                 imageUrl={post.image_4_3_url}
                 showUpload={false}
                 className="flex-shrink-0"
               >
                 <OptimizedImage
                   src={post.image_4_3_url}
-                  alt="4:3 image"
+                  alt="3:4 video"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>

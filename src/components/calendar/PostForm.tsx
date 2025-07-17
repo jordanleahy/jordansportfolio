@@ -245,14 +245,14 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
 
           <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
             <ImageUploadCard
-              title="16:9 Image"
+              title="16:9 Vid"
               aspectRatio="16/9"
               imageUrl={formData.image_16_9_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_16_9_url: undefined }))}
             />
             <ImageUploadCard
-              title="3:4 Image"
+              title="3:4 Vid"
               aspectRatio="3/4"
               imageUrl={formData.image_3_4_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_url: url }))}
