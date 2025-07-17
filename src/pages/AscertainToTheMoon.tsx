@@ -2,6 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 const AscertainToTheMoon = () => {
   return <>
       <Helmet>
@@ -19,10 +20,12 @@ const AscertainToTheMoon = () => {
 
           {/* Video Section */}
           <Card className="mb-12">
-            <CardContent className="p-6">
-              <div className="mx-auto max-w-sm">
-                
-              </div>
+            <CardContent className="p-0">
+              <AspectRatio ratio={9/16}>
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <p className="text-muted-foreground">Video player placeholder</p>
+                </div>
+              </AspectRatio>
             </CardContent>
           </Card>
 
