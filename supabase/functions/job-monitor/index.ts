@@ -147,36 +147,64 @@ function parseJobsWithRegex(html, config, targetName) {
   
   // For Workable specifically, look for job listings in the search results
   if (config.platform === 'workable') {
-    // Look for job links in the format [Job Title at Company](url)
-    const jobLinkMatches = [...html.matchAll(/<a[^>]*href="([^"]*view\/[^"]*)"[^>]*>(.*?)<\/a>/gs)];
-    console.log(`Found ${jobLinkMatches.length} Workable job links`);
+    // More robust pattern to find job view links
+    const jobLinkPattern = /href="(https:\/\/jobs\.workable\.com\/view\/[^"]+)"[^>]*>([^<]+)</g;
+    const jobMatches = [...html.matchAll(jobLinkPattern)];
+    console.log(`Found ${jobMatches.length} Workable job links`);
     
-    for (const match of jobLinkMatches) {
+    for (const match of jobMatches) {
       const link = match[1];
-      const titleText = match[2].replace(/<[^>]*>/g, '').trim();
+      const titleText = match[2].trim();
       
-      // Extract title and company from text like "Senior Product Designer at CompanyName"
-      const titleMatch = titleText.match(/^(.*?)\s+at\s+(.+)$/);
-      if (titleMatch) {
-        const title = titleMatch[1].trim();
-        const company = titleMatch[2].trim();
-        
-        // Look for location info after this link (in subsequent elements)
-        const linkIndex = html.indexOf(match[0]);
-        const afterLink = html.substring(linkIndex, linkIndex + 1000);
-        
-        // Extract location from nearby text patterns
-        const locationMatch = afterLink.match(/(Remote|Hybrid|On-site)\*\*([^*]+)/);
-        const location = locationMatch ? `${locationMatch[1]} - ${locationMatch[2].trim()}` : 'Remote';
-        
-        // Extract posting date
-        const dateMatch = afterLink.match(/Posted\s+(\d+\s+(?:days?|hours?|weeks?|months?)\s+ago)/);
-        const dateText = dateMatch ? dateMatch[1] : '';
-        
-        if (title && title.length > 2 && isRecentJob(dateText)) {
-          jobs.push({ title, location, link, dateText, company });
-          console.log(`Found Workable job: ${title} at ${company} in ${location}`);
+      // Skip if it's just whitespace or not a real job title
+      if (!titleText || titleText.length < 3) continue;
+      
+      // For Workable, the link text is often just the job title
+      const title = titleText;
+      
+      // Extract company name - look for company info after the job link
+      const linkIndex = html.indexOf(match[0]);
+      const afterLink = html.substring(linkIndex, linkIndex + 2000);
+      
+      // Look for company patterns - Workable often has company info in specific structures
+      let company = 'Unknown Company';
+      const companyPatterns = [
+        /at\s+([^<]+)<\/a>/,
+        /at\s+<[^>]*>([^<]+)<\/[^>]*>/,
+        /company[^>]*>([^<]+)/i
+      ];
+      
+      for (const pattern of companyPatterns) {
+        const companyMatch = afterLink.match(pattern);
+        if (companyMatch && companyMatch[1].trim().length > 0) {
+          company = companyMatch[1].trim();
+          break;
         }
+      }
+      
+      // Extract location - look for common location patterns
+      let location = 'Remote';
+      const locationPatterns = [
+        /(Remote|Hybrid|On-site)[^<]*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:,\s*[A-Z]{2})?)/,
+        /location[^>]*>([^<]+)/i,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2,})/
+      ];
+      
+      for (const pattern of locationPatterns) {
+        const locationMatch = afterLink.match(pattern);
+        if (locationMatch) {
+          location = locationMatch[0].trim();
+          break;
+        }
+      }
+      
+      // Extract posting date
+      const dateMatch = afterLink.match(/Posted\s+(\d+\s+(?:days?|hours?|weeks?|months?)\s+ago)/);
+      const dateText = dateMatch ? dateMatch[1] : '';
+      
+      if (title && title.length > 2 && isRecentJob(dateText)) {
+        jobs.push({ title, location, link, dateText, company });
+        console.log(`Found Workable job: "${title}" at "${company}" in "${location}"`);
       }
     }
   } else {
