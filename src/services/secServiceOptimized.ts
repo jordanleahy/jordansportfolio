@@ -132,17 +132,19 @@ export class SecServiceOptimized {
 
     // Apply sorting (server-side)
     if (filters.sortField && filters.sortDirection) {
-      const sortField = this.getSortField(filters.sortField);
       const ascending = filters.sortDirection === 'asc';
-      
+
       // Handle special sorting cases
       if (filters.sortField === 'percentRaised') {
-        // Sort by calculated percentage using SQL
-        query = query.order('totalamountsold', { ascending })
-                    .order('totalofferingamount', { ascending });
+        // Calculate percentage raised and order by it
+        const percentColumn = 'percent_raised';
+        query = query
+          .select(`*, ${percentColumn}:totalamountsold/nullif(totalofferingamount,0)`, { count: 'exact' })
+          .order(percentColumn, { ascending });
       } else if (filters.sortField === 'companyName') {
         query = query.order('company_name', { ascending });
       } else {
+        const sortField = this.getSortField(filters.sortField);
         query = query.order(sortField, { ascending });
       }
     } else {
