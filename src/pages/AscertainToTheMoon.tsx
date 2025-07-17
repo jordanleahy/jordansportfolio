@@ -26,10 +26,12 @@ const AscertainToTheMoon = () => {
           {/* Video Section */}
           <Card className="mb-12">
             <CardContent className="p-6">
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-4">
-                <div className="text-center">
-                  <p className="text-muted-foreground mb-2">Video will be embedded here</p>
-                  <p className="text-sm text-muted-foreground">Upload your introduction video</p>
+              <div className="mx-auto max-w-sm">
+                <div className="aspect-[9/16] bg-muted rounded-lg flex items-center justify-center mb-4">
+                  <div className="text-center">
+                    <p className="text-muted-foreground mb-2">9:16 Video</p>
+                    <p className="text-sm text-muted-foreground">Upload your introduction video</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
