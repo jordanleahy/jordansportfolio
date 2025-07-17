@@ -12,7 +12,7 @@ const BlogTemplate = lazy(() => import("@/components/blog/BlogTemplate").then(mo
 })));
 
 const BlogDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   
   // Use TanStack Query for blog post
   const { 
@@ -20,7 +20,7 @@ const BlogDetail = () => {
     isLoading: loading, 
     error,
     refetch
-  } = useBlogPost(id);
+  } = useBlogPost(slug);
 
   if (loading) {
     return (

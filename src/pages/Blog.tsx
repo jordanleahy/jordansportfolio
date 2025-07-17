@@ -108,7 +108,7 @@ const Blog = () => {
               transition={{ delay: 0.2 }}
             >
               <Link 
-                to={`/blog/${featuredPost.id}`}
+                to={`/blog/${featuredPost.slug}`}
                 onMouseEnter={() => handleMouseEnter(featuredPost.slug)}
               >
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
@@ -182,7 +182,7 @@ const Blog = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Link 
-                  to={`/blog/${post.id}`}
+                  to={`/blog/${post.slug}`}
                   onMouseEnter={() => handleMouseEnter(post.slug)}
                 >
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">

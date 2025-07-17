@@ -665,11 +665,11 @@ const handleSave = useCallback(async (shouldPublish = false) => {
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
-                  if (existingPost?.slug) {
-                    window.open(`/blog/${existingPost.slug}`, '_blank');
+                  if (slug) {
+                    window.open(`/blog/${slug}`, '_blank');
                   }
                 }}
-                disabled={!existingPost}
+                disabled={!slug}
               >
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
