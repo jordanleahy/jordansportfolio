@@ -48,7 +48,7 @@ export const TimeOnTaskTimer: React.FC = () => {
         <div className="space-y-4">
           <div className="text-center">
             <div className={`text-2xl font-mono font-bold text-primary transition-all duration-300 ${
-              isActive && !isStopped ? 'blur-md select-none' : ''
+              (isActive && !isStopped) || (isStopped && userGuess === null) ? 'blur-md select-none' : ''
             }`}>
               {formatTime(currentSessionTime)}
             </div>
@@ -82,7 +82,11 @@ export const TimeOnTaskTimer: React.FC = () => {
                     className="w-20 text-center"
                     min="1"
                   />
-                  <Button onClick={handleGuessSubmit} size="sm">
+                  <Button 
+                    onClick={handleGuessSubmit} 
+                    size="sm"
+                    disabled={!guessInput || parseInt(guessInput) <= 0}
+                  >
                     Submit Guess
                   </Button>
                 </div>
