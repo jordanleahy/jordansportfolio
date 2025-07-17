@@ -4,19 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bookmark, ExternalLink, MapPin, Calendar, Building } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface Job {
-  id: string;
-  title: string;
-  company: string;
-  platform: string;
-  location: string;
-  datePosted: string;
-  applicationUrl: string;
-  description: string;
-  type: string;
-  salary?: string;
-}
+import type { Job } from "@/types/job";
 
 interface JobCardProps {
   job: Job;
@@ -70,7 +58,7 @@ export const JobCard = ({ job, isBookmarked, onBookmarkToggle }: JobCardProps) =
                 {job.platform}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                {job.type}
+                {job.job_type}
               </Badge>
               {job.salary && (
                 <Badge variant="outline" className="text-xs">
@@ -83,7 +71,7 @@ export const JobCard = ({ job, isBookmarked, onBookmarkToggle }: JobCardProps) =
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 text-muted-foreground text-xs">
                 <Calendar className="h-3 w-3" />
-                <span>{formatDate(job.datePosted)}</span>
+                <span>{formatDate(job.date_posted)}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -108,7 +96,7 @@ export const JobCard = ({ job, isBookmarked, onBookmarkToggle }: JobCardProps) =
                   asChild
                   className="h-8"
                 >
-                  <a href={job.applicationUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={job.application_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-3 w-3 mr-1" />
                     Apply
                   </a>

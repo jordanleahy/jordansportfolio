@@ -403,6 +403,86 @@ export type Database = {
           },
         ]
       }
+      job_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_bookmarks_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          application_url: string
+          company: string
+          created_at: string | null
+          date_posted: string
+          description: string
+          id: string
+          is_active: boolean | null
+          job_type: string | null
+          location: string
+          platform: string
+          salary: string | null
+          scraped_at: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          application_url: string
+          company: string
+          created_at?: string | null
+          date_posted: string
+          description: string
+          id?: string
+          is_active?: boolean | null
+          job_type?: string | null
+          location: string
+          platform: string
+          salary?: string | null
+          scraped_at?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          application_url?: string
+          company?: string
+          created_at?: string | null
+          date_posted?: string
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          job_type?: string | null
+          location?: string
+          platform?: string
+          salary?: string | null
+          scraped_at?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       offerings: {
         Row: {
           accessionnumber: string

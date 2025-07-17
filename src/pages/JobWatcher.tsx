@@ -2,13 +2,14 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Filter, LogOut, Loader2 } from "lucide-react";
+import { Search, Calendar, Filter, LogOut, Loader2, RefreshCw } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { JobList } from "@/components/jobs/JobList";
-import { mockJobs } from "@/data/mockJobs";
+import { jobService } from "@/services/jobService";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
+import type { Job } from "@/types/job";
 import {
   Select,
   SelectContent,
@@ -23,10 +24,10 @@ const JobWatcher = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date");
-  const [bookmarkedJobs, setBookmarkedJobs] = useState<string[]>(() => {
-    const saved = localStorage.getItem('bookmarked-jobs');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<string[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(false);
+  const [isScrapingJobs, setIsScrapingJobs] = useState(false);
   const { toast } = useToast();
 
   // Auth state management
@@ -60,43 +61,108 @@ const JobWatcher = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Filter and sort jobs based on search and sort preferences
-  const filteredAndSortedJobs = useMemo(() => {
-    let filtered = mockJobs;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(job => 
-        job.title.toLowerCase().includes(query) ||
-        job.company.toLowerCase().includes(query)
-      );
+  // Load jobs and bookmarks when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadJobs();
+      loadBookmarks();
     }
+  }, [user]);
 
-    // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "date":
-          return new Date(b.datePosted).getTime() - new Date(a.datePosted).getTime();
-        case "company":
-          return a.company.localeCompare(b.company);
-        case "title":
-          return a.title.localeCompare(b.title);
-        default:
-          return 0;
-      }
-    });
+  const loadJobs = async () => {
+    setIsLoadingJobs(true);
+    try {
+      const fetchedJobs = await jobService.getJobs({
+        search: searchQuery,
+        sortBy: sortBy
+      });
+      setJobs(fetchedJobs);
+    } catch (error) {
+      console.error('Error loading jobs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load jobs. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingJobs(false);
+    }
+  };
 
-    return sorted;
-  }, [searchQuery, sortBy]);
-
-  const handleBookmarkToggle = (jobId: string) => {
-    const newBookmarks = bookmarkedJobs.includes(jobId)
-      ? bookmarkedJobs.filter(id => id !== jobId)
-      : [...bookmarkedJobs, jobId];
+  const loadBookmarks = async () => {
+    if (!user) return;
     
-    setBookmarkedJobs(newBookmarks);
-    localStorage.setItem('bookmarked-jobs', JSON.stringify(newBookmarks));
+    try {
+      const bookmarks = await jobService.getBookmarkedJobs(user.id);
+      setBookmarkedJobs(bookmarks);
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+    }
+  };
+
+  // Reload jobs when search or sort changes
+  useEffect(() => {
+    if (user) {
+      const timeoutId = setTimeout(() => {
+        loadJobs();
+      }, 300); // Debounce search
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchQuery, sortBy, user]);
+
+  const handleBookmarkToggle = async (jobId: string) => {
+    if (!user) return;
+
+    try {
+      const isBookmarked = await jobService.toggleBookmark(user.id, jobId);
+      
+      if (isBookmarked) {
+        setBookmarkedJobs(prev => [...prev, jobId]);
+        toast({
+          title: "Bookmarked",
+          description: "Job added to your bookmarks",
+        });
+      } else {
+        setBookmarkedJobs(prev => prev.filter(id => id !== jobId));
+        toast({
+          title: "Removed",
+          description: "Job removed from bookmarks",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update bookmark. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleScrapeJobs = async () => {
+    setIsScrapingJobs(true);
+    try {
+      const result = await jobService.scrapeJobs();
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message,
+        });
+        // Reload jobs after scraping
+        await loadJobs();
+      }
+    } catch (error) {
+      console.error('Error scraping jobs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to scrape new jobs. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScrapingJobs(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -159,6 +225,23 @@ const JobWatcher = () => {
               </div>
               
               <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={handleScrapeJobs}
+                  disabled={isScrapingJobs}
+                >
+                  {isScrapingJobs ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Scraping...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Get New Jobs
+                    </>
+                  )}
+                </Button>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -189,7 +272,7 @@ const JobWatcher = () => {
             
             {/* Stats */}
             <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-              <span>{filteredAndSortedJobs.length} jobs found</span>
+              <span>{jobs.length} jobs found</span>
               <span>{bookmarkedJobs.length} bookmarked</span>
               <span>Welcome, {user.email}</span>
             </div>
@@ -198,18 +281,38 @@ const JobWatcher = () => {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
-          <JobList 
-            jobs={filteredAndSortedJobs}
-            bookmarkedJobs={bookmarkedJobs}
-            onBookmarkToggle={handleBookmarkToggle}
-          />
+          {isLoadingJobs ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Loading jobs...</p>
+            </div>
+          ) : (
+            <JobList 
+              jobs={jobs}
+              bookmarkedJobs={bookmarkedJobs}
+              onBookmarkToggle={handleBookmarkToggle}
+            />
+          )}
           
-          {filteredAndSortedJobs.length === 0 && (
+          {!isLoadingJobs && jobs.length === 0 && (
             <div className="text-center py-12">
               <div className="text-muted-foreground text-lg mb-2">No jobs found</div>
-              <p className="text-muted-foreground text-sm">
-                Try adjusting your search terms or clearing filters
+              <p className="text-muted-foreground text-sm mb-4">
+                Try adjusting your search terms or get fresh job data
               </p>
+              <Button onClick={handleScrapeJobs} disabled={isScrapingJobs}>
+                {isScrapingJobs ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Getting Jobs...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Get New Jobs
+                  </>
+                )}
+              </Button>
             </div>
           )}
         </div>

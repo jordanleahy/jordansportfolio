@@ -1,5 +1,6 @@
 import React from "react";
-import { JobCard, Job } from "./JobCard";
+import { JobCard } from "./JobCard";
+import type { Job } from "@/types/job";
 
 interface JobListProps {
   jobs: Job[];
