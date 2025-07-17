@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { FFmpeg } from "https://esm.sh/@ffmpeg/ffmpeg@0.12.10";
-import { toBlobURL } from "https://esm.sh/@ffmpeg/util@0.12.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +8,9 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const cloudinaryCloudName = Deno.env.get('CLOUDINARY_CLOUD_NAME')!;
+const cloudinaryApiKey = Deno.env.get('CLOUDINARY_API_KEY')!;
+const cloudinaryApiSecret = Deno.env.get('CLOUDINARY_API_SECRET')!;
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
@@ -34,53 +35,81 @@ serve(async (req: Request) => {
 
     console.log('Processing audio file:', audioFile.name, 'for post:', postId);
 
-    // Initialize FFmpeg
-    const ffmpeg = new FFmpeg();
-    
-    // Load FFmpeg core
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-    });
-
-    console.log('FFmpeg loaded successfully');
-
-    // Convert audio file to Uint8Array
+    // Convert audio file to array buffer for Cloudinary upload
     const audioArrayBuffer = await audioFile.arrayBuffer();
     const audioData = new Uint8Array(audioArrayBuffer);
 
-    // Write audio file to FFmpeg filesystem
-    const inputFileName = 'input_audio.wav';
-    const outputFileName = 'output_video.mp4';
+    // Create form data for Cloudinary upload
+    const cloudinaryFormData = new FormData();
+    cloudinaryFormData.append('file', new Blob([audioData], { type: audioFile.type }));
+    cloudinaryFormData.append('upload_preset', 'unsigned'); // You may need to set this up in Cloudinary
+    cloudinaryFormData.append('resource_type', 'video');
     
-    await ffmpeg.writeFile(inputFileName, audioData);
+    // Add transformations to create video with waveform visualization
+    const transformation = 'f_mp4,fl_waveform,c_scale,w_1280,h_720,b_black,ac_aac,vc_h264';
+    cloudinaryFormData.append('transformation', transformation);
 
-    // Create a video with a static background and the audio
-    // This creates a proper MP4 video file with both video and audio streams
-    await ffmpeg.exec([
-      '-f', 'lavfi',
-      '-i', 'color=c=black:size=1280x720:duration=10',
-      '-i', inputFileName,
-      '-c:v', 'libx264',
-      '-c:a', 'aac',
-      '-b:a', '128k',
-      '-pix_fmt', 'yuv420p',
-      '-r', '30',
-      '-shortest',
-      '-y',
-      outputFileName
-    ]);
+    // Create authentication string for Cloudinary
+    const timestamp = Math.round(Date.now() / 1000);
+    const paramsToSign = `timestamp=${timestamp}&upload_preset=unsigned`;
+    
+    // Generate signature using crypto
+    const encoder = new TextEncoder();
+    const data = encoder.encode(paramsToSign + cloudinaryApiSecret);
+    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    console.log('Video generation completed');
+    cloudinaryFormData.append('api_key', cloudinaryApiKey);
+    cloudinaryFormData.append('timestamp', timestamp.toString());
+    cloudinaryFormData.append('signature', signature);
 
-    // Read the generated video file
-    const videoData = await ffmpeg.readFile(outputFileName);
-    const videoUint8Array = new Uint8Array(videoData as ArrayBuffer);
+    console.log('Uploading to Cloudinary for video generation...');
+
+    // Upload to Cloudinary
+    const cloudinaryResponse = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/video/upload`,
+      {
+        method: 'POST',
+        body: cloudinaryFormData
+      }
+    );
+
+    if (!cloudinaryResponse.ok) {
+      const errorText = await cloudinaryResponse.text();
+      console.error('Cloudinary upload failed:', errorText);
+      return new Response(`Cloudinary upload failed: ${errorText}`, { 
+        status: 500, 
+        headers: corsHeaders 
+      });
+    }
+
+    const cloudinaryResult = await cloudinaryResponse.json();
+    console.log('Cloudinary upload successful, public_id:', cloudinaryResult.public_id);
+
+    // Construct the video URL with transformations
+    const videoUrl = `https://res.cloudinary.com/${cloudinaryCloudName}/video/upload/${transformation}/${cloudinaryResult.public_id}.mp4`;
+    
+    console.log('Video URL generated:', videoUrl);
+
+    // Download the processed video from Cloudinary
+    const videoResponse = await fetch(videoUrl);
+    if (!videoResponse.ok) {
+      console.error('Failed to download video from Cloudinary');
+      return new Response('Failed to download processed video', { 
+        status: 500, 
+        headers: corsHeaders 
+      });
+    }
+
+    const videoArrayBuffer = await videoResponse.arrayBuffer();
+    const videoUint8Array = new Uint8Array(videoArrayBuffer);
+
+    console.log('Video downloaded from Cloudinary, size:', videoUint8Array.length);
 
     // Create a unique filename for the video
-    const timestamp = Date.now();
-    const videoFileName = `audio-video-${postId}-${timestamp}.mp4`;
+    const fileTimestamp = Date.now();
+    const videoFileName = `audio-video-${postId}-${fileTimestamp}.mp4`;
     const videoPath = `audio-videos/${videoFileName}`;
 
     // Upload the real video file
@@ -104,12 +133,12 @@ serve(async (req: Request) => {
       .from('general')
       .getPublicUrl(videoPath);
 
-    const videoUrl = urlData.publicUrl;
+    const finalVideoUrl = urlData.publicUrl;
 
     // Update the post with the video URL
     const { error: updateError } = await supabase
       .from('social_media_posts')
-      .update({ audio_to_video_url: videoUrl })
+      .update({ audio_to_video_url: finalVideoUrl })
       .eq('id', postId);
 
     if (updateError) {
@@ -124,7 +153,7 @@ serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      videoUrl: videoUrl,
+      videoUrl: finalVideoUrl,
       message: 'Audio converted to video successfully'
     }), {
       status: 200,
