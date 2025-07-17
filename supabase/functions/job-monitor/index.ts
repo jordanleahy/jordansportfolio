@@ -401,6 +401,27 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     console.error('[INSERT] Failed to connect to database:', error);
     throw error;
   }
+
+  // Check authentication status
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  
+  console.log('[AUTH] Creating new service client for insertion');
+  
+  // Create a fresh client with explicit service role configuration
+  const serviceClient = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    },
+    global: {
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'apikey': supabaseServiceKey,
+        'X-Client-Info': 'supabase-edge-runtime/1.0'
+      }
+    }
+  });
   
   const jobData = jobs.map(job => ({
     title: job.title,
@@ -414,19 +435,40 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     is_active: true
   }));
 
-  console.log('[INSERT] Job data prepared:', JSON.stringify(jobData.slice(0, 2), null, 2)); // Log first 2 jobs only
+  console.log('[INSERT] Job data prepared:', JSON.stringify(jobData.slice(0, 2), null, 2));
 
   try {
-    const { data, error } = await supabase
+    // Try with service client first
+    console.log('[INSERT] Attempting insertion with service role client');
+    const { data, error } = await serviceClient
       .from('jobs')
       .insert(jobData)
       .select();
 
     if (error) {
-      console.error('[INSERT] Database insert error:', error);
-      console.error('[INSERT] Error code:', error.code);
-      console.error('[INSERT] Error message:', error.message);
-      console.error('[INSERT] Error details:', error.details);
+      console.error('[INSERT] Service client insert error:', error);
+      
+      // If service client fails, try bypassing RLS by creating a direct SQL function call
+      console.log('[INSERT] Attempting fallback insertion method');
+      
+      // Insert jobs one by one to get better error reporting
+      for (let i = 0; i < jobData.length; i++) {
+        const job = jobData[i];
+        console.log(`[INSERT] Inserting job ${i + 1}/${jobData.length}: ${job.title} at ${job.company}`);
+        
+        const { data: singleJobData, error: singleJobError } = await serviceClient
+          .from('jobs')
+          .insert([job])
+          .select();
+          
+        if (singleJobError) {
+          console.error(`[INSERT] Failed to insert job ${i + 1}:`, singleJobError);
+          console.error(`[INSERT] Job data:`, job);
+        } else {
+          console.log(`[INSERT] Successfully inserted job ${i + 1}:`, singleJobData?.[0]?.title);
+        }
+      }
+      
       throw error;
     }
 
@@ -434,7 +476,12 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     console.log('[INSERT] First inserted job:', data?.[0] ? JSON.stringify(data[0], null, 2) : 'No data returned');
     
   } catch (error) {
-    console.error('[INSERT] Unexpected error during insertion:', error);
+    console.error('[INSERT] All insertion methods failed:', error);
+    
+    // Final attempt: log the exact SQL that would be generated
+    console.log('[INSERT] Sample job data for debugging:');
+    console.log(JSON.stringify(jobData[0], null, 2));
+    
     throw error;
   }
 }
