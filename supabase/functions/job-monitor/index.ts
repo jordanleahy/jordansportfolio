@@ -83,53 +83,154 @@ async function safeFetch(url, options = {}) {
   }
 }
 
-// Simple regex-based HTML parsing to avoid DOMParser issues
+// Check if a date string represents a job posted within the last 7 days
+function isRecentJob(dateText) {
+  if (!dateText) return true; // If no date found, include it
+  
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  // Common date patterns
+  const patterns = [
+    /(\d{1,2})\/(\d{1,2})\/(\d{4})/,  // MM/DD/YYYY
+    /(\d{4})-(\d{1,2})-(\d{1,2})/,    // YYYY-MM-DD
+    /(\d{1,2})\s+days?\s+ago/i,       // "X days ago"
+    /(\d{1,2})\s+hours?\s+ago/i,      // "X hours ago"
+    /(today|yesterday)/i,             // "today" or "yesterday"
+    /(just\s+now|moments?\s+ago)/i    // "just now" or "moments ago"
+  ];
+  
+  const text = dateText.toLowerCase().trim();
+  
+  // Check for relative dates
+  if (text.includes('today') || text.includes('just now') || text.includes('moment')) {
+    return true;
+  }
+  
+  if (text.includes('yesterday')) {
+    return true;
+  }
+  
+  const daysMatch = text.match(/(\d+)\s+days?\s+ago/);
+  if (daysMatch) {
+    return parseInt(daysMatch[1]) <= 7;
+  }
+  
+  const hoursMatch = text.match(/(\d+)\s+hours?\s+ago/);
+  if (hoursMatch) {
+    return true; // All jobs posted in hours are within 7 days
+  }
+  
+  // Try to parse absolute dates
+  try {
+    const date = new Date(dateText);
+    if (!isNaN(date.getTime())) {
+      return date >= sevenDaysAgo;
+    }
+  } catch (e) {
+    // If parsing fails, include the job
+  }
+  
+  return true; // Default to including if we can't determine the date
+}
+
+// Enhanced regex-based HTML parsing for any job type with date filtering
 function parseJobsWithRegex(html, config, targetName) {
   const jobs = [];
   
-  // Common patterns for different ATS platforms
-  const patterns = {
-    greenhouse: {
-      container: /<div[^>]*class="[^"]*opening[^"]*"[^>]*>(.*?)<\/div>/gs,
-      title: /<a[^>]*>(.*?)<\/a>/s,
-      location: /<div[^>]*class="[^"]*location[^"]*"[^>]*>(.*?)<\/div>/s,
-      link: /<a[^>]*href="([^"]*)"[^>]*>/s
-    },
-    lever: {
-      container: /<div[^>]*class="[^"]*posting[^"]*"[^>]*>(.*?)<\/div>/gs,
-      title: /<h5[^>]*>(.*?)<\/h5>/s,
-      location: /<span[^>]*class="[^"]*location[^"]*"[^>]*>(.*?)<\/span>/s,
-      link: /<a[^>]*href="([^"]*)"[^>]*>/s
-    },
-    default: {
-      container: /<div[^>]*(?:class="[^"]*(?:job|opening|posting)[^"]*")[^>]*>(.*?)<\/div>/gs,
-      title: /<(?:h[1-6]|a)[^>]*>(.*?)<\/(?:h[1-6]|a)>/s,
-      location: /<[^>]*(?:class="[^"]*location[^"]*")[^>]*>(.*?)<\/[^>]*>/s,
-      link: /<a[^>]*href="([^"]*)"[^>]*>/s
+  // More comprehensive patterns for finding job containers
+  const containerPatterns = [
+    // Standard job containers
+    /<(?:div|article|li)[^>]*class="[^"]*(?:job|opening|posting|position|role|card|item)[^"]*"[^>]*>(.*?)<\/(?:div|article|li)>/gs,
+    // Data attributes
+    /<(?:div|article|li)[^>]*(?:data-)?(?:job|position|role|id)[^>]*>(.*?)<\/(?:div|article|li)>/gs,
+    // Links to job pages
+    /<a[^>]*href="[^"]*(?:job|position|role|career)[^"]*"[^>]*>(.*?)<\/a>/gs,
+    // Table rows (some sites use tables)
+    /<tr[^>]*class="[^"]*(?:job|opening)[^"]*"[^>]*>(.*?)<\/tr>/gs
+  ];
+  
+  let containers = [];
+  for (const pattern of containerPatterns) {
+    containers = [...html.matchAll(pattern)];
+    if (containers.length > 0) {
+      console.log(`Found ${containers.length} job containers using pattern`);
+      break;
     }
-  };
+  }
   
-  const platform = config.platform || 'default';
-  const pattern = patterns[platform] || patterns.default;
-  
-  const containers = [...html.matchAll(pattern.container)];
   console.log(`Found ${containers.length} job containers for ${targetName} using regex`);
   
-  for (let i = 0; i < Math.min(containers.length, 50); i++) { // Limit to 50 jobs per target
+  for (let i = 0; i < Math.min(containers.length, 100); i++) { // Increased limit for broader search
     const container = containers[i][1];
     
-    const titleMatch = container.match(pattern.title);
-    const locationMatch = container.match(pattern.location);
-    const linkMatch = container.match(pattern.link);
+    // Extract job details with multiple fallback patterns
+    const titlePatterns = [
+      /<(?:h[1-6])[^>]*>(.*?)<\/h[1-6]>/s,
+      /<a[^>]*>(.*?)<\/a>/s,
+      /<span[^>]*class="[^"]*(?:title|name)[^"]*"[^>]*>(.*?)<\/span>/s,
+      /<div[^>]*class="[^"]*(?:title|name)[^"]*"[^>]*>(.*?)<\/div>/s
+    ];
     
-    if (titleMatch) {
-      const title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-      const location = locationMatch ? locationMatch[1].replace(/<[^>]*>/g, '').trim() : 'Not specified';
-      const link = linkMatch ? linkMatch[1] : '';
-      
-      if (title && title.length > 2) {
-        jobs.push({ title, location, link });
+    const locationPatterns = [
+      /<[^>]*class="[^"]*location[^"]*"[^>]*>(.*?)<\/[^>]*>/s,
+      /<[^>]*class="[^"]*address[^"]*"[^>]*>(.*?)<\/[^>]*>/s,
+      /<[^>]*class="[^"]*city[^"]*"[^>]*>(.*?)<\/[^>]*>/s
+    ];
+    
+    const linkPatterns = [
+      /<a[^>]*href="([^"]*)"[^>]*>/s
+    ];
+    
+    const datePatterns = [
+      /<[^>]*class="[^"]*(?:date|posted|time)[^"]*"[^>]*>(.*?)<\/[^>]*>/s,
+      /<time[^>]*>(.*?)<\/time>/s,
+      /<span[^>]*class="[^"]*(?:ago|posted)[^"]*"[^>]*>(.*?)<\/span>/s
+    ];
+    
+    // Find title
+    let title = '';
+    for (const pattern of titlePatterns) {
+      const match = container.match(pattern);
+      if (match) {
+        title = match[1].replace(/<[^>]*>/g, '').trim();
+        if (title.length > 2) break;
       }
+    }
+    
+    // Find location
+    let location = 'Remote';
+    for (const pattern of locationPatterns) {
+      const match = container.match(pattern);
+      if (match) {
+        location = match[1].replace(/<[^>]*>/g, '').trim();
+        if (location.length > 0) break;
+      }
+    }
+    
+    // Find link
+    let link = '';
+    for (const pattern of linkPatterns) {
+      const match = container.match(pattern);
+      if (match) {
+        link = match[1];
+        break;
+      }
+    }
+    
+    // Find date and check if recent
+    let dateText = '';
+    for (const pattern of datePatterns) {
+      const match = container.match(pattern);
+      if (match) {
+        dateText = match[1].replace(/<[^>]*>/g, '').trim();
+        break;
+      }
+    }
+    
+    // Only include jobs that have a title and are recent (last 7 days)
+    if (title && title.length > 2 && isRecentJob(dateText)) {
+      jobs.push({ title, location, link, dateText });
     }
   }
   
