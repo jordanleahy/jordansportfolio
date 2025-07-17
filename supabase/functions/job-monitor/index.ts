@@ -191,7 +191,10 @@ async function scrapeJobsFromTarget(target: JobTarget, supabase: any): Promise<S
     }
 
     const html = await response.text();
+    console.log(`HTML length: ${html.length} characters`);
+    
     const jobs = await parseJobsFromHTML(html, target);
+    console.log(`Parsed ${jobs.length} jobs from HTML`);
 
     // Enhanced filtering for design and related roles across all companies
     const relevantJobs = jobs.filter(job => {
@@ -213,12 +216,21 @@ async function scrapeJobsFromTarget(target: JobTarget, supabase: any): Promise<S
         'react', 'vue', 'angular', 'typescript', 'javascript', 'web developer'
       ];
       
-      return designTerms.some(term => title.includes(term) || description.includes(term)) ||
-             productTerms.some(term => title.includes(term) || description.includes(term));
+      const isRelevant = designTerms.some(term => title.includes(term) || description.includes(term)) ||
+                        productTerms.some(term => title.includes(term) || description.includes(term));
+      
+      if (isRelevant) {
+        console.log(`Job "${job.title}" at ${job.company} passed filter`);
+      }
+      
+      return isRelevant;
     });
+
+    console.log(`${relevantJobs.length} jobs passed filtering out of ${jobs.length} total`);
 
     // Check which jobs are new (not already in database)
     const newJobs = await filterNewJobs(relevantJobs, supabase);
+    console.log(`${newJobs.length} jobs are new out of ${relevantJobs.length} relevant jobs`);
 
     // Insert new jobs into database
     if (newJobs.length > 0) {
@@ -243,6 +255,8 @@ async function parseJobsFromHTML(html: string, target: JobTarget): Promise<Scrap
 
   const config = ATS_CONFIGS[target.ats_platform] || ATS_CONFIGS.greenhouse;
   const jobElements = doc.querySelectorAll(target.selector || config.selector);
+  console.log(`Found ${jobElements.length} job elements using selector: ${target.selector || config.selector}`);
+  
   const jobs: ScrapedJob[] = [];
 
   jobElements.forEach(element => {
