@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { FFmpeg } from "https://esm.sh/@ffmpeg/ffmpeg@0.12.10";
+import { toBlobURL } from "https://esm.sh/@ffmpeg/util@0.12.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,25 +34,59 @@ serve(async (req: Request) => {
 
     console.log('Processing audio file:', audioFile.name, 'for post:', postId);
 
-    // For now, we'll create a simple video with a static background and audio
-    // This is a simplified implementation - in production you'd want to use FFmpeg or similar
+    // Initialize FFmpeg
+    const ffmpeg = new FFmpeg();
     
+    // Load FFmpeg core
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+
+    console.log('FFmpeg loaded successfully');
+
+    // Convert audio file to Uint8Array
+    const audioArrayBuffer = await audioFile.arrayBuffer();
+    const audioData = new Uint8Array(audioArrayBuffer);
+
+    // Write audio file to FFmpeg filesystem
+    const inputFileName = 'input_audio.wav';
+    const outputFileName = 'output_video.mp4';
+    
+    await ffmpeg.writeFile(inputFileName, audioData);
+
+    // Create a video with a static background and the audio
+    // This creates a proper MP4 video file with both video and audio streams
+    await ffmpeg.exec([
+      '-f', 'lavfi',
+      '-i', 'color=c=black:size=1280x720:duration=10',
+      '-i', inputFileName,
+      '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-pix_fmt', 'yuv420p',
+      '-r', '30',
+      '-shortest',
+      '-y',
+      outputFileName
+    ]);
+
+    console.log('Video generation completed');
+
+    // Read the generated video file
+    const videoData = await ffmpeg.readFile(outputFileName);
+    const videoUint8Array = new Uint8Array(videoData as ArrayBuffer);
+
     // Create a unique filename for the video
     const timestamp = Date.now();
     const videoFileName = `audio-video-${postId}-${timestamp}.mp4`;
     const videoPath = `audio-videos/${videoFileName}`;
 
-    // Since we can't easily do video processing in edge functions without additional setup,
-    // we'll simulate the conversion process and store the audio file with a video extension
-    // In a real implementation, you would use FFmpeg.wasm or a video processing service
-    
-    const audioArrayBuffer = await audioFile.arrayBuffer();
-    const audioUint8Array = new Uint8Array(audioArrayBuffer);
-
-    // Upload the "video" (for now just the audio file with video metadata)
+    // Upload the real video file
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('general')
-      .upload(videoPath, audioUint8Array, {
+      .upload(videoPath, videoUint8Array, {
         contentType: 'video/mp4',
         upsert: true
       });
