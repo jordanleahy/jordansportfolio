@@ -41,7 +41,7 @@ const AscertainToTheMoon = () => {
           <Card>
             <CardContent className="p-8">
               <div className="prose prose-lg max-w-none">
-                <h2 className="text-2xl font-semibold mb-6">Dear Ascertain Team,</h2>
+                <h2 className="text-2xl font-semibold mb-6">Dear Hoshi & Eli,</h2>
                 
                 <div className="space-y-6 text-muted-foreground leading-relaxed">
                   <p>
