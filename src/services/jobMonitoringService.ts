@@ -23,9 +23,9 @@ export const jobMonitoringService = {
       .from('job_monitoring_config')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       console.error('Error fetching monitoring config:', error);
       throw error;
     }

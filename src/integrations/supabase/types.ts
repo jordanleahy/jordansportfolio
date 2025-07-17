@@ -509,7 +509,7 @@ export type Database = {
           {
             foreignKeyName: "job_monitoring_state_target_id_fkey"
             columns: ["target_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "job_targets"
             referencedColumns: ["id"]
           },
