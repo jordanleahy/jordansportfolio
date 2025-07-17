@@ -47,7 +47,7 @@ const AscertainToTheMoon = () => {
                     </p>
                     
                     <p>
-                      More specifically relevant to your work, I built a comprehensive <a href="/cases/case4" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">prior authorization workflow system</a> that reduced approval times from 3 days to 5 minutes through intelligent automation. This system processed thousands of authorizations while maintaining compliance—the same type of administrative workflow automation that's core to Ascertain's value proposition for health systems like Northwell.
+                      More specifically relevant to your work, I built a comprehensive <a href="/cases/case4" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">prior authorization workflow system</a> that reduced response times from 3 days to 5 minutes through intelligent automation. This system processed thousands of authorizations while maintaining compliance—the same type of administrative workflow automation that's core to Ascertain's value proposition for health systems like Northwell.
                     </p>
                     
                     <p>
