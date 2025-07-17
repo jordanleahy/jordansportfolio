@@ -170,16 +170,25 @@ export const PostCard = ({
 
         {/* Action Buttons */}
         <div className="space-y-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onGeneratePrompt(post)}
-            className="w-full"
-          >
-            <Lightbulb className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onGeneratePrompt(post)}
+              className="flex-1"
+            >
+              <Lightbulb className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+          </div>
           
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -207,14 +216,6 @@ export const PostCard = ({
               ) : (
                 <ChevronDown className="h-4 w-4 ml-1" />
               )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              Blog
             </Button>
           </div>
         </div>
