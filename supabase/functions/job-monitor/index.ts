@@ -346,6 +346,8 @@ async function filterNewJobs(jobs: ScrapedJob[], supabase: any): Promise<Scraped
 }
 
 async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
+  console.log(`Attempting to insert ${jobs.length} jobs`);
+  
   const jobData = jobs.map(job => ({
     title: job.title,
     company: job.company,
@@ -358,16 +360,21 @@ async function insertJobs(jobs: ScrapedJob[], supabase: any): Promise<void> {
     is_active: true
   }));
 
-  const { error } = await supabase
+  console.log('Job data to insert:', JSON.stringify(jobData, null, 2));
+
+  const { data, error } = await supabase
     .from('jobs')
-    .insert(jobData);
+    .insert(jobData)
+    .select();
 
   if (error) {
     console.error('Error inserting jobs:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     throw error;
   }
 
-  console.log(`Inserted ${jobs.length} new jobs`);
+  console.log(`Successfully inserted ${jobs.length} new jobs`);
+  console.log('Inserted data:', JSON.stringify(data, null, 2));
 }
 
 async function updateMonitoringState(
