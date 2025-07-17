@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 const AscertainToTheMoon = () => {
   return <>
       <Helmet>
@@ -36,6 +37,18 @@ const AscertainToTheMoon = () => {
                     Your browser does not support the video tag.
                   </video>
                 </AspectRatio>
+                
+                {/* QR Code */}
+                <div className="mt-4 text-center">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`}
+                    alt="QR Code for this page"
+                    className="mx-auto rounded-lg border border-muted-foreground/20"
+                    width={150}
+                    height={150}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">Scan to share this page</p>
+                </div>
               </CardContent>
             </Card>
 
@@ -83,6 +96,11 @@ const AscertainToTheMoon = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Time on Task Timer */}
+          <div className="mb-12">
+            <TimeOnTaskTimer />
           </div>
 
           {/* Google Calendar Scheduling */}
