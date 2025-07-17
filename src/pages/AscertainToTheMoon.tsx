@@ -75,7 +75,7 @@ const AscertainToTheMoon = () => {
                     Jordan Leahy
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Healthcare UX Designer & AI Solutions Architect
+                    jordanwilliamleahy.com
                   </p>
                 </div>
               </div>
