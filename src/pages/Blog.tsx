@@ -2,16 +2,18 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Calendar, ArrowRight, Plus, Edit } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, ArrowRight, Plus, Edit, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
+import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 const Blog = () => {
   const [user, setUser] = useState<User | null>(null);
+  const { isAdmin } = useUserRole();
   
   // Use TanStack Query for blog posts
   const { 
@@ -67,12 +69,22 @@ const Blog = () => {
           </Link>
           <div className="flex items-center gap-2">
             {user && (
-              <Link to="/blog-editor">
-                <Button variant="outline" size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Post
-                </Button>
-              </Link>
+              <>
+                <Link to="/blog-editor">
+                  <Button variant="outline" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Post
+                  </Button>
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin/blog">
+                    <Button variant="outline" size="sm">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+              </>
             )}
             <Button variant="outline" size="sm">
               <a href="#contact">Contact Jordan</a>

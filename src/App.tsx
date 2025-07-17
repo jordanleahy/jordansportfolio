@@ -15,6 +15,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogDetail = lazy(() => import("./pages/BlogDetail"));
 const BlogEditor = lazy(() => import("./pages/BlogEditor"));
+const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const Case1 = lazy(() => import("./pages/cases/Case1"));
 const Case4 = lazy(() => import("./pages/cases/Case4"));
 const Case3 = lazy(() => import("./pages/cases/Case3"));
@@ -98,6 +99,7 @@ const App = () => (
                   <Route path="/blog/:slug" element={<BlogDetail />} />
                   <Route path="/blog-editor" element={<BlogEditor />} />
                   <Route path="/blog-editor/:id" element={<BlogEditor />} />
+                  <Route path="/admin/blog" element={<AdminBlog />} />
                   <Route path="/cases/case1" element={<Case1 />} />
                   <Route path="/cases/case4" element={<Case4 />} />
                   <Route path="/cases/case3" element={<Case3 />} />

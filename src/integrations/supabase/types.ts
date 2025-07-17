@@ -997,6 +997,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       mv_offerings_enriched: {
@@ -1068,6 +1089,13 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
       insert_category_content: {
         Args: { category_name: string; posts_data: Json }
         Returns: number
@@ -1094,6 +1122,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       detection_method: "manual" | "voice_pattern" | "hybrid"
       event_status: "upcoming" | "in-progress" | "completed" | "cancelled"
       post_status: "draft" | "scheduled" | "published"
@@ -1224,6 +1253,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       detection_method: ["manual", "voice_pattern", "hybrid"],
       event_status: ["upcoming", "in-progress", "completed", "cancelled"],
       post_status: ["draft", "scheduled", "published"],
