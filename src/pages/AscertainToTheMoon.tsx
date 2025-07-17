@@ -21,7 +21,7 @@ const AscertainToTheMoon = () => {
           {/* Video and Cover Letter Section - Side by side on desktop */}
           <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
             {/* Video Section */}
-            <Card>
+            <Card className="bg-transparent border-none shadow-none">
               <CardContent className="p-0">
                 <AspectRatio ratio={9/16}>
                   <video 
