@@ -107,6 +107,105 @@ const AscertainToTheMoon = () => {
               {/* end Google Calendar Appointment Scheduling */}
             </CardContent>
           </Card>
+
+          {/* Healthcare Project Showcase */}
+          <div className="mt-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Related Healthcare AI Experience</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Healthcare AI projects that demonstrate my experience with workflow automation and clinical decision support systems
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Inpatient Revenue Cycle Management */}
+              <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl mb-2">Inpatient Revenue Cycle Management</CardTitle>
+                  <CardDescription className="text-sm">
+                    Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#RCM</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#LLM</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#ICD-10</span>
+                  </div>
+                  <button 
+                    onClick={() => window.open('/cases/case1', '_blank')}
+                    className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-2 group-hover:gap-3 transition-all"
+                  >
+                    View Case Study
+                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Drug Prior Auth and Validation */}
+              <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-6 h-6 bg-cyan-600 rounded-lg flex items-center justify-center">
+                      <div className="w-3 h-3 bg-white rounded-sm"></div>
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl mb-2">Drug Prior Auth and Validation</CardTitle>
+                  <CardDescription className="text-sm">
+                    Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#PriorAuth</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#ML</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#Workflow</span>
+                  </div>
+                  <button 
+                    onClick={() => window.open('/cases/case4', '_blank')}
+                    className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-2 group-hover:gap-3 transition-all"
+                  >
+                    View Case Study
+                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Denial and Appeal Resolution */}
+              <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
+                    <div className="w-6 h-6 bg-slate-600 rounded flex items-center justify-center">
+                      <div className="w-3 h-3 border border-white"></div>
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl mb-2">Denial and Appeal Resolution</CardTitle>
+                  <CardDescription className="text-sm">
+                    Designed a denial and appeal resolution application for managing denials, including the drafting of templates and sending to payer.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#Appeals</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#Research</span>
+                    <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">#UX</span>
+                  </div>
+                  <button 
+                    onClick={() => window.open('/cases/case3', '_blank')}
+                    className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-2 group-hover:gap-3 transition-all"
+                  >
+                    View Case Study
+                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </PageLayout>
