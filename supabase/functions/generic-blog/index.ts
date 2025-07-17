@@ -132,9 +132,18 @@ Requirements:
     // Parse the generated JSON content
     let blogContent;
     try {
-      blogContent = JSON.parse(generatedContent);
+      // Remove markdown code block formatting if present
+      let cleanContent = generatedContent.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      
+      blogContent = JSON.parse(cleanContent);
     } catch (error) {
       console.error('Failed to parse generated content:', generatedContent);
+      console.error('Parse error:', error.message);
       throw new Error('Failed to parse generated content');
     }
 
