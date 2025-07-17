@@ -147,9 +147,24 @@ function parseJobsWithRegex(html, config, targetName) {
   
   // For Workable specifically, look for job listings in the search results
   if (config.platform === 'workable') {
-    // More robust pattern to find job view links
-    const jobLinkPattern = /href="(https:\/\/jobs\.workable\.com\/view\/[^"]+)"[^>]*>([^<]+)</g;
-    const jobMatches = [...html.matchAll(jobLinkPattern)];
+    // Debug: log a sample of the HTML to see the actual structure
+    console.log(`Workable HTML sample (first 2000 chars): ${html.substring(0, 2000)}`);
+    console.log(`Workable HTML sample (around middle): ${html.substring(html.length/2, html.length/2 + 1000)}`);
+    
+    // Try multiple patterns to find job links
+    const patterns = [
+      /href="(https:\/\/jobs\.workable\.com\/view\/[^"]+)"[^>]*>([^<]+)/g,
+      /href="([^"]*\/view\/[^"]*)"[^>]*>([^<]+)/g,
+      /<a[^>]*href="([^"]*view\/[^"]*)"[^>]*>([^<]*)<\/a>/g,
+      /jobs\.workable\.com\/view\/[\w-]+/g
+    ];
+    
+    let jobMatches = [];
+    for (let i = 0; i < patterns.length; i++) {
+      jobMatches = [...html.matchAll(patterns[i])];
+      console.log(`Pattern ${i + 1} found ${jobMatches.length} matches`);
+      if (jobMatches.length > 0) break;
+    }
     console.log(`Found ${jobMatches.length} Workable job links`);
     
     for (const match of jobMatches) {
