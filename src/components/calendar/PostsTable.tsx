@@ -809,7 +809,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     <div 
                       className="cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
-                      title="Click to upload 16:9 video"
+                      title="Click to upload 9:16 video"
                     >
                        {post.image_9_16_url ? (
                         <ImageHoverOverlay
