@@ -45,7 +45,7 @@ export const TimeOnTaskTimer: React.FC = () => {
             {/* Stop Button */}
             {isActive && !isStopped && <Button onClick={stopSession} size="sm" className="mt-2" variant="destructive">
                 <Square className="h-3 w-3 mr-1" />
-                Stop Session
+                Stop
               </Button>}
             
             {/* Guess Input */}
