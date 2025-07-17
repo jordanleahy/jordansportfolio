@@ -18,6 +18,8 @@ export const useTimeOnTask = () => {
   const [totalTime, setTotalTime] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [isActive, setIsActive] = useState(true);
+  const [isStopped, setIsStopped] = useState(false);
+  const [userGuess, setUserGuess] = useState<number | null>(null);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartRef = useRef<number>(Date.now());
@@ -163,12 +165,32 @@ export const useTimeOnTask = () => {
     return Math.floor(totalTime / sessionCount);
   };
 
+  const stopSession = () => {
+    setIsStopped(true);
+    setIsActive(false);
+    pauseTimer();
+  };
+
+  const submitGuess = (guess: number) => {
+    setUserGuess(guess);
+    saveSession();
+    // Reset for next session
+    setIsStopped(false);
+    setIsActive(true);
+    setUserGuess(null);
+    sessionStartRef.current = Date.now();
+    setCurrentSessionTime(0);
+    startTimer();
+  };
+
   const resetData = () => {
     localStorage.removeItem('timeOnTask');
     sessionStorage.removeItem('currentSession');
     setCurrentSessionTime(0);
     setTotalTime(0);
     setSessionCount(0);
+    setIsStopped(false);
+    setUserGuess(null);
     sessionStartRef.current = Date.now();
   };
 
@@ -177,8 +199,12 @@ export const useTimeOnTask = () => {
     totalTime,
     sessionCount,
     isActive,
+    isStopped,
+    userGuess,
     formatTime,
     getAverageSessionTime,
-    resetData
+    resetData,
+    stopSession,
+    submitGuess
   };
 };

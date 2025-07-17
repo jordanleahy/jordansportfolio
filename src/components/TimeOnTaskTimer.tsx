@@ -1,19 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, RotateCcw, Activity } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Clock, RotateCcw, Activity, Square } from 'lucide-react';
 import { useTimeOnTask } from '@/hooks/useTimeOnTask';
 
 export const TimeOnTaskTimer: React.FC = () => {
+  const [guessInput, setGuessInput] = useState('');
+  
   const {
     currentSessionTime,
     totalTime,
     sessionCount,
     isActive,
+    isStopped,
+    userGuess,
     formatTime,
     getAverageSessionTime,
-    resetData
+    resetData,
+    stopSession,
+    submitGuess
   } = useTimeOnTask();
+
+  const handleGuessSubmit = () => {
+    const guess = parseInt(guessInput);
+    if (!isNaN(guess) && guess > 0) {
+      submitGuess(guess);
+      setGuessInput('');
+    }
+  };
 
   return (
     <Card className="border border-muted-foreground/20">
@@ -32,10 +47,47 @@ export const TimeOnTaskTimer: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-2xl font-mono font-bold text-primary">
+            <div className={`text-2xl font-mono font-bold text-primary transition-all duration-300 ${
+              isActive && !isStopped ? 'blur-md select-none' : ''
+            }`}>
               {formatTime(currentSessionTime)}
             </div>
             <div className="text-sm text-muted-foreground">Current Session</div>
+            
+            {/* Stop Button */}
+            {isActive && !isStopped && (
+              <Button 
+                onClick={stopSession}
+                size="sm"
+                className="mt-2"
+                variant="destructive"
+              >
+                <Square className="h-3 w-3 mr-1" />
+                Stop Session
+              </Button>
+            )}
+            
+            {/* Guess Input */}
+            {isStopped && (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  How long do you think this session was? (in minutes)
+                </p>
+                <div className="flex gap-2 items-center justify-center">
+                  <Input
+                    type="number"
+                    placeholder="5"
+                    value={guessInput}
+                    onChange={(e) => setGuessInput(e.target.value)}
+                    className="w-20 text-center"
+                    min="1"
+                  />
+                  <Button onClick={handleGuessSubmit} size="sm">
+                    Submit Guess
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="text-center">
