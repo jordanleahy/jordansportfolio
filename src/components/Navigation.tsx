@@ -154,14 +154,6 @@ const Navigation = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate("/agents")}
-                      className="ml-2"
-                    >
-                      Agents
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
                       onClick={handleSignOut}
                       className="ml-2"
                     >
@@ -253,17 +245,6 @@ const Navigation = () => {
                     >
                       <Calendar size={16} className="mr-2" />
                       Calendar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigate("/agents");
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full justify-start mt-1"
-                    >
-                      Agents
                     </Button>
                     <Button
                       variant="outline"
