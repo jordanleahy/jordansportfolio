@@ -180,7 +180,6 @@ serve(async (req) => {
     console.log(`Processing ${targets.length} targets with ${MAX_EXECUTION_TIME}ms time limit`);
     
     let totalNewJobs = 0;
-    const results = [];
 
     // Get existing job fingerprints for duplicate detection (last 1000 jobs only)
     const { data: existingJobs } = await supabase
@@ -269,17 +268,14 @@ serve(async (req) => {
           
           const { data, error } = await supabase
             .from('jobs')
-            .upsert(jobsToInsert, { 
-              onConflict: 'title,company,location',
-              ignoreDuplicates: true 
-            })
+            .insert(jobsToInsert)
             .select('id');
 
           if (error) {
-            console.error(`Error upserting jobs for ${target.name}:`, error);
+            console.error(`Error inserting jobs for ${target.name}:`, error);
           } else {
             insertedCount = data?.length || 0;
-            console.log(`Successfully upserted ${insertedCount} jobs from ${target.name}`);
+            console.log(`Successfully inserted ${insertedCount} jobs from ${target.name}`);
           }
         } else {
           console.log(`No new jobs found for ${target.name}`);
