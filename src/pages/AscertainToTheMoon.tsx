@@ -41,29 +41,41 @@ const AscertainToTheMoon = () => {
           <Card>
             <CardContent className="p-8">
               <div className="prose prose-lg max-w-none">
-                <h2 className="text-2xl font-semibold mb-6">Dear Hiring Team,</h2>
+                <h2 className="text-2xl font-semibold mb-6">Dear Ascertain Team,</h2>
                 
                 <div className="space-y-6 text-muted-foreground leading-relaxed">
                   <p>
-                    Your cover letter content will go here. This is where you can share your 
-                    passion, experience, and why you're the perfect fit for this opportunity.
+                    I understand the challenge you're solving intimately: case managers spending 60% of their time on manual administrative tasks instead of high-impact patient care. As someone who has dedicated my career to designing AI-powered healthcare solutions that reduce administrative burden, I'm excited about the opportunity to help Ascertain reach the moon—and beyond.
                   </p>
                   
                   <p>
-                    Add multiple paragraphs to tell your story, highlight your achievements, 
-                    and demonstrate your enthusiasm for the role.
+                    My experience directly aligns with your mission. I designed and implemented an <a href="/cases/case1" className="text-primary hover:text-primary/80 underline font-medium">AI sepsis detection system</a> that reduced mortality rates by 23% by automating early warning alerts for clinical teams. This project taught me how AI can transform healthcare workflows when thoughtfully integrated into existing systems—exactly what Ascertain is doing with case management.
                   </p>
                   
                   <p>
-                    This page serves as a creative, interactive cover letter that showcases 
-                    both your technical skills and personality.
+                    More specifically relevant to your work, I built a comprehensive <a href="/cases/case4" className="text-primary hover:text-primary/80 underline font-medium">prior authorization workflow system</a> that reduced approval times from 3 days to 5 minutes through intelligent automation. This system processed thousands of authorizations while maintaining compliance—the same type of administrative workflow automation that's core to Ascertain's value proposition for health systems like Northwell.
+                  </p>
+                  
+                  <p>
+                    Throughout my work in Healthcare RCM, I've seen firsthand how the right design can eliminate friction for overworked clinical staff. From CDI dashboards that streamline diagnosis coding to denial management platforms that cut appeal processing from 30 to 10 minutes, I've consistently focused on creating solutions that let healthcare professionals focus on what matters most: patient care.
+                  </p>
+                  
+                  <p>
+                    Your partnership with Deerfield Management and collaboration with the Aegis Digital Consortium demonstrates the thoughtful, strategic approach needed to scale AI in healthcare. I'm particularly excited about how Ascertain is reimagining workflows from the ground up rather than just making existing processes more efficient—this philosophical alignment resonates deeply with my design approach.
+                  </p>
+                  
+                  <p>
+                    I would love to discuss how my experience designing AI-powered healthcare tools can contribute to Ascertain's mission of enabling higher quality patient care, faster care journeys, and more cost-efficient delivery. Let's schedule a conversation about taking Ascertain to the moon together.
                   </p>
                 </div>
 
                 <div className="mt-8 pt-6 border-t">
                   <p className="text-lg font-medium">
                     Best regards,<br />
-                    Your Name
+                    Jordan Leahy
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Healthcare UX Designer & AI Solutions Architect
                   </p>
                 </div>
               </div>
