@@ -1,26 +1,32 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Wand2 } from 'lucide-react';
 import { uploadVideoToStorage, isVideoFile, getSupportedVideoFormats } from '@/utils/videoUpload';
+import { generateAndUploadGif } from '@/utils/gifGeneration';
 import { useToast } from '@/hooks/use-toast';
 
 interface VideoUploadCardProps {
   title: string;
   aspectRatio: string;
   videoUrl?: string;
+  gifUrl?: string;
   onVideoUpload: (url: string) => void;
   onVideoRemove: () => void;
+  onGifGenerated?: (url: string) => void;
 }
 
 const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
   title,
   aspectRatio,
   videoUrl,
+  gifUrl,
   onVideoUpload,
   onVideoRemove,
+  onGifGenerated,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const { toast } = useToast();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +82,28 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
     }
   };
 
+  const handleGenerateGif = async () => {
+    if (!videoUrl || !onGifGenerated) return;
+
+    setIsGeneratingGif(true);
+    try {
+      const gifUrl = await generateAndUploadGif(videoUrl);
+      onGifGenerated(gifUrl);
+      toast({
+        title: "GIF Generated",
+        description: "Video converted to GIF successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "GIF Generation Failed",
+        description: "Failed to convert video to GIF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingGif(false);
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
@@ -83,21 +111,42 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
       </CardHeader>
       <CardContent className="pt-0">
         {videoUrl ? (
-          <div className="relative">
-            <video
-              src={videoUrl}
-              controls
-              className="w-full h-32 object-cover rounded-md bg-muted"
-              style={{ aspectRatio }}
-            />
-            <Button
-              size="sm"
-              variant="destructive"
-              className="absolute top-2 right-2 h-6 w-6 p-0"
-              onClick={onVideoRemove}
-            >
-              <X className="h-3 w-3" />
-            </Button>
+          <div className="space-y-2">
+            <div className="relative">
+              <video
+                src={videoUrl}
+                controls
+                className="w-full h-32 object-cover rounded-md bg-muted"
+                style={{ aspectRatio }}
+              />
+              <Button
+                size="sm"
+                variant="destructive"
+                className="absolute top-2 right-2 h-6 w-6 p-0"
+                onClick={onVideoRemove}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+            {onGifGenerated && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleGenerateGif}
+                  disabled={isGeneratingGif}
+                  className="flex-1"
+                >
+                  <Wand2 className="h-3 w-3 mr-1" />
+                  {isGeneratingGif ? 'Generating...' : 'Create GIF'}
+                </Button>
+              </div>
+            )}
+            {gifUrl && (
+              <div className="text-xs text-muted-foreground">
+                ✓ GIF generated
+              </div>
+            )}
           </div>
         ) : (
           <div className="border-2 border-dashed border-muted-foreground/25 rounded-md p-4 text-center">
