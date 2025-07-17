@@ -13,15 +13,16 @@ export const uploadVideoToStorage = async (
 ): Promise<VideoUploadResult> => {
   try {
     // Validate file type using enhanced detection
-    if (!isVideoFile(file)) {
-      console.log('Upload validation failed for file:', file.name, 'type:', file.type);
-      return { success: false, error: 'Please select a video file' };
+    const validation = isVideoFile(file);
+    if (!validation.isValid) {
+      console.log('Upload validation failed:', validation.reason);
+      return { success: false, error: validation.reason || 'Invalid video file' };
     }
 
-    // Check file size (limit to 50MB)
+    // File size already validated in isVideoFile, but keep as backup
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
-      return { success: false, error: 'Video file size must be less than 50MB' };
+      return { success: false, error: `File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 50MB limit` };
     }
 
     const fileExt = file.name.split('.').pop();
@@ -50,24 +51,66 @@ export const uploadVideoToStorage = async (
   }
 };
 
-export const isVideoFile = (file: File): boolean => {
-  console.log('Checking file type:', file.type, 'for file:', file.name);
+interface VideoValidationResult {
+  isValid: boolean;
+  reason?: string;
+}
+
+export const isVideoFile = (file: File): VideoValidationResult => {
+  console.log('Validating file:', {
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    sizeInMB: (file.size / (1024 * 1024)).toFixed(2)
+  });
   
-  // Check MIME type first
-  if (file.type.startsWith('video/')) {
-    return true;
+  // Get file extension (primary validation for Chrome compatibility)
+  const extension = file.name.toLowerCase().split('.').pop();
+  const videoExtensions = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'm4v', '3gp'];
+  
+  // Primary check: file extension (most reliable in Chrome)
+  const hasValidExtension = videoExtensions.includes(extension || '');
+  
+  // Secondary check: MIME type (when available)
+  const hasValidMimeType = file.type.startsWith('video/');
+  
+  // Chrome-specific handling: some .mp4 files have empty MIME type
+  const isChromeCompatible = hasValidExtension && (hasValidMimeType || file.type === '');
+  
+  console.log('Validation results:', {
+    extension,
+    hasValidExtension,
+    hasValidMimeType,
+    isChromeCompatible,
+    mimeType: file.type || 'empty'
+  });
+  
+  if (!hasValidExtension) {
+    return {
+      isValid: false,
+      reason: `Unsupported file type "${extension}". Please select a video file (${videoExtensions.slice(0, 5).join(', ')}, etc.)`
+    };
   }
   
-  // Fallback: check file extension if MIME type is not detected
-  const extension = file.name.toLowerCase().split('.').pop();
-  const videoExtensions = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'flv', 'wmv'];
+  // File size validation (50MB limit)
+  const maxSize = 50 * 1024 * 1024;
+  if (file.size > maxSize) {
+    return {
+      isValid: false,
+      reason: `File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 50MB limit`
+    };
+  }
   
-  const isVideo = videoExtensions.includes(extension || '');
-  console.log('File extension check:', extension, 'is video:', isVideo);
+  if (file.size === 0) {
+    return {
+      isValid: false,
+      reason: 'File appears to be empty'
+    };
+  }
   
-  return isVideo;
+  return { isValid: true };
 };
 
 export const getSupportedVideoFormats = (): string[] => {
-  return ['.mp4', '.webm', '.ogg', '.avi', '.mov'];
+  return ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
 };

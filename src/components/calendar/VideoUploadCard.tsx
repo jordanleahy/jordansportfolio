@@ -34,11 +34,12 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
       extension: file.name.split('.').pop()
     });
 
-    if (!isVideoFile(file)) {
-      console.log('File validation failed:', file.type);
+    const validation = isVideoFile(file);
+    if (!validation.isValid) {
+      console.log('File validation failed:', validation.reason);
       toast({
         title: "Invalid File Type",
-        description: `File type "${file.type}" not supported. Please select a video file.`,
+        description: validation.reason,
         variant: "destructive",
       });
       return;
@@ -110,11 +111,12 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
               </div>
               <input
                 type="file"
-                accept="video/mp4,video/webm,video/ogg,video/avi,video/mov,video/*"
+                accept="video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv"
                 onChange={handleFileUpload}
                 disabled={isUploading}
                 className="hidden"
                 id={`video-upload-${title.replace(/\s+/g, '-').toLowerCase()}`}
+                key={videoUrl ? 'with-video' : 'no-video'}
               />
               <Button
                 size="sm"
