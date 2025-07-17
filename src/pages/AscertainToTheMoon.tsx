@@ -49,11 +49,11 @@ const AscertainToTheMoon = () => {
                   </p>
                   
                   <p>
-                    My experience directly aligns with your mission. I designed and implemented an <a href="/cases/case1" className="text-primary hover:text-primary/80 underline font-medium">AI sepsis detection system</a> that reduced mortality rates by 23% by automating early warning alerts for clinical teams. This project taught me how AI can transform healthcare workflows when thoughtfully integrated into existing systems—exactly what Ascertain is doing with case management.
+                    My experience directly aligns with your mission. I designed and implemented an <a href="/cases/case1" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">AI sepsis detection system</a> that reduced mortality rates by 23% by automating early warning alerts for clinical teams. This project taught me how AI can transform healthcare workflows when thoughtfully integrated into existing systems—exactly what Ascertain is doing with case management.
                   </p>
                   
                   <p>
-                    More specifically relevant to your work, I built a comprehensive <a href="/cases/case4" className="text-primary hover:text-primary/80 underline font-medium">prior authorization workflow system</a> that reduced approval times from 3 days to 5 minutes through intelligent automation. This system processed thousands of authorizations while maintaining compliance—the same type of administrative workflow automation that's core to Ascertain's value proposition for health systems like Northwell.
+                    More specifically relevant to your work, I built a comprehensive <a href="/cases/case4" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline font-medium">prior authorization workflow system</a> that reduced approval times from 3 days to 5 minutes through intelligent automation. This system processed thousands of authorizations while maintaining compliance—the same type of administrative workflow automation that's core to Ascertain's value proposition for health systems like Northwell.
                   </p>
                   
                   <p>
