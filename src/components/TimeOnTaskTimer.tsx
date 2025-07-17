@@ -40,7 +40,7 @@ export const TimeOnTaskTimer: React.FC = () => {
             <div className={`text-2xl font-mono font-bold text-primary transition-all duration-300 ${isActive && !isStopped || isStopped && userGuess === null ? 'blur-md select-none' : ''}`}>
               {formatTime(currentSessionTime)}
             </div>
-            <div className="text-sm text-muted-foreground">Current Session</div>
+            <div className="text-sm text-muted-foreground">Once you have finished reviewing hit stop</div>
             
             {/* Stop Button */}
             {isActive && !isStopped && <Button onClick={stopSession} size="sm" className="mt-2" variant="destructive">
