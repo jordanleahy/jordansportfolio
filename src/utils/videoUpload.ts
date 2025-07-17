@@ -12,8 +12,9 @@ export const uploadVideoToStorage = async (
   folder: string = 'social-media-videos'
 ): Promise<VideoUploadResult> => {
   try {
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
+    // Validate file type using enhanced detection
+    if (!isVideoFile(file)) {
+      console.log('Upload validation failed for file:', file.name, 'type:', file.type);
       return { success: false, error: 'Please select a video file' };
     }
 
@@ -50,7 +51,21 @@ export const uploadVideoToStorage = async (
 };
 
 export const isVideoFile = (file: File): boolean => {
-  return file.type.startsWith('video/');
+  console.log('Checking file type:', file.type, 'for file:', file.name);
+  
+  // Check MIME type first
+  if (file.type.startsWith('video/')) {
+    return true;
+  }
+  
+  // Fallback: check file extension if MIME type is not detected
+  const extension = file.name.toLowerCase().split('.').pop();
+  const videoExtensions = ['mp4', 'webm', 'ogg', 'avi', 'mov', 'mkv', 'flv', 'wmv'];
+  
+  const isVideo = videoExtensions.includes(extension || '');
+  console.log('File extension check:', extension, 'is video:', isVideo);
+  
+  return isVideo;
 };
 
 export const getSupportedVideoFormats = (): string[] => {

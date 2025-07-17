@@ -27,10 +27,18 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      extension: file.name.split('.').pop()
+    });
+
     if (!isVideoFile(file)) {
+      console.log('File validation failed:', file.type);
       toast({
         title: "Invalid File Type",
-        description: "Please select a video file.",
+        description: `File type "${file.type}" not supported. Please select a video file.`,
         variant: "destructive",
       });
       return;
