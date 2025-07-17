@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
-import Navigation from "@/components/Navigation";
+import AppLayout from "@/components/layout/AppLayout";
 import CompaniesSection from "@/components/CompaniesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
@@ -74,12 +74,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Navigation />
-      
-      
-
+    <AppLayout>
       {/* Hero Parallax Section */}
       <Suspense fallback={
         <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
@@ -98,8 +93,7 @@ const Index = () => {
       <ProjectCardsSection />
       <BlogTeaser />
       <ContactSection />
-
-    </div>
+    </AppLayout>
   );
 };
 

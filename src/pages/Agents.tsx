@@ -8,7 +8,7 @@ import { AgentCard } from '@/components/agents/AgentCard';
 import { useAgents, useDeleteAgent } from '@/hooks/useAgents';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import Navigation from '@/components/Navigation';
+import PageLayout from '@/components/layout/PageLayout';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,18 +56,18 @@ export default function Agents() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Navigation />
-      
-      {/* Mobile Header */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border/50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-foreground">AI Agents</h1>
+    <PageLayout>
+      {/* Page Header */}
+      <div className="bg-background border-b border-border">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">AI Agents</h1>
+              <p className="text-muted-foreground">Manage and interact with your AI agents</p>
+            </div>
             <Button 
               onClick={() => navigate('/agents/new')}
-              size={isMobile ? "sm" : "default"}
+              size="default"
               className="shadow-lg"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -75,40 +75,43 @@ export default function Agents() {
             </Button>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search agents..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-background"
-            />
-          </div>
+          {/* Search and Filters */}
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search agents..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {CATEGORIES.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "secondary"}
-                className={cn(
-                  "cursor-pointer whitespace-nowrap px-3 py-1 transition-colors",
-                  selectedCategory === category && "shadow-sm"
-                )}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Badge>
-            ))}
+            {/* Category Filter */}
+            <div className="flex gap-2 flex-wrap">
+              {CATEGORIES.map((category) => (
+                <Badge
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "secondary"}
+                  className={cn(
+                    "cursor-pointer transition-colors hover:bg-accent",
+                    selectedCategory === category && "shadow-sm"
+                  )}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-8">
         {filteredAgents.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-16">
             {agents.length === 0 ? (
               <div>
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -129,7 +132,7 @@ export default function Agents() {
           </div>
         ) : (
           <div className={cn(
-            "grid gap-4",
+            "grid gap-6",
             isMobile ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"
           )}>
             {filteredAgents.map((agent) => (
@@ -166,6 +169,6 @@ export default function Agents() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 }
