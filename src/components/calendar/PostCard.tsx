@@ -5,12 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Pen } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import VideoUploadCard from './VideoUploadCard';
+import { BlogPostButton } from './BlogPostButton';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -46,7 +47,6 @@ export const PostCard = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
-  const [creatingBlogIds, setCreatingBlogIds] = useState<Set<string>>(new Set());
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -60,56 +60,6 @@ export const PostCard = ({
     return text.length > limit ? text.substring(0, limit) + '...' : text;
   };
 
-  const handleCreateBlogPost = async () => {
-    setCreatingBlogIds(prev => new Set(prev).add(post.id));
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Please log in to create blog posts');
-      }
-
-      const response = await supabase.functions.invoke('generic-blog', {
-        body: { socialMediaPost: post },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (response.error) {
-        throw response.error;
-      }
-
-      const { blogPost, redirectUrl } = response.data;
-      
-      toast({
-        title: "Blog post created",
-        description: "A draft blog post has been created. Redirecting to editor...",
-      });
-
-      // Navigate to blog editor with the new post
-      setTimeout(() => {
-        if (redirectUrl) {
-          navigate(redirectUrl);
-        } else {
-          navigate(`/blog-editor/${blogPost.id}`);
-        }
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Error creating blog post:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create blog post. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setCreatingBlogIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(post.id);
-        return newSet;
-      });
-    }
-  };
 
   const ImageUploadButton = ({ type, label, isUploading }: { 
     type: '16_9' | '9_16' | '3_4' | '4_3'; 
@@ -226,20 +176,7 @@ export const PostCard = ({
         {/* Action Buttons */}
         <div className="space-y-2">
           <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleCreateBlogPost}
-              disabled={creatingBlogIds.has(post.id)}
-              title="Create blog post"
-            >
-              {creatingBlogIds.has(post.id) ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Pen className="h-4 w-4" />
-              )}
-            </Button>
+            <BlogPostButton post={post} />
             <Button
               variant="outline"
               size="sm"

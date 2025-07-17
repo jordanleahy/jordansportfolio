@@ -38,7 +38,10 @@ serve(async (req) => {
   }
 
   try {
-    const { socialMediaPost } = await req.json() as { socialMediaPost: SocialMediaPost };
+    const { socialMediaPost, checkExisting = true } = await req.json() as { 
+      socialMediaPost: SocialMediaPost;
+      checkExisting?: boolean;
+    };
 
     if (!socialMediaPost) {
       throw new Error('Social media post data is required');
@@ -181,6 +184,38 @@ Requirements:
     
     if (userError || !user) {
       throw new Error('Invalid authorization token');
+    }
+
+    // Check if a blog post already exists for this social media post
+    if (checkExisting) {
+      const { data: existingPosts, error: checkError } = await supabase
+        .from('blog_posts')
+        .select('id, slug, status, hero_headline')
+        .eq('user_id', user.id)
+        .ilike('hero_headline', `%${socialMediaPost.title.substring(0, 20)}%`)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (checkError) {
+        console.error('Error checking existing blog posts:', checkError);
+      } else if (existingPosts && existingPosts.length > 0) {
+        const existingPost = existingPosts[0];
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            blogPost: existingPost,
+            message: 'Found existing blog post',
+            redirectUrl: `/blog-editor/${existingPost.id}`,
+            isExisting: true
+          }),
+          { 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json' 
+            } 
+          }
+        );
+      }
     }
 
     // Generate unique slug from title
