@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut, Settings, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -109,67 +112,143 @@ const Navigation = () => {
             </motion.div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
-                {navItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className="text-muted-foreground hover:text-foreground transition-colors duration-200 px-3 py-2 text-sm font-medium flex items-center gap-2 hover:bg-accent/10 rounded-md"
-                  >
-                    <item.icon size={16} />
-                    {item.label}
-                  </button>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/sec")}
-                  className="ml-4"
-                >
-                  <BarChart3 size={16} className="mr-2" />
-                  Q2 Form D
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/blog")}
-                  className="ml-2"
-                  disabled
-                >
-                  <BookOpen size={16} className="mr-2" />
-                  Blog
-                </Button>
-                {isAuthenticated ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate("/calendar")}
-                      className="ml-2"
+            <div className="hidden lg:block">
+              <div className="flex items-center space-x-4">
+                {/* Main Nav Items */}
+                <div className="flex items-center space-x-6">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollToSection(item.id)}
+                      className="text-muted-foreground hover:text-foreground transition-colors duration-200 px-3 py-2 text-sm font-medium flex items-center gap-2 hover:bg-accent/10 rounded-md"
                     >
-                      <Calendar size={16} className="mr-2" />
-                      Calendar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSignOut}
-                      className="ml-2"
-                    >
-                      <LogOut size={16} className="mr-2" />
-                      Logout
-                    </Button>
-                  </>
-                ) : (
+                      <item.icon size={16} />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate("/auth")}
-                    className="ml-2"
+                    onClick={() => navigate("/sec")}
                   >
-                    <LogIn size={16} className="mr-2" />
-                    Login
+                    <BarChart3 size={16} className="mr-2" />
+                    <span className="hidden xl:inline">Q2 Form D</span>
+                    <span className="xl:hidden">SEC</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/blog")}
+                  >
+                    <BookOpen size={16} className="mr-2" />
+                    Blog
+                  </Button>
+
+                  {isAuthenticated ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <User size={16} className="mr-2" />
+                          <span className="hidden xl:inline">Account</span>
+                          <ChevronDown size={14} className="ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onClick={() => navigate("/calendar")}>
+                          <Calendar size={16} className="mr-2" />
+                          Calendar
+                        </DropdownMenuItem>
+                        {isAdmin && (
+                          <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
+                            <Settings size={16} className="mr-2" />
+                            Blog Admin
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleSignOut}>
+                          <LogOut size={16} className="mr-2" />
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/auth")}
+                    >
+                      <LogIn size={16} className="mr-2" />
+                      Login
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Tablet Navigation (md to lg) */}
+            <div className="hidden md:block lg:hidden">
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/sec")}
+                >
+                  <BarChart3 size={16} />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/blog")}
+                >
+                  <BookOpen size={16} />
+                </Button>
+
+                {isAuthenticated ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <User size={16} />
+                        <ChevronDown size={14} className="ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {navItems.map((item) => (
+                        <DropdownMenuItem key={item.id} onClick={() => scrollToSection(item.id)}>
+                          <item.icon size={16} className="mr-2" />
+                          {item.label}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/calendar")}>
+                        <Calendar size={16} className="mr-2" />
+                        Calendar
+                      </DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
+                          <Settings size={16} className="mr-2" />
+                          Blog Admin
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut size={16} className="mr-2" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/auth")}
+                  >
+                    <LogIn size={16} />
                   </Button>
                 )}
               </div>
@@ -246,6 +325,20 @@ const Navigation = () => {
                       <Calendar size={16} className="mr-2" />
                       Calendar
                     </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigate("/admin-blog");
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full justify-start mt-1"
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Blog Admin
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
