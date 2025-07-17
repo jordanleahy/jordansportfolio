@@ -85,53 +85,48 @@ async function safeFetch(url, options = {}) {
 
 // Check if a date string represents a job posted within the last 7 days
 function isRecentJob(dateText) {
-  if (!dateText) return true; // If no date found, include it
+  if (!dateText || typeof dateText !== 'string') return true; // If no date found, include it
   
-  const now = new Date();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  
-  // Common date patterns
-  const patterns = [
-    /(\d{1,2})\/(\d{1,2})\/(\d{4})/,  // MM/DD/YYYY
-    /(\d{4})-(\d{1,2})-(\d{1,2})/,    // YYYY-MM-DD
-    /(\d{1,2})\s+days?\s+ago/i,       // "X days ago"
-    /(\d{1,2})\s+hours?\s+ago/i,      // "X hours ago"
-    /(today|yesterday)/i,             // "today" or "yesterday"
-    /(just\s+now|moments?\s+ago)/i    // "just now" or "moments ago"
-  ];
-  
-  const text = dateText.toLowerCase().trim();
-  
-  // Check for relative dates
-  if (text.includes('today') || text.includes('just now') || text.includes('moment')) {
-    return true;
-  }
-  
-  if (text.includes('yesterday')) {
-    return true;
-  }
-  
-  const daysMatch = text.match(/(\d+)\s+days?\s+ago/);
-  if (daysMatch) {
-    return parseInt(daysMatch[1]) <= 7;
-  }
-  
-  const hoursMatch = text.match(/(\d+)\s+hours?\s+ago/);
-  if (hoursMatch) {
-    return true; // All jobs posted in hours are within 7 days
-  }
-  
-  // Try to parse absolute dates
   try {
-    const date = new Date(dateText);
-    if (!isNaN(date.getTime())) {
-      return date >= sevenDaysAgo;
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    const text = dateText.toLowerCase().trim();
+    
+    // Check for relative dates
+    if (text.includes('today') || text.includes('just now') || text.includes('moment')) {
+      return true;
     }
-  } catch (e) {
-    // If parsing fails, include the job
+    
+    if (text.includes('yesterday')) {
+      return true;
+    }
+    
+    const daysMatch = text.match(/(\d+)\s+days?\s+ago/);
+    if (daysMatch) {
+      return parseInt(daysMatch[1]) <= 7;
+    }
+    
+    const hoursMatch = text.match(/(\d+)\s+hours?\s+ago/);
+    if (hoursMatch) {
+      return true; // All jobs posted in hours are within 7 days
+    }
+    
+    // Try to parse absolute dates
+    try {
+      const date = new Date(dateText);
+      if (!isNaN(date.getTime())) {
+        return date >= sevenDaysAgo;
+      }
+    } catch (e) {
+      // If parsing fails, include the job
+    }
+    
+    return true; // Default to including if we can't determine the date
+  } catch (error) {
+    console.log(`Error parsing date text "${dateText}": ${error.message}`);
+    return true; // Default to including if parsing fails
   }
-  
-  return true; // Default to including if we can't determine the date
 }
 
 // Enhanced parsing using ATS-specific selectors
@@ -168,58 +163,63 @@ function parseJobsWithRegex(html, config, targetName) {
     console.log(`Found ${jobMatches.length} Workable job links`);
     
     for (const match of jobMatches) {
-      const link = match[1];
-      const titleText = match[2].trim();
-      
-      // Skip if it's just whitespace or not a real job title
-      if (!titleText || titleText.length < 3) continue;
-      
-      // For Workable, the link text is often just the job title
-      const title = titleText;
-      
-      // Extract company name - look for company info after the job link
-      const linkIndex = html.indexOf(match[0]);
-      const afterLink = html.substring(linkIndex, linkIndex + 2000);
-      
-      // Look for company patterns - Workable often has company info in specific structures
-      let company = 'Unknown Company';
-      const companyPatterns = [
-        /at\s+([^<]+)<\/a>/,
-        /at\s+<[^>]*>([^<]+)<\/[^>]*>/,
-        /company[^>]*>([^<]+)/i
-      ];
-      
-      for (const pattern of companyPatterns) {
-        const companyMatch = afterLink.match(pattern);
-        if (companyMatch && companyMatch[1].trim().length > 0) {
-          company = companyMatch[1].trim();
-          break;
+      try {
+        const link = match[1];
+        const titleText = match[2]?.trim();
+        
+        // Skip if it's just whitespace or not a real job title
+        if (!titleText || titleText.length < 3) continue;
+        
+        // For Workable, the link text is often just the job title
+        const title = titleText;
+        
+        // Extract company name - look for company info after the job link
+        const linkIndex = html.indexOf(match[0]);
+        const afterLink = html.substring(linkIndex, linkIndex + 2000);
+        
+        // Look for company patterns - Workable often has company info in specific structures
+        let company = 'Unknown Company';
+        const companyPatterns = [
+          /at\s+([^<]+)<\/a>/,
+          /at\s+<[^>]*>([^<]+)<\/[^>]*>/,
+          /company[^>]*>([^<]+)/i
+        ];
+        
+        for (const pattern of companyPatterns) {
+          const companyMatch = afterLink.match(pattern);
+          if (companyMatch && companyMatch[1]?.trim()?.length > 0) {
+            company = companyMatch[1].trim();
+            break;
+          }
         }
-      }
-      
-      // Extract location - look for common location patterns
-      let location = 'Remote';
-      const locationPatterns = [
-        /(Remote|Hybrid|On-site)[^<]*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:,\s*[A-Z]{2})?)/,
-        /location[^>]*>([^<]+)/i,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2,})/
-      ];
-      
-      for (const pattern of locationPatterns) {
-        const locationMatch = afterLink.match(pattern);
-        if (locationMatch) {
-          location = locationMatch[0].trim();
-          break;
+        
+        // Extract location - look for common location patterns
+        let location = 'Remote';
+        const locationPatterns = [
+          /(Remote|Hybrid|On-site)[^<]*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:,\s*[A-Z]{2})?)/,
+          /location[^>]*>([^<]+)/i,
+          /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2,})/
+        ];
+        
+        for (const pattern of locationPatterns) {
+          const locationMatch = afterLink.match(pattern);
+          if (locationMatch && locationMatch[0]) {
+            location = locationMatch[0].trim();
+            break;
+          }
         }
-      }
-      
-      // Extract posting date
-      const dateMatch = afterLink.match(/Posted\s+(\d+\s+(?:days?|hours?|weeks?|months?)\s+ago)/);
-      const dateText = dateMatch ? dateMatch[1] : '';
-      
-      if (title && title.length > 2 && isRecentJob(dateText)) {
-        jobs.push({ title, location, link, dateText, company });
-        console.log(`Found Workable job: "${title}" at "${company}" in "${location}"`);
+        
+        // Extract posting date
+        const dateMatch = afterLink.match(/Posted\s+(\d+\s+(?:days?|hours?|weeks?|months?)\s+ago)/);
+        const dateText = dateMatch ? dateMatch[1] : '';
+        
+        if (title && title.length > 2 && isRecentJob(dateText)) {
+          jobs.push({ title, location, link, dateText, company });
+          console.log(`Found Workable job: "${title}" at "${company}" in "${location}"`);
+        }
+      } catch (jobError) {
+        console.error(`Error processing Workable job match:`, jobError);
+        continue;
       }
     }
   } else if (config.platform === 'bamboohr' || config.platform === 'greenhouse') {
