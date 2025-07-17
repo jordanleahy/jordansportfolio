@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { FFmpeg } from "https://esm.sh/@ffmpeg/ffmpeg@0.12.10";
+import { toBlobURL } from "https://esm.sh/@ffmpeg/util@0.12.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,21 +34,60 @@ serve(async (req: Request) => {
 
     console.log('Processing audio file:', audioFile.name, 'for post:', postId);
 
-    // For now, just store the audio file as-is since FFmpeg doesn't work in Edge Functions
-    // In the future, this could be replaced with a cloud service for audio-to-video conversion
+    // Initialize FFmpeg
+    const ffmpeg = new FFmpeg();
+    
+    // Load FFmpeg core
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+
+    console.log('FFmpeg loaded successfully');
+
+    // Convert audio file to Uint8Array
     const audioArrayBuffer = await audioFile.arrayBuffer();
     const audioData = new Uint8Array(audioArrayBuffer);
 
-    // Create a unique filename for the audio file
-    const timestamp = Date.now();
-    const audioFileName = `audio-${postId}-${timestamp}.${audioFile.name.split('.').pop() || 'wav'}`;
-    const audioPath = `audio-files/${audioFileName}`;
+    // Write audio file to FFmpeg filesystem
+    const inputFileName = 'input_audio.wav';
+    const outputFileName = 'output_video.mp4';
+    
+    await ffmpeg.writeFile(inputFileName, audioData);
 
-    // Upload the audio file to storage
+    // Create a video with a static background and the audio
+    // This creates a proper MP4 video file with both video and audio streams
+    await ffmpeg.exec([
+      '-f', 'lavfi',
+      '-i', 'color=c=black:size=1280x720:duration=10',
+      '-i', inputFileName,
+      '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-pix_fmt', 'yuv420p',
+      '-r', '30',
+      '-shortest',
+      '-y',
+      outputFileName
+    ]);
+
+    console.log('Video generation completed');
+
+    // Read the generated video file
+    const videoData = await ffmpeg.readFile(outputFileName);
+    const videoUint8Array = new Uint8Array(videoData as ArrayBuffer);
+
+    // Create a unique filename for the video
+    const timestamp = Date.now();
+    const videoFileName = `audio-video-${postId}-${timestamp}.mp4`;
+    const videoPath = `audio-videos/${videoFileName}`;
+
+    // Upload the real video file
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('general')
-      .upload(audioPath, audioData, {
-        contentType: audioFile.type || 'audio/wav',
+      .upload(videoPath, videoUint8Array, {
+        contentType: 'video/mp4',
         upsert: true
       });
 
@@ -58,17 +99,17 @@ serve(async (req: Request) => {
       });
     }
 
-    // Get the public URL for the audio file
+    // Get the public URL
     const { data: urlData } = supabase.storage
       .from('general')
-      .getPublicUrl(audioPath);
+      .getPublicUrl(videoPath);
 
-    const audioUrl = urlData.publicUrl;
+    const videoUrl = urlData.publicUrl;
 
-    // Update the post with the audio URL (stored in audio_to_video_url for now)
+    // Update the post with the video URL
     const { error: updateError } = await supabase
       .from('social_media_posts')
-      .update({ audio_to_video_url: audioUrl })
+      .update({ audio_to_video_url: videoUrl })
       .eq('id', postId);
 
     if (updateError) {
@@ -79,12 +120,12 @@ serve(async (req: Request) => {
       });
     }
 
-    console.log('Audio file upload completed for post:', postId);
+    console.log('Audio-to-video conversion completed for post:', postId);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      audioUrl: audioUrl,
-      message: 'Audio file uploaded successfully (video conversion temporarily disabled due to technical limitations)'
+      videoUrl: videoUrl,
+      message: 'Audio converted to video successfully'
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
