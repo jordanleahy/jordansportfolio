@@ -24,9 +24,14 @@ const AscertainToTheMoon = () => {
             <Card>
               <CardContent className="p-0">
                 <AspectRatio ratio={9/16}>
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                    <p className="text-muted-foreground">Video player placeholder</p>
-                  </div>
+                  <video 
+                    className="w-full h-full object-cover rounded-lg"
+                    controls
+                    preload="metadata"
+                  >
+                    <source src="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//667F0B04-8D3D-429C-992C-1D8FB2883E9E%20(1)%20(1).mov" type="video/quicktime" />
+                    Your browser does not support the video tag.
+                  </video>
                 </AspectRatio>
               </CardContent>
             </Card>
