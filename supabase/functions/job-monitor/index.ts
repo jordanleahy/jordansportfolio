@@ -40,74 +40,47 @@ interface ScrapedJob {
 const ATS_CONFIGS: Record<string, ATSConfig> = {
   greenhouse: {
     platform: 'greenhouse',
-    selector: '.opening',
-    titleSelector: '.opening a',
-    companySelector: '.company-name',
-    locationSelector: '.location',
-    dateSelector: '.posted-date',
-    linkSelector: 'a'
+    selector: '.opening, .job-post, .job-listing',
+    titleSelector: '.opening a, .job-title, h3 a, .posting-btn-submit a',
+    companySelector: '.company-name, .company, .posting-company, [data-company]',
+    locationSelector: '.location, .job-location, .posting-location',
+    dateSelector: '.posted-date, .posting-date, .job-date',
+    linkSelector: 'a, .posting-btn-submit'
   },
   lever: {
     platform: 'lever',
-    selector: 'div.lever ul > li',
-    titleSelector: '.posting-title h5',
-    companySelector: '.posting-company',
-    locationSelector: '.posting-categories .location',
-    dateSelector: '.posting-date',
+    selector: '.posting, .job-posting, .position',
+    titleSelector: '.posting-title h5, .job-title, .position-title, a h5',
+    companySelector: '.posting-company, .company-name, .company',
+    locationSelector: '.posting-categories .location, .location, .job-location',
+    dateSelector: '.posting-date, .job-date',
     linkSelector: 'a'
   },
   workable: {
     platform: 'workable',
-    selector: 'ul.jobs-listing > li',
-    titleSelector: '.job-title',
-    companySelector: '.company-name',
-    locationSelector: '.job-location',
-    dateSelector: '.job-date',
-    linkSelector: 'a'
-  },
-  breezy: {
-    platform: 'breezy',
-    selector: '.breezy-widget .job-card',
-    titleSelector: '.job-title',
-    companySelector: '.company-name',
-    locationSelector: '.job-location',
-    dateSelector: '.job-posted',
-    linkSelector: 'a'
-  },
-  jazzhr: {
-    platform: 'jazzhr',
-    selector: 'table.jobs-table tbody tr',
-    titleSelector: 'td:first-child',
-    companySelector: '.company',
-    locationSelector: 'td:nth-child(2)',
-    dateSelector: 'td:last-child',
-    linkSelector: 'a'
-  },
-  bamboohr: {
-    platform: 'bamboohr',
-    selector: 'div#job-listings > div.job',
-    titleSelector: '.job-title',
-    companySelector: '.company-name',
-    locationSelector: '.job-location',
-    dateSelector: '.job-posted',
+    selector: '.job-item, .job-listing, .job-card',
+    titleSelector: '.job-title, .title, h3',
+    companySelector: '.company-name, .company, .employer',
+    locationSelector: '.job-location, .location',
+    dateSelector: '.job-date, .date',
     linkSelector: 'a'
   },
   smartrecruiters: {
     platform: 'smartrecruiters',
-    selector: '#job-listings article.jobposting-list-item',
-    titleSelector: '.job-title',
-    companySelector: '.company-name',
-    locationSelector: '.job-location',
-    dateSelector: '.job-date',
+    selector: '.jobposting-list-item, .job-item, .opening',
+    titleSelector: '.job-title, .title, .posting-title',
+    companySelector: '.company-name, .company, .employer-name',
+    locationSelector: '.job-location, .location',
+    dateSelector: '.job-date, .posting-date',
     linkSelector: 'a'
   },
-  recruitee: {
-    platform: 'recruitee',
-    selector: '.posting-card',
-    titleSelector: '.posting-title',
-    companySelector: '.company-name',
-    locationSelector: '.posting-location',
-    dateSelector: '.posting-date',
+  bamboohr: {
+    platform: 'bamboohr',
+    selector: '.job-card, .job-listing, .opening',
+    titleSelector: '.job-title, .title',
+    companySelector: '.company-name, .company',
+    locationSelector: '.job-location, .location',
+    dateSelector: '.job-posted, .date',
     linkSelector: 'a'
   }
 };
@@ -220,13 +193,32 @@ async function scrapeJobsFromTarget(target: JobTarget, supabase: any): Promise<S
     const html = await response.text();
     const jobs = await parseJobsFromHTML(html, target);
 
-    // Filter for design-related positions
-    const designJobs = jobs.filter(job => 
-      /product\s+designer|design\s+lead|senior\s+designer|ui\s+designer|ux\s+designer/i.test(job.title)
-    );
+    // Enhanced filtering for design and related roles across all companies
+    const relevantJobs = jobs.filter(job => {
+      const title = job.title.toLowerCase();
+      const description = job.description.toLowerCase();
+      
+      // Design roles
+      const designTerms = [
+        'product designer', 'ux designer', 'ui designer', 'visual designer',
+        'interaction designer', 'design lead', 'senior designer', 'staff designer',
+        'principal designer', 'design manager', 'design director', 'head of design',
+        'design system', 'brand designer', 'graphic designer', 'web designer',
+        'user experience', 'user interface', 'design researcher', 'service designer'
+      ];
+      
+      // Tech/Product roles that might be relevant
+      const productTerms = [
+        'product manager', 'frontend', 'front-end', 'full stack', 'fullstack',
+        'react', 'vue', 'angular', 'typescript', 'javascript', 'web developer'
+      ];
+      
+      return designTerms.some(term => title.includes(term) || description.includes(term)) ||
+             productTerms.some(term => title.includes(term) || description.includes(term));
+    });
 
     // Check which jobs are new (not already in database)
-    const newJobs = await filterNewJobs(designJobs, supabase);
+    const newJobs = await filterNewJobs(relevantJobs, supabase);
 
     // Insert new jobs into database
     if (newJobs.length > 0) {
@@ -258,10 +250,52 @@ async function parseJobsFromHTML(html: string, target: JobTarget): Promise<Scrap
       const titleElement = element.querySelector(config.titleSelector || 'a, .title, h3, h4, h5');
       const locationElement = element.querySelector(config.locationSelector || '.location, .job-location');
       const linkElement = element.querySelector(config.linkSelector || 'a');
+      const companyElement = element.querySelector(config.companySelector || '.company, .company-name');
 
       const title = titleElement?.textContent?.trim() || 'Unknown Position';
       const location = locationElement?.textContent?.trim() || 'Remote';
       const href = linkElement?.getAttribute('href') || '';
+      
+      // Extract company name from various sources
+      let company = companyElement?.textContent?.trim();
+      
+      // If no company found in element, try to extract from URL or other attributes
+      if (!company) {
+        // Try to get company from URL path
+        if (href.includes('/jobs/')) {
+          const urlParts = href.split('/');
+          const companyIndex = urlParts.findIndex(part => part === 'jobs') - 1;
+          if (companyIndex >= 0) {
+            company = urlParts[companyIndex];
+          }
+        }
+        
+        // Try data attributes
+        if (!company) {
+          company = element.getAttribute('data-company') || 
+                   element.getAttribute('data-employer') ||
+                   linkElement?.getAttribute('data-company');
+        }
+        
+        // Last resort: try to find in link text or nearby elements
+        if (!company) {
+          const parentText = element.parentElement?.textContent || element.textContent || '';
+          const companyMatch = parentText.match(/at\s+([A-Za-z0-9\s&-]+)(?:\s|$)/i);
+          company = companyMatch?.[1]?.trim();
+        }
+      }
+      
+      // Clean up company name
+      if (company) {
+        company = company.replace(/\s*\([^)]*\)/g, '').trim(); // Remove parentheses content
+        company = company.replace(/\s*-\s*.*$/, '').trim(); // Remove everything after dash
+        company = company.replace(/^at\s+/i, '').trim(); // Remove "at " prefix
+      }
+      
+      // Fallback company name
+      if (!company || company.length < 2) {
+        company = 'Various Companies';
+      }
       
       // Construct full URL
       let applicationUrl = href;
@@ -270,14 +304,14 @@ async function parseJobsFromHTML(html: string, target: JobTarget): Promise<Scrap
         applicationUrl = new URL(href, baseUrl).toString();
       }
 
-      if (title && applicationUrl) {
+      if (title && applicationUrl && title !== 'Unknown Position') {
         jobs.push({
           title,
-          company: extractCompanyFromTarget(target.name),
+          company,
           location,
           date_posted: new Date().toISOString().split('T')[0],
           application_url: applicationUrl,
-          description: `${title} position at ${extractCompanyFromTarget(target.name)}. Apply through their career page.`,
+          description: `${title} position at ${company}. This role was found on ${target.ats_platform} job board. Apply through the company's career page for full details.`,
           platform: target.ats_platform,
           target_id: target.id
         });
@@ -291,8 +325,9 @@ async function parseJobsFromHTML(html: string, target: JobTarget): Promise<Scrap
 }
 
 function extractCompanyFromTarget(targetName: string): string {
-  // Extract company name from target name (e.g., "Figma (Greenhouse)" -> "Figma")
-  return targetName.split('(')[0].trim();
+  // For ATS-wide scraping, we don't extract company from target name anymore
+  // This function is kept for backwards compatibility but returns a generic name
+  return 'Multiple Companies';
 }
 
 async function filterNewJobs(jobs: ScrapedJob[], supabase: any): Promise<ScrapedJob[]> {
@@ -371,25 +406,34 @@ async function updateMonitoringState(
 function generateFallbackJobs(target: JobTarget): ScrapedJob[] {
   console.log(`Generating fallback jobs for ${target.name}`);
   
-  const company = extractCompanyFromTarget(target.name);
+  // For ATS-wide targets, generate multiple fallback jobs from different companies
+  const companies = ['TechStart Inc', 'Design Labs', 'Innovation Co', 'Creative Corp', 'Product Studio'];
   const positions = [
     'Senior Product Designer',
-    'Product Designer',
-    'Staff Product Designer',
-    'Principal Product Designer',
-    'Lead Product Designer'
+    'Product Designer', 
+    'UX Designer',
+    'UI/UX Designer',
+    'Design Lead'
   ];
 
-  const randomPosition = positions[Math.floor(Math.random() * positions.length)];
+  const fallbackJobs: ScrapedJob[] = [];
   
-  return [{
-    title: randomPosition,
-    company,
-    location: 'Remote',
-    date_posted: new Date().toISOString().split('T')[0],
-    application_url: target.url,
-    description: `${randomPosition} position at ${company}. Join our design team and help shape the future of our products.`,
-    platform: target.ats_platform,
-    target_id: target.id
-  }];
+  // Generate 2-3 fallback jobs
+  for (let i = 0; i < Math.min(3, Math.floor(Math.random() * 3) + 1); i++) {
+    const randomCompany = companies[Math.floor(Math.random() * companies.length)];
+    const randomPosition = positions[Math.floor(Math.random() * positions.length)];
+    
+    fallbackJobs.push({
+      title: randomPosition,
+      company: randomCompany,
+      location: ['Remote', 'San Francisco, CA', 'New York, NY', 'Austin, TX'][Math.floor(Math.random() * 4)],
+      date_posted: new Date().toISOString().split('T')[0],
+      application_url: `${target.url}?fallback=true&job=${i}`,
+      description: `${randomPosition} position at ${randomCompany}. We're looking for a talented designer to join our team. This is a fallback job generated when the actual ${target.ats_platform} scraping encountered issues.`,
+      platform: target.ats_platform,
+      target_id: target.id
+    });
+  }
+  
+  return fallbackJobs;
 }
