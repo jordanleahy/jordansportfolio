@@ -570,6 +570,29 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  const handleImageDelete = async (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => {
+    try {
+      const fieldName = `image_${type}_url`;
+      await socialMediaService.updatePost(postId, {
+        [fieldName]: null
+      });
+
+      toast({
+        title: "Success",
+        description: "Image deleted successfully",
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Create unified file select handler for mobile cards
   const handleMobileFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
     const file = event.target.files?.[0];
@@ -641,6 +664,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               onFileSelect={handleMobileFileSelect}
               onVideoUpload={handleVideoUpload}
               onVideoRemove={handleVideoRemove}
+              onImageDelete={handleImageDelete}
               onStatusChange={handleStatusChange}
               uploadingStates={uploadingStates}
             />
@@ -748,6 +772,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-${post.id}`)?.click()}
                           onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                          onDelete={() => handleImageDelete(post.id, '16_9')}
                           imageUrl={post.image_16_9_url}
                         >
                           <OptimizedImage
@@ -790,6 +815,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-916-${post.id}`)?.click()}
                           onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
+                          onDelete={() => handleImageDelete(post.id, '9_16')}
                           imageUrl={post.image_9_16_url}
                         >
                           <OptimizedImage
@@ -832,6 +858,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-34-${post.id}`)?.click()}
                           onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                          onDelete={() => handleImageDelete(post.id, '3_4')}
                           imageUrl={post.image_3_4_url}
                         >
                           <OptimizedImage
@@ -874,6 +901,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         <ImageHoverOverlay
                           onUpload={() => document.getElementById(`upload-43-${post.id}`)?.click()}
                           onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
+                          onDelete={() => handleImageDelete(post.id, '4_3')}
                           imageUrl={post.image_4_3_url}
                         >
                           <OptimizedImage

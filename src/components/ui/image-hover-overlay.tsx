@@ -1,6 +1,6 @@
 import React, { useState, ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Upload, Eye, Download } from "lucide-react";
+import { Upload, Eye, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ImageHoverOverlayProps {
@@ -8,11 +8,13 @@ interface ImageHoverOverlayProps {
   onUpload?: () => void;
   onView?: () => void;
   onDownload?: () => void;
+  onDelete?: () => void;
   imageUrl?: string | null;
   className?: string;
   showUpload?: boolean;
   showView?: boolean;
   showDownload?: boolean;
+  showDelete?: boolean;
 }
 
 export const ImageHoverOverlay = ({
@@ -20,11 +22,13 @@ export const ImageHoverOverlay = ({
   onUpload,
   onView,
   onDownload,
+  onDelete,
   imageUrl,
   className,
   showUpload = true,
   showView = true,
   showDownload = true,
+  showDelete = true,
 }: ImageHoverOverlayProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -133,6 +137,23 @@ export const ImageHoverOverlay = ({
             )}
           >
             <Download className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {showDelete && onDelete && imageUrl && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className={cn(
+              "h-8 w-8 p-0 bg-destructive/80 hover:bg-destructive text-white shadow-lg rounded-full transition-all duration-200",
+              isHovered ? "delay-200" : ""
+            )}
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         )}
       </div>

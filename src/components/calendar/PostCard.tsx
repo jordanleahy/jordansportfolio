@@ -19,6 +19,7 @@ interface PostCardProps {
   onFileSelect: (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
+  onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   uploadingStates: {
     [key: string]: boolean;
@@ -33,6 +34,7 @@ export const PostCard = ({
   onFileSelect, 
   onVideoUpload,
   onVideoRemove,
+  onImageDelete,
   onStatusChange,
   uploadingStates 
 }: PostCardProps) => {
@@ -276,6 +278,7 @@ export const PostCard = ({
             {post.image_16_9_url && (
               <ImageHoverOverlay
                 onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                onDelete={() => onImageDelete(post.id, '16_9')}
                 imageUrl={post.image_16_9_url}
                 showUpload={false}
                 className="flex-shrink-0"
@@ -290,6 +293,7 @@ export const PostCard = ({
             {post.image_9_16_url && (
               <ImageHoverOverlay
                 onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
+                onDelete={() => onImageDelete(post.id, '9_16')}
                 imageUrl={post.image_9_16_url}
                 showUpload={false}
                 className="flex-shrink-0"
@@ -304,6 +308,7 @@ export const PostCard = ({
             {post.image_3_4_url && (
               <ImageHoverOverlay
                 onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                onDelete={() => onImageDelete(post.id, '3_4')}
                 imageUrl={post.image_3_4_url}
                 showUpload={false}
                 className="flex-shrink-0"
@@ -318,6 +323,7 @@ export const PostCard = ({
             {post.image_4_3_url && (
               <ImageHoverOverlay
                 onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
+                onDelete={() => onImageDelete(post.id, '4_3')}
                 imageUrl={post.image_4_3_url}
                 showUpload={false}
                 className="flex-shrink-0"
