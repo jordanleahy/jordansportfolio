@@ -106,9 +106,9 @@ const App = () => (
                   <Route path="/sec" element={<SEC />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/agents" element={<Agents />} />
+                  <Route path="/agents/:slug/edit" element={<AgentEditor />} />
                   <Route path="/agents/new" element={<AgentEditor />} />
                   <Route path="/agents/:slug" element={<AgentChat />} />
-                  <Route path="/agents/:slug/edit" element={<AgentEditor />} />
                   <Route path="/jobs" element={<JobWatcher />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
