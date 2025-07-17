@@ -309,13 +309,44 @@ export const PostCard = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = post.audio_to_video_url!;
-                        link.download = `${post.title.replace(/[^a-z0-9]/gi, '_')}_audio_video.mp4`;
-                        link.click();
+                      onClick={async () => {
+                        try {
+                          // Fetch the file as a blob to ensure proper download with correct MIME type
+                          const response = await fetch(post.audio_to_video_url!);
+                          if (!response.ok) {
+                            throw new Error('Failed to fetch video file');
+                          }
+                          
+                          const blob = await response.blob();
+                          // Create a blob with explicit video/mp4 MIME type for Apple Photos compatibility
+                          const videoBlob = new Blob([blob], { type: 'video/mp4' });
+                          
+                          // Create blob URL and download
+                          const blobUrl = URL.createObjectURL(videoBlob);
+                          const link = document.createElement('a');
+                          link.href = blobUrl;
+                          link.download = `${post.title.replace(/[^a-z0-9]/gi, '_')}_audio_video.mp4`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          
+                          // Clean up blob URL
+                          URL.revokeObjectURL(blobUrl);
+                          
+                          toast({
+                            title: "Download Complete",
+                            description: "Video downloaded successfully for Apple Photos",
+                          });
+                        } catch (error) {
+                          console.error('Download failed:', error);
+                          toast({
+                            title: "Download Failed",
+                            description: "Failed to download video file",
+                            variant: "destructive"
+                          });
+                        }
                       }}
-                      title="Download video"
+                      title="Download video for Apple Photos"
                     >
                       Download
                     </Button>
