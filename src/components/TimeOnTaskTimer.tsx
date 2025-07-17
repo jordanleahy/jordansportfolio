@@ -31,7 +31,6 @@ export const TimeOnTaskTimer: React.FC = () => {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="h-5 w-5 text-primary" />
           Guess Your Time on Task
-          {isActive}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
