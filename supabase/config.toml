@@ -38,3 +38,6 @@ port = 54330
 
 [functions.job-scraper]
 verify_jwt = false
+
+[functions.job-monitor]
+verify_jwt = false

@@ -95,10 +95,10 @@ export const jobService = {
     }
   },
 
-  // Trigger job scraping
+  // Trigger job scraping (legacy)
   async scrapeJobs(): Promise<{ success: boolean; message: string }> {
     try {
-      const { data, error } = await supabase.functions.invoke('job-scraper');
+      const { data, error } = await supabase.functions.invoke('job-monitor');
 
       if (error) {
         throw error;
@@ -106,7 +106,7 @@ export const jobService = {
 
       return data;
     } catch (error) {
-      console.error('Error triggering job scraping:', error);
+      console.error('Error triggering job monitoring:', error);
       throw error;
     }
   }

@@ -432,6 +432,164 @@ export type Database = {
           },
         ]
       }
+      job_monitoring_config: {
+        Row: {
+          created_at: string
+          date_selector: string | null
+          email_notifications: boolean
+          id: string
+          notifications_enabled: boolean
+          poll_interval_minutes: number
+          title_regex: string
+          updated_at: string
+          user_id: string
+          webhook_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_selector?: string | null
+          email_notifications?: boolean
+          id?: string
+          notifications_enabled?: boolean
+          poll_interval_minutes?: number
+          title_regex?: string
+          updated_at?: string
+          user_id: string
+          webhook_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_selector?: string | null
+          email_notifications?: boolean
+          id?: string
+          notifications_enabled?: boolean
+          poll_interval_minutes?: number
+          title_regex?: string
+          updated_at?: string
+          user_id?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      job_monitoring_state: {
+        Row: {
+          created_at: string
+          error_count: number | null
+          id: string
+          last_error: string | null
+          last_job_count: number | null
+          last_jobs_hash: string | null
+          last_scraped_at: string | null
+          target_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_count?: number | null
+          id?: string
+          last_error?: string | null
+          last_job_count?: number | null
+          last_jobs_hash?: string | null
+          last_scraped_at?: string | null
+          target_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_count?: number | null
+          id?: string
+          last_error?: string | null
+          last_job_count?: number | null
+          last_jobs_hash?: string | null
+          last_scraped_at?: string | null
+          target_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_monitoring_state_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "job_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          notification_type: string
+          sent_at: string
+          target_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          notification_type?: string
+          sent_at?: string
+          target_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          notification_type?: string
+          sent_at?: string
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_notifications_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "job_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_targets: {
+        Row: {
+          ats_platform: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          selector: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          ats_platform: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          selector: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          ats_platform?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          selector?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           application_url: string

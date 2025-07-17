@@ -2,9 +2,10 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Filter, LogOut, Loader2, RefreshCw } from "lucide-react";
+import { Search, Calendar, Filter, LogOut, Loader2, RefreshCw, Settings } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { JobList } from "@/components/jobs/JobList";
+import { JobMonitoringDashboard } from "@/components/jobs/JobMonitoringDashboard";
 import { jobService } from "@/services/jobService";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const JobWatcher = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +30,7 @@ const JobWatcher = () => {
   const [bookmarkedJobs, setBookmarkedJobs] = useState<string[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [isScrapingJobs, setIsScrapingJobs] = useState(false);
+  const [activeTab, setActiveTab] = useState("jobs");
   const { toast } = useToast();
 
   // Auth state management
@@ -218,50 +221,54 @@ const JobWatcher = () => {
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Job Watcher</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Job Monitoring System</h1>
                 <p className="text-muted-foreground mt-2">
-                  Discover and track Product Designer opportunities from leading companies
+                  Real-time monitoring of Product Designer opportunities from ATS platforms
                 </p>
               </div>
               
               <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleScrapeJobs}
-                  disabled={isScrapingJobs}
-                >
-                  {isScrapingJobs ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Scraping...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Get New Jobs
-                    </>
-                  )}
-                </Button>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search jobs or companies..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 w-80"
-                  />
-                </div>
-                
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date">Latest</SelectItem>
-                    <SelectItem value="company">Company</SelectItem>
-                    <SelectItem value="title">Job Title</SelectItem>
-                  </SelectContent>
-                </Select>
+                {activeTab === "jobs" && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleScrapeJobs}
+                      disabled={isScrapingJobs}
+                    >
+                      {isScrapingJobs ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Scraping...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Manual Scan
+                        </>
+                      )}
+                    </Button>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search jobs or companies..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 w-80"
+                      />
+                    </div>
+                    
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date">Latest</SelectItem>
+                        <SelectItem value="company">Company</SelectItem>
+                        <SelectItem value="title">Job Title</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
                 
                 <Button variant="outline" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
@@ -270,51 +277,69 @@ const JobWatcher = () => {
               </div>
             </div>
             
+            {/* Navigation Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+              <TabsList>
+                <TabsTrigger value="jobs">Job Results</TabsTrigger>
+                <TabsTrigger value="monitoring">Monitoring Dashboard</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
             {/* Stats */}
-            <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-              <span>{jobs.length} jobs found</span>
-              <span>{bookmarkedJobs.length} bookmarked</span>
-              <span>Welcome, {user.email}</span>
-            </div>
+            {activeTab === "jobs" && (
+              <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
+                <span>{jobs.length} jobs found</span>
+                <span>{bookmarkedJobs.length} bookmarked</span>
+                <span>Welcome, {user.email}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
-          {isLoadingJobs ? (
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-muted-foreground">Loading jobs...</p>
-            </div>
-          ) : (
-            <JobList 
-              jobs={jobs}
-              bookmarkedJobs={bookmarkedJobs}
-              onBookmarkToggle={handleBookmarkToggle}
-            />
-          )}
-          
-          {!isLoadingJobs && jobs.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground text-lg mb-2">No jobs found</div>
-              <p className="text-muted-foreground text-sm mb-4">
-                Try adjusting your search terms or get fresh job data
-              </p>
-              <Button onClick={handleScrapeJobs} disabled={isScrapingJobs}>
-                {isScrapingJobs ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Getting Jobs...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Get New Jobs
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsContent value="jobs">
+              {isLoadingJobs ? (
+                <div className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                  <p className="text-muted-foreground">Loading jobs...</p>
+                </div>
+              ) : (
+                <JobList 
+                  jobs={jobs}
+                  bookmarkedJobs={bookmarkedJobs}
+                  onBookmarkToggle={handleBookmarkToggle}
+                />
+              )}
+              
+              {!isLoadingJobs && jobs.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground text-lg mb-2">No jobs found</div>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Try adjusting your search terms or run the monitoring system
+                  </p>
+                  <Button onClick={handleScrapeJobs} disabled={isScrapingJobs}>
+                    {isScrapingJobs ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Scanning...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Manual Scan
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="monitoring">
+              <JobMonitoringDashboard user={user} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </>
