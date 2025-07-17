@@ -33,7 +33,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const [uploading34PostId, setUploading34PostId] = useState<string | null>(null);
   const [uploading43PostId, setUploading43PostId] = useState<string | null>(null);
   const [uploadingGeneralVideoPostId, setUploadingGeneralVideoPostId] = useState<string | null>(null);
-  const [audioProcessing, setAudioProcessing] = useState<Set<string>>(new Set());
+  
   const [showWatermarkModal, setShowWatermarkModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -642,31 +642,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               onVideoUpload={handleVideoUpload}
               onVideoRemove={handleVideoRemove}
               onStatusChange={handleStatusChange}
-              onAudioUpload={async (postId: string, file: File) => {
-                try {
-                  setAudioProcessing(prev => new Set(prev).add(postId));
-                  await socialMediaService.convertAudioToVideo(postId, file);
-                  onPostsChange();
-                  toast({
-                    title: "Audio converted",
-                    description: "Audio has been converted to video successfully.",
-                  });
-                } catch (error: any) {
-                  console.error('Error converting audio:', error);
-                  toast({
-                    title: "Error",
-                    description: "Failed to convert audio: " + error.message,
-                    variant: "destructive",
-                  });
-                } finally {
-                  setAudioProcessing(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(postId);
-                    return newSet;
-                  });
-                }
-              }}
-              audioProcessing={audioProcessing}
               uploadingStates={uploadingStates}
             />
           ))}
@@ -717,7 +692,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>3:4 Image</TableHead>
               <TableHead>3:4 Vid</TableHead>
               <TableHead>Video</TableHead>
-              <TableHead>Upload Audio</TableHead>
+              
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Actions</TableHead>
@@ -999,89 +974,6 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     </div>
                   </div>
                  </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={async () => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'audio/*,.mp3,.wav,.m4a,.aac,.flac';
-                        input.onchange = async (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            console.log('Audio file selected:', file.name, file.type, file.size);
-                            setAudioProcessing(prev => new Set(prev).add(post.id));
-                            
-                            try {
-                              const videoUrl = await socialMediaService.convertAudioToVideo(post.id, file);
-                              onPostsChange();
-                              toast({
-                                title: "Audio converted",
-                                description: "Audio has been converted to video successfully.",
-                              });
-                            } catch (error: any) {
-                              console.error('Error converting audio:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to convert audio: " + error.message,
-                                variant: "destructive",
-                              });
-                            } finally {
-                              setAudioProcessing(prev => {
-                                const newSet = new Set(prev);
-                                newSet.delete(post.id);
-                                return newSet;
-                              });
-                            }
-                          }
-                        };
-                        input.click();
-                      }}
-                      title="Click to upload audio and convert to video"
-                    >
-                      {post.audio_to_video_url ? (
-                        <div className="relative group">
-                          <video
-                            src={post.audio_to_video_url}
-                            className="w-20 h-15 rounded border cursor-pointer object-cover"
-                            preload="metadata"
-                            onClick={() => setPreviewImage({ url: post.audio_to_video_url!, alt: "Audio-generated video for " + post.title })}
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const link = document.createElement('a');
-                                link.href = post.audio_to_video_url!;
-                                link.download = `${post.title.replace(/[^a-z0-9]/gi, '_')}_audio_video.mp4`;
-                                link.click();
-                              }}
-                              className="text-white hover:text-gray-300 text-xs p-1 rounded bg-black/50"
-                              title="Download video"
-                            >
-                              Download
-                            </button>
-                          </div>
-                        </div>
-                       ) : (
-                         <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                           {audioProcessing.has(post.id) ? (
-                             <div className="flex flex-col items-center">
-                               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                               <span className="text-xs text-muted-foreground mt-1">Converting...</span>
-                             </div>
-                           ) : (
-                             <div className="flex flex-col items-center">
-                               <Upload className="h-4 w-4 text-muted-foreground" />
-                               <span className="text-xs text-muted-foreground">Audio</span>
-                             </div>
-                           )}
-                         </div>
-                       )}
-                    </div>
-                  </div>
-                </TableCell>
                 <TableCell>
                    <Badge
                     className={`${getStatusColor(post.status)} cursor-pointer hover:opacity-80 transition-opacity`}
