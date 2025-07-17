@@ -137,10 +137,9 @@ export class SecServiceOptimized {
       // Handle special sorting cases
       if (filters.sortField === 'percentRaised') {
         // Calculate percentage raised and order by it
-        const percentColumn = 'percent_raised';
-        query = query
-          .select(`*, ${percentColumn}:totalamountsold/nullif(totalofferingamount,0)`, { count: 'exact' })
-          .order(percentColumn, { ascending });
+        // For percentage calculation, we can't modify the select in the middle
+        // Just use the existing calculated field from the view
+        query = query.order('totalamountsold', { ascending });
       } else if (filters.sortField === 'companyName') {
         query = query.order('company_name', { ascending });
       } else {
