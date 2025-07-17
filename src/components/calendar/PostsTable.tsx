@@ -9,11 +9,12 @@ import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, Pen } from 'lucide
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { ImagePromptModal } from './ImagePromptModal';
 import { ImageWatermarkModal } from './ImageWatermarkModal';
 import { ImagePreviewModal } from '@/components/ui/image-preview-modal';
 import { PostCard } from './PostCard';
-import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostsTableProps {
@@ -24,6 +25,8 @@ interface PostsTableProps {
 export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const [isGeneratingBlog, setIsGeneratingBlog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const file916InputRef = useRef<HTMLInputElement>(null);
   const file34InputRef = useRef<HTMLInputElement>(null);
@@ -120,6 +123,49 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
       cachedPrompt: post.generated_image_prompt,
       category: post.category
     });
+  };
+
+  const handleCreateBlogPost = async (post: SocialMediaPost) => {
+    setIsGeneratingBlog(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Please log in to create blog posts');
+      }
+
+      const response = await supabase.functions.invoke('generic-blog', {
+        body: { socialMediaPost: post },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      const { blogPost } = response.data;
+      
+      toast({
+        title: "Blog post created",
+        description: "A draft blog post has been created. Redirecting to editor...",
+      });
+
+      // Navigate to blog editor with the new post
+      setTimeout(() => {
+        navigate(`/blog-editor/${blogPost.id}`);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create blog post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingBlog(false);
+    }
   };
 
   const handleImageUpload = async (postId: string, file: File) => {
@@ -1026,9 +1072,15 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                     <Button
                       size="sm"
                       variant="outline"
-                      title="Edit post"
+                      onClick={() => handleCreateBlogPost(post)}
+                      title="Create blog post"
+                      disabled={isGeneratingBlog}
                     >
-                      <Pen className="h-4 w-4" />
+                      {isGeneratingBlog ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Pen className="h-4 w-4" />
+                      )}
                     </Button>
                     <Button
                       size="sm"
