@@ -982,6 +982,7 @@ export type Database = {
           created_at: string
           day: number | null
           description: string
+          general_video_url: string | null
           generated_image_prompt: string | null
           id: string
           image_16_9_url: string | null
@@ -1003,6 +1004,7 @@ export type Database = {
           created_at?: string
           day?: number | null
           description: string
+          general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
           image_16_9_url?: string | null
@@ -1024,6 +1026,7 @@ export type Database = {
           created_at?: string
           day?: number | null
           description?: string
+          general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
           image_16_9_url?: string | null

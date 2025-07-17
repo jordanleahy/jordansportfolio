@@ -17,8 +17,8 @@ interface PostCardProps {
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video') => void;
-  onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video') => void;
+  onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
+  onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   uploadingStates: {
     [key: string]: boolean;
@@ -258,12 +258,19 @@ export const PostCard = ({
                 onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
                 onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
               />
+              <VideoUploadCard
+                title="General Video"
+                aspectRatio="16/9"
+                videoUrl={post.general_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
+                onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
+              />
             </div>
           </div>
         )}
 
         {/* Media Previews - Show any existing images or videos */}
-        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url) && !showPhotos && !showVideos && (
+        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
@@ -336,6 +343,15 @@ export const PostCard = ({
                   src={post.image_3_4_video_url}
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => setPreviewImage({ url: post.image_3_4_video_url!, alt: "3:4 video for " + post.title })}
+                />
+              </div>
+            )}
+            {post.general_video_url && (
+              <div className="flex-shrink-0">
+                <video
+                  src={post.general_video_url}
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
                 />
               </div>
             )}

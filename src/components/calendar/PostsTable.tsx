@@ -516,17 +516,19 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   };
 
   // Video upload handlers
-  const handleVideoUpload = async (postId: string, url: string, type: '16_9_video' | '3_4_video') => {
+  const handleVideoUpload = async (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => {
     try {
       const updateData = type === '16_9_video' ? 
         { image_16_9_video_url: url } : 
-        { image_3_4_video_url: url };
+        type === '3_4_video' ? 
+        { image_3_4_video_url: url } :
+        { general_video_url: url };
       
       await socialMediaService.updatePost(postId, updateData);
       
       toast({
         title: "Video uploaded",
-        description: `${type === '16_9_video' ? '16:9' : '3:4'} video has been successfully uploaded.`,
+        description: `${type === '16_9_video' ? '16:9' : type === '3_4_video' ? '3:4' : 'General'} video has been successfully uploaded.`,
       });
 
       onPostsChange();
@@ -540,17 +542,19 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
-  const handleVideoRemove = async (postId: string, type: '16_9_video' | '3_4_video') => {
+  const handleVideoRemove = async (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => {
     try {
       const updateData = type === '16_9_video' ? 
         { image_16_9_video_url: null } : 
-        { image_3_4_video_url: null };
+        type === '3_4_video' ? 
+        { image_3_4_video_url: null } :
+        { general_video_url: null };
       
       await socialMediaService.updatePost(postId, updateData);
       
       toast({
         title: "Video removed",
-        description: `${type === '16_9_video' ? '16:9' : '3:4'} video has been removed.`,
+        description: `${type === '16_9_video' ? '16:9' : type === '3_4_video' ? '3:4' : 'General'} video has been removed.`,
       });
 
       onPostsChange();
