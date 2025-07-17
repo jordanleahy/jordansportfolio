@@ -32,6 +32,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const [uploading916PostId, setUploading916PostId] = useState<string | null>(null);
   const [uploading34PostId, setUploading34PostId] = useState<string | null>(null);
   const [uploading43PostId, setUploading43PostId] = useState<string | null>(null);
+  const [uploadingGeneralVideoPostId, setUploadingGeneralVideoPostId] = useState<string | null>(null);
   const [showWatermarkModal, setShowWatermarkModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -906,14 +907,25 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         input.onchange = async (e) => {
                           const file = (e.target as HTMLInputElement).files?.[0];
                           if (file) {
+                            console.log('Video file selected:', file.name, file.type, file.size);
+                            setUploadingGeneralVideoPostId(post.id);
+                            
                             try {
                               // Upload the video file using the existing video upload utility
                               const { uploadVideoToStorage } = await import('@/utils/videoUpload');
+                              console.log('Starting video upload...');
                               const result = await uploadVideoToStorage(file);
+                              console.log('Upload result:', result);
                               
                               if (result.success && result.url) {
+                                console.log('Updating post with video URL:', result.url);
                                 await handleVideoUpload(post.id, result.url, 'general_video');
+                                toast({
+                                  title: "Success",
+                                  description: "Video uploaded successfully",
+                                });
                               } else {
+                                console.error('Upload failed:', result.error);
                                 toast({
                                   title: "Upload failed",
                                   description: result.error || "Failed to upload video",
@@ -927,6 +939,8 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                                 description: "Failed to upload video",
                                 variant: "destructive",
                               });
+                            } finally {
+                              setUploadingGeneralVideoPostId(null);
                             }
                           }
                         };
@@ -942,14 +956,18 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                             onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
                           />
                         </div>
-                      ) : (
-                        <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                          <div className="flex flex-col items-center">
-                            <Upload className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">Video</span>
-                          </div>
-                        </div>
-                      )}
+                       ) : (
+                         <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                           {uploadingGeneralVideoPostId === post.id ? (
+                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                           ) : (
+                             <div className="flex flex-col items-center">
+                               <Upload className="h-4 w-4 text-muted-foreground" />
+                               <span className="text-xs text-muted-foreground">Video</span>
+                             </div>
+                           )}
+                         </div>
+                       )}
                     </div>
                   </div>
                 </TableCell>
