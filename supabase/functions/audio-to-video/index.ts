@@ -41,23 +41,14 @@ serve(async (req: Request) => {
     // Create authentication for signed upload
     const timestamp = Math.round(Date.now() / 1000);
     
-    // Parameters for signature (alphabetically sorted, excluding file and api_key)
-    const params = {
-      resource_type: 'video',
-      timestamp: timestamp.toString()
-    };
+    // Create string to sign - ONLY include timestamp for basic upload
+    const stringToSign = `timestamp=${timestamp}${cloudinaryApiSecret}`;
     
-    // Create string to sign (alphabetically sorted parameters)
-    const sortedParams = Object.keys(params)
-      .sort()
-      .map(key => `${key}=${params[key]}`)
-      .join('&');
-    
-    console.log('String to sign:', sortedParams);
+    console.log('String to sign:', stringToSign);
     
     // Generate signature using crypto
     const encoder = new TextEncoder();
-    const data = encoder.encode(sortedParams + cloudinaryApiSecret);
+    const data = encoder.encode(stringToSign);
     const hashBuffer = await crypto.subtle.digest('SHA-1', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -67,7 +58,6 @@ serve(async (req: Request) => {
     // Create form data for Cloudinary upload (signed upload)
     const cloudinaryFormData = new FormData();
     cloudinaryFormData.append('file', new Blob([audioArrayBuffer], { type: audioFile.type }), audioFile.name);
-    cloudinaryFormData.append('resource_type', 'video');
     cloudinaryFormData.append('api_key', cloudinaryApiKey);
     cloudinaryFormData.append('timestamp', timestamp.toString());
     cloudinaryFormData.append('signature', signature);
