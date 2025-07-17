@@ -10,6 +10,8 @@ export interface SocialMediaPost {
   image_9_16_url?: string | null;
   image_3_4_url?: string | null;
   image_4_3_url?: string | null;
+  image_16_9_video_url?: string | null;
+  image_3_4_video_url?: string | null;
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;
@@ -27,6 +29,8 @@ export interface CreateSocialMediaPost {
   image_9_16_url?: string;
   image_3_4_url?: string;
   image_4_3_url?: string;
+  image_16_9_video_url?: string;
+  image_3_4_video_url?: string;
   status?: PostStatus;
   scheduled_date?: string;
   platform_tags?: string[];

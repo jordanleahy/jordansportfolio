@@ -515,6 +515,55 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     }
   };
 
+  // Video upload handlers
+  const handleVideoUpload = async (postId: string, url: string, type: '16_9_video' | '3_4_video') => {
+    try {
+      const updateData = type === '16_9_video' ? 
+        { image_16_9_video_url: url } : 
+        { image_3_4_video_url: url };
+      
+      await socialMediaService.updatePost(postId, updateData);
+      
+      toast({
+        title: "Video uploaded",
+        description: `${type === '16_9_video' ? '16:9' : '3:4'} video has been successfully uploaded.`,
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error updating post with video:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to save video URL.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVideoRemove = async (postId: string, type: '16_9_video' | '3_4_video') => {
+    try {
+      const updateData = type === '16_9_video' ? 
+        { image_16_9_video_url: null } : 
+        { image_3_4_video_url: null };
+      
+      await socialMediaService.updatePost(postId, updateData);
+      
+      toast({
+        title: "Video removed",
+        description: `${type === '16_9_video' ? '16:9' : '3:4'} video has been removed.`,
+      });
+
+      onPostsChange();
+    } catch (error) {
+      console.error('Error removing video:', error);
+      toast({
+        title: "Remove failed",
+        description: "Failed to remove video.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Create unified file select handler for mobile cards
   const handleMobileFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
     const file = event.target.files?.[0];
@@ -584,6 +633,8 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               onDelete={handleDeletePost}
               onGeneratePrompt={handleGenerateImagePrompt}
               onFileSelect={handleMobileFileSelect}
+              onVideoUpload={handleVideoUpload}
+              onVideoRemove={handleVideoRemove}
               onStatusChange={handleStatusChange}
               uploadingStates={uploadingStates}
             />

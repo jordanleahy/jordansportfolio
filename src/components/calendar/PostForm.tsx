@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
+import VideoUploadCard from './VideoUploadCard';
 import { socialMediaService } from '@/services/socialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -244,19 +245,19 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
           </div>
 
           <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
-            <ImageUploadCard
+            <VideoUploadCard
               title="16:9 Vid"
               aspectRatio="16/9"
-              imageUrl={formData.image_16_9_url}
-              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_url: url }))}
-              onImageRemove={() => setFormData(prev => ({ ...prev, image_16_9_url: undefined }))}
+              videoUrl={formData.image_16_9_video_url}
+              onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_video_url: url }))}
+              onVideoRemove={() => setFormData(prev => ({ ...prev, image_16_9_video_url: undefined }))}
             />
-            <ImageUploadCard
+            <VideoUploadCard
               title="3:4 Vid"
               aspectRatio="3/4"
-              imageUrl={formData.image_3_4_url}
-              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_url: url }))}
-              onImageRemove={() => setFormData(prev => ({ ...prev, image_3_4_url: undefined }))}
+              videoUrl={formData.image_3_4_video_url}
+              onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_video_url: url }))}
+              onVideoRemove={() => setFormData(prev => ({ ...prev, image_3_4_video_url: undefined }))}
             />
           </div>
 
