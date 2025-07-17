@@ -26,7 +26,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const [isGeneratingBlog, setIsGeneratingBlog] = useState(false);
+  const [creatingBlogIds, setCreatingBlogIds] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const file916InputRef = useRef<HTMLInputElement>(null);
   const file34InputRef = useRef<HTMLInputElement>(null);
@@ -126,7 +126,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   };
 
   const handleCreateBlogPost = async (post: SocialMediaPost) => {
-    setIsGeneratingBlog(true);
+    setCreatingBlogIds(prev => new Set(prev).add(post.id));
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -164,7 +164,11 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingBlog(false);
+      setCreatingBlogIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(post.id);
+        return newSet;
+      });
     }
   };
 
@@ -1074,9 +1078,9 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                       variant="outline"
                       onClick={() => handleCreateBlogPost(post)}
                       title="Create blog post"
-                      disabled={isGeneratingBlog}
+                      disabled={creatingBlogIds.has(post.id)}
                     >
-                      {isGeneratingBlog ? (
+                      {creatingBlogIds.has(post.id) ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Pen className="h-4 w-4" />

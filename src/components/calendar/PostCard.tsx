@@ -46,7 +46,7 @@ export const PostCard = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
-  const [isCreatingBlog, setIsCreatingBlog] = useState(false);
+  const [creatingBlogIds, setCreatingBlogIds] = useState<Set<string>>(new Set());
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,7 +61,7 @@ export const PostCard = ({
   };
 
   const handleCreateBlogPost = async () => {
-    setIsCreatingBlog(true);
+    setCreatingBlogIds(prev => new Set(prev).add(post.id));
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -99,7 +99,11 @@ export const PostCard = ({
         variant: "destructive",
       });
     } finally {
-      setIsCreatingBlog(false);
+      setCreatingBlogIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(post.id);
+        return newSet;
+      });
     }
   };
 
@@ -223,10 +227,10 @@ export const PostCard = ({
               size="sm"
               className="flex-1"
               onClick={handleCreateBlogPost}
-              disabled={isCreatingBlog}
+              disabled={creatingBlogIds.has(post.id)}
               title="Create blog post"
             >
-              {isCreatingBlog ? (
+              {creatingBlogIds.has(post.id) ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Pen className="h-4 w-4" />
