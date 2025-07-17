@@ -144,7 +144,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         throw response.error;
       }
 
-      const { blogPost } = response.data;
+      const { blogPost, redirectUrl } = response.data;
       
       toast({
         title: "Blog post created",
@@ -153,7 +153,11 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
 
       // Navigate to blog editor with the new post
       setTimeout(() => {
-        navigate(`/blog-editor/${blogPost.id}`);
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else {
+          navigate(`/blog-editor/${blogPost.id}`);
+        }
       }, 1000);
       
     } catch (error) {

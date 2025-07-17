@@ -26,12 +26,27 @@ export const usePublishedBlogPosts = () => {
   });
 };
 
-// Get blog post by slug
-export const useBlogPost = (slug: string | undefined) => {
+// Helper to detect if parameter is UUID (ID) or slug
+const isUUID = (value: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+};
+
+// Get blog post by slug or ID
+export const useBlogPost = (identifier: string | undefined) => {
   return useQuery({
-    queryKey: blogKeys.detail(slug || ''),
-    queryFn: () => slug ? BlogService.getPostBySlug(slug) : null,
-    enabled: !!slug,
+    queryKey: blogKeys.detail(identifier || ''),
+    queryFn: () => {
+      if (!identifier) return null;
+      
+      // If it's a UUID, fetch by ID (for editor), otherwise by slug (for public)
+      if (isUUID(identifier)) {
+        return BlogService.getPostById(identifier);
+      } else {
+        return BlogService.getPostBySlug(identifier);
+      }
+    },
+    enabled: !!identifier,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: (failureCount, error) => {

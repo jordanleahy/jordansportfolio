@@ -223,7 +223,8 @@ Requirements:
       JSON.stringify({ 
         success: true, 
         blogPost: blogPost,
-        message: 'Blog post draft created successfully'
+        message: 'Blog post draft created successfully',
+        redirectUrl: `/blog-editor/${blogPost.id}`
       }),
       { 
         headers: { 

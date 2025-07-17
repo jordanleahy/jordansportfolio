@@ -88,6 +88,26 @@ export class BlogService {
     })) as unknown as BlogPost[];
   }
 
+  static async getPostById(id: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch blog post: ${error.message}`);
+    }
+
+    return data ? {
+      ...data,
+      visual_sections: data.visual_sections as unknown as VisualSection[],
+      tldr_bullets: data.tldr_bullets as unknown as string[],
+      meta_keywords: data.meta_keywords as unknown as string[] | undefined,
+      tags: data.tags as unknown as string[] | undefined
+    } as unknown as BlogPost : null;
+  }
+
   static async getNextBlogPost(currentSlug: string): Promise<BlogPost | null> {
     // First get the current post's published_at date
     const { data: currentPost, error: currentError } = await supabase
