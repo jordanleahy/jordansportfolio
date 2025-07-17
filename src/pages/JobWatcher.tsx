@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Filter } from "lucide-react";
+import { Search, Calendar, Filter, LogOut, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { JobList } from "@/components/jobs/JobList";
 import { mockJobs } from "@/data/mockJobs";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { User, Session } from "@supabase/supabase-js";
 import {
   Select,
   SelectContent,
@@ -15,12 +18,47 @@ import {
 } from "@/components/ui/select";
 
 const JobWatcher = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [bookmarkedJobs, setBookmarkedJobs] = useState<string[]>(() => {
     const saved = localStorage.getItem('bookmarked-jobs');
     return saved ? JSON.parse(saved) : [];
   });
+  const { toast } = useToast();
+
+  // Auth state management
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        // Redirect unauthenticated users to auth page
+        if (!session?.user) {
+          window.location.href = '/auth';
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      // Redirect if not authenticated
+      if (!session?.user) {
+        window.location.href = '/auth';
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Filter and sort jobs based on search and sort preferences
   const filteredAndSortedJobs = useMemo(() => {
@@ -60,6 +98,43 @@ const JobWatcher = () => {
     setBookmarkedJobs(newBookmarks);
     localStorage.setItem('bookmarked-jobs', JSON.stringify(newBookmarks));
   };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      
+      // Redirect to auth page
+      window.location.href = '/auth';
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if no user (redirect will happen)
+  if (!user) {
+    return null;
+  }
 
   return (
     <>
@@ -104,6 +179,11 @@ const JobWatcher = () => {
                     <SelectItem value="title">Job Title</SelectItem>
                   </SelectContent>
                 </Select>
+                
+                <Button variant="outline" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
               </div>
             </div>
             
@@ -111,6 +191,7 @@ const JobWatcher = () => {
             <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
               <span>{filteredAndSortedJobs.length} jobs found</span>
               <span>{bookmarkedJobs.length} bookmarked</span>
+              <span>Welcome, {user.email}</span>
             </div>
           </div>
         </div>

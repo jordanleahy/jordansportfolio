@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { FileText, Globe, Mail } from "lucide-react";
+import { FileText, Globe, Mail, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -74,6 +75,24 @@ const HeroSection = () => {
           <Button 
             size="lg" 
             variant="secondary" 
+            className="w-full sm:w-auto"
+            asChild
+          >
+            <Link to="/jobs">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center"
+              >
+                <Search className="mr-2 h-5 w-5" />
+                Job Watcher
+              </motion.div>
+            </Link>
+          </Button>
+          
+          <Button 
+            size="lg" 
+            variant="outline" 
             className="w-full sm:w-auto"
             onClick={() => {
               const element = document.getElementById('contact');
