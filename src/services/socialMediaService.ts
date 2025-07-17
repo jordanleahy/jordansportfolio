@@ -93,5 +93,18 @@ export const socialMediaService = {
     
     const categories = [...new Set((data || []).map((item: any) => item.category as string))];
     return categories.filter(Boolean);
+  },
+
+  async convertAudioToVideo(postId: string, audioFile: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    formData.append('postId', postId);
+
+    const { data, error } = await supabase.functions.invoke('audio-to-video', {
+      body: formData,
+    });
+
+    if (error) throw error;
+    return data.videoUrl;
   }
 };

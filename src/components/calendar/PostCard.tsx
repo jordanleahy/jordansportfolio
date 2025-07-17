@@ -20,6 +20,8 @@ interface PostCardProps {
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
+  onAudioUpload?: (postId: string, file: File) => void;
+  audioProcessing?: Set<string>;
   uploadingStates: {
     [key: string]: boolean;
   };
@@ -34,6 +36,8 @@ export const PostCard = ({
   onVideoUpload,
   onVideoRemove,
   onStatusChange,
+  onAudioUpload,
+  audioProcessing,
   uploadingStates 
 }: PostCardProps) => {
   const { toast } = useToast();
@@ -265,12 +269,75 @@ export const PostCard = ({
                 onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
                 onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
               />
+              
+              {/* Audio to Video Upload */}
+              <div className="border rounded-lg p-3">
+                <h5 className="text-sm font-medium mb-2">Audio to Video</h5>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="audio/*,.mp3,.wav,.m4a,.aac,.flac"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file && onAudioUpload) {
+                        onAudioUpload(post.id, file);
+                      }
+                    }}
+                    className="hidden"
+                    id={`audio-upload-${post.id}`}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => document.getElementById(`audio-upload-${post.id}`)?.click()}
+                    disabled={audioProcessing?.has(post.id)}
+                    className="flex-1"
+                  >
+                    {audioProcessing?.has(post.id) ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Converting...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Audio
+                      </>
+                    )}
+                  </Button>
+                  {post.audio_to_video_url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = post.audio_to_video_url!;
+                        link.download = `${post.title.replace(/[^a-z0-9]/gi, '_')}_audio_video.mp4`;
+                        link.click();
+                      }}
+                      title="Download video"
+                    >
+                      Download
+                    </Button>
+                  )}
+                </div>
+                {post.audio_to_video_url && (
+                  <div className="mt-2">
+                    <video
+                      src={post.audio_to_video_url}
+                      className="w-full h-auto rounded border cursor-pointer"
+                      controls
+                      preload="metadata"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* Media Previews - Show any existing images or videos */}
-        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
+        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url || post.audio_to_video_url) && !showPhotos && !showVideos && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
@@ -352,6 +419,15 @@ export const PostCard = ({
                   src={post.general_video_url}
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
+                />
+              </div>
+            )}
+            {post.audio_to_video_url && (
+              <div className="flex-shrink-0">
+                <video
+                  src={post.audio_to_video_url}
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setPreviewImage({ url: post.audio_to_video_url!, alt: "Audio-generated video for " + post.title })}
                 />
               </div>
             )}

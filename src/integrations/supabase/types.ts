@@ -978,6 +978,7 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          audio_to_video_url: string | null
           category: string
           created_at: string
           day: number | null
@@ -1000,6 +1001,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          audio_to_video_url?: string | null
           category?: string
           created_at?: string
           day?: number | null
@@ -1022,6 +1024,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          audio_to_video_url?: string | null
           category?: string
           created_at?: string
           day?: number | null
