@@ -145,44 +145,39 @@ function parseJobsWithRegex(html, config, targetName) {
   // Create patterns based on ATS-specific selectors
   const containerPattern = atsConfig.jobListSelector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   
-  // For Workable specifically, look for the job list container structure
+  // For Workable specifically, look for job listings in the search results
   if (config.platform === 'workable') {
-    // Look for ul.whr-items container and its li.whr-item children
-    const workableContainerMatch = html.match(/<ul[^>]*class="[^"]*whr-items[^"]*"[^>]*>(.*?)<\/ul>/gs);
-    if (workableContainerMatch) {
-      console.log(`Found Workable job list container`);
-      const containerHtml = workableContainerMatch[0];
+    // Look for job links in the format [Job Title at Company](url)
+    const jobLinkMatches = [...html.matchAll(/<a[^>]*href="([^"]*view\/[^"]*)"[^>]*>(.*?)<\/a>/gs)];
+    console.log(`Found ${jobLinkMatches.length} Workable job links`);
+    
+    for (const match of jobLinkMatches) {
+      const link = match[1];
+      const titleText = match[2].replace(/<[^>]*>/g, '').trim();
       
-      // Extract individual job items
-      const jobMatches = [...containerHtml.matchAll(/<li[^>]*class="[^"]*whr-item[^"]*"[^>]*>(.*?)<\/li>/gs)];
-      console.log(`Found ${jobMatches.length} Workable job items`);
-      
-      for (const match of jobMatches) {
-        const jobHtml = match[1];
+      // Extract title and company from text like "Senior Product Designer at CompanyName"
+      const titleMatch = titleText.match(/^(.*?)\s+at\s+(.+)$/);
+      if (titleMatch) {
+        const title = titleMatch[1].trim();
+        const company = titleMatch[2].trim();
         
-        // Extract title from h3.whr-title
-        const titleMatch = jobHtml.match(/<h3[^>]*class="[^"]*whr-title[^"]*"[^>]*><a[^>]*>(.*?)<\/a><\/h3>/s);
-        const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+        // Look for location info after this link (in subsequent elements)
+        const linkIndex = html.indexOf(match[0]);
+        const afterLink = html.substring(linkIndex, linkIndex + 1000);
         
-        // Extract location from ul.whr-info li.whr-location
-        const locationMatch = jobHtml.match(/<li[^>]*class="[^"]*whr-location[^"]*"[^>]*>(.*?)<\/li>/s);
-        const location = locationMatch ? locationMatch[1].replace(/<[^>]*>/g, '').trim() : 'Remote';
+        // Extract location from nearby text patterns
+        const locationMatch = afterLink.match(/(Remote|Hybrid|On-site)\*\*([^*]+)/);
+        const location = locationMatch ? `${locationMatch[1]} - ${locationMatch[2].trim()}` : 'Remote';
         
-        // Extract link from h3.whr-title a
-        const linkMatch = jobHtml.match(/<h3[^>]*class="[^"]*whr-title[^"]*"[^>]*><a[^>]*href="([^"]*)"[^>]*>/s);
-        const link = linkMatch ? linkMatch[1] : '';
-        
-        // Extract date from ul.whr-info li.whr-date
-        const dateMatch = jobHtml.match(/<li[^>]*class="[^"]*whr-date[^"]*"[^>]*>(.*?)<\/li>/s);
-        const dateText = dateMatch ? dateMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+        // Extract posting date
+        const dateMatch = afterLink.match(/Posted\s+(\d+\s+(?:days?|hours?|weeks?|months?)\s+ago)/);
+        const dateText = dateMatch ? dateMatch[1] : '';
         
         if (title && title.length > 2 && isRecentJob(dateText)) {
-          jobs.push({ title, location, link, dateText });
-          console.log(`Found job: ${title} at ${location}`);
+          jobs.push({ title, location, link, dateText, company });
+          console.log(`Found Workable job: ${title} at ${company} in ${location}`);
         }
       }
-    } else {
-      console.log(`No Workable job container found in HTML`);
     }
   } else {
     // Fallback to generic parsing for other platforms
@@ -366,7 +361,7 @@ serve(async (req) => {
         const jobs = parseJobsWithRegex(html, config, target.name);
         
         const jobsToInsert = [];
-        const company = target.name.replace(/\s+(Greenhouse|Lever|Workable|BambooHR|SmartRecruiters|Jobs Board)$/i, '').trim();
+        let defaultCompany = target.name.replace(/\s+(Greenhouse|Lever|Workable|BambooHR|SmartRecruiters|Jobs Board)$/i, '').trim();
         
         for (const job of jobs) {
           try {
@@ -382,7 +377,8 @@ serve(async (req) => {
             // Skip if no title or duplicate
             if (!job.title || job.title.length < 3) continue;
             
-            const fingerprint = createJobFingerprint(job.title, company, job.location);
+            const jobCompany = job.company || defaultCompany;
+            const fingerprint = createJobFingerprint(job.title, jobCompany, job.location);
             if (existingFingerprints.has(fingerprint)) {
               continue;
             }
@@ -392,12 +388,12 @@ serve(async (req) => {
             
             jobsToInsert.push({
               title: job.title,
-              company,
+              company: jobCompany,
               platform: target.ats_platform,
               location: job.location,
               date_posted: new Date().toISOString().split('T')[0],
               application_url: fullUrl,
-              description: `${job.title} position at ${company} in ${job.location}`,
+              description: `${job.title} position at ${jobCompany} in ${job.location}`,
               job_type: 'Full-time',
               is_active: true,
               scraped_at: new Date().toISOString()
