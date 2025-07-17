@@ -8,6 +8,7 @@ import { AgentCard } from '@/components/agents/AgentCard';
 import { useAgents, useDeleteAgent } from '@/hooks/useAgents';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import Navigation from '@/components/Navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +57,9 @@ export default function Agents() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <Navigation />
+      
       {/* Mobile Header */}
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
