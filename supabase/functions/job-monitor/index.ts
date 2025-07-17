@@ -314,6 +314,9 @@ serve(async (req) => {
         const html = await response.text();
         console.log(`Fetched HTML for ${target.name}, length: ${html.length}`);
         
+        // Debug: Log first 500 chars of HTML to understand structure
+        console.log(`HTML preview for ${target.name}: ${html.substring(0, 500)}`);
+        
         // Use regex parsing instead of DOMParser
         const config = { platform: target.ats_platform };
         const jobs = parseJobsWithRegex(html, config, target.name);
