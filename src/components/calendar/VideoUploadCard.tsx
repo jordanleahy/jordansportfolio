@@ -102,7 +102,7 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
               </div>
               <input
                 type="file"
-                accept="video/*"
+                accept="video/mp4,video/webm,video/ogg,video/avi,video/mov,video/*"
                 onChange={handleFileUpload}
                 disabled={isUploading}
                 className="hidden"
