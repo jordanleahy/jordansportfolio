@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { SecService } from "@/services/secService";
+import { SecServiceOptimized } from "@/services/secServiceOptimized";
 import type { OfferingFilters } from "@/types/sec";
 
 // Query keys for consistent caching
@@ -22,19 +22,13 @@ export const useOfferings = (
 ) => {
   return useQuery({
     queryKey: secKeys.offeringsList(filters, page, pageSize),
-    queryFn: () => SecService.getOfferings(filters, page, pageSize),
-    staleTime: 1000 * 60 * 2, // 2 minutes for faster updates
+    queryFn: () => SecServiceOptimized.getOfferings(filters, page, pageSize),
+    staleTime: 1000 * 60 * 5, // 5 minutes for optimized queries
     retry: (failureCount, error: any) => {
-      // Log errors for debugging
-      console.error(`Query failed (attempt ${failureCount + 1}):`, error);
-      
-      // Don't retry server errors, but retry network issues
-      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('network')) {
-        return failureCount < 3;
-      }
-      return failureCount < 1; // Single retry for other errors
+      console.error(`Optimized query failed (attempt ${failureCount + 1}):`, error);
+      return failureCount < 2; // Reduced retries for faster queries
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     refetchOnWindowFocus: false,
   });
 };
@@ -43,15 +37,14 @@ export const useOfferings = (
 export const useOfferingDetail = (accessionnumber: string | undefined) => {
   return useQuery({
     queryKey: secKeys.offeringsDetail(accessionnumber || ''),
-    queryFn: () => SecService.getOfferingDetail(accessionnumber!),
+    queryFn: () => SecServiceOptimized.getOfferingDetail(accessionnumber!),
     enabled: !!accessionnumber,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes for detail queries
     retry: (failureCount, error: any) => {
-      // Don't retry on 404 errors
       if (error?.message?.includes('not found')) {
         return false;
       }
-      return failureCount < 2;
+      return failureCount < 1;
     },
   });
 };
@@ -60,9 +53,9 @@ export const useOfferingDetail = (accessionnumber: string | undefined) => {
 export const useIndustries = () => {
   return useQuery({
     queryKey: secKeys.industries(),
-    queryFn: SecService.getIndustries,
-    staleTime: 1000 * 60 * 30, // 30 minutes (industries don't change often)
-    retry: 2,
+    queryFn: SecServiceOptimized.getIndustries,
+    staleTime: 1000 * 60 * 60, // 1 hour (industries don't change often)
+    retry: 1,
     refetchOnWindowFocus: false,
   });
 };
@@ -71,9 +64,9 @@ export const useIndustries = () => {
 export const useSummaryStats = () => {
   return useQuery({
     queryKey: secKeys.summaryStats(),
-    queryFn: SecService.getSummaryStats,
-    staleTime: 0, // No caching - data only changes quarterly
-    retry: 2,
+    queryFn: SecServiceOptimized.getSummaryStats,
+    staleTime: 1000 * 60 * 30, // 30 minutes cache for summary stats
+    retry: 1,
     refetchOnWindowFocus: false,
   });
 };
@@ -85,8 +78,8 @@ export const usePrefetchOfferingDetail = () => {
   return (accessionnumber: string) => {
     queryClient.prefetchQuery({
       queryKey: secKeys.offeringsDetail(accessionnumber),
-      queryFn: () => SecService.getOfferingDetail(accessionnumber),
-      staleTime: 1000 * 60 * 10, // 10 minutes
+      queryFn: () => SecServiceOptimized.getOfferingDetail(accessionnumber),
+      staleTime: 1000 * 60 * 15, // 15 minutes
     });
   };
 };

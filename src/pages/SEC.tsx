@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Filter, X, TrendingUp, RotateCcw } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import { SummaryCards } from "@/components/sec/SummaryCards";
-import { OfferingsTable } from "@/components/sec/OfferingsTable";
+import { OfferingsTableOptimized } from "@/components/sec/OfferingsTableOptimized";
 import { FilterSidebar } from "@/components/sec/FilterSidebar";
 import { CompanyModal } from "@/components/sec/CompanyModal";
 import { Badge } from "@/components/ui/badge";
@@ -21,24 +21,43 @@ const SEC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    industries: [] as string[],
-    searchQuery: "",
-    fullySold: false,
-    amountRanges: [] as string[],
-    maxRaisedRanges: [] as string[],
-    states: [] as string[],
-    useDefaultFilters: true // Start with default view
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize filters from URL params
+  const [filters, setFilters] = useState(() => {
+    const urlFilters = {
+      industries: searchParams.get('industries')?.split(',').filter(Boolean) || [],
+      searchQuery: searchParams.get('search') || "",
+      fullySold: searchParams.get('fullySold') === 'true',
+      amountRanges: searchParams.get('amountRanges')?.split(',').filter(Boolean) || [],
+      maxRaisedRanges: searchParams.get('maxRaisedRanges')?.split(',').filter(Boolean) || [],
+      states: searchParams.get('states')?.split(',').filter(Boolean) || [],
+      useDefaultFilters: !searchParams.toString() // Default view if no params
+    };
+    return urlFilters;
   });
-  const [isDefaultView, setIsDefaultView] = useState(true);
+  
+  const [isDefaultView, setIsDefaultView] = useState(!searchParams.toString());
 
   const handleFiltersChange = (newFilters: any) => {
-    setFilters({ ...newFilters, useDefaultFilters: false });
+    const updatedFilters = { ...newFilters, useDefaultFilters: false };
+    setFilters(updatedFilters);
     setIsDefaultView(false);
+    
+    // Update URL params for persistence
+    const params = new URLSearchParams();
+    if (updatedFilters.industries?.length) params.set('industries', updatedFilters.industries.join(','));
+    if (updatedFilters.searchQuery) params.set('search', updatedFilters.searchQuery);
+    if (updatedFilters.fullySold) params.set('fullySold', 'true');
+    if (updatedFilters.amountRanges?.length) params.set('amountRanges', updatedFilters.amountRanges.join(','));
+    if (updatedFilters.maxRaisedRanges?.length) params.set('maxRaisedRanges', updatedFilters.maxRaisedRanges.join(','));
+    if (updatedFilters.states?.length) params.set('states', updatedFilters.states.join(','));
+    
+    setSearchParams(params);
   };
 
   const handleResetToDefault = () => {
-    setFilters({
+    const defaultFilters = {
       industries: [],
       searchQuery: "",
       fullySold: false,
@@ -46,8 +65,10 @@ const SEC = () => {
       maxRaisedRanges: [],
       states: [],
       useDefaultFilters: true
-    });
+    };
+    setFilters(defaultFilters);
     setIsDefaultView(true);
+    setSearchParams(new URLSearchParams()); // Clear URL params
   };
   const { toast } = useToast();
 
@@ -197,9 +218,9 @@ const SEC = () => {
               )}
             </div>
 
-            {/* Main Table */}
+            {/* Main Table - Optimized */}
             <div className="flex-1 min-w-0">
-              <OfferingsTable 
+              <OfferingsTableOptimized 
                 filters={filters}
                 onCompanySelect={setSelectedCompany}
               />
