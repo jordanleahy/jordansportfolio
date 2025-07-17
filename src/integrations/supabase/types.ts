@@ -982,14 +982,11 @@ export type Database = {
           created_at: string
           day: number | null
           description: string
-          general_gif_url: string | null
           general_video_url: string | null
           generated_image_prompt: string | null
           id: string
-          image_16_9_gif_url: string | null
           image_16_9_url: string | null
           image_16_9_video_url: string | null
-          image_3_4_gif_url: string | null
           image_3_4_url: string | null
           image_3_4_video_url: string | null
           image_4_3_url: string | null
@@ -1007,14 +1004,11 @@ export type Database = {
           created_at?: string
           day?: number | null
           description: string
-          general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
-          image_16_9_gif_url?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
-          image_3_4_gif_url?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
           image_4_3_url?: string | null
@@ -1032,14 +1026,11 @@ export type Database = {
           created_at?: string
           day?: number | null
           description?: string
-          general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
-          image_16_9_gif_url?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
-          image_3_4_gif_url?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
           image_4_3_url?: string | null

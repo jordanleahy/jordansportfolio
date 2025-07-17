@@ -249,19 +249,15 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               title="16:9 Vid"
               aspectRatio="16/9"
               videoUrl={formData.image_16_9_video_url}
-              gifUrl={formData.image_16_9_gif_url}
               onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_video_url: url }))}
               onVideoRemove={() => setFormData(prev => ({ ...prev, image_16_9_video_url: undefined }))}
-              onGifGenerated={(url) => setFormData(prev => ({ ...prev, image_16_9_gif_url: url }))}
             />
             <VideoUploadCard
               title="3:4 Vid"
               aspectRatio="3/4"
               videoUrl={formData.image_3_4_video_url}
-              gifUrl={formData.image_3_4_gif_url}
               onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_video_url: url }))}
               onVideoRemove={() => setFormData(prev => ({ ...prev, image_3_4_video_url: undefined }))}
-              onGifGenerated={(url) => setFormData(prev => ({ ...prev, image_3_4_gif_url: url }))}
             />
           </div>
 
