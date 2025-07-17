@@ -40,7 +40,9 @@ const HeroSection = memo(({ formData, handleInputChange }: any) => (
           value={formData.hero_headline}
           onChange={(e) => handleInputChange('hero_headline', e.target.value)}
           placeholder="Compelling headline for your blog post"
+          maxLength={60}
         />
+        <p className="text-xs text-muted-foreground mt-1">Required, 5-60 characters</p>
       </div>
       <div>
         <Label htmlFor="hero_subhead">Subheading *</Label>
@@ -50,16 +52,19 @@ const HeroSection = memo(({ formData, handleInputChange }: any) => (
           onChange={(e) => handleInputChange('hero_subhead', e.target.value)}
           placeholder="Supporting text that explains the value proposition"
           rows={3}
+          maxLength={150}
         />
+        <p className="text-xs text-muted-foreground mt-1">Required, 80-150 characters (15-25 words)</p>
       </div>
       <div>
-        <Label htmlFor="hero_image_url">Hero Image URL</Label>
+        <Label htmlFor="hero_image_url">Hero Image URL (optional)</Label>
         <Input
           id="hero_image_url"
           value={formData.hero_image_url}
           onChange={(e) => handleInputChange('hero_image_url', e.target.value)}
           placeholder="https://example.com/hero-image.jpg"
         />
+        <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
       </div>
       <div>
         <Label htmlFor="hero_video_url">Hero Video URL (optional)</Label>
@@ -69,6 +74,7 @@ const HeroSection = memo(({ formData, handleInputChange }: any) => (
           onChange={(e) => handleInputChange('hero_video_url', e.target.value)}
           placeholder="https://youtube.com/watch?v=..."
         />
+        <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
       </div>
       <div>
         <Label htmlFor="hero_badge">Badge Text (optional)</Label>
@@ -77,7 +83,9 @@ const HeroSection = memo(({ formData, handleInputChange }: any) => (
           value={formData.hero_badge}
           onChange={(e) => handleInputChange('hero_badge', e.target.value)}
           placeholder="NEW, TRENDING, etc."
+          maxLength={20}
         />
+        <p className="text-xs text-muted-foreground mt-1">Maximum 20 characters</p>
       </div>
     </CardContent>
   </Card>
@@ -99,7 +107,9 @@ const ContentSection = memo(({ formData, handleInputChange }: any) => (
             onChange={(e) => handleInputChange('intro_content', e.target.value)}
             placeholder="Write a compelling introduction that hooks the reader..."
             rows={4}
+            maxLength={450}
           />
+          <p className="text-xs text-muted-foreground mt-1">Required, 250-450 characters (50-75 words)</p>
         </div>
       </CardContent>
     </Card>
@@ -127,7 +137,9 @@ const ContentSection = memo(({ formData, handleInputChange }: any) => (
             onChange={(e) => handleInputChange('deep_dive_content', e.target.value)}
             placeholder="Additional detailed insights for interested readers..."
             rows={6}
+            maxLength={1500}
           />
+          <p className="text-xs text-muted-foreground mt-1">Optional, maximum 1500 characters (250 words)</p>
         </div>
       </CardContent>
     </Card>
@@ -151,6 +163,7 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
                 placeholder="Section headline"
                 maxLength={40}
               />
+              <p className="text-xs text-muted-foreground mt-1">Required, 3-40 characters</p>
             </div>
             <div>
               <Label>Content * (300-480 characters)</Label>
@@ -161,14 +174,16 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
                 rows={4}
                 maxLength={480}
               />
+              <p className="text-xs text-muted-foreground mt-1">Required, 60-80 words (300-480 characters)</p>
             </div>
             <div>
-              <Label>Image URL *</Label>
+              <Label>Image URL (optional)</Label>
               <Input
-                value={section.image_url}
+                value={section.image_url || ''}
                 onChange={(e) => handleVisualSectionChange(index, 'image_url', e.target.value)}
                 placeholder="https://example.com/image.jpg"
               />
+              <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
             </div>
             <div>
               <Label>CTA Text (optional)</Label>
@@ -185,6 +200,7 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
                 onChange={(e) => handleVisualSectionChange(index, 'cta_url', e.target.value)}
                 placeholder="https://example.com"
               />
+              <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
             </div>
           </CardContent>
         </Card>
@@ -201,16 +217,17 @@ const SummarySection = memo(({ formData, handleInputChange, handleTldrBulletChan
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="tldr_title">TL;DR Title</Label>
+          <Label htmlFor="tldr_title">TL;DR Title *</Label>
           <Input
             id="tldr_title"
             value={formData.tldr_title}
             onChange={(e) => handleInputChange('tldr_title', e.target.value)}
             placeholder="TL;DR"
           />
+          <p className="text-xs text-muted-foreground mt-1">Required field</p>
         </div>
         <div>
-          <Label>Bullet Points (3-5 points)</Label>
+          <Label>Bullet Points * (3-5 points)</Label>
           <div className="space-y-2">
             {formData.tldr_bullets.map((bullet: string, index: number) => (
               <div key={index} className="flex gap-2">
@@ -218,6 +235,7 @@ const SummarySection = memo(({ formData, handleInputChange, handleTldrBulletChan
                   value={bullet}
                   onChange={(e) => handleTldrBulletChange(index, e.target.value)}
                   placeholder={`Bullet point ${index + 1}`}
+                  maxLength={100}
                 />
                 {formData.tldr_bullets.length > 3 && (
                   <Button 
@@ -236,6 +254,7 @@ const SummarySection = memo(({ formData, handleInputChange, handleTldrBulletChan
                 Add Bullet Point
               </Button>
             )}
+            <p className="text-xs text-muted-foreground mt-1">Required, each bullet should be 10-100 characters</p>
           </div>
         </div>
       </CardContent>
@@ -254,15 +273,17 @@ const SummarySection = memo(({ formData, handleInputChange, handleTldrBulletChan
             onChange={(e) => handleInputChange('cta_text', e.target.value)}
             placeholder="Get Started Today"
           />
+          <p className="text-xs text-muted-foreground mt-1">Required field</p>
         </div>
         <div>
-          <Label htmlFor="cta_url">CTA URL</Label>
+          <Label htmlFor="cta_url">CTA URL (optional)</Label>
           <Input
             id="cta_url"
             value={formData.cta_url}
             onChange={(e) => handleInputChange('cta_url', e.target.value)}
             placeholder="https://example.com/signup"
           />
+          <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
         </div>
       </CardContent>
     </Card>
@@ -283,6 +304,7 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           onChange={(e) => setSlug(e.target.value)}
           placeholder="my-blog-post-title"
         />
+        <p className="text-xs text-muted-foreground mt-1">Required, must be unique</p>
       </div>
       <div>
         <Label htmlFor="meta_title">Meta Title *</Label>
@@ -291,7 +313,9 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           value={formData.meta_title}
           onChange={(e) => handleInputChange('meta_title', e.target.value)}
           placeholder="SEO optimized title"
+          maxLength={60}
         />
+        <p className="text-xs text-muted-foreground mt-1">Required, 10-60 characters</p>
       </div>
       <div>
         <Label htmlFor="meta_description">Meta Description *</Label>
@@ -301,7 +325,9 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           onChange={(e) => handleInputChange('meta_description', e.target.value)}
           placeholder="Brief description for search engines"
           rows={3}
+          maxLength={155}
         />
+        <p className="text-xs text-muted-foreground mt-1">Required, 50-155 characters</p>
       </div>
       <div>
         <Label htmlFor="category">Category *</Label>
@@ -311,6 +337,7 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           onChange={(e) => handleInputChange('category', e.target.value)}
           placeholder="Technology, Business, etc."
         />
+        <p className="text-xs text-muted-foreground mt-1">Required field</p>
       </div>
       <div>
         <Label htmlFor="tags">Tags (comma separated)</Label>
@@ -320,6 +347,7 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           onChange={(e) => handleTagsChange(e.target.value)}
           placeholder="tag1, tag2, tag3"
         />
+        <p className="text-xs text-muted-foreground mt-1">Optional, helps with categorization</p>
       </div>
       <div>
         <Label htmlFor="keywords">Meta Keywords (comma separated)</Label>
@@ -329,6 +357,7 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
           onChange={(e) => handleKeywordsChange(e.target.value)}
           placeholder="keyword1, keyword2, keyword3"
         />
+        <p className="text-xs text-muted-foreground mt-1">Optional, helps with SEO</p>
       </div>
     </CardContent>
   </Card>
@@ -512,10 +541,30 @@ const BlogEditor = () => {
     }
   }, [formData, debouncedAutoSave, existingPost]);
 
-  const handleSave = useCallback(async (shouldPublish = false) => {
+const handleSave = useCallback(async (shouldPublish = false) => {
     try {
       setSaving(true);
       
+      // Validate required fields before saving
+      if (!formData.hero_headline || !formData.hero_subhead || !formData.intro_content) {
+        toast({
+          variant: "destructive",
+          title: "Missing required fields",
+          description: "Please fill in all required hero and intro content fields."
+        });
+        return;
+      }
+
+      // Validate visual sections
+      if (!formData.visual_sections.every(section => section.headline && section.content)) {
+        toast({
+          variant: "destructive",
+          title: "Incomplete visual sections",
+          description: "Each visual section must have a headline and content."
+        });
+        return;
+      }
+
       // Auto-generate slug if not provided
       if (!slug) {
         const generatedSlug = formData.hero_headline
@@ -525,8 +574,20 @@ const BlogEditor = () => {
         setSlug(generatedSlug);
       }
 
+      // Clean up empty URLs
+      const cleanedVisualSections = formData.visual_sections.map(section => ({
+        ...section,
+        image_url: section.image_url || null,
+        cta_url: section.cta_url || null,
+        cta_text: section.cta_text || null
+      }));
+
       const postData = {
         ...formData,
+        visual_sections: cleanedVisualSections,
+        hero_image_url: formData.hero_image_url || null,
+        hero_video_url: formData.hero_video_url || null,
+        cta_url: formData.cta_url || null,
         slug: slug || formData.hero_headline.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-'),
         status: shouldPublish ? "published" : formData.status
       };
