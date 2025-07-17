@@ -662,6 +662,19 @@ const handleSave = useCallback(async (shouldPublish = false) => {
                 Save Draft
               </Button>
               <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  if (existingPost?.slug) {
+                    window.open(`/blog/${existingPost.slug}`, '_blank');
+                  }
+                }}
+                disabled={!existingPost}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+              </Button>
+              <Button 
                 size="sm" 
                 onClick={() => handleSave(true)}
                 disabled={saving}
