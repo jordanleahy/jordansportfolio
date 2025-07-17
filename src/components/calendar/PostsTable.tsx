@@ -13,6 +13,7 @@ import { ImagePromptModal } from './ImagePromptModal';
 import { ImageWatermarkModal } from './ImageWatermarkModal';
 import { ImagePreviewModal } from '@/components/ui/image-preview-modal';
 import { PostCard } from './PostCard';
+import VideoUploadCard from './VideoUploadCard';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -689,6 +690,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
               <TableHead>16:9 Vid</TableHead>
               <TableHead>3:4 Image</TableHead>
               <TableHead>3:4 Vid</TableHead>
+              <TableHead>Video</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Actions</TableHead>
@@ -892,6 +894,17 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                         </div>
                       )}
                     </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <VideoUploadCard
+                      title="General Video"
+                      aspectRatio="16/9"
+                      videoUrl={post.general_video_url || undefined}
+                      onVideoUpload={(url) => handleVideoUpload(post.id, url, 'general_video')}
+                      onVideoRemove={() => handleVideoRemove(post.id, 'general_video')}
+                    />
                   </div>
                 </TableCell>
                 <TableCell>
