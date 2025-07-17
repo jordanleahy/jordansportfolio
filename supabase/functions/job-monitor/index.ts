@@ -94,6 +94,11 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing required environment variables');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log('Starting job monitoring process...');
@@ -167,7 +172,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in job-monitor function:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'Unknown error occurred',
+        stack: error.stack 
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
