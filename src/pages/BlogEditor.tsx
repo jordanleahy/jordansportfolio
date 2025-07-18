@@ -606,7 +606,7 @@ const BlogEditor = () => {
     }
   }, [formData, debouncedAutoSave, existingPost]);
 
-const handleSave = useCallback(async (shouldPublish = false) => {
+  const handleSave = useCallback(async (shouldPublish = false) => {
     try {
       setSaving(true);
       
@@ -713,133 +713,141 @@ const handleSave = useCallback(async (shouldPublish = false) => {
       <Navigation />
       <div className="pt-16">
         <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Status and Actions */}
-        <div className="mb-6 p-4 border rounded-lg bg-card">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-medium text-muted-foreground">Post Status:</h2>
-              <Badge variant={formData.status === 'published' ? 'default' : 'secondary'}>
-                {formData.status}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {existingPost 
-                        ? "Are you sure you want to delete this blog post? This action cannot be undone."
-                        : "Are you sure you want to discard this draft? Any unsaved changes will be lost."
-                      }
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          {/* Status and Actions */}
+          <div className="mb-6 p-4 border rounded-lg bg-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-medium text-muted-foreground">Post Status:</h2>
+                <Badge variant={formData.status === 'published' ? 'default' : 'secondary'}>
+                  {formData.status}
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-3 justify-end sm:justify-start">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="min-h-[44px] sm:min-h-[36px]"
                     >
-                      {existingPost ? "Delete" : "Discard"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSave(false)}
-                disabled={saving}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Save Draft
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  if (slug) {
-                    window.open(`/blog/${slug}`, '_blank');
-                  }
-                }}
-                disabled={!slug}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => handleSave(true)}
-                disabled={saving}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Publish
-              </Button>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span className="hidden xs:inline">Delete</span>
+                      <span className="xs:hidden">Del</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {existingPost 
+                          ? "Are you sure you want to delete this blog post? This action cannot be undone."
+                          : "Are you sure you want to discard this draft? Any unsaved changes will be lost."
+                        }
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {existingPost ? "Delete" : "Discard"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleSave(false)}
+                  disabled={saving}
+                  className="min-h-[44px] sm:min-h-[36px]"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  <span className="hidden xs:inline">Save Draft</span>
+                  <span className="xs:hidden">Save</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    if (slug) {
+                      window.open(`/blog/${slug}`, '_blank');
+                    }
+                  }}
+                  disabled={!slug}
+                  className="min-h-[44px] sm:min-h-[36px]"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  <span className="hidden xs:inline">Preview</span>
+                  <span className="xs:hidden">View</span>
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => handleSave(true)}
+                  disabled={saving}
+                  className="min-h-[44px] sm:min-h-[36px] bg-primary hover:bg-primary/90"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  <span className="hidden xs:inline">Publish</span>
+                  <span className="xs:hidden">Pub</span>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-        <Tabs defaultValue="hero" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="hero">Hero</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="visuals">Visuals</TabsTrigger>
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="seo">SEO</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="hero" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="hero">Hero</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="visuals">Visuals</TabsTrigger>
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="seo">SEO</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-          {/* Hero Section */}
-          <TabsContent value="hero">
-            <HeroSection formData={formData} handleInputChange={handleInputChange} />
-          </TabsContent>
+            {/* Hero Section */}
+            <TabsContent value="hero">
+              <HeroSection formData={formData} handleInputChange={handleInputChange} />
+            </TabsContent>
 
-          {/* Content Section */}
-          <TabsContent value="content">
-            <ContentSection formData={formData} handleInputChange={handleInputChange} />
-          </TabsContent>
+            {/* Content Section */}
+            <TabsContent value="content">
+              <ContentSection formData={formData} handleInputChange={handleInputChange} />
+            </TabsContent>
 
-          {/* Visual Sections */}
-          <TabsContent value="visuals">
-            <VisualsSection formData={formData} handleVisualSectionChange={handleVisualSectionChange} />
-          </TabsContent>
+            {/* Visual Sections */}
+            <TabsContent value="visuals">
+              <VisualsSection formData={formData} handleVisualSectionChange={handleVisualSectionChange} />
+            </TabsContent>
 
-          {/* Summary Section */}
-          <TabsContent value="summary">
-            <SummarySection 
-              formData={formData} 
-              handleInputChange={handleInputChange}
-              handleTldrBulletChange={handleTldrBulletChange}
-              addTldrBullet={addTldrBullet}
-              removeTldrBullet={removeTldrBullet}
-            />
-          </TabsContent>
+            {/* Summary Section */}
+            <TabsContent value="summary">
+              <SummarySection 
+                formData={formData} 
+                handleInputChange={handleInputChange}
+                handleTldrBulletChange={handleTldrBulletChange}
+                addTldrBullet={addTldrBullet}
+                removeTldrBullet={removeTldrBullet}
+              />
+            </TabsContent>
 
-          {/* SEO Section */}
-          <TabsContent value="seo">
-            <SEOSection 
-              formData={formData}
-              slug={slug}
-              setSlug={setSlug}
-              handleInputChange={handleInputChange}
-              handleTagsChange={handleTagsChange}
-              handleKeywordsChange={handleKeywordsChange}
-            />
-          </TabsContent>
+            {/* SEO Section */}
+            <TabsContent value="seo">
+              <SEOSection 
+                formData={formData}
+                slug={slug}
+                setSlug={setSlug}
+                handleInputChange={handleInputChange}
+                handleTagsChange={handleTagsChange}
+                handleKeywordsChange={handleKeywordsChange}
+              />
+            </TabsContent>
 
-          {/* Settings Section */}
-          <TabsContent value="settings">
-            <SettingsSection formData={formData} handleInputChange={handleInputChange} />
-          </TabsContent>
-        </Tabs>
+            {/* Settings Section */}
+            <TabsContent value="settings">
+              <SettingsSection formData={formData} handleInputChange={handleInputChange} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
