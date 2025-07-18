@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, ArrowRight, Edit } from "lucide-react";
+import { Clock, Calendar, ArrowRight, Edit, Plus, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
@@ -44,11 +44,116 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+          <div className="text-center space-y-4 max-w-md mx-auto px-4">
+            <FileText className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-2xl font-bold">Failed to load blog posts</h2>
+            <p className="text-muted-foreground">
+              There was an error loading the blog posts. Please try again.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state when no published blogs exist
+  if (blogPosts.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        
+        {/* Hero Section */}
+        <section className="py-16 px-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h1 className="text-5xl font-bold mb-4">Design Stories</h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Insights, learnings, and behind-the-scenes stories from designing products that matter.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Empty State */}
+        <section className="py-16 px-4">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-center space-y-6"
+            >
+              <FileText className="h-16 w-16 text-muted-foreground/50 mx-auto" />
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold">No blog posts yet</h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Blog posts will appear here once they're published. 
+                  {user ? " You can create and publish your first blog post to get started." : " Check back soon for new content!"}
+                </p>
+              </div>
+              
+              {user && (
+                <div className="pt-4">
+                  <Button asChild size="lg">
+                    <Link to="/blog-editor">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create First Blog Post
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Newsletter Signup */}
+        <section className="py-16 px-4 bg-muted/30">
+          <div className="max-w-2xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
+              <p className="text-muted-foreground mb-8">
+                Get notified when new design insights and case studies are published.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-2 rounded-lg border border-input bg-background"
+                />
+                <Button>Subscribe</Button>
+              </div>
+            </motion.div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -152,14 +257,25 @@ const Blog = () => {
       {/* Other Posts Grid */}
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-2xl font-bold mb-8"
-          >
-            Latest Stories
-          </motion.h2>
+          <div className="flex items-center justify-between mb-8">
+            <motion.h2 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-2xl font-bold"
+            >
+              {featuredPost ? 'Latest Stories' : 'All Stories'}
+            </motion.h2>
+            
+            {user && (
+              <Button asChild variant="outline">
+                <Link to="/blog-editor">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Post
+                </Link>
+              </Button>
+            )}
+          </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {otherPosts.map((post, index) => (
