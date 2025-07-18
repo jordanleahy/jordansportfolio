@@ -3,6 +3,7 @@ export interface JobApplication {
   user_id: string;
   company_name: string;
   job_description: string;
+  job_description_link?: string;
   resume_link?: string;
   cover_letter_link?: string;
   created_at: string;
@@ -12,6 +13,7 @@ export interface JobApplication {
 export interface JobApplicationInput {
   company_name: string;
   job_description: string;
+  job_description_link?: string;
   resume_link?: string;
   cover_letter_link?: string;
 }

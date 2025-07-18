@@ -17,6 +17,7 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
   const [formData, setFormData] = useState<JobApplicationInput>({
     company_name: initialData?.company_name || "",
     job_description: initialData?.job_description || "",
+    job_description_link: initialData?.job_description_link || "",
     resume_link: initialData?.resume_link || "",
     cover_letter_link: initialData?.cover_letter_link || "",
   });
@@ -57,6 +58,17 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
               placeholder="Enter job description or title"
               className="min-h-[100px]"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job_description_link">Job Description Link</Label>
+            <Input
+              id="job_description_link"
+              type="url"
+              value={formData.job_description_link}
+              onChange={(e) => handleChange("job_description_link", e.target.value)}
+              placeholder="https://example.com/job-posting"
             />
           </div>
 

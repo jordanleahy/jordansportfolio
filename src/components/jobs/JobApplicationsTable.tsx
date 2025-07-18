@@ -37,6 +37,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
           <TableRow>
             <TableHead>Company</TableHead>
             <TableHead>Job Description</TableHead>
+            <TableHead>Job Link</TableHead>
             <TableHead>Resume</TableHead>
             <TableHead>Cover Letter</TableHead>
             <TableHead>Applied</TableHead>
@@ -53,6 +54,28 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                 <div className="truncate" title={application.job_description}>
                   {application.job_description}
                 </div>
+              </TableCell>
+              <TableCell>
+                {application.job_description_link ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="p-1 h-auto"
+                  >
+                    <a 
+                      href={application.job_description_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      <span className="sr-only">View Job Posting</span>
+                    </a>
+                  </Button>
+                ) : (
+                  <Badge variant="secondary">No link</Badge>
+                )}
               </TableCell>
               <TableCell>
                 {application.resume_link ? (

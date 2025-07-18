@@ -356,6 +356,7 @@ export type Database = {
           created_at: string
           id: string
           job_description: string
+          job_description_link: string | null
           resume_link: string | null
           updated_at: string
           user_id: string
@@ -366,6 +367,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_description: string
+          job_description_link?: string | null
           resume_link?: string | null
           updated_at?: string
           user_id: string
@@ -376,6 +378,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_description?: string
+          job_description_link?: string | null
           resume_link?: string | null
           updated_at?: string
           user_id?: string
