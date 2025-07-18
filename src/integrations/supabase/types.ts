@@ -349,6 +349,39 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          company_name: string
+          cover_letter_link: string | null
+          created_at: string
+          id: string
+          job_description: string
+          resume_link: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          cover_letter_link?: string | null
+          created_at?: string
+          id?: string
+          job_description: string
+          resume_link?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          cover_letter_link?: string | null
+          created_at?: string
+          id?: string
+          job_description?: string
+          resume_link?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       offerings: {
         Row: {
           accessionnumber: string
