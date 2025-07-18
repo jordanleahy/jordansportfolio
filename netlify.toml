@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/generate-prerender-routes.js && npm run build"
   publish = "dist"
 
 [build.processing]
@@ -16,11 +16,15 @@
 [build.processing.html]
   pretty_urls = true
 
-# Enable prerendering for better social media sharing
+# Enable prerendering for social media sharing
 [[plugins]]
-  package = "@netlify/plugin-sitemap"
+  package = "@netlify/plugin-prerender"
+  
+  [plugins.inputs]
+    publicDir = "dist"
+    routesFile = "prerender-routes.json"
 
-# Prerender blog routes for social media crawlers
+# Build environment
 [build.environment]
   NETLIFY_SKIP_PNPM_INSTALL = "true"
 
@@ -36,13 +40,7 @@
 
 # SPA fallback - exclude prerendered routes
 [[redirects]]
-  from = "/blog/*"
-  to = "/index.html"
-  status = 200
-  force = false
-  conditions = {Role = ["admin"]}
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
