@@ -63,7 +63,9 @@ export const BlogTemplate = ({
         <meta property="og:title" content={post.meta_title} />
         <meta property="og:description" content={post.meta_description} />
         <meta property="og:image" content={post.og_image_url || post.hero_image_url} />
+        <meta property="og:url" content={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
         <meta property="og:type" content="article" />
+        <link rel="canonical" href={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
