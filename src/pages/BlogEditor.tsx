@@ -179,15 +179,62 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
               <p className="text-xs text-muted-foreground mt-1">Required, 60-80 words (300-480 characters)</p>
             </div>
             <div>
-              <Label className="mb-3 block">Image (optional)</Label>
-              <ImageUploadCard
-                title={`Visual Section ${index + 1}`}
-                aspectRatio="16/9"
-                imageUrl={section.image_url || ''}
-                onImageUpload={(url) => handleVisualSectionChange(index, 'image_url', url)}
-                onImageRemove={() => handleVisualSectionChange(index, 'image_url', '')}
-              />
-              <p className="text-xs text-muted-foreground mt-1">Upload an image or provide a URL</p>
+              <Label>Image (optional)</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={section.image_url || ''}
+                  onChange={(e) => handleVisualSectionChange(index, 'image_url', e.target.value)}
+                  placeholder="Paste image or enter URL"
+                  onPaste={async (e) => {
+                    const items = e.clipboardData?.items;
+                    if (items) {
+                      for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        if (item.type.startsWith('image/')) {
+                          e.preventDefault();
+                          const file = item.getAsFile();
+                          if (file) {
+                            try {
+                              const { uploadImage } = await import('@/utils/imageUpload');
+                              const url = await uploadImage(file);
+                              if (url) handleVisualSectionChange(index, 'image_url', url);
+                            } catch (error) {
+                              console.error('Failed to upload pasted image:', error);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id={`image-upload-${index}`}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      try {
+                        const { uploadImage } = await import('@/utils/imageUpload');
+                        const url = await uploadImage(file);
+                        if (url) handleVisualSectionChange(index, 'image_url', url);
+                      } catch (error) {
+                        console.error('Failed to upload image:', error);
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById(`image-upload-${index}`)?.click()}
+                >
+                  Browse
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Paste image, browse file, or enter URL</p>
             </div>
             <div>
               <Label>CTA Text (optional)</Label>
