@@ -90,17 +90,30 @@ const Blog = () => {
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                   <div className="md:flex">
                     <div className="md:w-1/2">
-                      <div className="aspect-video bg-muted"></div>
+                      {featuredPost.hero_image_url ? (
+                        <img 
+                          src={featuredPost.hero_image_url} 
+                          alt={featuredPost.hero_headline}
+                          className="aspect-video w-full object-cover"
+                        />
+                      ) : (
+                        <div className="aspect-video bg-muted"></div>
+                      )}
                     </div>
                     <div className="md:w-1/2 p-8">
                       <div className="flex items-start justify-between mb-4">
                         <Badge>{featuredPost.category}</Badge>
                         {user && (
-                          <Link to={`/blog-editor/${featuredPost.slug}`}>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.location.href = `/blog-editor/${featuredPost.slug}`;
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                       <h2 className="text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
@@ -162,16 +175,29 @@ const Blog = () => {
                   onMouseEnter={() => handleMouseEnter(post.slug)}
                 >
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
-                    <div className="aspect-video bg-muted"></div>
+                    {post.hero_image_url ? (
+                      <img 
+                        src={post.hero_image_url} 
+                        alt={post.hero_headline}
+                        className="aspect-video w-full object-cover"
+                      />
+                    ) : (
+                      <div className="aspect-video bg-muted"></div>
+                    )}
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <Badge variant="secondary">{post.category}</Badge>
                         {user && (
-                          <Link to={`/blog-editor/${post.slug}`}>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.location.href = `/blog-editor/${post.slug}`;
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                       <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
