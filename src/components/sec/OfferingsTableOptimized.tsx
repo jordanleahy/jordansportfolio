@@ -18,12 +18,15 @@ import {
   ArrowUp, 
   ArrowDown, 
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from "lucide-react";
 import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
+import { PromptModal } from "./PromptModal";
+import { buildPrompt, mapOfferingToSecOffering, cachePrompt, loadCachedPrompt } from "@/lib/promptBuilder";
 
 interface OfferingsTableOptimizedProps {
   filters: any;
@@ -40,6 +43,9 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [promptCompanyName, setPromptCompanyName] = useState("");
   const itemsPerPage = 50; // Optimized page size
 
   // Debounce search query for performance
@@ -60,6 +66,14 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, filters, sortField, sortDirection]);
+
+  // Load cached prompt on component mount
+  useEffect(() => {
+    const cached = loadCachedPrompt();
+    if (cached) {
+      setGeneratedPrompt(cached);
+    }
+  }, []);
 
   // All data comes pre-processed from the server
   const offerings = offeringsData?.data || [];
@@ -105,6 +119,15 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
     return sortDirection === "asc" ? 
       <ArrowUp className="ml-2 h-4 w-4 text-primary" /> : 
       <ArrowDown className="ml-2 h-4 w-4 text-primary" />;
+  };
+
+  const handleGeneratePrompt = (offering: any) => {
+    const secOffering = mapOfferingToSecOffering(offering);
+    const prompt = buildPrompt(secOffering);
+    setGeneratedPrompt(prompt);
+    setPromptCompanyName(secOffering.company);
+    cachePrompt(prompt);
+    setIsPromptModalOpen(true);
   };
 
   if (isLoading) {
@@ -230,12 +253,13 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                   </Button>
                 </TableHead>
                 <TableHead>Founder/Executive</TableHead>
+                <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-red-500">
+                  <TableCell colSpan={8} className="text-center py-8 text-red-500">
                     <div>
                       <p className="font-semibold">Error loading SEC offerings</p>
                       <p className="text-sm mt-1">{error.message}</p>
@@ -252,7 +276,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 </TableRow>
               ) : offerings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     <div>
                       <p className="font-semibold">No SEC offerings found</p>
                       <p className="text-sm mt-1">
@@ -268,13 +292,15 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 offerings.map((offering: any) => (
                   <TableRow 
                     key={offering.accessionnumber}
-                    className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => {
-                      setSelectedOfferingId(offering.accessionnumber);
-                      setIsModalOpen(true);
-                    }}
+                    className="hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="font-medium">
+                    <TableCell 
+                      className="font-medium cursor-pointer"
+                      onClick={() => {
+                        setSelectedOfferingId(offering.accessionnumber);
+                        setIsModalOpen(true);
+                      }}
+                    >
                       <div>
                         <div className="font-semibold">
                           {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}
@@ -314,6 +340,20 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                     </TableCell>
                     <TableCell>
                       {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGeneratePrompt(offering);
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <FileText className="h-3 w-3" />
+                        Generate Prompt
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -365,6 +405,13 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           setIsModalOpen(false);
           setSelectedOfferingId(null);
         }}
+      />
+
+      <PromptModal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        prompt={generatedPrompt}
+        companyName={promptCompanyName}
       />
     </Card>
   );
