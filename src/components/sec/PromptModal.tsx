@@ -93,39 +93,29 @@ export const PromptModal: React.FC<PromptModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-lg font-semibold">
-            Research Prompt for {companyName}
-          </DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </DialogHeader>
-        
-        <div className="flex-1 flex flex-col space-y-4">
+        <DialogHeader className="space-y-4 pb-4">
+          <div className="flex flex-row items-center justify-between space-y-0">
+            <DialogTitle className="text-lg font-semibold">
+              Research Prompt for {companyName}
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <p className="text-sm text-muted-foreground">
             Copy this prompt and paste it into ChatGPT, Claude, or your preferred AI assistant for comprehensive company research.
           </p>
           
-          <div className="flex-1 min-h-0">
-            <Textarea
-              ref={textareaRef}
-              value={prompt}
-              readOnly
-              className="h-full min-h-[400px] font-mono text-sm resize-none"
-              placeholder="Prompt will appear here..."
-            />
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
             <Button
               onClick={handleCopyToClipboard}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-1 sm:flex-none"
               size="sm"
             >
               <Copy className="h-4 w-4" />
@@ -135,23 +125,23 @@ export const PromptModal: React.FC<PromptModalProps> = ({
             <Button
               onClick={handleDownloadAsText}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-1 sm:flex-none"
               size="sm"
             >
               <Download className="h-4 w-4" />
               Download as .txt
             </Button>
-            
-            <div className="flex-1" />
-            
-            <Button
-              onClick={onClose}
-              variant="secondary"
-              size="sm"
-            >
-              Close
-            </Button>
           </div>
+        </DialogHeader>
+        
+        <div className="flex-1 min-h-0">
+          <Textarea
+            ref={textareaRef}
+            value={prompt}
+            readOnly
+            className="h-full min-h-[400px] font-mono text-sm resize-none"
+            placeholder="Prompt will appear here..."
+          />
         </div>
       </DialogContent>
     </Dialog>
