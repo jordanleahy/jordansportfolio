@@ -24,9 +24,9 @@ export class SecServiceOptimized {
       .filter('totalamountsold', 'not.is', null)
       .gt('totalamountsold', 0);
 
-    // Apply default filters (server-side)
-    if (filters.useDefaultFilters) {
-      console.log('🚀 Applying server-side default filters');
+    // Apply default filters (server-side) - only if no specific filters are applied
+    if (filters.useDefaultFilters && (!filters.industries || filters.industries.length === 0)) {
+      console.log('🚀 Applying server-side default tech filters');
       
       // Technology industry filtering
       const techKeywords = [
@@ -40,9 +40,6 @@ export class SecServiceOptimized {
       ).join(',');
       
       query = query.or(techFilter);
-      
-      // US companies only
-      query = query.eq('is_us_company', true);
       
       // Must have required fields
       query = query
