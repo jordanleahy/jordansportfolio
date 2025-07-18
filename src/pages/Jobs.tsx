@@ -14,7 +14,7 @@ import {
   useDeleteJobApplication 
 } from "@/hooks/useJobApplications";
 import { JobApplication, JobApplicationInput } from "@/types/jobApplication";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function Jobs() {
   const [user, setUser] = useState<any>(null);
@@ -70,15 +70,14 @@ export default function Jobs() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         <div className="container mx-auto py-8 px-4">
           <div className="space-y-6">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-32 w-full" />
           </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
@@ -87,8 +86,7 @@ export default function Jobs() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -143,6 +141,6 @@ export default function Jobs() {
           )}
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
