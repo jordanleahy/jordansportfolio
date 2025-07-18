@@ -72,23 +72,7 @@ const HeroSection = () => {
             </motion.a>
           </Button>
           
-          <Button 
-            size="lg" 
-            variant="secondary" 
-            className="w-full sm:w-auto"
-            asChild
-          >
-            <Link to="/jobs">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center"
-              >
-                <Search className="mr-2 h-5 w-5" />
-                Job Watcher
-              </motion.div>
-            </Link>
-          </Button>
+          {/* Job Watcher button removed */}
           
           <Button 
             size="lg" 
