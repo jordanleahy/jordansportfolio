@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost } from "@/hooks/useBlogQueries";
 import Navigation from "@/components/Navigation";
+import { ImageUploadCard } from "@/components/calendar/ImageUploadCard";
 
 // Debounce utility
 const useDebounce = (callback: Function, delay: number) => {
@@ -178,13 +179,15 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
               <p className="text-xs text-muted-foreground mt-1">Required, 60-80 words (300-480 characters)</p>
             </div>
             <div>
-              <Label>Image URL (optional)</Label>
-              <Input
-                value={section.image_url || ''}
-                onChange={(e) => handleVisualSectionChange(index, 'image_url', e.target.value)}
-                placeholder="https://example.com/image.jpg"
+              <Label className="mb-3 block">Image (optional)</Label>
+              <ImageUploadCard
+                title={`Visual Section ${index + 1}`}
+                aspectRatio="16/9"
+                imageUrl={section.image_url || ''}
+                onImageUpload={(url) => handleVisualSectionChange(index, 'image_url', url)}
+                onImageRemove={() => handleVisualSectionChange(index, 'image_url', '')}
               />
-              <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
+              <p className="text-xs text-muted-foreground mt-1">Upload an image or provide a URL</p>
             </div>
             <div>
               <Label>CTA Text (optional)</Label>
