@@ -12,7 +12,8 @@ import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2 } from "lucide-react"
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { useBlogPost, useCreateBlogPost, useUpdateBlogPost } from "@/hooks/useBlogQueries";
+import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Navigation from "@/components/Navigation";
 import { ImageUploadCard } from "@/components/calendar/ImageUploadCard";
 
@@ -465,6 +466,7 @@ const BlogEditor = () => {
   const { data: existingPost, isLoading: loading } = useBlogPost(id);
   const createPostMutation = useCreateBlogPost();
   const updatePostMutation = useUpdateBlogPost();
+  const deletePostMutation = useDeleteBlogPost();
   
   const [saving, setSaving] = useState(false);
 
@@ -676,6 +678,21 @@ const handleSave = useCallback(async (shouldPublish = false) => {
     }
   }, [formData, slug, existingPost, updatePostMutation, createPostMutation, navigate]);
 
+  const handleDelete = useCallback(async () => {
+    if (!existingPost) return;
+    
+    try {
+      await deletePostMutation.mutateAsync(existingPost.id);
+      toast({
+        title: "Blog post deleted",
+        description: "The blog post has been permanently deleted."
+      });
+      navigate('/admin-blog');
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  }, [existingPost, deletePostMutation, navigate, toast]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -702,6 +719,36 @@ const handleSave = useCallback(async (shouldPublish = false) => {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
+              {existingPost && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this blog post? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
               <Button 
                 variant="outline" 
                 size="sm" 
