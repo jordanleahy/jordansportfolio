@@ -136,13 +136,13 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   const resetFilters = () => {
     const resetFilters = {
-      industries: [],
+      industries: ['Other Technology'],
       searchQuery: "",
       fullySold: false,
       amountRanges: [],
       maxRaisedRanges: [],
-      states: [],
-      useDefaultFilters: false
+      states: ['NY'],
+      useDefaultFilters: true
     };
     setSearchQuery("");
     onFiltersChange(resetFilters);

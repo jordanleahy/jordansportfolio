@@ -25,14 +25,15 @@ const SEC = () => {
   
   // Initialize filters from URL params
   const [filters, setFilters] = useState(() => {
+    const hasUrlParams = searchParams.toString();
     const urlFilters = {
-      industries: searchParams.get('industries')?.split(',').filter(Boolean) || [],
+      industries: searchParams.get('industries')?.split(',').filter(Boolean) || (hasUrlParams ? [] : ['Other Technology']),
       searchQuery: searchParams.get('search') || "",
       fullySold: searchParams.get('fullySold') === 'true',
       amountRanges: searchParams.get('amountRanges')?.split(',').filter(Boolean) || [],
       maxRaisedRanges: searchParams.get('maxRaisedRanges')?.split(',').filter(Boolean) || [],
-      states: searchParams.get('states')?.split(',').filter(Boolean) || [],
-      useDefaultFilters: !searchParams.toString() // Default view if no params
+      states: searchParams.get('states')?.split(',').filter(Boolean) || (hasUrlParams ? [] : ['NY']),
+      useDefaultFilters: !hasUrlParams // Default view if no params
     };
     return urlFilters;
   });
@@ -58,12 +59,12 @@ const SEC = () => {
 
   const handleResetToDefault = () => {
     const defaultFilters = {
-      industries: [],
+      industries: ['Other Technology'],
       searchQuery: "",
       fullySold: false,
       amountRanges: [],
       maxRaisedRanges: [],
-      states: [],
+      states: ['NY'],
       useDefaultFilters: true
     };
     setFilters(defaultFilters);
