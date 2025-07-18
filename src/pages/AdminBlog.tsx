@@ -122,7 +122,7 @@ const AdminBlog = () => {
                   post.status === 'published' ? 'default' : 
                   post.status === 'draft' ? 'secondary' : 'outline'
                 }>
-                  {post.status}
+                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                 </Badge>
               </TableCell>
               <TableCell>
