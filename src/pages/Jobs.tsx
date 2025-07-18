@@ -91,9 +91,14 @@ export default function Jobs() {
       <Navigation />
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+            <div className="space-y-1">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Welcome back, {user?.email?.split('@')[0] || 'User'}
+                </p>
+                <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
+              </div>
               <p className="text-muted-foreground">
                 Track your job applications and stay organized in your job search.
               </p>
