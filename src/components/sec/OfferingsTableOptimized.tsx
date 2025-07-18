@@ -23,9 +23,11 @@ import {
 } from "lucide-react";
 import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 import { PromptModal } from "./PromptModal";
+import { OfferingCard } from "./OfferingCard";
 import { buildPrompt, mapOfferingToSecOffering, cachePrompt, loadCachedPrompt } from "@/lib/promptBuilder";
 
 interface OfferingsTableOptimizedProps {
@@ -50,6 +52,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
 
   // Debounce search query for performance
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const isMobile = useIsMobile();
 
   // Build filters - all processing is now server-side
   const queryFilters: OfferingFilters = {
@@ -188,179 +191,228 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-32">Actions</TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("companyName")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
+        {/* Mobile Card Layout */}
+        {isMobile ? (
+          <div className="p-4 space-y-4">
+            {error ? (
+              <div className="text-center py-8 text-red-500">
+                <div>
+                  <p className="font-semibold">Error loading SEC offerings</p>
+                  <p className="text-sm mt-1">{error.message}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => window.location.reload()}
                   >
-                    Company Name
-                    {getSortIcon("companyName")}
+                    Retry
                   </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("amountRaised")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
-                  >
-                    Raise Target
-                    {getSortIcon("amountRaised")}
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("amountSold")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
-                  >
-                    Amount Sold
-                    {getSortIcon("amountSold")}
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("percentRaised")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
-                  >
-                    % Raised
-                    {getSortIcon("percentRaised")}
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("dateOfFirstSale")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
-                  >
-                    Date of First Sale
-                    {getSortIcon("dateOfFirstSale")}
-                  </Button>
-                </TableHead>
-                <TableHead>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort("industry")}
-                    className="h-auto p-0 font-semibold hover:bg-muted/50"
-                  >
-                    Industry
-                    {getSortIcon("industry")}
-                  </Button>
-                </TableHead>
-                <TableHead>Founder/Executive</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {error ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-red-500">
-                    <div>
-                      <p className="font-semibold">Error loading SEC offerings</p>
-                      <p className="text-sm mt-1">{error.message}</p>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2"
-                        onClick={() => window.location.reload()}
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : offerings.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    <div>
-                      <p className="font-semibold">No SEC offerings found</p>
-                      <p className="text-sm mt-1">
-                        {filters.useDefaultFilters 
-                          ? "No US tech companies found with these filters. Try adjusting your criteria."
-                          : "Import data or adjust your search criteria to see results."
-                        }
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                offerings.map((offering: any) => (
-                  <TableRow 
+                </div>
+              </div>
+            ) : offerings.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <div>
+                  <p className="font-semibold">No SEC offerings found</p>
+                  <p className="text-sm mt-1">
+                    {filters.useDefaultFilters 
+                      ? "No US tech companies found with these filters. Try adjusting your criteria."
+                      : "Import data or adjust your search criteria to see results."
+                    }
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {offerings.map((offering: any) => (
+                  <OfferingCard
                     key={offering.accessionnumber}
-                    className="hover:bg-muted/50 transition-colors"
-                  >
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGeneratePrompt(offering);
-                        }}
-                        className="flex items-center gap-1"
-                      >
-                        <FileText className="h-3 w-3" />
-                        Generate Prompt
-                      </Button>
-                    </TableCell>
-                    <TableCell 
-                      className="font-medium cursor-pointer"
-                      onClick={() => {
-                        setSelectedOfferingId(offering.accessionnumber);
-                        setIsModalOpen(true);
-                      }}
+                    offering={offering}
+                    onGeneratePrompt={handleGeneratePrompt}
+                    onViewDetails={(offeringId) => {
+                      setSelectedOfferingId(offeringId);
+                      setIsModalOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Desktop Table Layout */
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-32">Actions</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("companyName")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
                     >
+                      Company Name
+                      {getSortIcon("companyName")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("amountRaised")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
+                    >
+                      Raise Target
+                      {getSortIcon("amountRaised")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("amountSold")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
+                    >
+                      Amount Sold
+                      {getSortIcon("amountSold")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("percentRaised")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
+                    >
+                      % Raised
+                      {getSortIcon("percentRaised")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("dateOfFirstSale")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
+                    >
+                      Date of First Sale
+                      {getSortIcon("dateOfFirstSale")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("industry")}
+                      className="h-auto p-0 font-semibold hover:bg-muted/50"
+                    >
+                      Industry
+                      {getSortIcon("industry")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>Founder/Executive</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {error ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-red-500">
                       <div>
-                        <div className="font-semibold">
-                          {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {offering.issuers?.[0]?.city && offering.issuers?.[0]?.stateorcountrydescription 
-                            ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}`
-                            : offering.company_city && offering.company_location
-                            ? `${offering.company_city}, ${offering.company_location}`
-                            : 'Location not specified'
-                          }
-                        </div>
+                        <p className="font-semibold">Error loading SEC offerings</p>
+                        <p className="text-sm mt-1">{error.message}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={() => window.location.reload()}
+                        >
+                          Retry
+                        </Button>
                       </div>
                     </TableCell>
-                    <TableCell className="font-semibold text-green-600">
-                      {offering.totalofferingamount 
-                        ? formatCurrency(offering.totalofferingamount) 
-                        : 'Not disclosed'
-                      }
-                    </TableCell>
-                    <TableCell className="font-semibold text-blue-600">
-                      {offering.totalamountsold 
-                        ? formatCurrency(offering.totalamountsold) 
-                        : 'Not disclosed'
-                      }
-                    </TableCell>
-                    <TableCell className="font-semibold text-purple-600">
-                      {formatPercentage(offering.totalamountsold, offering.totalofferingamount)}
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(offering.sale_date)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {offering.industrygrouptype || 'Other'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
+                  </TableRow>
+                ) : offerings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <div>
+                        <p className="font-semibold">No SEC offerings found</p>
+                        <p className="text-sm mt-1">
+                          {filters.useDefaultFilters 
+                            ? "No US tech companies found with these filters. Try adjusting your criteria."
+                            : "Import data or adjust your search criteria to see results."
+                          }
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ) : (
+                  offerings.map((offering: any) => (
+                    <TableRow 
+                      key={offering.accessionnumber}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGeneratePrompt(offering);
+                          }}
+                          className="flex items-center gap-1"
+                        >
+                          <FileText className="h-3 w-3" />
+                          Generate Prompt
+                        </Button>
+                      </TableCell>
+                      <TableCell 
+                        className="font-medium cursor-pointer"
+                        onClick={() => {
+                          setSelectedOfferingId(offering.accessionnumber);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <div>
+                          <div className="font-semibold">
+                            {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {offering.issuers?.[0]?.city && offering.issuers?.[0]?.stateorcountrydescription 
+                              ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}`
+                              : offering.company_city && offering.company_location
+                              ? `${offering.company_city}, ${offering.company_location}`
+                              : 'Location not specified'
+                            }
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold text-green-600">
+                        {offering.totalofferingamount 
+                          ? formatCurrency(offering.totalofferingamount) 
+                          : 'Not disclosed'
+                        }
+                      </TableCell>
+                      <TableCell className="font-semibold text-blue-600">
+                        {offering.totalamountsold 
+                          ? formatCurrency(offering.totalamountsold) 
+                          : 'Not disclosed'
+                        }
+                      </TableCell>
+                      <TableCell className="font-semibold text-purple-600">
+                        {formatPercentage(offering.totalamountsold, offering.totalofferingamount)}
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(offering.sale_date)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {offering.industrygrouptype || 'Other'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {/* Optimized Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t">
