@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,7 +43,7 @@ export const BlogVisualSection = ({
               transition={{ duration: 0.8, delay: 0.2 }}
               className="md:w-1/2"
             >
-              <div className="aspect-video md:aspect-square bg-muted relative overflow-hidden">
+              <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                 <img
                   src={imageUrl}
                   alt={headline}
