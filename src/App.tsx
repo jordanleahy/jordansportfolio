@@ -80,12 +80,13 @@ const DefaultErrorFallback = ({ error }: { error: Error }) => (
   </div>
 );
 
-const queryClient = new QueryClient();
+const App = () => {
+  const queryClient = React.useMemo(() => new QueryClient(), []);
 
-const App = () => (
-  <div className="min-h-screen w-full overflow-x-hidden">
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
+  return (
+    <div className="min-h-screen w-full overflow-x-hidden">
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -115,8 +116,9 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </HelmetProvider>
-  </div>
-);
+      </HelmetProvider>
+    </div>
+  );
+};
 
 export default App;
