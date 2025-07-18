@@ -192,6 +192,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-32">Actions</TableHead>
                 <TableHead>
                   <Button
                     variant="ghost"
@@ -253,7 +254,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                   </Button>
                 </TableHead>
                 <TableHead>Founder/Executive</TableHead>
-                <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -294,6 +294,20 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                     key={offering.accessionnumber}
                     className="hover:bg-muted/50 transition-colors"
                   >
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGeneratePrompt(offering);
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <FileText className="h-3 w-3" />
+                        Generate Prompt
+                      </Button>
+                    </TableCell>
                     <TableCell 
                       className="font-medium cursor-pointer"
                       onClick={() => {
@@ -340,20 +354,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                     </TableCell>
                     <TableCell>
                       {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGeneratePrompt(offering);
-                        }}
-                        className="flex items-center gap-1"
-                      >
-                        <FileText className="h-3 w-3" />
-                        Generate Prompt
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
