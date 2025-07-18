@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2, Send } from "lucide-react";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -729,10 +729,10 @@ const BlogEditor = () => {
                       variant="destructive" 
                       size="sm"
                       className="min-h-[44px] sm:min-h-[36px]"
+                      aria-label="Delete post"
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span className="hidden xs:inline">Delete</span>
-                      <span className="xs:hidden">Del</span>
+                      <Trash2 className="xs:mr-0 sm:mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Delete</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -762,10 +762,10 @@ const BlogEditor = () => {
                   onClick={() => handleSave(false)}
                   disabled={saving}
                   className="min-h-[44px] sm:min-h-[36px]"
+                  aria-label="Save draft"
                 >
-                  <Save className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">Save Draft</span>
-                  <span className="xs:hidden">Save</span>
+                  <Save className="xs:mr-0 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Save Draft</span>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -777,20 +777,20 @@ const BlogEditor = () => {
                   }}
                   disabled={!slug}
                   className="min-h-[44px] sm:min-h-[36px]"
+                  aria-label="Preview post"
                 >
-                  <Eye className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">Preview</span>
-                  <span className="xs:hidden">View</span>
+                  <Eye className="xs:mr-0 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Preview</span>
                 </Button>
                 <Button 
                   size="sm" 
                   onClick={() => handleSave(true)}
                   disabled={saving}
                   className="min-h-[44px] sm:min-h-[36px] bg-primary hover:bg-primary/90"
+                  aria-label="Publish post"
                 >
-                  <Eye className="mr-2 h-4 w-4" />
-                  <span className="hidden xs:inline">Publish</span>
-                  <span className="xs:hidden">Pub</span>
+                  <Send className="xs:mr-0 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Publish</span>
                 </Button>
               </div>
             </div>
