@@ -22,6 +22,7 @@ const Case3 = lazy(() => import("./pages/cases/Case3"));
 const SEC = lazy(() => import("./pages/SEC"));
 const Calendar = lazy(() => import("./pages/Calendar"));
 const AscertainToTheMoon = lazy(() => import("./pages/AscertainToTheMoon"));
+const Jobs = lazy(() => import("./pages/Jobs"));
 const JobWatcher = lazy(() => import("./pages/JobWatcher"));
 
 // Loading fallback component
@@ -107,7 +108,8 @@ const App = () => {
                   <Route path="/sec" element={<SEC />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/ascertaintothemoon" element={<AscertainToTheMoon />} />
-                  <Route path="/jobs" element={<JobWatcher />} />
+                  <Route path="/jobs" element={<Jobs />} />
+                  <Route path="/job-watcher" element={<JobWatcher />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
