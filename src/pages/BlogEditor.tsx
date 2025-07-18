@@ -410,6 +410,16 @@ const SEOSection = memo(({ formData, slug, setSlug, handleInputChange, handleTag
         />
         <p className="text-xs text-muted-foreground mt-1">Optional, helps with SEO</p>
       </div>
+      <div>
+        <Label htmlFor="og_image_url">OG Image URL</Label>
+        <Input
+          id="og_image_url"
+          value={formData.og_image_url || formData.hero_image_url || ''}
+          onChange={(e) => handleInputChange('og_image_url', e.target.value)}
+          placeholder="Will use Hero Image URL if empty"
+        />
+        <p className="text-xs text-muted-foreground mt-1">Auto-populated with Hero Image URL. Override for custom OG image.</p>
+      </div>
     </CardContent>
   </Card>
 ));
@@ -487,6 +497,7 @@ const BlogEditor = () => {
     meta_title: "",
     meta_description: "",
     meta_keywords: [],
+    og_image_url: "",
     category: "",
     tags: [],
 
@@ -518,6 +529,7 @@ const BlogEditor = () => {
         meta_title: existingPost.meta_title,
         meta_description: existingPost.meta_description,
         meta_keywords: (existingPost.meta_keywords as string[]) || [],
+        og_image_url: existingPost.og_image_url || "",
         category: existingPost.category,
         tags: (existingPost.tags as string[]) || [],
         featured: existingPost.featured,

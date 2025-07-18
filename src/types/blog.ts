@@ -38,6 +38,7 @@ export interface BlogPost {
   meta_title: string;
   meta_description: string;
   meta_keywords?: Json; // Will be cast to string[]
+  og_image_url?: string;
   
   // Technical fields
   word_count?: number;
@@ -100,6 +101,7 @@ export const BlogPostSchema = z.object({
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
   meta_keywords: z.array(z.string()).optional(),
+  og_image_url: z.string().optional(),
   
   // Technical fields
   featured: z.boolean().default(false),

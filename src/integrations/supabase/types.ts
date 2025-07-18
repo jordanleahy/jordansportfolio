@@ -34,6 +34,7 @@ export type Database = {
           meta_description: string
           meta_keywords: string[] | null
           meta_title: string
+          og_image_url: string | null
           published_at: string | null
           read_time: number | null
           share_enabled: boolean
@@ -66,6 +67,7 @@ export type Database = {
           meta_description: string
           meta_keywords?: string[] | null
           meta_title: string
+          og_image_url?: string | null
           published_at?: string | null
           read_time?: number | null
           share_enabled?: boolean
@@ -98,6 +100,7 @@ export type Database = {
           meta_description?: string
           meta_keywords?: string[] | null
           meta_title?: string
+          og_image_url?: string | null
           published_at?: string | null
           read_time?: number | null
           share_enabled?: boolean

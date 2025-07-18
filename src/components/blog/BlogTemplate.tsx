@@ -62,14 +62,14 @@ export const BlogTemplate = ({
         {/* Open Graph */}
         <meta property="og:title" content={post.meta_title} />
         <meta property="og:description" content={post.meta_description} />
-        <meta property="og:image" content={post.hero_image_url} />
+        <meta property="og:image" content={post.og_image_url || post.hero_image_url} />
         <meta property="og:type" content="article" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.meta_title} />
         <meta name="twitter:description" content={post.meta_description} />
-        <meta name="twitter:image" content={post.hero_image_url} />
+        <meta name="twitter:image" content={post.og_image_url || post.hero_image_url} />
         
         {/* Article metadata */}
         <meta property="article:published_time" content={post.published_at} />
