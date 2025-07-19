@@ -4,83 +4,310 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Edit, Save, X, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
+import { toast } from "sonner";
+
 interface PublicPortfolioViewProps {
   portfolio: any; // Extended portfolio with job_applications data
 }
-const PublicPortfolioView = ({
-  portfolio
-}: PublicPortfolioViewProps) => {
+
+const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
+  const [user, setUser] = useState<any>(null);
+  const [editingSections, setEditingSections] = useState<{[key: string]: boolean}>({});
+  const [editableContent, setEditableContent] = useState({
+    hero_headline: "",
+    hero_subheadline: "",
+    value_proposition: "",
+    cover_letter: "",
+    custom_video_url: ""
+  });
+
+  const updatePortfolio = useUpdateCompanyPortfolio();
   const content = portfolio.generated_content as any || {};
   const heroSection = content.hero_section || {};
-  return <PageLayout>
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Initialize editable content
+  useEffect(() => {
+    if (portfolio) {
+      setEditableContent({
+        hero_headline: heroSection?.headline || "",
+        hero_subheadline: heroSection?.subheadline || "",
+        value_proposition: heroSection?.value_proposition || "",
+        cover_letter: portfolio.cover_letter || "",
+        custom_video_url: portfolio.custom_video_url || ""
+      });
+    }
+  }, [portfolio]);
+
+  const canEdit = user && portfolio && portfolio.user_id === user.id;
+
+  const startEditing = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: true }));
+  };
+
+  const cancelEditing = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: false }));
+    // Reset to original values
+    if (portfolio) {
+      setEditableContent({
+        hero_headline: heroSection?.headline || "",
+        hero_subheadline: heroSection?.subheadline || "",
+        value_proposition: heroSection?.value_proposition || "",
+        cover_letter: portfolio.cover_letter || "",
+        custom_video_url: portfolio.custom_video_url || ""
+      });
+    }
+  };
+
+  const saveSection = async (section: string) => {
+    if (!portfolio) return;
+
+    try {
+      let updateData: any = {};
+
+      if (section === 'hero') {
+        updateData = {
+          generated_content: {
+            ...content,
+            hero_section: {
+              headline: editableContent.hero_headline,
+              subheadline: editableContent.hero_subheadline,
+              value_proposition: editableContent.value_proposition
+            }
+          }
+        };
+      } else if (section === 'cover_letter') {
+        updateData = { cover_letter: editableContent.cover_letter };
+      } else if (section === 'video') {
+        updateData = { custom_video_url: editableContent.custom_video_url };
+      }
+
+      await updatePortfolio.mutateAsync({
+        id: portfolio.id,
+        ...updateData
+      });
+
+      setEditingSections(prev => ({ ...prev, [section]: false }));
+      toast.success("Changes saved successfully!");
+    } catch (error) {
+      console.error("Error saving section:", error);
+      toast.error("Failed to save changes");
+    }
+  };
+
+  return (
+    <PageLayout>
       <div className="min-h-screen bg-gradient-to-br from-background to-background/90 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
-          {/* Edit Portfolio Button */}
-          <div className="flex justify-end mb-6">
-            <Button 
-              variant="default" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2 flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Edit Portfolio
-            </Button>
-          </div>
-
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            
+          <div className="text-center mb-12 relative group">
+            {canEdit && !editingSections.hero && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => startEditing('hero')}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+
+            {editingSections.hero ? (
+              <div className="space-y-4">
+                <Input
+                  value={editableContent.hero_headline}
+                  onChange={(e) => setEditableContent(prev => ({ ...prev, hero_headline: e.target.value }))}
+                  placeholder="Your compelling headline..."
+                  className="text-center text-2xl font-bold"
+                />
+                <Input
+                  value={editableContent.hero_subheadline}
+                  onChange={(e) => setEditableContent(prev => ({ ...prev, hero_subheadline: e.target.value }))}
+                  placeholder="Supporting message..."
+                  className="text-center text-lg"
+                />
+                <Textarea
+                  value={editableContent.value_proposition}
+                  onChange={(e) => setEditableContent(prev => ({ ...prev, value_proposition: e.target.value }))}
+                  placeholder="What unique value do you bring..."
+                  rows={3}
+                  className="text-center"
+                />
+                <div className="flex justify-center gap-2">
+                  <Button size="sm" onClick={() => saveSection('hero')}>
+                    <Save className="w-4 h-4 mr-1" />
+                    Save
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => cancelEditing('hero')}>
+                    <X className="w-4 h-4 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {heroSection?.headline && (
+                  <h1 className="text-4xl font-bold mb-4">{heroSection.headline}</h1>
+                )}
+                {heroSection?.subheadline && (
+                  <p className="text-xl text-muted-foreground mb-6">{heroSection.subheadline}</p>
+                )}
+                {heroSection?.value_proposition && (
+                  <p className="text-lg max-w-2xl mx-auto">{heroSection.value_proposition}</p>
+                )}
+              </>
+            )}
           </div>
 
-          {/* Video and Cover Letter Section - Side by side on desktop */}
+          {/* Video and Cover Letter Section */}
           <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
             {/* Video Section */}
-            <Card className="bg-transparent border-none shadow-none">
+            <Card className="bg-transparent border-none shadow-none relative group">
+              {canEdit && !editingSections.video && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => startEditing('video')}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+
               <CardContent className="p-0 space-y-4">
-                <AspectRatio ratio={9 / 16}>
-                  {portfolio.custom_video_url ? portfolio.custom_video_url.includes('youtube.com') || portfolio.custom_video_url.includes('youtu.be') ? <iframe src={portfolio.custom_video_url.replace('watch?v=', 'embed/')} className="w-full h-full rounded-lg" allowFullScreen title="Introduction Video" /> : <video className="w-full h-full object-cover rounded-lg" controls preload="metadata" muted autoPlay={false}>
-                        <source src={portfolio.custom_video_url} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video> : <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-                      <div className="text-center text-muted-foreground">
-                        <div className="w-16 h-16 bg-muted-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <div className="w-6 h-6 bg-muted-foreground/40 rounded-full"></div>
+                {editingSections.video ? (
+                  <div className="space-y-4">
+                    <Input
+                      value={editableContent.custom_video_url}
+                      onChange={(e) => setEditableContent(prev => ({ ...prev, custom_video_url: e.target.value }))}
+                      placeholder="Video URL..."
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => saveSection('video')}>
+                        <Save className="w-4 h-4 mr-1" />
+                        Save
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => cancelEditing('video')}>
+                        <X className="w-4 h-4 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <AspectRatio ratio={9 / 16}>
+                    {portfolio.custom_video_url ? (
+                      portfolio.custom_video_url.includes('youtube.com') || portfolio.custom_video_url.includes('youtu.be') ? (
+                        <iframe 
+                          src={portfolio.custom_video_url.replace('watch?v=', 'embed/')} 
+                          className="w-full h-full rounded-lg" 
+                          allowFullScreen 
+                          title="Introduction Video" 
+                        />
+                      ) : (
+                        <video className="w-full h-full object-cover rounded-lg" controls preload="metadata" muted autoPlay={false}>
+                          <source src={portfolio.custom_video_url} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      )
+                    ) : (
+                      <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+                        <div className="text-center text-muted-foreground">
+                          <div className="w-16 h-16 bg-muted-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="w-6 h-6 bg-muted-foreground/40 rounded-full"></div>
+                          </div>
+                          <p className="text-sm">Introduction Video</p>
+                          <p className="text-xs">Coming Soon</p>
                         </div>
-                        <p className="text-sm">Introduction Video</p>
-                        <p className="text-xs">Coming Soon</p>
                       </div>
-                    </div>}
-                </AspectRatio>
+                    )}
+                  </AspectRatio>
+                )}
                 <TimeOnTaskTimer />
               </CardContent>
             </Card>
 
             {/* Cover Letter Content */}
-            {portfolio.cover_letter && <Card>
-                <CardContent className="p-8">
-                  <div className="prose prose-lg max-w-none">
-                    <h2 className="text-2xl font-semibold mb-6">Dear {portfolio.company_name} Team,</h2>
-                    
-                    <div className="space-y-6 text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {portfolio.cover_letter}
-                    </div>
+            {(portfolio.cover_letter || editingSections.cover_letter) && (
+              <Card className="relative group">
+                {canEdit && !editingSections.cover_letter && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => startEditing('cover_letter')}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                )}
 
-                    <div className="mt-8 pt-6 border-t">
-                      <p className="text-lg font-medium">
-                        Best regards,<br />
-                        Jordan Leahy
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        jordanwilliamleahy.com
-                      </p>
+                <CardContent className="p-8">
+                  {editingSections.cover_letter ? (
+                    <div className="space-y-4">
+                      <Textarea
+                        value={editableContent.cover_letter}
+                        onChange={(e) => setEditableContent(prev => ({ ...prev, cover_letter: e.target.value }))}
+                        placeholder="Your personalized cover letter..."
+                        rows={12}
+                        className="min-h-[300px]"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => saveSection('cover_letter')}>
+                          <Save className="w-4 h-4 mr-1" />
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => cancelEditing('cover_letter')}>
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="prose prose-lg max-w-none">
+                      <h2 className="text-2xl font-semibold mb-6">Dear {portfolio.company_name} Team,</h2>
+                      
+                      <div className="space-y-6 text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                        {portfolio.cover_letter}
+                      </div>
+
+                      <div className="mt-8 pt-6 border-t">
+                        <p className="text-lg font-medium">
+                          Best regards,<br />
+                          Jordan Leahy
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          jordanwilliamleahy.com
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </div>
 
           {/* Skills & Experience Highlights */}
-          {content.skills_alignment && content.skills_alignment.length > 0 && <div className="mt-12">
+          {content.skills_alignment && content.skills_alignment.length > 0 && (
+            <div className="mt-12">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-4">Relevant Skills & Experience</h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -89,7 +316,8 @@ const PublicPortfolioView = ({
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {content.skills_alignment.map((skill: any, index: number) => <Card key={index} className="group hover:shadow-lg transition-all duration-300">
+                {content.skills_alignment.map((skill: any, index: number) => (
+                  <Card key={index} className="group hover:shadow-lg transition-all duration-300">
                     <CardHeader>
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                         <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
@@ -101,19 +329,26 @@ const PublicPortfolioView = ({
                         {skill.relevance}
                       </CardDescription>
                     </CardHeader>
-                    {skill.examples && skill.examples.length > 0 && <CardContent>
+                    {skill.examples && skill.examples.length > 0 && (
+                      <CardContent>
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {skill.examples.slice(0, 3).map((example: string, exIndex: number) => <span key={exIndex} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                          {skill.examples.slice(0, 3).map((example: string, exIndex: number) => (
+                            <span key={exIndex} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
                               {example.substring(0, 20)}...
-                            </span>)}
+                            </span>
+                          ))}
                         </div>
-                      </CardContent>}
-                  </Card>)}
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
               </div>
-            </div>}
+            </div>
+          )}
 
           {/* Company Analysis Section */}
-          {content.company_analysis && <Card className="mt-8">
+          {content.company_analysis && (
+            <Card className="mt-8">
               <CardHeader>
                 <CardTitle>Why {portfolio.company_name}?</CardTitle>
                 <CardDescription>
@@ -122,32 +357,34 @@ const PublicPortfolioView = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {content.company_analysis.mission_alignment && <div>
+                  {content.company_analysis.mission_alignment && (
+                    <div>
                       <h3 className="font-semibold text-lg mb-2">Mission Alignment</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {content.company_analysis.mission_alignment}
                       </p>
-                    </div>}
-                  {content.company_analysis.culture_fit && <div>
+                    </div>
+                  )}
+                  {content.company_analysis.culture_fit && (
+                    <div>
                       <h3 className="font-semibold text-lg mb-2">Cultural Fit</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {content.company_analysis.culture_fit}
                       </p>
-                    </div>}
-                  {content.company_analysis.growth_opportunities && <div>
+                    </div>
+                  )}
+                  {content.company_analysis.growth_opportunities && (
+                    <div>
                       <h3 className="font-semibold text-lg mb-2">Growth Vision</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {content.company_analysis.growth_opportunities}
                       </p>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </CardContent>
-            </Card>}
-
-          {/* Job Description Reference (if available) */}
-          {portfolio.job_applications?.job_description && <Card className="border-dashed mt-8">
-              
-            </Card>}
+            </Card>
+          )}
 
           {/* Google Calendar Scheduling */}
           <Card className="mt-8">
@@ -158,11 +395,13 @@ const PublicPortfolioView = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Google Calendar Appointment Scheduling begin */}
-              <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true" style={{
-              border: 0
-            }} width="100%" height="600" frameBorder="0" />
-              {/* end Google Calendar Appointment Scheduling */}
+              <iframe 
+                src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true" 
+                style={{ border: 0 }} 
+                width="100%" 
+                height="600" 
+                frameBorder="0" 
+              />
             </CardContent>
           </Card>
 
@@ -176,7 +415,7 @@ const PublicPortfolioView = ({
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Inpatient Revenue Cycle Management */}
+              {/* Keep existing healthcare project cards */}
               <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardHeader>
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
@@ -202,7 +441,6 @@ const PublicPortfolioView = ({
                 </CardContent>
               </Card>
 
-              {/* Drug Prior Auth and Validation */}
               <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardHeader>
                   <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
@@ -228,7 +466,6 @@ const PublicPortfolioView = ({
                 </CardContent>
               </Card>
 
-              {/* Denial and Appeal Resolution */}
               <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardHeader>
                   <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
@@ -257,6 +494,8 @@ const PublicPortfolioView = ({
           </div>
         </div>
       </div>
-    </PageLayout>;
+    </PageLayout>
+  );
 };
+
 export default PublicPortfolioView;
