@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,7 +88,7 @@ export const BlogHero = ({
             </Button>
           </motion.div>
 
-          {/* Featured Image or Video - 3:4 ratio enforced */}
+          {/* Featured Image or Video - 16:9 ratio enforced */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -95,7 +96,7 @@ export const BlogHero = ({
             className="relative max-w-2xl mx-auto"
           >
             {videoUrl ? (
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted">
                 <video
                   autoPlay
                   loop
@@ -107,7 +108,7 @@ export const BlogHero = ({
                 </video>
               </div>
             ) : imageUrl ? (
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted">
                 <img
                   src={imageUrl}
                   alt={headline}
@@ -116,7 +117,7 @@ export const BlogHero = ({
                 />
               </div>
             ) : (
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <div className="aspect-[16/9] rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
                 <span className="text-muted-foreground text-lg">Featured Image</span>
               </div>
             )}
