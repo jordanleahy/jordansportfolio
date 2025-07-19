@@ -1,13 +1,19 @@
+
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { generateVendorPrompt } from '@/lib/promptBuilder';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,6 +25,9 @@ import {
 
 export default function VendorDetail() {
   const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const { toast } = useToast();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
@@ -51,6 +60,29 @@ export default function VendorDetail() {
     console.log('Vendor not found or error:', error);
     return <Navigate to="/404" replace />;
   }
+
+  const generateAdvancedPrompt = () => {
+    if (!vendor.website_url) {
+      toast({
+        title: "Error",
+        description: "This vendor doesn't have a website URL available.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const prompt = generateVendorPrompt(vendor.website_url);
+    setGeneratedPrompt(prompt);
+    setShowPrompt(true);
+  };
+
+  const copyPrompt = () => {
+    navigator.clipboard.writeText(generatedPrompt);
+    toast({
+      title: "Copied!",
+      description: "Advanced research prompt copied to clipboard.",
+    });
+  };
 
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type) {
@@ -93,6 +125,43 @@ export default function VendorDetail() {
           })}
         </script>
       </Helmet>
+
+      <Dialog open={showPrompt} onOpenChange={setShowPrompt}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Advanced Research Prompt for {vendor.company_name}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Copy this prompt and use it with ChatGPT or Claude for detailed vendor research:
+            </div>
+            
+            <Textarea
+              value={generatedPrompt}
+              readOnly
+              className="min-h-[400px] font-mono text-xs"
+            />
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPrompt(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={copyPrompt}
+                className="flex-1"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Prompt
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
@@ -145,12 +214,21 @@ export default function VendorDetail() {
               </div>
               <div className="flex items-center gap-2">
                 {vendor.website_url && (
-                  <Button asChild>
-                    <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Visit Website
-                    </a>
-                  </Button>
+                  <>
+                    <Button asChild>
+                      <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Visit Website
+                      </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={generateAdvancedPrompt}
+                      title="Generate Research Prompt"
+                    >
+                      <Lightbulb className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
