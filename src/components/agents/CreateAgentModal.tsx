@@ -68,22 +68,6 @@ export const CreateAgentModal = () => {
     setFormData({ ...formData, tags });
   };
 
-  const fillVendorJsonAgent = () => {
-    setFormData({
-      name: 'Vendor JSON Processor',
-      purpose: 'Cleans and validates malformed JSON data from ChatGPT responses for vendor information using AI-powered processing',
-      model_version: 'gpt-4o-mini',
-      trigger: 'API call',
-      input_source: 'Admin Vendors page',
-      output_target: 'Vendor database',
-      schedule: 'on-demand',
-      owner: 'Data Team',
-      status: 'active' as AgentStatus,
-      tags: ['json-processing', 'data-cleaning', 'vendors', 'ai-automation'],
-      notes: 'Currently processes vendor JSON with 95%+ success rate. Uses AI to fix escaped characters, malformed URLs, and structural issues.'
-    });
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -99,17 +83,6 @@ export const CreateAgentModal = () => {
             Add a new AI agent to track and manage automation workflows.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={fillVendorJsonAgent}
-            type="button"
-          >
-            Quick Fill: Vendor JSON Processor
-          </Button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
