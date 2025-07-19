@@ -171,9 +171,9 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick }: Vendo
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <div className="font-medium mb-1">Type</div>
-                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)} className="text-xs">
+                  <div className="text-muted-foreground text-xs">
                     {vendor.company_type}
-                  </Badge>
+                  </div>
                 </div>
                 <div>
                   <div className="font-medium mb-1">Founded</div>
@@ -195,50 +195,38 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick }: Vendo
 
               <div>
                 <div className="font-medium mb-1 text-sm">Core Services</div>
-                <div className="flex flex-wrap gap-1">
-                  {vendor.core_services.slice(0, 2).map((service, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs">
-                      {service}
-                    </Badge>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  {vendor.core_services.map((service, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{service}</span>
+                    </li>
                   ))}
-                  {vendor.core_services.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{vendor.core_services.length - 2}
-                    </Badge>
-                  )}
-                </div>
+                </ul>
               </div>
 
               <div>
                 <div className="font-medium mb-1 text-sm">Target Customers</div>
-                <div className="flex flex-wrap gap-1">
-                  {vendor.customers.slice(0, 2).map((customer, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {customer}
-                    </Badge>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  {vendor.customers.map((customer, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{customer}</span>
+                    </li>
                   ))}
-                  {vendor.customers.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{vendor.customers.length - 2}
-                    </Badge>
-                  )}
-                </div>
+                </ul>
               </div>
 
               <div>
                 <div className="font-medium mb-1 text-sm">Specialties</div>
-                <div className="flex flex-wrap gap-1">
-                  {vendor.specialties.slice(0, 2).map((specialty, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs">
-                      {specialty}
-                    </Badge>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  {vendor.specialties.map((specialty, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{specialty}</span>
+                    </li>
                   ))}
-                  {vendor.specialties.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{vendor.specialties.length - 2}
-                    </Badge>
-                  )}
-                </div>
+                </ul>
               </div>
             </CardContent>
           </Card>
