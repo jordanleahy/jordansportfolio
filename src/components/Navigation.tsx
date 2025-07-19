@@ -167,10 +167,14 @@ const Navigation = () => {
                           <Calendar size={16} className="mr-2" />
                           Calendar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/jobs")}>
-                          <FileText size={16} className="mr-2" />
-                          Jobs
-                        </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/jobs")}>
+                        <FileText size={16} className="mr-2" />
+                        Jobs
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/agents")}>
+                        <Settings size={16} className="mr-2" />
+                        AI Agents
+                      </DropdownMenuItem>
                         {isAdmin && (
                           <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
                             <Settings size={16} className="mr-2" />
@@ -244,6 +248,10 @@ const Navigation = () => {
                       <DropdownMenuItem onClick={() => navigate("/jobs")}>
                         <FileText size={16} className="mr-2" />
                         Jobs
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/agents")}>
+                        <Settings size={16} className="mr-2" />
+                        AI Agents
                       </DropdownMenuItem>
                       {isAdmin && (
                         <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
@@ -364,6 +372,18 @@ const Navigation = () => {
                     >
                       <FileText size={16} className="mr-2" />
                       Jobs
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate("/agents");
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      <Settings size={16} className="mr-2" />
+                      AI Agents
                     </Button>
                     {isAdmin && (
                       <Button

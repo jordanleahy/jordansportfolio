@@ -913,6 +913,66 @@ export type Database = {
           },
         ]
       }
+      openai_agents: {
+        Row: {
+          created_at: string
+          id: string
+          input_source: string
+          last_run: string | null
+          metrics: Json | null
+          model_version: string
+          name: string
+          notes: string | null
+          output_target: string
+          owner: string
+          purpose: string
+          schedule: string
+          status: Database["public"]["Enums"]["agent_status"]
+          tags: string[] | null
+          trigger: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_source: string
+          last_run?: string | null
+          metrics?: Json | null
+          model_version?: string
+          name: string
+          notes?: string | null
+          output_target: string
+          owner: string
+          purpose: string
+          schedule?: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          tags?: string[] | null
+          trigger: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_source?: string
+          last_run?: string | null
+          metrics?: Json | null
+          model_version?: string
+          name?: string
+          notes?: string | null
+          output_target?: string
+          owner?: string
+          purpose?: string
+          schedule?: string
+          status?: Database["public"]["Enums"]["agent_status"]
+          tags?: string[] | null
+          trigger?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recipients: {
         Row: {
           accessionnumber: string
@@ -1378,6 +1438,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_sample_agents: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1392,6 +1456,7 @@ export type Database = {
       }
     }
     Enums: {
+      agent_status: "active" | "paused" | "deprecated"
       app_role: "admin" | "moderator" | "user"
       detection_method: "manual" | "voice_pattern" | "hybrid"
       event_status: "upcoming" | "in-progress" | "completed" | "cancelled"
@@ -1523,6 +1588,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_status: ["active", "paused", "deprecated"],
       app_role: ["admin", "moderator", "user"],
       detection_method: ["manual", "voice_pattern", "hybrid"],
       event_status: ["upcoming", "in-progress", "completed", "cancelled"],

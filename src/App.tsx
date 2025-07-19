@@ -24,6 +24,7 @@ const Calendar = lazy(() => import("./pages/Calendar"));
 const AscertainToTheMoon = lazy(() => import("./pages/AscertainToTheMoon"));
 const Jobs = lazy(() => import("./pages/Jobs"));
 const Sepsis = lazy(() => import("./pages/agents/Sepsis"));
+const Agents = lazy(() => import("./pages/Agents"));
 const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
 const CompanyPortfolio = lazy(() => import("./pages/CompanyPortfolio"));
 const Vendors = lazy(() => import("./pages/Vendors"));
@@ -115,6 +116,7 @@ const App = () => {
                   <Route path="/ascertaintothemoon" element={<AscertainToTheMoon />} />
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/agents/sepsis" element={<Sepsis />} />
+                  <Route path="/agents" element={<Agents />} />
                   <Route path="/sec/data-dictionary" element={<DataDictionary />} />
                   <Route path="/vendors/:slugname" element={<Vendors />} />
                   <Route path="/vendors/:category/:vendorSlug" element={<VendorDetail />} />
