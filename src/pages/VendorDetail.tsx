@@ -22,9 +22,20 @@ export default function VendorDetail() {
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
-  if (!slugname || !vendorSlug || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
+  console.log('VendorDetail params:', { slugname, vendorSlug });
+  console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
+  console.log('Category exists:', slugname && VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]);
+
+  if (!slugname || !vendorSlug) {
+    console.log('Missing required params, redirecting to 404');
     return <Navigate to="/404" replace />;
   }
+
+  // Check if category exists, if not, use a default fallback
+  const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES] || {
+    title: `${slugname.charAt(0).toUpperCase() + slugname.slice(1)} Companies`,
+    description: `Analysis of ${slugname} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
+  };
 
   if (isLoading) {
     return (
@@ -37,10 +48,9 @@ export default function VendorDetail() {
   }
 
   if (error || !vendor) {
+    console.log('Vendor not found or error:', error);
     return <Navigate to="/404" replace />;
   }
-
-  const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES];
 
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type) {

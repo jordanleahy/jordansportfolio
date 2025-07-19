@@ -38,6 +38,34 @@ export const VENDOR_CATEGORIES = {
   rcm: {
     title: 'Revenue Cycle Management (RCM) Companies',
     description: 'Comprehensive analysis of RCM vendors, their capabilities, funding, and market positioning for competitive intelligence research.'
+  },
+  healthcare: {
+    title: 'Healthcare Technology Companies',
+    description: 'Healthcare technology vendors providing innovative solutions for hospitals, clinics, and healthcare organizations.'
+  },
+  fintech: {
+    title: 'Financial Technology Companies',
+    description: 'Financial technology vendors offering payment processing, banking solutions, and financial services platforms.'
+  },
+  saas: {
+    title: 'Software as a Service Companies',
+    description: 'SaaS vendors providing cloud-based software solutions across various industries and business functions.'
+  },
+  ai: {
+    title: 'Artificial Intelligence Companies',
+    description: 'AI and machine learning companies developing intelligent solutions and automation platforms.'
+  },
+  cybersecurity: {
+    title: 'Cybersecurity Companies',
+    description: 'Cybersecurity vendors providing protection, monitoring, and security solutions for organizations.'
+  },
+  edtech: {
+    title: 'Education Technology Companies', 
+    description: 'EdTech vendors creating innovative learning platforms and educational technology solutions.'
+  },
+  hrtech: {
+    title: 'Human Resources Technology Companies',
+    description: 'HR technology vendors offering talent management, payroll, and workforce solutions.'
   }
 } as const;
 
