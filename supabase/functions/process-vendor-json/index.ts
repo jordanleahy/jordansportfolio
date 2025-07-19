@@ -54,17 +54,23 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
     // Step 1: Clean the raw JSON string
     let cleanedJson = rawJson;
     
-    // Fix escaped underscores
-    if (cleanedJson.includes('\\_')) {
-      cleanedJson = cleanedJson.replace(/\\_/g, '_');
-      fixes.push('Fixed escaped underscores in field names');
-    }
+    // Fix all escaped characters that break JSON parsing
+    const escapeReplacements = [
+      { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
+      { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
+      { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
+      { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
+      { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
+      { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
+      { pattern: /\\r/g, replacement: '', description: 'escaped carriage returns' },
+    ];
     
-    // Fix escaped colons
-    if (cleanedJson.includes('\\:')) {
-      cleanedJson = cleanedJson.replace(/\\:/g, ':');
-      fixes.push('Fixed escaped colons');
-    }
+    escapeReplacements.forEach(({ pattern, replacement, description }) => {
+      if (pattern.test(cleanedJson)) {
+        cleanedJson = cleanedJson.replace(pattern, replacement);
+        fixes.push(`Fixed ${description} in field names`);
+      }
+    });
     
     // Fix malformed URLs - look for patterns like "url":"[https://...","other_field":"https://...
     const urlPattern = /("(?:website_url|source_url)"\s*:\s*")(\[https?:\/\/[^"]+)(",\s*"[^"]+"\s*:\s*")([^"]*")/g;
@@ -77,8 +83,10 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       });
     }
     
-    // Fix null values that might be escaped
+    // Fix null values that might be escaped or malformed
     cleanedJson = cleanedJson.replace(/\\null/g, 'null');
+    cleanedJson = cleanedJson.replace(/"null"/g, 'null');
+    cleanedJson = cleanedJson.replace(/:\s*"null"/g, ': null');
     
     console.log('JSON cleaning completed, attempting to parse...');
     
