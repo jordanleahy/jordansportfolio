@@ -115,7 +115,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({
               ) : (
                 <>
                   <Copy className="h-5 w-5 mr-2" />
-                  Copy Research Prompt
+                  Generate Research Prompt
                 </>
               )}
             </Button>
