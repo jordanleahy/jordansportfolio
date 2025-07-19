@@ -1,7 +1,8 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { VendorsTable } from '@/components/vendors/VendorsTable';
+import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { useVendors } from '@/hooks/useVendors';
@@ -10,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
 export default function Vendors() {
   const {
     slugname
@@ -109,9 +111,11 @@ export default function Vendors() {
     }
     return filtered;
   }, [allVendors, filters]);
+
   const handleVendorAdded = () => {
     refetch();
   };
+
   const handleDeleteVendor = async (vendor: any) => {
     if (window.confirm(`Are you sure you want to delete ${vendor.company_name}?`)) {
       try {
@@ -147,6 +151,7 @@ export default function Vendors() {
       }
     }
   };
+
   if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
     return <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -163,7 +168,9 @@ export default function Vendors() {
         </div>
       </PageLayout>;
   }
+  
   const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES];
+  
   if (isLoading) {
     return <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -171,6 +178,7 @@ export default function Vendors() {
         </div>
       </PageLayout>;
   }
+  
   if (error) {
     return <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -187,6 +195,7 @@ export default function Vendors() {
         </div>
       </PageLayout>;
   }
+
   return <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
@@ -212,13 +221,16 @@ export default function Vendors() {
               </Button>}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-1">
               <VendorFilters filters={filters} onFiltersChange={setFilters} vendors={allVendors} />
             </div>
 
-            <div className="lg:col-span-3">
-              <VendorsTable vendors={filteredVendors} onAddClick={() => setIsAddModalOpen(true)} onDeleteClick={handleDeleteVendor} />
+            <div className="lg:col-span-4">
+              <VendorsCardGrid 
+                vendors={filteredVendors} 
+                onDeleteClick={handleDeleteVendor} 
+              />
             </div>
           </div>
         </div>
