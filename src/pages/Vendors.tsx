@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -19,7 +18,7 @@ export default function Vendors() {
   const [user, setUser] = useState(null);
   
   // Fetch vendors from database
-  const { data: allVendors = [], isLoading, error } = useVendors();
+  const { data: allVendors = [], isLoading, error, refetch } = useVendors();
   
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -98,6 +97,10 @@ export default function Vendors() {
 
     return filtered;
   }, [allVendors, filters]);
+
+  const handleVendorAdded = () => {
+    refetch();
+  };
 
   if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
     return (
@@ -192,7 +195,8 @@ export default function Vendors() {
         
         <AddVendorModal 
           isOpen={isAddModalOpen} 
-          onClose={() => setIsAddModalOpen(false)} 
+          onClose={() => setIsAddModalOpen(false)}
+          onVendorAdded={handleVendorAdded}
         />
       </div>
     </PageLayout>
