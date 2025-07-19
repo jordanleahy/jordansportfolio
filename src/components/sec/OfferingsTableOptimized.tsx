@@ -28,7 +28,7 @@ import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 import { PromptModal } from "./PromptModal";
 import { OfferingCard } from "./OfferingCard";
-import { buildPrompt, mapOfferingToSecOffering, cachePrompt, loadCachedPrompt } from "@/lib/promptBuilder";
+import { generateVendorPrompt } from "@/lib/promptBuilder";
 
 interface OfferingsTableOptimizedProps {
   filters: any;
@@ -72,10 +72,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
 
   // Load cached prompt on component mount
   useEffect(() => {
-    const cached = loadCachedPrompt();
-    if (cached) {
-      setGeneratedPrompt(cached);
-    }
+    // TODO: Implement cached prompt functionality if needed
   }, []);
 
   // All data comes pre-processed from the server
@@ -125,11 +122,10 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   };
 
   const handleGeneratePrompt = (offering: any) => {
-    const secOffering = mapOfferingToSecOffering(offering);
-    const prompt = buildPrompt(secOffering);
+    const companyName = offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company';
+    const prompt = generateVendorPrompt(`https://example.com/${companyName}`);
     setGeneratedPrompt(prompt);
-    setPromptCompanyName(secOffering.company);
-    cachePrompt(prompt);
+    setPromptCompanyName(companyName);
     setIsPromptModalOpen(true);
   };
 
