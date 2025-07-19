@@ -377,9 +377,20 @@ export default function VendorDetail() {
                 {processingResult.errors && processingResult.errors.length > 0 && (
                   <div className="bg-red-50 border border-red-200 rounded p-3">
                     <h4 className="font-medium text-red-900 mb-2">❌ Errors ({processingResult.errors.length})</h4>
-                    <ul className="text-sm text-red-800 space-y-1">
+                    <ul className="text-sm text-red-800 space-y-2">
                       {processingResult.errors.map((error: string, idx: number) => (
-                        <li key={idx}>• {error}</li>
+                        <li key={idx} className="flex items-center justify-between gap-2">
+                          <span className="flex-1">• {error}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => processJsonData()}
+                            disabled={isProcessing}
+                            className="h-7 px-2 text-xs border-red-300 hover:bg-red-100 text-red-700"
+                          >
+                            Fix Error
+                          </Button>
+                        </li>
                       ))}
                     </ul>
                   </div>
