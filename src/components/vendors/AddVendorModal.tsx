@@ -20,6 +20,7 @@ type ModalMode = 'prompt' | 'json';
 export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModalProps) => {
   const [mode, setMode] = useState<ModalMode>('prompt');
   const [companyUrl, setCompanyUrl] = useState("");
+  const [cachedUrl, setCachedUrl] = useState("");
   const [jsonData, setJsonData] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -36,6 +37,7 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
       return;
     }
 
+    setCachedUrl(companyUrl);
     setIsGenerating(true);
     
     try {
@@ -178,6 +180,7 @@ Focus on revenue cycle management (RCM) capabilities, healthcare technology, and
   const handleClose = () => {
     setMode('prompt');
     setCompanyUrl("");
+    setCachedUrl("");
     setJsonData("");
     setGeneratedPrompt("");
     onClose();
@@ -224,6 +227,8 @@ Focus on revenue cycle management (RCM) capabilities, healthcare technology, and
                   placeholder="https://company.com"
                   value={companyUrl}
                   onChange={(e) => setCompanyUrl(e.target.value)}
+                  disabled={!!cachedUrl}
+                  className={cachedUrl ? "bg-muted" : ""}
                 />
               </div>
 
