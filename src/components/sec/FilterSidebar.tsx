@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { X, Filter, RotateCcw } from "lucide-react";
+import { X, Filter, RotateCcw, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useIndustries } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -373,6 +374,26 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </p>
           </>
         )}
+        
+        <Separator />
+        
+        {/* Data Dictionary Button */}
+        <div className="space-y-2">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            <Link to="/sec/data-dictionary" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Data Dictionary
+            </Link>
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            Learn about all available data fields and filtering options
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

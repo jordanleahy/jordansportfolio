@@ -24,6 +24,7 @@ const Calendar = lazy(() => import("./pages/Calendar"));
 const AscertainToTheMoon = lazy(() => import("./pages/AscertainToTheMoon"));
 const Jobs = lazy(() => import("./pages/Jobs"));
 const Sepsis = lazy(() => import("./pages/agents/Sepsis"));
+const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
 // Jobs-related components removed
 
 // Loading fallback component
@@ -111,6 +112,7 @@ const App = () => {
                   <Route path="/ascertaintothemoon" element={<AscertainToTheMoon />} />
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/agents/sepsis" element={<Sepsis />} />
+                  <Route path="/sec/data-dictionary" element={<DataDictionary />} />
                   {/* Jobs routes removed */}
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
