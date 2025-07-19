@@ -496,7 +496,7 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] w-[98vw] sm:w-[95vw] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl">Add New Vendor</DialogTitle>
         </DialogHeader>

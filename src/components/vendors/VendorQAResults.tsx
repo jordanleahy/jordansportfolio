@@ -37,19 +37,21 @@ export const VendorQAResults = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Quality Score */}
       <Card className={`border-2 ${getScoreColor(qaResult.qualityScore)}`}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            {getScoreIcon(qaResult.qualityScore)}
-            <span>Data Quality Assessment</span>
-            <Badge variant="outline" className="ml-auto text-base px-3 py-1">
+        <CardHeader className="pb-2 sm:pb-3">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg">
+            <div className="flex items-center gap-2">
+              {getScoreIcon(qaResult.qualityScore)}
+              <span>Data Quality Assessment</span>
+            </div>
+            <Badge variant="outline" className="self-start sm:ml-auto text-sm sm:text-base px-2 sm:px-3 py-1">
               {qaResult.qualityScore}/100
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-2 sm:space-y-3">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
@@ -61,7 +63,7 @@ export const VendorQAResults = ({
               />
             </div>
           </div>
-          <p className="text-sm">
+          <p className="text-xs sm:text-sm leading-relaxed">
             {qaResult.isRecommended 
               ? "✅ This data meets quality standards and is recommended for addition."
               : "⚠️ This data has quality issues that should be addressed before adding."
@@ -73,18 +75,18 @@ export const VendorQAResults = ({
       {/* Feedback */}
       {qaResult.feedback.length > 0 && (
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CheckCircle className="h-4 w-4 text-blue-600" />
-              Analysis Feedback
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <span>Analysis Feedback</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
               {qaResult.feedback.map((item, index) => (
-                <li key={index} className="text-sm flex items-start gap-2">
-                  <span className="text-blue-600 mt-1">•</span>
-                  <span>{item}</span>
+                <li key={index} className="text-xs sm:text-sm flex items-start gap-2">
+                  <span className="text-blue-600 mt-1 flex-shrink-0">•</span>
+                  <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}
             </ul>
@@ -95,18 +97,18 @@ export const VendorQAResults = ({
       {/* Warnings */}
       {qaResult.warnings.length > 0 && (
         <Card className="border-orange-200 bg-orange-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base text-orange-800">
-              <AlertTriangle className="h-4 w-4" />
-              Warnings
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-orange-800">
+              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+              <span>Warnings</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
               {qaResult.warnings.map((item, index) => (
-                <li key={index} className="text-sm text-orange-700 flex items-start gap-2">
-                  <span className="text-orange-600 mt-1">⚠</span>
-                  <span>{item}</span>
+                <li key={index} className="text-xs sm:text-sm text-orange-700 flex items-start gap-2">
+                  <span className="text-orange-600 mt-1 flex-shrink-0">⚠</span>
+                  <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}
             </ul>
@@ -117,18 +119,18 @@ export const VendorQAResults = ({
       {/* Suggestions */}
       {qaResult.suggestions.length > 0 && (
         <Card className="border-purple-200 bg-purple-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base text-purple-800">
-              <Lightbulb className="h-4 w-4" />
-              Improvement Suggestions
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-purple-800">
+              <Lightbulb className="h-4 w-4 flex-shrink-0" />
+              <span>Improvement Suggestions</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
               {qaResult.suggestions.map((item, index) => (
-                <li key={index} className="text-sm text-purple-700 flex items-start gap-2">
-                  <span className="text-purple-600 mt-1">💡</span>
-                  <span>{item}</span>
+                <li key={index} className="text-xs sm:text-sm text-purple-700 flex items-start gap-2">
+                  <span className="text-purple-600 mt-1 flex-shrink-0">💡</span>
+                  <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}
             </ul>
@@ -137,12 +139,12 @@ export const VendorQAResults = ({
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
         {qaResult.isRecommended ? (
           <Button 
             onClick={onProceed} 
             disabled={isProcessing}
-            className="flex-1"
+            className="w-full sm:flex-1 text-sm"
           >
             {isProcessing ? "Processing..." : "Proceed with Addition"}
           </Button>
@@ -151,7 +153,7 @@ export const VendorQAResults = ({
             onClick={onProceed} 
             disabled={isProcessing}
             variant="outline"
-            className="flex-1"
+            className="w-full sm:flex-1 text-sm"
           >
             {isProcessing ? "Processing..." : "Add Despite Issues"}
           </Button>
@@ -161,16 +163,18 @@ export const VendorQAResults = ({
           variant="outline" 
           onClick={onBypass}
           disabled={isProcessing}
+          className="w-full sm:w-auto text-sm"
         >
-          Skip QA & Preview
+          <span className="hidden sm:inline">Skip QA & </span>Preview
         </Button>
         
         <Button 
           variant="destructive" 
           onClick={onReject}
           disabled={isProcessing}
+          className="w-full sm:w-auto text-sm"
         >
-          Reject & Edit
+          <span className="hidden sm:inline">Reject & </span>Edit
         </Button>
       </div>
     </div>
