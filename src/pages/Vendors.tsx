@@ -4,30 +4,16 @@ import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsTable } from '@/components/vendors/VendorsTable';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
-import { RCM_SAMPLE_DATA, type Vendor, type VendorFiltersState } from '@/types/vendor';
+import { useVendors } from '@/hooks/useVendors';
+import { VENDOR_CATEGORIES, type VendorFiltersState } from '@/types/vendor';
 import { Card, CardContent } from '@/components/ui/card';
-
-const CATEGORY_TITLES: Record<string, string> = {
-  rcm: 'Revenue Cycle Management (RCM) Companies'
-};
-
-const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  rcm: 'Comprehensive analysis of RCM vendors, their capabilities, funding, and market positioning for competitive intelligence research.'
-};
 
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [filters, setFilters] = useState<VendorFiltersState>({});
-
-  // Get data based on category
-  const allVendors = useMemo(() => {
-    switch (slugname) {
-      case 'rcm':
-        return RCM_SAMPLE_DATA;
-      default:
-        return [];
-    }
-  }, [slugname]);
+  
+  // Fetch vendors from database
+  const { data: allVendors = [], isLoading, error } = useVendors();
 
   // Apply filters
   const filteredVendors = useMemo(() => {
@@ -80,7 +66,6 @@ export default function Vendors() {
 
     if (filters.fundingRange?.length) {
       filtered = filtered.filter(vendor => {
-        // Parse funding from string like "$47M" or "$34.1M"
         const fundingStr = vendor.total_funding;
         if (!fundingStr) return filters.fundingRange!.includes('no-funding');
         
@@ -102,7 +87,7 @@ export default function Vendors() {
     return filtered;
   }, [allVendors, filters]);
 
-  if (!slugname || !CATEGORY_TITLES[slugname]) {
+  if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
     return (
       <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -121,16 +106,47 @@ export default function Vendors() {
     );
   }
 
+  const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES];
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto py-8 px-4">
+          <div className="text-center">Loading vendors...</div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto py-8 px-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Error Loading Vendors</h1>
+                <p className="text-muted-foreground">
+                  Unable to load vendor data. Please try again later.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              {CATEGORY_TITLES[slugname]}
+              {categoryConfig.title}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {CATEGORY_DESCRIPTIONS[slugname]}
+              {categoryConfig.description}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               Showing {filteredVendors.length} of {allVendors.length} vendors

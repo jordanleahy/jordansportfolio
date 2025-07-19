@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut, Settings, ChevronDown, FileText } from "lucide-react";
+import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut, Settings, ChevronDown, FileText, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -159,6 +159,10 @@ const Navigation = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem onClick={() => navigate("/vendors/rcm")}>
+                          <Building2 size={16} className="mr-2" />
+                          Vendors
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate("/calendar")}>
                           <Calendar size={16} className="mr-2" />
                           Calendar
@@ -229,6 +233,10 @@ const Navigation = () => {
                         </DropdownMenuItem>
                       ))}
                       <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/vendors/rcm")}>
+                        <Building2 size={16} className="mr-2" />
+                        Vendors
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/calendar")}>
                         <Calendar size={16} className="mr-2" />
                         Calendar
@@ -321,6 +329,18 @@ const Navigation = () => {
                 </Button>
                 {isAuthenticated ? (
                   <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate("/vendors/rcm");
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      <Building2 size={16} className="mr-2" />
+                      Vendors
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

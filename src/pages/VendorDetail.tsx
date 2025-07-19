@@ -1,4 +1,3 @@
-
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles } from 'lucide-react';
@@ -8,10 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useVendorBySlug } from '@/hooks/useVendors';
-import type { Vendor } from '@/types/vendor';
+import { VENDOR_CATEGORIES } from '@/types/vendor';
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
@@ -19,16 +17,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-const CATEGORY_TITLES: Record<string, string> = {
-  rcm: 'Revenue Cycle Management'
-};
-
 export default function VendorDetail() {
-  const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
+  const { slugname, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
-  if (!category || !vendorSlug || !CATEGORY_TITLES[category]) {
+  if (!slugname || !vendorSlug || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
     return <Navigate to="/404" replace />;
   }
 
@@ -36,7 +30,7 @@ export default function VendorDetail() {
     return (
       <PageLayout>
         <div className="container mx-auto py-8 px-4">
-          <div className="text-center">Loading...</div>
+          <div className="text-center">Loading vendor details...</div>
         </div>
       </PageLayout>
     );
@@ -46,15 +40,7 @@ export default function VendorDetail() {
     return <Navigate to="/404" replace />;
   }
 
-  const categoryTitle = CATEGORY_TITLES[category];
-
-  const formatFunding = (amount?: number) => {
-    if (!amount) return 'Not disclosed';
-    if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(1)}M`;
-    }
-    return `$${(amount / 1000).toFixed(0)}K`;
-  };
+  const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES];
 
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type) {
@@ -66,7 +52,7 @@ export default function VendorDetail() {
     }
   };
 
-  const pageTitle = `${vendor.company_name} - ${categoryTitle} Vendor Profile`;
+  const pageTitle = `${vendor.company_name} - ${categoryConfig.title} Vendor Profile`;
   const pageDescription = `${vendor.description} ${vendor.founding_year ? `Founded in ${vendor.founding_year}, ` : ''}${vendor.company_name} offers ${vendor.core_services.join(', ')} for ${vendor.customers.join(', ')}.`;
 
   return (
@@ -74,13 +60,12 @@ export default function VendorDetail() {
       <Helmet>
         <title>{pageTitle} | Competitive Intelligence</title>
         <meta name="description" content={pageDescription} />
-        <meta name="keywords" content={`${vendor.company_name}, ${categoryTitle}, ${vendor.specialties.join(', ')}, ${vendor.core_services.join(', ')}`} />
+        <meta name="keywords" content={`${vendor.company_name}, ${categoryConfig.title}, ${vendor.specialties.join(', ')}, ${vendor.core_services.join(', ')}`} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="article" />
-        <link rel="canonical" href={`/vendors/${category}/${vendorSlug}`} />
+        <link rel="canonical" href={`/vendors/${slugname}/${vendorSlug}`} />
         
-        {/* Schema.org structured data */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -94,14 +79,13 @@ export default function VendorDetail() {
             },
             "url": vendor.website_url,
             "knowsLanguage": "en-US",
-            "industry": categoryTitle
+            "industry": categoryConfig.title
           })}
         </script>
       </Helmet>
 
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
-          {/* Breadcrumb Navigation */}
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -112,7 +96,7 @@ export default function VendorDetail() {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/vendors/${category}`}>{categoryTitle} Vendors</Link>
+                  <Link to={`/vendors/${slugname}`}>{categoryConfig.title}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -122,15 +106,13 @@ export default function VendorDetail() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Back Button */}
           <Button variant="outline" asChild className="mb-4">
-            <Link to={`/vendors/${category}`}>
+            <Link to={`/vendors/${slugname}`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to {categoryTitle} Vendors
+              Back to {categoryConfig.title}
             </Link>
           </Button>
 
-          {/* Header */}
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
@@ -146,7 +128,7 @@ export default function VendorDetail() {
                       Founded {vendor.founding_year}
                     </div>
                   )}
-                  <Badge variant="secondary">
+                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
                     {vendor.company_type}
                   </Badge>
                 </div>
@@ -165,9 +147,7 @@ export default function VendorDetail() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Company Overview */}
               <Card>
                 <CardHeader>
                   <CardTitle>Company Overview</CardTitle>
@@ -177,7 +157,6 @@ export default function VendorDetail() {
                 </CardContent>
               </Card>
 
-              {/* Core Services */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -196,7 +175,6 @@ export default function VendorDetail() {
                 </CardContent>
               </Card>
 
-              {/* Target Customers */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -215,7 +193,6 @@ export default function VendorDetail() {
                 </CardContent>
               </Card>
 
-              {/* Specialty Focus */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -234,7 +211,6 @@ export default function VendorDetail() {
                 </CardContent>
               </Card>
 
-              {/* Key Features & Benefits */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -267,7 +243,6 @@ export default function VendorDetail() {
                 </Card>
               </div>
 
-              {/* Notable Customers */}
               {vendor.notable_customers && vendor.notable_customers.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -285,7 +260,6 @@ export default function VendorDetail() {
                 </Card>
               )}
 
-              {/* Competitive Advantages */}
               {vendor.competitive_advantages && vendor.competitive_advantages.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -303,7 +277,6 @@ export default function VendorDetail() {
                 </Card>
               )}
 
-              {/* Performance Metrics */}
               {vendor.performance_metrics && (
                 <Card>
                   <CardHeader>
@@ -318,9 +291,7 @@ export default function VendorDetail() {
               )}
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
-              {/* Company Stats */}
               <Card>
                 <CardHeader>
                   <CardTitle>Company Stats</CardTitle>
@@ -342,14 +313,13 @@ export default function VendorDetail() {
                   <Separator />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Company Type</p>
-                    <Badge variant="secondary">
+                    <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
                       {vendor.company_type}
                     </Badge>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Funding Information */}
               {(vendor.total_funding || vendor.funding_stage || (vendor.key_investors && vendor.key_investors.length > 0)) && (
                 <Card>
                   <CardHeader>
