@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ExternalLink, DollarSign, Users, Building, Calendar, Plus } from 'lucide-react';
+import { ExternalLink, DollarSign, Users, Building, Calendar, Plus, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,12 +20,13 @@ interface VendorsTableProps {
   vendors: Vendor[];
   onVendorClick?: (vendor: Vendor) => void;
   onAddClick?: () => void;
+  onDeleteClick?: (vendor: Vendor) => void;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
-export function VendorsTable({ vendors, onVendorClick, onAddClick }: VendorsTableProps) {
+export function VendorsTable({ vendors, onVendorClick, onAddClick, onDeleteClick }: VendorsTableProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
@@ -109,6 +110,19 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick }: VendorsTabl
                     >
                       <Plus className="h-4 w-4" />
                       ADD
+                    </Button>
+                  )}
+                  {onDeleteClick && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteClick(vendor);
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
                   {vendor.website_url && (
@@ -365,6 +379,19 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick }: VendorsTabl
                         >
                           <Plus className="h-4 w-4" />
                           ADD
+                        </Button>
+                      )}
+                      {onDeleteClick && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteClick(vendor);
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                       {vendor.website_url && (
