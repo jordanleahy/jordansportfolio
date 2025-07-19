@@ -185,12 +185,6 @@ export default function VendorDetail() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <Button variant="outline" asChild className="mb-4">
-            <Link to={`/vendors/${category}`}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to {categoryConfig.title}
-            </Link>
-          </Button>
 
           <div className="space-y-4">
             <div className="flex items-start justify-between">
