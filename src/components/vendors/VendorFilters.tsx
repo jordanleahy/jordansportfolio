@@ -41,7 +41,7 @@ export function VendorFilters({ filters, onFiltersChange, vendors }: VendorFilte
   );
 
   return (
-    <Card className="sticky top-4">
+    <Card className="sticky top-4 hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
