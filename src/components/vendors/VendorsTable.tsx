@@ -102,19 +102,6 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick, onDeleteClick
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {onAddClick && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddClick();
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                      ADD
-                    </Button>
-                  )}
                   {onDeleteClick && (
                     <Button
                       size="sm"
@@ -371,19 +358,6 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick, onDeleteClick
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {onAddClick && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAddClick();
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                          ADD
-                        </Button>
-                      )}
                       {onDeleteClick && (
                         <Button
                           size="sm"
