@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Edit, Trash2 } from "lucide-react";
+import { ExternalLink, Edit, Trash2, FileText } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { useCreateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 
 interface JobApplicationsTableProps {
   applications: JobApplication[];
@@ -16,10 +18,29 @@ interface JobApplicationsTableProps {
 
 export function JobApplicationsTable({ applications, onEdit, onDelete, isDeleting }: JobApplicationsTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const createPortfolio = useCreateCompanyPortfolio();
 
   const handleDelete = (id: string) => {
     onDelete(id);
     setDeleteId(null);
+  };
+
+  const handleCreatePortfolio = async (application: JobApplication) => {
+    const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+    
+    try {
+      await createPortfolio.mutateAsync({
+        job_application_id: application.id,
+        company_name: application.company_name,
+        company_slug: companySlug,
+        status: 'draft'
+      });
+      
+      navigate(`/${companySlug}`);
+    } catch (error) {
+      console.error("Error creating portfolio:", error);
+    }
   };
 
   if (applications.length === 0) {
@@ -136,6 +157,16 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                   >
                     <Edit className="h-3 w-3" />
                     <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCreatePortfolio(application)}
+                    disabled={createPortfolio.isPending}
+                    className="p-1 h-auto"
+                  >
+                    <FileText className="h-3 w-3" />
+                    <span className="sr-only">Create Portfolio</span>
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

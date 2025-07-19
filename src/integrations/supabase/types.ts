@@ -119,6 +119,56 @@ export type Database = {
         }
         Relationships: []
       }
+      company_portfolios: {
+        Row: {
+          company_name: string
+          company_slug: string
+          cover_letter: string | null
+          created_at: string
+          custom_video_url: string | null
+          generated_content: Json | null
+          id: string
+          job_application_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          company_slug: string
+          cover_letter?: string | null
+          created_at?: string
+          custom_video_url?: string | null
+          generated_content?: Json | null
+          id?: string
+          job_application_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          company_slug?: string
+          cover_letter?: string | null
+          created_at?: string
+          custom_video_url?: string | null
+          generated_content?: Json | null
+          id?: string
+          job_application_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_portfolios_job_application_id_fkey"
+            columns: ["job_application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           capacity: number | null
