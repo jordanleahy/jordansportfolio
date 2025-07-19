@@ -1,4 +1,3 @@
-
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
@@ -31,6 +30,9 @@ export default function VendorDetail() {
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPasteOpen, setIsPasteOpen] = useState(false);
   const [pasteContent, setPasteContent] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedData, setProcessedData] = useState<any>(null);
+  const [processingResult, setProcessingResult] = useState<any>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
@@ -114,18 +116,68 @@ export default function VendorDetail() {
     return true;
   };
 
-  const submitPastedData = async () => {
+  const processJsonData = async () => {
+    if (!pasteContent.trim()) {
+      toast({
+        title: "No Data",
+        description: "Please paste JSON data first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
     try {
-      // Parse and validate JSON
-      const jsonData = JSON.parse(pasteContent);
-      
-      if (!validateVendorData(jsonData)) {
+      const { data, error } = await supabase.functions.invoke('process-vendor-json', {
+        body: { rawJson: pasteContent }
+      });
+
+      if (error) throw error;
+
+      setProcessingResult(data);
+      if (data.success) {
+        setProcessedData(data.cleanedData);
         toast({
-          title: "Invalid Data Structure",
-          description: "The JSON doesn't contain required vendor fields. Please check the response format.",
+          title: "JSON Processed Successfully",
+          description: `${data.fixes?.length || 0} issues fixed, ${data.warnings?.length || 0} warnings`,
+        });
+      } else {
+        toast({
+          title: "Processing Failed",
+          description: `${data.errors?.length || 0} errors found`,
           variant: "destructive",
         });
-        return;
+      }
+    } catch (error) {
+      console.error('Error processing JSON:', error);
+      toast({
+        title: "Processing Error",
+        description: "Failed to process JSON data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const submitPastedData = async () => {
+    const dataToSubmit = processedData || pasteContent;
+    
+    try {
+      let jsonData;
+      if (processedData) {
+        jsonData = processedData;
+      } else {
+        jsonData = JSON.parse(dataToSubmit);
+        
+        if (!validateVendorData(jsonData)) {
+          toast({
+            title: "Invalid Data Structure",
+            description: "The JSON doesn't contain required vendor fields. Try processing it first.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       // Map ChatGPT response to vendor fields
@@ -277,37 +329,95 @@ export default function VendorDetail() {
       </Dialog>
 
       <Dialog open={isPasteOpen} onOpenChange={setIsPasteOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">Paste ChatGPT Response</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              Paste the JSON response from ChatGPT here to process the vendor data:
+              Paste the JSON response from ChatGPT here. Use "Process JSON" to automatically fix common formatting issues.
             </div>
             
             <Textarea
               value={pasteContent}
-              onChange={(e) => setPasteContent(e.target.value)}
+              onChange={(e) => {
+                setPasteContent(e.target.value);
+                setProcessedData(null);
+                setProcessingResult(null);
+              }}
               placeholder="Paste your ChatGPT JSON response here..."
-              className="min-h-[200px] font-mono text-sm"
+              className="min-h-[150px] font-mono text-sm"
             />
+
+            {processingResult && (
+              <div className="space-y-2">
+                {processingResult.fixes && processingResult.fixes.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded p-3">
+                    <h4 className="font-medium text-green-900 mb-2">✅ Fixes Applied ({processingResult.fixes.length})</h4>
+                    <ul className="text-sm text-green-800 space-y-1">
+                      {processingResult.fixes.map((fix: string, idx: number) => (
+                        <li key={idx}>• {fix}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {processingResult.warnings && processingResult.warnings.length > 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                    <h4 className="font-medium text-yellow-900 mb-2">⚠️ Warnings ({processingResult.warnings.length})</h4>
+                    <ul className="text-sm text-yellow-800 space-y-1">
+                      {processingResult.warnings.map((warning: string, idx: number) => (
+                        <li key={idx}>• {warning}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {processingResult.errors && processingResult.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded p-3">
+                    <h4 className="font-medium text-red-900 mb-2">❌ Errors ({processingResult.errors.length})</h4>
+                    <ul className="text-sm text-red-800 space-y-1">
+                      {processingResult.errors.map((error: string, idx: number) => (
+                        <li key={idx}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {processedData && (
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Processed Data Preview:</h4>
+                <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
+                  {JSON.stringify(processedData, null, 2)}
+                </pre>
+              </div>
+            )}
             
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={() => setIsPasteOpen(false)}
-                className="flex-1 order-2 sm:order-1"
+                className="flex-1 order-3 sm:order-1"
               >
                 Cancel
               </Button>
               <Button
-                onClick={submitPastedData}
-                disabled={!pasteContent.trim()}
+                variant="secondary"
+                onClick={processJsonData}
+                disabled={!pasteContent.trim() || isProcessing}
                 className="flex-1 order-1 sm:order-2"
               >
-                Process JSON
+                {isProcessing ? "Processing..." : "Process JSON"}
+              </Button>
+              <Button
+                onClick={submitPastedData}
+                disabled={!pasteContent.trim() && !processedData}
+                className="flex-1 order-2 sm:order-3"
+              >
+                {processedData ? "Submit Processed Data" : "Submit Raw Data"}
               </Button>
             </div>
           </div>
