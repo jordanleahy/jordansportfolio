@@ -195,3 +195,72 @@ export const formatValidationErrors = (result: ValidationResult): string => {
   
   return message;
 };
+
+// New function to calculate data completeness score for QA
+export const calculateCompletenessScore = (data: any): number => {
+  const totalFields = [
+    'company_name', 'slug', 'headquarters', 'company_type', 'description',
+    'founding_year', 'core_services', 'specialties', 'customers',
+    'key_features', 'key_benefits', 'website_url', 'funding_stage',
+    'total_funding', 'key_investors', 'competitive_advantages'
+  ];
+  
+  let completedFields = 0;
+  
+  totalFields.forEach(field => {
+    const value = data[field];
+    if (value !== null && value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        if (value.length > 0) completedFields++;
+      } else {
+        completedFields++;
+      }
+    }
+  });
+  
+  return Math.round((completedFields / totalFields.length) * 100);
+};
+
+// Helper to identify potential data quality issues
+export const identifyDataQualityIssues = (data: any): string[] => {
+  const issues: string[] = [];
+  
+  // Check for generic or placeholder content
+  const genericTerms = ['lorem', 'ipsum', 'placeholder', 'example', 'test', 'unknown'];
+  const fieldsToCheck = ['company_name', 'description', 'headquarters'];
+  
+  fieldsToCheck.forEach(field => {
+    const value = data[field]?.toLowerCase() || '';
+    if (genericTerms.some(term => value.includes(term))) {
+      issues.push(`${field} contains generic placeholder text`);
+    }
+  });
+  
+  // Check for unrealistic funding amounts
+  if (data.total_funding && typeof data.total_funding === 'string') {
+    const fundingMatch = data.total_funding.match(/\$([0-9,]+)([MBK])?/);
+    if (fundingMatch) {
+      const amount = parseInt(fundingMatch[1].replace(/,/g, ''));
+      const suffix = fundingMatch[2];
+      
+      if (suffix === 'B' && amount > 50) {
+        issues.push('Funding amount seems unrealistically high');
+      }
+    }
+  }
+  
+  // Check for very short descriptions
+  if (data.description && data.description.length < 50) {
+    issues.push('Company description is very brief');
+  }
+  
+  // Check for empty arrays that should have content
+  const arrayFields = ['core_services', 'key_features', 'specialties'];
+  arrayFields.forEach(field => {
+    if (Array.isArray(data[field]) && data[field].length === 0) {
+      issues.push(`${field} is empty but should contain relevant information`);
+    }
+  });
+  
+  return issues;
+};

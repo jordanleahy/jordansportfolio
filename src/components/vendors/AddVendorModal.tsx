@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { validateVendorData, ValidationResult } from "@/utils/vendorValidation";
 import { VendorPreview } from "./VendorPreview";
+import { VendorQAResults } from "./VendorQAResults";
 
 interface AddVendorModalProps {
   isOpen: boolean;
@@ -17,7 +17,15 @@ interface AddVendorModalProps {
   onVendorAdded: () => void;
 }
 
-type ModalMode = 'prompt' | 'json' | 'preview';
+type ModalMode = 'prompt' | 'json' | 'qa' | 'preview';
+
+interface QAResult {
+  qualityScore: number;
+  feedback: string[];
+  suggestions: string[];
+  warnings: string[];
+  isRecommended: boolean;
+}
 
 export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModalProps) => {
   const [mode, setMode] = useState<ModalMode>('prompt');
@@ -28,6 +36,8 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [qaResult, setQaResult] = useState<QAResult | null>(null);
+  const [isRunningQA, setIsRunningQA] = useState(false);
   const { toast } = useToast();
 
   const generatePrompt = async () => {
@@ -103,7 +113,7 @@ VALIDATION: Test at jsonlint.com before submitting.`;
     }
   };
 
-  const validateJsonData = () => {
+  const validateJsonData = async () => {
     if (!jsonData.trim()) {
       toast({
         title: "Error",
@@ -144,11 +154,9 @@ VALIDATION: Test at jsonlint.com before submitting.`;
       setValidationResult(result);
       
       if (result.isValid) {
-        setMode('preview');
-        toast({
-          title: "Validation Successful",
-          description: "Data validated! Review the preview and confirm to add vendor.",
-        });
+        // Proceed to QA step
+        setMode('qa');
+        await runQAAnalysis(result.cleanedData);
       } else {
         toast({
           title: "Validation Failed",
@@ -164,6 +172,58 @@ VALIDATION: Test at jsonlint.com before submitting.`;
         variant: "destructive",
       });
     }
+  };
+
+  const runQAAnalysis = async (vendorData: any) => {
+    setIsRunningQA(true);
+    
+    try {
+      console.log("Running QA analysis for:", vendorData.company_name);
+      
+      const { data, error } = await supabase.functions.invoke('vendor-qa-agent', {
+        body: { vendorData }
+      });
+
+      if (error) {
+        console.error("QA analysis error:", error);
+        throw error;
+      }
+
+      console.log("QA analysis result:", data);
+      setQaResult(data);
+      
+      toast({
+        title: "QA Analysis Complete",
+        description: `Quality score: ${data.qualityScore}/100`,
+      });
+
+    } catch (error) {
+      console.error("Error running QA analysis:", error);
+      toast({
+        title: "QA Analysis Failed",
+        description: "Proceeding to preview without QA analysis.",
+        variant: "destructive",
+      });
+      
+      // Fallback to preview mode
+      setMode('preview');
+    } finally {
+      setIsRunningQA(false);
+    }
+  };
+
+  const handleQAProceed = () => {
+    setMode('preview');
+  };
+
+  const handleQAReject = () => {
+    setMode('json');
+    setQaResult(null);
+  };
+
+  const handleQABypass = () => {
+    setMode('preview');
+    setQaResult(null);
   };
 
   const confirmAddVendor = async () => {
@@ -268,7 +328,7 @@ VALIDATION: Test at jsonlint.com before submitting.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Vendor</DialogTitle>
         </DialogHeader>
@@ -290,6 +350,25 @@ VALIDATION: Test at jsonlint.com before submitting.`;
             >
               Add JSON Data
             </Button>
+            {qaResult && (
+              <Button
+                variant={mode === 'qa' ? 'default' : 'outline'}
+                onClick={() => setMode('qa')}
+                size="sm"
+              >
+                QA Results ({qaResult.qualityScore}/100)
+              </Button>
+            )}
+            {validationResult && (
+              <Button
+                variant={mode === 'preview' ? 'default' : 'outline'}
+                onClick={() => setMode('preview')}
+                size="sm"
+                disabled={!validationResult.isValid}
+              >
+                Preview
+              </Button>
+            )}
           </div>
 
           {mode === 'prompt' && (
@@ -388,6 +467,31 @@ VALIDATION: Test at jsonlint.com before submitting.`;
                   Try pasting it at <a href="https://jsonlint.com" target="_blank" rel="noopener noreferrer" className="underline">jsonlint.com</a> first to identify issues.
                 </p>
               </div>
+            </>
+          )}
+
+          {mode === 'qa' && (
+            <>
+              {isRunningQA ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="text-sm text-muted-foreground">
+                    AI Quality Agent is analyzing the vendor data...
+                  </p>
+                </div>
+              ) : qaResult ? (
+                <VendorQAResults
+                  qaResult={qaResult}
+                  onProceed={handleQAProceed}
+                  onReject={handleQAReject}
+                  onBypass={handleQABypass}
+                  isProcessing={isProcessing}
+                />
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No QA results available</p>
+                </div>
+              )}
             </>
           )}
 
