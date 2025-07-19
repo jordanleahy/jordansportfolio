@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 interface PublicPortfolioViewProps {
   portfolio: any; // Extended portfolio with job_applications data
 }
@@ -14,6 +16,17 @@ const PublicPortfolioView = ({
   return <PageLayout>
       <div className="min-h-screen bg-gradient-to-br from-background to-background/90 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Edit Portfolio Button */}
+          <div className="flex justify-end mb-6">
+            <Button 
+              variant="default" 
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2 flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Portfolio
+            </Button>
+          </div>
+
           {/* Hero Section */}
           <div className="text-center mb-12">
             
