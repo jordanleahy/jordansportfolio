@@ -26,7 +26,7 @@ const Jobs = lazy(() => import("./pages/Jobs"));
 const Sepsis = lazy(() => import("./pages/agents/Sepsis"));
 const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
 const CompanyPortfolio = lazy(() => import("./pages/CompanyPortfolio"));
-// Jobs-related components removed
+const Vendors = lazy(() => import("./pages/Vendors"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -114,8 +114,8 @@ const App = () => {
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/agents/sepsis" element={<Sepsis />} />
                   <Route path="/sec/data-dictionary" element={<DataDictionary />} />
+                  <Route path="/vendors/:slugname" element={<Vendors />} />
                   <Route path="/:companySlug" element={<CompanyPortfolio />} />
-                  {/* Jobs routes removed */}
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
