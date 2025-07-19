@@ -78,23 +78,13 @@ export const PromptModal: React.FC<PromptModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col bg-gradient-to-br from-background to-muted/20">
         <DialogHeader className="space-y-6 pb-6">
-          <div className="flex flex-row items-center justify-between space-y-0">
-            <div className="space-y-1">
-              <DialogTitle className="text-xl font-bold tracking-tight">
-                Research Prompt
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground font-medium">
-                {companyName}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0 shrink-0 hover:bg-muted/50"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <div className="space-y-1">
+            <DialogTitle className="text-xl font-bold tracking-tight">
+              Research Prompt
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground font-medium">
+              {companyName}
+            </p>
           </div>
           
           <div className="space-y-4">
