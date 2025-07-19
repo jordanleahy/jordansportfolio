@@ -18,23 +18,23 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export default function VendorDetail() {
-  const { slugname, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
+  const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
-  console.log('VendorDetail params:', { slugname, vendorSlug });
+  console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
-  console.log('Category exists:', slugname && VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]);
+  console.log('Category exists:', category && VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES]);
 
-  if (!slugname || !vendorSlug) {
+  if (!category || !vendorSlug) {
     console.log('Missing required params, redirecting to 404');
     return <Navigate to="/404" replace />;
   }
 
   // Check if category exists, if not, use a default fallback
-  const categoryConfig = VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES] || {
-    title: `${slugname.charAt(0).toUpperCase() + slugname.slice(1)} Companies`,
-    description: `Analysis of ${slugname} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
+  const categoryConfig = VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES] || {
+    title: `${category.charAt(0).toUpperCase() + category.slice(1)} Companies`,
+    description: `Analysis of ${category} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
   };
 
   if (isLoading) {
@@ -74,7 +74,7 @@ export default function VendorDetail() {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="article" />
-        <link rel="canonical" href={`/vendors/${slugname}/${vendorSlug}`} />
+        <link rel="canonical" href={`/vendors/${category}/${vendorSlug}`} />
         
         <script type="application/ld+json">
           {JSON.stringify({
@@ -106,7 +106,7 @@ export default function VendorDetail() {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/vendors/${slugname}`}>{categoryConfig.title}</Link>
+                  <Link to={`/vendors/${category}`}>{categoryConfig.title}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -117,7 +117,7 @@ export default function VendorDetail() {
           </Breadcrumb>
 
           <Button variant="outline" asChild className="mb-4">
-            <Link to={`/vendors/${slugname}`}>
+            <Link to={`/vendors/${category}`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to {categoryConfig.title}
             </Link>
