@@ -28,6 +28,8 @@ export default function VendorDetail() {
   const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
   const [showPrompt, setShowPrompt] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [isPasteOpen, setIsPasteOpen] = useState(false);
+  const [pasteContent, setPasteContent] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
@@ -86,25 +88,33 @@ export default function VendorDetail() {
     });
   };
 
-  const pasteJsonData = async () => {
+  const openPasteModal = () => {
+    setIsPasteOpen(true);
+    setPasteContent("");
+  };
+
+  const submitPastedData = () => {
     try {
-      const text = await navigator.clipboard.readText();
       // Parse and validate JSON
-      const jsonData = JSON.parse(text);
+      const jsonData = JSON.parse(pasteContent);
       
       // Show a toast to confirm the paste action
       toast({
-        title: "JSON Pasted!",
-        description: "ChatGPT response data has been processed.",
+        title: "JSON Processed!",
+        description: "ChatGPT response data has been processed successfully.",
       });
       
       // Here you can add logic to process the JSON data
-      console.log('Pasted JSON:', jsonData);
+      console.log('Processed JSON:', jsonData);
+      
+      // Close modal and clear content
+      setIsPasteOpen(false);
+      setPasteContent("");
       
     } catch (error) {
       toast({
         title: "Invalid JSON",
-        description: "Please copy valid JSON data from ChatGPT response.",
+        description: "Please paste valid JSON data from ChatGPT response.",
         variant: "destructive",
       });
     }
@@ -189,6 +199,44 @@ export default function VendorDetail() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isPasteOpen} onOpenChange={setIsPasteOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">Paste ChatGPT Response</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Paste the JSON response from ChatGPT here to process the vendor data:
+            </div>
+            
+            <Textarea
+              value={pasteContent}
+              onChange={(e) => setPasteContent(e.target.value)}
+              placeholder="Paste your ChatGPT JSON response here..."
+              className="min-h-[200px] font-mono text-sm"
+            />
+            
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsPasteOpen(false)}
+                className="flex-1 order-2 sm:order-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={submitPastedData}
+                disabled={!pasteContent.trim()}
+                className="flex-1 order-1 sm:order-2"
+              >
+                Process JSON
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="container mx-auto py-4 sm:py-8 px-4">
         <div className="space-y-4 sm:space-y-6">
           <Breadcrumb>
@@ -259,7 +307,7 @@ export default function VendorDetail() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={pasteJsonData}
+                      onClick={openPasteModal}
                       aria-label="Paste ChatGPT JSON Response"
                       className="min-h-[44px] min-w-[44px]"
                     >
