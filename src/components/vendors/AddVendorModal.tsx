@@ -46,6 +46,7 @@ Research the company at ${companyUrl} and return a complete JSON object with the
 
 {
   "company_name": "string - REQUIRED: Exact official company name",
+  "slug": "string - REQUIRED: URL-friendly version of company name (lowercase, no spaces, use dashes)",
   "headquarters": "string - REQUIRED: City, State format (e.g., 'Austin, TX' or 'London, UK')",
   "founding_year": 2020,
   "company_type": "string - REQUIRED: One of: 'SaaS Platform', 'Healthcare Technology', 'Consulting Firm', 'Private', 'Public', 'Subsidiary'",
@@ -71,11 +72,13 @@ Research the company at ${companyUrl} and return a complete JSON object with the
 CRITICAL REQUIREMENTS:
 1. Return ONLY the JSON object - no other text
 2. Use double quotes for all strings
-3. Ensure all required fields (company_name, headquarters, company_type, description) have actual values, not null
-4. Use proper JSON syntax - validate before responding
-5. Keep array items concise (2-8 words each)
-6. Use consistent location formatting (City, State/Country)
-7. Include the complete JSON structure - do not truncate any fields
+3. Ensure all required fields (company_name, slug, headquarters, company_type, description) have actual values, not null
+4. For the slug field: convert company name to lowercase, remove special characters, replace spaces with dashes (e.g., "SmarterDx" becomes "smarterdx")
+5. Use proper JSON syntax - validate before responding
+6. Keep array items concise (2-8 words each)
+7. Use consistent location formatting (City, State/Country)
+8. Include the complete JSON structure - do not truncate any fields
+9. All array fields must be present (even if empty arrays [])
 
 Research Guidelines:
 - Visit their website, about page, careers page, press releases
@@ -142,8 +145,8 @@ Validate your JSON before responding to ensure it's complete and properly format
       const parsedData = JSON.parse(cleanedJsonData);
       
       // Validate required fields
-      if (!parsedData.company_name || !parsedData.description || !parsedData.headquarters) {
-        throw new Error("Missing required fields: company_name, description, or headquarters");
+      if (!parsedData.company_name || !parsedData.description || !parsedData.headquarters || !parsedData.slug) {
+        throw new Error("Missing required fields: company_name, description, headquarters, or slug");
       }
 
       // Ensure arrays are properly formatted
@@ -165,12 +168,6 @@ Validate your JSON before responding to ensure it's complete and properly format
         throw new Error("User not authenticated");
       }
 
-      // Generate slug from company name
-      const slug = parsedData.company_name.toLowerCase()
-        .replace(/[^a-z0-9\s]/g, '')
-        .replace(/\s+/g, '-')
-        .trim();
-
       console.log("Inserting vendor data:", parsedData);
 
       // Insert completed record
@@ -178,7 +175,7 @@ Validate your JSON before responding to ensure it's complete and properly format
         .from('vendors')
         .insert({
           company_name: parsedData.company_name,
-          slug,
+          slug: parsedData.slug,
           status: 'completed',
           company_type: parsedData.company_type || 'Private',
           description: parsedData.description,
