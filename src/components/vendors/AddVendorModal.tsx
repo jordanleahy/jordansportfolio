@@ -43,7 +43,7 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
     try {
       const prompt = `🚨 BULLETPROOF JSON GENERATOR 🚨
 
-Research ${companyUrl} and return ONLY this JSON (no markdown, no explanations):
+Research ${companyUrl} and return ONLY RAW JSON (NO MARKDOWN BLOCKS, NO \`\`\`json):
 
 {
   "company_name": "Exact company name",
