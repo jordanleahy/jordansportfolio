@@ -137,9 +137,13 @@ export default function VendorDetail() {
       setProcessingResult(data);
       if (data.success) {
         setProcessedData(data.cleanedData);
+        const fixCount = data.fixes?.length || 0;
+        const warningCount = data.warnings?.length || 0;
+        const aiUsed = data.aiCleaningUsed ? " (AI-powered)" : "";
+        
         toast({
-          title: "JSON Processed Successfully",
-          description: `${data.fixes?.length || 0} issues fixed, ${data.warnings?.length || 0} warnings`,
+          title: `JSON Processed Successfully${aiUsed}`,
+          description: `${fixCount} issues fixed, ${warningCount} warnings`,
         });
       } else {
         toast({
@@ -336,7 +340,7 @@ export default function VendorDetail() {
           
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              Paste the JSON response from ChatGPT here. Use "Process JSON" to automatically fix common formatting issues.
+              Paste the JSON response from ChatGPT here. Use "Process JSON" to automatically fix common formatting issues using AI-powered cleaning.
             </div>
             
             <Textarea
@@ -352,6 +356,15 @@ export default function VendorDetail() {
 
             {processingResult && (
               <div className="space-y-2">
+                {processingResult.aiCleaningUsed && (
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                    <h4 className="font-medium text-blue-900 mb-2">🤖 AI-Powered Cleaning Used</h4>
+                    {processingResult.aiReasoning && (
+                      <p className="text-sm text-blue-800 whitespace-pre-wrap">{processingResult.aiReasoning}</p>
+                    )}
+                  </div>
+                )}
+
                 {processingResult.fixes && processingResult.fixes.length > 0 && (
                   <div className="bg-green-50 border border-green-200 rounded p-3">
                     <h4 className="font-medium text-green-900 mb-2">✅ Fixes Applied ({processingResult.fixes.length})</h4>
@@ -388,7 +401,7 @@ export default function VendorDetail() {
                             disabled={isProcessing}
                             className="h-7 px-2 text-xs border-red-300 hover:bg-red-100 text-red-700"
                           >
-                            Fix Error
+                            {isProcessing ? "Fixing..." : "Fix Error"}
                           </Button>
                         </li>
                       ))}
@@ -421,7 +434,7 @@ export default function VendorDetail() {
                 disabled={!pasteContent.trim() || isProcessing}
                 className="flex-1 order-1 sm:order-2"
               >
-                {isProcessing ? "Processing..." : "Process JSON"}
+                {isProcessing ? "Processing..." : "🤖 Process JSON (AI-Powered)"}
               </Button>
               <Button
                 onClick={submitPastedData}

@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
 interface ProcessingResult {
   success: boolean;
   cleanedData?: any;
@@ -14,6 +16,8 @@ interface ProcessingResult {
   fixes?: string[];
   errors?: string[];
   warnings?: string[];
+  aiCleaningUsed?: boolean;
+  aiReasoning?: string;
 }
 
 serve(async (req) => {
@@ -47,77 +51,56 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   const fixes: string[] = [];
   const warnings: string[] = [];
   const errors: string[] = [];
+  let aiCleaningUsed = false;
+  let aiReasoning = '';
 
   try {
     console.log('Starting JSON processing...');
     
-    // Step 1: Clean the raw JSON string
-    let cleanedJson = rawJson;
+    // Step 1: Try basic cleaning first
+    let cleanedJson = await basicJsonCleaning(rawJson, fixes);
     
-    // Fix all escaped characters that break JSON parsing
-    const escapeReplacements = [
-      { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
-      { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
-      { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
-      { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
-      { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
-      { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
-      { pattern: /\\r/g, replacement: '', description: 'escaped carriage returns' },
-    ];
-    
-    escapeReplacements.forEach(({ pattern, replacement, description }) => {
-      if (pattern.test(cleanedJson)) {
-        cleanedJson = cleanedJson.replace(pattern, replacement);
-        fixes.push(`Fixed ${description} in field names`);
-      }
-    });
-    
-    // Fix malformed URLs - look for patterns like "url":"[https://...","other_field":"https://...
-    const urlPattern = /("(?:website_url|source_url)"\s*:\s*")(\[https?:\/\/[^"]+)(",\s*"[^"]+"\s*:\s*")([^"]*")/g;
-    const urlMatches = cleanedJson.match(urlPattern);
-    if (urlMatches) {
-      cleanedJson = cleanedJson.replace(urlPattern, (match, prefix, url, separator, suffix) => {
-        const cleanUrl = url.replace(/^\[/, '').split(',')[0].split('"')[0];
-        fixes.push(`Fixed malformed URL: ${cleanUrl}`);
-        return `${prefix}${cleanUrl}"`;
-      });
-    }
-    
-    // Fix null values that might be escaped or malformed
-    cleanedJson = cleanedJson.replace(/\\null/g, 'null');
-    cleanedJson = cleanedJson.replace(/"null"/g, 'null');
-    cleanedJson = cleanedJson.replace(/:\s*"null"/g, ': null');
-    
-    console.log('JSON cleaning completed, attempting to parse...');
-    
-    // Step 2: Parse the cleaned JSON
+    // Step 2: Try to parse
     let parsedData;
     try {
       parsedData = JSON.parse(cleanedJson);
+      console.log('Basic cleaning successful');
     } catch (parseError) {
-      // Try to fix common JSON issues
-      console.log('Initial parse failed, attempting additional fixes...');
+      console.log('Basic cleaning failed, trying AI-powered cleaning...');
       
-      // Fix trailing commas
-      cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
-      
-      // Fix missing quotes around keys
-      cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-      
-      try {
+      // Step 3: Use AI to clean the JSON
+      if (openAIApiKey) {
+        try {
+          const aiResult = await aiJsonCleaning(rawJson);
+          if (aiResult.success) {
+            cleanedJson = aiResult.cleanedJson;
+            parsedData = JSON.parse(cleanedJson);
+            aiCleaningUsed = true;
+            aiReasoning = aiResult.reasoning;
+            fixes.push(...aiResult.fixes);
+            console.log('AI cleaning successful');
+          } else {
+            throw new Error(`AI cleaning failed: ${aiResult.error}`);
+          }
+        } catch (aiError) {
+          console.error('AI cleaning failed:', aiError);
+          // Fallback to enhanced rule-based cleaning
+          cleanedJson = await enhancedJsonCleaning(rawJson, fixes);
+          parsedData = JSON.parse(cleanedJson);
+        }
+      } else {
+        // No OpenAI key, use enhanced rule-based cleaning
+        cleanedJson = await enhancedJsonCleaning(rawJson, fixes);
         parsedData = JSON.parse(cleanedJson);
-        fixes.push('Fixed JSON syntax errors (trailing commas, unquoted keys)');
-      } catch (secondParseError) {
-        throw new Error(`JSON parsing failed: ${secondParseError.message}`);
       }
     }
     
     console.log('JSON parsed successfully, validating structure...');
     
-    // Step 3: Validate and transform the data
+    // Step 4: Validate and transform the data
     const validatedData = validateAndTransformVendorData(parsedData, warnings, errors);
     
-    // Step 4: Check for required fields
+    // Step 5: Check for required fields
     const requiredFields = ['company_name'];
     for (const field of requiredFields) {
       if (!validatedData[field] || validatedData[field].trim() === '') {
@@ -125,7 +108,7 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       }
     }
 
-    console.log(`Processing completed. Fixes: ${fixes.length}, Warnings: ${warnings.length}, Errors: ${errors.length}`);
+    console.log(`Processing completed. AI used: ${aiCleaningUsed}, Fixes: ${fixes.length}, Warnings: ${warnings.length}, Errors: ${errors.length}`);
 
     return {
       success: errors.length === 0,
@@ -133,7 +116,9 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       originalData: rawJson,
       fixes,
       warnings,
-      errors
+      errors,
+      aiCleaningUsed,
+      aiReasoning
     };
 
   } catch (error) {
@@ -145,9 +130,175 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       originalData: rawJson,
       fixes,
       warnings,
-      errors
+      errors,
+      aiCleaningUsed,
+      aiReasoning
     };
   }
+}
+
+async function aiJsonCleaning(rawJson: string): Promise<{
+  success: boolean;
+  cleanedJson?: string;
+  reasoning?: string;
+  fixes?: string[];
+  error?: string;
+}> {
+  const prompt = `You are a JSON cleaning specialist. Your task is to fix malformed JSON data that comes from ChatGPT responses for vendor information.
+
+IMPORTANT RULES:
+1. Return ONLY valid JSON - no explanation text, no markdown formatting, no code blocks
+2. Preserve ALL original data content - don't remove or change actual information
+3. Fix structural issues like escaped characters, malformed URLs, broken strings
+4. Common issues to fix:
+   - Escaped characters that break parsing (\\_,  \\:, \\", \\\\)
+   - Malformed URLs concatenated with other text
+   - Broken string boundaries
+   - Missing quotes around keys
+   - Trailing commas
+   - Invalid null values
+
+INPUT JSON TO CLEAN:
+${rawJson}
+
+Return the cleaned JSON followed by a line starting with "REASONING:" explaining what you fixed.`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a precise JSON cleaning tool. Return only valid JSON followed by reasoning.' 
+          },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.1,
+        max_tokens: 4000
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+    
+    // Split response into JSON and reasoning
+    const lines = aiResponse.split('\n');
+    let jsonEndIndex = -1;
+    let reasoning = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('REASONING:')) {
+        jsonEndIndex = i;
+        reasoning = lines.slice(i + 1).join('\n').trim();
+        break;
+      }
+    }
+    
+    const cleanedJson = jsonEndIndex > -1 
+      ? lines.slice(0, jsonEndIndex).join('\n').trim()
+      : aiResponse.trim();
+    
+    // Extract fixes from reasoning
+    const fixes = reasoning.split('\n')
+      .filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'))
+      .map(line => line.replace(/^[\s\-•]+/, '').trim())
+      .filter(fix => fix.length > 0);
+    
+    // Test if the cleaned JSON is valid
+    JSON.parse(cleanedJson);
+    
+    return {
+      success: true,
+      cleanedJson,
+      reasoning,
+      fixes: fixes.length > 0 ? fixes : ['AI successfully cleaned and restructured the JSON']
+    };
+  } catch (error) {
+    console.error('AI JSON cleaning error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+async function basicJsonCleaning(rawJson: string, fixes: string[]): Promise<string> {
+  let cleanedJson = rawJson;
+  
+  // Basic escape character fixes
+  const escapeReplacements = [
+    { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
+    { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
+    { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
+    { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
+  ];
+  
+  escapeReplacements.forEach(({ pattern, replacement, description }) => {
+    if (pattern.test(cleanedJson)) {
+      cleanedJson = cleanedJson.replace(pattern, replacement);
+      fixes.push(`Fixed ${description} in field names`);
+    }
+  });
+  
+  return cleanedJson;
+}
+
+async function enhancedJsonCleaning(rawJson: string, fixes: string[]): Promise<string> {
+  let cleanedJson = rawJson;
+  
+  // Enhanced cleaning with more patterns
+  const escapeReplacements = [
+    { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
+    { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
+    { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
+    { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
+    { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
+    { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
+    { pattern: /\\r/g, replacement: '', description: 'escaped carriage returns' },
+  ];
+  
+  escapeReplacements.forEach(({ pattern, replacement, description }) => {
+    if (pattern.test(cleanedJson)) {
+      cleanedJson = cleanedJson.replace(pattern, replacement);
+      fixes.push(`Fixed ${description} in field names`);
+    }
+  });
+  
+  // Fix malformed URLs
+  const urlPattern = /("(?:website_url|source_url)"\s*:\s*")(\[https?:\/\/[^"]+)(",\s*"[^"]+"\s*:\s*")([^"]*")/g;
+  const urlMatches = cleanedJson.match(urlPattern);
+  if (urlMatches) {
+    cleanedJson = cleanedJson.replace(urlPattern, (match, prefix, url, separator, suffix) => {
+      const cleanUrl = url.replace(/^\[/, '').split(',')[0].split('"')[0];
+      fixes.push(`Fixed malformed URL: ${cleanUrl}`);
+      return `${prefix}${cleanUrl}"`;
+    });
+  }
+  
+  // Fix null values
+  cleanedJson = cleanedJson.replace(/\\null/g, 'null');
+  cleanedJson = cleanedJson.replace(/"null"/g, 'null');
+  cleanedJson = cleanedJson.replace(/:\s*"null"/g, ': null');
+  
+  // Fix trailing commas
+  cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
+  
+  // Fix missing quotes around keys
+  cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+  
+  fixes.push('Applied enhanced rule-based cleaning');
+  
+  return cleanedJson;
 }
 
 function validateAndTransformVendorData(data: any, warnings: string[], errors: string[]): any {
