@@ -7,6 +7,7 @@ interface BlogHeroProps {
   headline: string;
   subhead: string;
   imageUrl?: string;
+  image16_9_url?: string;
   videoUrl?: string;
   badge?: string;
   readTime?: number;
@@ -17,11 +18,14 @@ export const BlogHero = ({
   headline, 
   subhead, 
   imageUrl, 
+  image16_9_url,
   videoUrl, 
   badge, 
   readTime,
   onCTAClick 
 }: BlogHeroProps) => {
+  // Prioritize 16:9 image for hero section
+  const heroImageUrl = image16_9_url || imageUrl;
   return (
     <motion.section
       initial={{ opacity: 0, y: 30 }}
@@ -87,15 +91,15 @@ export const BlogHero = ({
             </Button>
           </motion.div>
 
-          {/* Featured Image or Video - 3:4 ratio enforced */}
+          {/* Featured Image or Video - 16:9 ratio enforced */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
-            className="relative max-w-2xl mx-auto"
+            className="relative max-w-4xl mx-auto"
           >
             {videoUrl ? (
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted">
                 <video
                   autoPlay
                   loop
@@ -106,17 +110,17 @@ export const BlogHero = ({
                   <source src={videoUrl} type="video/mp4" />
                 </video>
               </div>
-            ) : imageUrl ? (
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+            ) : heroImageUrl ? (
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted">
                 <img
-                  src={imageUrl}
+                  src={heroImageUrl}
                   alt={headline}
                   className="w-full h-full object-cover"
                   loading="eager"
                 />
               </div>
             ) : (
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <div className="aspect-[16/9] rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
                 <span className="text-muted-foreground text-lg">Featured Image</span>
               </div>
             )}

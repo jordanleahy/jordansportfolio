@@ -102,7 +102,7 @@ export const BlogTemplate = ({
         <motion.div style={{
         y: heroY
       }}>
-          <BlogHero headline={post.hero_headline} subhead={post.hero_subhead} imageUrl={post.hero_image_url} videoUrl={post.hero_video_url} badge={post.hero_badge} readTime={post.read_time} onCTAClick={handleHeroClick} />
+          <BlogHero headline={post.hero_headline} subhead={post.hero_subhead} imageUrl={post.hero_image_url} image16_9_url={post.hero_image_16_9_url} videoUrl={post.hero_video_url} badge={post.hero_badge} readTime={post.read_time} onCTAClick={handleHeroClick} />
         </motion.div>
 
         {/* 2. Intro Paragraph (50–75 words) */}

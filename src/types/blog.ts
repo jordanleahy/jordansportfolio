@@ -12,6 +12,7 @@ export interface BlogPost {
   hero_headline: string;
   hero_subhead: string;
   hero_image_url?: string;
+  hero_image_16_9_url?: string;
   hero_video_url?: string;
   hero_badge?: string;
   

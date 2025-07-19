@@ -26,6 +26,7 @@ export type Database = {
           featured: boolean
           hero_badge: string | null
           hero_headline: string
+          hero_image_16_9_url: string | null
           hero_image_url: string | null
           hero_subhead: string
           hero_video_url: string | null
@@ -59,6 +60,7 @@ export type Database = {
           featured?: boolean
           hero_badge?: string | null
           hero_headline: string
+          hero_image_16_9_url?: string | null
           hero_image_url?: string | null
           hero_subhead: string
           hero_video_url?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           featured?: boolean
           hero_badge?: string | null
           hero_headline?: string
+          hero_image_16_9_url?: string | null
           hero_image_url?: string | null
           hero_subhead?: string
           hero_video_url?: string | null
