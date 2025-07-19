@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type Vendor } from '@/types/vendor';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VendorsTableProps {
   vendors: Vendor[];
@@ -28,6 +29,7 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const isMobile = useIsMobile();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -76,6 +78,131 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
       default: return 'secondary';
     }
   };
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {sortedVendors.map((vendor) => (
+          <Card 
+            key={vendor.id} 
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => handleVendorClick(vendor)}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">{vendor.company_name}</div>
+                  <div className="text-sm text-muted-foreground font-normal">
+                    {vendor.headquarters}
+                  </div>
+                </div>
+                {vendor.website_url && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(vendor.website_url, '_blank');
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <div className="text-sm font-medium mb-1">Description</div>
+                <div className="text-sm text-muted-foreground leading-relaxed">
+                  {vendor.description}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="font-medium mb-1">Type</div>
+                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
+                    {vendor.company_type}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="font-medium mb-1">Founded</div>
+                  <div className="text-muted-foreground">
+                    {vendor.founding_year || 'N/A'}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="font-medium mb-1">Funding</div>
+                <div className="text-sm text-muted-foreground">
+                  {formatFunding(vendor.total_funding)}
+                  {vendor.funding_stage && (
+                    <div className="text-xs">{vendor.funding_stage}</div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <div className="font-medium mb-1">Core Services</div>
+                <div className="flex flex-wrap gap-1">
+                  {vendor.core_services.slice(0, 3).map((service, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">
+                      {service}
+                    </Badge>
+                  ))}
+                  {vendor.core_services.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{vendor.core_services.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <div className="font-medium mb-1">Target Customers</div>
+                <div className="flex flex-wrap gap-1">
+                  {vendor.customers.slice(0, 3).map((customer, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs">
+                      {customer}
+                    </Badge>
+                  ))}
+                  {vendor.customers.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{vendor.customers.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <div className="font-medium mb-1">Specialties</div>
+                <div className="flex flex-wrap gap-1">
+                  {vendor.specialties.slice(0, 3).map((specialty, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">
+                      {specialty}
+                    </Badge>
+                  ))}
+                  {vendor.specialties.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{vendor.specialties.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {sortedVendors.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-8 text-muted-foreground">
+              No vendors found matching your filters.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
 
   return (
     <Card>
