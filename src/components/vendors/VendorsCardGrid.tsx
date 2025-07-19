@@ -11,12 +11,13 @@ interface VendorsCardGridProps {
   vendors: Vendor[];
   onVendorClick?: (vendor: Vendor) => void;
   onDeleteClick?: (vendor: Vendor) => void;
+  addVendorButton?: React.ReactNode;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
-export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick }: VendorsCardGridProps) {
+export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, addVendorButton }: VendorsCardGridProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
@@ -76,42 +77,49 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick }: Vendo
   return (
     <div className="space-y-6">
       {/* Sorting Controls */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
-        <Button
-          variant={sortField === 'company_name' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleSort('company_name')}
-          className="gap-2"
-        >
-          <Building className="h-4 w-4" />
-          Company
-          {sortField === 'company_name' && (
-            <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-          )}
-        </Button>
-        <Button
-          variant={sortField === 'company_type' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleSort('company_type')}
-        >
-          Type
-          {sortField === 'company_type' && (
-            <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-          )}
-        </Button>
-        <Button
-          variant={sortField === 'founding_year' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleSort('founding_year')}
-          className="gap-2"
-        >
-          <Calendar className="h-4 w-4" />
-          Founded
-          {sortField === 'founding_year' && (
-            <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-          )}
-        </Button>
+      <div className="flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+          <Button
+            variant={sortField === 'company_name' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => handleSort('company_name')}
+            className="gap-2"
+          >
+            <Building className="h-4 w-4" />
+            Company
+            {sortField === 'company_name' && (
+              <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+            )}
+          </Button>
+          <Button
+            variant={sortField === 'company_type' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => handleSort('company_type')}
+          >
+            Type
+            {sortField === 'company_type' && (
+              <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+            )}
+          </Button>
+          <Button
+            variant={sortField === 'founding_year' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => handleSort('founding_year')}
+            className="gap-2"
+          >
+            <Calendar className="h-4 w-4" />
+            Founded
+            {sortField === 'founding_year' && (
+              <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+            )}
+          </Button>
+        </div>
+        {addVendorButton && (
+          <div className="ml-auto">
+            {addVendorButton}
+          </div>
+        )}
       </div>
 
       {/* Responsive Card Grid */}
