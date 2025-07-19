@@ -32,6 +32,11 @@ const Index = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Redirect authenticated users to jobs page
+        if (session?.user) {
+          navigate('/jobs');
+        }
       }
     );
 
@@ -40,10 +45,15 @@ const Index = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Redirect authenticated users to jobs page
+      if (session?.user) {
+        navigate('/jobs');
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const handleSignOut = async () => {
     try {
