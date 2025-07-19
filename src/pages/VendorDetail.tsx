@@ -13,7 +13,42 @@ import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { generateVendorPrompt } from '@/lib/promptBuilder';
+// Utility function for generating vendor research prompts
+const generateVendorPrompt = (websiteUrl: string) => {
+  return `I need you to research this company thoroughly and provide detailed information in JSON format.
+
+Website: ${websiteUrl}
+
+Please browse their website and provide the following information in valid JSON format:
+
+{
+  "company_name": "Exact company name",
+  "website_url": "${websiteUrl}",
+  "description": "Detailed description of what the company does",
+  "industry": "Primary industry/sector",
+  "services": ["List", "of", "main", "services"],
+  "target_market": "Who they serve",
+  "company_size": "Estimated number of employees",
+  "founded_year": "Year founded (if available)",
+  "headquarters": "Location of main office",
+  "key_technologies": ["List", "of", "technologies", "they", "use"],
+  "pricing_model": "How they charge (if available)",
+  "contact_info": {
+    "email": "Contact email",
+    "phone": "Phone number",
+    "address": "Physical address"
+  },
+  "social_media": {
+    "linkedin": "LinkedIn URL",
+    "twitter": "Twitter URL"
+  },
+  "competitors": ["List", "of", "main", "competitors"],
+  "unique_value_proposition": "What makes them different",
+  "recent_news": ["Any", "recent", "news", "or", "updates"]
+}
+
+Please ensure the JSON is valid and complete. If any information is not available, use null or an empty array as appropriate.`;
+};
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Breadcrumb,
