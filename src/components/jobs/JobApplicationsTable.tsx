@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Edit, Trash2, FileText } from "lucide-react";
+import { ExternalLink, Edit, Trash2, FileText, Building2 } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { useCreateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
+import { useCreateCompanyPortfolio, useCompanyPortfolios } from "@/hooks/useCompanyPortfolios";
+import { useToast } from "@/hooks/use-toast";
 
 interface JobApplicationsTableProps {
   applications: JobApplication[];
@@ -20,6 +21,8 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
   const createPortfolio = useCreateCompanyPortfolio();
+  const { data: portfolios } = useCompanyPortfolios();
+  const { toast } = useToast();
 
   const handleDelete = (id: string) => {
     onDelete(id);
@@ -40,6 +43,21 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
       navigate(`/${companySlug}`);
     } catch (error) {
       console.error("Error creating portfolio:", error);
+    }
+  };
+
+  const handleViewPortfolio = (application: JobApplication) => {
+    const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+    const existingPortfolio = portfolios?.find(p => p.company_slug === companySlug);
+    
+    if (existingPortfolio) {
+      navigate(`/${companySlug}`);
+    } else {
+      toast({
+        title: "No portfolio found",
+        description: "Create a portfolio first using the portfolio button.",
+        variant: "default",
+      });
     }
   };
 
@@ -157,6 +175,15 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                   >
                     <Edit className="h-3 w-3" />
                     <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewPortfolio(application)}
+                    className="p-1 h-auto"
+                  >
+                    <Building2 className="h-3 w-3" />
+                    <span className="sr-only">View Portfolio</span>
                   </Button>
                   <Button
                     variant="ghost"
