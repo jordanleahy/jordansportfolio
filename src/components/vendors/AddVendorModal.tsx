@@ -41,78 +41,46 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
     setIsGenerating(true);
     
     try {
-      const prompt = `⚠️ CRITICAL JSON OUTPUT REQUIREMENTS ⚠️
+      const prompt = `🚨 BULLETPROOF JSON GENERATOR 🚨
 
-RETURN FORMAT: Raw JSON object ONLY - no markdown blocks, no explanations, no extra text
-
-QUOTE REQUIREMENT: Use ONLY standard straight quotes (") - ChatGPT often uses smart quotes (" ") which break JSON parsing. Double-check every quote is straight.
-
-Research ${companyUrl} and return this EXACT JSON structure:
+Research ${companyUrl} and return ONLY this JSON (no markdown, no explanations):
 
 {
-  "company_name": "REQUIRED: Exact official company name",
-  "slug": "REQUIRED: lowercase-company-name-with-dashes (no spaces, special chars)",
-  "headquarters": "REQUIRED: City, State format (Austin, TX or London, UK)",
+  "company_name": "Exact company name",
+  "slug": "lowercase-company-name",
+  "headquarters": "City, State",
   "founding_year": 2020,
-  "company_type": "REQUIRED: SaaS Platform OR Healthcare Technology OR Consulting Firm OR Private OR Public OR Subsidiary",
-  "description": "REQUIRED: Professional 2-3 sentence description of company and value proposition",
-  "core_services": ["Service 1", "Service 2", "Service 3"],
-  "specialties": ["Specialty 1", "Specialty 2"],
-  "customers": ["Customer Type 1", "Customer Type 2"],
-  "key_features": ["Feature 1", "Feature 2", "Feature 3"],
-  "key_benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
+  "company_type": "SaaS Platform",
+  "description": "2-3 sentence description",
+  "core_services": ["service1", "service2"],
+  "specialties": ["specialty1", "specialty2"],
+  "customers": ["customer-type1"],
+  "key_features": ["feature1", "feature2"],
+  "key_benefits": ["benefit1", "benefit2"],
   "website_url": "${companyUrl}",
   "source_url": "${companyUrl}",
-  "funding_stage": "Seed OR Series A OR Series B OR Series C OR IPO OR Private OR Public OR null",
-  "total_funding": "$10M OR $1.2B format OR null",
-  "key_investors": ["Investor 1", "Investor 2"],
-  "competitive_advantages": ["Advantage 1", "Advantage 2"],
-  "performance_metrics": {
-    "employees": "50-100 OR 500+ OR exact number",
-    "revenue": "$10M ARR OR null if private/unknown",
-    "customers": "1000+ OR 50 enterprise clients"
-  },
-  "notable_customers": ["Customer 1", "Customer 2", "Customer 3"],
-  "research_data": {
-    "research_date": "2024-01-15",
-    "data_sources": ["company website", "press releases", "funding announcements"],
-    "last_updated": "2024-01-15", 
-    "research_quality": "high OR medium OR low"
-  },
-  "company_data": {
-    "business_model": "SaaS subscription OR Enterprise licensing OR etc",
-    "target_market": "Enterprise healthcare OR SMB tech OR etc",
-    "technology_stack": ["React", "Node.js", "AWS"],
-    "partnerships": ["Partner 1", "Partner 2"]
-  },
-  "status": "completed"
+  "funding_stage": "Series A",
+  "total_funding": "$10M",
+  "key_investors": ["investor1"],
+  "competitive_advantages": ["advantage1"],
+  "performance_metrics": {"employees": "100", "revenue": "$5M"},
+  "notable_customers": ["customer1"],
+  "research_data": {"research_date": "2024-07-19", "data_sources": ["website"], "research_quality": "high"},
+  "company_data": {"business_model": "SaaS", "target_market": "Enterprise"},
+  "status": "draft"
 }
 
-🔥 ABSOLUTE REQUIREMENTS 🔥
-1. NO markdown code blocks (no \`\`\`json)
-2. NO explanatory text before or after JSON
-3. ALL quotes MUST be straight quotes (") - verify each one
-4. Required fields (company_name, slug, headquarters, company_type, description, status) cannot be null
-5. Slug: lowercase company name, spaces→dashes, remove special chars
-6. Arrays can be empty [] but must exist
-7. Use "null" (not null) for missing optional values
-8. Validate JSON syntax before responding
-9. Include status: "completed" field
-10. Keep array items under 8 words each
+CRITICAL RULES:
+• NO \`\`\`json blocks - raw JSON only
+• Use straight quotes (") not smart quotes (" ")  
+• founding_year = number (not string)
+• Empty arrays [] for unknown data
+• "null" for missing values
+• status = "draft"
 
-RESEARCH CHECKLIST:
-✓ Company website + about page
-✓ Recent press releases/news
-✓ Funding announcements
-✓ Team/careers page
-✓ Customer case studies
-✓ Product documentation
+FALLBACKS: Use "Unknown" for company_name, "unknown-company" for slug, "Unknown" for others if data unavailable.
 
-COPY-PASTE TEST: After generating, test your JSON at jsonlint.com to verify it parses correctly.
-
-FINAL CHECK: Every quote character in your response must be a straight quote ("). Smart quotes will break the system.
-
-Generate the JSON now:`;
+VALIDATION: Test at jsonlint.com before submitting.`;
 
       setGeneratedPrompt(prompt);
       
