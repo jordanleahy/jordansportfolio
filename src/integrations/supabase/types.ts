@@ -1203,6 +1203,7 @@ export type Database = {
       }
       vendors: {
         Row: {
+          company_data: Json | null
           company_name: string
           company_type: string
           competitive_advantages: string[]
@@ -1219,14 +1220,18 @@ export type Database = {
           key_investors: string[]
           notable_customers: string[]
           performance_metrics: Json | null
+          research_data: Json | null
           slug: string
+          source_url: string | null
           specialties: string[]
+          status: string | null
           total_funding: string | null
           updated_at: string
           user_id: string
           website_url: string | null
         }
         Insert: {
+          company_data?: Json | null
           company_name: string
           company_type: string
           competitive_advantages?: string[]
@@ -1243,14 +1248,18 @@ export type Database = {
           key_investors?: string[]
           notable_customers?: string[]
           performance_metrics?: Json | null
+          research_data?: Json | null
           slug: string
+          source_url?: string | null
           specialties?: string[]
+          status?: string | null
           total_funding?: string | null
           updated_at?: string
           user_id: string
           website_url?: string | null
         }
         Update: {
+          company_data?: Json | null
           company_name?: string
           company_type?: string
           competitive_advantages?: string[]
@@ -1267,8 +1276,11 @@ export type Database = {
           key_investors?: string[]
           notable_customers?: string[]
           performance_metrics?: Json | null
+          research_data?: Json | null
           slug?: string
+          source_url?: string | null
           specialties?: string[]
+          status?: string | null
           total_funding?: string | null
           updated_at?: string
           user_id?: string

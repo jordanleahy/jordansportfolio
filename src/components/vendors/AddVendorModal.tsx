@@ -414,34 +414,36 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
       console.log("🏷️ [AddVendorModal] Generated slug:", slug);
       console.log("🚀 [AddVendorModal] Inserting vendor into database...");
 
-      // Insert vendor record
+      // Insert vendor record with proper null handling
+      const insertData = {
+        company_name: cleanedData.company_name || '',
+        slug: slug,
+        status: cleanedData.status || 'draft',
+        company_type: cleanedData.company_type || '',
+        description: cleanedData.description || '',
+        headquarters: cleanedData.headquarters || 'Not specified',
+        founding_year: cleanedData.founding_year,
+        core_services: cleanedData.core_services || [],
+        specialties: cleanedData.specialties || [],
+        customers: cleanedData.customers || [],
+        key_features: cleanedData.key_features || [],
+        key_benefits: cleanedData.key_benefits || [],
+        website_url: cleanedData.website_url,
+        source_url: cleanedData.source_url,
+        funding_stage: cleanedData.funding_stage,
+        total_funding: cleanedData.total_funding,
+        key_investors: cleanedData.key_investors || [],
+        competitive_advantages: cleanedData.competitive_advantages || [],
+        performance_metrics: cleanedData.performance_metrics || {},
+        notable_customers: cleanedData.notable_customers || [],
+        research_data: cleanedData.research_data || {},
+        company_data: cleanedData.company_data || {},
+        user_id: user.id,
+      };
+
       const { data: vendor, error } = await supabase
         .from('vendors')
-        .insert({
-          company_name: cleanedData.company_name,
-          slug: slug,
-          status: cleanedData.status || 'draft',
-          company_type: cleanedData.company_type,
-          description: cleanedData.description,
-          headquarters: cleanedData.headquarters,
-          founding_year: cleanedData.founding_year,
-          core_services: cleanedData.core_services || [],
-          specialties: cleanedData.specialties || [],
-          customers: cleanedData.customers || [],
-          key_features: cleanedData.key_features || [],
-          key_benefits: cleanedData.key_benefits || [],
-          website_url: cleanedData.website_url,
-          source_url: cleanedData.source_url,
-          funding_stage: cleanedData.funding_stage,
-          total_funding: cleanedData.total_funding,
-          key_investors: cleanedData.key_investors || [],
-          competitive_advantages: cleanedData.competitive_advantages || [],
-          performance_metrics: cleanedData.performance_metrics || {},
-          notable_customers: cleanedData.notable_customers || [],
-          research_data: cleanedData.research_data || {},
-          company_data: cleanedData.company_data || {},
-          user_id: user.id,
-        })
+        .insert(insertData)
         .select()
         .single();
 
