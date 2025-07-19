@@ -266,8 +266,13 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
         throw new Error("User not authenticated");
       }
 
-      // Extract company name from URL (simple fallback)
-      const urlObj = new URL(websiteUrl);
+      // Normalize URL and extract company name
+      let normalizedUrl = websiteUrl.trim();
+      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+        normalizedUrl = 'https://' + normalizedUrl;
+      }
+      
+      const urlObj = new URL(normalizedUrl);
       const domain = urlObj.hostname.replace('www.', '');
       const companyName = domain.split('.')[0];
       
@@ -283,8 +288,8 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
       const insertData = {
         company_name: companyName.charAt(0).toUpperCase() + companyName.slice(1),
         slug: slug,
-        website_url: websiteUrl,
-        source_url: websiteUrl,
+        website_url: normalizedUrl,
+        source_url: normalizedUrl,
         status: 'draft',
         company_type: '',
         description: '',
