@@ -43,7 +43,7 @@ export const BlogVisualSection = ({
               transition={{ duration: 0.8, delay: 0.2 }}
               className="md:w-1/2"
             >
-              <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+              <div className="h-full min-h-[400px] bg-muted relative overflow-hidden">
                 <img
                   src={imageUrl}
                   alt={headline}
