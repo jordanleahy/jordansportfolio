@@ -1,7 +1,7 @@
 
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +84,30 @@ export default function VendorDetail() {
       title: "Copied!",
       description: "Advanced research prompt copied to clipboard.",
     });
+  };
+
+  const pasteJsonData = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      // Parse and validate JSON
+      const jsonData = JSON.parse(text);
+      
+      // Show a toast to confirm the paste action
+      toast({
+        title: "JSON Pasted!",
+        description: "ChatGPT response data has been processed.",
+      });
+      
+      // Here you can add logic to process the JSON data
+      console.log('Pasted JSON:', jsonData);
+      
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Please copy valid JSON data from ChatGPT response.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getCompanyTypeBadgeColor = (type: string) => {
@@ -231,6 +255,15 @@ export default function VendorDetail() {
                       className="min-h-[44px] min-w-[44px]"
                     >
                       <Lightbulb className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={pasteJsonData}
+                      aria-label="Paste ChatGPT JSON Response"
+                      className="min-h-[44px] min-w-[44px]"
+                    >
+                      <Clipboard className="h-4 w-4" />
                     </Button>
                   </>
                 )}
