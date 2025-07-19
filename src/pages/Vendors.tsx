@@ -15,15 +15,36 @@ export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [filters, setFilters] = useState<VendorFiltersState>({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   
   // Fetch vendors from database
   const { data: allVendors = [], isLoading, error, refetch } = useVendors();
   
+  // Enhanced authentication handling
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    const fetchUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        console.log('Auth check result:', { user: user?.id, error });
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+    
+    fetchUser();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      setUser(session?.user ?? null);
+      setIsLoadingAuth(false);
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Apply filters
@@ -205,10 +226,24 @@ export default function Vendors() {
                 Showing {filteredVendors.length} of {allVendors.length} vendors
               </p>
             </div>
-            {user && (
+            {isLoadingAuth ? (
+              <Button disabled className="gap-2">
+                <Plus className="h-4 w-4" />
+                Loading...
+              </Button>
+            ) : user ? (
               <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add Vendor
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => alert('Please log in to add vendors')} 
+                variant="outline" 
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Vendor (Login Required)
               </Button>
             )}
           </div>
