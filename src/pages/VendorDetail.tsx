@@ -14,6 +14,7 @@ import { VENDOR_CATEGORIES } from '@/types/vendor';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { generateVendorPrompt } from '@/lib/promptBuilder';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,6 +29,7 @@ export default function VendorDetail() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
@@ -129,7 +131,7 @@ export default function VendorDetail() {
       <Dialog open={showPrompt} onOpenChange={setShowPrompt}>
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Advanced Research Prompt for {vendor.company_name}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Advanced Research Prompt for {vendor.company_name}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -140,20 +142,20 @@ export default function VendorDetail() {
             <Textarea
               value={generatedPrompt}
               readOnly
-              className="min-h-[400px] font-mono text-xs"
+              className="min-h-[300px] sm:min-h-[400px] font-mono text-xs"
             />
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowPrompt(false)}
-                className="flex-1"
+                className="flex-1 order-2 sm:order-1"
               >
                 Close
               </Button>
               <Button
                 onClick={copyPrompt}
-                className="flex-1"
+                className="flex-1 order-1 sm:order-2"
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Prompt
@@ -163,62 +165,70 @@ export default function VendorDetail() {
         </DialogContent>
       </Dialog>
 
-      <div className="container mx-auto py-8 px-4">
-        <div className="space-y-6">
+      <div className="container mx-auto py-4 sm:py-8 px-4">
+        <div className="space-y-4 sm:space-y-6">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/">Home</Link>
+                  <Link to="/" className="text-sm">Home</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/vendors/${category}`}>{categoryConfig.title}</Link>
+                  <Link to={`/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{vendor.company_name}</BreadcrumbPage>
+                <BreadcrumbPage className="text-sm font-medium">{vendor.company_name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <h1 className="text-4xl font-bold tracking-tight">{vendor.company_name}</h1>
-                <div className="flex items-center gap-4 text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="space-y-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
+                  {vendor.company_name}
+                </h1>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <Building className="h-4 w-4" />
-                    {vendor.headquarters}
+                    <Building className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{vendor.headquarters}</span>
                   </div>
                   {vendor.founding_year && (
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Founded {vendor.founding_year}
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
+                      <span>Founded {vendor.founding_year}</span>
                     </div>
                   )}
-                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
+                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)} className="w-fit">
                     {vendor.company_type}
                   </Badge>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:flex-shrink-0">
                 {vendor.website_url && (
                   <>
-                    <Button asChild>
-                      <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Visit Website
+                    <Button asChild size={isMobile ? "icon" : "default"} className="min-h-[44px]">
+                      <a 
+                        href={vendor.website_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        aria-label={isMobile ? `Visit ${vendor.company_name} website` : undefined}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">Visit Website</span>}
                       </a>
                     </Button>
                     <Button
                       variant="outline"
+                      size="icon"
                       onClick={generateAdvancedPrompt}
-                      title="Generate Research Prompt"
+                      aria-label="Generate Research Prompt"
+                      className="min-h-[44px] min-w-[44px]"
                     >
                       <Lightbulb className="h-4 w-4" />
                     </Button>
@@ -228,20 +238,22 @@ export default function VendorDetail() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+            <div className="xl:col-span-2 space-y-6 lg:space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Company Overview</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Company Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{vendor.description}</p>
+                  <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                    {vendor.description}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <Sparkles className="h-5 w-5" />
                     Core Services
                   </CardTitle>
@@ -249,7 +261,7 @@ export default function VendorDetail() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {vendor.core_services.map((service, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <Badge key={idx} variant="outline" className="text-xs sm:text-sm">
                         {service}
                       </Badge>
                     ))}
@@ -259,7 +271,7 @@ export default function VendorDetail() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <Users className="h-5 w-5" />
                     Target Customers
                   </CardTitle>
@@ -267,7 +279,7 @@ export default function VendorDetail() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {vendor.customers.map((customer, idx) => (
-                      <Badge key={idx} variant="secondary">
+                      <Badge key={idx} variant="secondary" className="text-xs sm:text-sm">
                         {customer}
                       </Badge>
                     ))}
@@ -277,7 +289,7 @@ export default function VendorDetail() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <Target className="h-5 w-5" />
                     Specialty Focus
                   </CardTitle>
@@ -285,7 +297,7 @@ export default function VendorDetail() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {vendor.specialties.map((specialty, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <Badge key={idx} variant="outline" className="text-xs sm:text-sm">
                         {specialty}
                       </Badge>
                     ))}
@@ -293,15 +305,15 @@ export default function VendorDetail() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Key Features</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Key Features</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {vendor.key_features.map((feature, idx) => (
-                        <Badge key={idx} variant="default">
+                        <Badge key={idx} variant="default" className="text-xs sm:text-sm">
                           {feature}
                         </Badge>
                       ))}
@@ -311,12 +323,12 @@ export default function VendorDetail() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Key Benefits</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Key Benefits</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {vendor.key_benefits.map((benefit, idx) => (
-                        <Badge key={idx} variant="secondary">
+                        <Badge key={idx} variant="secondary" className="text-xs sm:text-sm">
                           {benefit}
                         </Badge>
                       ))}
@@ -328,12 +340,12 @@ export default function VendorDetail() {
               {vendor.notable_customers && vendor.notable_customers.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Notable Customers</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Notable Customers</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {vendor.notable_customers.map((customer, idx) => (
-                        <Badge key={idx} variant="outline">
+                        <Badge key={idx} variant="outline" className="text-xs sm:text-sm">
                           {customer}
                         </Badge>
                       ))}
@@ -345,12 +357,12 @@ export default function VendorDetail() {
               {vendor.competitive_advantages && vendor.competitive_advantages.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Competitive Advantages</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Competitive Advantages</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {vendor.competitive_advantages.map((advantage, idx) => (
-                        <Badge key={idx} variant="default">
+                        <Badge key={idx} variant="default" className="text-xs sm:text-sm">
                           {advantage}
                         </Badge>
                       ))}
@@ -362,40 +374,42 @@ export default function VendorDetail() {
               {vendor.performance_metrics && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Performance Metrics</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Performance Metrics</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <pre className="text-sm">{JSON.stringify(vendor.performance_metrics, null, 2)}</pre>
+                    <div className="bg-muted/50 p-4 rounded-lg overflow-x-auto">
+                      <pre className="text-xs sm:text-sm whitespace-pre-wrap">
+                        {JSON.stringify(vendor.performance_metrics, null, 2)}
+                      </pre>
                     </div>
                   </CardContent>
                 </Card>
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Company Stats</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Company Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {vendor.founding_year && (
                     <>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Founded</p>
-                        <p className="text-2xl font-bold">{vendor.founding_year}</p>
+                        <p className="text-xl sm:text-2xl font-bold">{vendor.founding_year}</p>
                       </div>
                       <Separator />
                     </>
                   )}
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Headquarters</p>
-                    <p className="font-medium">{vendor.headquarters}</p>
+                    <p className="font-medium text-sm sm:text-base break-words">{vendor.headquarters}</p>
                   </div>
                   <Separator />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Company Type</p>
-                    <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
+                    <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)} className="mt-1">
                       {vendor.company_type}
                     </Badge>
                   </div>
@@ -405,7 +419,7 @@ export default function VendorDetail() {
               {(vendor.total_funding || vendor.funding_stage || (vendor.key_investors && vendor.key_investors.length > 0)) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                       <DollarSign className="h-5 w-5" />
                       Funding Information
                     </CardTitle>
@@ -415,7 +429,7 @@ export default function VendorDetail() {
                       <>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Total Funding</p>
-                          <p className="text-2xl font-bold text-primary">
+                          <p className="text-xl sm:text-2xl font-bold text-primary break-words">
                             {vendor.total_funding}
                           </p>
                         </div>
@@ -426,7 +440,7 @@ export default function VendorDetail() {
                       <>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Funding Stage</p>
-                          <p className="font-medium">{vendor.funding_stage}</p>
+                          <p className="font-medium text-sm sm:text-base">{vendor.funding_stage}</p>
                         </div>
                         <Separator />
                       </>
