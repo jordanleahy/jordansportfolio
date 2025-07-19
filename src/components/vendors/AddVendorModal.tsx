@@ -41,7 +41,10 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
   const { toast } = useToast();
 
   const generatePrompt = async () => {
+    console.log("🎯 [AddVendorModal] generatePrompt called with URL:", companyUrl);
+    
     if (!companyUrl.trim()) {
+      console.warn("⚠️ [AddVendorModal] No company URL provided");
       toast({
         title: "Error",
         description: "Please enter a company URL first.",
@@ -50,6 +53,7 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
       return;
     }
 
+    console.log("✅ [AddVendorModal] Starting prompt generation for:", companyUrl);
     setCachedUrl(companyUrl);
     setIsGenerating(true);
     
@@ -246,12 +250,11 @@ Before submitting, verify:
 
 BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
 
+      console.log("📝 [AddVendorModal] Generated advanced prompt (length:", prompt.length, "characters)");
       setGeneratedPrompt(prompt);
       
-      toast({
-        title: "Success",
-        description: "Bulletproof prompt generated! Copy it, use with ChatGPT, then paste the raw JSON response in JSON mode.",
-      });
+      console.log("🎉 [AddVendorModal] Prompt generation successful, switching to JSON mode");
+      setMode('json');
     } catch (error) {
       console.error("Error generating prompt:", error);
       toast({
@@ -407,6 +410,9 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
         .replace(/-+/g, '-') // Replace multiple hyphens with single
         .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
         || 'unknown-company';
+      
+      console.log("🏷️ [AddVendorModal] Generated slug:", slug);
+      console.log("🚀 [AddVendorModal] Inserting vendor into database...");
 
       // Insert vendor record
       const { data: vendor, error } = await supabase

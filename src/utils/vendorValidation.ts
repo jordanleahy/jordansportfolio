@@ -36,6 +36,10 @@ export interface ValidationResult {
 }
 
 export const validateVendorData = (rawData: any): ValidationResult => {
+  console.log("🔍 [VendorValidation] Starting validation process");
+  console.log("📊 [VendorValidation] Raw data keys:", Object.keys(rawData || {}));
+  console.log("📋 [VendorValidation] Raw data preview:", JSON.stringify(rawData).substring(0, 200) + "...");
+  
   const errors: ValidationError[] = [];
   const warnings: ValidationError[] = [];
   const cleanedData: any = {};
@@ -43,8 +47,11 @@ export const validateVendorData = (rawData: any): ValidationResult => {
   // Only company_name is truly required now, others are nullable
   const requiredFields = ['company_name'];
   
+  console.log("✅ [VendorValidation] Checking required fields:", requiredFields);
+  
   for (const field of requiredFields) {
     if (!rawData[field] || typeof rawData[field] !== 'string' || rawData[field].trim() === '') {
+      console.warn(`⚠️ [VendorValidation] Missing required field: ${field}`);
       errors.push({
         field,
         message: `${field} is required and must be a non-empty string`,

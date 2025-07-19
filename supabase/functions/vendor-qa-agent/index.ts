@@ -16,23 +16,37 @@ interface QAResult {
 }
 
 serve(async (req) => {
+  console.log("🤖 [vendor-qa-agent] Function invoked");
+  console.log("📊 [vendor-qa-agent] Request method:", req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log("✅ [vendor-qa-agent] Handling CORS preflight");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("📝 [vendor-qa-agent] Parsing request body");
     const { vendorData } = await req.json();
     
+    console.log("📊 [vendor-qa-agent] Received vendor data:", {
+      company_name: vendorData?.company_name,
+      dataKeys: Object.keys(vendorData || {}),
+      dataSize: JSON.stringify(vendorData || {}).length
+    });
+    
     if (!vendorData) {
+      console.error("❌ [vendor-qa-agent] No vendor data provided");
       throw new Error('Vendor data is required');
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
+      console.error("❌ [vendor-qa-agent] OpenAI API key not configured");
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log('Analyzing vendor data for:', vendorData.company_name);
+    console.log("🔍 [vendor-qa-agent] Analyzing vendor data for:", vendorData.company_name);
+    console.log("🤖 [vendor-qa-agent] Preparing AI prompt for quality analysis");
 
     const prompt = `You are a expert business analyst specializing in healthcare technology vendor assessment. Analyze this vendor data for quality, accuracy, and completeness.
 
@@ -76,6 +90,7 @@ Provide your response in this EXACT JSON format (no markdown):
 
 Be specific and actionable in your feedback. Focus on data quality issues that could affect business intelligence value.`;
 
+    console.log("🚀 [vendor-qa-agent] Calling OpenAI API");
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -99,19 +114,32 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
       }),
     });
 
+    console.log("📬 [vendor-qa-agent] OpenAI API response status:", response.status);
+    
     if (!response.ok) {
+      console.error("❌ [vendor-qa-agent] OpenAI API error:", response.status, response.statusText);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
-
-    console.log('AI Response:', aiResponse);
+    
+    console.log("✅ [vendor-qa-agent] AI Response received");
+    console.log("📋 [vendor-qa-agent] AI Response preview:", aiResponse.substring(0, 200) + "...");
 
     // Parse AI response and validate format
     let qaResult: QAResult;
     try {
+      console.log("🔧 [vendor-qa-agent] Parsing AI response JSON");
       qaResult = JSON.parse(aiResponse);
+      
+      console.log("📊 [vendor-qa-agent] Parsed QA result:", {
+        qualityScore: qaResult.qualityScore,
+        feedbackCount: qaResult.feedback?.length || 0,
+        suggestionsCount: qaResult.suggestions?.length || 0,
+        warningsCount: qaResult.warnings?.length || 0,
+        isRecommended: qaResult.isRecommended
+      });
       
       // Validate required fields
       if (typeof qaResult.qualityScore !== 'number' || 
@@ -119,15 +147,24 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
           !Array.isArray(qaResult.suggestions) ||
           !Array.isArray(qaResult.warnings) ||
           typeof qaResult.isRecommended !== 'boolean') {
+        console.error("❌ [vendor-qa-agent] Invalid QA result format detected");
         throw new Error('Invalid QA result format');
       }
 
       // Ensure score is in valid range
+      const originalScore = qaResult.qualityScore;
       qaResult.qualityScore = Math.max(1, Math.min(100, qaResult.qualityScore));
+      if (originalScore !== qaResult.qualityScore) {
+        console.log(`🔧 [vendor-qa-agent] Score clamped from ${originalScore} to ${qaResult.qualityScore}`);
+      }
+      
+      console.log("✅ [vendor-qa-agent] QA result validation passed");
       
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
+      console.error("❌ [vendor-qa-agent] Failed to parse AI response:", parseError);
+      console.error("❌ [vendor-qa-agent] Raw AI response:", aiResponse);
       // Fallback result
+      console.log("⚠️ [vendor-qa-agent] Using fallback QA result");
       qaResult = {
         qualityScore: 50,
         feedback: ['AI analysis failed - manual review recommended'],
@@ -137,16 +174,28 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
       };
     }
 
-    console.log('QA Result:', qaResult);
+    console.log("🎯 [vendor-qa-agent] Final QA Result:", {
+      qualityScore: qaResult.qualityScore,
+      isRecommended: qaResult.isRecommended,
+      totalFeedback: qaResult.feedback.length,
+      totalSuggestions: qaResult.suggestions.length,
+      totalWarnings: qaResult.warnings.length
+    });
 
+    console.log("✅ [vendor-qa-agent] Returning successful QA analysis");
     return new Response(JSON.stringify(qaResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in vendor QA agent:', error);
+    console.error("❌ [vendor-qa-agent] Function error:", error);
+    console.error("❌ [vendor-qa-agent] Error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
+    
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       qualityScore: 0,
       feedback: ['QA analysis failed'],
       suggestions: ['Manual review required'],
