@@ -68,7 +68,10 @@ export default function AdminVendors() {
         performance_metrics: parsed.performance_metrics,
         notable_customers: parsed.notable_customers || [],
         website_url: parsed.website_url,
-        slug
+        slug,
+        user_id: '', // Will be set when saving to database
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       setPreviewData(vendorData);
