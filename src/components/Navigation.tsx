@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut, Settings, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Briefcase, User, BookOpen, Mail, BarChart3, Calendar, LogIn, LogOut, Settings, ChevronDown, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -163,6 +163,10 @@ const Navigation = () => {
                           <Calendar size={16} className="mr-2" />
                           Calendar
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/jobs")}>
+                          <FileText size={16} className="mr-2" />
+                          Jobs
+                        </DropdownMenuItem>
                         {isAdmin && (
                           <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
                             <Settings size={16} className="mr-2" />
@@ -228,6 +232,10 @@ const Navigation = () => {
                       <DropdownMenuItem onClick={() => navigate("/calendar")}>
                         <Calendar size={16} className="mr-2" />
                         Calendar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/jobs")}>
+                        <FileText size={16} className="mr-2" />
+                        Jobs
                       </DropdownMenuItem>
                       {isAdmin && (
                         <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
@@ -324,6 +332,18 @@ const Navigation = () => {
                     >
                       <Calendar size={16} className="mr-2" />
                       Calendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigate("/jobs");
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full justify-start mt-1"
+                    >
+                      <FileText size={16} className="mr-2" />
+                      Jobs
                     </Button>
                     {isAdmin && (
                       <Button
