@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useCompanyPortfolio, useUpdateCompanyPortfolio, useGeneratePortfolioContent } from "@/hooks/useCompanyPortfolios";
 import { Button } from "@/components/ui/button";
@@ -5,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Wand2, Upload, Save } from "lucide-react";
+import { ArrowLeft, Wand2, Upload, Save, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
 
 const CompanyPortfolio = () => {
   const { companySlug } = useParams();
@@ -16,6 +19,8 @@ const CompanyPortfolio = () => {
   const updatePortfolio = useUpdateCompanyPortfolio();
   const generateContent = useGeneratePortfolioContent();
 
+  const [user, setUser] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editableContent, setEditableContent] = useState({
     hero_headline: "",
     hero_subheadline: "",
@@ -23,6 +28,18 @@ const CompanyPortfolio = () => {
     cover_letter: "",
     custom_video_url: ""
   });
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+  }, []);
+
+  // Determine if user can edit this portfolio
+  const canEdit = user && portfolio && portfolio.user_id === user.id;
 
   useEffect(() => {
     if (portfolio) {
@@ -77,6 +94,7 @@ const CompanyPortfolio = () => {
         custom_video_url: editableContent.custom_video_url,
         status: 'completed'
       });
+      setIsEditMode(false);
     } catch (error) {
       console.error("Error saving portfolio:", error);
     }
@@ -107,6 +125,24 @@ const CompanyPortfolio = () => {
     );
   }
 
+  // Show public view if not in edit mode or user can't edit
+  if (!isEditMode || !canEdit) {
+    return (
+      <div className="relative">
+        {canEdit && (
+          <div className="fixed top-4 right-4 z-50">
+            <Button onClick={() => setIsEditMode(true)} className="gap-2">
+              <Edit className="h-4 w-4" />
+              Edit Portfolio
+            </Button>
+          </div>
+        )}
+        <PublicPortfolioView portfolio={portfolio} />
+      </div>
+    );
+  }
+
+  // Show edit mode for authenticated users
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -114,12 +150,12 @@ const CompanyPortfolio = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => navigate("/jobs")}>
+              <Button variant="ghost" onClick={() => setIsEditMode(false)}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
                 <h1 className="text-3xl font-bold">{portfolio.company_name} Portfolio</h1>
-                <p className="text-muted-foreground">Tailored for {portfolio.company_name}</p>
+                <p className="text-muted-foreground">Editing mode - Tailored for {portfolio.company_name}</p>
               </div>
             </div>
             <div className="flex gap-2">
