@@ -1,5 +1,6 @@
+
 [build]
-  command = "node scripts/generate-prerender-routes.js && npm run build"
+  command = "npm run build"
   publish = "dist"
 
 [build.processing]
@@ -16,14 +17,6 @@
 [build.processing.html]
   pretty_urls = true
 
-# Prerender plugin temporarily disabled due to package installation issues
-# [[plugins]]
-#   package = "@netlify/plugin-prerender"
-#   
-#   [plugins.inputs]
-#     publicDir = "dist"
-#     routesFile = "prerender-routes.json"
-
 # Build environment
 [build.environment]
   NETLIFY_SKIP_PNPM_INSTALL = "true"
@@ -38,7 +31,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SPA fallback - exclude prerendered routes
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
