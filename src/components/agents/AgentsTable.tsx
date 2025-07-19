@@ -1,6 +1,8 @@
+
 import { useState } from 'react';
 import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { AgentStatusBadge } from './AgentStatusBadge';
+import { CreateAgentModal } from './CreateAgentModal';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,14 +15,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
+  Select,  
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Plus, Play, Pause, Trash2 } from 'lucide-react';
+import { Search, Play, Pause, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AgentStatus, OpenAIAgent } from '@/types/openaiAgent';
 import { useUpdateAgent, useDeleteAgent } from '@/hooks/useOpenAIAgents';
@@ -60,10 +62,7 @@ export const AgentsTable = () => {
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle>My OpenAI Agents</CardTitle>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Agent
-          </Button>
+          <CreateAgentModal />
         </div>
         
         {/* Filters */}

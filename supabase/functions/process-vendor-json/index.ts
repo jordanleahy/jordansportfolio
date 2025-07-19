@@ -1,6 +1,6 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,12 +9,17 @@ const corsHeaders = {
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
+// Initialize Supabase client for metrics tracking
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 interface ProcessingResult {
   success: boolean;
   cleanedData?: any;
   originalData?: any;
   fixes?: string[];
-  errors?: string[];
+  errors?: string[];  
   warnings?: string[];
   aiCleaningUsed?: boolean;
   aiReasoning?: string;
@@ -26,17 +31,28 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let success = false;
+
   try {
     const { rawJson } = await req.json();
     console.log('Processing raw JSON input...');
 
     const result = await processVendorJson(rawJson);
+    success = result.success;
+
+    // Track agent metrics if processing was successful
+    if (success) {
+      await trackAgentUsage(startTime, true);
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in process-vendor-json function:', error);
+    await trackAgentUsage(startTime, false);
+    
     return new Response(JSON.stringify({ 
       success: false,
       errors: [error.message] 
@@ -46,6 +62,36 @@ serve(async (req) => {
     });
   }
 });
+
+async function trackAgentUsage(startTime: number, success: boolean) {
+  try {
+    const processingTime = Date.now() - startTime;
+    
+    // Find the vendor JSON processor agent
+    const { data: agent } = await supabase
+      .from('openai_agents')
+      .select('*')
+      .eq('name', 'Vendor JSON Processor')
+      .single();
+
+    if (agent) {
+      // Update last_run timestamp
+      await supabase
+        .from('openai_agents')
+        .update({ 
+          last_run: new Date().toISOString(),
+          metrics: {
+            latencyMs: processingTime,
+            errorRate: success ? 0 : 1
+          }
+        })
+        .eq('id', agent.id);
+    }
+  } catch (error) {
+    console.error('Error tracking agent usage:', error);
+    // Don't fail the main request if metrics tracking fails
+  }
+}
 
 async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   const fixes: string[] = [];
