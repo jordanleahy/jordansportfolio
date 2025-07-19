@@ -1,24 +1,23 @@
 
 export interface Vendor {
   id: string;
-  companyName: string;
+  company_name: string;
   headquarters: string;
-  yearFounded: number;
-  companyType: 'Public' | 'Private' | 'Startup' | 'Subsidiary';
+  founding_year?: number;
+  company_type: string;
   description: string;
-  coreServices: string[];
-  targetCustomers: string[];
-  specialtyFocus: string[];
-  keyFeatures: string[];
-  keyBenefits: string[];
-  fundingRaised?: number;
-  latestFundingRound?: string;
-  investors?: string[];
-  notableCustomers?: string[];
-  metrics?: string[];
-  websiteUrl?: string;
-  notes?: string;
-  category: string;
+  core_services: string[];
+  specialties: string[];
+  customers: string[];
+  key_features: string[];
+  key_benefits: string[];
+  website_url?: string;
+  funding_stage?: string;
+  total_funding?: string;
+  key_investors: string[];
+  competitive_advantages: string[];
+  performance_metrics?: any;
+  notable_customers: string[];
   slug: string;
 }
 

@@ -28,6 +28,7 @@ const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
 const CompanyPortfolio = lazy(() => import("./pages/CompanyPortfolio"));
 const Vendors = lazy(() => import("./pages/Vendors"));
 const VendorDetail = lazy(() => import("./pages/VendorDetail"));
+const AdminVendors = lazy(() => import("./pages/AdminVendors"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -117,6 +118,7 @@ const App = () => {
                   <Route path="/sec/data-dictionary" element={<DataDictionary />} />
                   <Route path="/vendors/:slugname" element={<Vendors />} />
                   <Route path="/vendors/:category/:vendorSlug" element={<VendorDetail />} />
+                  <Route path="/admin/vendors" element={<AdminVendors />} />
                   <Route path="/:companySlug" element={<CompanyPortfolio />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

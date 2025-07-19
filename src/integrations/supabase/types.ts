@@ -1201,6 +1201,81 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          company_name: string
+          company_type: string
+          competitive_advantages: string[]
+          core_services: string[]
+          created_at: string
+          customers: string[]
+          description: string
+          founding_year: number | null
+          funding_stage: string | null
+          headquarters: string
+          id: string
+          key_benefits: string[]
+          key_features: string[]
+          key_investors: string[]
+          notable_customers: string[]
+          performance_metrics: Json | null
+          slug: string
+          specialties: string[]
+          total_funding: string | null
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          company_name: string
+          company_type: string
+          competitive_advantages?: string[]
+          core_services?: string[]
+          created_at?: string
+          customers?: string[]
+          description: string
+          founding_year?: number | null
+          funding_stage?: string | null
+          headquarters: string
+          id?: string
+          key_benefits?: string[]
+          key_features?: string[]
+          key_investors?: string[]
+          notable_customers?: string[]
+          performance_metrics?: Json | null
+          slug: string
+          specialties?: string[]
+          total_funding?: string | null
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          company_type?: string
+          competitive_advantages?: string[]
+          core_services?: string[]
+          created_at?: string
+          customers?: string[]
+          description?: string
+          founding_year?: number | null
+          funding_stage?: string | null
+          headquarters?: string
+          id?: string
+          key_benefits?: string[]
+          key_features?: string[]
+          key_investors?: string[]
+          notable_customers?: string[]
+          performance_metrics?: Json | null
+          slug?: string
+          specialties?: string[]
+          total_funding?: string | null
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       mv_offerings_enriched: {

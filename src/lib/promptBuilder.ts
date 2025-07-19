@@ -1,145 +1,43 @@
-import type { OfferingDetail } from "@/types/sec";
+export const generateVendorPrompt = (companyUrl: string): string => {
+  return `Please research the company at ${companyUrl} and provide comprehensive information about them. Return your response as a valid JSON object with the following structure:
 
-export interface SecOffering {
-  id: string;
-  company: string;
-  cityState: string;
-  signer: string;
-  accession: string;
-  securityType: string;
-  raiseTarget: number;
-  amountSold: number;
-  minInvestment: number;
+{
+  "company_name": "string - The official company name",
+  "headquarters": "string - Location of headquarters (City, State/Country)",
+  "company_type": "string - Type of company (e.g., 'SaaS Platform', 'Healthcare Technology', 'Consulting Firm')",
+  "description": "string - 2-3 sentence description of what the company does and their value proposition",
+  "core_services": ["array of strings - Main services/products offered"],
+  "specialties": ["array of strings - Key areas of specialization or expertise"],
+  "customers": ["array of strings - Types of customers they serve (e.g., 'Healthcare Providers', 'Enterprise Companies')"],
+  "founding_year": number - Year the company was founded (if available),
+  "funding_stage": "string - Current funding stage (e.g., 'Series A', 'Private', 'Public') or null",
+  "total_funding": "string - Total funding raised (e.g., '$50M') or null",
+  "key_investors": ["array of strings - Notable investors/VCs"],
+  "competitive_advantages": ["array of strings - What makes them unique or better than competitors"],
+  "key_features": ["array of strings - Important product/service features"],
+  "key_benefits": ["array of strings - Main benefits clients get from using their services"],
+  "performance_metrics": {
+    "optional object with any available metrics like customer_count, revenue_growth, etc."
+  },
+  "notable_customers": ["array of strings - Well-known clients or customer names if publicly available"],
+  "website_url": "string - The main website URL"
 }
 
-export function mapOfferingToSecOffering(offering: any): SecOffering {
-  // Extract company name from various possible sources
-  const company = offering.issuers?.[0]?.entityname || 
-                 offering.company_name || 
-                 offering.issuers?.[0]?.ENTITYNAME || 
-                 'Unknown Company';
+Research Guidelines:
+- Visit their website, about page, careers page, and any available press releases
+- Look for case studies, customer testimonials, or success stories
+- Check for recent funding announcements or growth metrics
+- Identify their target market and competitive positioning
+- Find information about their team size, locations, or notable employees
+- Look for any awards, certifications, or industry recognition
 
-  // Extract location
-  const city = offering.issuers?.[0]?.city || 
-               offering.issuers?.[0]?.CITY || 
-               offering.company_city || 
-               'Unknown';
-  const state = offering.issuers?.[0]?.stateorcountrydescription || 
-                offering.issuers?.[0]?.STATEORCOUNTRYDESCRIPTION || 
-                offering.company_location || 
-                'Unknown';
-  const cityState = `${city}, ${state}`;
+Data Quality Requirements:
+- Ensure all string fields are properly formatted and professional
+- Use consistent formatting for locations (City, State format for US, City, Country for international)
+- Keep array items concise but descriptive (2-8 words each typically)
+- For funding amounts, use standard formats like "$10M", "$1.2B"
+- If information is not available, use null or empty arrays rather than making assumptions
+- Ensure the description is compelling and clearly explains their value proposition
 
-  // Extract signer
-  const signer = offering.signatures?.[0]?.nameofsigner || 
-                offering.signatures?.[0]?.NAMEOFSIGNER || 
-                offering.primary_signer || 
-                'Not specified';
-
-  // Extract accession number
-  const accession = offering.accessionnumber || 
-                   offering.ACCESSIONNUMBER || 
-                   'Unknown';
-
-  // Determine security type based on boolean flags
-  let securityType = 'Unknown';
-  if (offering.isequitytype || offering.ISEQUITYTYPE) securityType = 'Equity';
-  else if (offering.isdebttype || offering.ISDEBTTYPE) securityType = 'Debt';
-  else if (offering.isoptiontoacquiretype || offering.ISOPTIONTOACQUIRETYPE) securityType = 'Option to Acquire';
-  else if (offering.ispooledinvestmentfundtype || offering.ISPOOLEDINVESTMENTFUNDTYPE) securityType = 'Pooled Investment Fund';
-  else if (offering.isothertype || offering.ISOTHERTYPE) securityType = offering.descriptionofothertype || offering.DESCRIPTIONOFOTHERTYPE || 'Other';
-
-  // Extract financial data
-  const raiseTarget = offering.totalofferingamount || offering.TOTALOFFERINGAMOUNT || 0;
-  const amountSold = offering.totalamountsold || offering.TOTALAMOUNTSOLD || 0;
-  const minInvestment = offering.minimuminvestmentaccepted || offering.MINIMUMINVESTMENTACCEPTED || 0;
-
-  return {
-    id: accession,
-    company,
-    cityState,
-    signer,
-    accession,
-    securityType,
-    raiseTarget,
-    amountSold,
-    minInvestment
-  };
-}
-
-export function buildPrompt(offering: SecOffering): string {
-  const formatCurrency = (amount: number) => {
-    if (amount === 0) return 'Not disclosed';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: 'standard',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
-  const remaining = offering.raiseTarget - offering.amountSold;
-
-  return `You are my venture-style research assistant.
-
-❶  TARGET  
-   • Legal entity: "${offering.company}" (principal place of business: ${offering.cityState})  
-   • Executive / authorized signer: "${offering.signer}"  
-   • SEC Form D accession #: ${offering.accession}  
-   • Offering details (as of filing):  
-        – Security type: ${offering.securityType}  
-        – Total authorized: ${formatCurrency(offering.raiseTarget)}  
-        – Sold: ${formatCurrency(offering.amountSold)}  
-        – Remaining: ${formatCurrency(remaining)}  
-        – Minimum investment: ${formatCurrency(offering.minInvestment)}
-
-❷  TASKS  
-   A. Validate & enrich company profile:
-      • Confirm legal entity name, corporate structure, and registration details
-      • Research founding team, key executives, and board composition
-      • Map product/service offerings, business model, and revenue streams
-      • Identify target market, customer base, and competitive positioning
-      
-   B. Financial & fundraising analysis:
-      • Cross-reference this Form D with prior fundraising rounds
-      • Analyze valuation trends, dilution patterns, and investor composition
-      • Research current revenue, growth metrics, and burn rate (if available)
-      • Identify lead investors, follow-on participants, and strategic partners
-      
-   C. Market & competitive intelligence:
-      • Research industry dynamics, market size, and growth projections
-      • Identify direct competitors and their recent funding activities
-      • Analyze regulatory environment and potential compliance considerations
-      • Assess technology differentiation and intellectual property position
-      
-   D. Due diligence red flags:
-      • Check for any litigation, regulatory issues, or compliance violations
-      • Research executive backgrounds for any concerning patterns
-      • Validate business licenses and regulatory approvals
-      • Cross-check against SEC enforcement actions or sanctions lists
-
-❸  OUTPUT SPECS  
-   • Bullet, semi-formal prose, ≤ 600 words  
-   • Inline footnote links for all claims and data points
-   • Highlight any material concerns or positive differentiators
-   • Include next steps for deeper due diligence if warranted
-   • Organize findings by: Company Overview, Financial Profile, Market Position, Risk Assessment`;
-}
-
-export function cachePrompt(prompt: string): void {
-  try {
-    localStorage.setItem('sec-last-generated-prompt', prompt);
-  } catch (error) {
-    console.warn('Failed to cache prompt:', error);
-  }
-}
-
-export function loadCachedPrompt(): string | null {
-  try {
-    return localStorage.getItem('sec-last-generated-prompt');
-  } catch (error) {
-    console.warn('Failed to load cached prompt:', error);
-    return null;
-  }
-}
+Return ONLY the JSON object, no additional text or explanations.`;
+};
