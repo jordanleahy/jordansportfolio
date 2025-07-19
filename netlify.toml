@@ -16,13 +16,13 @@
 [build.processing.html]
   pretty_urls = true
 
-# Enable prerendering for social media sharing
-[[plugins]]
-  package = "@netlify/plugin-prerender"
-  
-  [plugins.inputs]
-    publicDir = "dist"
-    routesFile = "prerender-routes.json"
+# Prerender plugin temporarily disabled due to package installation issues
+# [[plugins]]
+#   package = "@netlify/plugin-prerender"
+#   
+#   [plugins.inputs]
+#     publicDir = "dist"
+#     routesFile = "prerender-routes.json"
 
 # Build environment
 [build.environment]
