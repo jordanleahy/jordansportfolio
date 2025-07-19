@@ -3,6 +3,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
+import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 
 interface PublicPortfolioViewProps {
   portfolio: any; // Extended portfolio with job_applications data
@@ -24,11 +25,11 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
           {/* Video and Cover Letter Section - Side by side on desktop */}
           <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
             {/* Video Section */}
-            {portfolio.custom_video_url && (
-              <Card className="bg-transparent border-none shadow-none">
-                <CardContent className="p-0 space-y-4">
-                  <AspectRatio ratio={9/16}>
-                    {portfolio.custom_video_url.includes('youtube.com') || portfolio.custom_video_url.includes('youtu.be') ? (
+            <Card className="bg-transparent border-none shadow-none">
+              <CardContent className="p-0 space-y-4">
+                <AspectRatio ratio={9/16}>
+                  {portfolio.custom_video_url ? (
+                    portfolio.custom_video_url.includes('youtube.com') || portfolio.custom_video_url.includes('youtu.be') ? (
                       <iframe
                         src={portfolio.custom_video_url.replace('watch?v=', 'embed/')}
                         className="w-full h-full rounded-lg"
@@ -46,11 +47,22 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
                         <source src={portfolio.custom_video_url} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                    )}
-                  </AspectRatio>
-                </CardContent>
-              </Card>
-            )}
+                    )
+                  ) : (
+                    <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <div className="w-16 h-16 bg-muted-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <div className="w-6 h-6 bg-muted-foreground/40 rounded-full"></div>
+                        </div>
+                        <p className="text-sm">Introduction Video</p>
+                        <p className="text-xs">Coming Soon</p>
+                      </div>
+                    </div>
+                  )}
+                </AspectRatio>
+                <TimeOnTaskTimer />
+              </CardContent>
+            </Card>
 
             {/* Cover Letter Content */}
             {portfolio.cover_letter && (
