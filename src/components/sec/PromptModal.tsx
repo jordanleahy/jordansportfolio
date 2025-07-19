@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -76,8 +77,11 @@ export const PromptModal: React.FC<PromptModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col bg-gradient-to-br from-background to-muted/20">
+      <DialogContent className="h-screen max-w-4xl flex flex-col bg-gradient-to-br from-background to-muted/20 m-0 rounded-none">
         <DialogHeader className="space-y-6 pb-6">
+          <DialogDescription className="sr-only">
+            AI-powered research prompt for comprehensive company analysis
+          </DialogDescription>
           <div className="space-y-1">
             <DialogTitle className="text-xl font-bold tracking-tight">
               Research Prompt
