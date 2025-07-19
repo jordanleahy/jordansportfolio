@@ -54,46 +54,197 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
     setIsGenerating(true);
     
     try {
-      const prompt = `🚨 BULLETPROOF JSON GENERATOR 🚨
+      const prompt = `🔬 ADVANCED VENDOR INTELLIGENCE EXTRACTION SYSTEM 🔬
 
-Research ${companyUrl} and return ONLY RAW JSON (NO MARKDOWN BLOCKS, NO \`\`\`json):
+====================================================================
+MISSION: Deep-dive research on ${companyUrl} to extract comprehensive vendor intelligence data
+OBJECTIVE: Generate a complete vendor profile suitable for competitive analysis and procurement evaluation
+OUTPUT FORMAT: RAW JSON ONLY (NO markdown blocks, NO \`\`\`json wrappers)
+====================================================================
 
+RESEARCH INSTRUCTIONS:
+1. Visit the company's main website, about pages, product pages, pricing pages, and press releases
+2. Look for investor relations, funding announcements, customer case studies, and testimonials  
+3. Examine leadership team backgrounds, company timeline, and competitive positioning
+4. Analyze product features, benefits, target markets, and business model
+5. Cross-reference information across multiple sources for accuracy
+6. Focus on factual, verifiable information over marketing language
+
+REQUIRED JSON STRUCTURE:
 {
-  "company_name": "Exact company name",
-  "slug": "lowercase-company-name",
-  "headquarters": "City, State",
-  "founding_year": 2020,
-  "company_type": "SaaS Platform",
-  "description": "2-3 sentence description",
-  "core_services": ["service1", "service2"],
-  "specialties": ["specialty1", "specialty2"],
-  "customers": ["customer-type1"],
-  "key_features": ["feature1", "feature2"],
-  "key_benefits": ["benefit1", "benefit2"],
+  "company_name": null,
+  "headquarters": null,
+  "founding_year": null,
+  "company_type": null,
+  "description": null,
+  "core_services": [],
+  "specialties": [],
+  "customers": [],
+  "key_features": [],
+  "key_benefits": [],
   "website_url": "${companyUrl}",
   "source_url": "${companyUrl}",
-  "funding_stage": "Series A",
-  "total_funding": "$10M",
-  "key_investors": ["investor1"],
-  "competitive_advantages": ["advantage1"],
-  "performance_metrics": {"employees": "100", "revenue": "$5M"},
-  "notable_customers": ["customer1"],
-  "research_data": {"research_date": "2024-07-19", "data_sources": ["website"], "research_quality": "high"},
-  "company_data": {"business_model": "SaaS", "target_market": "Enterprise"},
+  "funding_stage": null,
+  "total_funding": null,
+  "key_investors": [],
+  "competitive_advantages": [],
+  "performance_metrics": null,
+  "notable_customers": [],
+  "research_data": null,
+  "company_data": null,
   "status": "draft"
 }
 
-CRITICAL RULES:
-• NO \`\`\`json blocks - raw JSON only
-• Use straight quotes (") not smart quotes (" ")  
-• founding_year = number (not string)
-• Empty arrays [] for unknown data
-• "null" for missing values
-• status = "draft"
+====================================================================
+DETAILED FIELD SPECIFICATIONS:
+====================================================================
 
-FALLBACKS: Use "Unknown" for company_name, "unknown-company" for slug, "Unknown" for others if data unavailable.
+COMPANY_NAME: Official legal business name or primary brand name
 
-VALIDATION: Test at jsonlint.com before submitting.`;
+HEADQUARTERS: City, State/Province, Country format (e.g., "San Francisco, CA, USA")
+
+FOUNDING_YEAR: 4-digit year as number (e.g., 2015) or null if unknown
+
+COMPANY_TYPE: Select most accurate category:
+- "Private SaaS Company"
+- "Public Technology Company" 
+- "Healthcare Technology Vendor"
+- "Financial Services Provider"
+- "Enterprise Software Vendor"
+- "Consulting Services Firm"
+- "System Integrator"
+- "Technology Startup"
+- "Fortune 500 Company"
+- Or create appropriate category based on business model
+
+DESCRIPTION: 150-300 word comprehensive overview covering:
+- What the company does
+- Primary business focus
+- Target market served
+- Key value proposition
+- Market position or unique approach
+
+CORE_SERVICES: Primary service offerings (3-8 items):
+- Use specific, technical terminology
+- Focus on main revenue-generating services
+- Examples: ["Revenue Cycle Management", "Clinical Documentation Improvement", "Medical Coding Services"]
+
+SPECIALTIES: Specific expertise areas or niche focuses (3-6 items):
+- Technical specializations
+- Industry verticals
+- Regulatory compliance areas
+- Examples: ["HIPAA Compliance", "Epic EHR Integration", "Denial Management"]
+
+CUSTOMERS: Customer segments or types served (2-5 items):
+- Be specific about customer categories
+- Include size descriptors when relevant
+- Examples: ["Multi-Specialty Physician Groups", "Critical Access Hospitals", "Academic Medical Centers"]
+
+KEY_FEATURES: Product/service features that differentiate the vendor (4-8 items):
+- Technical capabilities
+- Platform features
+- Integration abilities
+- Examples: ["Real-time Analytics Dashboard", "AI-Powered Coding Automation", "24/7 Support"]
+
+KEY_BENEFITS: Business outcomes customers achieve (4-8 items):
+- Focus on measurable benefits
+- Include efficiency, cost, or performance improvements
+- Examples: ["30% Reduction in Claim Denials", "Improved Cash Flow", "Enhanced Compliance"]
+
+FUNDING_STAGE: Current funding status:
+- "Bootstrap/Self-Funded"
+- "Angel/Pre-Seed"
+- "Seed Round"
+- "Series A/B/C/D/E"
+- "Growth Equity"
+- "Private Equity Backed"
+- "Public Company"
+- "Acquired by [Parent Company]"
+
+TOTAL_FUNDING: Total funding raised (format: "$XXM" or "$XXB") or null
+
+KEY_INVESTORS: Major investors, VCs, or parent companies (if applicable)
+
+COMPETITIVE_ADVANTAGES: What sets them apart from competitors (3-6 items):
+- Unique technology
+- Market position
+- Strategic partnerships
+- Examples: ["First-to-Market AI Technology", "Largest Customer Base", "Proprietary Integration Platform"]
+
+PERFORMANCE_METRICS: Key company metrics as object:
+{
+  "employee_count": "estimate or range",
+  "annual_revenue": "estimate if available", 
+  "customer_count": "number if known",
+  "years_in_business": "calculated from founding",
+  "market_share": "percentage if available",
+  "client_retention_rate": "percentage if disclosed"
+}
+
+NOTABLE_CUSTOMERS: Specific named customers or customer examples (if disclosed):
+- Public references only
+- Customer case studies
+- Press release mentions
+
+RESEARCH_DATA: Research metadata object:
+{
+  "research_date": "2024-07-19",
+  "data_sources": ["website", "press_releases", "third_party"],
+  "research_quality": "high/medium/low",
+  "confidence_level": "high/medium/low",
+  "last_updated": "most recent info date found",
+  "verification_status": "verified/unverified"
+}
+
+COMPANY_DATA: Additional structured data object:
+{
+  "business_model": "SaaS/Professional Services/Hybrid/Other",
+  "target_market": "Enterprise/Mid-Market/Small Business/All",
+  "geographic_presence": "US Only/North America/Global",
+  "industry_focus": "Healthcare/Financial/Technology/Multi-Industry",
+  "technology_stack": ["known technologies used"],
+  "certifications": ["relevant certifications"],
+  "partnerships": ["key technology partners"]
+}
+
+====================================================================
+CRITICAL OUTPUT REQUIREMENTS:
+====================================================================
+
+1. RETURN RAW JSON ONLY - No markdown blocks, no \`\`\`json wrappers, no explanatory text
+2. ALL STRING VALUES must use straight quotes (") not smart quotes (" ")
+3. founding_year MUST be a number (e.g., 2015) not a string ("2015")
+4. Use null (not "null" string) for truly unknown values
+5. Use empty arrays [] for unknown list fields
+6. Ensure all JSON is valid - test at jsonlint.com if unsure
+7. Do not include fields beyond the specified schema
+8. status field must always be "draft"
+
+====================================================================
+FALLBACK PROTOCOLS:
+====================================================================
+
+If specific information cannot be found:
+- company_name: Use domain name without .com if no other name found
+- headquarters: Research company registration/press releases for location
+- Use null for unknown single values
+- Use empty arrays [] for unknown list values
+- Be conservative - prefer null/empty over guessing
+
+====================================================================
+QUALITY ASSURANCE CHECKLIST:
+====================================================================
+Before submitting, verify:
+✓ JSON is valid and properly formatted
+✓ All required commas and brackets in place  
+✓ founding_year is number type, not string
+✓ No trailing commas in objects/arrays
+✓ All strings use straight quotes
+✓ Output contains ONLY the JSON, no other text
+✓ Research reflects current/recent company information
+✓ Information is factual and verifiable
+
+BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
 
       setGeneratedPrompt(prompt);
       
@@ -248,12 +399,21 @@ VALIDATION: Test at jsonlint.com before submitting.`;
       const cleanedData = validationResult.cleanedData;
       console.log("Inserting vendor data:", cleanedData);
 
+      // Auto-generate slug from company name
+      const slug = cleanedData.company_name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+        || 'unknown-company';
+
       // Insert vendor record
       const { data: vendor, error } = await supabase
         .from('vendors')
         .insert({
           company_name: cleanedData.company_name,
-          slug: cleanedData.slug,
+          slug: slug,
           status: cleanedData.status || 'draft',
           company_type: cleanedData.company_type,
           description: cleanedData.description,

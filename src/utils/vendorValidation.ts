@@ -1,23 +1,22 @@
 interface VendorSchema {
-  company_name: string;
-  slug: string;
-  headquarters: string;
+  company_name?: string | null;
+  headquarters?: string | null;
   founding_year?: number | null;
-  company_type: string;
-  description: string;
-  core_services: string[];
-  specialties: string[];
-  customers: string[];
-  key_features: string[];
-  key_benefits: string[];
+  company_type?: string | null;
+  description?: string | null;
+  core_services?: string[] | null;
+  specialties?: string[] | null;
+  customers?: string[] | null;
+  key_features?: string[] | null;
+  key_benefits?: string[] | null;
   website_url?: string | null;
   source_url?: string | null;
   funding_stage?: string | null;
   total_funding?: string | null;
-  key_investors: string[];
-  competitive_advantages: string[];
+  key_investors?: string[] | null;
+  competitive_advantages?: string[] | null;
   performance_metrics?: Record<string, any> | null;
-  notable_customers: string[];
+  notable_customers?: string[] | null;
   research_data?: Record<string, any> | null;
   company_data?: Record<string, any> | null;
   status?: string;
@@ -41,8 +40,8 @@ export const validateVendorData = (rawData: any): ValidationResult => {
   const warnings: ValidationError[] = [];
   const cleanedData: any = {};
 
-  // Required fields validation
-  const requiredFields = ['company_name', 'slug', 'headquarters', 'company_type', 'description'];
+  // Only company_name is truly required now, others are nullable
+  const requiredFields = ['company_name'];
   
   for (const field of requiredFields) {
     if (!rawData[field] || typeof rawData[field] !== 'string' || rawData[field].trim() === '') {
