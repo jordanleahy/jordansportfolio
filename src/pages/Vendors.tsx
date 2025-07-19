@@ -1,19 +1,31 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsTable } from '@/components/vendors/VendorsTable';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
+import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { useVendors } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES, type VendorFiltersState } from '@/types/vendor';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [filters, setFilters] = useState<VendorFiltersState>({});
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
   
   // Fetch vendors from database
   const { data: allVendors = [], isLoading, error } = useVendors();
+  
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
 
   // Apply filters
   const filteredVendors = useMemo(() => {
@@ -141,16 +153,24 @@ export default function Vendors() {
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {categoryConfig.title}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {categoryConfig.description}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Showing {filteredVendors.length} of {allVendors.length} vendors
-            </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {categoryConfig.title}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {categoryConfig.description}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing {filteredVendors.length} of {allVendors.length} vendors
+              </p>
+            </div>
+            {user && (
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Vendor
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -169,6 +189,11 @@ export default function Vendors() {
             </div>
           </div>
         </div>
+        
+        <AddVendorModal 
+          isOpen={isAddModalOpen} 
+          onClose={() => setIsAddModalOpen(false)} 
+        />
       </div>
     </PageLayout>
   );
