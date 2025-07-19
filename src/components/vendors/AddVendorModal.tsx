@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Copy, ExternalLink, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { validateVendorData, ValidationResult } from "@/utils/vendorValidation";
+import { VendorPreview } from "./VendorPreview";
 
 interface AddVendorModalProps {
   isOpen: boolean;
@@ -15,13 +17,14 @@ interface AddVendorModalProps {
   onVendorAdded: () => void;
 }
 
-type ModalMode = 'prompt' | 'json';
+type ModalMode = 'prompt' | 'json' | 'preview';
 
 export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModalProps) => {
   const [mode, setMode] = useState<ModalMode>('prompt');
   const [companyUrl, setCompanyUrl] = useState("");
   const [cachedUrl, setCachedUrl] = useState("");
   const [jsonData, setJsonData] = useState("");
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
@@ -100,7 +103,7 @@ VALIDATION: Test at jsonlint.com before submitting.`;
     }
   };
 
-  const processJsonData = async () => {
+  const validateJsonData = () => {
     if (!jsonData.trim()) {
       toast({
         title: "Error",
@@ -110,8 +113,6 @@ VALIDATION: Test at jsonlint.com before submitting.`;
       return;
     }
 
-    setIsProcessing(true);
-    
     try {
       // Aggressive JSON cleaning
       let cleanedJsonData = jsonData.trim();
@@ -135,70 +136,84 @@ VALIDATION: Test at jsonlint.com before submitting.`;
 
       console.log("Cleaned JSON data:", cleanedJsonData);
 
-      // Parse and validate JSON
+      // Parse JSON
       const parsedData = JSON.parse(cleanedJsonData);
       
-      // Validate critical required fields
-      const requiredFields = ['company_name', 'description', 'headquarters', 'slug', 'company_type'];
-      const missingFields = requiredFields.filter(field => !parsedData[field]);
+      // Validate data against schema
+      const result = validateVendorData(parsedData);
+      setValidationResult(result);
       
-      if (missingFields.length > 0) {
-        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      if (result.isValid) {
+        setMode('preview');
+        toast({
+          title: "Validation Successful",
+          description: "Data validated! Review the preview and confirm to add vendor.",
+        });
+      } else {
+        toast({
+          title: "Validation Failed",
+          description: `Found ${result.errors.length} error(s). Please fix the issues and try again.`,
+          variant: "destructive",
+        });
       }
-
-      // Ensure arrays are properly formatted
-      const arrayFields = ['core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'];
-      arrayFields.forEach(field => {
-        if (!Array.isArray(parsedData[field])) {
-          parsedData[field] = [];
-        }
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      toast({
+        title: "JSON Parse Error",
+        description: error instanceof Error ? error.message : "Invalid JSON format. Please check your data and try again.",
+        variant: "destructive",
       });
+    }
+  };
 
-      // Ensure objects exist
-      if (!parsedData.performance_metrics || typeof parsedData.performance_metrics !== 'object') {
-        parsedData.performance_metrics = {};
-      }
-      if (!parsedData.research_data || typeof parsedData.research_data !== 'object') {
-        parsedData.research_data = {};
-      }
-      if (!parsedData.company_data || typeof parsedData.company_data !== 'object') {
-        parsedData.company_data = {};
-      }
+  const confirmAddVendor = async () => {
+    if (!validationResult || !validationResult.isValid) {
+      toast({
+        title: "Error",
+        description: "No valid data to insert.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setIsProcessing(true);
+    
+    try {
       // Get authenticated user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("User not authenticated");
       }
 
-      console.log("Inserting vendor data:", parsedData);
+      const cleanedData = validationResult.cleanedData;
+      console.log("Inserting vendor data:", cleanedData);
 
       // Insert vendor record
       const { data: vendor, error } = await supabase
         .from('vendors')
         .insert({
-          company_name: parsedData.company_name,
-          slug: parsedData.slug,
-          status: parsedData.status || 'completed',
-          company_type: parsedData.company_type,
-          description: parsedData.description,
-          headquarters: parsedData.headquarters,
-          founding_year: parsedData.founding_year,
-          core_services: parsedData.core_services || [],
-          specialties: parsedData.specialties || [],
-          customers: parsedData.customers || [],
-          key_features: parsedData.key_features || [],
-          key_benefits: parsedData.key_benefits || [],
-          website_url: parsedData.website_url,
-          source_url: parsedData.source_url || parsedData.website_url,
-          funding_stage: parsedData.funding_stage,
-          total_funding: parsedData.total_funding,
-          key_investors: parsedData.key_investors || [],
-          competitive_advantages: parsedData.competitive_advantages || [],
-          performance_metrics: parsedData.performance_metrics,
-          notable_customers: parsedData.notable_customers || [],
-          research_data: parsedData.research_data || {},
-          company_data: parsedData.company_data || {},
+          company_name: cleanedData.company_name,
+          slug: cleanedData.slug,
+          status: cleanedData.status || 'draft',
+          company_type: cleanedData.company_type,
+          description: cleanedData.description,
+          headquarters: cleanedData.headquarters,
+          founding_year: cleanedData.founding_year,
+          core_services: cleanedData.core_services || [],
+          specialties: cleanedData.specialties || [],
+          customers: cleanedData.customers || [],
+          key_features: cleanedData.key_features || [],
+          key_benefits: cleanedData.key_benefits || [],
+          website_url: cleanedData.website_url,
+          source_url: cleanedData.source_url,
+          funding_stage: cleanedData.funding_stage,
+          total_funding: cleanedData.total_funding,
+          key_investors: cleanedData.key_investors || [],
+          competitive_advantages: cleanedData.competitive_advantages || [],
+          performance_metrics: cleanedData.performance_metrics || {},
+          notable_customers: cleanedData.notable_customers || [],
+          research_data: cleanedData.research_data || {},
+          company_data: cleanedData.company_data || {},
           user_id: user.id,
         })
         .select()
@@ -211,16 +226,16 @@ VALIDATION: Test at jsonlint.com before submitting.`;
 
       toast({
         title: "Success",
-        description: `Vendor "${parsedData.company_name}" has been added successfully!`,
+        description: `Vendor "${cleanedData.company_name}" has been added successfully!`,
       });
 
       onVendorAdded();
       handleClose();
     } catch (error) {
-      console.error("Error processing JSON:", error);
+      console.error("Error inserting vendor:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process JSON data. Please check the format and try again.",
+        description: error instanceof Error ? error.message : "Failed to add vendor. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -242,6 +257,7 @@ VALIDATION: Test at jsonlint.com before submitting.`;
     setCachedUrl("");
     setJsonData("");
     setGeneratedPrompt("");
+    setValidationResult(null);
     onClose();
   };
 
@@ -359,11 +375,11 @@ VALIDATION: Test at jsonlint.com before submitting.`;
               </div>
 
               <Button 
-                onClick={processJsonData} 
+                onClick={validateJsonData} 
                 disabled={isProcessing || !jsonData.trim()}
                 className="w-full"
               >
-                {isProcessing ? "Processing..." : "Add Vendor"}
+                {isProcessing ? "Validating..." : "Validate & Preview"}
               </Button>
 
               <div className="bg-blue-50 border border-blue-200 p-3 rounded-md">
@@ -373,6 +389,15 @@ VALIDATION: Test at jsonlint.com before submitting.`;
                 </p>
               </div>
             </>
+          )}
+
+          {mode === 'preview' && validationResult && (
+            <VendorPreview
+              validationResult={validationResult}
+              onConfirm={confirmAddVendor}
+              onCancel={() => setMode('json')}
+              isProcessing={isProcessing}
+            />
           )}
         </div>
       </DialogContent>
