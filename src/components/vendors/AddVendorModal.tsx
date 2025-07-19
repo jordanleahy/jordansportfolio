@@ -496,18 +496,19 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Vendor</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">Add New Vendor</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           {/* Mode Toggle */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant={mode === 'prompt' ? 'default' : 'outline'}
               onClick={() => setMode('prompt')}
               size="sm"
+              className="text-xs sm:text-sm px-2 sm:px-3"
             >
               Generate Prompt
             </Button>
@@ -515,6 +516,7 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
               variant={mode === 'json' ? 'default' : 'outline'}
               onClick={() => setMode('json')}
               size="sm"
+              className="text-xs sm:text-sm px-2 sm:px-3"
             >
               Add JSON Data
             </Button>
@@ -523,8 +525,9 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
                 variant={mode === 'qa' ? 'default' : 'outline'}
                 onClick={() => setMode('qa')}
                 size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
               >
-                QA Results ({qaResult.qualityScore}/100)
+                <span className="hidden sm:inline">QA Results </span>({qaResult.qualityScore}/100)
               </Button>
             )}
             {validationResult && (
@@ -532,6 +535,7 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
                 variant={mode === 'preview' ? 'default' : 'outline'}
                 onClick={() => setMode('preview')}
                 size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
                 disabled={!validationResult.isValid}
               >
                 Preview
@@ -564,37 +568,37 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${companyUrl}`;
 
               {generatedPrompt && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <Label>Generated Prompt</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={copyPrompt}
-                        className="gap-2"
+                        className="gap-2 text-xs sm:text-sm"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                         Copy
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={switchToJsonMode}
-                        className="gap-2"
+                        className="gap-2 text-xs sm:text-sm"
                       >
-                        <RefreshCw className="h-4 w-4" />
-                        Switch to JSON Mode
+                        <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Switch to </span>JSON Mode
                       </Button>
                     </div>
                   </div>
-                  <div className="bg-muted p-4 rounded-md text-sm max-h-60 overflow-y-auto">
-                    <pre className="whitespace-pre-wrap">{generatedPrompt}</pre>
+                  <div className="bg-muted p-3 sm:p-4 rounded-md text-xs sm:text-sm max-h-60 overflow-y-auto">
+                    <pre className="whitespace-pre-wrap break-words">{generatedPrompt}</pre>
                   </div>
                   <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-                    <p className="text-sm text-yellow-800 font-medium">
+                    <p className="text-xs sm:text-sm text-yellow-800 font-medium">
                       📋 Instructions:
                     </p>
-                    <ol className="text-sm text-yellow-700 mt-1 list-decimal list-inside space-y-1">
+                    <ol className="text-xs sm:text-sm text-yellow-700 mt-1 list-decimal list-inside space-y-1">
                       <li>Copy the prompt above</li>
                       <li>Paste it into ChatGPT</li>
                       <li>Copy the raw JSON response (no markdown blocks)</li>
