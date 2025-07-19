@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ExternalLink, DollarSign, Users, Building, Calendar } from 'lucide-react';
 import {
   Table,
@@ -16,13 +16,15 @@ import { type Vendor } from '@/types/vendor';
 
 interface VendorsTableProps {
   vendors: Vendor[];
-  onVendorClick: (vendor: Vendor) => void;
+  onVendorClick?: (vendor: Vendor) => void;
 }
 
 type SortField = 'companyName' | 'yearFounded' | 'fundingRaised' | 'companyType';
 type SortDirection = 'asc' | 'desc';
 
 export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
+  const navigate = useNavigate();
+  const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('companyName');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -32,6 +34,14 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleVendorClick = (vendor: Vendor) => {
+    if (slugname) {
+      navigate(`/vendors/${slugname}/${vendor.slug}`);
+    } else if (onVendorClick) {
+      onVendorClick(vendor);
     }
   };
 
@@ -140,21 +150,21 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                 <TableRow 
                   key={vendor.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onVendorClick(vendor)}
+                  onClick={() => handleVendorClick(vendor)}
                 >
                   <TableCell>
                     <div>
-                      <div className="font-medium">{vendor.companyName}</div>
+                      <div className="font-medium hover:text-primary">{vendor.companyName}</div>
                       <div className="text-sm text-muted-foreground">
                         {vendor.headquarters}
                       </div>
                     </div>
                   </TableCell>
-                   <TableCell>
-                     <div className="max-w-[300px] whitespace-normal break-words text-sm leading-relaxed">
-                       {vendor.description}
-                     </div>
-                   </TableCell>
+                  <TableCell>
+                    <div className="max-w-[300px] whitespace-normal break-words text-sm leading-relaxed">
+                      {vendor.description}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[120px]">
                       {vendor.coreServices.slice(0, 2).map((service, idx) => (

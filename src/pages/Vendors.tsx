@@ -1,12 +1,10 @@
-
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsTable } from '@/components/vendors/VendorsTable';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
-import { VendorModal } from '@/components/vendors/VendorModal';
 import { RCM_SAMPLE_DATA, type Vendor, type VendorFiltersState } from '@/types/vendor';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 const CATEGORY_TITLES: Record<string, string> = {
   rcm: 'Revenue Cycle Management (RCM) Companies'
@@ -18,7 +16,6 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
 
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [filters, setFilters] = useState<VendorFiltersState>({});
 
   // Get data based on category
@@ -146,19 +143,11 @@ export default function Vendors() {
             <div className="lg:col-span-3">
               <VendorsTable
                 vendors={filteredVendors}
-                onVendorClick={setSelectedVendor}
               />
             </div>
           </div>
         </div>
       </div>
-
-      {selectedVendor && (
-        <VendorModal
-          vendor={selectedVendor}
-          onClose={() => setSelectedVendor(null)}
-        />
-      )}
     </PageLayout>
   );
 }
