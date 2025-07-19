@@ -40,7 +40,7 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
     setIsGenerating(true);
     
     try {
-      const prompt = `IMPORTANT: Return ONLY valid JSON with no additional text, explanations, or markdown formatting. Do not include any text before or after the JSON.
+      const prompt = `CRITICAL: Return ONLY valid JSON with straight double quotes (") - NO smart quotes, curly quotes, or markdown. Do not include any text before or after the JSON.
 
 Research the company at ${companyUrl} and return a complete JSON object with the following EXACT structure. All fields are required - use null for unknown values, empty arrays [] for missing lists, and empty strings "" for missing text:
 
@@ -57,6 +57,7 @@ Research the company at ${companyUrl} and return a complete JSON object with the
   "key_features": ["Feature 1", "Feature 2", "Feature 3"],
   "key_benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
   "website_url": "${companyUrl}",
+  "source_url": "${companyUrl}",
   "funding_stage": "string or null - Options: 'Seed', 'Series A', 'Series B', 'Series C', 'IPO', 'Private', 'Public' or null",
   "total_funding": "string or null - Format: '$10M', '$1.2B' or null",
   "key_investors": ["Investor 1", "Investor 2"],
@@ -66,12 +67,24 @@ Research the company at ${companyUrl} and return a complete JSON object with the
     "revenue": "string or null - Format: '$10M ARR' or null if private",
     "customers": "string - Number like '1000+' or '50 enterprise clients'"
   },
-  "notable_customers": ["Customer 1", "Customer 2", "Customer 3"]
+  "notable_customers": ["Customer 1", "Customer 2", "Customer 3"],
+  "research_data": {
+    "research_date": "2024-01-15",
+    "data_sources": ["company website", "press releases", "funding announcements"],
+    "last_updated": "2024-01-15",
+    "research_quality": "high"
+  },
+  "company_data": {
+    "business_model": "SaaS subscription",
+    "target_market": "Enterprise healthcare",
+    "technology_stack": ["React", "Node.js", "AWS"],
+    "partnerships": ["Partner 1", "Partner 2"]
+  }
 }
 
 CRITICAL REQUIREMENTS:
-1. Return ONLY the JSON object - no other text
-2. Use double quotes for all strings
+1. Return ONLY the JSON object - no other text, explanations, or markdown
+2. Use ONLY straight double quotes (") - NO smart quotes (" ") or single quotes
 3. Ensure all required fields (company_name, slug, headquarters, company_type, description) have actual values, not null
 4. For the slug field: convert company name to lowercase, remove special characters, replace spaces with dashes (e.g., "SmarterDx" becomes "smarterdx")
 5. Use proper JSON syntax - validate before responding
@@ -79,6 +92,7 @@ CRITICAL REQUIREMENTS:
 7. Use consistent location formatting (City, State/Country)
 8. Include the complete JSON structure - do not truncate any fields
 9. All array fields must be present (even if empty arrays [])
+10. VERIFY your JSON has ONLY straight quotes before sending
 
 Research Guidelines:
 - Visit their website, about page, careers page, press releases
@@ -187,12 +201,15 @@ Validate your JSON before responding to ensure it's complete and properly format
           key_features: parsedData.key_features || [],
           key_benefits: parsedData.key_benefits || [],
           website_url: parsedData.website_url,
+          source_url: parsedData.source_url || parsedData.website_url,
           funding_stage: parsedData.funding_stage,
           total_funding: parsedData.total_funding,
           key_investors: parsedData.key_investors || [],
           competitive_advantages: parsedData.competitive_advantages || [],
           performance_metrics: parsedData.performance_metrics,
           notable_customers: parsedData.notable_customers || [],
+          research_data: parsedData.research_data || {},
+          company_data: parsedData.company_data || {},
           user_id: user.id,
         })
         .select()
