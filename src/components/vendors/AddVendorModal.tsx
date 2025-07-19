@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -41,33 +40,52 @@ export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModa
     setIsGenerating(true);
     
     try {
-      const prompt = `Please analyze the company at ${companyUrl} and provide detailed information in the following JSON format:
+      const prompt = `IMPORTANT: Return ONLY valid JSON with no additional text, explanations, or markdown formatting. Do not include any text before or after the JSON.
+
+Research the company at ${companyUrl} and return a complete JSON object with the following EXACT structure. All fields are required - use null for unknown values, empty arrays [] for missing lists, and empty strings "" for missing text:
 
 {
-  "company_name": "Exact company name",
-  "headquarters": "City, State/Country",
+  "company_name": "string - REQUIRED: Exact official company name",
+  "headquarters": "string - REQUIRED: City, State format (e.g., 'Austin, TX' or 'London, UK')",
   "founding_year": 2020,
-  "company_type": "Private/Public/Subsidiary",
-  "description": "Detailed company description (2-3 sentences)",
+  "company_type": "string - REQUIRED: One of: 'SaaS Platform', 'Healthcare Technology', 'Consulting Firm', 'Private', 'Public', 'Subsidiary'",
+  "description": "string - REQUIRED: 2-3 sentence professional description of company and value proposition",
   "core_services": ["Service 1", "Service 2", "Service 3"],
   "specialties": ["Specialty 1", "Specialty 2"],
   "customers": ["Customer Type 1", "Customer Type 2"],
   "key_features": ["Feature 1", "Feature 2", "Feature 3"],
   "key_benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
   "website_url": "${companyUrl}",
-  "funding_stage": "Seed/Series A/B/C/IPO/Private",
-  "total_funding": "$X million",
+  "funding_stage": "string or null - Options: 'Seed', 'Series A', 'Series B', 'Series C', 'IPO', 'Private', 'Public' or null",
+  "total_funding": "string or null - Format: '$10M', '$1.2B' or null",
   "key_investors": ["Investor 1", "Investor 2"],
   "competitive_advantages": ["Advantage 1", "Advantage 2"],
   "performance_metrics": {
-    "employees": "Number or range",
-    "revenue": "$X million (if public)",
-    "customers": "Number of customers/clients"
+    "employees": "string - Number or range like '50-100' or '500+'",
+    "revenue": "string or null - Format: '$10M ARR' or null if private",
+    "customers": "string - Number like '1000+' or '50 enterprise clients'"
   },
   "notable_customers": ["Customer 1", "Customer 2", "Customer 3"]
 }
 
-Focus on revenue cycle management (RCM) capabilities, healthcare technology, and competitive positioning. Ensure all information is accurate and current.`;
+CRITICAL REQUIREMENTS:
+1. Return ONLY the JSON object - no other text
+2. Use double quotes for all strings
+3. Ensure all required fields (company_name, headquarters, company_type, description) have actual values, not null
+4. Use proper JSON syntax - validate before responding
+5. Keep array items concise (2-8 words each)
+6. Use consistent location formatting (City, State/Country)
+7. Include the complete JSON structure - do not truncate any fields
+
+Research Guidelines:
+- Visit their website, about page, careers page, press releases
+- Look for case studies, customer testimonials, success stories  
+- Check for funding announcements and growth metrics
+- Identify target market and competitive positioning
+- Find team size, locations, notable employees
+- Look for awards, certifications, industry recognition
+
+Validate your JSON before responding to ensure it's complete and properly formatted.`;
 
       setGeneratedPrompt(prompt);
       
@@ -100,12 +118,45 @@ Focus on revenue cycle management (RCM) capabilities, healthcare technology, and
     setIsProcessing(true);
     
     try {
+      // Clean the JSON data - remove any potential markdown formatting or extra text
+      let cleanedJsonData = jsonData.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanedJsonData.startsWith('```json')) {
+        cleanedJsonData = cleanedJsonData.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedJsonData.startsWith('```')) {
+        cleanedJsonData = cleanedJsonData.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      // Remove any text before the first { or after the last }
+      const firstBrace = cleanedJsonData.indexOf('{');
+      const lastBrace = cleanedJsonData.lastIndexOf('}');
+      
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        cleanedJsonData = cleanedJsonData.substring(firstBrace, lastBrace + 1);
+      }
+
+      console.log("Cleaned JSON data:", cleanedJsonData);
+
       // Parse and validate JSON
-      const parsedData = JSON.parse(jsonData);
+      const parsedData = JSON.parse(cleanedJsonData);
       
       // Validate required fields
       if (!parsedData.company_name || !parsedData.description || !parsedData.headquarters) {
         throw new Error("Missing required fields: company_name, description, or headquarters");
+      }
+
+      // Ensure arrays are properly formatted
+      const arrayFields = ['core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'];
+      arrayFields.forEach(field => {
+        if (!Array.isArray(parsedData[field])) {
+          parsedData[field] = [];
+        }
+      });
+
+      // Ensure performance_metrics is an object
+      if (!parsedData.performance_metrics || typeof parsedData.performance_metrics !== 'object') {
+        parsedData.performance_metrics = {};
       }
 
       // Create vendor record
@@ -119,6 +170,8 @@ Focus on revenue cycle management (RCM) capabilities, healthcare technology, and
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-')
         .trim();
+
+      console.log("Inserting vendor data:", parsedData);
 
       // Insert completed record
       const { data: vendor, error } = await supabase
@@ -148,7 +201,10 @@ Focus on revenue cycle management (RCM) capabilities, healthcare technology, and
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database insert error:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
