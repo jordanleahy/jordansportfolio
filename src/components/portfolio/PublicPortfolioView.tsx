@@ -1,6 +1,6 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 
 interface PublicPortfolioViewProps {
@@ -12,149 +12,166 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
   const heroSection = content.hero_section || {};
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <div className="space-y-2">
-              <Badge variant="secondary" className="mb-4">
-                Portfolio for {portfolio.company_name}
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-                {heroSection.headline || "Professional Portfolio"}
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-                {heroSection.subheadline || "Crafted specifically for this opportunity"}
-              </p>
-            </div>
-            {heroSection.value_proposition && (
-              <div className="bg-card border rounded-lg p-6 mt-8">
-                <p className="text-lg leading-relaxed">
-                  {heroSection.value_proposition}
-                </p>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/90 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-12">
+        {/* Video and Cover Letter Section - Side by side on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
           {/* Video Section */}
           {portfolio.custom_video_url && (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Introduction Video</h2>
-                <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+            <Card className="bg-transparent border-none shadow-none">
+              <CardContent className="p-0 space-y-4">
+                <AspectRatio ratio={9/16}>
                   {portfolio.custom_video_url.includes('youtube.com') || portfolio.custom_video_url.includes('youtu.be') ? (
                     <iframe
                       src={portfolio.custom_video_url.replace('watch?v=', 'embed/')}
-                      className="w-full h-full"
+                      className="w-full h-full rounded-lg"
                       allowFullScreen
                       title="Introduction Video"
                     />
                   ) : (
                     <video
-                      src={portfolio.custom_video_url}
+                      className="w-full h-full object-cover rounded-lg"
                       controls
-                      className="w-full h-full object-cover"
-                    />
+                      preload="metadata"
+                      muted
+                      autoPlay={false}
+                    >
+                      <source src={portfolio.custom_video_url} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   )}
-                </div>
+                </AspectRatio>
               </CardContent>
             </Card>
           )}
 
-          {/* Cover Letter Section */}
+          {/* Cover Letter Content */}
           {portfolio.cover_letter && (
             <Card>
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">Cover Letter</h2>
                 <div className="prose prose-lg max-w-none">
-                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                  <h2 className="text-2xl font-semibold mb-6">Dear {portfolio.company_name} Team,</h2>
+                  
+                  <div className="space-y-6 text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     {portfolio.cover_letter}
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t">
+                    <p className="text-lg font-medium">
+                      Best regards,<br />
+                      Jordan Leahy
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      jordanwilliamleahy.com
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
-
-          {/* Skills & Experience Highlights */}
-          {content.skills_alignment && content.skills_alignment.length > 0 && (
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">Relevant Skills & Experience</h2>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {content.skills_alignment.map((skill: any, index: number) => (
-                    <div key={index} className="space-y-3">
-                      <h3 className="font-semibold text-lg">{skill.skill}</h3>
-                      <p className="text-muted-foreground">{skill.relevance}</p>
-                      {skill.examples && skill.examples.length > 0 && (
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          {skill.examples.map((example: string, exIndex: number) => (
-                            <li key={exIndex}>{example}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Company Analysis Section */}
-          {content.company_analysis && (
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">Why {portfolio.company_name}?</h2>
-                <div className="space-y-6">
-                  {content.company_analysis.mission_alignment && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Mission Alignment</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {content.company_analysis.mission_alignment}
-                      </p>
-                    </div>
-                  )}
-                  {content.company_analysis.culture_fit && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Cultural Fit</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {content.company_analysis.culture_fit}
-                      </p>
-                    </div>
-                  )}
-                  {content.company_analysis.growth_opportunities && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Growth Vision</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {content.company_analysis.growth_opportunities}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Job Description Reference (if available) */}
-          {portfolio.job_applications?.job_description && (
-            <Card className="border-dashed">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
-                  Job Description Reference
-                </h3>
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-6">
-                    {portfolio.job_applications.job_description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
+
+        {/* Skills & Experience Highlights */}
+        {content.skills_alignment && content.skills_alignment.length > 0 && (
+          <div className="mt-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-4">Relevant Skills & Experience</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Skills and experience that align with {portfolio.company_name}'s needs
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {content.skills_alignment.map((skill: any, index: number) => (
+                <Card key={index} className="group hover:shadow-lg transition-all duration-300">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl mb-2">{skill.skill}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {skill.relevance}
+                    </CardDescription>
+                  </CardHeader>
+                  {skill.examples && skill.examples.length > 0 && (
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {skill.examples.slice(0, 3).map((example: string, exIndex: number) => (
+                          <span key={exIndex} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                            {example.substring(0, 20)}...
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Company Analysis Section */}
+        {content.company_analysis && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Why {portfolio.company_name}?</CardTitle>
+              <CardDescription>
+                Understanding the mission and values that drive alignment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {content.company_analysis.mission_alignment && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Mission Alignment</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {content.company_analysis.mission_alignment}
+                    </p>
+                  </div>
+                )}
+                {content.company_analysis.culture_fit && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Cultural Fit</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {content.company_analysis.culture_fit}
+                    </p>
+                  </div>
+                )}
+                {content.company_analysis.growth_opportunities && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Growth Vision</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {content.company_analysis.growth_opportunities}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Job Description Reference (if available) */}
+        {portfolio.job_applications?.job_description && (
+          <Card className="border-dashed mt-8">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
+                Job Description Reference
+              </h3>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-6">
+                  {portfolio.job_applications.job_description}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
