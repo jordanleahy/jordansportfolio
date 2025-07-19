@@ -248,33 +248,19 @@ const AdminBlog = () => {
             </TabsList>
 
             <TabsContent value="all">
-              <Card>
-                <CardHeader>
-                  <CardTitle>All Blog Posts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <BlogPostsTable 
-                    posts={allPosts} 
-                    loading={allPostsLoading} 
-                    error={allPostsError} 
-                  />
-                </CardContent>
-              </Card>
+              <BlogPostsTable 
+                posts={allPosts} 
+                loading={allPostsLoading} 
+                error={allPostsError} 
+              />
             </TabsContent>
 
             <TabsContent value="drafts">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Draft Posts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <BlogPostsTable 
-                    posts={draftPosts} 
-                    loading={draftPostsLoading} 
-                    error={draftPostsError} 
-                  />
-                </CardContent>
-              </Card>
+              <BlogPostsTable 
+                posts={draftPosts} 
+                loading={draftPostsLoading} 
+                error={draftPostsError} 
+              />
             </TabsContent>
           </Tabs>
         </div>
