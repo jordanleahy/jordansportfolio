@@ -150,11 +150,11 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="max-w-[200px] truncate text-sm">
-                      {vendor.description}
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div className="max-w-[300px] whitespace-normal break-words text-sm leading-relaxed">
+                       {vendor.description}
+                     </div>
+                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[120px]">
                       {vendor.coreServices.slice(0, 2).map((service, idx) => (
