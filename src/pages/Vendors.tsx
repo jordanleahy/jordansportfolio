@@ -102,6 +102,24 @@ export default function Vendors() {
     refetch();
   };
 
+  const handleDeleteVendor = async (vendor: any) => {
+    if (window.confirm(`Are you sure you want to delete ${vendor.company_name}?`)) {
+      try {
+        const { error } = await supabase
+          .from('vendors')
+          .delete()
+          .eq('id', vendor.id);
+        
+        if (error) throw error;
+        
+        refetch();
+      } catch (error) {
+        console.error('Error deleting vendor:', error);
+        alert('Failed to delete vendor');
+      }
+    }
+  };
+
   if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
     return (
       <PageLayout>
@@ -189,6 +207,7 @@ export default function Vendors() {
               <VendorsTable
                 vendors={filteredVendors}
                 onAddClick={() => setIsAddModalOpen(true)}
+                onDeleteClick={handleDeleteVendor}
               />
             </div>
           </div>
