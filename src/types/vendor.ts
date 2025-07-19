@@ -22,7 +22,7 @@ export interface Vendor {
   slug: string;
 }
 
-export interface VendorFilters {
+export interface VendorFiltersState {
   companyType?: string[];
   fundingRange?: string[];
   specialties?: string[];

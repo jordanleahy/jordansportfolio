@@ -5,7 +5,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsTable } from '@/components/vendors/VendorsTable';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
 import { VendorModal } from '@/components/vendors/VendorModal';
-import { RCM_SAMPLE_DATA, type Vendor, type VendorFilters } from '@/types/vendor';
+import { RCM_SAMPLE_DATA, type Vendor, type VendorFiltersState } from '@/types/vendor';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const CATEGORY_TITLES: Record<string, string> = {
@@ -19,7 +19,7 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const [filters, setFilters] = useState<VendorFilters>({});
+  const [filters, setFilters] = useState<VendorFiltersState>({});
 
   // Get data based on category
   const allVendors = useMemo(() => {

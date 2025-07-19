@@ -5,20 +5,20 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { type Vendor, type VendorFilters } from '@/types/vendor';
+import { type Vendor, type VendorFiltersState } from '@/types/vendor';
 
 interface VendorFiltersProps {
-  filters: VendorFilters;
-  onFiltersChange: (filters: VendorFilters) => void;
+  filters: VendorFiltersState;
+  onFiltersChange: (filters: VendorFiltersState) => void;
   vendors: Vendor[];
 }
 
 export function VendorFilters({ filters, onFiltersChange, vendors }: VendorFiltersProps) {
-  const updateFilters = (key: keyof VendorFilters, value: any) => {
+  const updateFilters = (key: keyof VendorFiltersState, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
-  const handleCheckboxChange = (key: keyof VendorFilters, value: string, checked: boolean) => {
+  const handleCheckboxChange = (key: keyof VendorFiltersState, value: string, checked: boolean) => {
     const currentValues = filters[key] as string[] || [];
     const newValues = checked
       ? [...currentValues, value]
