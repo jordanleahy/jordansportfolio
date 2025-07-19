@@ -93,65 +93,132 @@ const AdminBlog = () => {
     }
 
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead>Published</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      <>
+        {/* Desktop Table View */}
+        <div className="hidden lg:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Last Updated</TableHead>
+                <TableHead>Published</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {posts.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell className="font-medium">
+                    <div className="max-w-[300px] truncate">
+                      {post.hero_headline || 'Untitled'}
+                    </div>
+                    {post.hero_subhead && (
+                      <div className="text-sm text-muted-foreground max-w-[300px] truncate">
+                        {post.hero_subhead}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      post.status === 'published' ? 'default' : 
+                      post.status === 'draft' ? 'secondary' : 'outline'
+                    }>
+                      {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{post.category}</Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(post.updated_at)}</TableCell>
+                  <TableCell>
+                    {post.published_at ? formatDate(post.published_at) : '-'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {post.status === 'published' && (
+                        <Link to={`/blog/${post.slug}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
+                      <Link to={`/blog-editor/${post.slug}`}>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
           {posts.map((post) => (
-            <TableRow key={post.id}>
-              <TableCell className="font-medium">
-                <div className="max-w-[300px] truncate">
-                  {post.hero_headline || 'Untitled'}
+            <Card key={post.id} className="p-4">
+              <div className="space-y-3">
+                {/* Title and Subtitle */}
+                <div>
+                  <h3 className="font-medium text-foreground leading-tight">
+                    {post.hero_headline || 'Untitled'}
+                  </h3>
+                  {post.hero_subhead && (
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      {post.hero_subhead}
+                    </p>
+                  )}
                 </div>
-                {post.hero_subhead && (
-                  <div className="text-sm text-muted-foreground max-w-[300px] truncate">
-                    {post.hero_subhead}
+
+                {/* Status and Category */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={
+                    post.status === 'published' ? 'default' : 
+                    post.status === 'draft' ? 'secondary' : 'outline'
+                  }>
+                    {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                  </Badge>
+                  <Badge variant="outline">{post.category}</Badge>
+                </div>
+
+                {/* Dates */}
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="flex justify-between">
+                    <span>Last Updated:</span>
+                    <span>{formatDate(post.updated_at)}</span>
                   </div>
-                )}
-              </TableCell>
-              <TableCell>
-                <Badge variant={
-                  post.status === 'published' ? 'default' : 
-                  post.status === 'draft' ? 'secondary' : 'outline'
-                }>
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline">{post.category}</Badge>
-              </TableCell>
-              <TableCell>{formatDate(post.updated_at)}</TableCell>
-              <TableCell>
-                {post.published_at ? formatDate(post.published_at) : '-'}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
+                  <div className="flex justify-between">
+                    <span>Published:</span>
+                    <span>{post.published_at ? formatDate(post.published_at) : 'Not published'}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2 pt-2 border-t border-border">
                   {post.status === 'published' && (
                     <Link to={`/blog/${post.slug}`}>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="outline" size="sm" className="flex items-center gap-2">
                         <Eye className="h-4 w-4" />
+                        View
                       </Button>
                     </Link>
                   )}
                   <Link to={`/blog-editor/${post.slug}`}>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="default" size="sm" className="flex items-center gap-2">
                       <Edit className="h-4 w-4" />
+                      Edit
                     </Button>
                   </Link>
                 </div>
-              </TableCell>
-            </TableRow>
+              </div>
+            </Card>
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      </>
     );
   };
 
@@ -159,44 +226,57 @@ const AdminBlog = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header with Add Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Blog Administration</h1>
+              <p className="text-muted-foreground">Manage your blog posts and drafts</p>
+            </div>
+            <Link to="/blog-editor">
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4 mr-2" />
+                New Post
+              </Button>
+            </Link>
+          </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-8">
-        <Tabs defaultValue="all" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="all">All Posts ({allPosts.length})</TabsTrigger>
-            <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="all" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+              <TabsTrigger value="all">All Posts ({allPosts.length})</TabsTrigger>
+              <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="all">
-            <Card>
-              <CardHeader>
-                <CardTitle>All Blog Posts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BlogPostsTable 
-                  posts={allPosts} 
-                  loading={allPostsLoading} 
-                  error={allPostsError} 
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+            <TabsContent value="all">
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Blog Posts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <BlogPostsTable 
+                    posts={allPosts} 
+                    loading={allPostsLoading} 
+                    error={allPostsError} 
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          <TabsContent value="drafts">
-            <Card>
-              <CardHeader>
-                <CardTitle>Draft Posts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BlogPostsTable 
-                  posts={draftPosts} 
-                  loading={draftPostsLoading} 
-                  error={draftPostsError} 
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="drafts">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Draft Posts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <BlogPostsTable 
+                    posts={draftPosts} 
+                    loading={draftPostsLoading} 
+                    error={draftPostsError} 
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
