@@ -105,17 +105,36 @@ export default function Vendors() {
   const handleDeleteVendor = async (vendor: any) => {
     if (window.confirm(`Are you sure you want to delete ${vendor.company_name}?`)) {
       try {
-        const { error } = await supabase
+        console.log('Attempting to delete vendor:', vendor.id, 'User ID:', user?.id);
+        
+        const { data, error, count } = await supabase
           .from('vendors')
           .delete()
-          .eq('id', vendor.id);
+          .eq('id', vendor.id)
+          .select('*');
         
-        if (error) throw error;
+        console.log('Delete result:', { data, error, count });
         
+        if (error) {
+          console.error('Supabase delete error:', error);
+          if (error.code === 'PGRST116') {
+            alert('You can only delete vendors you created. This vendor was created by another user.');
+          } else {
+            alert(`Failed to delete vendor: ${error.message}`);
+          }
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          alert('Vendor not found or you do not have permission to delete it.');
+          return;
+        }
+        
+        alert('Vendor deleted successfully!');
         refetch();
       } catch (error) {
         console.error('Error deleting vendor:', error);
-        alert('Failed to delete vendor');
+        alert('Failed to delete vendor: Network or unexpected error');
       }
     }
   };
