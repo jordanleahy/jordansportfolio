@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { generateVendorPrompt } from "@/lib/promptBuilder";
+import { PageLayout } from "@/components/layout/PageLayout";
 import type { Vendor } from "@/types/vendor";
 
 export default function AdminVendors() {
@@ -127,7 +128,8 @@ export default function AdminVendors() {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <PageLayout>
+      <div className="container mx-auto py-8 space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-2">Vendor Research Assistant</h1>
         <p className="text-muted-foreground">
@@ -211,6 +213,7 @@ export default function AdminVendors() {
           </Card>
         )}
       </div>
-    </div>
+      </div>
+    </PageLayout>
   );
 }
