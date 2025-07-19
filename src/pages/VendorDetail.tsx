@@ -23,6 +23,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
 
 export default function VendorDetail() {
   const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
@@ -664,18 +665,7 @@ export default function VendorDetail() {
               )}
 
               {vendor.performance_metrics && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Performance Metrics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-muted/50 p-4 rounded-lg overflow-x-auto">
-                      <pre className="text-xs sm:text-sm whitespace-pre-wrap">
-                        {JSON.stringify(vendor.performance_metrics, null, 2)}
-                      </pre>
-                    </div>
-                  </CardContent>
-                </Card>
+                <PerformanceMetrics metrics={vendor.performance_metrics} />
               )}
             </div>
 
