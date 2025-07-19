@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ExternalLink, DollarSign, Users, Building, Calendar } from 'lucide-react';
+import { ExternalLink, DollarSign, Users, Building, Calendar, Plus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -19,12 +19,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface VendorsTableProps {
   vendors: Vendor[];
   onVendorClick?: (vendor: Vendor) => void;
+  onAddClick?: () => void;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
-export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
+export function VendorsTable({ vendors, onVendorClick, onAddClick }: VendorsTableProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
@@ -96,18 +97,33 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                     {vendor.headquarters}
                   </div>
                 </div>
-                {vendor.website_url && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(vendor.website_url, '_blank');
-                    }}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {onAddClick && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddClick();
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      ADD
+                    </Button>
+                  )}
+                  {vendor.website_url && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(vendor.website_url, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -338,6 +354,19 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      {onAddClick && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddClick();
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                          ADD
+                        </Button>
+                      )}
                       {vendor.website_url && (
                         <Button
                           size="sm"

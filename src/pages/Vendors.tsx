@@ -188,6 +188,7 @@ export default function Vendors() {
             <div className="lg:col-span-3">
               <VendorsTable
                 vendors={filteredVendors}
+                onAddClick={() => setIsAddModalOpen(true)}
               />
             </div>
           </div>
