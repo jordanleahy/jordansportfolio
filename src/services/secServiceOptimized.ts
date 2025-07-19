@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { 
   OfferingFilters, 
@@ -69,16 +70,16 @@ export class SecServiceOptimized {
       `);
     }
 
-    // Apply amount range filters (server-side)
+    // Apply amount range filters (server-side) - Fixed PostgREST syntax
     if (filters.amountRanges && filters.amountRanges.length > 0) {
       const amountConditions = filters.amountRanges.map(range => {
         switch (range) {
           case "Less than $500k":
             return "totalofferingamount.lt.500000";
           case "$500k - $2MM":
-            return "(totalofferingamount.gte.500000,totalofferingamount.lte.2000000)";
+            return "and(totalofferingamount.gte.500000,totalofferingamount.lte.2000000)";
           case "$2MM - $5MM":
-            return "(totalofferingamount.gte.2000000,totalofferingamount.lte.5000000)";
+            return "and(totalofferingamount.gte.2000000,totalofferingamount.lte.5000000)";
           case "$5MM+":
             return "totalofferingamount.gt.5000000";
           default:
@@ -91,22 +92,22 @@ export class SecServiceOptimized {
       }
     }
 
-    // Apply max raised filters (server-side)
+    // Apply max raised filters (server-side) - Fixed PostgREST syntax
     if (filters.maxRaisedRanges && filters.maxRaisedRanges.length > 0) {
       const raisedConditions = filters.maxRaisedRanges.map(range => {
         switch (range) {
           case "Less than $250K":
             return "totalamountsold.lt.250000";
           case "$250K - $500K":
-            return "(totalamountsold.gte.250000,totalamountsold.lte.500000)";
+            return "and(totalamountsold.gte.250000,totalamountsold.lte.500000)";
           case "$500K - $1M":
-            return "(totalamountsold.gte.500000,totalamountsold.lte.1000000)";
+            return "and(totalamountsold.gte.500000,totalamountsold.lte.1000000)";
           case "$1M - $2M":
-            return "(totalamountsold.gte.1000000,totalamountsold.lte.2000000)";
+            return "and(totalamountsold.gte.1000000,totalamountsold.lte.2000000)";
           case "$2MM - $5MM":
-            return "(totalamountsold.gte.2000000,totalamountsold.lte.5000000)";
+            return "and(totalamountsold.gte.2000000,totalamountsold.lte.5000000)";
           case "$5MM - $10MM":
-            return "(totalamountsold.gte.5000000,totalamountsold.lte.10000000)";
+            return "and(totalamountsold.gte.5000000,totalamountsold.lte.10000000)";
           default:
             return null;
         }

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExternalLink, DollarSign, Users, Building, Calendar } from 'lucide-react';
@@ -19,13 +20,13 @@ interface VendorsTableProps {
   onVendorClick?: (vendor: Vendor) => void;
 }
 
-type SortField = 'companyName' | 'yearFounded' | 'fundingRaised' | 'companyType';
+type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
 export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
-  const [sortField, setSortField] = useState<SortField>('companyName');
+  const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const handleSort = (field: SortField) => {
@@ -49,11 +50,6 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
     let aVal: any = a[sortField];
     let bVal: any = b[sortField];
 
-    if (sortField === 'fundingRaised') {
-      aVal = a.fundingRaised || 0;
-      bVal = b.fundingRaised || 0;
-    }
-
     if (typeof aVal === 'string') {
       aVal = aVal.toLowerCase();
       bVal = bVal.toLowerCase();
@@ -66,12 +62,9 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
     }
   });
 
-  const formatFunding = (amount?: number) => {
+  const formatFunding = (amount?: string) => {
     if (!amount) return 'Not disclosed';
-    if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(1)}M`;
-    }
-    return `$${(amount / 1000).toFixed(0)}K`;
+    return amount;
   };
 
   const getCompanyTypeBadgeColor = (type: string) => {
@@ -93,12 +86,12 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
               <TableRow>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50 min-w-[200px]"
-                  onClick={() => handleSort('companyName')}
+                  onClick={() => handleSort('company_name')}
                 >
                   <div className="flex items-center gap-2">
                     <Building className="h-4 w-4" />
                     Company
-                    {sortField === 'companyName' && (
+                    {sortField === 'company_name' && (
                       <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
@@ -109,35 +102,24 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                 <TableHead className="min-w-[120px]">Specialties</TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('companyType')}
+                  onClick={() => handleSort('company_type')}
                 >
                   <div className="flex items-center gap-2">
                     Type
-                    {sortField === 'companyType' && (
+                    {sortField === 'company_type' && (
                       <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
                 </TableHead>
+                <TableHead>Funding</TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('fundingRaised')}
-                >
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Funding
-                    {sortField === 'fundingRaised' && (
-                      <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort('yearFounded')}
+                  onClick={() => handleSort('founding_year')}
                 >
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Founded
-                    {sortField === 'yearFounded' && (
+                    {sortField === 'founding_year' && (
                       <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
@@ -154,7 +136,7 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                 >
                   <TableCell>
                     <div>
-                      <div className="font-medium hover:text-primary">{vendor.companyName}</div>
+                      <div className="font-medium hover:text-primary">{vendor.company_name}</div>
                       <div className="text-sm text-muted-foreground">
                         {vendor.headquarters}
                       </div>
@@ -167,75 +149,75 @@ export function VendorsTable({ vendors, onVendorClick }: VendorsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[120px]">
-                      {vendor.coreServices.slice(0, 2).map((service, idx) => (
+                      {vendor.core_services.slice(0, 2).map((service, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {service}
                         </Badge>
                       ))}
-                      {vendor.coreServices.length > 2 && (
+                      {vendor.core_services.length > 2 && (
                         <Badge variant="outline" className="text-xs">
-                          +{vendor.coreServices.length - 2}
+                          +{vendor.core_services.length - 2}
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[120px]">
-                      {vendor.targetCustomers.slice(0, 2).map((customer, idx) => (
+                      {vendor.customers.slice(0, 2).map((customer, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {customer}
                         </Badge>
                       ))}
-                      {vendor.targetCustomers.length > 2 && (
+                      {vendor.customers.length > 2 && (
                         <Badge variant="secondary" className="text-xs">
-                          +{vendor.targetCustomers.length - 2}
+                          +{vendor.customers.length - 2}
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1 max-w-[120px]">
-                      {vendor.specialtyFocus.slice(0, 2).map((specialty, idx) => (
+                      {vendor.specialties.slice(0, 2).map((specialty, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {specialty}
                         </Badge>
                       ))}
-                      {vendor.specialtyFocus.length > 2 && (
+                      {vendor.specialties.length > 2 && (
                         <Badge variant="outline" className="text-xs">
-                          +{vendor.specialtyFocus.length - 2}
+                          +{vendor.specialties.length - 2}
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getCompanyTypeBadgeColor(vendor.companyType)}>
-                      {vendor.companyType}
+                    <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
+                      {vendor.company_type}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {formatFunding(vendor.fundingRaised)}
-                      {vendor.latestFundingRound && (
+                      {formatFunding(vendor.total_funding)}
+                      {vendor.funding_stage && (
                         <div className="text-xs text-muted-foreground truncate">
-                          {vendor.latestFundingRound}
+                          {vendor.funding_stage}
                         </div>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm font-medium">
-                      {vendor.yearFounded}
+                      {vendor.founding_year || 'N/A'}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {vendor.websiteUrl && (
+                      {vendor.website_url && (
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(vendor.websiteUrl, '_blank');
+                            window.open(vendor.website_url, '_blank');
                           }}
                         >
                           <ExternalLink className="h-4 w-4" />

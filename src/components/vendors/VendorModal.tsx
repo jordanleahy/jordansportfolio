@@ -17,12 +17,9 @@ interface VendorModalProps {
 }
 
 export function VendorModal({ vendor, onClose }: VendorModalProps) {
-  const formatFunding = (amount?: number) => {
+  const formatFunding = (amount?: string) => {
     if (!amount) return 'Not disclosed';
-    if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(1)}M`;
-    }
-    return `$${(amount / 1000).toFixed(0)}K`;
+    return amount;
   };
 
   const getCompanyTypeBadgeColor = (type: string) => {
@@ -41,27 +38,29 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <DialogTitle className="text-2xl">{vendor.companyName}</DialogTitle>
+              <DialogTitle className="text-2xl">{vendor.company_name}</DialogTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Building className="h-4 w-4" />
                   {vendor.headquarters}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Founded {vendor.yearFounded}
-                </div>
-                <Badge variant={getCompanyTypeBadgeColor(vendor.companyType)}>
-                  {vendor.companyType}
+                {vendor.founding_year && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    Founded {vendor.founding_year}
+                  </div>
+                )}
+                <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)}>
+                  {vendor.company_type}
                 </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {vendor.websiteUrl && (
+              {vendor.website_url && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(vendor.websiteUrl, '_blank')}
+                  onClick={() => window.open(vendor.website_url, '_blank')}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Visit Website
@@ -87,7 +86,7 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
               Core Services
             </h3>
             <div className="flex flex-wrap gap-2">
-              {vendor.coreServices.map((service, idx) => (
+              {vendor.core_services.map((service, idx) => (
                 <Badge key={idx} variant="outline">
                   {service}
                 </Badge>
@@ -102,7 +101,7 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
               Target Customers
             </h3>
             <div className="flex flex-wrap gap-2">
-              {vendor.targetCustomers.map((customer, idx) => (
+              {vendor.customers.map((customer, idx) => (
                 <Badge key={idx} variant="secondary">
                   {customer}
                 </Badge>
@@ -117,7 +116,7 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
               Specialty Focus
             </h3>
             <div className="flex flex-wrap gap-2">
-              {vendor.specialtyFocus.map((specialty, idx) => (
+              {vendor.specialties.map((specialty, idx) => (
                 <Badge key={idx} variant="outline">
                   {specialty}
                 </Badge>
@@ -129,7 +128,7 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
           <div>
             <h3 className="font-semibold text-lg mb-3">Key Features & Capabilities</h3>
             <div className="flex flex-wrap gap-2">
-              {vendor.keyFeatures.map((feature, idx) => (
+              {vendor.key_features.map((feature, idx) => (
                 <Badge key={idx} variant="default">
                   {feature}
                 </Badge>
@@ -141,7 +140,7 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
           <div>
             <h3 className="font-semibold text-lg mb-3">Key Benefits & Value</h3>
             <div className="flex flex-wrap gap-2">
-              {vendor.keyBenefits.map((benefit, idx) => (
+              {vendor.key_benefits.map((benefit, idx) => (
                 <Badge key={idx} variant="secondary">
                   {benefit}
                 </Badge>
@@ -152,34 +151,34 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
           <Separator />
 
           {/* Funding Information */}
-          {(vendor.fundingRaised || vendor.latestFundingRound || vendor.investors) && (
+          {(vendor.total_funding || vendor.funding_stage || vendor.key_investors.length > 0) && (
             <div>
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
                 Funding Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {vendor.fundingRaised && (
+                {vendor.total_funding && (
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Total Funding</p>
                     <p className="text-2xl font-bold text-primary">
-                      {formatFunding(vendor.fundingRaised)}
+                      {formatFunding(vendor.total_funding)}
                     </p>
                   </div>
                 )}
-                {vendor.latestFundingRound && (
+                {vendor.funding_stage && (
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Latest Round</p>
                     <p className="text-lg font-semibold">
-                      {vendor.latestFundingRound}
+                      {vendor.funding_stage}
                     </p>
                   </div>
                 )}
-                {vendor.investors && vendor.investors.length > 0 && (
+                {vendor.key_investors && vendor.key_investors.length > 0 && (
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Investors</p>
                     <div className="flex flex-wrap gap-1">
-                      {vendor.investors.map((investor, idx) => (
+                      {vendor.key_investors.map((investor, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {investor}
                         </Badge>
@@ -192,11 +191,11 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
           )}
 
           {/* Notable Customers */}
-          {vendor.notableCustomers && vendor.notableCustomers.length > 0 && (
+          {vendor.notable_customers && vendor.notable_customers.length > 0 && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Notable Customers</h3>
               <div className="flex flex-wrap gap-2">
-                {vendor.notableCustomers.map((customer, idx) => (
+                {vendor.notable_customers.map((customer, idx) => (
                   <Badge key={idx} variant="outline">
                     {customer}
                   </Badge>
@@ -205,27 +204,17 @@ export function VendorModal({ vendor, onClose }: VendorModalProps) {
             </div>
           )}
 
-          {/* Metrics */}
-          {vendor.metrics && vendor.metrics.length > 0 && (
+          {/* Performance Metrics */}
+          {vendor.performance_metrics && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Performance Metrics</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {vendor.metrics.map((metric, idx) => (
+                {Object.entries(vendor.performance_metrics).map(([key, value], idx) => (
                   <div key={idx} className="p-3 bg-muted/50 rounded-lg">
-                    <p className="font-medium text-primary">{metric}</p>
+                    <p className="font-medium text-primary">{key}: {String(value)}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Notes */}
-          {vendor.notes && (
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Additional Notes</h3>
-              <p className="text-muted-foreground bg-muted/50 p-4 rounded-lg">
-                {vendor.notes}
-              </p>
             </div>
           )}
         </div>

@@ -31,10 +31,10 @@ export function VendorFilters({ filters, onFiltersChange, vendors }: VendorFilte
   };
 
   // Extract unique values for filter options
-  const companyTypes = [...new Set(vendors.map(v => v.companyType))];
-  const allServices = [...new Set(vendors.flatMap(v => v.coreServices))];
-  const allCustomers = [...new Set(vendors.flatMap(v => v.targetCustomers))];
-  const allSpecialties = [...new Set(vendors.flatMap(v => v.specialtyFocus))];
+  const companyTypes = [...new Set(vendors.map(v => v.company_type))];
+  const allServices = [...new Set(vendors.flatMap(v => v.core_services))];
+  const allCustomers = [...new Set(vendors.flatMap(v => v.customers))];
+  const allSpecialties = [...new Set(vendors.flatMap(v => v.specialties))];
 
   const hasActiveFilters = Object.values(filters).some(value => 
     Array.isArray(value) ? value.length > 0 : value
