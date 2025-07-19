@@ -78,51 +78,57 @@ export const InvestmentResearchView: React.FC<InvestmentResearchViewProps> = ({
   return (
     <div className="space-y-4">
       {/* Header with generation timestamp */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+      <div className="flex flex-col gap-2 mb-4">
         <h3 className="text-lg font-semibold">Investment Analysis</h3>
-        <Badge variant="outline" className="w-fit">
+        <Badge variant="outline" className="w-fit text-xs">
           Generated {formatDate(generatedAt)}
         </Badge>
       </div>
 
-      {/* Executive Summary Cards - Mobile First Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {/* Executive Summary Cards - Stacked Mobile */}
+      <div className="space-y-3 mb-6">
         <Card className="border-l-4 border-l-primary">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Building2 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Entity</span>
+            <div className="flex items-start gap-3">
+              <Building2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-sm mb-1">Legal Entity</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {data.company_overview.corporate_structure}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground leading-tight">
-              {data.company_overview.corporate_structure}
-            </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium">Offering</span>
+            <div className="flex items-start gap-3">
+              <DollarSign className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-sm mb-1">Total Offering</h4>
+                <p className="text-lg font-bold text-green-600 mb-1">
+                  {data.financial_profile.total_offering}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {data.financial_profile.security_offered}
+                </p>
+              </div>
             </div>
-            <p className="text-xs font-semibold text-green-600">
-              {data.financial_profile.total_offering}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {data.financial_profile.security_offered}
-            </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-blue-500">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium">Market</span>
+            <div className="flex items-start gap-3">
+              <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-sm mb-1">Target Market</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {data.market_position.target_market}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground leading-tight">
-              {data.market_position.target_market.substring(0, 50)}...
-            </p>
           </CardContent>
         </Card>
 
@@ -131,143 +137,154 @@ export const InvestmentResearchView: React.FC<InvestmentResearchViewProps> = ({
           riskLevel.color === 'warning' ? 'border-l-yellow-500' : 'border-l-green-500'
         }`}>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className={`h-4 w-4 ${
+            <div className="flex items-start gap-3">
+              <AlertTriangle className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
                 riskLevel.color === 'destructive' ? 'text-red-600' :
                 riskLevel.color === 'warning' ? 'text-yellow-600' : 'text-green-600'
               }`} />
-              <span className="text-sm font-medium">Risk</span>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-medium text-sm mb-2">Risk Assessment</h4>
+                <Badge variant={
+                  riskLevel.color === 'destructive' ? 'destructive' :
+                  riskLevel.color === 'warning' ? 'secondary' : 'outline'
+                } className="text-xs">
+                  {riskLevel.level} Risk
+                </Badge>
+              </div>
             </div>
-            <Badge variant={
-              riskLevel.color === 'destructive' ? 'destructive' :
-              riskLevel.color === 'warning' ? 'secondary' : 'outline'
-            } className="text-xs">
-              {riskLevel.level}
-            </Badge>
           </CardContent>
         </Card>
       </div>
 
-      {/* Company Overview */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Building2 className="h-4 w-4" />
-            Company Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Legal Entity
-              </label>
-              <p className="text-sm font-medium mt-1">{data.company_overview.legal_entity}</p>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Headquarters
-              </label>
-              <p className="text-sm font-medium mt-1">{data.company_overview.headquarters}</p>
-            </div>
-          </div>
-          
-          <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Business Description
-            </label>
-            <p className="text-sm mt-1 leading-relaxed">{data.company_overview.business_description}</p>
-          </div>
-          
-          <div className="bg-muted/30 p-3 rounded-lg">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Notable Feature
-            </label>
-            <p className="text-sm mt-1 leading-relaxed">{data.company_overview.notable_feature}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Financial Profile */}
+      {/* Financial Overview Card */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <DollarSign className="h-4 w-4" />
-            Financial Profile
+            Financial Overview
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
-              <p className="text-xs text-green-700 font-medium">Total Offering</p>
-              <p className="text-lg font-bold text-green-800">{data.financial_profile.total_offering}</p>
+          {/* Key Metrics */}
+          <div className="space-y-3">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-green-700">Total Offering</span>
+                <span className="text-lg font-bold text-green-800">{data.financial_profile.total_offering}</span>
+              </div>
             </div>
-            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700 font-medium">Amount Sold</p>
-              <p className="text-lg font-bold text-blue-800">{data.financial_profile.amount_sold}</p>
+            
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-blue-700">Amount Sold</span>
+                <span className="text-lg font-bold text-blue-800">{data.financial_profile.amount_sold}</span>
+              </div>
             </div>
-            <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-              <p className="text-xs text-orange-700 font-medium">Remaining</p>
-              <p className="text-lg font-bold text-orange-800">{data.financial_profile.remaining}</p>
+            
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-orange-700">Remaining</span>
+                <span className="text-lg font-bold text-orange-800">{data.financial_profile.remaining}</span>
+              </div>
             </div>
           </div>
 
+          <Separator />
+
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Prior Funding
-              </label>
-              <div className="mt-2 space-y-1">
+              <h5 className="text-sm font-medium text-muted-foreground mb-2">Prior Funding History</h5>
+              <div className="space-y-2">
                 {data.financial_profile.prior_funding.map((funding, index) => (
-                  <p key={index} className="text-sm bg-muted/30 p-2 rounded">{funding}</p>
+                  <div key={index} className="p-2 bg-muted/30 rounded text-sm">
+                    {funding}
+                  </div>
                 ))}
               </div>
             </div>
             
             <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Revenue Metrics
-              </label>
-              <p className="text-sm mt-1">{data.financial_profile.revenue_metrics}</p>
+              <h5 className="text-sm font-medium text-muted-foreground mb-1">Revenue Metrics</h5>
+              <p className="text-sm">{data.financial_profile.revenue_metrics}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Market Position */}
+      {/* Company Details Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Building2 className="h-4 w-4" />
+            Company Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Legal Entity</span>
+              <span className="text-sm font-medium text-right">{data.company_overview.legal_entity}</span>
+            </div>
+            
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Headquarters</span>
+              <span className="text-sm text-right">{data.company_overview.headquarters}</span>
+            </div>
+            
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Executive</span>
+              <span className="text-sm text-right">{data.company_overview.executive_signer}</span>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <h5 className="text-sm font-medium text-muted-foreground mb-2">Business Description</h5>
+            <p className="text-sm leading-relaxed">{data.company_overview.business_description}</p>
+          </div>
+          
+          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <h5 className="text-sm font-medium text-primary mb-1">Key Feature</h5>
+            <p className="text-sm">{data.company_overview.notable_feature}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Market & Competition Card */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4" />
-            Market Position
+            Market & Competition
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Target Market
-            </label>
-            <p className="text-sm mt-1 leading-relaxed">{data.market_position.target_market}</p>
+            <h5 className="text-sm font-medium text-muted-foreground mb-2">Target Market</h5>
+            <p className="text-sm leading-relaxed">{data.market_position.target_market}</p>
           </div>
           
+          <Separator />
+          
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Competitive Landscape
-            </label>
-            <div className="mt-2 space-y-1">
+            <h5 className="text-sm font-medium text-muted-foreground mb-2">Competitive Landscape</h5>
+            <div className="space-y-2">
               {data.market_position.competitive_landscape.map((item, index) => (
-                <p key={index} className="text-sm bg-muted/30 p-2 rounded">{item}</p>
+                <div key={index} className="p-2 bg-muted/30 rounded text-sm">
+                  {item}
+                </div>
               ))}
             </div>
           </div>
           
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Technology
-            </label>
-            <div className="mt-2 space-y-1">
+            <h5 className="text-sm font-medium text-muted-foreground mb-2">Technology Stack</h5>
+            <div className="space-y-2">
               {data.market_position.technology.map((tech, index) => (
-                <p key={index} className="text-sm bg-muted/30 p-2 rounded">{tech}</p>
+                <div key={index} className="p-2 bg-muted/30 rounded text-sm">
+                  {tech}
+                </div>
               ))}
             </div>
           </div>
@@ -295,42 +312,39 @@ export const InvestmentResearchView: React.FC<InvestmentResearchViewProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Leadership Check
-              </label>
-              <p className="text-sm mt-1">{data.risk_assessment.leadership_check}</p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Leadership</span>
+              <span className="text-sm text-right flex-1 ml-4">{data.risk_assessment.leadership_check}</span>
             </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Litigation
-              </label>
-              <p className="text-sm mt-1">{data.risk_assessment.litigation}</p>
+            
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-muted-foreground">Litigation</span>
+              <span className="text-sm text-right flex-1 ml-4">{data.risk_assessment.litigation}</span>
             </div>
           </div>
           
+          <Separator />
+          
           <div>
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Regulatory
-            </label>
-            <div className="mt-2 space-y-1">
+            <h5 className="text-sm font-medium text-muted-foreground mb-2">Regulatory Environment</h5>
+            <div className="space-y-2">
               {data.risk_assessment.regulatory.map((reg, index) => (
-                <p key={index} className="text-sm bg-muted/30 p-2 rounded">{reg}</p>
+                <div key={index} className="p-2 bg-muted/30 rounded text-sm">
+                  {reg}
+                </div>
               ))}
             </div>
           </div>
 
           {data.risk_assessment.concerns.length > 0 && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Key Concerns
-              </label>
-              <div className="mt-2 space-y-2">
+              <h5 className="text-sm font-medium text-muted-foreground mb-2">Key Concerns</h5>
+              <div className="space-y-2">
                 {data.risk_assessment.concerns.map((concern, index) => (
-                  <div key={index} className="flex gap-2 p-2 bg-red-50 border border-red-200 rounded">
+                  <div key={index} className="flex gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-red-800">{concern}</p>
+                    <p className="text-sm text-red-800 leading-relaxed">{concern}</p>
                   </div>
                 ))}
               </div>
@@ -348,13 +362,13 @@ export const InvestmentResearchView: React.FC<InvestmentResearchViewProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {data.next_steps.map((step, index) => (
-              <div key={index} className="flex gap-3 p-3 border rounded-lg">
-                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+              <div key={index} className="flex gap-3 p-3 border border-border rounded-lg bg-background">
+                <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
                   {index + 1}
                 </div>
-                <p className="text-sm leading-relaxed">{step}</p>
+                <p className="text-sm leading-relaxed flex-1">{step}</p>
               </div>
             ))}
           </div>
