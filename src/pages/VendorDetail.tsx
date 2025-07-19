@@ -10,7 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useVendorBySlug } from '@/hooks/useVendors';
-import { VENDOR_CATEGORIES } from '@/types/vendor';
+import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { generateVendorPrompt } from '@/lib/promptBuilder';
@@ -93,28 +94,104 @@ export default function VendorDetail() {
     setPasteContent("");
   };
 
-  const submitPastedData = () => {
+  const validateVendorData = (data: any): boolean => {
+    // Check for required fields that should be present in ChatGPT response
+    const requiredStringFields = ['company_name', 'description', 'headquarters'];
+    const requiredArrayFields = ['core_services', 'specialties', 'customers'];
+    
+    for (const field of requiredStringFields) {
+      if (!data[field] || typeof data[field] !== 'string') {
+        return false;
+      }
+    }
+    
+    for (const field of requiredArrayFields) {
+      if (!data[field] || !Array.isArray(data[field])) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const submitPastedData = async () => {
     try {
       // Parse and validate JSON
       const jsonData = JSON.parse(pasteContent);
       
-      // Show a toast to confirm the paste action
-      toast({
-        title: "JSON Processed!",
-        description: "ChatGPT response data has been processed successfully.",
-      });
+      if (!validateVendorData(jsonData)) {
+        toast({
+          title: "Invalid Data Structure",
+          description: "The JSON doesn't contain required vendor fields. Please check the response format.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Map ChatGPT response to vendor fields
+      const vendorUpdate: Partial<Vendor> = {
+        // Core company info
+        company_name: jsonData.company_name || vendor?.company_name,
+        description: jsonData.description || vendor?.description,
+        headquarters: jsonData.headquarters || vendor?.headquarters,
+        founding_year: jsonData.founding_year || vendor?.founding_year,
+        company_type: jsonData.company_type || vendor?.company_type,
+        
+        // Services and capabilities
+        core_services: jsonData.core_services || vendor?.core_services || [],
+        specialties: jsonData.specialties || vendor?.specialties || [],
+        customers: jsonData.customers || vendor?.customers || [],
+        key_features: jsonData.key_features || vendor?.key_features || [],
+        key_benefits: jsonData.key_benefits || vendor?.key_benefits || [],
+        competitive_advantages: jsonData.competitive_advantages || vendor?.competitive_advantages || [],
+        notable_customers: jsonData.notable_customers || vendor?.notable_customers || [],
+        
+        // Funding info
+        funding_stage: jsonData.funding_stage || vendor?.funding_stage,
+        total_funding: jsonData.total_funding || vendor?.total_funding,
+        key_investors: jsonData.key_investors || vendor?.key_investors || [],
+        
+        // Store complete research data
+        research_data: {
+          ...vendor?.research_data,
+          chatgpt_response: jsonData,
+          last_updated: new Date().toISOString(),
+          confidence_level: jsonData.confidence_level,
+          verification_status: jsonData.verification_status
+        },
+        
+        // Performance metrics if provided
+        performance_metrics: jsonData.performance_metrics || vendor?.performance_metrics
+      };
+
+      // Update vendor in database
+      const { error } = await supabase
+        .from('vendors')
+        .update(vendorUpdate)
+        .eq('id', vendor?.id);
+
+      if (error) {
+        throw error;
+      }
       
-      // Here you can add logic to process the JSON data
-      console.log('Processed JSON:', jsonData);
+      // Show success message
+      toast({
+        title: "Vendor Data Updated!",
+        description: "ChatGPT response has been processed and vendor data updated successfully.",
+      });
       
       // Close modal and clear content
       setIsPasteOpen(false);
       setPasteContent("");
       
+      // Refresh the page to show updated data
+      window.location.reload();
+      
     } catch (error) {
+      console.error('Error processing JSON:', error);
       toast({
-        title: "Invalid JSON",
-        description: "Please paste valid JSON data from ChatGPT response.",
+        title: "Processing Error",
+        description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
         variant: "destructive",
       });
     }

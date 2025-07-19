@@ -18,6 +18,10 @@ export interface Vendor {
   competitive_advantages: string[];
   performance_metrics?: any;
   notable_customers: string[];
+  research_data?: any;
+  company_data?: any;
+  source_url?: string;
+  status?: string;
   slug: string;
   user_id: string;
   created_at: string;
