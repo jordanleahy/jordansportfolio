@@ -195,11 +195,11 @@ const SEC = () => {
 
 
 
-        {/* Main Content */}
-        <div className="container mx-auto px-4 pb-8">
+        {/* Main Content - Full Width Layout */}
+        <div className="pb-8 w-full">
           <div className="flex gap-3">
             {/* Desktop Filter Sidebar */}
-            <div className="hidden lg:block w-64 flex-shrink-0">
+            <div className="hidden lg:block w-64 flex-shrink-0 pl-4">
               <FilterSidebar 
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
@@ -219,8 +219,8 @@ const SEC = () => {
               )}
             </div>
 
-            {/* Main Table - Optimized */}
-            <div className="flex-1 min-w-0">
+            {/* Main Table - Optimized - Full Width */}
+            <div className="flex-1 min-w-0 pr-4">
               <OfferingsTableOptimized 
                 filters={filters}
                 onCompanySelect={setSelectedCompany}
