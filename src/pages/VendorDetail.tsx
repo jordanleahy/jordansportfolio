@@ -20,26 +20,56 @@ const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
   return `I need you to research this company thoroughly and provide detailed information in JSON format that matches our exact database schema.
 
 Website: ${websiteUrl}
+Company: ${vendor.company_name}
 
 Please browse their website and provide the following information in valid JSON format that matches our database fields exactly:
 
 {
-  "company_name": "${vendor.company_name}",
-  "headquarters": "${vendor.headquarters}",
-  "founding_year": ${vendor.founding_year || 'null'},
-  "company_type": "${vendor.company_type}",
-  "description": "${vendor.description}",
-  "core_services": ${JSON.stringify(vendor.core_services, null, 4).replace(/^/gm, '    ').trim()},
-  "customers": ${JSON.stringify(vendor.customers, null, 4).replace(/^/gm, '    ').trim()},
-  "specialties": ${JSON.stringify(vendor.specialties, null, 4).replace(/^/gm, '    ').trim()},
-  "key_features": ${JSON.stringify(vendor.key_features, null, 4).replace(/^/gm, '    ').trim()},
-  "key_benefits": ${JSON.stringify(vendor.key_benefits, null, 4).replace(/^/gm, '    ').trim()},
+  "company_name": "Full Company Name",
+  "headquarters": "City, State/Province, Country",
+  "founding_year": 2020,
+  "company_type": "Private|Public|Non-profit",
+  "description": "Detailed company description explaining what they do, their services, and market focus",
+  "core_services": [
+    "Service 1",
+    "Service 2", 
+    "Service 3"
+  ],
+  "customers": [
+    "Target Customer Type 1",
+    "Target Customer Type 2",
+    "Target Customer Type 3"
+  ],
+  "specialties": [
+    "Specialty Area 1",
+    "Specialty Area 2",
+    "Technology Focus 1"
+  ],
+  "key_features": [
+    "Key Feature 1",
+    "Key Feature 2",
+    "Key Feature 3"
+  ],
+  "key_benefits": [
+    "Business Benefit 1",
+    "Business Benefit 2",
+    "Business Benefit 3"
+  ],
   "website_url": "${websiteUrl}",
-  "funding_stage": "${vendor.funding_stage || 'To be researched'}",
-  "total_funding": "${vendor.total_funding || 'To be researched'}",
-  "key_investors": ${JSON.stringify(vendor.key_investors, null, 4).replace(/^/gm, '    ').trim()},
-  "competitive_advantages": ${JSON.stringify(vendor.competitive_advantages, null, 4).replace(/^/gm, '    ').trim()},
-  "notable_customers": ${JSON.stringify(vendor.notable_customers, null, 4).replace(/^/gm, '    ').trim()},
+  "funding_stage": "Seed|Series A|Series B|Private Equity|Public|Bootstrap",
+  "total_funding": "$X million" or "Not disclosed",
+  "key_investors": [
+    "Investor 1",
+    "Investor 2"
+  ],
+  "competitive_advantages": [
+    "Advantage 1",
+    "Advantage 2"
+  ],
+  "notable_customers": [
+    "Notable Customer 1",
+    "Notable Customer 2"
+  ],
   "company_data": {},
   "research_data": {}
 }
