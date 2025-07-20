@@ -740,6 +740,16 @@ export default function VendorDetail() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
             <div className="xl:col-span-2 space-y-6 lg:space-y-8">
+              {isEditing && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <Edit className="h-4 w-4 text-amber-600" />
+                    <span className="text-amber-800 font-medium">Edit Mode Active</span>
+                  </div>
+                  <p className="text-amber-700 text-sm mt-1">You are now in edit mode. Click sections to edit them inline.</p>
+                </div>
+              )}
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg sm:text-xl">Company Overview</CardTitle>
