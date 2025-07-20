@@ -18,7 +18,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorSitemapTree } from '@/components/vendors/VendorSitemapTree';
-import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
+import { useSystemAgent } from '@/hooks/useSystemAgent';
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -216,7 +216,7 @@ export default function VendorDetail() {
   const { isAdmin } = useUserRole();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
-  const { data: agents } = useOpenAIAgents();
+  const { data: websiteAnalyzerAgent, error: agentError } = useSystemAgent("Website Structure Analyzer");
 
   console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
@@ -476,59 +476,20 @@ export default function VendorDetail() {
   const analyzeWebsiteStructure = async () => {
     if (!vendor.website_url) {
       toast({
-        title: "Error",
-        description: "This vendor doesn't have a website URL available.",
+        title: "Website URL Required",
+        description: "Please add a website URL to the vendor first.",
         variant: "destructive",
       });
       return;
     }
 
-    // Find any suitable agent or create one automatically
-    let sitemapAgent = agents?.find(agent => 
-      agent.name === "Website Structure Analyzer" && agent.status === "active"
-    );
-
-    // If no specific agent exists, use any active agent
-    if (!sitemapAgent && agents && agents.length > 0) {
-      sitemapAgent = agents.find(agent => agent.status === "active");
-    }
-
-    // If still no agent, create one automatically
-    if (!sitemapAgent) {
-      try {
-        const { data: newAgent, error: createError } = await supabase
-          .from('openai_agents')
-          .insert([{
-            name: "Website Structure Analyzer",
-            purpose: "Analyzes website structure and content organization",
-            model_version: "gpt-4o",
-            trigger: "manual",
-            input_source: "website_url",
-            output_target: "sitemap_tree",
-            schedule: "manual",
-            owner: "System",
-            status: "active" as const,
-            metrics: { latencyMs: 0, errorRate: 0 },
-            user_id: (await supabase.auth.getUser()).data.user?.id
-          }])
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        sitemapAgent = newAgent as any; // Cast to bypass type mismatch
-        
-        toast({
-          title: "Agent Created",
-          description: "Website Structure Analyzer agent created automatically.",
-        });
-      } catch (error) {
-        toast({
-          title: "Agent Creation Failed",
-          description: "Could not create the required agent. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (!websiteAnalyzerAgent) {
+      toast({
+        title: "System Agent Unavailable",
+        description: agentError?.message || "Website analyzer is not available. Please contact support.",
+        variant: "destructive",
+      });
+      return;
     }
 
     setIsAnalyzingWebsite(true);
@@ -537,7 +498,7 @@ export default function VendorDetail() {
         body: {
           vendorId: vendor.id,
           websiteUrl: vendor.website_url,
-          agentId: sitemapAgent.id
+          agentId: websiteAnalyzerAgent.id
         }
       });
 
