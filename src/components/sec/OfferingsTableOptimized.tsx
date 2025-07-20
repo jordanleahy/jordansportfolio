@@ -19,53 +19,18 @@ import {
   ArrowDown, 
   ChevronLeft,
   ChevronRight,
-  FileText,
-  X
+  Sparkles,
+  X,
+  ExternalLink
 } from "lucide-react";
 import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
-import { PromptModal } from "./PromptModal";
 import { OfferingCard } from "./OfferingCard";
-
-// Utility function for generating vendor research prompts
-const generateVendorPrompt = (websiteUrl: string) => {
-  return `I need you to research this company thoroughly and provide detailed information in JSON format.
-
-Website: ${websiteUrl}
-
-Please browse their website and provide the following information in valid JSON format:
-
-{
-  "company_name": "Exact company name",
-  "website_url": "${websiteUrl}",
-  "description": "Detailed description of what the company does",
-  "industry": "Primary industry/sector",
-  "services": ["List", "of", "main", "services"],
-  "target_market": "Who they serve",
-  "company_size": "Estimated number of employees",
-  "founded_year": "Year founded (if available)",
-  "headquarters": "Location of main office",
-  "key_technologies": ["List", "of", "technologies", "they", "use"],
-  "pricing_model": "How they charge (if available)",
-  "contact_info": {
-    "email": "Contact email",
-    "phone": "Phone number",
-    "address": "Physical address"
-  },
-  "social_media": {
-    "linkedin": "LinkedIn URL",
-    "twitter": "Twitter URL"
-  },
-  "competitors": ["List", "of", "main", "competitors"],
-  "unique_value_proposition": "What makes them different",
-  "recent_news": ["Any", "recent", "news", "or", "updates"]
-}
-
-Please ensure the JSON is valid and complete. If any information is not available, use null or an empty array as appropriate.`;
-};
 
 interface OfferingsTableOptimizedProps {
   filters: any;
@@ -82,20 +47,16 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
-  const [promptCompanyName, setPromptCompanyName] = useState("");
-  const itemsPerPage = 50; // Optimized page size
+  const [enhancingOfferings, setEnhancingOfferings] = useState<Set<string>>(new Set());
+  const itemsPerPage = 50;
+  const { toast } = useToast();
 
-  // Debounce search query for performance with longer delay
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isMobile = useIsMobile();
 
-  // Check if search query is too short
   const isSearchTooShort = searchQuery.length > 0 && searchQuery.length < 2;
   const isSearching = searchQuery !== debouncedSearchQuery;
 
-  // Build filters - all processing is now server-side
   const queryFilters: OfferingFilters = {
     ...filters,
     searchQuery: debouncedSearchQuery || undefined,
@@ -106,12 +67,10 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const { data: offeringsData, isLoading, error } = useOfferings(queryFilters, currentPage, itemsPerPage);
   const { data: selectedOfferingDetail, isLoading: isDetailLoading } = useOfferingDetail(selectedOfferingId || undefined);
 
-  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, filters, sortField, sortDirection]);
 
-  // All data comes pre-processed from the server
   const offerings = offeringsData?.data || [];
   const totalItems = offeringsData?.total || 0;
   const totalPages = offeringsData?.totalPages || 0;
@@ -157,12 +116,62 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
       <ArrowDown className="ml-2 h-4 w-4 text-primary" />;
   };
 
-  const handleGeneratePrompt = (offering: any) => {
+  const handleEnhanceOffering = async (offering: any) => {
+    const offeringId = offering.accessionnumber;
     const companyName = offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company';
-    const prompt = generateVendorPrompt(`https://example.com/${companyName}`);
-    setGeneratedPrompt(prompt);
-    setPromptCompanyName(companyName);
-    setIsPromptModalOpen(true);
+    
+    setEnhancingOfferings(prev => new Set(prev).add(offeringId));
+    
+    try {
+      toast({
+        title: "Enhancing Company Profile",
+        description: `Researching ${companyName} and creating vendor profile...`,
+      });
+
+      const { data, error } = await supabase.functions.invoke('vendor-enhancement-agent', {
+        body: { offering }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        const { vendor, category, action } = data;
+        
+        toast({
+          title: `Vendor Profile ${action === 'created' ? 'Created' : 'Updated'}!`,
+          description: (
+            <div className="flex flex-col gap-2">
+              <span>{vendor.company_name} has been {action} in the {category} category.</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="self-start"
+                onClick={() => window.open(`/vendors/${category}`, '_blank')}
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                View Profile
+              </Button>
+            </div>
+          ),
+          duration: 8000,
+        });
+      } else {
+        throw new Error(data.error || 'Enhancement failed');
+      }
+    } catch (error) {
+      console.error('Enhancement error:', error);
+      toast({
+        title: "Enhancement Failed",
+        description: error.message || "Failed to enhance company profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEnhancingOfferings(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(offeringId);
+        return newSet;
+      });
+    }
   };
 
   const getSearchMessage = () => {
@@ -225,7 +234,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
       <CardHeader>
         <CardTitle>SEC Offerings ({totalItems.toLocaleString()} total)</CardTitle>
         
-        {/* Search Input - Full Width */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -246,7 +254,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           )}
         </div>
 
-        {/* Search Message - Underneath Input */}
         <div className="flex items-center text-sm text-muted-foreground min-h-[24px]">
           {getSearchMessage() && (
             <span className={isSearchTooShort ? "text-amber-600" : ""}>
@@ -256,7 +263,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Mobile Card Layout */}
         {isMobile ? (
           <div className="p-4 space-y-4">
             {error ? (
@@ -297,7 +303,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                   <OfferingCard
                     key={offering.accessionnumber}
                     offering={offering}
-                    onGeneratePrompt={handleGeneratePrompt}
+                    onGeneratePrompt={() => handleEnhanceOffering(offering)}
                     onViewDetails={(offeringId) => {
                       setSelectedOfferingId(offeringId);
                       setIsModalOpen(true);
@@ -308,7 +314,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
             )}
           </div>
         ) : (
-          /* Desktop Table Layout */
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -419,81 +424,85 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                     </TableCell>
                   </TableRow>
                 ) : (
-                  offerings.map((offering: any) => (
-                    <TableRow 
-                      key={offering.accessionnumber}
-                      className="hover:bg-muted/50 transition-colors"
-                    >
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleGeneratePrompt(offering);
-                          }}
-                          className="flex items-center gap-1"
-                        >
-                          <FileText className="h-3 w-3" />
-                          Generate Prompt
-                        </Button>
-                      </TableCell>
-                      <TableCell 
-                        className="font-medium cursor-pointer"
-                        onClick={() => {
-                          setSelectedOfferingId(offering.accessionnumber);
-                          setIsModalOpen(true);
-                        }}
+                  offerings.map((offering: any) => {
+                    const isEnhancing = enhancingOfferings.has(offering.accessionnumber);
+                    
+                    return (
+                      <TableRow 
+                        key={offering.accessionnumber}
+                        className="hover:bg-muted/50 transition-colors"
                       >
-                        <div>
-                          <div className="font-semibold">
-                            {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEnhanceOffering(offering);
+                            }}
+                            disabled={isEnhancing}
+                            className="flex items-center gap-1"
+                          >
+                            <Sparkles className={`h-3 w-3 ${isEnhancing ? 'animate-spin' : ''}`} />
+                            {isEnhancing ? 'Enhancing...' : 'Enhance'}
+                          </Button>
+                        </TableCell>
+                        <TableCell 
+                          className="font-medium cursor-pointer"
+                          onClick={() => {
+                            setSelectedOfferingId(offering.accessionnumber);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <div>
+                            <div className="font-semibold">
+                              {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {offering.issuers?.[0]?.city && offering.issuers?.[0]?.stateorcountrydescription 
+                                ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}`
+                                : offering.company_city && offering.company_location
+                                ? `${offering.company_city}, ${offering.company_location}`
+                                : 'Location not specified'
+                              }
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {offering.issuers?.[0]?.city && offering.issuers?.[0]?.stateorcountrydescription 
-                              ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}`
-                              : offering.company_city && offering.company_location
-                              ? `${offering.company_city}, ${offering.company_location}`
-                              : 'Location not specified'
-                            }
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold text-green-600">
-                        {offering.totalofferingamount 
-                          ? formatCurrency(offering.totalofferingamount) 
-                          : 'Not disclosed'
-                        }
-                      </TableCell>
-                      <TableCell className="font-semibold text-blue-600">
-                        {offering.totalamountsold 
-                          ? formatCurrency(offering.totalamountsold) 
-                          : 'Not disclosed'
-                        }
-                      </TableCell>
-                      <TableCell className="font-semibold text-purple-600">
-                        {formatPercentage(offering.totalamountsold, offering.totalofferingamount)}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(offering.sale_date)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {offering.industrygrouptype || 'Other'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                        <TableCell className="font-semibold text-green-600">
+                          {offering.totalofferingamount 
+                            ? formatCurrency(offering.totalofferingamount) 
+                            : 'Not disclosed'
+                          }
+                        </TableCell>
+                        <TableCell className="font-semibold text-blue-600">
+                          {offering.totalamountsold 
+                            ? formatCurrency(offering.totalamountsold) 
+                            : 'Not disclosed'
+                          }
+                        </TableCell>
+                        <TableCell className="font-semibold text-purple-600">
+                          {formatPercentage(offering.totalamountsold, offering.totalofferingamount)}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(offering.sale_date)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {offering.industrygrouptype || 'Other'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Not specified'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
           </div>
         )}
 
-        {/* Optimized Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t">
           <div className="text-sm text-muted-foreground">
             {currentResults > 0 ? (
@@ -536,13 +545,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           setIsModalOpen(false);
           setSelectedOfferingId(null);
         }}
-      />
-
-      <PromptModal
-        isOpen={isPromptModalOpen}
-        onClose={() => setIsPromptModalOpen(false)}
-        prompt={generatedPrompt}
-        companyName={promptCompanyName}
       />
     </Card>
   );
