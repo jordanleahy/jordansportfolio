@@ -90,10 +90,10 @@ export const validateVendorData = (rawData: any): ValidationResult => {
     }
   }
 
-  // Array field validations
+  // Array field validations - Added 'competitors' to the array
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 
-    'key_investors', 'competitive_advantages', 'notable_customers',
+    'key_investors', 'competitive_advantages', 'competitors', 'notable_customers',
     'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
   ];
   
