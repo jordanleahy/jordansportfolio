@@ -9,6 +9,7 @@ import { useVendorEdit } from '@/hooks/useVendorEdit';
 import { TextEditor } from './editors/TextEditor';
 import { ArrayEditor } from './editors/ArrayEditor';
 import { SelectEditor } from './editors/SelectEditor';
+import { CompetitorSelector } from './editors/CompetitorSelector';
 
 export interface FieldConfig {
   key: keyof Vendor;
@@ -88,6 +89,16 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
           );
         
         case 'array':
+          // Use specialized competitor selector for competitors field
+          if (field.key === 'competitors') {
+            return (
+              <CompetitorSelector
+                value={Array.isArray(value) ? value : []}
+                onChange={(newValue) => updateField(field.key, newValue)}
+                maxItems={field.maxItems}
+              />
+            );
+          }
           return (
             <ArrayEditor
               value={Array.isArray(value) ? value : []}
