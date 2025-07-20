@@ -250,36 +250,30 @@ export default function Vendors() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-1">
-              <VendorFilters filters={filters} onFiltersChange={setFilters} vendors={allVendors} />
-            </div>
-
-            <div className="lg:col-span-4">
-              <VendorsCardGrid 
-                vendors={filteredVendors} 
-                onDeleteClick={handleDeleteVendor}
-                addVendorButton={
-                  isLoadingAuth ? (
-                    <Button disabled className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Loading...
-                    </Button>
-                  ) : user ? (
-                    <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Add Vendor
-                    </Button>
-                  ) : (
-                    <Button onClick={() => alert('Please log in to add vendors')} variant="outline" className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Add Vendor (Login Required)
-                    </Button>
-                  )
-                }
-              />
-            </div>
+          <div className="flex items-center gap-4 mb-6">
+            <VendorFilters filters={filters} onFiltersChange={setFilters} vendors={allVendors} />
+            {isLoadingAuth ? (
+              <Button disabled className="gap-2">
+                <Plus className="h-4 w-4" />
+                Loading...
+              </Button>
+            ) : user ? (
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Vendor
+              </Button>
+            ) : (
+              <Button onClick={() => alert('Please log in to add vendors')} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Vendor (Login Required)
+              </Button>
+            )}
           </div>
+
+          <VendorsCardGrid 
+            vendors={filteredVendors} 
+            onDeleteClick={handleDeleteVendor}
+          />
         </div>
         
         <AddVendorModal 

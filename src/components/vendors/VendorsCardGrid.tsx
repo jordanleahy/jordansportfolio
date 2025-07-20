@@ -11,13 +11,12 @@ interface VendorsCardGridProps {
   vendors: Vendor[];
   onVendorClick?: (vendor: Vendor) => void;
   onDeleteClick?: (vendor: Vendor) => void;
-  addVendorButton?: React.ReactNode;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
-export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, addVendorButton }: VendorsCardGridProps) {
+export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick }: VendorsCardGridProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
@@ -115,11 +114,6 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, addVend
             )}
           </Button>
         </div>
-        {addVendorButton && (
-          <div className="ml-auto">
-            {addVendorButton}
-          </div>
-        )}
       </div>
 
       {/* Responsive Card Grid */}
