@@ -268,35 +268,37 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
         <CardContent>
           {isEditing && (
             <div className="mb-6">
-              <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  dragActive 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted-foreground/25 hover:border-primary/50'
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">
-                    Drop images here or click to upload
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    JPG, PNG, WebP, GIF up to 5MB each
-                  </p>
+              <label className="block cursor-pointer">
+                <div
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    dragActive 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted-foreground/25 hover:border-primary/50'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">
+                      Drop images here or click to upload
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG, WebP, GIF up to 5MB each
+                    </p>
+                  </div>
                 </div>
                 <input
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={handleFileInput}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="sr-only"
                   disabled={isUploading}
                 />
-              </div>
+              </label>
               {isUploading && (
                 <p className="text-sm text-muted-foreground text-center mt-2">
                   Uploading images...
