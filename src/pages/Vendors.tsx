@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -127,6 +126,10 @@ export default function Vendors() {
   }, [allVendors, filters]);
 
   const handleVendorAdded = () => {
+    refetch();
+  };
+
+  const handleVendorSaved = () => {
     refetch();
   };
 
@@ -273,6 +276,7 @@ export default function Vendors() {
           <VendorsCardGrid 
             vendors={filteredVendors} 
             onDeleteClick={handleDeleteVendor}
+            onSave={handleVendorSaved}
           />
         </div>
         
