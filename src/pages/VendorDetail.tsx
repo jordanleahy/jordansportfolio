@@ -90,9 +90,34 @@ Return ONLY valid JSON that matches our database schema exactly. No additional t
   
   "key_investors": "Array of investor names from press releases, about page, or investor sections. Include VC firms, strategic investors, or notable individual investors",
   
+  "business_model": "Description of how the company makes money (e.g., 'SaaS subscription', 'Transaction-based', 'Professional services')",
+  
+  "employee_count_range": "Estimate from careers page, team size, or about section (e.g., '50-100', '500-1000')",
+  
+  "geographic_presence": "Description of geographic coverage or markets served",
+  
+  "contact_email": "Primary contact email if available",
+  
+  "contact_phone": "Main phone number if listed",
+  
+  "contact_address": "Full mailing address if provided",
+  
+  "linkedin_url": "LinkedIn company page URL if found",
+  
+  "twitter_url": "Twitter/X profile URL if found",
+  
+  "certifications": "Array of industry certifications, compliance standards, or security badges found",
+  
+  "awards_recognition": "Array of awards, recognition, or industry rankings found on the site",
+  
+  "office_locations": "Array of office locations from contact/locations pages",
+  
+  "partnerships": "Array of strategic partners, integrations, or technology alliances mentioned",
+  
+  "tech_stack": "Array of core technologies used in their platform",
+
   "performance_metrics": {
     "annual_revenue": "Extract revenue figures if disclosed (format: '$X million')",
-    "employee_count": "Look for team size, about page, LinkedIn company page (format: number or range like '100-500')",
     "customer_count": "Number of customers/clients served if mentioned",
     "market_share": "Market position percentage if disclosed",
     "growth_rate": "Annual growth rate if mentioned (format: 'X% YoY')",
@@ -113,25 +138,11 @@ Return ONLY valid JSON that matches our database schema exactly. No additional t
   },
   
   "company_data": {
-    "employee_count_range": "Estimate from careers page, team size, or about section (e.g., '50-100', '500-1000')",
-    "office_locations": "Array of office locations from contact/locations pages",
-    "tech_stack": "Array of technologies mentioned in job postings, technical docs, or integration pages",
-    "certifications": "Array of industry certifications, compliance standards, or security badges found",
-    "partnerships": "Array of strategic partners, integrations, or technology alliances mentioned",
-    "awards_recognition": "Array of awards, recognition, or industry rankings found on the site",
-    "business_model": "Description of how the company makes money (e.g., 'SaaS subscription', 'Transaction-based', 'Professional services')",
     "target_market_size": "Description of addressable market if mentioned",
-    "geographic_presence": "Description of geographic coverage or markets served",
-    "technology_stack": "Array of core technologies used in their platform",
-    "contact_info": {
-      "email": "Primary contact email if available",
-      "phone": "Main phone number if listed",
-      "address": "Full mailing address if provided"
-    },
-    "social_media": {
-      "linkedin": "LinkedIn company page URL if found",
-      "twitter": "Twitter/X profile URL if found"
-    }
+    "industry_focus": "Primary industry verticals served",
+    "recent_news": "Array of recent announcements or news",
+    "website_structure": "Brief description of website organization",
+    "notable_findings": "Array of interesting discoveries not captured in standard fields"
   }
 }
 
@@ -356,6 +367,21 @@ export default function VendorDetail() {
         // Performance metrics - now properly structured
         performance_metrics: jsonData.performance_metrics || vendor?.performance_metrics || null,
         
+        // Extract new direct fields from JSON
+        business_model: jsonData.business_model || vendor?.business_model,
+        employee_count_range: jsonData.employee_count_range || vendor?.employee_count_range,
+        geographic_presence: jsonData.geographic_presence || vendor?.geographic_presence,
+        contact_email: jsonData.contact_email || vendor?.contact_email,
+        contact_phone: jsonData.contact_phone || vendor?.contact_phone,
+        contact_address: jsonData.contact_address || vendor?.contact_address,
+        linkedin_url: jsonData.linkedin_url || vendor?.linkedin_url,
+        twitter_url: jsonData.twitter_url || vendor?.twitter_url,
+        certifications: jsonData.certifications || vendor?.certifications || [],
+        awards_recognition: jsonData.awards_recognition || vendor?.awards_recognition || [],
+        office_locations: jsonData.office_locations || vendor?.office_locations || [],
+        partnerships: jsonData.partnerships || vendor?.partnerships || [],
+        tech_stack: jsonData.tech_stack || vendor?.tech_stack || [],
+        
         // Research data - flattened structure to match database schema
         research_data: {
           ...vendor?.research_data,
@@ -372,11 +398,11 @@ export default function VendorDetail() {
           notable_findings: jsonData.research_data?.notable_findings || []
         },
         
-        // Company data - properly structured
+        // Company data - now only contains unstructured fields
         company_data: {
           ...vendor?.company_data,
           ...jsonData.company_data,
-          // Ensure nested objects are properly handled
+          // Keep only non-extracted fields
           contact_info: {
             ...vendor?.company_data?.contact_info,
             ...jsonData.company_data?.contact_info

@@ -27,6 +27,20 @@ export interface Vendor {
   user_id: string;
   created_at: string;
   updated_at: string;
+  // New extracted fields from company_data
+  business_model?: string;
+  employee_count_range?: string;
+  geographic_presence?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  contact_address?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  certifications?: string[];
+  awards_recognition?: string[];
+  office_locations?: string[];
+  partnerships?: string[];
+  tech_stack?: string[];
 }
 
 export interface VendorFiltersState {

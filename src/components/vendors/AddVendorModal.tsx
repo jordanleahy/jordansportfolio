@@ -69,6 +69,19 @@ REQUIRED JSON STRUCTURE (EXACT DATABASE SCHEMA):
   "key_investors": [],
   "competitive_advantages": [],
   "notable_customers": [],
+  "business_model": null,
+  "employee_count_range": null,
+  "geographic_presence": null,
+  "contact_email": null,
+  "contact_phone": null,
+  "contact_address": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "certifications": [],
+  "awards_recognition": [],
+  "office_locations": [],
+  "partnerships": [],
+  "tech_stack": [],
   "performance_metrics": {},
   "research_data": {},
   "company_data": {},
@@ -135,42 +148,69 @@ NOTABLE_CUSTOMERS: Specific named customers (array of strings)
 - Public references only
 - Customer case studies mentioned
 
+BUSINESS_MODEL: Revenue model (string). Examples:
+- "SaaS subscription model"
+- "Transaction-based fees"
+- "Professional services"
+- "Hybrid subscription and services"
+
+EMPLOYEE_COUNT_RANGE: Company size estimate (string). Examples:
+- "1-10"
+- "50-100"
+- "500-1000"
+- "1000+"
+
+GEOGRAPHIC_PRESENCE: Geographic coverage (string). Examples:
+- "United States only"
+- "North America"
+- "Global presence in 50+ countries"
+
+CONTACT_EMAIL: Primary business contact email (string)
+
+CONTACT_PHONE: Main business phone number (string)
+
+CONTACT_ADDRESS: Full business address (string)
+
+LINKEDIN_URL: LinkedIn company page URL (string)
+
+TWITTER_URL: Twitter/X company profile URL (string)
+
+CERTIFICATIONS: Industry certifications and compliance standards (array of strings)
+
+AWARDS_RECOGNITION: Awards, recognitions, rankings received (array of strings)
+
+OFFICE_LOCATIONS: Physical office locations (array of strings)
+
+PARTNERSHIPS: Strategic partnerships and integrations (array of strings)
+
+TECH_STACK: Core technologies used in platform/products (array of strings)
+
 PERFORMANCE_METRICS: Key company metrics (object):
 {
-  "employee_count": "estimate or range",
   "annual_revenue": "estimate if available", 
   "customer_count": "number if known",
-  "market_share": "percentage if available"
+  "market_share": "percentage if available",
+  "growth_rate": "annual growth rate if known",
+  "retention_rate": "customer retention percentage"
 }
 
 RESEARCH_DATA: Research metadata (object):
 {
-  "research_date": "2024-07-19",
+  "research_date": "2024-07-20",
   "data_sources": ["website", "press_releases"],
   "confidence_level": "high/medium/low",
-  "verification_status": "verified/unverified"
+  "verification_status": "verified/unverified",
+  "research_quality": "comprehensive/standard/limited",
+  "data_completeness": "85%"
 }
 
-COMPANY_DATA: Additional structured data (object):
+COMPANY_DATA: Additional unstructured data (object):
 {
-  "business_model": "SaaS/Professional Services/Hybrid",
   "target_market_size": "Enterprise/Mid-Market/Small Business",
-  "geographic_presence": "US Only/North America/Global",
   "industry_focus": "Healthcare/Financial/Technology/Multi-Industry",
-  "technology_stack": ["known technologies used"],
-  "certifications": ["relevant certifications"],
-  "partnerships": ["key technology partners"],
-  "contact_info": {
-    "email": "contact email",
-    "phone": "phone number",
-    "address": "physical address"
-  },
-  "social_media": {
-    "linkedin": "LinkedIn URL",
-    "twitter": "Twitter URL"
-  },
-  "competitors": ["main competitors"],
-  "recent_news": ["recent announcements or news"]
+  "recent_news": ["recent announcements or news"],
+  "website_structure": "description of site organization",
+  "notable_findings": ["interesting discoveries"]
 }
 
 ====================================================================
@@ -291,6 +331,19 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
         key_investors: [],
         competitive_advantages: [],
         notable_customers: [],
+        business_model: null,
+        employee_count_range: null,
+        geographic_presence: null,
+        contact_email: null,
+        contact_phone: null,
+        contact_address: null,
+        linkedin_url: null,
+        twitter_url: null,
+        certifications: [],
+        awards_recognition: [],
+        office_locations: [],
+        partnerships: [],
+        tech_stack: [],
         performance_metrics: {},
         research_data: {},
         company_data: {},

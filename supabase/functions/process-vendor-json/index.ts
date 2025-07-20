@@ -188,7 +188,10 @@ async function applyDirectMapping(data: any, fixes: string[], warnings: string[]
     'company_name', 'headquarters', 'founding_year', 'company_type', 'description',
     'core_services', 'specialties', 'customers', 'key_features', 'key_benefits',
     'website_url', 'funding_stage', 'total_funding', 'key_investors',
-    'competitive_advantages', 'notable_customers', 'company_data', 'research_data'
+    'competitive_advantages', 'notable_customers', 'company_data', 'research_data',
+    'business_model', 'employee_count_range', 'geographic_presence',
+    'contact_email', 'contact_phone', 'contact_address', 'linkedin_url', 'twitter_url',
+    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
   ];
   
   for (const field of directFields) {
@@ -199,7 +202,11 @@ async function applyDirectMapping(data: any, fixes: string[], warnings: string[]
   }
   
   // Clean citations from arrays
-  const arrayFields = ['core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'];
+  const arrayFields = [
+    'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 
+    'key_investors', 'competitive_advantages', 'notable_customers',
+    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
+  ];
   for (const field of arrayFields) {
     if (mappedData[field] && Array.isArray(mappedData[field])) {
       mappedData[field] = cleanArrayValues(mappedData[field]);
@@ -214,7 +221,12 @@ async function applyDirectMapping(data: any, fixes: string[], warnings: string[]
   }
   
   // Clean citations from text fields
-  const textFields = ['company_name', 'headquarters', 'description', 'company_type', 'funding_stage', 'total_funding'];
+  const textFields = [
+    'company_name', 'headquarters', 'description', 'company_type', 
+    'funding_stage', 'total_funding', 'business_model', 'employee_count_range',
+    'geographic_presence', 'contact_email', 'contact_phone', 'contact_address',
+    'linkedin_url', 'twitter_url'
+  ];
   for (const field of textFields) {
     if (mappedData[field] && typeof mappedData[field] === 'string') {
       mappedData[field] = cleanCitationText(mappedData[field]);
@@ -296,7 +308,7 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { 
             role: 'system', 
@@ -440,7 +452,8 @@ function validateRequiredFields(data: any, warnings: string[], errors: string[])
   // Ensure array fields are arrays
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'key_features', 
-    'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'
+    'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers',
+    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
   ];
   
   for (const field of arrayFields) {

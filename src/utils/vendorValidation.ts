@@ -20,6 +20,20 @@ interface VendorSchema {
   research_data?: Record<string, any> | null;
   company_data?: Record<string, any> | null;
   status?: string;
+  // New extracted fields
+  business_model?: string | null;
+  employee_count_range?: string | null;
+  geographic_presence?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  contact_address?: string | null;
+  linkedin_url?: string | null;
+  twitter_url?: string | null;
+  certifications?: string[] | null;
+  awards_recognition?: string[] | null;
+  office_locations?: string[] | null;
+  partnerships?: string[] | null;
+  tech_stack?: string[] | null;
 }
 
 interface ValidationError {
@@ -77,7 +91,11 @@ export const validateVendorData = (rawData: any): ValidationResult => {
   }
 
   // Array field validations
-  const arrayFields = ['core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'];
+  const arrayFields = [
+    'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 
+    'key_investors', 'competitive_advantages', 'notable_customers',
+    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
+  ];
   
   for (const field of arrayFields) {
     if (rawData[field] !== undefined) {
@@ -158,7 +176,11 @@ export const validateVendorData = (rawData: any): ValidationResult => {
   }
 
   // String field validations
-  const stringFields = ['funding_stage', 'total_funding'];
+  const stringFields = [
+    'funding_stage', 'total_funding', 'business_model', 'employee_count_range',
+    'geographic_presence', 'contact_email', 'contact_phone', 'contact_address',
+    'linkedin_url', 'twitter_url'
+  ];
   for (const field of stringFields) {
     if (rawData[field] !== undefined && rawData[field] !== null) {
       if (typeof rawData[field] === 'string') {
