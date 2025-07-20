@@ -26,6 +26,51 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
     return citations[fieldName] || [];
   };
 
+  // Utility functions to check for meaningful data
+  const hasCompanyData = () => {
+    if (!companyData) return false;
+    
+    return !!(
+      companyData.business_model ||
+      companyData.company_size ||
+      companyData.target_market_size ||
+      companyData.geographic_presence ||
+      (companyData.technology_stack && companyData.technology_stack.length > 0) ||
+      (companyData.certifications && companyData.certifications.length > 0)
+    );
+  };
+
+  const hasContactData = () => {
+    if (!companyData?.contact_info) return false;
+    
+    return !!(
+      companyData.contact_info.email ||
+      companyData.contact_info.phone ||
+      companyData.contact_info.address
+    );
+  };
+
+  const hasSocialMediaData = () => {
+    if (!companyData?.social_media) return false;
+    
+    return !!(
+      companyData.social_media.linkedin ||
+      companyData.social_media.twitter
+    );
+  };
+
+  const hasResearchData = () => {
+    if (!researchData) return false;
+    
+    return !!(
+      researchData.research_quality ||
+      researchData.confidence_level ||
+      (researchData.data_sources && researchData.data_sources.length > 0) ||
+      researchData.verification_status ||
+      researchData.last_updated
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Citation Toggle */}
@@ -54,8 +99,8 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
         <CitationViewer citations={citations} citationCount={citationCount} />
       )}
 
-      {/* Company Information */}
-      {companyData && Object.keys(companyData).length > 0 && (
+      {/* Company Information - Only show if there's meaningful data */}
+      {hasCompanyData() && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -161,8 +206,8 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
         </Card>
       )}
 
-      {/* Contact Information */}
-      {companyData?.contact_info && (
+      {/* Contact Information - Only show if there's contact data */}
+      {hasContactData() && (
         <Card>
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
@@ -202,8 +247,8 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
         </Card>
       )}
 
-      {/* Social Media */}
-      {companyData?.social_media && (
+      {/* Social Media - Only show if there are social media links */}
+      {hasSocialMediaData() && (
         <Card>
           <CardHeader>
             <CardTitle>Social Media</CardTitle>
@@ -242,8 +287,8 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
         </Card>
       )}
 
-      {/* Research Insights */}
-      {researchData && Object.keys(researchData).length > 0 && (
+      {/* Research Insights - Only show if there's research data */}
+      {hasResearchData() && (
         <Card>
           <CardHeader>
             <CardTitle>Research Insights</CardTitle>
