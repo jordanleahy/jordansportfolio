@@ -50,13 +50,13 @@ RESEARCH INSTRUCTIONS:
 5. Cross-reference information across multiple sources for accuracy
 6. Focus on factual, verifiable information over marketing language
 
-REQUIRED JSON STRUCTURE:
+REQUIRED JSON STRUCTURE (EXACT DATABASE SCHEMA):
 {
-  "company_name": null,
-  "headquarters": null,
+  "company_name": "",
+  "headquarters": "",
   "founding_year": null,
-  "company_type": null,
-  "description": null,
+  "company_type": "",
+  "description": "",
   "core_services": [],
   "specialties": [],
   "customers": [],
@@ -68,123 +68,109 @@ REQUIRED JSON STRUCTURE:
   "total_funding": null,
   "key_investors": [],
   "competitive_advantages": [],
-  "performance_metrics": null,
   "notable_customers": [],
-  "research_data": null,
-  "company_data": null,
+  "performance_metrics": {},
+  "research_data": {},
+  "company_data": {},
   "status": "draft"
 }
 
 ====================================================================
-DETAILED FIELD SPECIFICATIONS:
+DETAILED MAPPING GUIDE:
 ====================================================================
 
-COMPANY_NAME: Official legal business name or primary brand name
+COMPANY_NAME: Official legal business name or primary brand name (string)
 
-HEADQUARTERS: City, State/Province, Country format (e.g., "San Francisco, CA, USA")
+HEADQUARTERS: City, State/Province, Country format (e.g., "San Francisco, CA, USA") (string)
 
-FOUNDING_YEAR: 4-digit year as number (e.g., 2015) or null if unknown
+FOUNDING_YEAR: 4-digit year as number (e.g., 2015) or null if unknown (number)
 
-COMPANY_TYPE: Select most accurate category:
-- "Private SaaS Company"
-- "Public Technology Company" 
+COMPANY_TYPE: Business category (string). Examples:
+- "Private Technology Company"
+- "Public Healthcare Company" 
+- "SaaS Provider"
+- "Consulting Firm"
 - "Healthcare Technology Vendor"
-- "Financial Services Provider"
-- "Enterprise Software Vendor"
-- "Consulting Services Firm"
-- "System Integrator"
-- "Technology Startup"
-- "Fortune 500 Company"
-- Or create appropriate category based on business model
 
-DESCRIPTION: 150-300 word comprehensive overview covering:
-- What the company does
-- Primary business focus
-- Target market served
-- Key value proposition
-- Market position or unique approach
+DESCRIPTION: 150-300 word comprehensive overview (string)
 
-CORE_SERVICES: Primary service offerings (3-8 items):
+CORE_SERVICES: Primary service offerings (array of strings, 3-8 items)
 - Use specific, technical terminology
 - Focus on main revenue-generating services
-- Examples: ["Revenue Cycle Management", "Clinical Documentation Improvement", "Medical Coding Services"]
 
-SPECIALTIES: Specific expertise areas or niche focuses (3-6 items):
+SPECIALTIES: Specific expertise areas or niche focuses (array of strings, 3-6 items)
 - Technical specializations
 - Industry verticals
 - Regulatory compliance areas
-- Examples: ["HIPAA Compliance", "Epic EHR Integration", "Denial Management"]
 
-CUSTOMERS: Customer segments or types served (2-5 items):
+CUSTOMERS: Customer segments or types served (array of strings, 2-5 items)
 - Be specific about customer categories
 - Include size descriptors when relevant
-- Examples: ["Multi-Specialty Physician Groups", "Critical Access Hospitals", "Academic Medical Centers"]
 
-KEY_FEATURES: Product/service features that differentiate the vendor (4-8 items):
+KEY_FEATURES: Product/service features that differentiate the vendor (array of strings, 4-8 items)
 - Technical capabilities
 - Platform features
 - Integration abilities
-- Examples: ["Real-time Analytics Dashboard", "AI-Powered Coding Automation", "24/7 Support"]
 
-KEY_BENEFITS: Business outcomes customers achieve (4-8 items):
+KEY_BENEFITS: Business outcomes customers achieve (array of strings, 4-8 items)
 - Focus on measurable benefits
 - Include efficiency, cost, or performance improvements
-- Examples: ["30% Reduction in Claim Denials", "Improved Cash Flow", "Enhanced Compliance"]
 
-FUNDING_STAGE: Current funding status:
+FUNDING_STAGE: Current funding status (string or null). Examples:
 - "Bootstrap/Self-Funded"
-- "Angel/Pre-Seed"
-- "Seed Round"
 - "Series A/B/C/D/E"
-- "Growth Equity"
 - "Private Equity Backed"
 - "Public Company"
-- "Acquired by [Parent Company]"
 
-TOTAL_FUNDING: Total funding raised (format: "$XXM" or "$XXB") or null
+TOTAL_FUNDING: Total funding raised (string format: "$XXM" or "$XXB") or null
 
-KEY_INVESTORS: Major investors, VCs, or parent companies (if applicable)
+KEY_INVESTORS: Major investors, VCs, or parent companies (array of strings)
 
-COMPETITIVE_ADVANTAGES: What sets them apart from competitors (3-6 items):
+COMPETITIVE_ADVANTAGES: What sets them apart from competitors (array of strings, 3-6 items)
 - Unique technology
 - Market position
 - Strategic partnerships
-- Examples: ["First-to-Market AI Technology", "Largest Customer Base", "Proprietary Integration Platform"]
 
-PERFORMANCE_METRICS: Key company metrics as object:
+NOTABLE_CUSTOMERS: Specific named customers (array of strings)
+- Public references only
+- Customer case studies mentioned
+
+PERFORMANCE_METRICS: Key company metrics (object):
 {
   "employee_count": "estimate or range",
   "annual_revenue": "estimate if available", 
   "customer_count": "number if known",
-  "years_in_business": "calculated from founding",
-  "market_share": "percentage if available",
-  "client_retention_rate": "percentage if disclosed"
+  "market_share": "percentage if available"
 }
 
-NOTABLE_CUSTOMERS: Specific named customers or customer examples (if disclosed):
-- Public references only
-- Customer case studies
-- Press release mentions
-
-RESEARCH_DATA: Research metadata object:
+RESEARCH_DATA: Research metadata (object):
 {
   "research_date": "2024-07-19",
-  "data_sources": ["website", "press_releases", "third_party"],
-  "research_quality": "high/medium/low",
+  "data_sources": ["website", "press_releases"],
   "confidence_level": "high/medium/low",
-  "last_updated": "most recent info date found",
   "verification_status": "verified/unverified"
 }
 
-COMPANY_DATA: Additional structured data object:
+COMPANY_DATA: Additional structured data (object):
 {
-  "business_model": "SaaS/Professional Services/Hybrid/Other",
-  "target_market": "Enterprise/Mid-Market/Small Business/All",
+  "business_model": "SaaS/Professional Services/Hybrid",
+  "target_market_size": "Enterprise/Mid-Market/Small Business",
   "geographic_presence": "US Only/North America/Global",
   "industry_focus": "Healthcare/Financial/Technology/Multi-Industry",
   "technology_stack": ["known technologies used"],
   "certifications": ["relevant certifications"],
-  "partnerships": ["key technology partners"]
+  "partnerships": ["key technology partners"],
+  "contact_info": {
+    "email": "contact email",
+    "phone": "phone number",
+    "address": "physical address"
+  },
+  "social_media": {
+    "linkedin": "LinkedIn URL",
+    "twitter": "Twitter URL"
+  },
+  "competitors": ["main competitors"],
+  "recent_news": ["recent announcements or news"]
 }
 
 ====================================================================
@@ -196,9 +182,10 @@ CRITICAL OUTPUT REQUIREMENTS:
 3. founding_year MUST be a number (e.g., 2015) not a string ("2015")
 4. Use null (not "null" string) for truly unknown values
 5. Use empty arrays [] for unknown list fields
-6. Ensure all JSON is valid - test at jsonlint.com if unsure
-7. Do not include fields beyond the specified schema
-8. status field must always be "draft"
+6. Use empty objects {} for unknown object fields
+7. Ensure all JSON is valid - test at jsonlint.com if unsure
+8. Do not include fields beyond the specified schema
+9. status field must always be "draft"
 
 ====================================================================
 FALLBACK PROTOCOLS:
@@ -209,6 +196,7 @@ If specific information cannot be found:
 - headquarters: Research company registration/press releases for location
 - Use null for unknown single values
 - Use empty arrays [] for unknown list values
+- Use empty objects {} for unknown object fields
 - Be conservative - prefer null/empty over guessing
 
 ====================================================================
@@ -223,6 +211,7 @@ Before submitting, verify:
 ✓ Output contains ONLY the JSON, no other text
 ✓ Research reflects current/recent company information
 ✓ Information is factual and verifiable
+✓ All field names match the exact database schema
 
 BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
 
@@ -291,9 +280,9 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
         website_url: normalizedUrl,
         source_url: normalizedUrl,
         status: 'draft',
-        company_type: '',
-        description: '',
-        headquarters: '',
+        company_type: 'Technology Company',
+        description: `${companyName.charAt(0).toUpperCase() + companyName.slice(1)} is a technology company providing innovative solutions.`,
+        headquarters: 'Unknown',
         core_services: [],
         specialties: [],
         customers: [],

@@ -13,6 +13,8 @@ import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { VendorRichData } from '@/components/vendors/VendorRichData';
+
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string) => {
   return `I need you to research this company thoroughly and provide detailed information in JSON format.
@@ -49,6 +51,7 @@ Please browse their website and provide the following information in valid JSON 
 
 Please ensure the JSON is valid and complete. If any information is not available, use null or an empty array as appropriate.`;
 };
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Breadcrumb,
@@ -706,6 +709,11 @@ export default function VendorDetail() {
               {vendor.performance_metrics && (
                 <PerformanceMetrics metrics={vendor.performance_metrics} />
               )}
+
+              <VendorRichData 
+                companyData={vendor.company_data}
+                researchData={vendor.research_data}
+              />
             </div>
 
             <div className="space-y-4 lg:space-y-6">
