@@ -21,16 +21,8 @@ interface ProcessingResult {
   fixes?: string[];
   errors?: string[];  
   warnings?: string[];
-  aiCleaningUsed?: boolean;
-  aiReasoning?: string;
-}
-
-interface ParsedCitation {
-  id: string;
-  documentId: string;
-  startLine?: number;
-  endLine?: number;
-  originalText: string;
+  modelUsed?: string;
+  processingTimeMs?: number;
 }
 
 serve(async (req) => {
@@ -44,12 +36,11 @@ serve(async (req) => {
 
   try {
     const { rawJson } = await req.json();
-    console.log('Processing raw JSON input...');
+    console.log('Processing raw JSON with o3 Pro optimization...');
 
-    const result = await processVendorJson(rawJson);
+    const result = await processVendorJsonWithO3Pro(rawJson, startTime);
     success = result.success;
 
-    // Track agent metrics if processing was successful
     if (success) {
       await trackAgentUsage(startTime, true);
     }
@@ -63,7 +54,9 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({ 
       success: false,
-      errors: [error.message] 
+      errors: [error.message],
+      modelUsed: 'o3-pro',
+      processingTimeMs: Date.now() - startTime
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -75,7 +68,6 @@ async function trackAgentUsage(startTime: number, success: boolean) {
   try {
     const processingTime = Date.now() - startTime;
     
-    // Find the vendor JSON processor agent
     const { data: agent } = await supabase
       .from('openai_agents')
       .select('*')
@@ -83,147 +75,58 @@ async function trackAgentUsage(startTime: number, success: boolean) {
       .single();
 
     if (agent) {
-      // Update last_run timestamp
       await supabase
         .from('openai_agents')
         .update({ 
           last_run: new Date().toISOString(),
           metrics: {
             latencyMs: processingTime,
-            errorRate: success ? 0 : 1
+            errorRate: success ? 0 : 1,
+            modelUsed: 'o3-pro'
           }
         })
         .eq('id', agent.id);
     }
   } catch (error) {
     console.error('Error tracking agent usage:', error);
-    // Don't fail the main request if metrics tracking fails
   }
 }
 
-function parseCitations(text: string): { cleanText: string; citations: ParsedCitation[] } {
-  const citationPattern = /【([^†]+)†L?(\d+)?-?L?(\d+)?】/g;
-  const citations: ParsedCitation[] = [];
-  let match;
-  let citationIndex = 0;
-
-  while ((match = citationPattern.exec(text)) !== null) {
-    const [fullMatch, documentId, startLine, endLine] = match;
-    citations.push({
-      id: `citation_${citationIndex++}`,
-      documentId,
-      startLine: startLine ? parseInt(startLine) : undefined,
-      endLine: endLine ? parseInt(endLine) : startLine ? parseInt(startLine) : undefined,
-      originalText: fullMatch
-    });
-  }
-
-  const cleanText = text.replace(citationPattern, '').trim();
-  
-  return { cleanText, citations };
-}
-
-function processTextWithCitations(text: string): { text: string; citations: ParsedCitation[] } {
-  if (typeof text !== 'string') return { text: String(text), citations: [] };
-  return parseCitations(text);
-}
-
-function processArrayWithCitations(array: any[]): { items: string[]; citations: ParsedCitation[] } {
-  const allCitations: ParsedCitation[] = [];
-  const cleanItems: string[] = [];
-
-  array.forEach((item, index) => {
-    if (typeof item === 'string' && item.trim() !== '') {
-      const { cleanText, citations } = parseCitations(item);
-      if (cleanText.length > 0) {
-        cleanItems.push(cleanText);
-        // Add index information to citations for array context
-        citations.forEach(citation => {
-          citation.id = `${citation.id}_item_${index}`;
-          allCitations.push(citation);
-        });
-      }
-    }
-  });
-
-  return { items: cleanItems, citations: allCitations };
-}
-
-async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
+// Optimized for o3 Pro single-pass processing
+async function processVendorJsonWithO3Pro(rawJson: string, startTime: number): Promise<ProcessingResult> {
   const fixes: string[] = [];
   const warnings: string[] = [];
   const errors: string[] = [];
-  let aiCleaningUsed = false;
-  let aiReasoning = '';
 
   try {
-    console.log('Starting JSON processing...');
+    console.log('Using o3 Pro for intelligent JSON processing...');
     
-    // Step 1: Enhanced basic cleaning first (handles ChatGPT formatting)
-    let cleanedJson = await enhancedBasicCleaning(rawJson, fixes);
+    // Single intelligent processing step with o3 Pro
+    const result = await o3ProProcessVendorData(rawJson);
     
-    // Step 2: Try to parse
-    let parsedData;
-    try {
-      parsedData = JSON.parse(cleanedJson);
-      console.log('Enhanced basic cleaning successful');
-    } catch (parseError) {
-      console.log('Basic cleaning failed, trying AI-powered cleaning...');
-      
-      // Step 3: Use AI to clean the JSON (with timeout)
-      if (openAIApiKey) {
-        try {
-          const aiResult = await Promise.race([
-            aiJsonCleaning(rawJson),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('AI cleaning timeout')), 15000))
-          ]) as any;
-          
-          if (aiResult.success) {
-            cleanedJson = aiResult.cleanedJson;
-            parsedData = JSON.parse(cleanedJson);
-            aiCleaningUsed = true;
-            aiReasoning = aiResult.reasoning;
-            fixes.push(...aiResult.fixes);
-            console.log('AI cleaning successful');
-          } else {
-            throw new Error(`AI cleaning failed: ${aiResult.error}`);
-          }
-        } catch (aiError) {
-          console.error('AI cleaning failed:', aiError);
-          // Fallback to legacy enhanced cleaning
-          cleanedJson = await legacyEnhancedCleaning(rawJson, fixes);
-          parsedData = JSON.parse(cleanedJson);
-        }
-      } else {
-        // No OpenAI key, use legacy enhanced cleaning
-        cleanedJson = await legacyEnhancedCleaning(rawJson, fixes);
-        parsedData = JSON.parse(cleanedJson);
-      }
+    if (!result.success) {
+      throw new Error(result.error || 'o3 Pro processing failed');
     }
+
+    // Validate the processed data
+    const validatedData = validateCoreFields(result.data, warnings, errors);
     
-    console.log('JSON parsed successfully, applying citation-aware field mapping...');
-    
-    // Step 4: Apply citation-aware field mapping
-    const mappedData = await applyCitationAwareMapping(parsedData, fixes, warnings);
-    
-    // Step 5: Validate and set defaults for required fields
-    const validatedData = validateRequiredFields(mappedData, warnings, errors);
-    
-    console.log(`Processing completed. AI used: ${aiCleaningUsed}, Fixes: ${fixes.length}, Warnings: ${warnings.length}, Errors: ${errors.length}`);
+    const processingTime = Date.now() - startTime;
+    console.log(`o3 Pro processing completed in ${processingTime}ms. Warnings: ${warnings.length}, Errors: ${errors.length}`);
 
     return {
       success: errors.length === 0,
       cleanedData: validatedData,
       originalData: rawJson,
-      fixes,
+      fixes: result.fixes || [],
       warnings,
       errors,
-      aiCleaningUsed,
-      aiReasoning
+      modelUsed: 'o3-pro',
+      processingTimeMs: processingTime
     };
 
   } catch (error) {
-    console.error('Error during JSON processing:', error);
+    console.error('Error during o3 Pro processing:', error);
     errors.push(error.message);
     
     return {
@@ -232,123 +135,80 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       fixes,
       warnings,
       errors,
-      aiCleaningUsed,
-      aiReasoning
+      modelUsed: 'o3-pro',
+      processingTimeMs: Date.now() - startTime
     };
   }
 }
 
-async function applyCitationAwareMapping(data: any, fixes: string[], warnings: string[]): Promise<any> {
-  const mappedData: any = {};
-  const allCitations: { [key: string]: ParsedCitation[] } = {};
-  
-  // Direct field assignments with citation extraction
-  const directFields = [
-    'company_name', 'headquarters', 'founding_year', 'company_type', 'description',
-    'website_url', 'funding_stage', 'total_funding', 'business_model', 
-    'employee_count_range', 'geographic_presence', 'contact_email', 
-    'contact_phone', 'contact_address', 'linkedin_url', 'twitter_url'
-  ];
-  
-  for (const field of directFields) {
-    if (data[field] !== undefined && data[field] !== null) {
-      if (typeof data[field] === 'string') {
-        const { text, citations } = processTextWithCitations(data[field]);
-        mappedData[field] = text;
-        if (citations.length > 0) {
-          allCitations[field] = citations;
-          fixes.push(`Extracted ${citations.length} citations from ${field}`);
-        }
-      } else {
-        mappedData[field] = data[field];
-      }
-    }
-  }
-  
-  // Array field processing with citation extraction
-  const arrayFields = [
-    'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 
-    'key_investors', 'competitive_advantages', 'notable_customers',
-    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
-  ];
-  
-  for (const field of arrayFields) {
-    if (data[field] && Array.isArray(data[field])) {
-      const { items, citations } = processArrayWithCitations(data[field]);
-      mappedData[field] = items;
-      if (citations.length > 0) {
-        allCitations[field] = citations;
-        fixes.push(`Extracted ${citations.length} citations from ${field} array`);
-      }
-    } else {
-      mappedData[field] = [];
-    }
-  }
-  
-  // Store citations in research_data
-  if (Object.keys(allCitations).length > 0) {
-    mappedData.research_data = {
-      ...data.research_data,
-      citations: allCitations,
-      citation_count: Object.values(allCitations).reduce((sum, citations) => sum + citations.length, 0)
-    };
-    fixes.push(`Stored ${Object.keys(allCitations).length} field citations in research_data`);
-  }
-  
-  // Generate slug from company name
-  if (mappedData.company_name) {
-    mappedData.slug = generateSlug(mappedData.company_name);
-    fixes.push('Generated slug from company name');
-  }
-  
-  // Handle other object fields
-  const objectFields = ['performance_metrics', 'company_data'];
-  for (const field of objectFields) {
-    if (data[field] !== undefined) {
-      if (typeof data[field] === 'object' && data[field] !== null) {
-        mappedData[field] = data[field];
-      } else {
-        warnings.push({
-          field,
-          message: `${field} should be an object, setting to empty object`,
-          severity: 'warning'
-        });
-        mappedData[field] = {};
-      }
-    } else {
-      mappedData[field] = {};
-    }
-  }
-  
-  // Set default research_data if not already set
-  if (!mappedData.research_data) {
-    mappedData.research_data = data.research_data || {};
-  }
-  
-  return mappedData;
-}
-
-function generateSlug(companyName: string): string {
-  return companyName
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-async function aiJsonCleaning(rawJson: string): Promise<{
+// o3 Pro intelligent processing with simplified schema
+async function o3ProProcessVendorData(rawJson: string): Promise<{
   success: boolean;
-  cleanedJson?: string;
-  reasoning?: string;
+  data?: any;
   fixes?: string[];
   error?: string;
 }> {
-  // Use a more focused, smaller prompt for faster processing
-  const prompt = `Fix this malformed JSON. Common issues: escaped underscores (\\_), broken quotes, trailing commas.
+  const simplifiedSchema = {
+    // Core required fields
+    company_name: "string (required)",
+    headquarters: "string (required)", 
+    company_type: "Private|Public|Non-profit|Government",
+    description: "string (required)",
+    
+    // Contact & web presence
+    website_url: "string|null",
+    contact_email: "string|null",
+    contact_phone: "string|null",
+    linkedin_url: "string|null",
+    
+    // Business details
+    founding_year: "number|null",
+    funding_stage: "string|null", 
+    total_funding: "string|null",
+    employee_count_range: "string|null",
+    business_model: "string|null",
+    
+    // Array fields (use empty array [] if not available)
+    core_services: "string[]",
+    specialties: "string[]", 
+    customers: "string[]",
+    key_features: "string[]",
+    key_benefits: "string[]",
+    competitive_advantages: "string[]",
+    key_investors: "string[]",
+    notable_customers: "string[]",
+    
+    // Optional arrays
+    tech_stack: "string[]|null",
+    certifications: "string[]|null",
+    partnerships: "string[]|null",
+    
+    // Structured data
+    performance_metrics: "object|null",
+    company_data: "object|null"
+  };
 
-RETURN ONLY VALID JSON:
-${rawJson.substring(0, 2000)}${rawJson.length > 2000 ? '...[truncated]' : ''}`;
+  const prompt = `You are an expert at extracting and structuring company data. Clean this raw JSON and map it to the specified schema.
+
+CRITICAL RULES:
+1. Fix any JSON syntax errors (escaped characters, malformed quotes, trailing commas)
+2. Use your reasoning to map fields intelligently - the input may have different field names
+3. For company_type: choose exactly one of: Private, Public, Non-profit, Government
+4. Use null for missing string/number fields, empty arrays [] for missing array fields
+5. Extract meaningful data even if field names don't match exactly
+6. Generate a slug from company_name (lowercase, hyphens, no special chars)
+7. Return ONLY valid JSON with no additional text
+
+INPUT SCHEMA TARGET:
+${JSON.stringify(simplifiedSchema, null, 2)}
+
+REMEMBER: 
+- Keep citations in the original text format 【document†line】 - don't remove them
+- Use your intelligence to infer appropriate company_type from context
+- Map similar fields (e.g., "services" → "core_services", "founded" → "founding_year")
+
+RAW DATA TO PROCESS:
+${rawJson}`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -358,37 +218,42 @@ ${rawJson.substring(0, 2000)}${rawJson.length > 2000 ? '...[truncated]' : ''}`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Faster, cheaper model
+        model: 'o3-pro-2025-01-16',
         messages: [
           { 
             role: 'system', 
-            content: 'You fix JSON syntax errors. Return only valid JSON, no explanation.' 
+            content: 'You are an expert data processor. Extract and clean company data according to the schema. Return only valid JSON.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0,
-        max_tokens: 2000 // Reduced for faster processing
+        temperature: 0.1,
+        max_tokens: 4000
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const cleanedJson = data.choices[0].message.content.trim();
+    const processedJson = data.choices[0].message.content.trim();
     
-    // Test if the cleaned JSON is valid
-    JSON.parse(cleanedJson);
+    // Validate the returned JSON
+    const parsedData = JSON.parse(processedJson);
+    
+    // Add slug generation
+    if (parsedData.company_name) {
+      parsedData.slug = generateSlug(parsedData.company_name);
+    }
     
     return {
       success: true,
-      cleanedJson,
-      reasoning: 'AI cleaned JSON formatting issues',
-      fixes: ['AI successfully fixed JSON syntax errors']
+      data: parsedData,
+      fixes: ['o3 Pro intelligent processing completed', 'Generated slug from company name']
     };
+    
   } catch (error) {
-    console.error('AI JSON cleaning error:', error);
+    console.error('o3 Pro processing error:', error);
     return {
       success: false,
       error: error.message
@@ -396,73 +261,7 @@ ${rawJson.substring(0, 2000)}${rawJson.length > 2000 ? '...[truncated]' : ''}`;
   }
 }
 
-async function enhancedBasicCleaning(rawJson: string, fixes: string[]): Promise<string> {
-  let cleanedJson = rawJson;
-  
-  // Enhanced cleaning with ChatGPT-specific patterns
-  const cleaningRules = [
-    // Fix escaped underscores (ChatGPT common issue)
-    { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
-    // Fix escaped colons
-    { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
-    // Fix markdown-style URLs in brackets
-    { pattern: /\[https?:\/\/([^\]]+)\]\(https?:\/\/[^)]+\)/g, replacement: 'https://$1', description: 'markdown URLs' },
-    // Fix escaped quotes
-    { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
-    // Fix double backslashes
-    { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
-    // Fix escaped newlines
-    { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
-    // Fix escaped tabs
-    { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
-    // Fix trailing commas in arrays and objects
-    { pattern: /,(\s*[}\]])/g, replacement: '$1', description: 'trailing commas' },
-    // Fix missing quotes around object keys
-    { pattern: /([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, replacement: '$1"$2":', description: 'unquoted object keys' }
-  ];
-  
-  cleaningRules.forEach(({ pattern, replacement, description }) => {
-    if (pattern.test(cleanedJson)) {
-      cleanedJson = cleanedJson.replace(pattern, replacement);
-      fixes.push(`Fixed ${description}`);
-    }
-  });
-  
-  return cleanedJson;
-}
-
-async function legacyEnhancedCleaning(rawJson: string, fixes: string[]): Promise<string> {
-  let cleanedJson = rawJson;
-  
-  const escapeReplacements = [
-    { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
-    { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
-    { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
-    { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
-    { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
-    { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
-    { pattern: /\\r/g, replacement: '', description: 'escaped carriage returns' },
-  ];
-  
-  escapeReplacements.forEach(({ pattern, replacement, description }) => {
-    if (pattern.test(cleanedJson)) {
-      cleanedJson = cleanedJson.replace(pattern, replacement);
-      fixes.push(`Fixed ${description} in field names`);
-    }
-  });
-  
-  // Fix trailing commas
-  cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
-  
-  // Fix missing quotes around keys
-  cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
-  
-  fixes.push('Applied legacy enhanced cleaning');
-  
-  return cleanedJson;
-}
-
-function validateRequiredFields(data: any, warnings: string[], errors: string[]): any {
+function validateCoreFields(data: any, warnings: string[], errors: string[]): any {
   const validated: any = { ...data };
   
   // Required fields validation
@@ -473,49 +272,56 @@ function validateRequiredFields(data: any, warnings: string[], errors: string[])
     }
   }
   
-  // Ensure array fields are arrays
-  const arrayFields = [
+  // Validate company_type is one of allowed values
+  const allowedCompanyTypes = ['Private', 'Public', 'Non-profit', 'Government'];
+  if (validated.company_type && !allowedCompanyTypes.includes(validated.company_type)) {
+    warnings.push(`Invalid company_type: ${validated.company_type}, using 'Private' as default`);
+    validated.company_type = 'Private';
+  }
+  
+  // Ensure array fields are arrays and have sensible defaults
+  const coreArrayFields = [
     'core_services', 'specialties', 'customers', 'key_features', 
-    'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers',
-    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
+    'key_benefits', 'competitive_advantages', 'key_investors', 'notable_customers'
   ];
   
-  for (const field of arrayFields) {
+  for (const field of coreArrayFields) {
     if (!validated[field] || !Array.isArray(validated[field])) {
       validated[field] = [];
-      warnings.push(`Set empty array for ${field}`);
+      warnings.push(`Set empty array for required field: ${field}`);
     }
   }
   
-  // Ensure JSON fields are objects
+  // Optional array fields - can be null
+  const optionalArrayFields = ['tech_stack', 'certifications', 'partnerships'];
+  for (const field of optionalArrayFields) {
+    if (validated[field] && !Array.isArray(validated[field])) {
+      validated[field] = null;
+      warnings.push(`Reset invalid ${field} to null`);
+    }
+  }
+  
+  // Ensure object fields exist
   if (!validated.company_data || typeof validated.company_data !== 'object') {
     validated.company_data = {};
   }
   
-  if (!validated.research_data || typeof validated.research_data !== 'object') {
-    validated.research_data = {};
+  if (!validated.performance_metrics || typeof validated.performance_metrics !== 'object') {
+    validated.performance_metrics = null;
   }
   
-  // Set default status
-  if (!validated.status) {
-    validated.status = 'draft';
-  }
-  
-  // Set defaults for missing required fields
-  if (!validated.company_type) {
-    validated.company_type = 'Technology Company';
-    warnings.push('Set default company_type');
-  }
-  
-  if (!validated.headquarters) {
-    validated.headquarters = 'Unknown';
-    warnings.push('Set default headquarters');
-  }
-  
-  if (!validated.description && validated.company_name) {
-    validated.description = `${validated.company_name} is a technology company providing innovative solutions.`;
-    warnings.push('Generated default description');
-  }
+  // Set user_id and status for database compatibility
+  validated.user_id = null; // Will be set by calling code
+  validated.status = 'draft';
   
   return validated;
+}
+
+function generateSlug(companyName: string): string {
+  return companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
