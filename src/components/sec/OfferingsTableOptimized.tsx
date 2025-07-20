@@ -19,7 +19,8 @@ import {
   ArrowDown, 
   ChevronLeft,
   ChevronRight,
-  FileText
+  FileText,
+  X
 } from "lucide-react";
 import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -210,14 +211,34 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle>SEC Offerings ({totalItems.toLocaleString()} total)</CardTitle>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search companies or industries..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search companies, industries, locations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            {searchQuery && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <span>
+                  Found {currentResults} of {totalItems} results
+                  {debouncedSearchQuery !== searchQuery && " (searching...)"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>

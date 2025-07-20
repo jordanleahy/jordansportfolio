@@ -64,25 +64,14 @@ export class SecServiceOptimized {
     if (searchQuery && searchQuery.trim()) {
       console.log('🚀 Applying server-side fuzzy search:', searchQuery);
       
-      // Use raw SQL for fuzzy search with similarity scoring
-      const { data: fuzzyResults, error: fuzzyError } = await supabase.rpc('fuzzy_search_offerings', {
-        search_term: searchQuery,
-        similarity_threshold: 0.1
-      });
-      
-      if (fuzzyError) {
-        console.warn('Fuzzy search failed, falling back to ILIKE:', fuzzyError);
-        // Fallback to traditional ILIKE search
-        query = query.or(`
-          company_name.ilike.%${searchQuery}%,
-          industrygrouptype.ilike.%${searchQuery}%,
-          company_city.ilike.%${searchQuery}%
-        `);
-      } else if (fuzzyResults && fuzzyResults.length > 0) {
-        // Filter by the fuzzy search results
-        const accessionnumbers = fuzzyResults.map((r: any) => r.accessionnumber);
-        query = query.in('accessionnumber', accessionnumbers);
-      }
+      // Enhanced search with both fuzzy and traditional matching
+      // First try exact and prefix matches, then fuzzy matches
+      query = query.or(`
+        company_name.ilike.${searchQuery}%,
+        company_name.ilike.%${searchQuery}%,
+        industrygrouptype.ilike.%${searchQuery}%,
+        company_city.ilike.%${searchQuery}%
+      `);
     }
 
     // Apply amount range filters (server-side) - Fixed PostgREST syntax

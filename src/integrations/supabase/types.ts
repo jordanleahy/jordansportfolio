@@ -1481,6 +1481,14 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      fuzzy_search_offerings: {
+        Args: { search_term: string; similarity_threshold?: number }
+        Returns: {
+          accessionnumber: string
+          company_name: string
+          similarity_score: number
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
