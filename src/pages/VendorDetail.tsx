@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Globe, Loader2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useVendorBySlug } from "@/hooks/useVendors";
+import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,8 +17,6 @@ import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
-import { VendorSitemapTree } from '@/components/vendors/VendorSitemapTree';
-// Removed useSystemAgent import - using direct sitemap fetch instead
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -209,7 +207,6 @@ export default function VendorDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
-  const [isAnalyzingWebsite, setIsAnalyzingWebsite] = useState(false);
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -469,51 +466,6 @@ export default function VendorDetail() {
         description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
         variant: "destructive",
       });
-    }
-  };
-
-  const analyzeWebsiteStructure = async () => {
-    if (!vendor.website_url) {
-      toast({
-        title: "Website URL Required",
-        description: "Please add a website URL to the vendor first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsAnalyzingWebsite(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-sitemap', {
-        body: {
-          vendorId: vendor.id,
-          websiteUrl: vendor.website_url,
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        toast({
-          title: "Sitemap Analysis Complete",
-          description: data.message || "Website sitemap has been fetched and saved.",
-        });
-        
-        // Refresh vendor data to show updated sitemap
-        window.location.reload();
-      } else {
-        throw new Error(data.error || 'Failed to fetch sitemap');
-      }
-
-    } catch (error) {
-      console.error('Sitemap fetch error:', error);
-      toast({
-        title: "Sitemap Fetch Failed",
-        description: error instanceof Error ? error.message : "Failed to fetch sitemap.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAnalyzingWebsite(false);
     }
   };
 
@@ -788,20 +740,6 @@ export default function VendorDetail() {
                     >
                       <Clipboard className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={analyzeWebsiteStructure}
-                      disabled={isAnalyzingWebsite}
-                      aria-label="Analyze Website Structure"
-                      className="min-h-[44px] min-w-[44px]"
-                    >
-                      {isAnalyzingWebsite ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Globe className="h-4 w-4" />
-                      )}
-                    </Button>
                   </>
                 )}
               </div>
@@ -909,13 +847,6 @@ export default function VendorDetail() {
 
               {vendor.performance_metrics && (
                 <PerformanceMetrics metrics={vendor.performance_metrics} />
-              )}
-
-              {vendor.sitemap_tree && (
-                <VendorSitemapTree 
-                  sitemapTree={vendor.sitemap_tree}
-                  websiteUrl={vendor.website_url}
-                />
               )}
 
               <VendorRichData 

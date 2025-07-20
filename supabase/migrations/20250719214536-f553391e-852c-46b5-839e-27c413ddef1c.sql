@@ -127,22 +127,6 @@ BEGIN
       '{"latencyMs": 3200, "errorRate": 0.15}',
       ARRAY['legacy', 'email', 'data-migration'],
       'Replaced by newer parsing agent with better accuracy'
-    ),
-    (
-      auth.uid(),
-      'Website Structure Analyzer',
-      'Analyzes website structure and content organization for vendor research',
-      'gpt-4o',
-      'manual',
-      'website_url',
-      'sitemap_tree',
-      'manual',
-      'System',
-      'active',
-      now() - interval '1 hour',
-      '{"latencyMs": 1500, "errorRate": 0.01}',
-      ARRAY['website-analysis', 'vendor-research', 'system'],
-      'System agent for automatic website structure analysis'
     );
   END IF;
 END;

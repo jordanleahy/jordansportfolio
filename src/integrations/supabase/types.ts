@@ -1293,9 +1293,6 @@ export type Database = {
           partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
-          sitemap_agent_id: string | null
-          sitemap_fetched_at: string | null
-          sitemap_tree: Json | null
           slug: string
           source_url: string | null
           specialties: string[]
@@ -1339,9 +1336,6 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
-          sitemap_agent_id?: string | null
-          sitemap_fetched_at?: string | null
-          sitemap_tree?: Json | null
           slug: string
           source_url?: string | null
           specialties?: string[]
@@ -1385,9 +1379,6 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
-          sitemap_agent_id?: string | null
-          sitemap_fetched_at?: string | null
-          sitemap_tree?: Json | null
           slug?: string
           source_url?: string | null
           specialties?: string[]
@@ -1400,15 +1391,7 @@ export type Database = {
           vendor_images?: Json | null
           website_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "vendors_sitemap_agent_id_fkey"
-            columns: ["sitemap_agent_id"]
-            isOneToOne: false
-            referencedRelation: "openai_agents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
