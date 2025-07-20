@@ -42,6 +42,9 @@ export interface Vendor {
   partnerships?: string[];
   tech_stack?: string[];
   vendor_images?: any; // JSONB field for image metadata
+  sitemap_tree?: any;
+  sitemap_fetched_at?: string;
+  sitemap_agent_id?: string;
 }
 
 export interface VendorFiltersState {

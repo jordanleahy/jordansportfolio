@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Globe, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,8 @@ import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
+import { VendorSitemapTree } from '@/components/vendors/VendorSitemapTree';
+import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -207,12 +209,14 @@ export default function VendorDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
+  const [isAnalyzingWebsite, setIsAnalyzingWebsite] = useState(false);
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isAdmin } = useUserRole();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
+  const { data: agents } = useOpenAIAgents();
 
   console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
@@ -466,6 +470,65 @@ export default function VendorDetail() {
         description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
         variant: "destructive",
       });
+    }
+  };
+
+  const analyzeWebsiteStructure = async () => {
+    if (!vendor.website_url) {
+      toast({
+        title: "Error",
+        description: "This vendor doesn't have a website URL available.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Find or create a Website Structure Analyzer agent
+    let sitemapAgent = agents?.find(agent => 
+      agent.name === "Website Structure Analyzer" && agent.status === "active"
+    );
+
+    if (!sitemapAgent) {
+      toast({
+        title: "Agent Required",
+        description: "Please create a 'Website Structure Analyzer' agent first in the Agents section.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzingWebsite(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-website-structure', {
+        body: {
+          vendorId: vendor.id,
+          websiteUrl: vendor.website_url,
+          agentId: sitemapAgent.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({
+          title: "Website Analysis Complete",
+          description: "Website structure has been analyzed and saved.",
+        });
+        
+        // Refresh the page to show the analysis
+        window.location.reload();
+      } else {
+        throw new Error(data.error || 'Analysis failed');
+      }
+    } catch (error) {
+      console.error('Website analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "Failed to analyze website structure.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzingWebsite(false);
     }
   };
 
@@ -740,6 +803,20 @@ export default function VendorDetail() {
                     >
                       <Clipboard className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={analyzeWebsiteStructure}
+                      disabled={isAnalyzingWebsite}
+                      aria-label="Analyze Website Structure"
+                      className="min-h-[44px] min-w-[44px]"
+                    >
+                      {isAnalyzingWebsite ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Globe className="h-4 w-4" />
+                      )}
+                    </Button>
                   </>
                 )}
               </div>
@@ -847,6 +924,13 @@ export default function VendorDetail() {
 
               {vendor.performance_metrics && (
                 <PerformanceMetrics metrics={vendor.performance_metrics} />
+              )}
+
+              {vendor.sitemap_tree && (
+                <VendorSitemapTree 
+                  sitemapTree={vendor.sitemap_tree}
+                  websiteUrl={vendor.website_url}
+                />
               )}
 
               <VendorRichData 
