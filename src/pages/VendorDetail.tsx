@@ -70,6 +70,11 @@ Please browse their website and provide the following information in valid JSON 
     "Notable Customer 1",
     "Notable Customer 2"
   ],
+  "competitors": [
+    "Competitor Company 1",
+    "Competitor Company 2",
+    "Competitor Company 3"
+  ],
   "company_data": {},
   "research_data": {}
 }
@@ -271,6 +276,9 @@ export default function VendorDetail() {
         funding_stage: jsonData.funding_stage || vendor?.funding_stage,
         total_funding: jsonData.total_funding || vendor?.total_funding,
         key_investors: jsonData.key_investors || vendor?.key_investors || [],
+        
+        // Competitors
+        competitors: jsonData.competitors || vendor?.competitors || [],
         
         // Store complete research data
         research_data: {
@@ -728,6 +736,23 @@ export default function VendorDetail() {
                         </li>
                       ))}
                     </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {(vendor.competitors && vendor.competitors.length > 0) || (vendor.research_data?.competitors && vendor.research_data?.competitors.length > 0) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg sm:text-xl">Competitors</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {(vendor.competitors?.length > 0 ? vendor.competitors : vendor.research_data?.competitors || []).map((competitor, idx) => (
+                        <Badge key={idx} variant="destructive" className="text-xs sm:text-sm">
+                          {competitor}
+                        </Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               )}

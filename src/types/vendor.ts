@@ -16,6 +16,7 @@ export interface Vendor {
   total_funding?: string;
   key_investors: string[];
   competitive_advantages: string[];
+  competitors: string[];
   performance_metrics?: any;
   notable_customers: string[];
   research_data?: any;

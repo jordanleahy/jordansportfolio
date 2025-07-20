@@ -1267,6 +1267,7 @@ export type Database = {
           company_name: string
           company_type: string
           competitive_advantages: string[]
+          competitors: string[]
           core_services: string[]
           created_at: string
           customers: string[]
@@ -1295,6 +1296,7 @@ export type Database = {
           company_name: string
           company_type: string
           competitive_advantages?: string[]
+          competitors?: string[]
           core_services?: string[]
           created_at?: string
           customers?: string[]
@@ -1323,6 +1325,7 @@ export type Database = {
           company_name?: string
           company_type?: string
           competitive_advantages?: string[]
+          competitors?: string[]
           core_services?: string[]
           created_at?: string
           customers?: string[]

@@ -185,22 +185,6 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
             <CardTitle>Research Insights</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {researchData.competitors && researchData.competitors.length > 0 && (
-              <>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Key Competitors</p>
-                  <div className="flex flex-wrap gap-2">
-                    {researchData.competitors.map((competitor: string, idx: number) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        {competitor}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <Separator />
-              </>
-            )}
-
             {researchData.recent_news && researchData.recent_news.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">Recent News</p>
