@@ -150,44 +150,14 @@ const Navigation = () => {
                   </Button>
 
                   {isAuthenticated ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <User size={16} className="mr-2" />
-                          <span className="hidden xl:inline">Account</span>
-                          <ChevronDown size={14} className="ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => navigate("/vendors/rcm")}>
-                          <Building2 size={16} className="mr-2" />
-                          Vendors
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/calendar")}>
-                          <Calendar size={16} className="mr-2" />
-                          Calendar
-                        </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/jobs")}>
-                        <FileText size={16} className="mr-2" />
-                        Jobs
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/agents")}>
-                        <Settings size={16} className="mr-2" />
-                        AI Agents
-                      </DropdownMenuItem>
-                        {isAdmin && (
-                          <DropdownMenuItem onClick={() => navigate("/admin-blog")}>
-                            <Settings size={16} className="mr-2" />
-                            Blog Admin
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleSignOut}>
-                          <LogOut size={16} className="mr-2" />
-                          Logout
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      <span className="hidden xl:inline">Logout</span>
+                    </Button>
                   ) : (
                     <Button
                       variant="outline"
