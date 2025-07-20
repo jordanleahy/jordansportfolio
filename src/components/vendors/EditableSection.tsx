@@ -125,6 +125,22 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
     switch (field.type) {
       case 'text':
       case 'multiline':
+        // Check if the value is a URL and make it clickable
+        const isUrl = value && typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
+        
+        if (isUrl) {
+          return (
+            <a 
+              href={value} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+            >
+              {value}
+            </a>
+          );
+        }
+        
         return (
           <div className="text-sm text-muted-foreground">
             {typeof value === 'string' ? value : 'Not provided'}
