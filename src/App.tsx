@@ -1,136 +1,70 @@
-import React, { Suspense, lazy } from "react";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from 'react-helmet-async';
-
-// Immediate load for critical routes
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import SEC from "./pages/SEC";
+import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
+import BlogEditor from "./pages/BlogEditor";
+import AdminBlog from "./pages/AdminBlog";
+import Calendar from "./pages/Calendar";
+import Jobs from "./pages/Jobs";
+import CompanyPortfolio from "./pages/CompanyPortfolio";
+import Agents from "./pages/Agents";
+import AscertainToTheMoon from "./pages/AscertainToTheMoon";
+import Vendors from "./pages/Vendors";
+import VendorsIndex from "./pages/VendorsIndex";
+import VendorDetail from "./pages/VendorDetail";
+import Case1 from "./pages/cases/Case1";
+import Case3 from "./pages/cases/Case3";
+import Case4 from "./pages/cases/Case4";
+import Sepsis from "./pages/agents/Sepsis";
+import DataDictionary from "./pages/sec/DataDictionary";
 import NotFound from "./pages/NotFound";
 
-// Lazy load all other routes for performance
-const Auth = lazy(() => import("./pages/Auth"));
-const Blog = lazy(() => import("./pages/Blog"));
-const BlogDetail = lazy(() => import("./pages/BlogDetail"));
-const BlogEditor = lazy(() => import("./pages/BlogEditor"));
-const AdminBlog = lazy(() => import("./pages/AdminBlog"));
-const Case1 = lazy(() => import("./pages/cases/Case1"));
-const Case4 = lazy(() => import("./pages/cases/Case4"));
-const Case3 = lazy(() => import("./pages/cases/Case3"));
-const SEC = lazy(() => import("./pages/SEC"));
-const Calendar = lazy(() => import("./pages/Calendar"));
-const AscertainToTheMoon = lazy(() => import("./pages/AscertainToTheMoon"));
-const Jobs = lazy(() => import("./pages/Jobs"));
-const Sepsis = lazy(() => import("./pages/agents/Sepsis"));
-const Agents = lazy(() => import("./pages/Agents"));
-const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
-const CompanyPortfolio = lazy(() => import("./pages/CompanyPortfolio"));
-const Vendors = lazy(() => import("./pages/Vendors"));
-const VendorDetail = lazy(() => import("./pages/VendorDetail"));
+const queryClient = new QueryClient();
 
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="text-center space-y-4">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-      <p className="text-muted-foreground">Loading...</p>
-    </div>
-  </div>
-);
-
-// Error boundary component
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error }> },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Code splitting error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      return <FallbackComponent error={this.state.error!} />;
-    }
-
-    return this.props.children;
-  }
-}
-
-const DefaultErrorFallback = ({ error }: { error: Error }) => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="text-center space-y-4 max-w-md mx-auto px-4">
-      <div className="text-destructive text-xl">⚠️</div>
-      <h2 className="text-lg font-semibold">Something went wrong</h2>
-      <p className="text-muted-foreground text-sm">
-        {error.message || 'An unexpected error occurred while loading this page.'}
-      </p>
-      <button 
-        onClick={() => window.location.reload()} 
-        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-      >
-        Reload Page
-      </button>
-    </div>
-  </div>
-);
-
-const App = () => {
-  const queryClient = React.useMemo(() => new QueryClient(), []);
-
+function App() {
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
+    <QueryClientProvider client={queryClient}>
       <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ErrorBoundary>
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogDetail />} />
-                  <Route path="/blog-editor" element={<BlogEditor />} />
-                  <Route path="/blog-editor/:id" element={<BlogEditor />} />
-                  <Route path="/admin-blog" element={<AdminBlog />} />
-                  <Route path="/cases/case1" element={<Case1 />} />
-                  <Route path="/cases/case4" element={<Case4 />} />
-                  <Route path="/cases/case3" element={<Case3 />} />
-                  <Route path="/sec" element={<SEC />} />
-                  <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/ascertaintothemoon" element={<AscertainToTheMoon />} />
-                  <Route path="/jobs" element={<Jobs />} />
-                  <Route path="/agents/sepsis" element={<Sepsis />} />
-                  <Route path="/agents" element={<Agents />} />
-                  <Route path="/sec/data-dictionary" element={<DataDictionary />} />
-                  <Route path="/vendors/:slugname" element={<Vendors />} />
-                  <Route path="/vendors/:category/:vendorSlug" element={<VendorDetail />} />
-                  <Route path="/:companySlug" element={<CompanyPortfolio />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/sec" element={<SEC />} />
+              <Route path="/sec/data-dictionary" element={<DataDictionary />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
+              <Route path="/blog-editor" element={<BlogEditor />} />
+              <Route path="/admin-blog" element={<AdminBlog />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
+              <Route path="/agents" element={<Agents />} />
+              <Route path="/agents/sepsis" element={<Sepsis />} />
+              <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
+              <Route path="/vendors" element={<VendorsIndex />} />
+              <Route path="/vendors/:slugname" element={<Vendors />} />
+              <Route path="/vendors/:slugname/:vendorSlug" element={<VendorDetail />} />
+              <Route path="/cases/case1" element={<Case1 />} />
+              <Route path="/cases/case3" element={<Case3 />} />
+              <Route path="/cases/case4" element={<Case4 />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
-      </QueryClientProvider>
       </HelmetProvider>
-    </div>
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;

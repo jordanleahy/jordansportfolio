@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink, Building, Edit, Save, X, Upload } from 'lucide-react';
@@ -7,9 +6,11 @@ import { useVendorEdit } from '@/hooks/useVendorEdit';
 import { TextEditor } from './editors/TextEditor';
 import { ArrayEditor } from './editors/ArrayEditor';
 import { SelectEditor } from './editors/SelectEditor';
+import { Badge } from '@/components/ui/badge';
+import { VENDOR_CATEGORIES, type VendorCategory } from '@/types/vendor';
 
 interface EditableVendorCardProps {
-  vendor: Vendor;
+  vendor: Vendor & { category?: VendorCategory };
   onVendorClick?: (vendor: Vendor) => void;
   onDeleteClick?: (vendor: Vendor) => void;
   onSave?: () => void;
@@ -87,6 +88,11 @@ export function EditableVendorCard({
                 <div className="text-sm text-muted-foreground font-normal truncate">
                   {vendor.headquarters}
                 </div>
+                {vendor.category && (
+                  <Badge variant="outline" className="text-xs mt-1">
+                    {VENDOR_CATEGORIES[vendor.category].title.replace(' Companies', '')}
+                  </Badge>
+                )}
               </>
             )}
           </div>
