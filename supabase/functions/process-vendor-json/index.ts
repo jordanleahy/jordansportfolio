@@ -159,21 +159,25 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   try {
     console.log('Starting JSON processing...');
     
-    // Step 1: Try basic cleaning first
-    let cleanedJson = await basicJsonCleaning(rawJson, fixes);
+    // Step 1: Enhanced basic cleaning first (handles ChatGPT formatting)
+    let cleanedJson = await enhancedBasicCleaning(rawJson, fixes);
     
     // Step 2: Try to parse
     let parsedData;
     try {
       parsedData = JSON.parse(cleanedJson);
-      console.log('Basic cleaning successful');
+      console.log('Enhanced basic cleaning successful');
     } catch (parseError) {
       console.log('Basic cleaning failed, trying AI-powered cleaning...');
       
-      // Step 3: Use AI to clean the JSON
+      // Step 3: Use AI to clean the JSON (with timeout)
       if (openAIApiKey) {
         try {
-          const aiResult = await aiJsonCleaning(rawJson);
+          const aiResult = await Promise.race([
+            aiJsonCleaning(rawJson),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('AI cleaning timeout')), 15000))
+          ]) as any;
+          
           if (aiResult.success) {
             cleanedJson = aiResult.cleanedJson;
             parsedData = JSON.parse(cleanedJson);
@@ -186,13 +190,13 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
           }
         } catch (aiError) {
           console.error('AI cleaning failed:', aiError);
-          // Fallback to enhanced rule-based cleaning
-          cleanedJson = await enhancedJsonCleaning(rawJson, fixes);
+          // Fallback to legacy enhanced cleaning
+          cleanedJson = await legacyEnhancedCleaning(rawJson, fixes);
           parsedData = JSON.parse(cleanedJson);
         }
       } else {
-        // No OpenAI key, use enhanced rule-based cleaning
-        cleanedJson = await enhancedJsonCleaning(rawJson, fixes);
+        // No OpenAI key, use legacy enhanced cleaning
+        cleanedJson = await legacyEnhancedCleaning(rawJson, fixes);
         parsedData = JSON.parse(cleanedJson);
       }
     }
@@ -340,25 +344,11 @@ async function aiJsonCleaning(rawJson: string): Promise<{
   fixes?: string[];
   error?: string;
 }> {
-  const prompt = `You are a JSON cleaning specialist. Your task is to fix malformed JSON data that comes from ChatGPT responses for vendor information.
+  // Use a more focused, smaller prompt for faster processing
+  const prompt = `Fix this malformed JSON. Common issues: escaped underscores (\\_), broken quotes, trailing commas.
 
-IMPORTANT RULES:
-1. Return ONLY valid JSON - no explanation text, no markdown formatting, no code blocks
-2. Preserve ALL original data content - don't remove or change actual information
-3. Fix structural issues like escaped characters, malformed URLs, broken strings
-4. PRESERVE citation references in the format 【document_id†LstartLine-LendLine】 - these are important for source tracking
-5. Common issues to fix:
-   - Escaped characters that break parsing (\\_,  \\:, \\", \\\\)
-   - Malformed URLs concatenated with other text
-   - Broken string boundaries
-   - Missing quotes around keys
-   - Trailing commas
-   - Invalid null values
-
-INPUT JSON TO CLEAN:
-${rawJson}
-
-Return the cleaned JSON followed by a line starting with "REASONING:" explaining what you fixed.`;
+RETURN ONLY VALID JSON:
+${rawJson.substring(0, 2000)}${rawJson.length > 2000 ? '...[truncated]' : ''}`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -368,16 +358,16 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini', // Faster, cheaper model
         messages: [
           { 
             role: 'system', 
-            content: 'You are a precise JSON cleaning tool. Return only valid JSON followed by reasoning. PRESERVE citation references.' 
+            content: 'You fix JSON syntax errors. Return only valid JSON, no explanation.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.1,
-        max_tokens: 4000
+        temperature: 0,
+        max_tokens: 2000 // Reduced for faster processing
       }),
     });
 
@@ -386,30 +376,7 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
-    
-    // Split response into JSON and reasoning
-    const lines = aiResponse.split('\n');
-    let jsonEndIndex = -1;
-    let reasoning = '';
-    
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('REASONING:')) {
-        jsonEndIndex = i;
-        reasoning = lines.slice(i + 1).join('\n').trim();
-        break;
-      }
-    }
-    
-    const cleanedJson = jsonEndIndex > -1 
-      ? lines.slice(0, jsonEndIndex).join('\n').trim()
-      : aiResponse.trim();
-    
-    // Extract fixes from reasoning
-    const fixes = reasoning.split('\n')
-      .filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'))
-      .map(line => line.replace(/^[\s\-•]+/, '').trim())
-      .filter(fix => fix.length > 0);
+    const cleanedJson = data.choices[0].message.content.trim();
     
     // Test if the cleaned JSON is valid
     JSON.parse(cleanedJson);
@@ -417,8 +384,8 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
     return {
       success: true,
       cleanedJson,
-      reasoning,
-      fixes: fixes.length > 0 ? fixes : ['AI successfully cleaned and restructured the JSON while preserving citations']
+      reasoning: 'AI cleaned JSON formatting issues',
+      fixes: ['AI successfully fixed JSON syntax errors']
     };
   } catch (error) {
     console.error('AI JSON cleaning error:', error);
@@ -429,31 +396,44 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
   }
 }
 
-async function basicJsonCleaning(rawJson: string, fixes: string[]): Promise<string> {
+async function enhancedBasicCleaning(rawJson: string, fixes: string[]): Promise<string> {
   let cleanedJson = rawJson;
   
-  // Basic escape character fixes
-  const escapeReplacements = [
+  // Enhanced cleaning with ChatGPT-specific patterns
+  const cleaningRules = [
+    // Fix escaped underscores (ChatGPT common issue)
     { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
+    // Fix escaped colons
     { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
+    // Fix markdown-style URLs in brackets
+    { pattern: /\[https?:\/\/([^\]]+)\]\(https?:\/\/[^)]+\)/g, replacement: 'https://$1', description: 'markdown URLs' },
+    // Fix escaped quotes
     { pattern: /\\"/g, replacement: '"', description: 'escaped quotes' },
+    // Fix double backslashes
     { pattern: /\\\\/g, replacement: '\\', description: 'double backslashes' },
+    // Fix escaped newlines
+    { pattern: /\\n/g, replacement: ' ', description: 'escaped newlines' },
+    // Fix escaped tabs
+    { pattern: /\\t/g, replacement: ' ', description: 'escaped tabs' },
+    // Fix trailing commas in arrays and objects
+    { pattern: /,(\s*[}\]])/g, replacement: '$1', description: 'trailing commas' },
+    // Fix missing quotes around object keys
+    { pattern: /([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, replacement: '$1"$2":', description: 'unquoted object keys' }
   ];
   
-  escapeReplacements.forEach(({ pattern, replacement, description }) => {
+  cleaningRules.forEach(({ pattern, replacement, description }) => {
     if (pattern.test(cleanedJson)) {
       cleanedJson = cleanedJson.replace(pattern, replacement);
-      fixes.push(`Fixed ${description} in field names`);
+      fixes.push(`Fixed ${description}`);
     }
   });
   
   return cleanedJson;
 }
 
-async function enhancedJsonCleaning(rawJson: string, fixes: string[]): Promise<string> {
+async function legacyEnhancedCleaning(rawJson: string, fixes: string[]): Promise<string> {
   let cleanedJson = rawJson;
   
-  // Enhanced cleaning with more patterns
   const escapeReplacements = [
     { pattern: /\\_/g, replacement: '_', description: 'escaped underscores' },
     { pattern: /\\:/g, replacement: ':', description: 'escaped colons' },
@@ -471,29 +451,13 @@ async function enhancedJsonCleaning(rawJson: string, fixes: string[]): Promise<s
     }
   });
   
-  // Fix malformed URLs
-  const urlPattern = /("(?:website_url|source_url)"\s*:\s*")(\[https?:\/\/[^"]+)(",\s*"[^"]+"\s*:\s*")([^"]*")/g;
-  const urlMatches = cleanedJson.match(urlPattern);
-  if (urlMatches) {
-    cleanedJson = cleanedJson.replace(urlPattern, (match, prefix, url, separator, suffix) => {
-      const cleanUrl = url.replace(/^\[/, '').split(',')[0].split('"')[0];
-      fixes.push(`Fixed malformed URL: ${cleanUrl}`);
-      return `${prefix}${cleanUrl}"`;
-    });
-  }
-  
-  // Fix null values
-  cleanedJson = cleanedJson.replace(/\\null/g, 'null');
-  cleanedJson = cleanedJson.replace(/"null"/g, 'null');
-  cleanedJson = cleanedJson.replace(/:\s*"null"/g, ': null');
-  
   // Fix trailing commas
   cleanedJson = cleanedJson.replace(/,(\s*[}\]])/g, '$1');
   
   // Fix missing quotes around keys
   cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
   
-  fixes.push('Applied enhanced rule-based cleaning while preserving citations');
+  fixes.push('Applied legacy enhanced cleaning');
   
   return cleanedJson;
 }
