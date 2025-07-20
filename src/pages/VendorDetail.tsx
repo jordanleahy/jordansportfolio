@@ -78,6 +78,8 @@ Return ONLY valid JSON that matches our database schema exactly. No additional t
   
   "competitive_advantages": "Array of 2-5 unique differentiators. Check 'why choose us', competitive comparison pages, or unique selling propositions",
   
+  "competitors": "Array of 2-6 main competitor company names. Look for competitive comparison pages, industry analysis, press releases mentioning rivals, or inferred from market positioning",
+  
   "notable_customers": "Array of recognizable customer names from case studies, testimonials, customer logos, or press releases. Include company names only",
   
   "website_url": "${websiteUrl}",
@@ -87,6 +89,17 @@ Return ONLY valid JSON that matches our database schema exactly. No additional t
   "total_funding": "Look for funding announcements, press releases, or investor pages. Format as '$X million' or '$X billion'. Use 'Not disclosed' if private",
   
   "key_investors": "Array of investor names from press releases, about page, or investor sections. Include VC firms, strategic investors, or notable individual investors",
+  
+  "performance_metrics": {
+    "annual_revenue": "Extract revenue figures if disclosed (format: '$X million')",
+    "employee_count": "Look for team size, about page, LinkedIn company page (format: number or range like '100-500')",
+    "customer_count": "Number of customers/clients served if mentioned",
+    "market_share": "Market position percentage if disclosed",
+    "growth_rate": "Annual growth rate if mentioned (format: 'X% YoY')",
+    "retention_rate": "Customer retention percentage if disclosed",
+    "transactions_processed": "Volume metrics if applicable (e.g., 'X million transactions/month')",
+    "uptime_sla": "Service level agreement percentage if mentioned"
+  },
   
   "research_data": {
     "data_sources": "Array listing specific website sections explored (e.g., ['About Page', 'Product Documentation', 'Press Releases', 'Customer Case Studies'])",
@@ -105,7 +118,20 @@ Return ONLY valid JSON that matches our database schema exactly. No additional t
     "tech_stack": "Array of technologies mentioned in job postings, technical docs, or integration pages",
     "certifications": "Array of industry certifications, compliance standards, or security badges found",
     "partnerships": "Array of strategic partners, integrations, or technology alliances mentioned",
-    "awards_recognition": "Array of awards, recognition, or industry rankings found on the site"
+    "awards_recognition": "Array of awards, recognition, or industry rankings found on the site",
+    "business_model": "Description of how the company makes money (e.g., 'SaaS subscription', 'Transaction-based', 'Professional services')",
+    "target_market_size": "Description of addressable market if mentioned",
+    "geographic_presence": "Description of geographic coverage or markets served",
+    "technology_stack": "Array of core technologies used in their platform",
+    "contact_info": {
+      "email": "Primary contact email if available",
+      "phone": "Main phone number if listed",
+      "address": "Full mailing address if provided"
+    },
+    "social_media": {
+      "linkedin": "LinkedIn company page URL if found",
+      "twitter": "Twitter/X profile URL if found"
+    }
   }
 }
 
@@ -117,6 +143,8 @@ Before returning JSON, verify:
 - Dates are properly formatted
 - Company name matches website branding
 - Information is factual and website-sourced
+- Competitors array includes actual competitor company names
+- Performance metrics are quantifiable when available
 
 **CRITICAL INSTRUCTIONS:**
 - Use exact field names shown above - do not modify any field names
@@ -299,7 +327,7 @@ export default function VendorDetail() {
         }
       }
 
-      // Map ChatGPT response to vendor fields
+      // Map ChatGPT response to vendor fields with improved data handling
       const vendorUpdate: Partial<Vendor> = {
         // Core company info
         company_name: jsonData.company_name || vendor?.company_name,
@@ -317,22 +345,47 @@ export default function VendorDetail() {
         competitive_advantages: jsonData.competitive_advantages || vendor?.competitive_advantages || [],
         notable_customers: jsonData.notable_customers || vendor?.notable_customers || [],
         
+        // Competitors - now properly handled
+        competitors: jsonData.competitors || vendor?.competitors || [],
+        
         // Funding info
         funding_stage: jsonData.funding_stage || vendor?.funding_stage,
         total_funding: jsonData.total_funding || vendor?.total_funding,
         key_investors: jsonData.key_investors || vendor?.key_investors || [],
         
-        // Store complete research data
+        // Performance metrics - now properly structured
+        performance_metrics: jsonData.performance_metrics || vendor?.performance_metrics || null,
+        
+        // Research data - flattened structure to match database schema
         research_data: {
           ...vendor?.research_data,
+          // Store the complete ChatGPT response for reference
           chatgpt_response: jsonData,
+          // Extract research metadata to top level
+          data_sources: jsonData.research_data?.data_sources || [],
+          confidence_level: jsonData.research_data?.confidence_level || 'medium',
+          verification_status: jsonData.research_data?.verification_status || 'unverified',
+          research_quality: jsonData.research_data?.research_quality || 'standard',
           last_updated: new Date().toISOString(),
-          confidence_level: jsonData.confidence_level,
-          verification_status: jsonData.verification_status
+          website_structure: jsonData.research_data?.website_structure || '',
+          data_completeness: jsonData.research_data?.data_completeness || '0%',
+          notable_findings: jsonData.research_data?.notable_findings || []
         },
         
-        // Performance metrics if provided
-        performance_metrics: jsonData.performance_metrics || vendor?.performance_metrics
+        // Company data - properly structured
+        company_data: {
+          ...vendor?.company_data,
+          ...jsonData.company_data,
+          // Ensure nested objects are properly handled
+          contact_info: {
+            ...vendor?.company_data?.contact_info,
+            ...jsonData.company_data?.contact_info
+          },
+          social_media: {
+            ...vendor?.company_data?.social_media,
+            ...jsonData.company_data?.social_media
+          }
+        }
       };
 
       // Update vendor in database
