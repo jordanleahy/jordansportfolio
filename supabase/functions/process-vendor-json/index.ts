@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
@@ -24,6 +23,14 @@ interface ProcessingResult {
   warnings?: string[];
   aiCleaningUsed?: boolean;
   aiReasoning?: string;
+}
+
+interface ParsedCitation {
+  id: string;
+  documentId: string;
+  startLine?: number;
+  endLine?: number;
+  originalText: string;
 }
 
 serve(async (req) => {
@@ -94,6 +101,54 @@ async function trackAgentUsage(startTime: number, success: boolean) {
   }
 }
 
+function parseCitations(text: string): { cleanText: string; citations: ParsedCitation[] } {
+  const citationPattern = /【([^†]+)†L?(\d+)?-?L?(\d+)?】/g;
+  const citations: ParsedCitation[] = [];
+  let match;
+  let citationIndex = 0;
+
+  while ((match = citationPattern.exec(text)) !== null) {
+    const [fullMatch, documentId, startLine, endLine] = match;
+    citations.push({
+      id: `citation_${citationIndex++}`,
+      documentId,
+      startLine: startLine ? parseInt(startLine) : undefined,
+      endLine: endLine ? parseInt(endLine) : startLine ? parseInt(startLine) : undefined,
+      originalText: fullMatch
+    });
+  }
+
+  const cleanText = text.replace(citationPattern, '').trim();
+  
+  return { cleanText, citations };
+}
+
+function processTextWithCitations(text: string): { text: string; citations: ParsedCitation[] } {
+  if (typeof text !== 'string') return { text: String(text), citations: [] };
+  return parseCitations(text);
+}
+
+function processArrayWithCitations(array: any[]): { items: string[]; citations: ParsedCitation[] } {
+  const allCitations: ParsedCitation[] = [];
+  const cleanItems: string[] = [];
+
+  array.forEach((item, index) => {
+    if (typeof item === 'string' && item.trim() !== '') {
+      const { cleanText, citations } = parseCitations(item);
+      if (cleanText.length > 0) {
+        cleanItems.push(cleanText);
+        // Add index information to citations for array context
+        citations.forEach(citation => {
+          citation.id = `${citation.id}_item_${index}`;
+          allCitations.push(citation);
+        });
+      }
+    }
+  });
+
+  return { items: cleanItems, citations: allCitations };
+}
+
 async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   const fixes: string[] = [];
   const warnings: string[] = [];
@@ -142,10 +197,10 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       }
     }
     
-    console.log('JSON parsed successfully, applying direct field mapping...');
+    console.log('JSON parsed successfully, applying citation-aware field mapping...');
     
-    // Step 4: Apply direct field mapping (no complex transformations)
-    const mappedData = await applyDirectMapping(parsedData, fixes, warnings);
+    // Step 4: Apply citation-aware field mapping
+    const mappedData = await applyCitationAwareMapping(parsedData, fixes, warnings);
     
     // Step 5: Validate and set defaults for required fields
     const validatedData = validateRequiredFields(mappedData, warnings, errors);
@@ -179,39 +234,61 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   }
 }
 
-async function applyDirectMapping(data: any, fixes: string[], warnings: string[]): Promise<any> {
-  // Since our prompt now matches the database schema exactly, we can do direct assignment
+async function applyCitationAwareMapping(data: any, fixes: string[], warnings: string[]): Promise<any> {
   const mappedData: any = {};
+  const allCitations: { [key: string]: ParsedCitation[] } = {};
   
-  // Direct field assignments (no mapping needed)
+  // Direct field assignments with citation extraction
   const directFields = [
     'company_name', 'headquarters', 'founding_year', 'company_type', 'description',
-    'core_services', 'specialties', 'customers', 'key_features', 'key_benefits',
-    'website_url', 'funding_stage', 'total_funding', 'key_investors',
-    'competitive_advantages', 'notable_customers', 'company_data', 'research_data',
-    'business_model', 'employee_count_range', 'geographic_presence',
-    'contact_email', 'contact_phone', 'contact_address', 'linkedin_url', 'twitter_url',
-    'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
+    'website_url', 'funding_stage', 'total_funding', 'business_model', 
+    'employee_count_range', 'geographic_presence', 'contact_email', 
+    'contact_phone', 'contact_address', 'linkedin_url', 'twitter_url'
   ];
   
   for (const field of directFields) {
     if (data[field] !== undefined && data[field] !== null) {
-      mappedData[field] = data[field];
-      fixes.push(`Direct assignment: ${field}`);
+      if (typeof data[field] === 'string') {
+        const { text, citations } = processTextWithCitations(data[field]);
+        mappedData[field] = text;
+        if (citations.length > 0) {
+          allCitations[field] = citations;
+          fixes.push(`Extracted ${citations.length} citations from ${field}`);
+        }
+      } else {
+        mappedData[field] = data[field];
+      }
     }
   }
   
-  // Clean citations from arrays
+  // Array field processing with citation extraction
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 
     'key_investors', 'competitive_advantages', 'notable_customers',
     'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
   ];
+  
   for (const field of arrayFields) {
-    if (mappedData[field] && Array.isArray(mappedData[field])) {
-      mappedData[field] = cleanArrayValues(mappedData[field]);
-      fixes.push(`Cleaned citations from ${field}`);
+    if (data[field] && Array.isArray(data[field])) {
+      const { items, citations } = processArrayWithCitations(data[field]);
+      mappedData[field] = items;
+      if (citations.length > 0) {
+        allCitations[field] = citations;
+        fixes.push(`Extracted ${citations.length} citations from ${field} array`);
+      }
+    } else {
+      mappedData[field] = [];
     }
+  }
+  
+  // Store citations in research_data
+  if (Object.keys(allCitations).length > 0) {
+    mappedData.research_data = {
+      ...data.research_data,
+      citations: allCitations,
+      citation_count: Object.values(allCitations).reduce((sum, citations) => sum + citations.length, 0)
+    };
+    fixes.push(`Stored ${Object.keys(allCitations).length} field citations in research_data`);
   }
   
   // Generate slug from company name
@@ -220,49 +297,31 @@ async function applyDirectMapping(data: any, fixes: string[], warnings: string[]
     fixes.push('Generated slug from company name');
   }
   
-  // Clean citations from text fields
-  const textFields = [
-    'company_name', 'headquarters', 'description', 'company_type', 
-    'funding_stage', 'total_funding', 'business_model', 'employee_count_range',
-    'geographic_presence', 'contact_email', 'contact_phone', 'contact_address',
-    'linkedin_url', 'twitter_url'
-  ];
-  for (const field of textFields) {
-    if (mappedData[field] && typeof mappedData[field] === 'string') {
-      mappedData[field] = cleanCitationText(mappedData[field]);
+  // Handle other object fields
+  const objectFields = ['performance_metrics', 'company_data'];
+  for (const field of objectFields) {
+    if (data[field] !== undefined) {
+      if (typeof data[field] === 'object' && data[field] !== null) {
+        mappedData[field] = data[field];
+      } else {
+        warnings.push({
+          field,
+          message: `${field} should be an object, setting to empty object`,
+          severity: 'warning'
+        });
+        mappedData[field] = {};
+      }
+    } else {
+      mappedData[field] = {};
     }
+  }
+  
+  // Set default research_data if not already set
+  if (!mappedData.research_data) {
+    mappedData.research_data = data.research_data || {};
   }
   
   return mappedData;
-}
-
-function cleanCitationText(text: string): string {
-  if (typeof text !== 'string') return text;
-  // Remove citation patterns like [oai_citation:0‡domain.com]
-  return text.replace(/\s*\[oai_citation:[^\]]+\]/g, '').trim();
-}
-
-function cleanArrayValues(array: any[]): string[] {
-  return array
-    .filter(item => typeof item === 'string' && item.trim() !== '')
-    .map(item => cleanCitationText(item))
-    .filter(item => item.length > 0);
-}
-
-function extractYearFromText(text: any): number | null {
-  if (typeof text === 'number') return text;
-  if (typeof text !== 'string') return null;
-  
-  // Extract 4-digit year from text
-  const yearMatch = text.match(/\b(19|20)\d{2}\b/);
-  if (yearMatch) {
-    const year = parseInt(yearMatch[0]);
-    const currentYear = new Date().getFullYear();
-    if (year >= 1800 && year <= currentYear + 5) {
-      return year;
-    }
-  }
-  return null;
 }
 
 function generateSlug(companyName: string): string {
@@ -287,7 +346,8 @@ IMPORTANT RULES:
 1. Return ONLY valid JSON - no explanation text, no markdown formatting, no code blocks
 2. Preserve ALL original data content - don't remove or change actual information
 3. Fix structural issues like escaped characters, malformed URLs, broken strings
-4. Common issues to fix:
+4. PRESERVE citation references in the format 【document_id†LstartLine-LendLine】 - these are important for source tracking
+5. Common issues to fix:
    - Escaped characters that break parsing (\\_,  \\:, \\", \\\\)
    - Malformed URLs concatenated with other text
    - Broken string boundaries
@@ -312,7 +372,7 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
         messages: [
           { 
             role: 'system', 
-            content: 'You are a precise JSON cleaning tool. Return only valid JSON followed by reasoning.' 
+            content: 'You are a precise JSON cleaning tool. Return only valid JSON followed by reasoning. PRESERVE citation references.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -358,7 +418,7 @@ Return the cleaned JSON followed by a line starting with "REASONING:" explaining
       success: true,
       cleanedJson,
       reasoning,
-      fixes: fixes.length > 0 ? fixes : ['AI successfully cleaned and restructured the JSON']
+      fixes: fixes.length > 0 ? fixes : ['AI successfully cleaned and restructured the JSON while preserving citations']
     };
   } catch (error) {
     console.error('AI JSON cleaning error:', error);
@@ -433,7 +493,7 @@ async function enhancedJsonCleaning(rawJson: string, fixes: string[]): Promise<s
   // Fix missing quotes around keys
   cleanedJson = cleanedJson.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
   
-  fixes.push('Applied enhanced rule-based cleaning');
+  fixes.push('Applied enhanced rule-based cleaning while preserving citations');
   
   return cleanedJson;
 }

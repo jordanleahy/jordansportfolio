@@ -31,7 +31,8 @@ serve(async (req) => {
     console.log("📊 [vendor-qa-agent] Received vendor data:", {
       company_name: vendorData?.company_name,
       dataKeys: Object.keys(vendorData || {}),
-      dataSize: JSON.stringify(vendorData || {}).length
+      dataSize: JSON.stringify(vendorData || {}).length,
+      citationCount: vendorData?.research_data?.citation_count || 0
     });
     
     if (!vendorData) {
@@ -48,36 +49,53 @@ serve(async (req) => {
     console.log("🔍 [vendor-qa-agent] Analyzing vendor data for:", vendorData.company_name);
     console.log("🤖 [vendor-qa-agent] Preparing AI prompt for quality analysis");
 
+    // Extract citation information for analysis
+    const citations = vendorData.research_data?.citations || {};
+    const citationCount = vendorData.research_data?.citation_count || 0;
+    const uniqueDocuments = citations ? [...new Set(Object.values(citations).flat().map((c: any) => c.documentId))] : [];
+
     const prompt = `You are a expert business analyst specializing in healthcare technology vendor assessment. Analyze this vendor data for quality, accuracy, and completeness.
 
 VENDOR DATA:
 ${JSON.stringify(vendorData, null, 2)}
 
+CITATION ANALYSIS:
+- Total Citations: ${citationCount}
+- Unique Source Documents: ${uniqueDocuments.length}
+- Fields with Citations: ${Object.keys(citations).join(', ')}
+- Citation Density: ${citationCount > 0 ? 'High' : 'None'}
+
 Evaluate the following criteria and provide a detailed assessment:
 
-1. DATA QUALITY (30 points):
+1. DATA QUALITY (25 points):
    - Completeness of information
    - Consistency across fields
    - Professional language and clarity
    - Absence of placeholder/generic text
 
-2. BUSINESS LOGIC (25 points):
+2. SOURCE QUALITY (25 points):
+   - Citation coverage and density
+   - Source diversity and credibility
+   - Verification of key claims
+   - Research data transparency
+
+3. BUSINESS LOGIC (25 points):
    - Realistic funding amounts and stages
    - Consistent company type vs services
    - Logical headquarters vs founding year
    - Reasonable company size indicators
 
-3. COMPETITIVE ACCURACY (25 points):
+4. COMPETITIVE ACCURACY (25 points):
    - Services align with company type
    - Competitive advantages are specific
    - Key features are differentiated
    - Target customers make sense
 
-4. DATA FRESHNESS (20 points):
-   - Recent founding year if applicable
-   - Current funding information
-   - Up-to-date service offerings
-   - Modern technology references
+CITATION SCORING BONUS:
+- Add 5 points for excellent citation coverage (>50 citations)
+- Add 3 points for good citation coverage (20-50 citations)
+- Add 1 point for basic citation coverage (5-20 citations)
+- Subtract 5 points for no citations on key claims
 
 Provide your response in this EXACT JSON format (no markdown):
 {
@@ -88,7 +106,7 @@ Provide your response in this EXACT JSON format (no markdown):
   "isRecommended": [true/false based on score >= 70]
 }
 
-Be specific and actionable in your feedback. Focus on data quality issues that could affect business intelligence value.`;
+Be specific and actionable in your feedback. Focus on both data quality and source citation quality.`;
 
     console.log("🚀 [vendor-qa-agent] Calling OpenAI API");
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -102,7 +120,7 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
         messages: [
           {
             role: 'system',
-            content: 'You are a business data quality analyst. Respond only with valid JSON in the exact format requested.'
+            content: 'You are a business data quality analyst with expertise in source verification and citation analysis. Respond only with valid JSON in the exact format requested.'
           },
           {
             role: 'user',
@@ -138,7 +156,8 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
         feedbackCount: qaResult.feedback?.length || 0,
         suggestionsCount: qaResult.suggestions?.length || 0,
         warningsCount: qaResult.warnings?.length || 0,
-        isRecommended: qaResult.isRecommended
+        isRecommended: qaResult.isRecommended,
+        citationBonus: citationCount > 50 ? 5 : citationCount > 20 ? 3 : citationCount > 5 ? 1 : 0
       });
       
       // Validate required fields
@@ -158,19 +177,26 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
         console.log(`🔧 [vendor-qa-agent] Score clamped from ${originalScore} to ${qaResult.qualityScore}`);
       }
       
+      // Add citation-specific feedback
+      if (citationCount > 0) {
+        qaResult.feedback.push(`Excellent source documentation with ${citationCount} citations from ${uniqueDocuments.length} sources`);
+      } else {
+        qaResult.warnings.push('No source citations found - consider adding source references for key claims');
+      }
+      
       console.log("✅ [vendor-qa-agent] QA result validation passed");
       
     } catch (parseError) {
       console.error("❌ [vendor-qa-agent] Failed to parse AI response:", parseError);
       console.error("❌ [vendor-qa-agent] Raw AI response:", aiResponse);
-      // Fallback result
+      // Fallback result with citation consideration
       console.log("⚠️ [vendor-qa-agent] Using fallback QA result");
       qaResult = {
-        qualityScore: 50,
-        feedback: ['AI analysis failed - manual review recommended'],
-        suggestions: ['Verify all data fields manually'],
+        qualityScore: citationCount > 0 ? 60 : 40,
+        feedback: citationCount > 0 ? ['Source citations detected but analysis failed'] : ['AI analysis failed - manual review recommended'],
+        suggestions: ['Verify all data fields manually', 'Add source citations for key claims'],
         warnings: ['QA agent encountered an error'],
-        isRecommended: false
+        isRecommended: citationCount > 20
       };
     }
 
@@ -179,7 +205,8 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
       isRecommended: qaResult.isRecommended,
       totalFeedback: qaResult.feedback.length,
       totalSuggestions: qaResult.suggestions.length,
-      totalWarnings: qaResult.warnings.length
+      totalWarnings: qaResult.warnings.length,
+      citationCount: citationCount
     });
 
     console.log("✅ [vendor-qa-agent] Returning successful QA analysis");
@@ -198,7 +225,7 @@ Be specific and actionable in your feedback. Focus on data quality issues that c
       error: error instanceof Error ? error.message : 'Unknown error',
       qualityScore: 0,
       feedback: ['QA analysis failed'],
-      suggestions: ['Manual review required'],
+      suggestions: ['Manual review required', 'Add source citations'],
       warnings: ['QA system error'],
       isRecommended: false
     }), {
