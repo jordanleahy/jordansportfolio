@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -29,6 +30,7 @@ import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 import { PromptModal } from "./PromptModal";
 import { OfferingCard } from "./OfferingCard";
+
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string) => {
   return `I need you to research this company thoroughly and provide detailed information in JSON format.
@@ -86,9 +88,13 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const [promptCompanyName, setPromptCompanyName] = useState("");
   const itemsPerPage = 50; // Optimized page size
 
-  // Debounce search query for performance
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  // Debounce search query for performance with longer delay
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isMobile = useIsMobile();
+
+  // Check if search query is too short
+  const isSearchTooShort = searchQuery.length > 0 && searchQuery.length < 2;
+  const isSearching = searchQuery !== debouncedSearchQuery;
 
   // Build filters - all processing is now server-side
   const queryFilters: OfferingFilters = {
@@ -105,11 +111,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, filters, sortField, sortDirection]);
-
-  // Load cached prompt on component mount
-  useEffect(() => {
-    // TODO: Implement cached prompt functionality if needed
-  }, []);
 
   // All data comes pre-processed from the server
   const offerings = offeringsData?.data || [];
@@ -163,6 +164,19 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
     setGeneratedPrompt(prompt);
     setPromptCompanyName(companyName);
     setIsPromptModalOpen(true);
+  };
+
+  const getSearchMessage = () => {
+    if (isSearchTooShort) {
+      return "Type at least 2 characters to search";
+    }
+    if (isSearching) {
+      return "Searching...";
+    }
+    if (debouncedSearchQuery && currentResults > 0) {
+      return `Found ${currentResults} of ${totalItems} results`;
+    }
+    return null;
   };
 
   if (isLoading) {
@@ -231,14 +245,13 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 </Button>
               )}
             </div>
-            {searchQuery && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <span>
-                  Found {currentResults} of {totalItems} results
-                  {debouncedSearchQuery !== searchQuery && " (searching...)"}
+            <div className="flex items-center text-sm text-muted-foreground min-h-[24px]">
+              {getSearchMessage() && (
+                <span className={isSearchTooShort ? "text-amber-600" : ""}>
+                  {getSearchMessage()}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -260,6 +273,11 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                     Retry
                   </Button>
                 </div>
+              </div>
+            ) : isSearchTooShort ? (
+              <div className="text-center py-8 text-amber-600">
+                <p className="font-semibold">Search too short</p>
+                <p className="text-sm mt-1">Please type at least 2 characters to search</p>
               </div>
             ) : offerings.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -374,6 +392,15 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                         >
                           Retry
                         </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : isSearchTooShort ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-amber-600">
+                      <div>
+                        <p className="font-semibold">Search too short</p>
+                        <p className="text-sm mt-1">Please type at least 2 characters to search</p>
                       </div>
                     </TableCell>
                   </TableRow>

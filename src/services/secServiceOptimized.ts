@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { 
   OfferingFilters, 
@@ -57,21 +56,26 @@ export class SecServiceOptimized {
       query = query.in('industrygrouptype', filters.industries);
     }
 
-    // Apply fuzzy search query (server-side with pg_trgm similarity)
+    // Apply enhanced fuzzy search query with minimum length check
     const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
                        ((filters.searchQuery as any)?.value || '');
     
-    if (searchQuery && searchQuery.trim()) {
-      console.log('🚀 Applying server-side fuzzy search:', searchQuery);
+    if (searchQuery && searchQuery.trim() && searchQuery.trim().length >= 2) {
+      console.log('🚀 Applying enhanced fuzzy search:', searchQuery);
       
-      // Enhanced search with both fuzzy and traditional matching
-      // First try exact and prefix matches, then fuzzy matches
-      query = query.or(`
-        company_name.ilike.${searchQuery}%,
-        company_name.ilike.%${searchQuery}%,
-        industrygrouptype.ilike.%${searchQuery}%,
-        company_city.ilike.%${searchQuery}%
-      `);
+      // Escape special characters to prevent query parsing errors
+      const escapedQuery = searchQuery.replace(/[%_\\]/g, '\\$&');
+      
+      // Enhanced search with progressive matching - fixed single line format
+      const searchConditions = [
+        `company_name.ilike.${escapedQuery}%`,
+        `company_name.ilike.%${escapedQuery}%`,
+        `industrygrouptype.ilike.%${escapedQuery}%`,
+        `company_city.ilike.%${escapedQuery}%`,
+        `company_location.ilike.%${escapedQuery}%`
+      ].join(',');
+      
+      query = query.or(searchConditions);
     }
 
     // Apply amount range filters (server-side) - Fixed PostgREST syntax
@@ -157,23 +161,87 @@ export class SecServiceOptimized {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
-    const { data, error, count } = await query.range(from, to);
+    try {
+      const { data, error, count } = await query.range(from, to);
 
-    console.log('🚀 Optimized query results:', {
-      error: error?.message,
-      count,
-      dataLength: data?.length || 0
-    });
+      console.log('🚀 Optimized query results:', {
+        error: error?.message,
+        count,
+        dataLength: data?.length || 0
+      });
 
-    if (error) {
-      console.error('Error fetching offerings:', error);
-      throw new Error(`Failed to fetch offerings: ${error.message}`);
+      if (error) {
+        console.error('Error fetching offerings:', error);
+        throw new Error(`Failed to fetch offerings: ${error.message}`);
+      }
+
+      // Transform data to match expected format
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        // Maintain backward compatibility
+        issuers: [{
+          entityname: item.company_name,
+          city: item.company_city,
+          stateorcountrydescription: item.company_location,
+          stateorcountry: item.country_code
+        }],
+        signatures: [{
+          nameofsigner: item.primary_signer
+        }]
+      }));
+
+      return {
+        data: transformedData,
+        count: count || 0,
+        total: count || 0,
+        page,
+        pageSize,
+        totalPages: Math.ceil((count || 0) / pageSize)
+      };
+    } catch (error: any) {
+      console.error('Search query failed:', error);
+      // Fallback to basic search if fuzzy search fails
+      if (searchQuery && searchQuery.trim()) {
+        console.log('🔄 Falling back to basic search');
+        return this.getOfferingsBasicSearch(filters, page, pageSize);
+      }
+      throw error;
+    }
+  }
+
+  // Fallback basic search method
+  private static async getOfferingsBasicSearch(
+    filters: OfferingFilters = {}, 
+    page = 1, 
+    pageSize = 50
+  ): Promise<PaginatedResponse<any>> {
+    let query = supabase
+      .from('mv_offerings_enriched')
+      .select('*', { count: 'exact' });
+
+    // Apply base filters
+    query = query
+      .filter('totalamountsold', 'not.is', null)
+      .gt('totalamountsold', 0);
+
+    // Simple search without fuzzy logic
+    const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
+                       ((filters.searchQuery as any)?.value || '');
+    
+    if (searchQuery && searchQuery.trim()) {
+      query = query.ilike('company_name', `%${searchQuery}%`);
     }
 
-    // Transform data to match expected format
+    // Apply pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) throw error;
+
     const transformedData = (data || []).map(item => ({
       ...item,
-      // Maintain backward compatibility
       issuers: [{
         entityname: item.company_name,
         city: item.company_city,
