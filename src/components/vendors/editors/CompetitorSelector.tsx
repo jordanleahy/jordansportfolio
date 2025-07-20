@@ -107,13 +107,12 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
           </PopoverTrigger>
           <PopoverContent className="w-[400px] p-0 animate-scale-in" align="start" side="bottom">
             <Command className="rounded-lg border-0 shadow-lg">
-              <div className="flex items-center border-b px-4 py-2 bg-muted/20">
-                <Search className="mr-3 h-4 w-4 shrink-0 text-muted-foreground" />
+              <div className="border-b bg-muted/20">
                 <CommandInput
                   placeholder="Search companies or add new..."
                   value={searchValue}
                   onValueChange={setSearchValue}
-                  className="border-0 px-0 focus:ring-0 bg-transparent placeholder:text-muted-foreground/70"
+                  className="border-0 px-4 py-3 focus:ring-0 bg-transparent placeholder:text-muted-foreground/70"
                 />
               </div>
               <CommandList className="max-h-80 overflow-auto">
