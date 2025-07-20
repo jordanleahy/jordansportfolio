@@ -133,17 +133,14 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
                               key={company.id}
                               value={company.company_name}
                               onSelect={() => handleSelectCompetitor(company.company_name)}
-                              className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent/50 transition-all duration-200 group data-[selected]:bg-accent"
+                              className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent transition-colors"
                             >
-                              <div className="flex items-center justify-center w-10 h-10 bg-muted/50 rounded-lg group-hover:bg-primary/10 transition-colors duration-200">
-                                <Building2 className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+                              <div className="flex items-center justify-center w-10 h-10 bg-muted rounded-lg">
+                                <Building2 className="h-5 w-5 text-muted-foreground" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium text-sm text-foreground truncate">{company.company_name}</div>
                                 <div className="text-xs text-muted-foreground">Existing vendor</div>
-                              </div>
-                              <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                Click to add
                               </div>
                             </CommandItem>
                           ))}
@@ -162,9 +159,9 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
                           value={searchValue}
                           onSelect={handleCreateAndAddCompetitor}
                           disabled={createVendorMutation.isPending}
-                          className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent/50 transition-all duration-200 group data-[selected]:bg-accent disabled:opacity-50"
+                          className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
                         >
-                          <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-200">
+                          <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg">
                             {createVendorMutation.isPending ? (
                               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
                             ) : (
@@ -185,11 +182,6 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
                               }
                             </div>
                           </div>
-                          {!createVendorMutation.isPending && (
-                            <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                              Click to create
-                            </div>
-                          )}
                         </CommandItem>
                       </CommandGroup>
                     )}
