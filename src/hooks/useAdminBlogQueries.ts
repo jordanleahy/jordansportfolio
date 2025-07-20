@@ -1,10 +1,12 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blog';
+import { blogKeys } from './useBlogQueries';
 
 export const useAdminAllBlogPosts = () => {
   return useQuery({
-    queryKey: ['admin-blog-posts'],
+    queryKey: blogKeys.list({ admin: true, status: 'all' }),
     queryFn: async (): Promise<BlogPost[]> => {
       const { data, error } = await supabase
         .from('blog_posts')
@@ -23,7 +25,7 @@ export const useAdminAllBlogPosts = () => {
 
 export const useAdminDraftBlogPosts = () => {
   return useQuery({
-    queryKey: ['admin-draft-blog-posts'],
+    queryKey: blogKeys.list({ admin: true, status: 'draft' }),
     queryFn: async (): Promise<BlogPost[]> => {
       const { data, error } = await supabase
         .from('blog_posts')

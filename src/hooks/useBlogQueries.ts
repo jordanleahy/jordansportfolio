@@ -166,7 +166,7 @@ export const useDeleteBlogPost = () => {
   return useMutation({
     mutationFn: (id: string) => BlogService.deletePost(id),
     onSuccess: (_, deletedId) => {
-      // Remove from all relevant caches
+      // Invalidate all blog-related caches to ensure UI refresh
       queryClient.invalidateQueries({ queryKey: blogKeys.all });
       
       toast({
