@@ -185,17 +185,70 @@ export const VendorRichData = ({ companyData, researchData }: VendorRichDataProp
             <CardTitle>Research Insights</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {researchData.recent_news && researchData.recent_news.length > 0 && (
+            {researchData.research_quality && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Research Quality</p>
+                  <Badge variant="secondary" className="capitalize">
+                    {researchData.research_quality}
+                  </Badge>
+                </div>
+                <Separator />
+              </>
+            )}
+            
+            {researchData.confidence_level && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Confidence Level</p>
+                  <Badge variant="outline" className="capitalize">
+                    {researchData.confidence_level}
+                  </Badge>
+                </div>
+                <Separator />
+              </>
+            )}
+            
+            {researchData.data_sources && researchData.data_sources.length > 0 && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Data Sources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {researchData.data_sources.map((source: string, idx: number) => (
+                      <Badge key={idx} variant="outline" className="text-xs capitalize">
+                        {source}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <Separator />
+              </>
+            )}
+            
+            {researchData.verification_status && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Verification Status</p>
+                  <Badge 
+                    variant={researchData.verification_status === 'verified' ? 'default' : 'secondary'}
+                    className="capitalize"
+                  >
+                    {researchData.verification_status}
+                  </Badge>
+                </div>
+                <Separator />
+              </>
+            )}
+            
+            {researchData.last_updated && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">Recent News</p>
-                <ul className="space-y-2">
-                  {researchData.recent_news.map((news: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <Calendar className="h-3 w-3 text-muted-foreground mt-1 flex-shrink-0" />
-                      <span>{news}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="font-medium">
+                    {new Date(researchData.last_updated).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             )}
           </CardContent>
