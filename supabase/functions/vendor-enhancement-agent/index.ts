@@ -81,8 +81,8 @@ serve(async (req) => {
     const industry = offering.industrygrouptype || 'Technology';
     const fundingAmount = offering.totalofferingamount || offering.totalamountsold;
 
-    // Create enhanced prompt for OpenAI with search
-    const prompt = `You are a business intelligence researcher. Search the web thoroughly for detailed information about the company "${companyName}" located in ${location} in the ${industry} industry. They recently raised ${fundingAmount ? `$${fundingAmount.toLocaleString()}` : 'funding'}.
+    // Create enhanced prompt for OpenAI (Note: Using knowledge cutoff data)
+    const prompt = `You are a business intelligence researcher. Based on your knowledge, provide detailed information about the company "${companyName}" located in ${location} in the ${industry} industry. They recently raised ${fundingAmount ? `$${fundingAmount.toLocaleString()}` : 'funding'}.
 
 Please provide comprehensive information in this exact JSON format:
 
@@ -178,14 +178,20 @@ Important guidelines:
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get user ID from the request
+    // Get user ID from the request headers
     const authHeader = req.headers.get('authorization');
     let userId = null;
     
     if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id;
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        if (error) throw error;
+        userId = user?.id;
+      } catch (authError) {
+        console.error('Auth error:', authError);
+        throw new Error('Invalid authentication token');
+      }
     }
 
     if (!userId) {
