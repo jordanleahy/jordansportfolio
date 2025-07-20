@@ -655,9 +655,9 @@ export default function VendorDetail() {
                       <span>Founded {vendor.founding_year}</span>
                     </div>
                   )}
-                  <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)} className="w-fit">
+                  <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">
                     {vendor.company_type}
-                  </Badge>
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:flex-shrink-0">
@@ -888,9 +888,9 @@ export default function VendorDetail() {
                   <Separator />
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Company Type</p>
-                    <Badge variant={getCompanyTypeBadgeColor(vendor.company_type)} className="mt-1">
+                    <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded inline-block mt-1">
                       {vendor.company_type}
-                    </Badge>
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -927,13 +927,14 @@ export default function VendorDetail() {
                     {vendor.key_investors && vendor.key_investors.length > 0 && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-2">Key Investors</p>
-                        <div className="flex flex-wrap gap-1">
+                        <ul className="space-y-1">
                           {vendor.key_investors.map((investor, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {investor}
-                            </Badge>
+                            <li key={idx} className="flex items-start gap-2 text-sm">
+                              <span className="text-primary mt-1 flex-shrink-0">•</span>
+                              <span>{investor}</span>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     )}
                   </CardContent>
