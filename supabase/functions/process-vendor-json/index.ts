@@ -31,14 +31,14 @@ const FIELD_MAPPINGS = {
   // Core company info mappings
   'industry': 'company_type',
   'services': 'core_services',
-  'target_market': 'customers',
+  'target_market': 'customers', // Special handling - convert string to array
   'company_size': null, // Store in company_data
-  'key_technologies': 'key_features',
+  'key_technologies': 'specialties', // Map technologies to specialties
   'pricing_model': null, // Store in company_data
   'contact_info': null, // Store in company_data
   'social_media': null, // Store in company_data
   'competitors': null, // Store in research_data
-  'unique_value_proposition': 'competitive_advantages',
+  'unique_value_proposition': null, // Store in research_data
   'recent_news': null, // Store in research_data
   'founded_year': 'founding_year',
   
@@ -224,15 +224,29 @@ async function applyFieldMapping(data: any, fixes: string[], warnings: string[])
     const mappedField = FIELD_MAPPINGS[key];
     
     if (mappedField) {
-      // Direct field mapping
-      mappedData[mappedField] = value;
-      fixes.push(`Mapped '${key}' to '${mappedField}'`);
+      // Special handling for target_market -> customers conversion
+      if (key === 'target_market' && typeof value === 'string') {
+        // Convert string to array by splitting on common delimiters
+        const cleanValue = cleanCitationText(value);
+        if (cleanValue.includes(',')) {
+          mappedData[mappedField] = cleanValue.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        } else if (cleanValue.includes(' and ')) {
+          mappedData[mappedField] = cleanValue.split(' and ').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        } else {
+          mappedData[mappedField] = [cleanValue];
+        }
+        fixes.push(`Converted target_market string to customers array`);
+      } else {
+        // Direct field mapping
+        mappedData[mappedField] = value;
+        fixes.push(`Mapped '${key}' to '${mappedField}'`);
+      }
     } else if (mappedField === null) {
       // Store in appropriate JSON field
       if (['company_size', 'pricing_model', 'contact_info', 'social_media'].includes(key)) {
         companyData[key] = value;
         fixes.push(`Stored '${key}' in company_data`);
-      } else if (['competitors', 'recent_news'].includes(key)) {
+      } else if (['competitors', 'recent_news', 'unique_value_proposition'].includes(key)) {
         researchData[key] = value;
         fixes.push(`Stored '${key}' in research_data`);
       }

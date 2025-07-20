@@ -28,25 +28,43 @@ Please browse their website and provide the following information in valid JSON 
   "website_url": "${websiteUrl}",
   "description": "Detailed description of what the company does",
   "industry": "Primary industry/sector",
-  "services": ["List", "of", "main", "services"],
-  "target_market": "Who they serve",
-  "company_size": "Estimated number of employees",
-  "founded_year": "Year founded (if available)",
-  "headquarters": "Location of main office",
-  "key_technologies": ["List", "of", "technologies", "they", "use"],
-  "pricing_model": "How they charge (if available)",
+  "services": [
+    "Revenue Cycle Management (RCM)",
+    "Patient Access Services",
+    "Medical Coding & Billing",
+    "List all main services offered"
+  ],
+  "target_market": "Hospitals, health systems, physician groups, payers, and other specific customer types they serve",
+  "company_size": "25,000+ employees or estimated number",
+  "founded_year": "2011 or year founded (if available)",
+  "headquarters": "Dallas, Texas, USA or main office location",
+  "key_technologies": [
+    "RPA (Robotic Process Automation)",
+    "Artificial Intelligence (AI)", 
+    "Machine Learning (ML)",
+    "List all technologies and platforms they use"
+  ],
+  "pricing_model": "Custom contracts, subscription model, or how they charge (if available)",
   "contact_info": {
-    "email": "Contact email",
-    "phone": "Phone number",
-    "address": "Physical address"
+    "email": "info@company.com",
+    "phone": "+1 800 XXX XXXX",
+    "address": "Full physical address"
   },
   "social_media": {
-    "linkedin": "LinkedIn URL",
-    "twitter": "Twitter URL"
+    "linkedin": "https://www.linkedin.com/company/...",
+    "twitter": "https://twitter.com/..."
   },
-  "competitors": ["List", "of", "main", "competitors"],
-  "unique_value_proposition": "What makes them different",
-  "recent_news": ["Any", "recent", "news", "or", "updates"]
+  "competitors": [
+    "Main competitor 1",
+    "Main competitor 2", 
+    "List of main competitors"
+  ],
+  "unique_value_proposition": "What makes them different from competitors, their key differentiators",
+  "recent_news": [
+    "Recent expansion news",
+    "Product launches",
+    "Any recent news or updates from 2023-2024"
+  ]
 }
 
 Please ensure the JSON is valid and complete. If any information is not available, use null or an empty array as appropriate.`;
