@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Edit } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
+import { useUserRole } from '@/hooks/useUserRole';
 
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
@@ -187,8 +188,10 @@ export default function VendorDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isAdmin } = useUserRole();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
@@ -718,6 +721,17 @@ export default function VendorDetail() {
                     >
                       <Clipboard className="h-4 w-4" />
                     </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsEditing(!isEditing)}
+                        aria-label={isEditing ? "Exit Edit Mode" : "Edit Vendor"}
+                        className="min-h-[44px] min-w-[44px]"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
