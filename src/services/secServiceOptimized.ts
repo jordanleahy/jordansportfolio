@@ -57,17 +57,32 @@ export class SecServiceOptimized {
       query = query.in('industrygrouptype', filters.industries);
     }
 
-    // Apply search query (server-side with full-text search)
+    // Apply fuzzy search query (server-side with pg_trgm similarity)
     const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
                        ((filters.searchQuery as any)?.value || '');
     
     if (searchQuery && searchQuery.trim()) {
-      console.log('🚀 Applying server-side search:', searchQuery);
-      query = query.or(`
-        company_name.ilike.%${searchQuery}%,
-        industrygrouptype.ilike.%${searchQuery}%,
-        company_city.ilike.%${searchQuery}%
-      `);
+      console.log('🚀 Applying server-side fuzzy search:', searchQuery);
+      
+      // Use raw SQL for fuzzy search with similarity scoring
+      const { data: fuzzyResults, error: fuzzyError } = await supabase.rpc('fuzzy_search_offerings', {
+        search_term: searchQuery,
+        similarity_threshold: 0.1
+      });
+      
+      if (fuzzyError) {
+        console.warn('Fuzzy search failed, falling back to ILIKE:', fuzzyError);
+        // Fallback to traditional ILIKE search
+        query = query.or(`
+          company_name.ilike.%${searchQuery}%,
+          industrygrouptype.ilike.%${searchQuery}%,
+          company_city.ilike.%${searchQuery}%
+        `);
+      } else if (fuzzyResults && fuzzyResults.length > 0) {
+        // Filter by the fuzzy search results
+        const accessionnumbers = fuzzyResults.map((r: any) => r.accessionnumber);
+        query = query.in('accessionnumber', accessionnumbers);
+      }
     }
 
     // Apply amount range filters (server-side) - Fixed PostgREST syntax
