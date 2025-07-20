@@ -41,6 +41,7 @@ export interface Vendor {
   office_locations?: string[];
   partnerships?: string[];
   tech_stack?: string[];
+  vendor_images?: any; // JSONB field for image metadata
 }
 
 export interface VendorFiltersState {

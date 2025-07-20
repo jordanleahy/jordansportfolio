@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
+import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -836,6 +837,11 @@ export default function VendorDetail() {
               <EditableSection 
                 vendor={vendor} 
                 config={technologyConfig} 
+                canEdit={isAdmin}
+              />
+
+              <VendorImageGallery 
+                vendor={vendor} 
                 canEdit={isAdmin}
               />
 

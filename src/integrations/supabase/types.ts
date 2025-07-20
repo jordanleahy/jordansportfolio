@@ -1302,6 +1302,7 @@ export type Database = {
           twitter_url: string | null
           updated_at: string
           user_id: string
+          vendor_images: Json | null
           website_url: string | null
         }
         Insert: {
@@ -1344,6 +1345,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id: string
+          vendor_images?: Json | null
           website_url?: string | null
         }
         Update: {
@@ -1386,6 +1388,7 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
+          vendor_images?: Json | null
           website_url?: string | null
         }
         Relationships: []
