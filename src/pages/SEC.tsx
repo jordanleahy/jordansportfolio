@@ -197,9 +197,9 @@ const SEC = () => {
 
         {/* Main Content - Full Width Layout */}
         <div className="pb-8 w-full">
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-start">
             {/* Desktop Filter Sidebar */}
-            <div className="hidden lg:block w-64 flex-shrink-0 pl-4 sticky top-20 self-start max-h-[calc(100vh-5rem)] overflow-y-auto">
+            <div className="hidden lg:block w-64 flex-shrink-0 pl-4 sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto">
               <FilterSidebar 
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
