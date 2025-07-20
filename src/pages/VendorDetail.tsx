@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 
 // Utility function for generating vendor research prompts
-const generateVendorPrompt = (websiteUrl: string) => {
+const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
   return `I need you to research this company thoroughly and provide detailed information in JSON format that matches our exact database schema.
 
 Website: ${websiteUrl}
@@ -24,104 +24,25 @@ Website: ${websiteUrl}
 Please browse their website and provide the following information in valid JSON format that matches our database fields exactly:
 
 {
-  "company_name": "Access Healthcare Services",
-  "headquarters": "Dallas, Texas, USA",
-  "founding_year": 2011,
-  "company_type": "Private",
-  "description": "Access Healthcare provides revenue cycle management services, HIM solutions, and intelligent automation for healthcare providers, payers, and related organizations. They leverage a global workforce and proprietary platforms like echo to improve operational efficiency, reduce cost to collect, and optimize revenue performance.",
-  "core_services": [
-    "Revenue Cycle Management (RCM)",
-    "Patient Access Services", 
-    "Medical Coding & Billing",
-    "Accounts Receivable Management",
-    "Payment Posting",
-    "Denial Management",
-    "Eligibility & Benefits Verification",
-    "Telehealth Support Services",
-    "HIM & Audit Services",
-    "Business Process Outsourcing (BPO)",
-    "Intelligent Automation (via echo platform)"
-  ],
-  "specialties": [
-    "RPA (Robotic Process Automation)",
-    "Artificial Intelligence (AI)",
-    "Machine Learning (ML)", 
-    "Natural Language Processing (NLP)",
-    "echo Platform",
-    "Analytics & Reporting Engines"
-  ],
-  "customers": [
-    "Hospitals",
-    "Health systems", 
-    "Physician groups",
-    "Dental groups",
-    "Payers",
-    "RCM software platforms"
-  ],
-  "key_features": [
-    "End-to-end RCM automation",
-    "Real-time analytics and reporting",
-    "Scalable global workforce",
-    "AI-powered claim processing",
-    "Integrated denial management",
-    "Multi-platform compatibility"
-  ],
-  "key_benefits": [
-    "Reduced cost to collect",
-    "Improved operational efficiency", 
-    "Faster claim processing",
-    "Higher collection rates",
-    "Compliance with healthcare regulations",
-    "24/7 global support coverage"
-  ],
+  "company_name": "${vendor.company_name}",
+  "headquarters": "${vendor.headquarters}",
+  "founding_year": ${vendor.founding_year || 'null'},
+  "company_type": "${vendor.company_type}",
+  "description": "${vendor.description}",
+  "core_services": ${JSON.stringify(vendor.core_services, null, 4).replace(/^/gm, '    ').trim()},
+  "customers": ${JSON.stringify(vendor.customers, null, 4).replace(/^/gm, '    ').trim()},
+  "specialties": ${JSON.stringify(vendor.specialties, null, 4).replace(/^/gm, '    ').trim()},
+  "key_features": ${JSON.stringify(vendor.key_features, null, 4).replace(/^/gm, '    ').trim()},
+  "key_benefits": ${JSON.stringify(vendor.key_benefits, null, 4).replace(/^/gm, '    ').trim()},
   "website_url": "${websiteUrl}",
-  "funding_stage": "Private Equity",
-  "total_funding": "Not publicly disclosed",
-  "key_investors": [
-    "Private equity firms",
-    "Healthcare-focused investors"
-  ],
-  "competitive_advantages": [
-    "Scalable workforce with deep domain expertise in U.S. healthcare billing practices",
-    "Proprietary echo platform enabling end-to-end automation of RCM workflows", 
-    "Global delivery centers providing cost-effective solutions",
-    "AI-powered predictive analytics for denial management"
-  ],
-  "notable_customers": [
-    "Large healthcare providers",
-    "Multi-specialty physician groups",
-    "Regional health systems"
-  ],
-  "company_data": {
-    "company_size": "25,000+ employees",
-    "pricing_model": "Custom contracts based on scope of RCM services and automation tools; pricing details not publicly disclosed",
-    "contact_info": {
-      "email": "info@accesshealthcare.com",
-      "phone": "+1 800 267 2671",
-      "address": "8500 Freeport Parkway, Suite 150, Irving, TX 75063, USA"
-    },
-    "social_media": {
-      "linkedin": "https://www.linkedin.com/company/accesshealthcare/",
-      "twitter": "https://twitter.com/AccessHCS"
-    }
-  },
-  "research_data": {
-    "competitors": [
-      "Omega Healthcare",
-      "GeBBS Healthcare Solutions", 
-      "AGS Health",
-      "R1 RCM",
-      "nThrive (now FinThrive)",
-      "3M Health Information Systems",
-      "Change Healthcare (now part of Optum)"
-    ],
-    "unique_value_proposition": "Access Healthcare differentiates itself with a scalable workforce, deep domain expertise in U.S. healthcare billing practices, and its proprietary echo platform that enables end-to-end automation of RCM workflows, leading to higher collections at lower costs.",
-    "recent_news": [
-      "In 2023, Access Healthcare expanded its global delivery centers in the Philippines and India to accommodate growing demand from U.S. clients.",
-      "They launched an enhanced version of their echo platform integrating AI-powered predictive analytics to improve denial management and claims resolution.", 
-      "They announced partnerships with large healthcare providers and RCM platforms to support digital transformation initiatives in revenue cycle operations."
-    ]
-  }
+  "funding_stage": "${vendor.funding_stage || 'To be researched'}",
+  "total_funding": "${vendor.total_funding || 'To be researched'}",
+  "key_investors": ${JSON.stringify(vendor.key_investors, null, 4).replace(/^/gm, '    ').trim()},
+  "competitive_advantages": ${JSON.stringify(vendor.competitive_advantages, null, 4).replace(/^/gm, '    ').trim()},
+  "notable_customers": ${JSON.stringify(vendor.notable_customers, null, 4).replace(/^/gm, '    ').trim()},
+  "company_data": {},
+  "research_data": {}
+}
 }
 
 CRITICAL: Use the exact field names shown above. Do not change any field names. If information is not available, use null for strings/numbers, empty arrays [], or empty objects {} as appropriate.`;
@@ -192,7 +113,7 @@ export default function VendorDetail() {
       return;
     }
 
-    const prompt = generateVendorPrompt(vendor.website_url);
+    const prompt = generateVendorPrompt(vendor.website_url, vendor);
     setGeneratedPrompt(prompt);
     setShowPrompt(true);
   };
