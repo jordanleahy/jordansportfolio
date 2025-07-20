@@ -26,31 +26,6 @@ interface ProcessingResult {
   aiReasoning?: string;
 }
 
-// Field mapping dictionary to handle common variations
-const FIELD_MAPPINGS = {
-  // Core company info mappings
-  'industry': 'company_type',
-  'services': 'core_services',
-  'target_market': 'customers', // Special handling - convert string to array
-  'company_size': null, // Store in company_data
-  'key_technologies': 'specialties', // Map technologies to specialties
-  'pricing_model': null, // Store in company_data
-  'contact_info': null, // Store in company_data
-  'social_media': null, // Store in company_data
-  'competitors': null, // Store in research_data
-  'unique_value_proposition': null, // Store in research_data
-  'recent_news': null, // Store in research_data
-  'founded_year': 'founding_year',
-  
-  // Handle variations
-  'founded': 'founding_year',
-  'established': 'founding_year',
-  'year_founded': 'founding_year',
-  'location': 'headquarters',
-  'hq': 'headquarters',
-  'main_office': 'headquarters'
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -167,22 +142,14 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
       }
     }
     
-    console.log('JSON parsed successfully, applying field mapping...');
+    console.log('JSON parsed successfully, applying direct field mapping...');
     
-    // Step 4: Apply intelligent field mapping
-    const mappedData = await applyFieldMapping(parsedData, fixes, warnings);
+    // Step 4: Apply direct field mapping (no complex transformations)
+    const mappedData = await applyDirectMapping(parsedData, fixes, warnings);
     
-    // Step 5: Validate and transform the mapped data
-    const validatedData = validateAndTransformVendorData(mappedData, warnings, errors);
+    // Step 5: Validate and set defaults for required fields
+    const validatedData = validateRequiredFields(mappedData, warnings, errors);
     
-    // Step 6: Check for required fields
-    const requiredFields = ['company_name', 'headquarters', 'company_type', 'description'];
-    for (const field of requiredFields) {
-      if (!validatedData[field] || validatedData[field].trim() === '') {
-        errors.push(`Missing required field: ${field}`);
-      }
-    }
-
     console.log(`Processing completed. AI used: ${aiCleaningUsed}, Fixes: ${fixes.length}, Warnings: ${warnings.length}, Errors: ${errors.length}`);
 
     return {
@@ -212,99 +179,46 @@ async function processVendorJson(rawJson: string): Promise<ProcessingResult> {
   }
 }
 
-async function applyFieldMapping(data: any, fixes: string[], warnings: string[]): Promise<any> {
+async function applyDirectMapping(data: any, fixes: string[], warnings: string[]): Promise<any> {
+  // Since our prompt now matches the database schema exactly, we can do direct assignment
   const mappedData: any = {};
-  const companyData: any = {};
-  const researchData: any = {};
   
-  // Process each field in the input data
-  for (const [key, value] of Object.entries(data)) {
-    if (value === null || value === undefined) continue;
-    
-    const mappedField = FIELD_MAPPINGS[key];
-    
-    if (mappedField) {
-      // Special handling for target_market -> customers conversion
-      if (key === 'target_market' && typeof value === 'string') {
-        // Convert string to array by splitting on common delimiters
-        const cleanValue = cleanCitationText(value);
-        if (cleanValue.includes(',')) {
-          mappedData[mappedField] = cleanValue.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-        } else if (cleanValue.includes(' and ')) {
-          mappedData[mappedField] = cleanValue.split(' and ').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-        } else {
-          mappedData[mappedField] = [cleanValue];
-        }
-        fixes.push(`Converted target_market string to customers array`);
-      } else {
-        // Direct field mapping
-        mappedData[mappedField] = value;
-        fixes.push(`Mapped '${key}' to '${mappedField}'`);
-      }
-    } else if (mappedField === null) {
-      // Store in appropriate JSON field
-      if (['company_size', 'pricing_model', 'contact_info', 'social_media'].includes(key)) {
-        companyData[key] = value;
-        fixes.push(`Stored '${key}' in company_data`);
-      } else if (['competitors', 'recent_news', 'unique_value_proposition'].includes(key)) {
-        researchData[key] = value;
-        fixes.push(`Stored '${key}' in research_data`);
-      }
-    } else {
-      // Check if it's a standard database field
-      const standardFields = [
-        'company_name', 'headquarters', 'founding_year', 'company_type', 'description',
-        'core_services', 'specialties', 'customers', 'key_features', 'key_benefits',
-        'website_url', 'source_url', 'funding_stage', 'total_funding', 'key_investors',
-        'competitive_advantages', 'notable_customers', 'status'
-      ];
-      
-      if (standardFields.includes(key)) {
-        mappedData[key] = value;
-      } else {
-        // Store unknown fields in company_data
-        companyData[key] = value;
-        warnings.push(`Unknown field '${key}' stored in company_data`);
-      }
+  // Direct field assignments (no mapping needed)
+  const directFields = [
+    'company_name', 'headquarters', 'founding_year', 'company_type', 'description',
+    'core_services', 'specialties', 'customers', 'key_features', 'key_benefits',
+    'website_url', 'funding_stage', 'total_funding', 'key_investors',
+    'competitive_advantages', 'notable_customers', 'company_data', 'research_data'
+  ];
+  
+  for (const field of directFields) {
+    if (data[field] !== undefined && data[field] !== null) {
+      mappedData[field] = data[field];
+      fixes.push(`Direct assignment: ${field}`);
     }
   }
   
-  // Clean and process specific fields
-  if (mappedData.founding_year) {
-    mappedData.founding_year = extractYearFromText(mappedData.founding_year);
-  }
-  
-  // Clean arrays by removing citations
+  // Clean citations from arrays
   const arrayFields = ['core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'];
   for (const field of arrayFields) {
     if (mappedData[field] && Array.isArray(mappedData[field])) {
       mappedData[field] = cleanArrayValues(mappedData[field]);
+      fixes.push(`Cleaned citations from ${field}`);
     }
   }
   
   // Generate slug from company name
   if (mappedData.company_name) {
     mappedData.slug = generateSlug(mappedData.company_name);
+    fixes.push('Generated slug from company name');
   }
   
-  // Set defaults for required fields
-  if (!mappedData.company_type && companyData.industry) {
-    mappedData.company_type = cleanCitationText(companyData.industry);
-    fixes.push('Used industry as company_type');
-  }
-  
-  if (!mappedData.headquarters && companyData.location) {
-    mappedData.headquarters = cleanCitationText(companyData.location);
-    fixes.push('Used location as headquarters');
-  }
-  
-  // Store JSON data
-  if (Object.keys(companyData).length > 0) {
-    mappedData.company_data = companyData;
-  }
-  
-  if (Object.keys(researchData).length > 0) {
-    mappedData.research_data = researchData;
+  // Clean citations from text fields
+  const textFields = ['company_name', 'headquarters', 'description', 'company_type', 'funding_stage', 'total_funding'];
+  for (const field of textFields) {
+    if (mappedData[field] && typeof mappedData[field] === 'string') {
+      mappedData[field] = cleanCitationText(mappedData[field]);
+    }
   }
   
   return mappedData;
@@ -512,92 +426,59 @@ async function enhancedJsonCleaning(rawJson: string, fixes: string[]): Promise<s
   return cleanedJson;
 }
 
-function validateAndTransformVendorData(data: any, warnings: string[], errors: string[]): any {
-  const transformed: any = {};
+function validateRequiredFields(data: any, warnings: string[], errors: string[]): any {
+  const validated: any = { ...data };
   
-  // Required string fields
-  const stringFields = [
-    'company_name', 'headquarters', 'description', 'company_type',
-    'funding_stage', 'total_funding', 'website_url', 'source_url', 'status', 'slug'
-  ];
-  
-  for (const field of stringFields) {
-    if (data[field] !== undefined && data[field] !== null) {
-      if (typeof data[field] === 'string') {
-        transformed[field] = data[field].trim();
-      } else {
-        transformed[field] = String(data[field]);
-        warnings.push(`Converted ${field} from ${typeof data[field]} to string`);
-      }
+  // Required fields validation
+  const requiredFields = ['company_name', 'headquarters', 'company_type', 'description'];
+  for (const field of requiredFields) {
+    if (!validated[field] || (typeof validated[field] === 'string' && validated[field].trim() === '')) {
+      errors.push(`Missing required field: ${field}`);
     }
   }
   
-  // Numeric fields
-  if (data.founding_year !== undefined && data.founding_year !== null) {
-    const year = Number(data.founding_year);
-    if (isNaN(year) || year < 1800 || year > new Date().getFullYear() + 5) {
-      warnings.push(`Invalid founding year: ${data.founding_year}`);
-    } else {
-      transformed.founding_year = year;
-    }
-  }
-  
-  // Array fields
+  // Ensure array fields are arrays
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'key_features', 
     'key_benefits', 'key_investors', 'competitive_advantages', 'notable_customers'
   ];
   
   for (const field of arrayFields) {
-    if (data[field] !== undefined) {
-      if (Array.isArray(data[field])) {
-        transformed[field] = data[field]
-          .filter(item => typeof item === 'string' && item.trim() !== '')
-          .map(item => item.trim());
-      } else {
-        warnings.push(`Field ${field} should be an array, found ${typeof data[field]}`);
-        transformed[field] = [];
-      }
-    } else {
-      transformed[field] = [];
+    if (!validated[field] || !Array.isArray(validated[field])) {
+      validated[field] = [];
+      warnings.push(`Set empty array for ${field}`);
     }
   }
   
-  // Object fields
-  const objectFields = ['performance_metrics', 'research_data', 'company_data'];
-  for (const field of objectFields) {
-    if (data[field] !== undefined && data[field] !== null) {
-      if (typeof data[field] === 'object') {
-        transformed[field] = data[field];
-      } else {
-        warnings.push(`Field ${field} should be an object, found ${typeof data[field]}`);
-        transformed[field] = {};
-      }
-    } else {
-      transformed[field] = {};
-    }
+  // Ensure JSON fields are objects
+  if (!validated.company_data || typeof validated.company_data !== 'object') {
+    validated.company_data = {};
   }
   
-  // Set default status if not provided
-  if (!transformed.status) {
-    transformed.status = 'draft';
+  if (!validated.research_data || typeof validated.research_data !== 'object') {
+    validated.research_data = {};
   }
   
-  // Ensure required fields have defaults if missing
-  if (!transformed.company_type) {
-    transformed.company_type = 'Technology Company';
+  // Set default status
+  if (!validated.status) {
+    validated.status = 'draft';
+  }
+  
+  // Set defaults for missing required fields
+  if (!validated.company_type) {
+    validated.company_type = 'Technology Company';
     warnings.push('Set default company_type');
   }
   
-  if (!transformed.headquarters) {
-    transformed.headquarters = 'Unknown';
+  if (!validated.headquarters) {
+    validated.headquarters = 'Unknown';
     warnings.push('Set default headquarters');
   }
   
-  if (!transformed.description) {
-    transformed.description = `${transformed.company_name} is a technology company providing innovative solutions.`;
+  if (!validated.description && validated.company_name) {
+    validated.description = `${validated.company_name} is a technology company providing innovative solutions.`;
     warnings.push('Generated default description');
   }
   
-  return transformed;
+  return validated;
 }

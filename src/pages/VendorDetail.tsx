@@ -17,57 +17,114 @@ import { VendorRichData } from '@/components/vendors/VendorRichData';
 
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string) => {
-  return `I need you to research this company thoroughly and provide detailed information in JSON format.
+  return `I need you to research this company thoroughly and provide detailed information in JSON format that matches our exact database schema.
 
 Website: ${websiteUrl}
 
-Please browse their website and provide the following information in valid JSON format:
+Please browse their website and provide the following information in valid JSON format that matches our database fields exactly:
 
 {
-  "company_name": "Exact company name",
-  "website_url": "${websiteUrl}",
-  "description": "Detailed description of what the company does",
-  "industry": "Primary industry/sector",
-  "services": [
+  "company_name": "Access Healthcare Services",
+  "headquarters": "Dallas, Texas, USA",
+  "founding_year": 2011,
+  "company_type": "Private",
+  "description": "Access Healthcare provides revenue cycle management services, HIM solutions, and intelligent automation for healthcare providers, payers, and related organizations. They leverage a global workforce and proprietary platforms like echo to improve operational efficiency, reduce cost to collect, and optimize revenue performance.",
+  "core_services": [
     "Revenue Cycle Management (RCM)",
-    "Patient Access Services",
+    "Patient Access Services", 
     "Medical Coding & Billing",
-    "List all main services offered"
+    "Accounts Receivable Management",
+    "Payment Posting",
+    "Denial Management",
+    "Eligibility & Benefits Verification",
+    "Telehealth Support Services",
+    "HIM & Audit Services",
+    "Business Process Outsourcing (BPO)",
+    "Intelligent Automation (via echo platform)"
   ],
-  "target_market": "Hospitals, health systems, physician groups, payers, and other specific customer types they serve",
-  "company_size": "25,000+ employees or estimated number",
-  "founded_year": "2011 or year founded (if available)",
-  "headquarters": "Dallas, Texas, USA or main office location",
-  "key_technologies": [
+  "specialties": [
     "RPA (Robotic Process Automation)",
-    "Artificial Intelligence (AI)", 
-    "Machine Learning (ML)",
-    "List all technologies and platforms they use"
+    "Artificial Intelligence (AI)",
+    "Machine Learning (ML)", 
+    "Natural Language Processing (NLP)",
+    "echo Platform",
+    "Analytics & Reporting Engines"
   ],
-  "pricing_model": "Custom contracts, subscription model, or how they charge (if available)",
-  "contact_info": {
-    "email": "info@company.com",
-    "phone": "+1 800 XXX XXXX",
-    "address": "Full physical address"
-  },
-  "social_media": {
-    "linkedin": "https://www.linkedin.com/company/...",
-    "twitter": "https://twitter.com/..."
-  },
-  "competitors": [
-    "Main competitor 1",
-    "Main competitor 2", 
-    "List of main competitors"
+  "customers": [
+    "Hospitals",
+    "Health systems", 
+    "Physician groups",
+    "Dental groups",
+    "Payers",
+    "RCM software platforms"
   ],
-  "unique_value_proposition": "What makes them different from competitors, their key differentiators",
-  "recent_news": [
-    "Recent expansion news",
-    "Product launches",
-    "Any recent news or updates from 2023-2024"
-  ]
+  "key_features": [
+    "End-to-end RCM automation",
+    "Real-time analytics and reporting",
+    "Scalable global workforce",
+    "AI-powered claim processing",
+    "Integrated denial management",
+    "Multi-platform compatibility"
+  ],
+  "key_benefits": [
+    "Reduced cost to collect",
+    "Improved operational efficiency", 
+    "Faster claim processing",
+    "Higher collection rates",
+    "Compliance with healthcare regulations",
+    "24/7 global support coverage"
+  ],
+  "website_url": "${websiteUrl}",
+  "funding_stage": "Private Equity",
+  "total_funding": "Not publicly disclosed",
+  "key_investors": [
+    "Private equity firms",
+    "Healthcare-focused investors"
+  ],
+  "competitive_advantages": [
+    "Scalable workforce with deep domain expertise in U.S. healthcare billing practices",
+    "Proprietary echo platform enabling end-to-end automation of RCM workflows", 
+    "Global delivery centers providing cost-effective solutions",
+    "AI-powered predictive analytics for denial management"
+  ],
+  "notable_customers": [
+    "Large healthcare providers",
+    "Multi-specialty physician groups",
+    "Regional health systems"
+  ],
+  "company_data": {
+    "company_size": "25,000+ employees",
+    "pricing_model": "Custom contracts based on scope of RCM services and automation tools; pricing details not publicly disclosed",
+    "contact_info": {
+      "email": "info@accesshealthcare.com",
+      "phone": "+1 800 267 2671",
+      "address": "8500 Freeport Parkway, Suite 150, Irving, TX 75063, USA"
+    },
+    "social_media": {
+      "linkedin": "https://www.linkedin.com/company/accesshealthcare/",
+      "twitter": "https://twitter.com/AccessHCS"
+    }
+  },
+  "research_data": {
+    "competitors": [
+      "Omega Healthcare",
+      "GeBBS Healthcare Solutions", 
+      "AGS Health",
+      "R1 RCM",
+      "nThrive (now FinThrive)",
+      "3M Health Information Systems",
+      "Change Healthcare (now part of Optum)"
+    ],
+    "unique_value_proposition": "Access Healthcare differentiates itself with a scalable workforce, deep domain expertise in U.S. healthcare billing practices, and its proprietary echo platform that enables end-to-end automation of RCM workflows, leading to higher collections at lower costs.",
+    "recent_news": [
+      "In 2023, Access Healthcare expanded its global delivery centers in the Philippines and India to accommodate growing demand from U.S. clients.",
+      "They launched an enhanced version of their echo platform integrating AI-powered predictive analytics to improve denial management and claims resolution.", 
+      "They announced partnerships with large healthcare providers and RCM platforms to support digital transformation initiatives in revenue cycle operations."
+    ]
+  }
 }
 
-Please ensure the JSON is valid and complete. If any information is not available, use null or an empty array as appropriate.`;
+CRITICAL: Use the exact field names shown above. Do not change any field names. If information is not available, use null for strings/numbers, empty arrays [], or empty objects {} as appropriate.`;
 };
 
 import { useIsMobile } from '@/hooks/use-mobile';
