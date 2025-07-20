@@ -738,13 +738,14 @@ export default function VendorDetail() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                  <ul className="space-y-2">
                     {vendor.customers.map((customer, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs sm:text-sm">
-                        {customer}
-                      </Badge>
+                      <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
+                        <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                        <span>{customer}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </CardContent>
               </Card>
 
@@ -756,13 +757,14 @@ export default function VendorDetail() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
+                  <ul className="space-y-2">
                     {vendor.specialties.map((specialty, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs sm:text-sm">
-                        {specialty}
-                      </Badge>
+                      <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
+                        <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                        <span>{specialty}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </CardContent>
               </Card>
 
@@ -806,13 +808,14 @@ export default function VendorDetail() {
                     <CardTitle className="text-lg sm:text-xl">Notable Customers</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2">
+                    <ul className="space-y-2">
                       {vendor.notable_customers.map((customer, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs sm:text-sm">
-                          {customer}
-                        </Badge>
+                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
+                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                          <span>{customer}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </CardContent>
                 </Card>
               )}
@@ -841,13 +844,14 @@ export default function VendorDetail() {
                     <CardTitle className="text-lg sm:text-xl">Competitors</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2">
+                    <ul className="space-y-2">
                       {(vendor.competitors?.length > 0 ? vendor.competitors : vendor.research_data?.competitors || []).map((competitor, idx) => (
-                        <Badge key={idx} variant="destructive" className="text-xs sm:text-sm">
-                          {competitor}
-                        </Badge>
+                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
+                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                          <span>{competitor}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </CardContent>
                 </Card>
               )}
