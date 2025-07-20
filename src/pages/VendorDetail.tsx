@@ -17,65 +17,115 @@ import { VendorRichData } from '@/components/vendors/VendorRichData';
 
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
-  return `I need you to research this company thoroughly and provide detailed information in JSON format that matches our exact database schema.
+  return `You are an expert business research analyst with advanced website browsing capabilities. Your task is to conduct comprehensive research on the following company by thoroughly exploring their website and extracting detailed information that matches our exact database schema.
 
+**COMPANY TO RESEARCH:**
 Website: ${websiteUrl}
 Company: ${vendor.company_name}
 
-Please browse their website and provide the following information in valid JSON format that matches our database fields exactly:
+**RESEARCH METHODOLOGY:**
+1. Browse and analyze ALL accessible pages of the website including:
+   - Homepage and main navigation sections
+   - About Us, Company, Team, Leadership pages
+   - Products, Services, Solutions pages
+   - Customer stories, case studies, testimonials
+   - News, Press releases, Blog posts
+   - Careers, Jobs, Culture pages
+   - Investor relations, Funding announcements
+   - Resource center, whitepapers, documentation
+   - Contact, locations, office information
+
+2. Look for additional information sources:
+   - Sub-domains (blog.*, news.*, investors.*)
+   - Footer links and legal pages
+   - Product documentation and technical specs
+   - Partner and integration pages
+   - Social proof and customer logos
+
+**EXTRACTION GUIDELINES:**
+- Extract ONLY factual information found on the website
+- When direct information isn't available, use contextual clues and industry standards
+- For missing data, use appropriate null values or empty arrays
+- Rewrite all content in neutral, professional tone (avoid direct quotes)
+- Cross-reference information across multiple pages for accuracy
+- Look for implied information (e.g., enterprise focus from customer logos)
+
+**OUTPUT REQUIREMENTS:**
+Return ONLY valid JSON that matches our database schema exactly. No additional text, explanations, or questions.
+
+**DETAILED FIELD INSTRUCTIONS:**
 
 {
-  "company_name": "Full Company Name",
-  "headquarters": "City, State/Province, Country",
-  "founding_year": 2020,
-  "company_type": "Private|Public|Non-profit",
-  "description": "Detailed company description explaining what they do, their services, and market focus",
-  "core_services": [
-    "Service 1",
-    "Service 2", 
-    "Service 3"
-  ],
-  "customers": [
-    "Target Customer Type 1",
-    "Target Customer Type 2",
-    "Target Customer Type 3"
-  ],
-  "specialties": [
-    "Specialty Area 1",
-    "Specialty Area 2",
-    "Technology Focus 1"
-  ],
-  "key_features": [
-    "Key Feature 1",
-    "Key Feature 2",
-    "Key Feature 3"
-  ],
-  "key_benefits": [
-    "Business Benefit 1",
-    "Business Benefit 2",
-    "Business Benefit 3"
-  ],
+  "company_name": "Extract official company name from header, about page, or legal sections",
+  
+  "headquarters": "Look in contact/about pages for main office location. Format: 'City, State/Province, Country'",
+  
+  "founding_year": "Check about page, timeline, company history sections. Use numeric year only",
+  
+  "company_type": "Determine from about page, legal info, or context. Options: 'Private', 'Public', 'Startup', 'Subsidiary', 'Non-profit'",
+  
+  "description": "Write comprehensive 2-3 sentence description combining mission, main business, and market focus. Extract from about page, homepage hero section, or company overview",
+  
+  "core_services": "Array of 3-8 main services/products. Check services page, navigation menu, product sections. Be specific (e.g., 'Cloud Infrastructure Management' not just 'Cloud Services')",
+  
+  "customers": "Array of target customer types. Look for customer pages, case studies, 'who we serve' sections. Include business size, industry, or role (e.g., 'Enterprise Healthcare Organizations', 'Mid-market SaaS Companies')",
+  
+  "specialties": "Array of 3-6 technical specialties, methodologies, or niche focuses. Check technology pages, expertise sections, certifications, or technical documentation",
+  
+  "key_features": "Array of 4-8 main product/service features. Extract from product pages, feature lists, or capability sections. Focus on functional capabilities",
+  
+  "key_benefits": "Array of 4-8 business benefits customers receive. Look for outcomes, ROI statements, value propositions. Focus on business impact",
+  
+  "competitive_advantages": "Array of 2-5 unique differentiators. Check 'why choose us', competitive comparison pages, or unique selling propositions",
+  
+  "notable_customers": "Array of recognizable customer names from case studies, testimonials, customer logos, or press releases. Include company names only",
+  
   "website_url": "${websiteUrl}",
-  "funding_stage": "Seed|Series A|Series B|Private Equity|Public|Bootstrap",
-  "total_funding": "$X million" or "Not disclosed",
-  "key_investors": [
-    "Investor 1",
-    "Investor 2"
-  ],
-  "competitive_advantages": [
-    "Advantage 1",
-    "Advantage 2"
-  ],
-  "notable_customers": [
-    "Notable Customer 1",
-    "Notable Customer 2"
-  ],
-  "company_data": {},
-  "research_data": {}
-}
+  
+  "funding_stage": "Check press releases, about page, investor section. Options: 'Bootstrap', 'Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Private Equity', 'Public', 'Acquired'",
+  
+  "total_funding": "Look for funding announcements, press releases, or investor pages. Format as '$X million' or '$X billion'. Use 'Not disclosed' if private",
+  
+  "key_investors": "Array of investor names from press releases, about page, or investor sections. Include VC firms, strategic investors, or notable individual investors",
+  
+  "research_data": {
+    "data_sources": "Array listing specific website sections explored (e.g., ['About Page', 'Product Documentation', 'Press Releases', 'Customer Case Studies'])",
+    "confidence_level": "Rate data confidence: 'high' (comprehensive website info), 'medium' (some gaps), or 'low' (limited information)",
+    "verification_status": "'verified' if cross-referenced across multiple pages, 'unverified' if single source",
+    "research_quality": "'comprehensive' if 5+ pages analyzed, 'standard' if 3-4 pages, 'limited' if 1-2 pages only",
+    "last_updated": "Current timestamp in ISO format",
+    "website_structure": "Brief description of website organization and information availability",
+    "data_completeness": "Percentage estimate of how much required information was found (e.g., '85%')",
+    "notable_findings": "Array of interesting discoveries not captured in standard fields"
+  },
+  
+  "company_data": {
+    "employee_count_range": "Estimate from careers page, team size, or about section (e.g., '50-100', '500-1000')",
+    "office_locations": "Array of office locations from contact/locations pages",
+    "tech_stack": "Array of technologies mentioned in job postings, technical docs, or integration pages",
+    "certifications": "Array of industry certifications, compliance standards, or security badges found",
+    "partnerships": "Array of strategic partners, integrations, or technology alliances mentioned",
+    "awards_recognition": "Array of awards, recognition, or industry rankings found on the site"
+  }
 }
 
-CRITICAL: Use the exact field names shown above. Do not change any field names. If information is not available, use null for strings/numbers, empty arrays [], or empty objects {} as appropriate.`;
+**QUALITY VALIDATION:**
+Before returning JSON, verify:
+- All required string fields have meaningful content (minimum 10 characters)
+- Arrays contain 3+ relevant items where specified
+- No placeholder text or generic descriptions
+- Dates are properly formatted
+- Company name matches website branding
+- Information is factual and website-sourced
+
+**CRITICAL INSTRUCTIONS:**
+- Use exact field names shown above - do not modify any field names
+- Return ONLY the JSON object - no additional text, markdown, or explanations
+- If information is unavailable, use null for strings/numbers, empty arrays [] for arrays, empty objects {} for objects
+- Be thorough - spend time exploring the website comprehensively
+- Focus on accuracy over speed - verify information across multiple pages
+
+Begin your comprehensive website analysis now and return the complete JSON object.`;
 };
 
 import { useIsMobile } from '@/hooks/use-mobile';
