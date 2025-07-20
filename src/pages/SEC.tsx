@@ -197,9 +197,9 @@ const SEC = () => {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 pb-8">
-          <div className="flex gap-6">
+          <div className="flex gap-3">
             {/* Desktop Filter Sidebar */}
-            <div className="hidden lg:block w-80 flex-shrink-0">
+            <div className="hidden lg:block w-64 flex-shrink-0">
               <FilterSidebar 
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
