@@ -11,6 +11,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Vendors() {
   const {
@@ -22,6 +33,9 @@ export default function Vendors() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState<any>(null);
+  const { toast } = useToast();
 
   // Fetch vendors from database
   const {
@@ -116,39 +130,66 @@ export default function Vendors() {
     refetch();
   };
 
-  const handleDeleteVendor = async (vendor: any) => {
-    if (window.confirm(`Are you sure you want to delete ${vendor.company_name}?`)) {
-      try {
-        console.log('Attempting to delete vendor:', vendor.id, 'User ID:', user?.id);
-        const {
-          data,
-          error,
-          count
-        } = await supabase.from('vendors').delete().eq('id', vendor.id).select('*');
-        console.log('Delete result:', {
-          data,
-          error,
-          count
-        });
-        if (error) {
-          console.error('Supabase delete error:', error);
-          if (error.code === 'PGRST116') {
-            alert('You can only delete vendors you created. This vendor was created by another user.');
-          } else {
-            alert(`Failed to delete vendor: ${error.message}`);
-          }
-          return;
+  const handleDeleteVendor = (vendor: any) => {
+    setVendorToDelete(vendor);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteVendor = async () => {
+    if (!vendorToDelete) return;
+
+    try {
+      console.log('Attempting to delete vendor:', vendorToDelete.id, 'User ID:', user?.id);
+      const { data, error } = await supabase
+        .from('vendors')
+        .delete()
+        .eq('id', vendorToDelete.id)
+        .select('*');
+        
+      console.log('Delete result:', { data, error });
+      
+      if (error) {
+        console.error('Supabase delete error:', error);
+        if (error.code === 'PGRST116') {
+          toast({
+            title: "Permission Denied",
+            description: "You can only delete vendors you created.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to delete vendor: ${error.message}`,
+            variant: "destructive",
+          });
         }
-        if (!data || data.length === 0) {
-          alert('Vendor not found or you do not have permission to delete it.');
-          return;
-        }
-        alert('Vendor deleted successfully!');
-        refetch();
-      } catch (error) {
-        console.error('Error deleting vendor:', error);
-        alert('Failed to delete vendor: Network or unexpected error');
+        return;
       }
+      
+      if (!data || data.length === 0) {
+        toast({
+          title: "Not Found",
+          description: "Vendor not found or you do not have permission to delete it.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Vendor deleted successfully!",
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error deleting vendor:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete vendor: Network or unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteModalOpen(false);
+      setVendorToDelete(null);
     }
   };
 
@@ -241,7 +282,31 @@ export default function Vendors() {
           </div>
         </div>
         
-        <AddVendorModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onVendorAdded={handleVendorAdded} />
+        <AddVendorModal 
+          isOpen={isAddModalOpen} 
+          onClose={() => setIsAddModalOpen(false)} 
+          onVendorAdded={handleVendorAdded} 
+        />
+
+        <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete "{vendorToDelete?.company_name}". This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteVendor}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageLayout>;
 }
