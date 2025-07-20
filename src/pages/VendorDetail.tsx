@@ -483,18 +483,52 @@ export default function VendorDetail() {
       return;
     }
 
-    // Find or create a Website Structure Analyzer agent
+    // Find any suitable agent or create one automatically
     let sitemapAgent = agents?.find(agent => 
       agent.name === "Website Structure Analyzer" && agent.status === "active"
     );
 
+    // If no specific agent exists, use any active agent
+    if (!sitemapAgent && agents && agents.length > 0) {
+      sitemapAgent = agents.find(agent => agent.status === "active");
+    }
+
+    // If still no agent, create one automatically
     if (!sitemapAgent) {
-      toast({
-        title: "Agent Required",
-        description: "Please create a 'Website Structure Analyzer' agent first in the Agents section.",
-        variant: "destructive",
-      });
-      return;
+      try {
+        const { data: newAgent, error: createError } = await supabase
+          .from('openai_agents')
+          .insert([{
+            name: "Website Structure Analyzer",
+            purpose: "Analyzes website structure and content organization",
+            model_version: "gpt-4o",
+            trigger: "manual",
+            input_source: "website_url",
+            output_target: "sitemap_tree",
+            schedule: "manual",
+            owner: "System",
+            status: "active" as const,
+            metrics: { latencyMs: 0, errorRate: 0 },
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          }])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        sitemapAgent = newAgent as any; // Cast to bypass type mismatch
+        
+        toast({
+          title: "Agent Created",
+          description: "Website Structure Analyzer agent created automatically.",
+        });
+      } catch (error) {
+        toast({
+          title: "Agent Creation Failed",
+          description: "Could not create the required agent. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsAnalyzingWebsite(true);
