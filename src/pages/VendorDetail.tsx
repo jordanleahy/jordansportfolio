@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useVendorBySlug } from '@/hooks/useVendors';
+import { useVendorBySlug } from "@/hooks/useVendors";
 import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +18,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorSitemapTree } from '@/components/vendors/VendorSitemapTree';
-import { useSystemAgent } from '@/hooks/useSystemAgent';
+// Removed useSystemAgent import - using direct sitemap fetch instead
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -216,7 +216,6 @@ export default function VendorDetail() {
   const { isAdmin } = useUserRole();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
-  const { data: websiteAnalyzerAgent, error: agentError } = useSystemAgent("Website Structure Analyzer");
 
   console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
@@ -483,22 +482,12 @@ export default function VendorDetail() {
       return;
     }
 
-    if (!websiteAnalyzerAgent) {
-      toast({
-        title: "System Agent Unavailable",
-        description: agentError?.message || "Website analyzer is not available. Please contact support.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsAnalyzingWebsite(true);
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-website-structure', {
+      const { data, error } = await supabase.functions.invoke('fetch-sitemap', {
         body: {
           vendorId: vendor.id,
           websiteUrl: vendor.website_url,
-          agentId: websiteAnalyzerAgent.id
         }
       });
 
@@ -506,20 +495,21 @@ export default function VendorDetail() {
 
       if (data.success) {
         toast({
-          title: "Website Analysis Complete",
-          description: "Website structure has been analyzed and saved.",
+          title: "Sitemap Analysis Complete",
+          description: data.message || "Website sitemap has been fetched and saved.",
         });
         
-        // Refresh the page to show the analysis
+        // Refresh vendor data to show updated sitemap
         window.location.reload();
       } else {
-        throw new Error(data.error || 'Analysis failed');
+        throw new Error(data.error || 'Failed to fetch sitemap');
       }
+
     } catch (error) {
-      console.error('Website analysis error:', error);
+      console.error('Sitemap fetch error:', error);
       toast({
-        title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Failed to analyze website structure.",
+        title: "Sitemap Fetch Failed",
+        description: error instanceof Error ? error.message : "Failed to fetch sitemap.",
         variant: "destructive",
       });
     } finally {
