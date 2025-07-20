@@ -98,7 +98,7 @@ export function useVendorEdit({ vendor, onSave }: UseVendorEditProps) {
         .from('vendors')
         .update({
           ...validation.cleanedData,
-          status: 'published',
+          status: 'completed',
           updated_at: new Date().toISOString()
         })
         .eq('id', vendor.id);
