@@ -99,7 +99,7 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-center gap-2 h-11 text-sm border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 animate-fade-in"
+              className="w-full justify-center gap-2 h-11 text-sm border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 hover:text-foreground transition-all duration-200 animate-fade-in"
             >
               <Plus className="h-4 w-4" />
               Add competitor
