@@ -1263,88 +1263,127 @@ export type Database = {
       }
       vendors: {
         Row: {
+          awards_recognition: string[] | null
+          business_model: string | null
+          certifications: string[] | null
           company_data: Json | null
           company_name: string
           company_type: string
           competitive_advantages: string[]
           competitors: string[]
+          contact_address: string | null
+          contact_email: string | null
+          contact_phone: string | null
           core_services: string[]
           created_at: string
           customers: string[]
           description: string
+          employee_count_range: string | null
           founding_year: number | null
           funding_stage: string | null
+          geographic_presence: string | null
           headquarters: string
           id: string
           key_benefits: string[]
           key_features: string[]
           key_investors: string[]
+          linkedin_url: string | null
           notable_customers: string[]
+          office_locations: string[] | null
+          partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
           slug: string
           source_url: string | null
           specialties: string[]
           status: string | null
+          tech_stack: string[] | null
           total_funding: string | null
+          twitter_url: string | null
           updated_at: string
           user_id: string
           website_url: string | null
         }
         Insert: {
+          awards_recognition?: string[] | null
+          business_model?: string | null
+          certifications?: string[] | null
           company_data?: Json | null
           company_name: string
           company_type: string
           competitive_advantages?: string[]
           competitors?: string[]
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           core_services?: string[]
           created_at?: string
           customers?: string[]
           description: string
+          employee_count_range?: string | null
           founding_year?: number | null
           funding_stage?: string | null
+          geographic_presence?: string | null
           headquarters: string
           id?: string
           key_benefits?: string[]
           key_features?: string[]
           key_investors?: string[]
+          linkedin_url?: string | null
           notable_customers?: string[]
+          office_locations?: string[] | null
+          partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
           slug: string
           source_url?: string | null
           specialties?: string[]
           status?: string | null
+          tech_stack?: string[] | null
           total_funding?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id: string
           website_url?: string | null
         }
         Update: {
+          awards_recognition?: string[] | null
+          business_model?: string | null
+          certifications?: string[] | null
           company_data?: Json | null
           company_name?: string
           company_type?: string
           competitive_advantages?: string[]
           competitors?: string[]
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           core_services?: string[]
           created_at?: string
           customers?: string[]
           description?: string
+          employee_count_range?: string | null
           founding_year?: number | null
           funding_stage?: string | null
+          geographic_presence?: string | null
           headquarters?: string
           id?: string
           key_benefits?: string[]
           key_features?: string[]
           key_investors?: string[]
+          linkedin_url?: string | null
           notable_customers?: string[]
+          office_locations?: string[] | null
+          partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
           slug?: string
           source_url?: string | null
           specialties?: string[]
           status?: string | null
+          tech_stack?: string[] | null
           total_funding?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
