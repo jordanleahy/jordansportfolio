@@ -140,7 +140,6 @@ export function CompetitorSelector({ value, onChange, maxItems = 10 }: Competito
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium text-sm text-foreground truncate">{company.company_name}</div>
-                                <div className="text-xs text-muted-foreground">Existing vendor</div>
                               </div>
                             </CommandItem>
                           ))}
