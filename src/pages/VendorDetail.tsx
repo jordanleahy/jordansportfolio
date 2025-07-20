@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Edit } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,24 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
+import { EditableSection } from '@/components/vendors/EditableSection';
+import {
+  companyOverviewConfig,
+  servicesConfig,
+  specializationsConfig,
+  customersConfig,
+  featuresConfig,
+  benefitsConfig,
+  competitiveConfig,
+  competitorsConfig,
+  notableCustomersConfig,
+  fundingConfig,
+  businessConfig,
+  contactConfig,
+  socialConfig,
+  recognitionConfig,
+  technologyConfig,
+} from '@/data/vendorSectionConfigs';
 
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
@@ -188,7 +206,7 @@ export default function VendorDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isAdmin } = useUserRole();
@@ -721,17 +739,6 @@ export default function VendorDetail() {
                     >
                       <Clipboard className="h-4 w-4" />
                     </Button>
-                    {isAdmin && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setIsEditing(!isEditing)}
-                        aria-label={isEditing ? "Exit Edit Mode" : "Edit Vendor"}
-                        className="min-h-[44px] min-w-[44px]"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    )}
                   </>
                 )}
               </div>
@@ -740,171 +747,97 @@ export default function VendorDetail() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
             <div className="xl:col-span-2 space-y-6 lg:space-y-8">
-              {isEditing && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <Edit className="h-4 w-4 text-amber-600" />
-                    <span className="text-amber-800 font-medium">Edit Mode Active</span>
-                  </div>
-                  <p className="text-amber-700 text-sm mt-1">You are now in edit mode. Click sections to edit them inline.</p>
-                </div>
-              )}
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl">Company Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-                    {vendor.description}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Sparkles className="h-5 w-5" />
-                    Core Services
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {vendor.core_services.map((service, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                        <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                        <span>{service}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Users className="h-5 w-5" />
-                    Target Customers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {vendor.customers.map((customer, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                        <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                        <span>{customer}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Target className="h-5 w-5" />
-                    Specialty Focus
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {vendor.specialties.map((specialty, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                        <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                        <span>{specialty}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <EditableSection 
+                vendor={vendor} 
+                config={companyOverviewConfig} 
+                canEdit={isAdmin}
+              />
+              
+              <EditableSection 
+                vendor={vendor} 
+                config={servicesConfig} 
+                canEdit={isAdmin}
+              />
+              
+              <EditableSection 
+                vendor={vendor} 
+                config={customersConfig} 
+                canEdit={isAdmin}
+              />
+              
+              <EditableSection 
+                vendor={vendor} 
+                config={specializationsConfig} 
+                canEdit={isAdmin}
+              />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Key Features</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {vendor.key_features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <EditableSection 
+                  vendor={vendor} 
+                  config={featuresConfig} 
+                  canEdit={isAdmin}
+                />
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Key Benefits</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {vendor.key_benefits.map((benefit, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <EditableSection 
+                  vendor={vendor} 
+                  config={benefitsConfig} 
+                  canEdit={isAdmin}
+                />
               </div>
 
-              {vendor.notable_customers && vendor.notable_customers.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Notable Customers</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {vendor.notable_customers.map((customer, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                          <span>{customer}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
+              <EditableSection 
+                vendor={vendor} 
+                config={notableCustomersConfig} 
+                canEdit={isAdmin}
+              />
 
-              {vendor.competitive_advantages && vendor.competitive_advantages.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Competitive Advantages</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {vendor.competitive_advantages.map((advantage, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                          <span>{advantage}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
+              <EditableSection 
+                vendor={vendor} 
+                config={competitiveConfig} 
+                canEdit={isAdmin}
+              />
 
-              {(vendor.competitors && vendor.competitors.length > 0) || (vendor.research_data?.competitors && vendor.research_data?.competitors.length > 0) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Competitors</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {(vendor.competitors?.length > 0 ? vendor.competitors : vendor.research_data?.competitors || []).map((competitor, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm sm:text-base">
-                          <span className="text-primary mt-1.5 flex-shrink-0">•</span>
-                          <span>{competitor}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
+              <EditableSection 
+                vendor={vendor} 
+                config={competitorsConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={fundingConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={businessConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={contactConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={socialConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={recognitionConfig} 
+                canEdit={isAdmin}
+              />
+
+              <EditableSection 
+                vendor={vendor} 
+                config={technologyConfig} 
+                canEdit={isAdmin}
+              />
 
               {vendor.performance_metrics && (
                 <PerformanceMetrics metrics={vendor.performance_metrics} />
