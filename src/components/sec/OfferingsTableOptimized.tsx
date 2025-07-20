@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -183,9 +182,10 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
     return (
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-10 w-full sm:w-80" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-4 w-48" />
           </div>
         </CardHeader>
         <CardContent>
@@ -223,36 +223,36 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <CardTitle>SEC Offerings ({totalItems.toLocaleString()} total)</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search companies, industries, locations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => setSearchQuery('')}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground min-h-[24px]">
-              {getSearchMessage() && (
-                <span className={isSearchTooShort ? "text-amber-600" : ""}>
-                  {getSearchMessage()}
-                </span>
-              )}
-            </div>
-          </div>
+        <CardTitle>SEC Offerings ({totalItems.toLocaleString()} total)</CardTitle>
+        
+        {/* Search Input - Full Width */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search companies, industries, locations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+              onClick={() => setSearchQuery('')}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+
+        {/* Search Message - Underneath Input */}
+        <div className="flex items-center text-sm text-muted-foreground min-h-[24px]">
+          {getSearchMessage() && (
+            <span className={isSearchTooShort ? "text-amber-600" : ""}>
+              {getSearchMessage()}
+            </span>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-0">
