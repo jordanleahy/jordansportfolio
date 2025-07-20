@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, Pen } from 'lucide-react';
@@ -27,6 +28,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [creatingBlogIds, setCreatingBlogIds] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'draft' | 'published'>('draft');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const file916InputRef = useRef<HTMLInputElement>(null);
   const file34InputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,11 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
     category: 'cdi'
   });
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
+
+  // Filter posts by status
+  const draftPosts = posts.filter(post => post.status === 'draft');
+  const publishedPosts = posts.filter(post => post.status === 'published');
+  const filteredPosts = activeTab === 'draft' ? draftPosts : publishedPosts;
 
   const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
     try {
@@ -707,23 +714,54 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
           <span className="text-sm text-muted-foreground">{posts.length} posts</span>
         </div>
         
-        <div className="space-y-3">
-          {posts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onCopy={handleCopyContent}
-              onDelete={handleDeletePost}
-              onGeneratePrompt={handleGenerateImagePrompt}
-              onFileSelect={handleMobileFileSelect}
-              onVideoUpload={handleVideoUpload}
-              onVideoRemove={handleVideoRemove}
-              onImageDelete={handleImageDelete}
-              onStatusChange={handleStatusChange}
-              uploadingStates={uploadingStates}
-            />
-          ))}
-        </div>
+        <Tabs defaultValue="draft" onValueChange={(value) => setActiveTab(value as 'draft' | 'published')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="draft">Draft ({draftPosts.length})</TabsTrigger>
+            <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="draft" className="space-y-3 mt-4">
+            {draftPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                onCopy={handleCopyContent}
+                onDelete={handleDeletePost}
+                onGeneratePrompt={handleGenerateImagePrompt}
+                onFileSelect={handleMobileFileSelect}
+                onVideoUpload={handleVideoUpload}
+                onVideoRemove={handleVideoRemove}
+                onImageDelete={handleImageDelete}
+                onStatusChange={handleStatusChange}
+                uploadingStates={uploadingStates}
+              />
+            ))}
+            {draftPosts.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">No draft posts yet.</p>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="published" className="space-y-3 mt-4">
+            {publishedPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                onCopy={handleCopyContent}
+                onDelete={handleDeletePost}
+                onGeneratePrompt={handleGenerateImagePrompt}
+                onFileSelect={handleMobileFileSelect}
+                onVideoUpload={handleVideoUpload}
+                onVideoRemove={handleVideoRemove}
+                onImageDelete={handleImageDelete}
+                onStatusChange={handleStatusChange}
+                uploadingStates={uploadingStates}
+              />
+            ))}
+            {publishedPosts.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">No published posts yet.</p>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <ImagePromptModal
           isOpen={imagePromptModal.isOpen}
@@ -759,368 +797,744 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
         <CardTitle>Your Social Media Posts</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Day</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>16:9 Image</TableHead>
-              <TableHead>16:9 Vid</TableHead>
-              <TableHead>3:4 Image</TableHead>
-              <TableHead>3:4 Vid</TableHead>
-              <TableHead>Video</TableHead>
-              
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {posts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
-              <TableRow key={post.id}>
-                <TableCell className="font-medium">
-                  {post.day || '-'}
-                </TableCell>
-                <TableCell className="font-medium max-w-xs">
-                  <div className="truncate" title={post.title}>
-                    {post.title}
-                  </div>
-                </TableCell>
-                <TableCell className="max-w-sm">
-                  <div className="truncate" title={post.description}>
-                    {post.description.length > 100 ? post.description.substring(0, 100) + '...' : post.description}
-                  </div>
-                  {post.description.length > 100 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 mt-1 text-xs text-primary"
-                      onClick={() => {
-                        // Show full description in a simple alert for now - could be enhanced with a modal
-                        toast({
-                          title: post.title,
-                          description: post.description,
-                        });
-                      }}
-                    >
-                      Read more
-                    </Button>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileSelect(post.id, e)}
-                      className="hidden"
-                      id={`upload-${post.id}`}
-                    />
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => document.getElementById(`upload-${post.id}`)?.click()}
-                      title="Click to upload 16:9 image"
-                    >
-                      {post.image_16_9_url ? (
-                        <ImageHoverOverlay
-                          onUpload={() => document.getElementById(`upload-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
-                          onDelete={() => handleImageDelete(post.id, '16_9')}
-                          imageUrl={post.image_16_9_url}
+        <Tabs defaultValue="draft" onValueChange={(value) => setActiveTab(value as 'draft' | 'published')}>
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="draft">Draft ({draftPosts.length})</TabsTrigger>
+            <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="draft">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Day</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>16:9 Image</TableHead>
+                  <TableHead>16:9 Vid</TableHead>
+                  <TableHead>3:4 Image</TableHead>
+                  <TableHead>3:4 Vid</TableHead>
+                  <TableHead>Video</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {draftPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">
+                      {post.day || '-'}
+                    </TableCell>
+                    <TableCell className="font-medium max-w-xs">
+                      <div className="truncate" title={post.title}>
+                        {post.title}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-sm">
+                      <div className="truncate" title={post.description}>
+                        {post.description.length > 100 ? post.description.substring(0, 100) + '...' : post.description}
+                      </div>
+                      {post.description.length > 100 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 mt-1 text-xs text-primary"
+                          onClick={() => {
+                            toast({
+                              title: post.title,
+                              description: post.description,
+                            });
+                          }}
                         >
-                          <OptimizedImage
-                            src={post.image_16_9_url}
-                            alt="16:9 Image"
-                            aspectRatio="16/9"
-                            className="w-20 h-auto rounded border cursor-pointer"
-                          />
-                        </ImageHoverOverlay>
-                      ) : (
-                        <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                          {uploadingPostId === post.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          ) : (
-                            <>
-                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground ml-1">16:9</span>
-                            </>
-                          )}
-                        </div>
+                          Read more
+                        </Button>
                       )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFile916Select(post.id, e)}
-                      className="hidden"
-                      id={`upload-916-${post.id}`}
-                    />
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
-                      title="Click to upload 9:16 video"
-                    >
-                       {post.image_9_16_url ? (
-                        <ImageHoverOverlay
-                          onUpload={() => document.getElementById(`upload-916-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
-                          onDelete={() => handleImageDelete(post.id, '9_16')}
-                          imageUrl={post.image_9_16_url}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileSelect(post.id, e)}
+                          className="hidden"
+                          id={`upload-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-${post.id}`)?.click()}
+                          title="Click to upload 16:9 image"
                         >
-                          <OptimizedImage
-                            src={post.image_9_16_url}
-                            alt="16:9 Video"
-                            aspectRatio="9/16"
-                            className="w-12 h-auto rounded border cursor-pointer"
-                          />
-                        </ImageHoverOverlay>
-                      ) : (
-                        <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                          {uploading916PostId === post.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          {post.image_16_9_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '16_9')}
+                              imageUrl={post.image_16_9_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_16_9_url}
+                                alt="16:9 Image"
+                                aspectRatio="16/9"
+                                className="w-20 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
                           ) : (
-                            <div className="flex flex-col items-center">
-                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">16:9 Vid</span>
+                            <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploadingPostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <>
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground ml-1">16:9</span>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFile34Select(post.id, e)}
-                      className="hidden"
-                      id={`upload-34-${post.id}`}
-                    />
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => document.getElementById(`upload-34-${post.id}`)?.click()}
-                      title="Click to upload 3:4 image"
-                    >
-                       {post.image_3_4_url ? (
-                        <ImageHoverOverlay
-                          onUpload={() => document.getElementById(`upload-34-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
-                          onDelete={() => handleImageDelete(post.id, '3_4')}
-                          imageUrl={post.image_3_4_url}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile916Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-916-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-916-${post.id}`)?.click()}
+                          title="Click to upload 9:16 video"
                         >
-                          <OptimizedImage
-                            src={post.image_3_4_url}
-                            alt="3:4 Image"
-                            aspectRatio="3/4"
-                            className="w-16 h-auto rounded border cursor-pointer"
-                          />
-                        </ImageHoverOverlay>
-                      ) : (
-                        <div className="w-16 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                          {uploading34PostId === post.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          {post.image_9_16_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-916-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '9_16')}
+                              imageUrl={post.image_9_16_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_9_16_url}
+                                alt="16:9 Video"
+                                aspectRatio="9/16"
+                                className="w-12 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
                           ) : (
-                            <div className="flex flex-col items-center">
-                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">3:4</span>
+                            <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading916PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">16:9 Vid</span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFile43Select(post.id, e)}
-                      className="hidden"
-                      id={`upload-43-${post.id}`}
-                    />
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => document.getElementById(`upload-43-${post.id}`)?.click()}
-                      title="Click to upload 3:4 video"
-                    >
-                       {post.image_4_3_url ? (
-                        <ImageHoverOverlay
-                          onUpload={() => document.getElementById(`upload-43-${post.id}`)?.click()}
-                          onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
-                          onDelete={() => handleImageDelete(post.id, '4_3')}
-                          imageUrl={post.image_4_3_url}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile34Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-34-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-34-${post.id}`)?.click()}
+                          title="Click to upload 3:4 image"
                         >
-                          <OptimizedImage
-                            src={post.image_4_3_url}
-                            alt="3:4 Video"
-                            aspectRatio="4/3"
-                            className="w-20 h-auto rounded border cursor-pointer"
-                          />
-                        </ImageHoverOverlay>
-                      ) : (
-                        <div className="w-20 h-16 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                          {uploading43PostId === post.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          {post.image_3_4_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-34-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '3_4')}
+                              imageUrl={post.image_3_4_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_3_4_url}
+                                alt="3:4 Image"
+                                aspectRatio="3/4"
+                                className="w-16 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
                           ) : (
-                            <div className="flex flex-col items-center">
-                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-xs text-muted-foreground">3:4 Vid</span>
+                            <div className="w-16 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading34PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">3:4</span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={async () => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv';
-                        input.onchange = async (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            console.log('Video file selected:', file.name, file.type, file.size);
-                            setUploadingGeneralVideoPostId(post.id);
-                            
-                            try {
-                              // Upload the video file using the existing video upload utility
-                              const { uploadVideoToStorage } = await import('@/utils/videoUpload');
-                              console.log('Starting video upload...');
-                              const result = await uploadVideoToStorage(file);
-                              console.log('Upload result:', result);
-                              
-                              if (result.success && result.url) {
-                                console.log('Updating post with video URL:', result.url);
-                                await handleVideoUpload(post.id, result.url, 'general_video');
-                                toast({
-                                  title: "Success",
-                                  description: "Video uploaded successfully",
-                                });
-                              } else {
-                                console.error('Upload failed:', result.error);
-                                toast({
-                                  title: "Upload failed",
-                                  description: result.error || "Failed to upload video",
-                                  variant: "destructive",
-                                });
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile43Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-43-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-43-${post.id}`)?.click()}
+                          title="Click to upload 3:4 video"
+                        >
+                          {post.image_4_3_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-43-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '4_3')}
+                              imageUrl={post.image_4_3_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_4_3_url}
+                                alt="3:4 Video"
+                                aspectRatio="4/3"
+                                className="w-20 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
+                          ) : (
+                            <div className="w-20 h-16 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading43PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">3:4 Vid</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={async () => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv';
+                            input.onchange = async (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                console.log('Video file selected:', file.name, file.type, file.size);
+                                setUploadingGeneralVideoPostId(post.id);
+                                
+                                try {
+                                  const { uploadVideoToStorage } = await import('@/utils/videoUpload');
+                                  console.log('Starting video upload...');
+                                  const result = await uploadVideoToStorage(file);
+                                  console.log('Upload result:', result);
+                                  
+                                  if (result.success && result.url) {
+                                    console.log('Updating post with video URL:', result.url);
+                                    await handleVideoUpload(post.id, result.url, 'general_video');
+                                    toast({
+                                      title: "Success",
+                                      description: "Video uploaded successfully",
+                                    });
+                                  } else {
+                                    console.error('Upload failed:', result.error);
+                                    toast({
+                                      title: "Upload failed",
+                                      description: result.error || "Failed to upload video",
+                                      variant: "destructive",
+                                    });
+                                  }
+                                } catch (error) {
+                                  console.error('Error uploading video:', error);
+                                  toast({
+                                    title: "Upload failed",
+                                    description: "Failed to upload video",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setUploadingGeneralVideoPostId(null);
+                                }
                               }
-                            } catch (error) {
-                              console.error('Error uploading video:', error);
-                              toast({
-                                title: "Upload failed",
-                                description: "Failed to upload video",
-                                variant: "destructive",
-                              });
-                            } finally {
-                              setUploadingGeneralVideoPostId(null);
-                            }
-                          }
-                        };
-                        input.click();
-                      }}
-                      title="Click to upload general video"
-                    >
-                      {post.general_video_url ? (
-                        <div className="relative">
-                          <video
-                            src={post.general_video_url}
-                            className="w-20 h-15 rounded border cursor-pointer object-cover"
-                            preload="metadata"
-                            onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
-                          />
+                            };
+                            input.click();
+                          }}
+                          title="Click to upload general video"
+                        >
+                          {post.general_video_url ? (
+                            <div className="relative">
+                              <video
+                                src={post.general_video_url}
+                                className="w-20 h-15 rounded border cursor-pointer object-cover"
+                                preload="metadata"
+                                onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploadingGeneralVideoPostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <Upload className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">Video</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                       ) : (
-                         <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
-                           {uploadingGeneralVideoPostId === post.id ? (
-                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                           ) : (
-                             <div className="flex flex-col items-center">
-                               <Upload className="h-4 w-4 text-muted-foreground" />
-                               <span className="text-xs text-muted-foreground">Video</span>
-                             </div>
-                           )}
-                         </div>
-                       )}
-                    </div>
-                  </div>
-                 </TableCell>
-                <TableCell>
-                   <Badge
-                    className={`${getStatusColor(post.status)} cursor-pointer hover:opacity-80 transition-opacity`}
-                    onClick={() => {
-                      if (post.status === 'draft') {
-                        handleStatusChange(post.id, 'published');
-                        toast({
-                          title: "Status Updated",
-                          description: "Post marked as published",
-                        });
-                      }
-                    }}
-                  >
-                    {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {new Date(post.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCreateBlogPost(post)}
-                      title="Create blog post"
-                      disabled={creatingBlogIds.has(post.id)}
-                    >
-                      {creatingBlogIds.has(post.id) ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Pen className="h-4 w-4" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`${getStatusColor(post.status)} cursor-pointer hover:opacity-80 transition-opacity`}
+                        onClick={() => {
+                          if (post.status === 'draft') {
+                            handleStatusChange(post.id, 'published');
+                            toast({
+                              title: "Status Updated",
+                              description: "Post marked as published",
+                            });
+                          }
+                        }}
+                      >
+                        {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(post.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCreateBlogPost(post)}
+                          title="Create blog post"
+                          disabled={creatingBlogIds.has(post.id)}
+                        >
+                          {creatingBlogIds.has(post.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Pen className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGenerateImagePrompt(post)}
+                          title="Generate image prompt"
+                          className="flex items-center gap-1"
+                        >
+                          <Lightbulb className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyContent(post)}
+                          title="Copy content to clipboard"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeletePost(post.id)}
+                          title="Delete post"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {draftPosts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                      No draft posts yet.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TabsContent>
+          
+          <TabsContent value="published">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Day</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>16:9 Image</TableHead>
+                  <TableHead>16:9 Vid</TableHead>
+                  <TableHead>3:4 Image</TableHead>
+                  <TableHead>3:4 Vid</TableHead>
+                  <TableHead>Video</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {publishedPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">
+                      {post.day || '-'}
+                    </TableCell>
+                    <TableCell className="font-medium max-w-xs">
+                      <div className="truncate" title={post.title}>
+                        {post.title}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-sm">
+                      <div className="truncate" title={post.description}>
+                        {post.description.length > 100 ? post.description.substring(0, 100) + '...' : post.description}
+                      </div>
+                      {post.description.length > 100 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 mt-1 text-xs text-primary"
+                          onClick={() => {
+                            toast({
+                              title: post.title,
+                              description: post.description,
+                            });
+                          }}
+                        >
+                          Read more
+                        </Button>
                       )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleGenerateImagePrompt(post)}
-                      title="Generate image prompt"
-                      className="flex items-center gap-1"
-                    >
-                      <Lightbulb className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCopyContent(post)}
-                      title="Copy content to clipboard"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDeletePost(post.id)}
-                      title="Delete post"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileSelect(post.id, e)}
+                          className="hidden"
+                          id={`upload-pub-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-pub-${post.id}`)?.click()}
+                          title="Click to upload 16:9 image"
+                        >
+                          {post.image_16_9_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-pub-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '16_9')}
+                              imageUrl={post.image_16_9_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_16_9_url}
+                                alt="16:9 Image"
+                                aspectRatio="16/9"
+                                className="w-20 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
+                          ) : (
+                            <div className="w-20 h-12 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploadingPostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <>
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground ml-1">16:9</span>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile916Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-916-pub-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-916-pub-${post.id}`)?.click()}
+                          title="Click to upload 9:16 video"
+                        >
+                          {post.image_9_16_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-916-pub-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '9_16')}
+                              imageUrl={post.image_9_16_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_9_16_url}
+                                alt="16:9 Video"
+                                aspectRatio="9/16"
+                                className="w-12 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
+                          ) : (
+                            <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading916PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">16:9 Vid</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile34Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-34-pub-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-34-pub-${post.id}`)?.click()}
+                          title="Click to upload 3:4 image"
+                        >
+                          {post.image_3_4_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-34-pub-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '3_4')}
+                              imageUrl={post.image_3_4_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_3_4_url}
+                                alt="3:4 Image"
+                                aspectRatio="3/4"
+                                className="w-16 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
+                          ) : (
+                            <div className="w-16 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading34PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">3:4</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFile43Select(post.id, e)}
+                          className="hidden"
+                          id={`upload-43-pub-${post.id}`}
+                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => document.getElementById(`upload-43-pub-${post.id}`)?.click()}
+                          title="Click to upload 3:4 video"
+                        >
+                          {post.image_4_3_url ? (
+                            <ImageHoverOverlay
+                              onUpload={() => document.getElementById(`upload-43-pub-${post.id}`)?.click()}
+                              onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
+                              onDelete={() => handleImageDelete(post.id, '4_3')}
+                              imageUrl={post.image_4_3_url}
+                            >
+                              <OptimizedImage
+                                src={post.image_4_3_url}
+                                alt="3:4 Video"
+                                aspectRatio="4/3"
+                                className="w-20 h-auto rounded border cursor-pointer"
+                              />
+                            </ImageHoverOverlay>
+                          ) : (
+                            <div className="w-20 h-16 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploading43PostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">3:4 Vid</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={async () => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv';
+                            input.onchange = async (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                setUploadingGeneralVideoPostId(post.id);
+                                
+                                try {
+                                  const { uploadVideoToStorage } = await import('@/utils/videoUpload');
+                                  const result = await uploadVideoToStorage(file);
+                                  
+                                  if (result.success && result.url) {
+                                    await handleVideoUpload(post.id, result.url, 'general_video');
+                                    toast({
+                                      title: "Success",
+                                      description: "Video uploaded successfully",
+                                    });
+                                  } else {
+                                    toast({
+                                      title: "Upload failed",
+                                      description: result.error || "Failed to upload video",
+                                      variant: "destructive",
+                                    });
+                                  }
+                                } catch (error) {
+                                  toast({
+                                    title: "Upload failed",
+                                    description: "Failed to upload video",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setUploadingGeneralVideoPostId(null);
+                                }
+                              }
+                            };
+                            input.click();
+                          }}
+                          title="Click to upload general video"
+                        >
+                          {post.general_video_url ? (
+                            <div className="relative">
+                              <video
+                                src={post.general_video_url}
+                                className="w-20 h-15 rounded border cursor-pointer object-cover"
+                                preload="metadata"
+                                onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-15 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                              {uploadingGeneralVideoPostId === post.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              ) : (
+                                <div className="flex flex-col items-center">
+                                  <Upload className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs text-muted-foreground">Video</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`${getStatusColor(post.status)} cursor-pointer hover:opacity-80 transition-opacity`}
+                        onClick={() => {
+                          if (post.status === 'published') {
+                            handleStatusChange(post.id, 'draft');
+                            toast({
+                              title: "Status Updated",
+                              description: "Post marked as draft",
+                            });
+                          }
+                        }}
+                      >
+                        {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(post.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCreateBlogPost(post)}
+                          title="Create blog post"
+                          disabled={creatingBlogIds.has(post.id)}
+                        >
+                          {creatingBlogIds.has(post.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Pen className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGenerateImagePrompt(post)}
+                          title="Generate image prompt"
+                          className="flex items-center gap-1"
+                        >
+                          <Lightbulb className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyContent(post)}
+                          title="Copy content to clipboard"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeletePost(post.id)}
+                          title="Delete post"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {publishedPosts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                      No published posts yet.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TabsContent>
+        </Tabs>
       </CardContent>
       
       <ImagePromptModal
