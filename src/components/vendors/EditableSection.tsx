@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -135,13 +136,11 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
           return <div className="text-sm text-muted-foreground">None specified</div>;
         }
         return (
-          <div className="flex flex-wrap gap-1">
+          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
             {value.map((item, idx) => (
-              <Badge key={idx} variant="secondary" className="text-xs">
-                {item}
-              </Badge>
+              <li key={idx}>{item}</li>
             ))}
-          </div>
+          </ul>
         );
       
       case 'select':
