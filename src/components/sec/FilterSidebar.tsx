@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { X, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-import { useIndustries } from "@/hooks/useSecQueries";
 
 interface FilterSidebarProps {
   filters: {
