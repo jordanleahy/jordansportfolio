@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useCompanyPortfolios } from "@/hooks/useCompanyPortfolios";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { createPersonalizedPortfolio } from "@/services/landingPageService";
 
 interface JobApplicationsTableProps {
@@ -26,6 +26,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   const navigate = useNavigate();
   const { data: portfolios } = useCompanyPortfolios();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleDelete = (id: string) => {
     onDelete(id);
@@ -33,23 +34,65 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   };
 
   const handleCreatePortfolio = async (application: JobApplication) => {
+    console.log('Starting portfolio creation for:', application.company_name);
+    console.log('User authenticated:', !!user);
+    console.log('User ID:', user?.id);
+
+    // Check authentication first
+    if (!user) {
+      console.error('User not authenticated');
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a personalized portfolio.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
     
     setCreatingPortfolio(application.id);
     try {
+      console.log('Creating portfolio with slug:', companySlug);
       await createPersonalizedPortfolio(application, companySlug);
       
+      console.log('Portfolio created successfully');
       toast({
         title: "Success",
         description: "Personalized landing page created successfully!",
       });
       
       navigate(`/${companySlug}`);
-    } catch (error) {
-      console.error("Error creating portfolio:", error);
+    } catch (error: any) {
+      console.error("Detailed error creating portfolio:", error);
+      
+      let errorMessage = "Failed to create personalized landing page. Please try again.";
+      let errorTitle = "Error";
+
+      // Handle specific error types
+      if (error?.message?.includes('Invalid Refresh Token') || error?.message?.includes('refresh_token_not_found')) {
+        errorTitle = "Session Expired";
+        errorMessage = "Your session has expired. Please sign in again to continue.";
+        // Redirect to auth page after a short delay
+        setTimeout(() => {
+          navigate('/auth');
+        }, 2000);
+      } else if (error?.message?.includes('User not authenticated')) {
+        errorTitle = "Authentication Required";
+        errorMessage = "Please sign in to create a personalized portfolio.";
+        navigate('/auth');
+      } else if (error?.message?.includes('OpenAI')) {
+        errorTitle = "AI Service Error";
+        errorMessage = "There was an issue with the AI content generation. Please try again later.";
+      } else if (error?.message?.includes('network') || error?.message?.includes('fetch')) {
+        errorTitle = "Network Error";
+        errorMessage = "Please check your internet connection and try again.";
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to create personalized landing page. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
