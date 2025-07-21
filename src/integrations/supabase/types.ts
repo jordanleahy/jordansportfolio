@@ -1291,6 +1291,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_jobs: {
+        Row: {
+          created_at: string
+          id: string
+          job_description: string
+          job_url: string
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_description: string
+          job_url: string
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_description?: string
+          job_url?: string
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_jobs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           awards_recognition: string[] | null

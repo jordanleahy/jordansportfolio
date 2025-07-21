@@ -20,6 +20,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useVendorPublish } from '@/hooks/useVendorPublish';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
+import { ProductJobsCard } from '@/components/vendors/ProductJobsCard';
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -876,6 +877,9 @@ export default function VendorDetail() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
             <div className="xl:col-span-2 space-y-6 lg:space-y-8">
+              {/* Product Jobs Card - Admin Only */}
+              <ProductJobsCard vendorId={vendor.id} />
+              
               <EditableSection 
                 vendor={vendor} 
                 config={companyOverviewConfig} 
