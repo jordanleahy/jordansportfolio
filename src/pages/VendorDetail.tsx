@@ -1,12 +1,13 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
@@ -200,6 +201,7 @@ import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
 
 export default function VendorDetail() {
   const { slugname: category, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
+  const navigate = useNavigate();
   const [showPrompt, setShowPrompt] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPasteOpen, setIsPasteOpen] = useState(false);
@@ -207,6 +209,7 @@ export default function VendorDetail() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -466,6 +469,60 @@ export default function VendorDetail() {
         description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDeleteVendor = async () => {
+    if (!vendor) return;
+
+    setIsDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to delete vendors.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if user can delete this vendor (admin or owner)
+      if (!isAdmin && vendor.user_id !== user.id) {
+        toast({
+          title: "Permission Denied",
+          description: "You can only delete vendors you created.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('vendors')
+        .delete()
+        .eq('id', vendor.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Vendor Deleted",
+        description: `${vendor.company_name} has been permanently deleted.`,
+      });
+
+      // Navigate back to the vendors list
+      navigate(`/vendors/${category}`);
+    } catch (error) {
+      console.error('Error deleting vendor:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete vendor. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -731,15 +788,49 @@ export default function VendorDetail() {
                     >
                       <Lightbulb className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={openPasteModal}
-                      aria-label="Paste ChatGPT JSON Response"
-                      className="min-h-[44px] min-w-[44px]"
-                    >
-                      <Clipboard className="h-4 w-4" />
-                    </Button>
+                     <Button
+                       variant="outline"
+                       size="icon"
+                       onClick={openPasteModal}
+                       aria-label="Paste ChatGPT JSON Response"
+                       className="min-h-[44px] min-w-[44px]"
+                     >
+                       <Clipboard className="h-4 w-4" />
+                     </Button>
+                     
+                     {/* Delete Button with Confirmation */}
+                     <AlertDialog>
+                       <AlertDialogTrigger asChild>
+                         <Button
+                           variant="outline"
+                           size="icon"
+                           aria-label={`Delete ${vendor.company_name}`}
+                           className="min-h-[44px] min-w-[44px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                           disabled={isDeleting}
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </AlertDialogTrigger>
+                       <AlertDialogContent>
+                         <AlertDialogHeader>
+                           <AlertDialogTitle>Delete Vendor</AlertDialogTitle>
+                           <AlertDialogDescription>
+                             Are you sure you want to permanently delete "{vendor.company_name}"? 
+                             This action cannot be undone and will remove all associated data.
+                           </AlertDialogDescription>
+                         </AlertDialogHeader>
+                         <AlertDialogFooter>
+                           <AlertDialogCancel>Cancel</AlertDialogCancel>
+                           <AlertDialogAction
+                             onClick={handleDeleteVendor}
+                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                             disabled={isDeleting}
+                           >
+                             {isDeleting ? "Deleting..." : "Delete"}
+                           </AlertDialogAction>
+                         </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialog>
                   </>
                 )}
               </div>
