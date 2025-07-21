@@ -259,9 +259,7 @@ export default function VendorsIndex() {
             
             
             
-            <p className="text-sm text-muted-foreground mb-4">
-              Showing {filteredVendors.length} of {allVendors.length} vendors
-            </p>
+            
 
             {/* Category Statistics */}
             <div className="flex flex-wrap gap-2 mb-4">
