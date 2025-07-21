@@ -8,14 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2, Send } from "lucide-react";
+import { AlertTriangle, Save, Eye, ArrowLeft, Plus, Trash2, Send, Sparkles } from "lucide-react";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
-import { ImageUploadCard } from "@/components/calendar/ImageUploadCard";
+import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
 
 // Debounce utility
 const useDebounce = (callback: Function, delay: number) => {
@@ -149,7 +149,7 @@ const ContentSection = memo(({ formData, handleInputChange }: any) => (
   </>
 ));
 
-const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
+const VisualsSection = memo(({ formData, handleVisualSectionChange, handleOpenPromptModal }: any) => (
   <div className="space-y-6">
     {formData.visual_sections.map((section: any, index: number) => (
       <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -234,8 +234,18 @@ const VisualsSection = memo(({ formData, handleVisualSectionChange }: any) => (
                 >
                   Browse
                 </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenPromptModal(index)}
+                  className="flex items-center gap-1"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  AI Prompt
+                </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Paste image, browse file, or enter URL</p>
+              <p className="text-xs text-muted-foreground mt-1">Paste image, browse file, enter URL, or generate AI prompt</p>
             </div>
             <div>
               <Label>CTA Text (optional)</Label>
@@ -469,6 +479,7 @@ const BlogEditor = () => {
   const deletePostMutation = useDeleteBlogPost();
   
   const [saving, setSaving] = useState(false);
+  const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<BlogPostInput>({
@@ -553,6 +564,14 @@ const BlogEditor = () => {
       newSections[index] = { ...newSections[index], [field]: value };
       return { ...prev, visual_sections: newSections };
     });
+  }, []);
+
+  const handleOpenPromptModal = useCallback((index: number) => {
+    setPromptModalOpen(index);
+  }, []);
+
+  const handleClosePromptModal = useCallback(() => {
+    setPromptModalOpen(null);
   }, []);
 
   const handleTldrBulletChange = useCallback((index: number, value: string) => {
@@ -815,7 +834,11 @@ const BlogEditor = () => {
 
             {/* Visual Sections */}
             <TabsContent value="visuals">
-              <VisualsSection formData={formData} handleVisualSectionChange={handleVisualSectionChange} />
+              <VisualsSection 
+                formData={formData} 
+                handleVisualSectionChange={handleVisualSectionChange}
+                handleOpenPromptModal={handleOpenPromptModal}
+              />
             </TabsContent>
 
             {/* Summary Section */}
@@ -847,6 +870,17 @@ const BlogEditor = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Image Prompt Modal */}
+        {promptModalOpen !== null && (
+          <BlogVisualPrompt
+            isOpen={promptModalOpen !== null}
+            onClose={handleClosePromptModal}
+            headline={formData.visual_sections[promptModalOpen]?.headline || ''}
+            content={formData.visual_sections[promptModalOpen]?.content || ''}
+            category="cdi"
+          />
+        )}
     </PageLayout>
   );
 };
