@@ -247,39 +247,78 @@ export default function PublicVendorView() {
 
             {/* Sidebar - Right Column */}
             <div className="space-y-6">
-              {/* Company Overview Stats */}
+              {/* Company Stats */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Company Overview</CardTitle>
+                  <CardTitle className="text-lg">Company Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {vendor.employee_count_range && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Employees</span>
-                      <span className="font-medium">{vendor.employee_count_range}</span>
+                  {vendor.founding_year && (
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-1">Founded</span>
+                      <span className="text-xl font-semibold">{vendor.founding_year}</span>
                     </div>
                   )}
+                  <div>
+                    <span className="text-sm text-muted-foreground block mb-1">Headquarters</span>
+                    <span className="font-medium">{vendor.headquarters}</span>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground block mb-1">Company Type</span>
+                    <span className="font-medium">{vendor.company_type}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Funding Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Funding Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <span className="text-sm text-muted-foreground block mb-1">Total Funding</span>
+                    <span className="text-xl font-semibold">
+                      {vendor.total_funding || 'Not disclosed'}
+                    </span>
+                  </div>
                   {vendor.funding_stage && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Funding Stage</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-1">Funding Stage</span>
                       <span className="font-medium">{vendor.funding_stage}</span>
                     </div>
                   )}
-                  {vendor.total_funding && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Total Funding</span>
-                      <span className="font-medium">{vendor.total_funding}</span>
+                  {vendor.key_investors && vendor.key_investors.length > 0 && (
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-2">Key Investors</span>
+                      <ul className="space-y-1">
+                        {vendor.key_investors.map((investor, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
+                            <span className="text-sm font-medium">{investor}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {vendor.employee_count_range && (
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-1">Employees</span>
+                      <span className="font-medium">{vendor.employee_count_range}</span>
                     </div>
                   )}
                   {vendor.business_model && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Business Model</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-1">Business Model</span>
                       <span className="font-medium">{vendor.business_model}</span>
                     </div>
                   )}
                   {vendor.geographic_presence && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Geographic Presence</span>
+                    <div>
+                      <span className="text-sm text-muted-foreground block mb-1">Geographic Presence</span>
                       <span className="font-medium">{vendor.geographic_presence}</span>
                     </div>
                   )}
