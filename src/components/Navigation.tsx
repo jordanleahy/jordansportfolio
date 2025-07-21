@@ -42,7 +42,7 @@ const Navigation = () => {
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
-    { href: "/homehealth", label: "Home Health", icon: Heart },
+    
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
   ];
@@ -219,17 +219,6 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/homehealth"
-                          className={cn(navLinkStyles, isActive("/homehealth") && "bg-accent text-accent-foreground")}
-                        >
-                          <Heart className="mr-2 h-4 w-4" />
-                          Home Health
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
