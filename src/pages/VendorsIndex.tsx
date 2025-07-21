@@ -262,11 +262,7 @@ export default function VendorsIndex() {
             
 
             {/* Category Statistics */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {Object.entries(categoryStats).map(([category, count]) => count > 0 && <Badge key={category} variant="secondary" className="text-xs">
-                    {VENDOR_CATEGORIES[category as VendorCategory].title.replace(' Companies', '')}: {count}
-                  </Badge>)}
-            </div>
+            
           </div>
 
           <div className="flex items-center gap-4 mb-6">
