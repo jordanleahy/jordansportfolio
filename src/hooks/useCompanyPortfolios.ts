@@ -23,7 +23,16 @@ export const useCompanyPortfolio = (companySlug: string) => {
   return useQuery({
     queryKey: ["company-portfolio", companySlug],
     queryFn: async () => {
-      console.log('🔍 Fetching portfolio for slug:', companySlug);
+      console.log('🔍 DEBUG: Starting portfolio fetch for slug:', companySlug);
+      console.log('🔍 DEBUG: Current user:', await supabase.auth.getUser());
+      
+      // First, let's see all portfolios for this user
+      const { data: allPortfolios, error: allError } = await supabase
+        .from("company_portfolios")
+        .select("id, company_slug, company_name")
+        .order("created_at", { ascending: false });
+      
+      console.log('🔍 DEBUG: All portfolios:', allPortfolios);
       
       const { data, error } = await supabase
         .from("company_portfolios")
@@ -40,7 +49,8 @@ export const useCompanyPortfolio = (companySlug: string) => {
         found: !!data,
         id: data?.id,
         company_name: data?.company_name,
-        user_id: data?.user_id
+        user_id: data?.user_id,
+        slug: data?.company_slug
       });
       
       return data as CompanyPortfolio & { 
