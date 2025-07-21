@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Edit, Trash2, FileText, Building2 } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
 import { formatDistanceToNow } from "date-fns";
@@ -70,38 +71,22 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Company</TableHead>
-            <TableHead>Job Description</TableHead>
-            <TableHead>Job Link</TableHead>
-            <TableHead>Resume</TableHead>
-            <TableHead>Cover Letter</TableHead>
-            <TableHead>Applied</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.map((application) => (
-            <TableRow key={application.id}>
-              <TableCell className="font-medium">
-                {application.company_name}
-              </TableCell>
-              <TableCell className="max-w-xs">
-                <div className="truncate" title={application.job_description}>
-                  {application.job_description}
-                </div>
-              </TableCell>
-              <TableCell>
+    <div>
+      {/* Mobile Cards View */}
+      <div className="block md:hidden space-y-4">
+        {applications.map((application) => (
+          <Card key={application.id} className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold">{application.company_name}</CardTitle>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {application.job_description}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Links Row */}
+              <div className="flex flex-wrap gap-2">
                 {application.job_description_link ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="p-1 h-auto"
-                  >
+                  <Button variant="outline" size="sm" asChild>
                     <a 
                       href={application.job_description_link} 
                       target="_blank" 
@@ -109,21 +94,12 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       className="flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      <span className="sr-only">View Job Posting</span>
+                      Job Link
                     </a>
                   </Button>
-                ) : (
-                  <Badge variant="secondary">No link</Badge>
-                )}
-              </TableCell>
-              <TableCell>
+                ) : null}
                 {application.resume_link ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="p-1 h-auto"
-                  >
+                  <Button variant="outline" size="sm" asChild>
                     <a 
                       href={application.resume_link} 
                       target="_blank" 
@@ -131,21 +107,12 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       className="flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      <span className="sr-only">View Resume</span>
+                      Resume
                     </a>
                   </Button>
-                ) : (
-                  <Badge variant="secondary">No link</Badge>
-                )}
-              </TableCell>
-              <TableCell>
+                ) : null}
                 {application.cover_letter_link ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="p-1 h-auto"
-                  >
+                  <Button variant="outline" size="sm" asChild>
                     <a 
                       href={application.cover_letter_link} 
                       target="_blank" 
@@ -153,86 +120,247 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       className="flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
-                      <span className="sr-only">View Cover Letter</span>
+                      Cover Letter
                     </a>
                   </Button>
-                ) : (
-                  <Badge variant="secondary">No link</Badge>
-                )}
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
-                </span>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
+                ) : null}
+              </div>
+              
+              {/* Applied Date */}
+              <div className="text-sm text-muted-foreground">
+                Applied {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
+              </div>
+              
+              {/* Actions Row */}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <div className="flex gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(application)}
-                    className="p-1 h-auto"
                   >
-                    <Edit className="h-3 w-3" />
-                    <span className="sr-only">Edit</span>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleViewPortfolio(application)}
-                    className="p-1 h-auto"
                   >
-                    <Building2 className="h-3 w-3" />
-                    <span className="sr-only">View Portfolio</span>
+                    <Building2 className="h-4 w-4 mr-1" />
+                    Portfolio
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCreatePortfolio(application)}
                     disabled={createPortfolio.isPending}
-                    className="p-1 h-auto"
                   >
-                    <FileText className="h-3 w-3" />
-                    <span className="sr-only">Create Portfolio</span>
+                    <FileText className="h-4 w-4 mr-1" />
+                    Create
                   </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1 h-auto text-destructive hover:text-destructive"
-                        onClick={() => setDeleteId(application.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Application</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete your application to {application.company_name}? 
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(application.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? "Deleting..." : "Delete"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
-              </TableCell>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Application</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete your application to {application.company_name}? 
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(application.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? "Deleting..." : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Company</TableHead>
+              <TableHead>Job Description</TableHead>
+              <TableHead>Job Link</TableHead>
+              <TableHead>Resume</TableHead>
+              <TableHead>Cover Letter</TableHead>
+              <TableHead>Applied</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {applications.map((application) => (
+              <TableRow key={application.id}>
+                <TableCell className="font-medium">
+                  {application.company_name}
+                </TableCell>
+                <TableCell className="max-w-xs">
+                  <div className="truncate" title={application.job_description}>
+                    {application.job_description}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {application.job_description_link ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="p-1 h-auto"
+                    >
+                      <a 
+                        href={application.job_description_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        <span className="sr-only">View Job Posting</span>
+                      </a>
+                    </Button>
+                  ) : (
+                    <Badge variant="secondary">No link</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {application.resume_link ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="p-1 h-auto"
+                    >
+                      <a 
+                        href={application.resume_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        <span className="sr-only">View Resume</span>
+                      </a>
+                    </Button>
+                  ) : (
+                    <Badge variant="secondary">No link</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {application.cover_letter_link ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="p-1 h-auto"
+                    >
+                      <a 
+                        href={application.cover_letter_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        <span className="sr-only">View Cover Letter</span>
+                      </a>
+                    </Button>
+                  ) : (
+                    <Badge variant="secondary">No link</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEdit(application)}
+                      className="p-1 h-auto"
+                    >
+                      <Edit className="h-3 w-3" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewPortfolio(application)}
+                      className="p-1 h-auto"
+                    >
+                      <Building2 className="h-3 w-3" />
+                      <span className="sr-only">View Portfolio</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCreatePortfolio(application)}
+                      disabled={createPortfolio.isPending}
+                      className="p-1 h-auto"
+                    >
+                      <FileText className="h-3 w-3" />
+                      <span className="sr-only">Create Portfolio</span>
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-1 h-auto text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(application.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Application</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete your application to {application.company_name}? 
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(application.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
