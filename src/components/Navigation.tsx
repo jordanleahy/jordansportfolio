@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -130,15 +130,16 @@ const Navigation = () => {
             {/* Header with improved close button */}
             <div className="flex items-center justify-between p-4 border-b border-border/50">
               <h2 className="text-lg font-semibold text-foreground">Menu</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0 hover:bg-accent/50 rounded-full transition-colors"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close menu</span>
-              </Button>
+              <SheetClose asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-accent/50 rounded-full transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close menu</span>
+                </Button>
+              </SheetClose>
             </div>
             
             {/* Navigation Links with improved spacing and icons */}
@@ -148,46 +149,46 @@ const Navigation = () => {
                 const itemIsActive = isActive(item.href);
                 
                 return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20",
-                      itemIsActive && "bg-accent text-accent-foreground font-semibold shadow-sm",
-                      // Staggered animation delay
-                      `animate-fade-in`
-                    )}
-                    style={{ 
-                      animationDelay: `${index * 50}ms`,
-                      animationFillMode: 'both'
-                    }}
-                    onClick={(e) => {
-                      setIsOpen(false);
-                      // Smooth scroll for anchor links
-                      if (item.href.includes('#')) {
-                        e.preventDefault();
-                        const anchor = item.href.split('#')[1];
-                        const element = document.getElementById(anchor);
-                        if (element) {
-                          setTimeout(() => {
-                            element.scrollIntoView({ 
-                              behavior: 'smooth',
-                              block: 'start'
-                            });
-                          }, 300); // Wait for menu close animation
+                  <SheetClose key={item.href} asChild>
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20",
+                        itemIsActive && "bg-accent text-accent-foreground font-semibold shadow-sm",
+                        // Staggered animation delay
+                        `animate-fade-in`
+                      )}
+                      style={{ 
+                        animationDelay: `${index * 50}ms`,
+                        animationFillMode: 'both'
+                      }}
+                      onClick={(e) => {
+                        // Smooth scroll for anchor links
+                        if (item.href.includes('#')) {
+                          e.preventDefault();
+                          const anchor = item.href.split('#')[1];
+                          const element = document.getElementById(anchor);
+                          if (element) {
+                            setTimeout(() => {
+                              element.scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'start'
+                              });
+                            }, 300); // Wait for menu close animation
+                          }
                         }
-                      }
-                    }}
-                  >
-                    <Icon className={cn(
-                      "h-5 w-5 transition-colors",
-                      itemIsActive ? "text-accent-foreground" : "text-muted-foreground"
-                    )} />
-                    <span>{item.label}</span>
-                    {itemIsActive && (
-                      <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    )}
-                  </Link>
+                      }}
+                    >
+                      <Icon className={cn(
+                        "h-5 w-5 transition-colors",
+                        itemIsActive ? "text-accent-foreground" : "text-muted-foreground"
+                      )} />
+                      <span>{item.label}</span>
+                      {itemIsActive && (
+                        <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      )}
+                    </Link>
+                  </SheetClose>
                 );
               })}
             </nav>
@@ -195,14 +196,15 @@ const Navigation = () => {
             {/* Login Button for Mobile with improved styling */}
             {!user && (
               <div className="p-4 border-t border-border/50 mt-auto">
-                <Link 
-                  to="/auth" 
-                  className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium bg-primary text-primary-foreground rounded-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <LogIn className="h-5 w-5" />
-                  <span>Login</span>
-                </Link>
+                <SheetClose asChild>
+                  <Link 
+                    to="/auth" 
+                    className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium bg-primary text-primary-foreground rounded-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <LogIn className="h-5 w-5" />
+                    <span>Login</span>
+                  </Link>
+                </SheetClose>
               </div>
             )}
           </div>
