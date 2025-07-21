@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { VendorFilters } from '@/components/vendors/VendorFilters';
@@ -13,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 export default function VendorsIndex() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<VendorFiltersState>({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -165,6 +167,14 @@ export default function VendorsIndex() {
     });
     return stats;
   }, [filteredVendors]);
+  
+  const handleVendorClick = (vendor: any) => {
+    const category = getVendorCategory(vendor);
+    const vendorDetailUrl = `/vendors/${category}/${vendor.slug}`;
+    console.log('Navigating to vendor detail:', vendorDetailUrl);
+    navigate(vendorDetailUrl);
+  };
+  
   const handleVendorAdded = () => {
     refetch();
   };
@@ -270,6 +280,7 @@ export default function VendorsIndex() {
               ...vendor,
               category: getVendorCategory(vendor)
             }))} 
+            onVendorClick={handleVendorClick}
             onDeleteClick={handleDeleteVendor} 
             onSave={handleVendorSaved}
             filters={filters}
