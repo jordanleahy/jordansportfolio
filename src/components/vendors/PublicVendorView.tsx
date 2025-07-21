@@ -158,12 +158,6 @@ export default function PublicVendorView() {
                   )}
                 </div>
 
-                {/* Company Description */}
-                {vendor.description && (
-                  <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                    {vendor.description}
-                  </p>
-                )}
               </div>
 
               {/* Right side - Visit Website Button */}
