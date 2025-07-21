@@ -14,6 +14,7 @@ import { VENDOR_CATEGORIES, type Vendor } from '@/types/vendor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
 import { EditableSection } from '@/components/vendors/EditableSection';
@@ -214,6 +215,7 @@ export default function VendorDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isAdmin } = useUserRole();
+  const queryClient = useQueryClient();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
@@ -511,6 +513,10 @@ export default function VendorDetail() {
         title: "Vendor Deleted",
         description: `${vendor.company_name} has been permanently deleted.`,
       });
+
+      // Invalidate React Query cache to ensure the vendor list is updated
+      await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      await queryClient.invalidateQueries({ queryKey: ["vendor", vendorSlug] });
 
       // Navigate back to the vendors list
       navigate(`/vendors/${category}`);
