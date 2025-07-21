@@ -122,7 +122,15 @@ Guidelines:
     // Parse the JSON response
     let parsedContent;
     try {
-      parsedContent = JSON.parse(generatedContent);
+      // Clean up the response by removing markdown code block formatting if present
+      let cleanContent = generatedContent.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      parsedContent = JSON.parse(cleanContent);
     } catch (e) {
       console.error('Failed to parse generated content as JSON:', generatedContent);
       throw new Error('Generated content is not valid JSON');
