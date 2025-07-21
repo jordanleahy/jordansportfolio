@@ -63,7 +63,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
         description: "Personalized landing page created successfully!",
       });
       
-      navigate(`/${companySlug}`);
+      navigate(`/portfolio/${companySlug}`);
     } catch (error: any) {
       console.error("Detailed error creating portfolio:", error);
       
@@ -105,7 +105,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
     const existingPortfolio = portfolios?.find(p => p.company_slug === companySlug);
     
     if (existingPortfolio) {
-      navigate(`/${companySlug}`);
+      navigate(`/portfolio/${companySlug}`);
     } else {
       toast({
         title: "No portfolio found",
