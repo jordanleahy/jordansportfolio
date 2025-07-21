@@ -9,6 +9,7 @@ import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
 import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
 import { CoverLetterContent } from "@/data/coverLetterContent";
 import { PortfolioVideoUploadSection } from "./PortfolioVideoUploadSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CoverLetterPortfolioViewProps {
   portfolio: CompanyPortfolio & {
@@ -23,6 +24,7 @@ interface CoverLetterPortfolioViewProps {
 }
 
 const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) => {
+  const { user } = useAuth();
   const jobApplication = portfolio.job_applications;
 
   // Use custom video if available, otherwise fall back to default
@@ -53,7 +55,7 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         coverLetterContent={coverLetterContent}
       />
 
-      <PortfolioVideoUploadSection portfolio={portfolio} />
+      {user && <PortfolioVideoUploadSection portfolio={portfolio} />}
 
       <SchedulingSection
         calendarSrc="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true"
