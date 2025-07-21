@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,8 +9,9 @@ import { ExternalLink, Edit, Trash2, FileText, Building2 } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { useCreateCompanyPortfolio, useCompanyPortfolios } from "@/hooks/useCompanyPortfolios";
+import { useCompanyPortfolios } from "@/hooks/useCompanyPortfolios";
 import { useToast } from "@/hooks/use-toast";
+import { createPersonalizedPortfolio } from "@/services/landingPageService";
 
 interface JobApplicationsTableProps {
   applications: JobApplication[];
@@ -20,8 +22,8 @@ interface JobApplicationsTableProps {
 
 export function JobApplicationsTable({ applications, onEdit, onDelete, isDeleting }: JobApplicationsTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [creatingPortfolio, setCreatingPortfolio] = useState<string | null>(null);
   const navigate = useNavigate();
-  const createPortfolio = useCreateCompanyPortfolio();
   const { data: portfolios } = useCompanyPortfolios();
   const { toast } = useToast();
 
@@ -33,17 +35,25 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   const handleCreatePortfolio = async (application: JobApplication) => {
     const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
     
+    setCreatingPortfolio(application.id);
     try {
-      await createPortfolio.mutateAsync({
-        job_application_id: application.id,
-        company_name: application.company_name,
-        company_slug: companySlug,
-        status: 'draft'
+      await createPersonalizedPortfolio(application, companySlug);
+      
+      toast({
+        title: "Success",
+        description: "Personalized landing page created successfully!",
       });
       
       navigate(`/${companySlug}`);
     } catch (error) {
       console.error("Error creating portfolio:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create personalized landing page. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingPortfolio(null);
     }
   };
 
@@ -154,10 +164,10 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCreatePortfolio(application)}
-                    disabled={createPortfolio.isPending}
+                    disabled={creatingPortfolio === application.id}
                   >
                     <FileText className="h-4 w-4 mr-1" />
-                    Create
+                    {creatingPortfolio === application.id ? 'Creating...' : 'Create'}
                   </Button>
                 </div>
                 <AlertDialog>
@@ -316,11 +326,13 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCreatePortfolio(application)}
-                      disabled={createPortfolio.isPending}
+                      disabled={creatingPortfolio === application.id}
                       className="p-1 h-auto"
                     >
                       <FileText className="h-3 w-3" />
-                      <span className="sr-only">Create Portfolio</span>
+                      <span className="sr-only">
+                        {creatingPortfolio === application.id ? 'Creating Portfolio' : 'Create Portfolio'}
+                      </span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

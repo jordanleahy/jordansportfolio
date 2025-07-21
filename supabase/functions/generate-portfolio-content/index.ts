@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -18,10 +19,10 @@ serve(async (req) => {
   }
 
   try {
-    const { jobDescription } = await req.json();
+    const { jobDescription, companyName, jobDescriptionLink } = await req.json();
     
-    if (!jobDescription) {
-      throw new Error('Job description is required');
+    if (!jobDescription || !companyName) {
+      throw new Error('Job description and company name are required');
     }
 
     // Get user from JWT token
@@ -39,46 +40,56 @@ serve(async (req) => {
       .eq('status', 'published')
       .limit(5);
 
-    // Create portfolio content prompt
+    // Create enhanced portfolio content prompt
     const portfolioPrompt = `
-You are an expert career consultant and portfolio optimizer. Analyze the following job description and create a tailored portfolio content strategy.
+You are an expert career consultant and portfolio optimizer. Create a highly personalized landing page for a job application that will impress the hiring manager.
 
-Job Description:
-${jobDescription}
+Company Name: ${companyName}
+Job Description: ${jobDescription}
+${jobDescriptionLink ? `Job Posting URL: ${jobDescriptionLink}` : ''}
 
 Available Portfolio Elements:
-${blogPosts?.map(post => `- ${post.hero_headline}: ${post.intro_content.substring(0, 200)}...`).join('\n') || 'No portfolio elements available'}
+${blogPosts?.map(post => `- ${post.hero_headline}: ${post.intro_content?.substring(0, 200)}...`).join('\n') || 'No portfolio elements available'}
 
-Generate a JSON response with the following structure:
+Create a compelling, personalized landing page that demonstrates deep understanding of the company's needs and how the candidate can solve their problems. Generate a JSON response with the following structure:
+
 {
   "hero_section": {
-    "headline": "Compelling headline that speaks to the company's needs",
-    "subheadline": "Supporting message that highlights your value proposition",
-    "value_proposition": "Clear statement of what you bring to this specific role"
+    "headline": "Compelling, punchy headline that speaks directly to the company's needs (max 60 characters)",
+    "subheadline": "Supporting message that highlights unique value proposition (max 120 characters)",
+    "value_proposition": "Clear, compelling statement of what you bring to this specific role and company (200-300 words)"
   },
   "relevant_projects": [
     {
       "project_id": "blog_post_id_or_case_study_id",
-      "relevance_score": 0.9,
-      "customized_description": "How this project specifically relates to their needs"
+      "relevance_score": 0.95,
+      "customized_description": "Detailed explanation of how this project/experience specifically relates to their needs and demonstrates the skills they're looking for (150-200 words)"
     }
   ],
   "skills_alignment": [
     {
-      "skill": "Technical or soft skill mentioned in job",
-      "relevance": "Why this skill matters for this role",
-      "examples": ["Specific examples from your work"]
+      "skill": "Technical or soft skill mentioned in job posting",
+      "relevance": "Why this skill matters for this specific role at this company",
+      "examples": ["Specific, quantifiable examples from your experience demonstrating this skill"]
     }
   ],
   "company_analysis": {
-    "mission_alignment": "How your values align with theirs",
-    "culture_fit": "Why you'd thrive in their environment",
-    "growth_opportunities": "What you hope to achieve together"
+    "mission_alignment": "How your personal values and career goals align with their company mission and culture (100-150 words)",
+    "culture_fit": "Why you'd thrive in their specific work environment based on what you know about the company (100-150 words)",
+    "growth_opportunities": "What you hope to achieve and contribute in this role, showing long-term thinking (100-150 words)"
   },
-  "cover_letter": "A personalized cover letter that weaves together the above elements in a compelling narrative, addressing the hiring manager directly and demonstrating deep understanding of their needs and how you can solve their problems."
+  "cover_letter": "A personalized, compelling cover letter that weaves together all the above elements in a natural, engaging narrative. Address the hiring manager directly, demonstrate deep research and understanding of their challenges, and show exactly how you can solve their problems. Make it feel personal and authentic, not templated. (500-700 words)"
 }
 
-Make the content highly specific to this job posting. Reference specific requirements, technologies, or company goals mentioned in the description.
+Guidelines:
+- Make the content highly specific to this job posting and company
+- Reference specific requirements, technologies, or company goals mentioned in the description
+- Use confident, professional language that shows expertise
+- Include quantifiable achievements and specific examples where possible
+- Show genuine enthusiasm for the company and role
+- Demonstrate understanding of industry trends and challenges
+- Make the cover letter feel personal and conversational, not robotic
+- Focus on value you can bring, not just what you want to get from the role
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -92,11 +103,12 @@ Make the content highly specific to this job posting. Reference specific require
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert career consultant who creates highly targeted portfolio content. Always respond with valid JSON.' 
+            content: 'You are an expert career consultant who creates highly targeted, personalized portfolio content for job applications. You understand how to analyze job descriptions and create compelling narratives that demonstrate perfect fit. Always respond with valid JSON.' 
           },
           { role: 'user', content: portfolioPrompt }
         ],
         temperature: 0.7,
+        max_tokens: 2000,
       }),
     });
 

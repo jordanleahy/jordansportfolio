@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyPortfolio, CompanyPortfolioInput } from "@/types/companyPortfolio";
@@ -53,8 +54,9 @@ export const useCreateCompanyPortfolio = () => {
       if (error) throw error;
       return data as CompanyPortfolio;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["company-portfolios"] });
+      queryClient.invalidateQueries({ queryKey: ["company-portfolio", data.company_slug] });
       toast({
         title: "Portfolio created",
         description: "Company portfolio has been created successfully.",
