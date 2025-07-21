@@ -3,17 +3,15 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, DollarSign, Calendar, TrendingUp, Sparkles } from "lucide-react";
+import { MapPin, DollarSign, Calendar, TrendingUp } from "lucide-react";
 
 interface OfferingCardProps {
   offering: any;
-  onGeneratePrompt: (offering: any) => void;
   onViewDetails: (offeringId: string) => void;
 }
 
 export const OfferingCard: React.FC<OfferingCardProps> = ({
   offering,
-  onGeneratePrompt,
   onViewDetails
 }) => {
   const formatCurrency = (amount: number) => {
@@ -50,17 +48,6 @@ export const OfferingCard: React.FC<OfferingCardProps> = ({
   return (
     <Card className="w-full hover:shadow-md transition-all duration-200 border border-border/50">
       <CardContent className="p-4 space-y-4">
-        {/* Enhance Button - Prominent at top */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onGeneratePrompt(offering)}
-          className="w-full flex items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20"
-        >
-          <Sparkles className="h-4 w-4" />
-          Enhance Profile
-        </Button>
-
         {/* Company Info */}
         <div 
           className="cursor-pointer space-y-2"

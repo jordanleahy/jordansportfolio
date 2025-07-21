@@ -19,7 +19,6 @@ import {
   ArrowDown, 
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   X,
   ExternalLink
 } from "lucide-react";
@@ -27,12 +26,9 @@ import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 import { OfferingCard } from "./OfferingCard";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { AuthRequiredModal } from "@/components/auth/AuthRequiredModal";
 
 interface OfferingsTableOptimizedProps {
   filters: any;
@@ -49,10 +45,8 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [enhancingOfferings, setEnhancingOfferings] = useState<Set<string>>(new Set());
-  const { guardedAction, showAuthModal, closeAuthModal } = useAuthGuard();
+  
   const itemsPerPage = 50;
-  const { toast } = useToast();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isMobile = useIsMobile();
@@ -119,69 +113,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
       <ArrowDown className="ml-2 h-4 w-4 text-primary" />;
   };
 
-  const handleEnhanceOffering = async (offering: any) => {
-    return guardedAction(async () => {
-      await performEnhanceOffering(offering);
-    });
-  };
-
-  const performEnhanceOffering = async (offering: any) => {
-    const offeringId = offering.accessionnumber;
-    const companyName = offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company';
-    
-    setEnhancingOfferings(prev => new Set(prev).add(offeringId));
-    
-    try {
-      toast({
-        title: "Enhancing Company Profile",
-        description: `Researching ${companyName} and creating vendor profile...`,
-      });
-
-      const { data, error } = await supabase.functions.invoke('vendor-enhancement-agent', {
-        body: { offering }
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        const { vendor, category, action } = data;
-        
-        toast({
-          title: `Vendor Profile ${action === 'created' ? 'Created' : 'Updated'}!`,
-          description: (
-            <div className="flex flex-col gap-2">
-              <span>{vendor.company_name} has been {action} in the {category} category.</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="self-start"
-                onClick={() => window.open(`/vendors/${category}`, '_blank')}
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                View Profile
-              </Button>
-            </div>
-          ),
-          duration: 8000,
-        });
-      } else {
-        throw new Error(data.error || 'Enhancement failed');
-      }
-    } catch (error) {
-      console.error('Enhancement error:', error);
-      toast({
-        title: "Enhancement Failed",
-        description: error.message || "Failed to enhance company profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setEnhancingOfferings(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(offeringId);
-        return newSet;
-      });
-    }
-  };
 
   const getSearchMessage = () => {
     if (isSearchTooShort) {
@@ -312,7 +243,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                   <OfferingCard
                     key={offering.accessionnumber}
                     offering={offering}
-                    onGeneratePrompt={() => handleEnhanceOffering(offering)}
                     onViewDetails={(offeringId) => {
                       setSelectedOfferingId(offeringId);
                       setIsModalOpen(true);
@@ -325,11 +255,10 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-32">Actions</TableHead>
-                  <TableHead>
-                    <Button
+               <TableHeader>
+                 <TableRow>
+                   <TableHead>
+                     <Button
                       variant="ghost"
                       onClick={() => handleSort("companyName")}
                       className="h-auto p-0 font-semibold hover:bg-muted/50"
@@ -392,9 +321,9 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {error ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-red-500">
+                 {error ? (
+                   <TableRow>
+                     <TableCell colSpan={7} className="text-center py-8 text-red-500">
                       <div>
                         <p className="font-semibold">Error loading SEC offerings</p>
                         <p className="text-sm mt-1">{error.message}</p>
@@ -409,18 +338,18 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : isSearchTooShort ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-amber-600">
+                 ) : isSearchTooShort ? (
+                   <TableRow>
+                     <TableCell colSpan={7} className="text-center py-8 text-amber-600">
                       <div>
                         <p className="font-semibold">Search too short</p>
                         <p className="text-sm mt-1">Please type at least 2 characters to search</p>
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : offerings.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                 ) : offerings.length === 0 ? (
+                   <TableRow>
+                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       <div>
                         <p className="font-semibold">No SEC offerings found</p>
                         <p className="text-sm mt-1">
@@ -434,28 +363,11 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                   </TableRow>
                 ) : (
                   offerings.map((offering: any) => {
-                    const isEnhancing = enhancingOfferings.has(offering.accessionnumber);
-                    
                     return (
                       <TableRow 
                         key={offering.accessionnumber}
                         className="hover:bg-muted/50 transition-colors"
                       >
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEnhanceOffering(offering);
-                            }}
-                            disabled={isEnhancing}
-                            className="flex items-center gap-1"
-                          >
-                            <Sparkles className={`h-3 w-3 ${isEnhancing ? 'animate-spin' : ''}`} />
-                            {isEnhancing ? 'Enhancing...' : 'Enhance'}
-                          </Button>
-                        </TableCell>
                         <TableCell 
                           className="font-medium cursor-pointer"
                           onClick={() => {
@@ -554,12 +466,6 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           setIsModalOpen(false);
           setSelectedOfferingId(null);
         }}
-      />
-
-      <AuthRequiredModal
-        open={showAuthModal}
-        onClose={closeAuthModal}
-        feature="enhance company profiles"
       />
     </Card>
   );
