@@ -112,19 +112,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
   const hasActiveFilters = filters.industries.length > 0 || searchQuery.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
   return <Card className="flex flex-col h-full relative z-10 shadow-sm bg-transparent">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex items-center justify-between">
-          
-          <div className="flex items-center gap-2">
-            {hasActiveFilters && <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 px-2">
-                <RotateCcw className="h-4 w-4" />
-              </Button>}
-            {onClose && <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-                <X className="h-4 w-4" />
-              </Button>}
-          </div>
-        </div>
-      </CardHeader>
+      
       <CardContent className="flex-1 overflow-y-auto space-y-6 bg-transparent">
         {/* Search Filter */}
         <div className="space-y-3">
