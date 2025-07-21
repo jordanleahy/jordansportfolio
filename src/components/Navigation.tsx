@@ -160,7 +160,23 @@ const Navigation = () => {
                       animationDelay: `${index * 50}ms`,
                       animationFillMode: 'both'
                     }}
-                    onClick={() => setIsOpen(false)}
+                    onClick={(e) => {
+                      setIsOpen(false);
+                      // Smooth scroll for anchor links
+                      if (item.href.includes('#')) {
+                        e.preventDefault();
+                        const anchor = item.href.split('#')[1];
+                        const element = document.getElementById(anchor);
+                        if (element) {
+                          setTimeout(() => {
+                            element.scrollIntoView({ 
+                              behavior: 'smooth',
+                              block: 'start'
+                            });
+                          }, 300); // Wait for menu close animation
+                        }
+                      }
+                    }}
                   >
                     <Icon className={cn(
                       "h-5 w-5 transition-colors",
