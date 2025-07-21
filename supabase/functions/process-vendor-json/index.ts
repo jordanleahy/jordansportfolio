@@ -172,6 +172,7 @@ async function o3ProProcessVendorData(rawJson: string): Promise<{
     core_services: "string[]",
     specialties: "string[]", 
     customers: "string[]",
+    competitors: "string[]",
     key_features: "string[]",
     key_benefits: "string[]",
     competitive_advantages: "string[]",
@@ -281,7 +282,7 @@ function validateCoreFields(data: any, warnings: string[], errors: string[]): an
   
   // Ensure array fields are arrays and have sensible defaults
   const coreArrayFields = [
-    'core_services', 'specialties', 'customers', 'key_features', 
+    'core_services', 'specialties', 'customers', 'competitors', 'key_features', 
     'key_benefits', 'competitive_advantages', 'key_investors', 'notable_customers'
   ];
   
