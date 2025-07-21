@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, Pen } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, NotebookPen } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -1129,7 +1129,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                           {creatingBlogIds.has(post.id) ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Pen className="h-4 w-4" />
+                            <NotebookPen className="h-4 w-4" />
                           )}
                         </Button>
                         <Button
@@ -1492,7 +1492,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                           {creatingBlogIds.has(post.id) ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Pen className="h-4 w-4" />
+                            <NotebookPen className="h-4 w-4" />
                           )}
                         </Button>
                         <Button
