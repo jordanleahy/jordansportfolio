@@ -260,9 +260,9 @@ const Navigation = () => {
             </NavigationMenu>
 
             {/* Mobile Navigation */}
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="flex items-center justify-between w-full md:hidden">
               
-              {/* Quick Access Icons */}
+              {/* Quick Access Icons - Left Side */}
               <div className="flex items-center gap-1">
                 {user ? (
                   // Authenticated user quick access icons
@@ -358,7 +358,7 @@ const Navigation = () => {
                 )}
               </div>
 
-              {/* Hamburger Menu */}
+              {/* Hamburger Menu - Far Right */}
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm">
