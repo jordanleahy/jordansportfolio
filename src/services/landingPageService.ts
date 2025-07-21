@@ -72,10 +72,10 @@ export const createPersonalizedPortfolio = async (
     
     console.log('Content generated, creating portfolio record...');
     
-    // Create the portfolio with generated content
+    // Create or update the portfolio with generated content
     const { data, error } = await supabase
       .from("company_portfolios")
-      .insert({
+      .upsert({
         job_application_id: jobApplication.id,
         company_name: jobApplication.company_name,
         company_slug: companySlug,
@@ -83,6 +83,8 @@ export const createPersonalizedPortfolio = async (
         cover_letter: generatedContent.cover_letter,
         status: 'completed' as const,
         user_id: user.id
+      }, {
+        onConflict: 'user_id,company_slug'
       })
       .select()
       .single();
