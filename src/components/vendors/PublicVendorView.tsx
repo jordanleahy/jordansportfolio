@@ -21,18 +21,19 @@ import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
 
 export default function PublicVendorView() {
-  const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
+  const { category, vendorSlug } = useParams<{ category?: string; vendorSlug: string }>();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
 
-  if (!category || !vendorSlug) {
+  if (!vendorSlug) {
     return <Navigate to="/404" replace />;
   }
 
-  // Check if category exists, if not, use a default fallback
-  const categoryConfig = VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES] || {
-    title: `${category.charAt(0).toUpperCase() + category.slice(1)} Companies`,
-    description: `Analysis of ${category} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
+  // Determine category and config - handle RCM companies special case
+  const actualCategory = category || 'rcm';
+  const categoryConfig = VENDOR_CATEGORIES[actualCategory as keyof typeof VENDOR_CATEGORIES] || {
+    title: `RCM Companies`,
+    description: `Analysis of RCM vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
   };
 
   if (isLoading) {
@@ -121,8 +122,8 @@ export default function PublicVendorView() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/${category}companies`}>
-                  {getCategoryDisplayName(category)}
+                <BreadcrumbLink href={`/${actualCategory}companies`}>
+                  {getCategoryDisplayName(actualCategory)}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
