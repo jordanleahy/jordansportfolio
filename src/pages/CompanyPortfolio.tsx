@@ -4,6 +4,8 @@ import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
+import CoverLetterPortfolioView from "@/components/portfolio/CoverLetterPortfolioView";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 const CompanyPortfolio = () => {
   const { company: companySlug } = useParams();
@@ -77,7 +79,11 @@ const CompanyPortfolio = () => {
     );
   }
 
-  return <PublicPortfolioView portfolio={portfolio} />;
+  return (
+    <PageLayout>
+      <CoverLetterPortfolioView portfolio={portfolio} />
+    </PageLayout>
+  );
 };
 
 export default CompanyPortfolio;
