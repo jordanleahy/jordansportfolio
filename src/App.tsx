@@ -31,6 +31,7 @@ import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import Comparison from "./pages/Comparison";
+import ComparisonDetail from "./pages/ComparisonDetail";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -109,6 +110,7 @@ function App() {
                 <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
                 <Route path="/homehealth" element={<HomeHealth />} />
                 <Route path="/comparison" element={<Comparison />} />
+                <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
