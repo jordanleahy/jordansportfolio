@@ -1,6 +1,7 @@
+
 import React from 'react';
 import Navigation from '@/components/Navigation';
-import SubNavigation from '@/components/SubNavigation';
+import OptimizedSubNavigation from '@/components/OptimizedSubNavigation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background">
       {showNavigation && <Navigation />}
-      {showNavigation && <SubNavigation />}
+      {showNavigation && <OptimizedSubNavigation />}
       <main className="relative">
         {children}
       </main>
