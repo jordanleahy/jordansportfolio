@@ -47,7 +47,13 @@ const Navigation = () => {
       e.preventDefault();
       const element = document.getElementById(anchor);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Account for sticky header height
+        const headerHeight = 56; // 14 * 4 = 56px (h-14)
+        const elementPosition = element.offsetTop - headerHeight;
+        window.scrollTo({
+          top: elementPosition,
+          behavior: 'smooth'
+        });
       }
     }
   };
