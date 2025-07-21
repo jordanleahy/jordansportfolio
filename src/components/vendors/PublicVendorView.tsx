@@ -130,7 +130,7 @@ export default function PublicVendorView() {
           </Breadcrumb>
 
           {/* Clean Header Section */}
-          <div className="rounded-lg border p-8">
+          <div className="rounded-lg p-8">
             <div className="flex items-start justify-between">
               {/* Left side - Company Info */}
               <div className="space-y-4 flex-1">
