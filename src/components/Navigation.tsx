@@ -29,7 +29,7 @@ const Navigation = () => {
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
-    { href: "/sec", label: "SEC", icon: Database },
+    { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
   ];
 
@@ -115,8 +115,8 @@ const Navigation = () => {
                       to="/sec"
                       className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
                     >
-                      <Database className="mr-2 h-4 w-4" />
-                      SEC
+                      <span className="mr-2 text-sm font-bold">$$</span>
+                      Funded Startups
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
