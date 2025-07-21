@@ -262,6 +262,102 @@ const Navigation = () => {
             {/* Mobile Navigation */}
             <div className="flex items-center gap-2 md:hidden">
               
+              {/* Quick Access Icons */}
+              <div className="flex items-center gap-1">
+                {user ? (
+                  // Authenticated user quick access icons
+                  <>
+                    <Link
+                      to="/sec"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/sec") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Database className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/vendors"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/vendors") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Building2 className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/calendar"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/calendar") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Calendar className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/jobs"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/jobs") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/agents"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/agents") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin-blog"
+                        className={cn(
+                          "p-2 rounded-lg transition-colors hover:bg-accent",
+                          isActive("/admin-blog") && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <BookOpen className="h-4 w-4" />
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  // Public user quick access icons
+                  <>
+                    <Link
+                      to="/"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Home className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/blog"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/blog") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/sec"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/sec") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Database className="h-4 w-4" />
+                    </Link>
+                  </>
+                )}
+              </div>
+
               {/* Hamburger Menu */}
               <Sheet>
                 <SheetTrigger asChild>
