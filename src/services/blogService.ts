@@ -23,13 +23,17 @@ export class BlogService {
     })) as unknown as BlogPost[];
   }
 
-  static async getPostBySlug(slug: string): Promise<BlogPost | null> {
-    const { data, error } = await supabase
+  static async getPostBySlug(slug: string, includeUnpublished = false): Promise<BlogPost | null> {
+    let query = supabase
       .from('blog_posts')
       .select('*')
-      .eq('slug', slug)
-      .eq('status', 'published')
-      .maybeSingle();
+      .eq('slug', slug);
+    
+    if (!includeUnpublished) {
+      query = query.eq('status', 'published');
+    }
+    
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch blog post: ${error.message}`);

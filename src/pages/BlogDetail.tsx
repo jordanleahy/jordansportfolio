@@ -1,11 +1,12 @@
 import React, { Suspense, lazy } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useBlogPost } from "@/hooks/useBlogQueries";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Badge } from "@/components/ui/badge";
 
 // Lazy load heavy BlogTemplate component
 const BlogTemplate = lazy(() => import("@/components/blog/BlogTemplate").then(module => ({ 
@@ -14,6 +15,8 @@ const BlogTemplate = lazy(() => import("@/components/blog/BlogTemplate").then(mo
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get('preview') === 'true';
   
   // Use TanStack Query for blog post
   const { 
@@ -21,7 +24,7 @@ const BlogDetail = () => {
     isLoading: loading, 
     error,
     refetch
-  } = useBlogPost(slug);
+  } = useBlogPost(slug, isPreview);
 
   if (loading) {
     return (
@@ -70,6 +73,17 @@ const BlogDetail = () => {
 
   return (
     <PageLayout>
+      {isPreview && (
+        <div className="bg-orange-100 dark:bg-orange-950 border-b border-orange-200 dark:border-orange-800 py-3">
+          <div className="max-w-6xl mx-auto px-4 flex items-center gap-2 text-orange-800 dark:text-orange-200">
+            <Eye className="h-4 w-4" />
+            <span className="text-sm font-medium">Preview Mode</span>
+            <Badge variant="outline" className="text-xs">
+              {post?.status === 'draft' ? 'Draft' : post?.status}
+            </Badge>
+          </div>
+        </div>
+      )}
       <Suspense fallback={
           <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center space-y-4">

@@ -812,7 +812,7 @@ const BlogEditor = () => {
                   size="sm" 
                   onClick={() => {
                     if (slug) {
-                      window.open(`/blog/${slug}`, '_blank');
+                      window.open(`/blog/${slug}?preview=true`, '_blank');
                     }
                   }}
                   disabled={!slug}

@@ -33,7 +33,7 @@ const isUUID = (value: string): boolean => {
 };
 
 // Get blog post by slug or ID
-export const useBlogPost = (identifier: string | undefined) => {
+export const useBlogPost = (identifier: string | undefined, includeUnpublished = false) => {
   return useQuery({
     queryKey: blogKeys.detail(identifier || ''),
     queryFn: () => {
@@ -43,7 +43,7 @@ export const useBlogPost = (identifier: string | undefined) => {
       if (isUUID(identifier)) {
         return BlogService.getPostById(identifier);
       } else {
-        return BlogService.getPostBySlug(identifier);
+        return BlogService.getPostBySlug(identifier, includeUnpublished);
       }
     },
     enabled: !!identifier,
@@ -189,10 +189,10 @@ export const useDeleteBlogPost = () => {
 export const usePrefetchBlogPost = () => {
   const queryClient = useQueryClient();
   
-  return (slug: string) => {
+  return (slug: string, includeUnpublished = false) => {
     queryClient.prefetchQuery({
       queryKey: blogKeys.detail(slug),
-      queryFn: () => BlogService.getPostBySlug(slug),
+      queryFn: () => BlogService.getPostBySlug(slug, includeUnpublished),
       staleTime: 10 * 60 * 1000, // 10 minutes
     });
   };
