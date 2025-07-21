@@ -6,8 +6,8 @@ import { ExternalLink, FileText } from "lucide-react";
 import { CoverLetterPageLayout } from "@/components/cover-letter/CoverLetterPageLayout";
 import { VideoWithCoverLetterLayout } from "@/components/cover-letter/VideoWithCoverLetterLayout";
 import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
-import { ProjectShowcase } from "@/components/cover-letter/ProjectShowcase";
-import { CoverLetterContent, ProjectData } from "@/data/coverLetterContent";
+import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
+import { CoverLetterContent } from "@/data/coverLetterContent";
 
 interface CoverLetterPortfolioViewProps {
   portfolio: CompanyPortfolio & {
@@ -22,46 +22,23 @@ interface CoverLetterPortfolioViewProps {
 }
 
 const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) => {
-  const generatedContent = portfolio.generated_content;
   const jobApplication = portfolio.job_applications;
 
-  // Create cover letter content from generated content
+  // Create cover letter content using the generated cover letter or fallback
   const coverLetterContent: CoverLetterContent = {
-    recipient: generatedContent?.hero_section?.headline || `Dear ${portfolio.company_name} Team,`,
-    paragraphs: generatedContent?.cover_letter 
-      ? [generatedContent.cover_letter]
+    recipient: `Dear ${portfolio.company_name} Team,`,
+    paragraphs: portfolio.generated_content?.cover_letter 
+      ? [portfolio.generated_content.cover_letter]
       : [
-          generatedContent?.hero_section?.value_proposition || `I'm particularly drawn to ${portfolio.company_name} because of our shared values.`,
-          generatedContent?.company_analysis?.mission_alignment || "My experience directly aligns with your needs.",
-          `I would love to discuss how my experience can contribute to ${portfolio.company_name}'s continued success and growth.`
+          `I'm writing to express my strong interest in joining ${portfolio.company_name}. With over 10 years of experience in healthcare technology and AI applications, I'm excited about the opportunity to contribute to your team's mission.`,
+          `My background in clinical documentation integrity, revenue cycle management, and healthcare data analytics aligns perfectly with your needs. I've successfully implemented technology solutions that improve patient outcomes and operational efficiency across multiple healthcare organizations.`,
+          `I would love to discuss how my experience can contribute to ${portfolio.company_name}'s continued success and growth. Thank you for considering my application.`
         ],
     signature: {
       name: "Jordan Leahy",
       website: "jordanwilliamleahy.com"
     }
   };
-
-  // Convert relevant projects to ProjectData format
-  const portfolioProjects: ProjectData[] = generatedContent?.relevant_projects?.slice(0, 3).map((project, index) => ({
-    title: `Relevant Project ${index + 1}`,
-    description: project.customized_description.slice(0, 150) + "...",
-    tags: [`${Math.round(project.relevance_score * 100)}% match`, "#Project"],
-    link: "#",
-    iconColor: "bg-blue-600",
-    iconBg: "bg-blue-100"
-  })) || [];
-
-  // Add skills as projects if we have space
-  const skillsAsProjects: ProjectData[] = generatedContent?.skills_alignment?.slice(0, 3 - portfolioProjects.length).map((skill, index) => ({
-    title: skill.skill,
-    description: skill.relevance.slice(0, 150) + "...",
-    tags: ["#Skill", "#Experience"],
-    link: "#",
-    iconColor: "bg-cyan-600",
-    iconBg: "bg-cyan-100"
-  })) || [];
-
-  const allProjects = [...portfolioProjects, ...skillsAsProjects];
 
   return (
     <CoverLetterPageLayout>
@@ -76,13 +53,7 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         companyName={portfolio.company_name}
       />
 
-      {allProjects.length > 0 && (
-        <ProjectShowcase
-          title="Related Experience"
-          description={`Projects that demonstrate my experience relevant to ${portfolio.company_name}'s needs`}
-          projects={allProjects}
-        />
-      )}
+      <HealthcareProjectsSection />
 
       {jobApplication && (jobApplication.resume_link || jobApplication.job_description_link) && (
         <div className="mt-12 text-center">

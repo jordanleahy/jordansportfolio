@@ -25,71 +25,32 @@ serve(async (req) => {
       throw new Error('Job description and company name are required');
     }
 
-    // Get user from JWT token
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Get user portfolio data (case studies, blog posts, etc.)
-    const { data: blogPosts } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .limit(5);
-
-    // Create enhanced portfolio content prompt
-    const portfolioPrompt = `
-You are an expert career consultant and portfolio optimizer. Create a highly personalized landing page for a job application that will impress the hiring manager.
+    // Create focused cover letter generation prompt
+    const coverLetterPrompt = `
+You are an expert career consultant who writes compelling, personalized cover letters. Create a professional cover letter for Jordan Leahy applying to ${companyName}.
 
 Company Name: ${companyName}
 Job Description: ${jobDescription}
 ${jobDescriptionLink ? `Job Posting URL: ${jobDescriptionLink}` : ''}
 
-Available Portfolio Elements:
-${blogPosts?.map(post => `- ${post.hero_headline}: ${post.intro_content?.substring(0, 200)}...`).join('\n') || 'No portfolio elements available'}
+About Jordan Leahy:
+- Senior healthcare technology professional with 10+ years of experience
+- Expert in AI/ML applications for clinical workflows and population health
+- Strong background in revenue cycle management, clinical documentation integrity, and healthcare data analytics
+- Proven track record of implementing technology solutions that improve patient outcomes and operational efficiency
+- Experience with EHR systems, healthcare interoperability, and regulatory compliance
 
-Create a compelling, personalized landing page that demonstrates deep understanding of the company's needs and how the candidate can solve their problems. Generate a JSON response with the following structure:
+Write a compelling cover letter that:
+1. Addresses the hiring manager professionally
+2. Demonstrates deep understanding of the company's mission and challenges
+3. Shows specific alignment between Jordan's experience and the job requirements
+4. Highlights quantifiable achievements relevant to this role
+5. Expresses genuine enthusiasm for the opportunity
+6. Maintains a confident, professional tone throughout
 
-{
-  "hero_section": {
-    "headline": "Compelling, punchy headline that speaks directly to the company's needs (max 60 characters)",
-    "subheadline": "Supporting message that highlights unique value proposition (max 120 characters)",
-    "value_proposition": "Clear, compelling statement of what you bring to this specific role and company (200-300 words)"
-  },
-  "relevant_projects": [
-    {
-      "project_id": "blog_post_id_or_case_study_id",
-      "relevance_score": 0.95,
-      "customized_description": "Detailed explanation of how this project/experience specifically relates to their needs and demonstrates the skills they're looking for (150-200 words)"
-    }
-  ],
-  "skills_alignment": [
-    {
-      "skill": "Technical or soft skill mentioned in job posting",
-      "relevance": "Why this skill matters for this specific role at this company",
-      "examples": ["Specific, quantifiable examples from your experience demonstrating this skill"]
-    }
-  ],
-  "company_analysis": {
-    "mission_alignment": "How your personal values and career goals align with their company mission and culture (100-150 words)",
-    "culture_fit": "Why you'd thrive in their specific work environment based on what you know about the company (100-150 words)",
-    "growth_opportunities": "What you hope to achieve and contribute in this role, showing long-term thinking (100-150 words)"
-  },
-  "cover_letter": "A personalized, compelling cover letter that weaves together all the above elements in a natural, engaging narrative. Address the hiring manager directly, demonstrate deep research and understanding of their challenges, and show exactly how you can solve their problems. Make it feel personal and authentic, not templated. (500-700 words)"
-}
+The cover letter should be 500-700 words and feel personal, not templated. Focus on value Jordan can bring to solve their specific problems.
 
-Guidelines:
-- Make the content highly specific to this job posting and company
-- Reference specific requirements, technologies, or company goals mentioned in the description
-- Use confident, professional language that shows expertise
-- Include quantifiable achievements and specific examples where possible
-- Show genuine enthusiasm for the company and role
-- Demonstrate understanding of industry trends and challenges
-- Make the cover letter feel personal and conversational, not robotic
-- Focus on value you can bring, not just what you want to get from the role
+Return ONLY the cover letter text, no JSON formatting or additional structure.
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -103,12 +64,12 @@ Guidelines:
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert career consultant who creates highly targeted, personalized portfolio content for job applications. You understand how to analyze job descriptions and create compelling narratives that demonstrate perfect fit. Always respond with valid JSON.' 
+            content: 'You are an expert career consultant who creates highly targeted, personalized cover letters. You understand how to analyze job descriptions and create compelling narratives that demonstrate perfect fit. Always respond with just the cover letter text.' 
           },
-          { role: 'user', content: portfolioPrompt }
+          { role: 'user', content: coverLetterPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 1000,
       }),
     });
 
@@ -117,26 +78,9 @@ Guidelines:
     }
 
     const data = await response.json();
-    const generatedContent = data.choices[0].message.content;
+    const coverLetter = data.choices[0].message.content;
 
-    // Parse the JSON response
-    let parsedContent;
-    try {
-      // Clean up the response by removing markdown code block formatting if present
-      let cleanContent = generatedContent.trim();
-      if (cleanContent.startsWith('```json')) {
-        cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (cleanContent.startsWith('```')) {
-        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      parsedContent = JSON.parse(cleanContent);
-    } catch (e) {
-      console.error('Failed to parse generated content as JSON:', generatedContent);
-      throw new Error('Generated content is not valid JSON');
-    }
-
-    return new Response(JSON.stringify(parsedContent), {
+    return new Response(JSON.stringify({ cover_letter: coverLetter }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 

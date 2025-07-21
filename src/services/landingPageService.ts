@@ -30,8 +30,8 @@ export const generateLandingPageContent = async (
       throw new Error('No data returned from portfolio content generation');
     }
 
-    console.log('Generated content successfully:', Object.keys(data));
-    return data;
+    console.log('Generated cover letter successfully');
+    return { cover_letter: data.cover_letter };
   } catch (error: any) {
     console.error("Error generating landing page content:", error);
     
@@ -72,8 +72,6 @@ export const createPersonalizedPortfolio = async (
     }
 
     console.log('🚀 User authenticated, generating content...');
-    console.log('🚀 Current user ID:', user.id);
-    console.log('🚀 Job application user ID:', jobApplication.user_id);
     
     // Verify the job application exists and belongs to the user
     const { data: existingApp, error: appError } = await supabase
@@ -94,17 +92,10 @@ export const createPersonalizedPortfolio = async (
     
     console.log('🚀 Job application verified:', existingApp.id);
     
-    // Generate AI-powered content
+    // Generate AI-powered cover letter
     const generatedContent = await generateLandingPageContent(jobApplication);
     
     console.log('🚀 Content generated, creating portfolio record...');
-    console.log('🚀 About to upsert with:', {
-      job_application_id: jobApplication.id,
-      company_name: jobApplication.company_name,
-      company_slug: companySlug,
-      user_id: user.id,
-      content_keys: Object.keys(generatedContent)
-    });
     
     // Create or update the portfolio with generated content
     const { data, error } = await supabase
@@ -125,22 +116,10 @@ export const createPersonalizedPortfolio = async (
 
     if (error) {
       console.error('🚀 Database insert error:', error);
-      console.error('🚀 Error details:', {
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        message: error.message
-      });
       throw new Error(`Database error: ${error.message}`);
     }
     
     console.log('🚀 Portfolio created successfully:', data?.id);
-    console.log('🚀 Portfolio data:', {
-      id: data?.id,
-      company_slug: data?.company_slug,
-      user_id: data?.user_id,
-      job_application_id: data?.job_application_id
-    });
     
     // Add a small delay to ensure the database transaction is fully committed
     await new Promise(resolve => setTimeout(resolve, 100));
