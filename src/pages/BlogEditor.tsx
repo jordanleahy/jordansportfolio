@@ -629,24 +629,46 @@ const BlogEditor = () => {
     try {
       setSaving(true);
       
-      // Validate required fields before saving
-      if (!formData.hero_headline || !formData.hero_subhead || !formData.intro_content) {
-        toast({
-          variant: "destructive",
-          title: "Missing required fields",
-          description: "Please fill in all required hero and intro content fields."
-        });
-        return;
-      }
+      // Validate required fields only for publishing
+      if (shouldPublish) {
+        if (!formData.hero_headline || !formData.hero_subhead || !formData.intro_content) {
+          toast({
+            variant: "destructive",
+            title: "Missing required fields",
+            description: "Please fill in all required hero and intro content fields before publishing."
+          });
+          return;
+        }
 
-      // Validate visual sections
-      if (!formData.visual_sections.every(section => section.headline && section.content)) {
-        toast({
-          variant: "destructive",
-          title: "Incomplete visual sections",
-          description: "Each visual section must have a headline and content."
-        });
-        return;
+        // Validate visual sections for publishing
+        if (!formData.visual_sections.every(section => section.headline && section.content)) {
+          toast({
+            variant: "destructive",
+            title: "Incomplete visual sections",
+            description: "Each visual section must have a headline and content before publishing."
+          });
+          return;
+        }
+
+        // Validate SEO fields for publishing
+        if (!formData.meta_title || !formData.meta_description || !formData.category) {
+          toast({
+            variant: "destructive", 
+            title: "Missing SEO fields",
+            description: "Please fill in meta title, meta description, and category before publishing."
+          });
+          return;
+        }
+
+        // Validate TL;DR for publishing
+        if (!formData.cta_text || !formData.tldr_bullets || formData.tldr_bullets.length < 3) {
+          toast({
+            variant: "destructive",
+            title: "Missing summary content", 
+            description: "Please add CTA text and at least 3 TL;DR bullet points before publishing."
+          });
+          return;
+        }
       }
 
       // Auto-generate slug if not provided
