@@ -2,14 +2,36 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from "@supabase/supabase-js";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const location = useLocation();
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -81,6 +103,23 @@ const Navigation = () => {
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
+
+          {/* Login Button for Desktop */}
+          {!user && (
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  to="/auth"
+                  className={cn(
+                    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium transition-colors hover:bg-primary/90 focus:bg-primary/90 focus:outline-none"
+                  )}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
 
@@ -99,6 +138,11 @@ const Navigation = () => {
             <NavLink href="/#about">About</NavLink>
             <NavLink href="/sec">SEC Data</NavLink>
             <NavLink href="/blog">Blog</NavLink>
+            {!user && (
+              <NavLink href="/auth" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Login
+              </NavLink>
+            )}
           </nav>
         </SheetContent>
       </Sheet>
