@@ -14,6 +14,10 @@ import { Card, CardContent } from '@/components/ui/card';
 const ComparisonDetail = () => {
   const { comparisonType } = useParams<{ comparisonType: string }>();
   
+  console.log('Comparison Type:', comparisonType);
+  console.log('Available keys:', Object.keys(comparisonDataMap));
+  console.log('Data found:', !!comparisonDataMap[comparisonType || '']);
+  
   if (!comparisonType || !comparisonDataMap[comparisonType]) {
     return (
       <AppLayout>
@@ -21,6 +25,9 @@ const ComparisonDetail = () => {
           <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
           <p className="text-muted-foreground">
             The comparison you're looking for doesn't exist or has been moved.
+          </p>
+          <p className="text-sm text-muted-foreground mt-4">
+            Requested: {comparisonType} | Available: {Object.keys(comparisonDataMap).join(', ')}
           </p>
         </div>
       </AppLayout>
