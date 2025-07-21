@@ -156,7 +156,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     (filters.states?.length || 0) > 0;
 
   return (
-    <Card className="flex flex-col h-full relative z-10 bg-background border shadow-sm">
+    <Card className="flex flex-col h-full relative z-10 bg-background shadow-sm">
       <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
