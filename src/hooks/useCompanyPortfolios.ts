@@ -27,7 +27,7 @@ export const useCompanyPortfolio = (companySlug: string) => {
         .from("company_portfolios")
         .select("*, job_applications(*)")
         .eq("company_slug", companySlug)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data as CompanyPortfolio & { 
@@ -38,7 +38,7 @@ export const useCompanyPortfolio = (companySlug: string) => {
           cover_letter_link?: string; 
           created_at: string; 
         }; 
-      };
+      } | null;
     },
     enabled: !!companySlug,
   });

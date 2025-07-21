@@ -63,7 +63,10 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
         description: "Personalized landing page created successfully!",
       });
       
-      navigate(`/portfolio/${companySlug}`);
+      // Small delay to ensure database transaction is committed
+      setTimeout(() => {
+        navigate(`/portfolio/${companySlug}`);
+      }, 100);
     } catch (error: any) {
       console.error("Detailed error creating portfolio:", error);
       
