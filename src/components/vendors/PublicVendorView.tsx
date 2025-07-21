@@ -181,13 +181,8 @@ export default function PublicVendorView() {
                 </div>
               </div>
 
-              {/* Performance Metrics */}
-              {vendor.performance_metrics && Object.keys(vendor.performance_metrics).length > 0 && (
-                <PerformanceMetrics metrics={vendor.performance_metrics} />
-              )}
-
-              {/* Services and Capabilities Grid */}
-              <div className="grid gap-6 md:grid-cols-2">
+              {/* Services and Capabilities - Single Column */}
+              <div className="space-y-6">
                 {renderArrayField(vendor.core_services, "Core Services", <Target className="h-5 w-5" />)}
                 {renderArrayField(vendor.specialties, "Specialties", <Sparkles className="h-5 w-5" />)}
                 {renderArrayField(vendor.customers, "Target Customers", <Users className="h-5 w-5" />)}
@@ -304,6 +299,11 @@ export default function PublicVendorView() {
               )}
             </div>
           </div>
+
+          {/* Performance Metrics - At Bottom */}
+          {vendor.performance_metrics && Object.keys(vendor.performance_metrics).length > 0 && (
+            <PerformanceMetrics metrics={vendor.performance_metrics} />
+          )}
         </div>
       </PageLayout>
     </>
