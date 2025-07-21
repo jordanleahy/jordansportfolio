@@ -69,21 +69,22 @@ export default function PublicVendorView() {
     if (!items || items.length === 0) return null;
     
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
+      <Card className="h-full">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
             {icon}
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <ul className="space-y-3">
             {items.map((item, index) => (
-              <Badge key={index} variant="secondary" className="text-sm">
-                {item}
-              </Badge>
+              <li key={index} className="flex items-start gap-3 text-sm leading-relaxed">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                <span className="text-muted-foreground">{item}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </CardContent>
       </Card>
     );
@@ -162,9 +163,11 @@ export default function PublicVendorView() {
                   </div>
                 </div>
 
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {vendor.description}
-                </p>
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-base text-muted-foreground leading-relaxed">
+                    {vendor.description}
+                  </p>
+                </div>
 
                 <div className="flex gap-3">
                   {vendor.website_url && (
