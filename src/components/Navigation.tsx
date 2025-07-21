@@ -14,7 +14,10 @@ const Navigation = () => {
   // Simplified active state logic
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/" && !location.hash;
-    if (path.includes("#")) return location.pathname + location.hash === path;
+    if (path.includes("#")) {
+      const [basePath, hash] = path.split('#');
+      return location.pathname === basePath && location.hash === `#${hash}`;
+    }
     return location.pathname.startsWith(path);
   };
 
