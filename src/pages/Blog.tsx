@@ -1,24 +1,17 @@
-// Removed framer-motion for better mobile scrolling
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar, ArrowRight, Edit, Plus, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
 import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
-import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
+
 const Blog = () => {
-  const {
-    user
-  } = useAuth();
-  const {
-    isAdmin
-  } = useUserRole();
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
 
   // Use TanStack Query for blog posts
   const {
@@ -32,20 +25,26 @@ const Blog = () => {
   const handleMouseEnter = (slug: string) => {
     prefetchBlogPost(slug);
   };
+
   const featuredPost = blogPosts.find(post => post.featured);
   const otherPosts = blogPosts.filter(post => !post.featured);
+
   if (loading) {
-    return <PageLayout>
+    return (
+      <PageLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
             <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
           </div>
         </div>
-      </PageLayout>;
+      </PageLayout>
+    );
   }
+
   if (error) {
-    return <PageLayout>
+    return (
+      <PageLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center space-y-4 max-w-md mx-auto px-4">
             <FileText className="h-12 w-12 text-destructive mx-auto" />
@@ -58,13 +57,14 @@ const Blog = () => {
             </Button>
           </div>
         </div>
-      </PageLayout>;
+      </PageLayout>
+    );
   }
 
   // Empty state when no published blogs exist
   if (blogPosts.length === 0) {
-    return <PageLayout>
-        
+    return (
+      <PageLayout>
         {/* Hero Section */}
         <section className="py-16 px-4 pt-24">
           <div className="max-w-4xl mx-auto">
@@ -90,14 +90,16 @@ const Blog = () => {
                 </p>
               </div>
               
-              {user && <div className="pt-4">
+              {user && (
+                <div className="pt-4">
                   <Button asChild size="lg">
                     <Link to="/blog-editor">
                       <Plus className="mr-2 h-4 w-4" />
                       Create First Blog Post
                     </Link>
                   </Button>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -111,38 +113,71 @@ const Blog = () => {
                 Get notified when new design insights and case studies are published.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" />
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" 
+                />
                 <Button>Subscribe</Button>
               </div>
             </div>
           </div>
         </section>
-      </PageLayout>;
+      </PageLayout>
+    );
   }
-  return <PageLayout>
 
+  return (
+    <PageLayout>
       {/* Hero Section */}
-      
+      <section className="py-16 px-4 pt-24">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl font-bold mb-4">Design Stories</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Insights, learnings, and behind-the-scenes stories from designing products that matter.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Post */}
-      {featuredPost && <section className="py-8 px-4">
+      {featuredPost && (
+        <section className="py-8 px-4">
           <div className="max-w-6xl mx-auto">
             <div>
-              <Link to={`/blog/${featuredPost.slug}`} onMouseEnter={() => handleMouseEnter(featuredPost.slug)}>
+              <Link 
+                to={`/blog/${featuredPost.slug}`} 
+                onMouseEnter={() => handleMouseEnter(featuredPost.slug)}
+              >
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                   <div className="md:flex">
                     <div className="md:w-1/2">
-                      {featuredPost.hero_image_url ? <img src={featuredPost.hero_image_url} alt={featuredPost.hero_headline} className="aspect-video w-full object-cover" /> : <div className="aspect-video bg-muted"></div>}
+                      {featuredPost.hero_image_url ? (
+                        <img 
+                          src={featuredPost.hero_image_url} 
+                          alt={featuredPost.hero_headline} 
+                          className="aspect-video w-full object-cover" 
+                        />
+                      ) : (
+                        <div className="aspect-video bg-muted"></div>
+                      )}
                     </div>
                     <div className="md:w-1/2 p-8">
                       <div className="flex items-start justify-between mb-4">
                         <Badge>{featuredPost.category}</Badge>
-                        {user && <Button variant="ghost" size="sm" onClick={e => {
-                      e.preventDefault();
-                      window.location.href = `/blog-editor/${featuredPost.slug}`;
-                    }}>
+                        {user && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.location.href = `/blog-editor/${featuredPost.slug}`;
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
-                          </Button>}
+                          </Button>
+                        )}
                       </div>
                       <h2 className="text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
                         {featuredPost.hero_headline}
@@ -154,10 +189,10 @@ const Blog = () => {
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {new Date(featuredPost.published_at || featuredPost.created_at).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
@@ -174,7 +209,8 @@ const Blog = () => {
               </Link>
             </div>
           </div>
-        </section>}
+        </section>
+      )}
 
       {/* Other Posts Grid */}
       <section className="py-12 px-4">
@@ -184,28 +220,48 @@ const Blog = () => {
               {featuredPost ? 'Latest Stories' : 'All Stories'}
             </h2>
             
-            {user && <Button asChild variant="outline">
+            {user && (
+              <Button asChild variant="outline">
                 <Link to="/blog-editor">
                   <Plus className="mr-2 h-4 w-4" />
                   New Post
                 </Link>
-              </Button>}
+              </Button>
+            )}
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {otherPosts.map((post, index) => <div key={post.id}>
-                <Link to={`/blog/${post.slug}`} onMouseEnter={() => handleMouseEnter(post.slug)}>
+            {otherPosts.map((post) => (
+              <div key={post.id}>
+                <Link 
+                  to={`/blog/${post.slug}`} 
+                  onMouseEnter={() => handleMouseEnter(post.slug)}
+                >
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
-                    {post.hero_image_url ? <img src={post.hero_image_url} alt={post.hero_headline} className="aspect-video w-full object-cover" /> : <div className="aspect-video bg-muted"></div>}
+                    {post.hero_image_url ? (
+                      <img 
+                        src={post.hero_image_url} 
+                        alt={post.hero_headline} 
+                        className="aspect-video w-full object-cover" 
+                      />
+                    ) : (
+                      <div className="aspect-video bg-muted"></div>
+                    )}
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <Badge variant="secondary">{post.category}</Badge>
-                        {user && <Button variant="ghost" size="sm" onClick={e => {
-                      e.preventDefault();
-                      window.location.href = `/blog-editor/${post.slug}`;
-                    }}>
+                        {user && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.location.href = `/blog-editor/${post.slug}`;
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
-                          </Button>}
+                          </Button>
+                        )}
                       </div>
                       <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
                         {post.hero_headline}
@@ -217,9 +273,9 @@ const Blog = () => {
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                      })}
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
@@ -229,7 +285,8 @@ const Blog = () => {
                     </CardContent>
                   </Card>
                 </Link>
-              </div>)}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -243,12 +300,18 @@ const Blog = () => {
               Get notified when I publish new design insights and case studies.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" />
+              <input 
+                type="email" 
+                placeholder="Enter your email" 
+                className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" 
+              />
               <Button>Subscribe</Button>
             </div>
           </div>
         </div>
-        </section>
-    </PageLayout>;
+      </section>
+    </PageLayout>
+  );
 };
+
 export default Blog;
