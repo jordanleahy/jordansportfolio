@@ -53,9 +53,8 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         videoSrc={videoSrc}
         posterSrc="/lovable-uploads/6ad28481-a75a-4096-a9f1-74822cefe882.png"
         coverLetterContent={coverLetterContent}
+        portfolio={portfolio}
       />
-
-      {user && <PortfolioVideoUploadSection portfolio={portfolio} />}
 
       <SchedulingSection
         calendarSrc="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true"
