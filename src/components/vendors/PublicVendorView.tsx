@@ -1,4 +1,3 @@
-
 import { useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Home } from 'lucide-react';
@@ -7,24 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
-
 export default function PublicVendorView() {
-  const { category, vendorSlug } = useParams<{ category?: string; vendorSlug: string }>();
-  
-  const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
-
+  const {
+    category,
+    vendorSlug
+  } = useParams<{
+    category?: string;
+    vendorSlug: string;
+  }>();
+  const {
+    data: vendor,
+    isLoading,
+    error
+  } = useVendorBySlug(vendorSlug || '');
   if (!vendorSlug) {
     return <Navigate to="/404" replace />;
   }
@@ -35,21 +34,16 @@ export default function PublicVendorView() {
     title: `RCM Companies`,
     description: `Analysis of RCM vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
   };
-
   if (isLoading) {
-    return (
-      <PageLayout>
+    return <PageLayout>
         <div className="container mx-auto py-8 px-4">
           <div className="text-center">Loading vendor details...</div>
         </div>
-      </PageLayout>
-    );
+      </PageLayout>;
   }
-
   if (error || !vendor || vendor.status !== 'published') {
     return <Navigate to="/404" replace />;
   }
-
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'startup':
@@ -64,12 +58,9 @@ export default function PublicVendorView() {
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
     }
   };
-
   const renderArrayField = (items: string[] | undefined, title: string, icon: React.ReactNode) => {
     if (!items || items.length === 0) return null;
-    
-    return (
-      <Card className="h-full">
+    return <Card className="h-full">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             {icon}
@@ -78,27 +69,23 @@ export default function PublicVendorView() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
-            {items.map((item, index) => (
-              <li key={index} className="flex items-start gap-3 text-sm leading-relaxed">
+            {items.map((item, index) => <li key={index} className="flex items-start gap-3 text-sm leading-relaxed">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
                 <span className="text-muted-foreground">{item}</span>
-              </li>
-            ))}
+              </li>)}
           </ul>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   };
-
   const getCategoryDisplayName = (cat: string) => {
-    switch(cat) {
-      case 'rcm': return 'RCM Companies';
-      default: return `${cat.charAt(0).toUpperCase() + cat.slice(1)} Companies`;
+    switch (cat) {
+      case 'rcm':
+        return 'RCM Companies';
+      default:
+        return `${cat.charAt(0).toUpperCase() + cat.slice(1)} Companies`;
     }
   };
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>{vendor.company_name} - Company Profile</title>
         <meta name="description" content={vendor.description} />
@@ -154,30 +141,24 @@ export default function PublicVendorView() {
                       <Building className="h-4 w-4" />
                       {vendor.headquarters}
                     </span>
-                    {vendor.founding_year && (
-                      <span className="flex items-center gap-1">
+                    {vendor.founding_year && <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Founded {vendor.founding_year}
-                      </span>
-                    )}
+                      </span>}
                   </div>
                 </div>
 
                 <div className="prose prose-lg max-w-none">
-                  <p className="text-base text-muted-foreground leading-relaxed">
-                    {vendor.description}
-                  </p>
+                  
                 </div>
 
                 <div className="flex gap-3">
-                  {vendor.website_url && (
-                    <Button asChild>
+                  {vendor.website_url && <Button asChild>
                       <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Visit Website
                       </a>
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
               </div>
 
@@ -202,12 +183,10 @@ export default function PublicVendorView() {
                     <p className="text-muted-foreground">{vendor.headquarters}</p>
                   </div>
                   
-                  {vendor.founding_year && (
-                    <div>
+                  {vendor.founding_year && <div>
                       <h3 className="text-base font-semibold mb-2">Founded</h3>
                       <p className="text-muted-foreground">{vendor.founding_year}</p>
-                    </div>
-                  )}
+                    </div>}
                   
                   <div>
                     <h3 className="text-base font-semibold mb-2">Company Type</h3>
@@ -237,12 +216,7 @@ export default function PublicVendorView() {
               </div>
 
               {/* Image Gallery */}
-              {vendor.vendor_images && vendor.vendor_images.length > 0 && (
-                <VendorImageGallery 
-                  vendor={vendor}
-                  canEdit={false}
-                />
-              )}
+              {vendor.vendor_images && vendor.vendor_images.length > 0 && <VendorImageGallery vendor={vendor} canEdit={false} />}
             </div>
 
             {/* Sidebar - Right Column */}
@@ -253,12 +227,10 @@ export default function PublicVendorView() {
                   <CardTitle className="text-lg">Company Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {vendor.founding_year && (
-                    <div>
+                  {vendor.founding_year && <div>
                       <span className="text-sm text-muted-foreground block mb-1">Founded</span>
                       <span className="text-xl font-semibold">{vendor.founding_year}</span>
-                    </div>
-                  )}
+                    </div>}
                   <div>
                     <span className="text-sm text-muted-foreground block mb-1">Headquarters</span>
                     <span className="font-medium">{vendor.headquarters}</span>
@@ -285,101 +257,74 @@ export default function PublicVendorView() {
                       {vendor.total_funding || 'Not disclosed'}
                     </span>
                   </div>
-                  {vendor.funding_stage && (
-                    <div>
+                  {vendor.funding_stage && <div>
                       <span className="text-sm text-muted-foreground block mb-1">Funding Stage</span>
                       <span className="font-medium">{vendor.funding_stage}</span>
-                    </div>
-                  )}
-                  {vendor.key_investors && vendor.key_investors.length > 0 && (
-                    <div>
+                    </div>}
+                  {vendor.key_investors && vendor.key_investors.length > 0 && <div>
                       <span className="text-sm text-muted-foreground block mb-2">Key Investors</span>
                       <ul className="space-y-1">
-                        {vendor.key_investors.map((investor, index) => (
-                          <li key={index} className="flex items-start gap-2">
+                        {vendor.key_investors.map((investor, index) => <li key={index} className="flex items-start gap-2">
                             <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
                             <span className="text-sm font-medium">{investor}</span>
-                          </li>
-                        ))}
+                          </li>)}
                       </ul>
-                    </div>
-                  )}
-                  {vendor.employee_count_range && (
-                    <div>
+                    </div>}
+                  {vendor.employee_count_range && <div>
                       <span className="text-sm text-muted-foreground block mb-1">Employees</span>
                       <span className="font-medium">{vendor.employee_count_range}</span>
-                    </div>
-                  )}
-                  {vendor.business_model && (
-                    <div>
+                    </div>}
+                  {vendor.business_model && <div>
                       <span className="text-sm text-muted-foreground block mb-1">Business Model</span>
                       <span className="font-medium">{vendor.business_model}</span>
-                    </div>
-                  )}
-                  {vendor.geographic_presence && (
-                    <div>
+                    </div>}
+                  {vendor.geographic_presence && <div>
                       <span className="text-sm text-muted-foreground block mb-1">Geographic Presence</span>
                       <span className="font-medium">{vendor.geographic_presence}</span>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
               {/* Contact Information */}
-              {(vendor.contact_email || vendor.contact_phone || vendor.contact_address || vendor.linkedin_url || vendor.twitter_url) && (
-                <Card>
+              {(vendor.contact_email || vendor.contact_phone || vendor.contact_address || vendor.linkedin_url || vendor.twitter_url) && <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Contact Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {vendor.contact_email && (
-                      <div className="flex justify-between">
+                    {vendor.contact_email && <div className="flex justify-between">
                         <span className="text-muted-foreground">Email</span>
                         <a href={`mailto:${vendor.contact_email}`} className="text-primary hover:underline">
                           {vendor.contact_email}
                         </a>
-                      </div>
-                    )}
-                    {vendor.contact_phone && (
-                      <div className="flex justify-between">
+                      </div>}
+                    {vendor.contact_phone && <div className="flex justify-between">
                         <span className="text-muted-foreground">Phone</span>
                         <span className="font-medium">{vendor.contact_phone}</span>
-                      </div>
-                    )}
-                    {vendor.contact_address && (
-                      <div className="flex justify-between">
+                      </div>}
+                    {vendor.contact_address && <div className="flex justify-between">
                         <span className="text-muted-foreground">Address</span>
                         <span className="font-medium text-right">{vendor.contact_address}</span>
-                      </div>
-                    )}
+                      </div>}
                     <div className="flex gap-2 pt-2">
-                      {vendor.linkedin_url && (
-                        <Button variant="outline" size="sm" asChild>
+                      {vendor.linkedin_url && <Button variant="outline" size="sm" asChild>
                           <a href={vendor.linkedin_url} target="_blank" rel="noopener noreferrer">
                             LinkedIn
                           </a>
-                        </Button>
-                      )}
-                      {vendor.twitter_url && (
-                        <Button variant="outline" size="sm" asChild>
+                        </Button>}
+                      {vendor.twitter_url && <Button variant="outline" size="sm" asChild>
                           <a href={vendor.twitter_url} target="_blank" rel="noopener noreferrer">
                             Twitter
                           </a>
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
             </div>
           </div>
 
           {/* Performance Metrics - At Bottom */}
-          {vendor.performance_metrics && Object.keys(vendor.performance_metrics).length > 0 && (
-            <PerformanceMetrics metrics={vendor.performance_metrics} />
-          )}
+          {vendor.performance_metrics && Object.keys(vendor.performance_metrics).length > 0 && <PerformanceMetrics metrics={vendor.performance_metrics} />}
         </div>
       </PageLayout>
-    </>
-  );
+    </>;
 }
