@@ -130,13 +130,13 @@ export default function PublicVendorView() {
           </Breadcrumb>
 
           {/* Clean Header Section */}
-          <div className="rounded-lg p-8">
-            <div className="flex items-start justify-between">
-              {/* Left side - Company Info */}
-              <div className="space-y-4 flex-1">
+          <div className="rounded-lg p-4 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              {/* Company Info */}
+              <div className="space-y-3 md:space-y-4 flex-1">
                 {/* Company Name and Type */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-4xl font-bold text-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
                     {vendor.company_name}
                   </h1>
                   <Badge className={getCompanyTypeBadgeColor(vendor.company_type)}>
@@ -145,32 +145,31 @@ export default function PublicVendorView() {
                 </div>
                 
                 {/* Location and Founded Info */}
-                <div className="flex items-center gap-6 text-muted-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm md:text-base text-muted-foreground">
                   <span className="flex items-center gap-2">
-                    <Building className="h-4 w-4" />
-                    {vendor.headquarters}
+                    <Building className="h-4 w-4 flex-shrink-0" />
+                    <span className="break-words">{vendor.headquarters}</span>
                   </span>
                   {vendor.founding_year && (
                     <span className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
                       Founded {vendor.founding_year}
                     </span>
                   )}
                 </div>
-
               </div>
 
-              {/* Right side - Visit Website Button */}
-              <div className="ml-8">
-                {vendor.website_url && (
-                  <Button asChild size="lg">
+              {/* Visit Website Button */}
+              {vendor.website_url && (
+                <div className="flex justify-end md:ml-8">
+                  <Button asChild size="lg" className="w-full sm:w-auto">
                     <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Visit Website
                     </a>
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
