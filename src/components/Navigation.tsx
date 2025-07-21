@@ -29,20 +29,21 @@ const Navigation = () => {
   const navLinkStyles = "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50";
   const mobileNavItemStyles = "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20";
 
-  const mobileMenuItems = [
+  const mobileMenuItems = user ? [
+    // Authenticated user items
+    { href: "/sec", label: "Funded Startups", icon: Database },
+    { href: "/vendors", label: "Vendors", icon: Building2 },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
+    { href: "/jobs", label: "Jobs", icon: FileText },
+    { href: "/agents", label: "AI Agents", icon: Settings },
+    ...(isAdmin ? [{ href: "/admin-blog", label: "Blog Admin", icon: BookOpen }] : [])
+  ] : [
+    // Public items
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
-    // Authenticated user items
-    ...(user ? [
-      { href: "/vendors", label: "Vendors", icon: Building2 },
-      { href: "/calendar", label: "Calendar", icon: Calendar },
-      { href: "/jobs", label: "Jobs", icon: FileText },
-      { href: "/agents", label: "AI Agents", icon: Settings },
-      ...(isAdmin ? [{ href: "/admin-blog", label: "Blog Admin", icon: BookOpen }] : [])
-    ] : [])
   ];
 
   const handleSignOut = async () => {
@@ -89,70 +90,21 @@ const Navigation = () => {
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/"
-                      className={cn(navLinkStyles, isActive("/") && "bg-accent text-accent-foreground")}
-                    >
-                      <Home className="mr-2 h-4 w-4" />
-                      Home
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/#case-studies"
-                      className={cn(navLinkStyles, isActive("/#case-studies") && "bg-accent text-accent-foreground")}
-                      onClick={(e) => handleAnchorClick(e, "/#case-studies")}
-                    >
-                      <Target className="mr-2 h-4 w-4" />
-                      Case Studies
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/blog"
-                      className={cn(navLinkStyles, isActive("/blog") && "bg-accent text-accent-foreground")}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Blog
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/sec"
-                      className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
-                    >
-                      <span className="mr-2 text-sm font-bold">$$</span>
-                      Funded Startups
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/#about"
-                      className={cn(navLinkStyles, isActive("/#about") && "bg-accent text-accent-foreground")}
-                      onClick={(e) => handleAnchorClick(e, "/#about")}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      About
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-
-                {user && (
+                {user ? (
+                  // Authenticated user navigation
                   <>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/sec"
+                          className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
+                        >
+                          <span className="mr-2 text-sm font-bold">$$</span>
+                          Funded Startups
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
@@ -214,32 +166,95 @@ const Navigation = () => {
                         </NavigationMenuLink>
                       </NavigationMenuItem>
                     )}
-                  </>
-                )}
 
-                {user ? (
-                  <NavigationMenuItem>
-                    <Button
-                      variant="ghost"
-                      onClick={handleSignOut}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </Button>
-                  </NavigationMenuItem>
-                ) : (
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        to="/auth"
-                        className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium transition-colors hover:bg-primary/90 focus:bg-primary/90 focus:outline-none"
+                    <NavigationMenuItem>
+                      <Button
+                        variant="ghost"
+                        onClick={handleSignOut}
+                        className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
                       >
-                        <LogIn className="mr-2 h-4 w-4" />
-                        Login
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </Button>
+                    </NavigationMenuItem>
+                  </>
+                ) : (
+                  // Public navigation
+                  <>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/"
+                          className={cn(navLinkStyles, isActive("/") && "bg-accent text-accent-foreground")}
+                        >
+                          <Home className="mr-2 h-4 w-4" />
+                          Home
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/#case-studies"
+                          className={cn(navLinkStyles, isActive("/#case-studies") && "bg-accent text-accent-foreground")}
+                          onClick={(e) => handleAnchorClick(e, "/#case-studies")}
+                        >
+                          <Target className="mr-2 h-4 w-4" />
+                          Case Studies
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/blog"
+                          className={cn(navLinkStyles, isActive("/blog") && "bg-accent text-accent-foreground")}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          Blog
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/sec"
+                          className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
+                        >
+                          <span className="mr-2 text-sm font-bold">$$</span>
+                          Funded Startups
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/#about"
+                          className={cn(navLinkStyles, isActive("/#about") && "bg-accent text-accent-foreground")}
+                          onClick={(e) => handleAnchorClick(e, "/#about")}
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          About
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/auth"
+                          className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium transition-colors hover:bg-primary/90 focus:bg-primary/90 focus:outline-none"
+                        >
+                          <LogIn className="mr-2 h-4 w-4" />
+                          Login
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  </>
                 )}
               </NavigationMenuList>
             </NavigationMenu>
