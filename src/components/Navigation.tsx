@@ -32,6 +32,7 @@ const Navigation = () => {
   // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
+    { href: "/rcmcompanies", label: "RCM Companies", icon: Heart },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
     // Admin-only items
@@ -85,7 +86,7 @@ const Navigation = () => {
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">RSAM Companies</span>
+            <span className="hidden font-bold sm:inline-block">RCM Companies</span>
           </Link>
         </div>
         
@@ -97,6 +98,18 @@ const Navigation = () => {
                 {user ? (
                   // Authenticated user navigation
                   <>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/rcmcompanies"
+                          className={cn(navLinkStyles, isActive("/rcmcompanies") && "bg-accent text-accent-foreground")}
+                        >
+                          <Heart className="mr-2 h-4 w-4" />
+                          RCM Companies
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
