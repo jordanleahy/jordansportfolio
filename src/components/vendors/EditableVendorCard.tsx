@@ -173,7 +173,7 @@ export function EditableVendorCard({
       </CardHeader>
       
       <CardContent className="space-y-3 flex-1 flex flex-col" onClick={(e) => isEditing && e.stopPropagation()}>
-        <div>
+        <div className="flex-1">
           <div className="text-sm font-medium mb-1">Description</div>
           {isEditing ? (
             <TextEditor
