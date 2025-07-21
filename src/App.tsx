@@ -73,6 +73,7 @@ function App() {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/blog-editor" element={<BlogEditor />} />
+                <Route path="/blog-editor/:id" element={<BlogEditor />} />
                 <Route path="/admin-blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
                 <Route 
                   path="/calendar" 
