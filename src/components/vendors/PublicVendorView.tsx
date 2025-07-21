@@ -11,6 +11,7 @@ import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
+
 export default function PublicVendorView() {
   const {
     category,
@@ -24,6 +25,7 @@ export default function PublicVendorView() {
     isLoading,
     error
   } = useVendorBySlug(vendorSlug || '');
+
   if (!vendorSlug) {
     return <Navigate to="/404" replace />;
   }
@@ -34,6 +36,7 @@ export default function PublicVendorView() {
     title: `RCM Companies`,
     description: `Analysis of RCM vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
   };
+
   if (isLoading) {
     return <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -41,9 +44,11 @@ export default function PublicVendorView() {
         </div>
       </PageLayout>;
   }
+
   if (error || !vendor || vendor.status !== 'published') {
     return <Navigate to="/404" replace />;
   }
+
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'startup':
@@ -58,6 +63,7 @@ export default function PublicVendorView() {
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
     }
   };
+
   const renderArrayField = (items: string[] | undefined, title: string, icon: React.ReactNode) => {
     if (!items || items.length === 0) return null;
     return <Card className="h-full">
@@ -77,6 +83,7 @@ export default function PublicVendorView() {
         </CardContent>
       </Card>;
   };
+
   const getCategoryDisplayName = (cat: string) => {
     switch (cat) {
       case 'rcm':
@@ -85,6 +92,7 @@ export default function PublicVendorView() {
         return `${cat.charAt(0).toUpperCase() + cat.slice(1)} Companies`;
     }
   };
+
   return <>
       <Helmet>
         <title>{vendor.company_name} - Company Profile</title>
@@ -121,80 +129,61 @@ export default function PublicVendorView() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Header Section - Two Column Layout */}
+          {/* Clean Header Section */}
+          <div className="bg-card rounded-lg border p-8">
+            <div className="flex items-start justify-between">
+              {/* Left side - Company Info */}
+              <div className="space-y-4 flex-1">
+                {/* Company Name and Type */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-4xl font-bold text-foreground">
+                    {vendor.company_name}
+                  </h1>
+                  <Badge className={getCompanyTypeBadgeColor(vendor.company_type)}>
+                    {vendor.company_type}
+                  </Badge>
+                </div>
+                
+                {/* Location and Founded Info */}
+                <div className="flex items-center gap-6 text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    {vendor.headquarters}
+                  </span>
+                  {vendor.founding_year && (
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Founded {vendor.founding_year}
+                    </span>
+                  )}
+                </div>
+
+                {/* Company Description */}
+                {vendor.description && (
+                  <p className="text-muted-foreground leading-relaxed max-w-3xl">
+                    {vendor.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Right side - Visit Website Button */}
+              <div className="ml-8">
+                {vendor.website_url && (
+                  <Button asChild size="lg">
+                    <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content - Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content - Left Column */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                      {vendor.company_name}
-                    </h1>
-                    <Badge className={getCompanyTypeBadgeColor(vendor.company_type)}>
-                      {vendor.company_type}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Building className="h-4 w-4" />
-                      {vendor.headquarters}
-                    </span>
-                    {vendor.founding_year && <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        Founded {vendor.founding_year}
-                      </span>}
-                  </div>
-                </div>
-
-                <div className="prose prose-lg max-w-none">
-                  
-                </div>
-
-                <div className="flex gap-3">
-                  {vendor.website_url && <Button asChild>
-                      <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Visit Website
-                      </a>
-                    </Button>}
-                </div>
-              </div>
-
-              {/* Company Overview Section */}
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl font-semibold">Company Overview</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">Basic company information and description</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h3 className="text-base font-semibold mb-3">Description</h3>
-                    <p className="text-muted-foreground leading-relaxed">{vendor.description}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">Headquarters</h3>
-                    <p className="text-muted-foreground">{vendor.headquarters}</p>
-                  </div>
-                  
-                  {vendor.founding_year && <div>
-                      <h3 className="text-base font-semibold mb-2">Founded</h3>
-                      <p className="text-muted-foreground">{vendor.founding_year}</p>
-                    </div>}
-                  
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">Company Type</h3>
-                    <p className="text-muted-foreground">{vendor.company_type}</p>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Services and Capabilities - Single Column */}
               <div className="space-y-6">
                 {renderArrayField(vendor.core_services, "Core Services", <Target className="h-5 w-5" />)}
