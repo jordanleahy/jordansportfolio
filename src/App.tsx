@@ -32,6 +32,7 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import Comparison from "./pages/Comparison";
 import ComparisonDetail from "./pages/ComparisonDetail";
+import RCMCompanies from "./pages/RCMCompanies";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -114,6 +115,7 @@ function App() {
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
+                <Route path="/rcmcompanies" element={<RCMCompanies />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
