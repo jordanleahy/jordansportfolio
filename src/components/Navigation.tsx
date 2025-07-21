@@ -20,7 +20,7 @@ const Navigation = () => {
     return location.pathname.startsWith(path);
   };
 
-  const NavLink = ({ href, children, className, ...props }: { href: string; children: React.ReactNode; className?: string }) => (
+  const NavLink = ({ href, children, className, ...props }: { href: string; children: React.ReactNode; className?: string; onClick?: () => void }) => (
     <Link
       to={href}
       className={cn(
@@ -28,7 +28,6 @@ const Navigation = () => {
         isActive(href) && "bg-accent text-accent-foreground",
         className
       )}
-      onClick={() => setIsOpen(false)}
       {...props}
     >
       {children}
@@ -111,19 +110,78 @@ const Navigation = () => {
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-          <nav className="flex flex-col gap-4">
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/#case-studies">Case Studies</NavLink>
-            <NavLink href="/#about">About</NavLink>
-            <NavLink href="/sec">SEC Data</NavLink>
-            <NavLink href="/blog">Blog</NavLink>
+        <SheetContent 
+          side="right" 
+          className="w-80 p-0 bg-background/95 backdrop-blur-md border-l animate-slide-in-right data-[state=closed]:animate-slide-out-right"
+        >
+          <div className="flex flex-col h-full">
+            {/* Header with close button */}
+            <div className="flex items-center justify-between p-6 border-b border-border/50">
+              <h2 className="text-lg font-semibold text-foreground">Menu</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8 p-0 hover:bg-accent rounded-full"
+              >
+                <span className="text-xl leading-none">×</span>
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
+            
+            {/* Navigation Links */}
+            <nav className="flex flex-col p-6 space-y-3 flex-1">
+              <Link 
+                to="/" 
+                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-1">Home</span>
+              </Link>
+              <Link 
+                to="/#case-studies" 
+                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-1">Case Studies</span>
+              </Link>
+              <Link 
+                to="/#about" 
+                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-1">About</span>
+              </Link>
+              <Link 
+                to="/sec" 
+                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-1">SEC Data</span>
+              </Link>
+              <Link 
+                to="/blog" 
+                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-1">Blog</span>
+              </Link>
+            </nav>
+            
+            {/* Login Button for Mobile */}
             {!user && (
-              <NavLink href="/auth" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Login
-              </NavLink>
+              <div className="p-6 pt-0 mt-auto border-t border-border/50">
+                <Link 
+                  to="/auth" 
+                  className="flex items-center justify-center gap-3 py-4 px-6 text-base font-medium bg-primary text-primary-foreground rounded-xl transition-all duration-300 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span>Login</span>
+                </Link>
+              </div>
             )}
-          </nav>
+          </div>
         </SheetContent>
       </Sheet>
     </>

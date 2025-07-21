@@ -40,12 +40,12 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/sec" element={<SEC />} />
-              <Route path="/sec/data-dictionary" element={<DataDictionary />} />
-              <Route path="/blog" element={<Blog />} />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/sec" element={<SEC />} />
+                <Route path="/sec/data-dictionary" element={<DataDictionary />} />
+                <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/blog-editor" element={<BlogEditor />} />
               <Route path="/admin-blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
@@ -62,7 +62,7 @@ function App() {
               <Route path="/cases/case3" element={<Case3 />} />
               <Route path="/cases/case4" element={<Case4 />} />
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
