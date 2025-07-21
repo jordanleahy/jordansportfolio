@@ -94,6 +94,9 @@ const Navigation = () => {
         </SheetTrigger>
         <SheetContent side="right" className="w-[300px] sm:w-[400px]">
           <nav className="flex flex-col gap-4">
+            <NavLink href="/">Home</NavLink>
+            <NavLink href="/#case-studies">Case Studies</NavLink>
+            <NavLink href="/#about">About</NavLink>
             <NavLink href="/sec">SEC Data</NavLink>
             <NavLink href="/blog">Blog</NavLink>
           </nav>
