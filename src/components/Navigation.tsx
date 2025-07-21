@@ -124,6 +124,7 @@ const Navigation = () => {
         <SheetContent 
           side="right" 
           className="w-80 p-0 bg-background/95 backdrop-blur-md border-l"
+          hideClose
         >
           <div className="flex flex-col h-full">
             {/* Header with improved close button */}
