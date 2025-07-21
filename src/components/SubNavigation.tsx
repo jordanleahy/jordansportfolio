@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Building2, Calendar, FileText, Settings, BookOpen, LogOut } from "lucide-react";
@@ -40,7 +41,7 @@ const SubNavigation = () => {
 
   const navItems = [
     { 
-      path: "/vendors/rcm", 
+      path: "/vendors", 
       label: "Vendors", 
       icon: Building2,
       isActive: location.pathname.startsWith("/vendors")
