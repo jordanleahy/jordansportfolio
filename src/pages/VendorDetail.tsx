@@ -199,7 +199,7 @@ import {
 import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
 
 export default function VendorDetail() {
-  const { category, vendorSlug } = useParams<{ category: string; vendorSlug: string }>();
+  const { slugname: category, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
   const [showPrompt, setShowPrompt] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPasteOpen, setIsPasteOpen] = useState(false);
