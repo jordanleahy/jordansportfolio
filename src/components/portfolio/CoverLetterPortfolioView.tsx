@@ -8,6 +8,7 @@ import { VideoWithCoverLetterLayout } from "@/components/cover-letter/VideoWithC
 import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
 import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
 import { CoverLetterContent } from "@/data/coverLetterContent";
+import { PortfolioVideoUploadSection } from "./PortfolioVideoUploadSection";
 
 interface CoverLetterPortfolioViewProps {
   portfolio: CompanyPortfolio & {
@@ -23,6 +24,10 @@ interface CoverLetterPortfolioViewProps {
 
 const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) => {
   const jobApplication = portfolio.job_applications;
+
+  // Use custom video if available, otherwise fall back to default
+  const videoSrc = portfolio.custom_video_url || 
+    "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//667F0B04-8D3D-429C-992C-1D8FB2883E9E%20(1)%20(1)%202.mov";
 
   // Create cover letter content using the generated cover letter or fallback
   const coverLetterContent: CoverLetterContent = {
@@ -43,10 +48,12 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
   return (
     <CoverLetterPageLayout>
       <VideoWithCoverLetterLayout
-        videoSrc="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//667F0B04-8D3D-429C-992C-1D8FB2883E9E%20(1)%20(1)%202.mov"
+        videoSrc={videoSrc}
         posterSrc="/lovable-uploads/6ad28481-a75a-4096-a9f1-74822cefe882.png"
         coverLetterContent={coverLetterContent}
       />
+
+      <PortfolioVideoUploadSection portfolio={portfolio} />
 
       <SchedulingSection
         calendarSrc="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true"
