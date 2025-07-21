@@ -36,6 +36,11 @@ Focus on the scene, setting, and layout, not on narrative backstory or detailed 
 - Clocks or timers indicating turnaround
 - Hospital corridors, office partitions, meeting rooms
 
+👥 Gender Representation Requirements
+- When people are included: 70% women, 30% men
+- Ensure diverse representation in professional healthcare roles
+- Women should be prominently featured in leadership and technical positions
+
 ✅ Updated Visual Style & Layout Guidance
 
 🎨 Color Palette
@@ -81,6 +86,11 @@ Focus on the business scene, office setting, and professional layout, not on nar
 - Handshakes, contract signatures, approval workflows
 - Office buildings, meeting rooms, corporate environments
 - Filing systems, audit trails, compliance documentation
+
+👥 Gender Representation Requirements
+- When people are included: 70% women, 30% men
+- Ensure diverse representation in professional business roles
+- Women should be prominently featured in leadership and decision-making positions
 
 ✅ Updated Visual Style & Layout Guidance
 
