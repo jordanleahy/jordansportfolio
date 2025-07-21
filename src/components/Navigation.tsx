@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -15,10 +15,21 @@ const Navigation = () => {
 
   const isActive = (path: string) => {
     if (path === "/") {
-      return location.pathname === "/";
+      return location.pathname === "/" && !location.hash;
+    }
+    if (path.includes("#")) {
+      return location.pathname + location.hash === path;
     }
     return location.pathname.startsWith(path);
   };
+
+  const mobileMenuItems = [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/#case-studies", label: "Case Studies", icon: Target },
+    { href: "/#about", label: "About", icon: User },
+    { href: "/sec", label: "SEC Data", icon: Database },
+    { href: "/blog", label: "Blog", icon: FileText },
+  ];
 
   const NavLink = ({ href, children, className, ...props }: { href: string; children: React.ReactNode; className?: string; onClick?: () => void }) => (
     <Link
@@ -112,68 +123,64 @@ const Navigation = () => {
         </SheetTrigger>
         <SheetContent 
           side="right" 
-          className="w-80 p-0 bg-background/95 backdrop-blur-md border-l animate-slide-in-right data-[state=closed]:animate-slide-out-right"
+          className="w-80 p-0 bg-background/95 backdrop-blur-md border-l"
         >
           <div className="flex flex-col h-full">
-            {/* Header with close button */}
-            <div className="flex items-center justify-between p-6 border-b border-border/50">
+            {/* Header with improved close button */}
+            <div className="flex items-center justify-between p-4 border-b border-border/50">
               <h2 className="text-lg font-semibold text-foreground">Menu</h2>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0 hover:bg-accent rounded-full"
+                className="h-8 w-8 p-0 hover:bg-accent/50 rounded-full transition-colors"
               >
-                <span className="text-xl leading-none">×</span>
-                <span className="sr-only">Close</span>
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close menu</span>
               </Button>
             </div>
             
-            {/* Navigation Links */}
-            <nav className="flex flex-col p-6 space-y-3 flex-1">
-              <Link 
-                to="/" 
-                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="ml-1">Home</span>
-              </Link>
-              <Link 
-                to="/#case-studies" 
-                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="ml-1">Case Studies</span>
-              </Link>
-              <Link 
-                to="/#about" 
-                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="ml-1">About</span>
-              </Link>
-              <Link 
-                to="/sec" 
-                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="ml-1">SEC Data</span>
-              </Link>
-              <Link 
-                to="/blog" 
-                className="flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 hover:bg-accent/20 hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="ml-1">Blog</span>
-              </Link>
+            {/* Navigation Links with improved spacing and icons */}
+            <nav className="flex flex-col p-4 space-y-1 flex-1">
+              {mobileMenuItems.map((item, index) => {
+                const Icon = item.icon;
+                const itemIsActive = isActive(item.href);
+                
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20",
+                      itemIsActive && "bg-accent text-accent-foreground font-semibold shadow-sm",
+                      // Staggered animation delay
+                      `animate-fade-in`
+                    )}
+                    style={{ 
+                      animationDelay: `${index * 50}ms`,
+                      animationFillMode: 'both'
+                    }}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Icon className={cn(
+                      "h-5 w-5 transition-colors",
+                      itemIsActive ? "text-accent-foreground" : "text-muted-foreground"
+                    )} />
+                    <span>{item.label}</span>
+                    {itemIsActive && (
+                      <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
             
-            {/* Login Button for Mobile */}
+            {/* Login Button for Mobile with improved styling */}
             {!user && (
-              <div className="p-6 pt-0 mt-auto border-t border-border/50">
+              <div className="p-4 border-t border-border/50 mt-auto">
                 <Link 
                   to="/auth" 
-                  className="flex items-center justify-center gap-3 py-4 px-6 text-base font-medium bg-primary text-primary-foreground rounded-xl transition-all duration-300 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                  className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium bg-primary text-primary-foreground rounded-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   onClick={() => setIsOpen(false)}
                 >
                   <LogIn className="h-5 w-5" />
