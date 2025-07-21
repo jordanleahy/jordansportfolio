@@ -14,7 +14,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   return (
     <AppLayout showNavigation={showNavigation}>
-      <div className={`pt-8 md:pt-16 ${className}`}>
+      <div className={className}>
         {children}
       </div>
     </AppLayout>
