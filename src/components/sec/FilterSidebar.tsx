@@ -112,9 +112,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   };
   const hasActiveFilters = filters.industries.length > 0 || searchQuery.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
   return (
-    <div className="h-full relative z-10 bg-background border rounded-lg">
+    <div className="h-full relative z-10 bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5" />
           <h2 className="font-semibold">Filters</h2>
