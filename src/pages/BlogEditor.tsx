@@ -627,9 +627,6 @@ const BlogEditor = () => {
 
   const handleSave = useCallback(async (shouldPublish = false) => {
     try {
-      console.log('handleSave called with shouldPublish:', shouldPublish);
-      console.log('Current formData:', formData);
-      
       setSaving(true);
       
       // Validate required fields only for publishing
@@ -701,24 +698,18 @@ const BlogEditor = () => {
         status: shouldPublish ? "published" : formData.status
       };
 
-      console.log('Prepared postData:', postData);
-      console.log('existingPost:', existingPost);
-
+      let result;
       if (existingPost) {
-        console.log('Updating existing post');
-        const result = await updatePostMutation.mutateAsync({
+        result = await updatePostMutation.mutateAsync({
           id: existingPost.id,
           data: postData
         });
-        console.log('Update result:', result);
         // Navigate to the updated slug if it changed
         if (result.slug !== existingPost.slug) {
           navigate(`/blog-editor/${result.slug}`);
         }
       } else {
-        console.log('Creating new post');
-        const result = await createPostMutation.mutateAsync(postData);
-        console.log('Create result:', result);
+        result = await createPostMutation.mutateAsync(postData);
         navigate(`/blog-editor/${result.slug}`);
       }
     } catch (error) {
@@ -727,7 +718,7 @@ const BlogEditor = () => {
     } finally {
       setSaving(false);
     }
-  }, [formData, slug, existingPost, updatePostMutation, createPostMutation, navigate, toast]);
+  }, [formData, slug, existingPost, updatePostMutation, createPostMutation, navigate]);
 
   const handleDelete = useCallback(async () => {
     if (existingPost) {

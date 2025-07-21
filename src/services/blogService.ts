@@ -169,8 +169,6 @@ export class BlogService {
   }
 
   static async createPost(postInput: BlogPostInput): Promise<BlogPost> {
-    console.log('BlogService.createPost called with:', postInput);
-    
     // Optional validation - allow empty posts
     const validatedPost = postInput;
     
@@ -186,15 +184,11 @@ export class BlogService {
     
     // Generate slug with fallback
     const slug = generateSlug(validatedPost.hero_headline || 'untitled-post');
-    
-    console.log('Generated slug:', slug);
 
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('Auth user:', user, 'Auth error:', userError);
     
     if (userError || !user) {
-      console.error('Authentication failed:', userError);
       throw new Error('User must be authenticated to create posts');
     }
 
@@ -215,22 +209,15 @@ export class BlogService {
       visual_sections: validatedPost.visual_sections || []
     };
 
-    console.log('Final postData to insert:', postData);
-
     const { data, error } = await supabase
       .from('blog_posts')
       .insert(postData)
       .select()
       .single();
 
-    console.log('Insert result - data:', data, 'error:', error);
-
     if (error) {
-      console.error('Database insert error:', error);
       throw new Error(`Failed to create blog post: ${error.message}`);
     }
-
-    console.log('Successfully created blog post:', data);
 
     return {
       ...data,
