@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from '@/components/layout/PageLayout';
 import { ImageUploadCard } from "@/components/calendar/ImageUploadCard";
 
 // Debounce utility
@@ -709,10 +709,8 @@ const BlogEditor = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="pt-16">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+    <PageLayout>
+      <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Status and Actions */}
           <div className="mb-6 p-4 border rounded-lg bg-card">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -849,8 +847,7 @@ const BlogEditor = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

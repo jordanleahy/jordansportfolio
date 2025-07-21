@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from '@/components/layout/PageLayout';
 import { ArrowLeft, Building2, DollarSign, FileText, MapPin, Users, Calendar, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -185,10 +185,8 @@ const DataDictionary = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <PageLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
@@ -311,10 +309,9 @@ const DataDictionary = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

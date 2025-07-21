@@ -10,7 +10,7 @@ import { useAdminAllBlogPosts, useAdminDraftBlogPosts } from "@/hooks/useAdminBl
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from '@/components/layout/PageLayout';
 
 const AdminBlog = () => {
   const navigate = useNavigate();
@@ -223,10 +223,8 @@ const AdminBlog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <PageLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header with Add Button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
@@ -264,8 +262,7 @@ const AdminBlog = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

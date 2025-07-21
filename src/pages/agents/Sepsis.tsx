@@ -1,13 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from '@/components/layout/PageLayout';
 
 const Sepsis = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <PageLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
             {/* Header */}
             <div className="text-center space-y-4">
@@ -66,10 +64,9 @@ const Sepsis = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
