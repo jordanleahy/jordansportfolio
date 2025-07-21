@@ -35,13 +35,21 @@ const Navigation = () => {
 
   const handleAnchorClick = (e: React.MouseEvent, href: string) => {
     if (href.includes('#')) {
+      const [basePath, anchor] = href.split('#');
+      
+      // If we're not on the target page, navigate first
+      if (location.pathname !== basePath) {
+        // Let the Link handle navigation normally
+        return;
+      }
+      
+      // If we're already on the page, prevent default and scroll
       e.preventDefault();
-      const anchor = href.split('#')[1];
       const element = document.getElementById(anchor);
       if (element) {
         setTimeout(() => {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 300);
+        }, 100);
       }
     }
   };
