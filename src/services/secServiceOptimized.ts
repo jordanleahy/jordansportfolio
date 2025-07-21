@@ -56,27 +56,6 @@ export class SecServiceOptimized {
       query = query.in('industrygrouptype', filters.industries);
     }
 
-    // Apply enhanced fuzzy search query with minimum length check
-    const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
-                       ((filters.searchQuery as any)?.value || '');
-    
-    if (searchQuery && searchQuery.trim() && searchQuery.trim().length >= 2) {
-      console.log('🚀 Applying enhanced fuzzy search:', searchQuery);
-      
-      // Escape special characters to prevent query parsing errors
-      const escapedQuery = searchQuery.replace(/[%_\\]/g, '\\$&');
-      
-      // Enhanced search with progressive matching - fixed single line format
-      const searchConditions = [
-        `company_name.ilike.${escapedQuery}%`,
-        `company_name.ilike.%${escapedQuery}%`,
-        `industrygrouptype.ilike.%${escapedQuery}%`,
-        `company_city.ilike.%${escapedQuery}%`,
-        `company_location.ilike.%${escapedQuery}%`
-      ].join(',');
-      
-      query = query.or(searchConditions);
-    }
 
     // Apply amount range filters (server-side) - Fixed PostgREST syntax
     if (filters.amountRanges && filters.amountRanges.length > 0) {
@@ -200,11 +179,6 @@ export class SecServiceOptimized {
       };
     } catch (error: any) {
       console.error('Search query failed:', error);
-      // Fallback to basic search if fuzzy search fails
-      if (searchQuery && searchQuery.trim()) {
-        console.log('🔄 Falling back to basic search');
-        return this.getOfferingsBasicSearch(filters, page, pageSize);
-      }
       throw error;
     }
   }
@@ -224,13 +198,6 @@ export class SecServiceOptimized {
       .filter('totalamountsold', 'not.is', null)
       .gt('totalamountsold', 0);
 
-    // Simple search without fuzzy logic
-    const searchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
-                       ((filters.searchQuery as any)?.value || '');
-    
-    if (searchQuery && searchQuery.trim()) {
-      query = query.ilike('company_name', `%${searchQuery}%`);
-    }
 
     // Apply pagination
     const from = (page - 1) * pageSize;

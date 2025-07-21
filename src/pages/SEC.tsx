@@ -25,7 +25,7 @@ const SEC = () => {
     const hasUrlParams = searchParams.toString();
     const urlFilters = {
       industries: searchParams.get('industries')?.split(',').filter(Boolean) || (hasUrlParams ? [] : ['Other Technology']),
-      searchQuery: searchParams.get('search') || "",
+      
       fullySold: searchParams.get('fullySold') === 'true',
       amountRanges: searchParams.get('amountRanges')?.split(',').filter(Boolean) || [],
       maxRaisedRanges: searchParams.get('maxRaisedRanges')?.split(',').filter(Boolean) || [],
@@ -45,7 +45,7 @@ const SEC = () => {
     // Update URL params for persistence
     const params = new URLSearchParams();
     if (updatedFilters.industries?.length) params.set('industries', updatedFilters.industries.join(','));
-    if (updatedFilters.searchQuery) params.set('search', updatedFilters.searchQuery);
+    
     if (updatedFilters.fullySold) params.set('fullySold', 'true');
     if (updatedFilters.amountRanges?.length) params.set('amountRanges', updatedFilters.amountRanges.join(','));
     if (updatedFilters.maxRaisedRanges?.length) params.set('maxRaisedRanges', updatedFilters.maxRaisedRanges.join(','));
@@ -57,7 +57,7 @@ const SEC = () => {
   const handleResetToDefault = () => {
     const defaultFilters = {
       industries: ['Other Technology'],
-      searchQuery: "",
+      
       fullySold: false,
       amountRanges: [],
       maxRaisedRanges: [],

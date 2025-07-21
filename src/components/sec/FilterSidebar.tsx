@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { X, Filter, RotateCcw, BookOpen } from "lucide-react";
+import { X, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useIndustries } from "@/hooks/useSecQueries";
-import { useDebounce } from "@/hooks/useDebounce";
+
 interface FilterSidebarProps {
   filters: {
     industries: string[];
-    searchQuery: string;
     fullySold?: boolean;
     amountRanges?: string[];
     maxRaisedRanges?: string[];
@@ -22,24 +20,12 @@ interface FilterSidebarProps {
   onFiltersChange: (filters: any) => void;
   onClose?: () => void;
 }
+
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filters,
   onFiltersChange,
   onClose
 }) => {
-  const [searchQuery, setSearchQuery] = useState(filters.searchQuery || "");
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  // Update filters immediately for non-search changes, debounced for search
-  useEffect(() => {
-    if (debouncedSearchQuery !== filters.searchQuery) {
-      onFiltersChange({
-        ...filters,
-        searchQuery: debouncedSearchQuery
-      });
-    }
-  }, [debouncedSearchQuery]);
-
   // Technology-focused industries only
   const techIndustries = ["Other Technology", "Computer Software", "Biotechnology", "Computer Hardware", "Internet", "Software", "Technology", "Telecommunications", "Computer Services", "Electronics", "Information Technology", "Media & Entertainment", "FinTech", "E-commerce"];
 
@@ -66,81 +52,98 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     code: "TN",
     name: "Tennessee"
   }];
+
   const handleIndustryToggle = (industry: string) => {
-    const updatedIndustries = filters.industries.includes(industry) ? filters.industries.filter(i => i !== industry) : [...filters.industries, industry];
+    const updatedIndustries = filters.industries.includes(industry) 
+      ? filters.industries.filter(i => i !== industry) 
+      : [...filters.industries, industry];
     onFiltersChange({
       ...filters,
       industries: updatedIndustries
     });
   };
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
+
   const handleAmountRangeToggle = (range: string) => {
-    const updatedRanges = filters.amountRanges?.includes(range) ? filters.amountRanges.filter(r => r !== range) : [...(filters.amountRanges || []), range];
+    const updatedRanges = filters.amountRanges?.includes(range) 
+      ? filters.amountRanges.filter(r => r !== range) 
+      : [...(filters.amountRanges || []), range];
     onFiltersChange({
       ...filters,
       amountRanges: updatedRanges
     });
   };
+
   const handleMaxRaisedToggle = (range: string) => {
-    const updatedRanges = filters.maxRaisedRanges?.includes(range) ? filters.maxRaisedRanges.filter(r => r !== range) : [...(filters.maxRaisedRanges || []), range];
+    const updatedRanges = filters.maxRaisedRanges?.includes(range) 
+      ? filters.maxRaisedRanges.filter(r => r !== range) 
+      : [...(filters.maxRaisedRanges || []), range];
     onFiltersChange({
       ...filters,
       maxRaisedRanges: updatedRanges
     });
   };
+
   const handleStateToggle = (stateCode: string) => {
-    const updatedStates = filters.states?.includes(stateCode) ? filters.states.filter(s => s !== stateCode) : [...(filters.states || []), stateCode];
+    const updatedStates = filters.states?.includes(stateCode) 
+      ? filters.states.filter(s => s !== stateCode) 
+      : [...(filters.states || []), stateCode];
     onFiltersChange({
       ...filters,
       states: updatedStates
     });
   };
+
   const resetFilters = () => {
     const resetFilters = {
       industries: ['Other Technology'],
-      searchQuery: "",
       fullySold: false,
       amountRanges: [],
       maxRaisedRanges: [],
       states: ['NY'],
       useDefaultFilters: true
     };
-    setSearchQuery("");
     onFiltersChange(resetFilters);
   };
-  const hasActiveFilters = filters.industries.length > 0 || searchQuery.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
-  return <Card className="flex flex-col h-full relative z-10 bg-transparent border-0">
-      
+
+  const hasActiveFilters = filters.industries.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
+
+  return (
+    <Card className="flex flex-col h-full relative z-10 bg-transparent border-0">
       <CardContent className="flex-1 overflow-y-auto space-y-6 bg-transparent px-0">
-        {/* Search Filter */}
-        <div className="space-y-3">
-          <Label className="text-sm font-semibold">Search</Label>
-          <Input placeholder="Search companies, industries..." value={searchQuery} onChange={e => handleSearchChange(e.target.value)} className="w-full" />
-        </div>
-
-        <Separator />
-
         {/* Industry Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Technology Industry</Label>
           <div className="space-y-2">
-            {techIndustries.map(industry => <div key={industry} className="flex items-center space-x-2">
-                <Checkbox id={industry} checked={filters.industries.includes(industry)} onCheckedChange={() => handleIndustryToggle(industry)} />
+            {techIndustries.map(industry => (
+              <div key={industry} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={industry} 
+                  checked={filters.industries.includes(industry)} 
+                  onCheckedChange={() => handleIndustryToggle(industry)} 
+                />
                 <Label htmlFor={industry} className="text-sm font-normal cursor-pointer flex-1">
                   {industry}
                 </Label>
-              </div>)}
+              </div>
+            ))}
           </div>
           
           {/* Selected Industries */}
-          {filters.industries.length > 0 && <div className="flex flex-wrap gap-1 mt-2">
-              {filters.industries.map(industry => <Badge key={industry} variant="secondary" className="text-xs cursor-pointer" onClick={() => handleIndustryToggle(industry)}>
+          {filters.industries.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {filters.industries.map(industry => (
+                <Badge 
+                  key={industry} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer" 
+                  onClick={() => handleIndustryToggle(industry)}
+                >
                   {industry}
                   <X className="ml-1 h-3 w-3" />
-                </Badge>)}
-            </div>}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -149,21 +152,36 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Amount Raised</Label>
           <div className="space-y-2">
-            {amountRanges.map(range => <div key={range} className="flex items-center space-x-2">
-                <Checkbox id={range} checked={filters.amountRanges?.includes(range) || false} onCheckedChange={() => handleAmountRangeToggle(range)} />
+            {amountRanges.map(range => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={range} 
+                  checked={filters.amountRanges?.includes(range) || false} 
+                  onCheckedChange={() => handleAmountRangeToggle(range)} 
+                />
                 <Label htmlFor={range} className="text-sm font-normal cursor-pointer flex-1">
                   {range}
                 </Label>
-              </div>)}
+              </div>
+            ))}
           </div>
           
           {/* Selected Amount Ranges */}
-          {(filters.amountRanges?.length || 0) > 0 && <div className="flex flex-wrap gap-1 mt-2">
-              {filters.amountRanges?.map(range => <Badge key={range} variant="secondary" className="text-xs cursor-pointer" onClick={() => handleAmountRangeToggle(range)}>
+          {(filters.amountRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {filters.amountRanges?.map(range => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer" 
+                  onClick={() => handleAmountRangeToggle(range)}
+                >
                   {range}
                   <X className="ml-1 h-3 w-3" />
-                </Badge>)}
-            </div>}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -172,21 +190,36 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Amount Sold</Label>
           <div className="space-y-2">
-            {maxRaisedRanges.map(range => <div key={range} className="flex items-center space-x-2">
-                <Checkbox id={`max-${range}`} checked={filters.maxRaisedRanges?.includes(range) || false} onCheckedChange={() => handleMaxRaisedToggle(range)} />
+            {maxRaisedRanges.map(range => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`max-${range}`} 
+                  checked={filters.maxRaisedRanges?.includes(range) || false} 
+                  onCheckedChange={() => handleMaxRaisedToggle(range)} 
+                />
                 <Label htmlFor={`max-${range}`} className="text-sm font-normal cursor-pointer flex-1">
                   {range}
                 </Label>
-              </div>)}
+              </div>
+            ))}
           </div>
           
           {/* Selected Max Raised Ranges */}
-          {(filters.maxRaisedRanges?.length || 0) > 0 && <div className="flex flex-wrap gap-1 mt-2">
-              {filters.maxRaisedRanges?.map(range => <Badge key={range} variant="secondary" className="text-xs cursor-pointer" onClick={() => handleMaxRaisedToggle(range)}>
+          {(filters.maxRaisedRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {filters.maxRaisedRanges?.map(range => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer" 
+                  onClick={() => handleMaxRaisedToggle(range)}
+                >
                   {range}
                   <X className="ml-1 h-3 w-3" />
-                </Badge>)}
-            </div>}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
@@ -195,32 +228,49 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="space-y-3">
           <Label className="text-sm font-semibold">State</Label>
           <div className="space-y-2">
-            {states.map(state => <div key={state.code} className="flex items-center space-x-2">
-                <Checkbox id={state.code} checked={filters.states?.includes(state.code) || false} onCheckedChange={() => handleStateToggle(state.code)} />
+            {states.map(state => (
+              <div key={state.code} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={state.code} 
+                  checked={filters.states?.includes(state.code) || false} 
+                  onCheckedChange={() => handleStateToggle(state.code)} 
+                />
                 <Label htmlFor={state.code} className="text-sm font-normal cursor-pointer flex-1">
                   {state.name} ({state.code})
                 </Label>
-              </div>)}
+              </div>
+            ))}
           </div>
           
           {/* Selected States */}
-          {(filters.states?.length || 0) > 0 && <div className="flex flex-wrap gap-1 mt-2">
+          {(filters.states?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
               {filters.states?.map(stateCode => {
-            const state = states.find(s => s.code === stateCode);
-            return <Badge key={stateCode} variant="secondary" className="text-xs cursor-pointer" onClick={() => handleStateToggle(stateCode)}>
+                const state = states.find(s => s.code === stateCode);
+                return (
+                  <Badge 
+                    key={stateCode} 
+                    variant="secondary" 
+                    className="text-xs cursor-pointer" 
+                    onClick={() => handleStateToggle(stateCode)}
+                  >
                     {state?.name || stateCode}
                     <X className="ml-1 h-3 w-3" />
-                  </Badge>;
-          })}
-            </div>}
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {hasActiveFilters && <>
+        {hasActiveFilters && (
+          <>
             <Separator />
             <p className="text-xs text-muted-foreground text-center">
               {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} amount sold, {filters.states?.length || 0} states selected
             </p>
-          </>}
+          </>
+        )}
         
         <Separator />
         
@@ -237,5 +287,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </p>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };

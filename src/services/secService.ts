@@ -113,13 +113,6 @@ export class SecService {
     }
 
     // Handle search query - fix the weird object issue
-    const serverSearchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
-                       ((filters.searchQuery as any)?.value || '');
-    
-    if (serverSearchQuery && serverSearchQuery.trim()) {
-      console.log('🔍 DEBUG: Applying search query:', serverSearchQuery);
-      query = query.or(`industrygrouptype.ilike.%${serverSearchQuery}%,descriptionofothertype.ilike.%${serverSearchQuery}%`);
-    }
 
     // Filter for fully sold companies (offering amount equals amount sold)
     if (filters.fullySold) {
@@ -330,26 +323,6 @@ export class SecService {
       console.log('🔍 DEBUG: After state filter:', beforeCount, '->', filteredOfferings.length);
     }
     
-    // Apply search filtering on company names (client-side since we need issuer data)
-    const clientSearchQuery = typeof filters.searchQuery === 'string' ? filters.searchQuery : 
-                       ((filters.searchQuery as any)?.value || '');
-    if (clientSearchQuery && clientSearchQuery.trim()) {
-      console.log('🔍 DEBUG: Applying client-side search for company names:', clientSearchQuery);
-      const beforeCount = filteredOfferings.length;
-      filteredOfferings = filteredOfferings.filter(offering => {
-        // Search in company names
-        const companyNameMatch = offering.issuers.some((issuer: any) => 
-          issuer.entityname && issuer.entityname.toLowerCase().includes(clientSearchQuery.toLowerCase())
-        );
-        
-        // Search in industry (already done server-side, but include for completeness)
-        const industryMatch = offering.industrygrouptype && 
-          offering.industrygrouptype.toLowerCase().includes(clientSearchQuery.toLowerCase());
-          
-        return companyNameMatch || industryMatch;
-      });
-      console.log('🔍 DEBUG: After search filter:', beforeCount, '->', filteredOfferings.length);
-    }
     
     const finalOfferings = filteredOfferings;
     

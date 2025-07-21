@@ -149,7 +149,7 @@ export interface OfferingDetail extends OfferingWithIssuer {
 export interface OfferingFilters {
   industry?: string;
   industries?: string[];
-  searchQuery?: string;
+  
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   fullySold?: boolean; // Filter for companies where offering amount equals amount sold
