@@ -15,7 +15,7 @@ export function useVendorPublish({ vendorId, vendorSlug, category }: UseVendorPu
   const queryClient = useQueryClient();
 
   const togglePublishStatus = async (currentStatus: string) => {
-    const newStatus = currentStatus === 'completed' ? 'draft' : 'completed';
+    const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     
     setIsPublishing(true);
     try {
@@ -32,20 +32,20 @@ export function useVendorPublish({ vendorId, vendorSlug, category }: UseVendorPu
       // Invalidate and refetch vendor data
       await queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] });
 
-      const actionText = newStatus === 'completed' ? 'published' : 'unpublished';
-      const publicUrl = newStatus === 'completed' 
+      const actionText = newStatus === 'published' ? 'published' : 'unpublished';
+      const publicUrl = newStatus === 'published' 
         ? `${window.location.origin}/public/vendors/${category}/${vendorSlug}`
         : null;
 
       toast({
         title: `Vendor ${actionText}`,
-        description: newStatus === 'completed' 
+        description: newStatus === 'published' 
           ? `Vendor is now publicly accessible at: ${publicUrl}`
           : 'Vendor is no longer publicly accessible',
       });
 
       // If published, offer to copy the public URL
-      if (newStatus === 'completed' && publicUrl) {
+      if (newStatus === 'published' && publicUrl) {
         navigator.clipboard.writeText(publicUrl);
         setTimeout(() => {
           toast({
