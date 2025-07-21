@@ -23,13 +23,26 @@ export const useCompanyPortfolio = (companySlug: string) => {
   return useQuery({
     queryKey: ["company-portfolio", companySlug],
     queryFn: async () => {
+      console.log('🔍 Fetching portfolio for slug:', companySlug);
+      
       const { data, error } = await supabase
         .from("company_portfolios")
         .select("*, job_applications(*)")
         .eq("company_slug", companySlug)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔍 Portfolio fetch error:', error);
+        throw error;
+      }
+      
+      console.log('🔍 Portfolio fetch result:', {
+        found: !!data,
+        id: data?.id,
+        company_name: data?.company_name,
+        user_id: data?.user_id
+      });
+      
       return data as CompanyPortfolio & { 
         job_applications?: { 
           job_description: string; 

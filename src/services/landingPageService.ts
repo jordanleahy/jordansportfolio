@@ -51,13 +51,19 @@ export const createPersonalizedPortfolio = async (
   companySlug: string
 ) => {
   try {
-    console.log('Starting portfolio creation process...');
+    console.log('🚀 Starting portfolio creation process...');
+    console.log('🚀 Job application details:', {
+      id: jobApplication.id,
+      company_name: jobApplication.company_name,
+      user_id: jobApplication.user_id,
+      job_description_length: jobApplication.job_description?.length || 0
+    });
     
     // Check authentication first
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError) {
-      console.error('Auth check error:', authError);
+      console.error('🚀 Auth check error:', authError);
       throw new Error(`Authentication error: ${authError.message}`);
     }
     
@@ -65,12 +71,40 @@ export const createPersonalizedPortfolio = async (
       throw new Error('User not authenticated');
     }
 
-    console.log('User authenticated, generating content...');
+    console.log('🚀 User authenticated, generating content...');
+    console.log('🚀 Current user ID:', user.id);
+    console.log('🚀 Job application user ID:', jobApplication.user_id);
+    
+    // Verify the job application exists and belongs to the user
+    const { data: existingApp, error: appError } = await supabase
+      .from('job_applications')
+      .select('*')
+      .eq('id', jobApplication.id)
+      .eq('user_id', user.id)
+      .single();
+    
+    if (appError) {
+      console.error('🚀 Job application verification error:', appError);
+      throw new Error(`Job application not found: ${appError.message}`);
+    }
+    
+    if (!existingApp) {
+      throw new Error('Job application not found or access denied');
+    }
+    
+    console.log('🚀 Job application verified:', existingApp.id);
     
     // Generate AI-powered content
     const generatedContent = await generateLandingPageContent(jobApplication);
     
-    console.log('Content generated, creating portfolio record...');
+    console.log('🚀 Content generated, creating portfolio record...');
+    console.log('🚀 About to upsert with:', {
+      job_application_id: jobApplication.id,
+      company_name: jobApplication.company_name,
+      company_slug: companySlug,
+      user_id: user.id,
+      content_keys: Object.keys(generatedContent)
+    });
     
     // Create or update the portfolio with generated content
     const { data, error } = await supabase
@@ -90,14 +124,27 @@ export const createPersonalizedPortfolio = async (
       .single();
 
     if (error) {
-      console.error('Database insert error:', error);
+      console.error('🚀 Database insert error:', error);
+      console.error('🚀 Error details:', {
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        message: error.message
+      });
       throw new Error(`Database error: ${error.message}`);
     }
     
-    console.log('Portfolio created successfully:', data?.id);
+    console.log('🚀 Portfolio created successfully:', data?.id);
+    console.log('🚀 Portfolio data:', {
+      id: data?.id,
+      company_slug: data?.company_slug,
+      user_id: data?.user_id,
+      job_application_id: data?.job_application_id
+    });
+    
     return data;
   } catch (error: any) {
-    console.error("Error creating personalized portfolio:", error);
+    console.error("🚀 Error creating personalized portfolio:", error);
     
     // Preserve original error message for better debugging
     throw error;
