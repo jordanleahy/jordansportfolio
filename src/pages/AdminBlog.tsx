@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAdminAllBlogPosts, useAdminDraftBlogPosts, useDeleteBlogPost } from "@/hooks/useAdminBlogQueries";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,20 +25,32 @@ import {
 
 const AdminBlog = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<any>(null);
   
+  console.log('AdminBlog component state:', {
+    user: user?.id,
+    authLoading,
+    isAdmin,
+    roleLoading,
+    userAuthenticated: !!user,
+    adminCheckComplete: !roleLoading
+  });
+  
   const { 
     data: allPosts = [], 
     isLoading: allPostsLoading, 
-    error: allPostsError 
+    error: allPostsError,
+    isError: allPostsIsError
   } = useAdminAllBlogPosts();
   
   const { 
     data: draftPosts = [], 
     isLoading: draftPostsLoading, 
-    error: draftPostsError 
+    error: draftPostsError,
+    isError: draftPostsIsError
   } = useAdminDraftBlogPosts();
 
   const deleteBlogPost = useDeleteBlogPost();
@@ -57,23 +70,33 @@ const AdminBlog = () => {
 
   // Redirect if not admin
   useEffect(() => {
-    if (!roleLoading && !isAdmin) {
-      navigate('/blog');
+    if (!authLoading && !roleLoading) {
+      if (!user) {
+        console.log('No user found, redirecting to auth');
+        navigate('/auth');
+      } else if (!isAdmin) {
+        console.log('User is not admin, redirecting to blog');
+        navigate('/blog');
+      }
     }
-  }, [isAdmin, roleLoading, navigate]);
+  }, [user, isAdmin, authLoading, roleLoading, navigate]);
 
-  if (roleLoading) {
+  // Show loading while checking authentication and role
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Checking permissions...</p>
+          <p className="mt-4 text-muted-foreground">
+            {authLoading ? 'Checking authentication...' : 'Checking permissions...'}
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!isAdmin) {
+  // Don't render if user is not authenticated or not admin
+  if (!user || !isAdmin) {
     return null; // Will redirect
   }
 
@@ -85,7 +108,7 @@ const AdminBlog = () => {
     });
   };
 
-  const BlogPostsTable = ({ posts, loading, error }: { posts: any[], loading: boolean, error: any }) => {
+  const BlogPostsTable = ({ posts, loading, error, isError }: { posts: any[], loading: boolean, error: any, isError: boolean }) => {
     if (loading) {
       return (
         <div className="space-y-4">
@@ -101,11 +124,13 @@ const AdminBlog = () => {
       );
     }
 
-    if (error) {
+    if (isError && error) {
+      console.error('Blog posts table error:', error);
       return (
         <Alert variant="destructive">
           <AlertDescription>
             Failed to load blog posts: {error.message}
+            {!user && <div className="mt-2 text-sm">Authentication required to view admin content.</div>}
           </AlertDescription>
         </Alert>
       );
@@ -293,7 +318,8 @@ const AdminBlog = () => {
               <BlogPostsTable 
                 posts={allPosts} 
                 loading={allPostsLoading} 
-                error={allPostsError} 
+                error={allPostsError}
+                isError={allPostsIsError}
               />
             </TabsContent>
 
@@ -301,7 +327,8 @@ const AdminBlog = () => {
               <BlogPostsTable 
                 posts={draftPosts} 
                 loading={draftPostsLoading} 
-                error={draftPostsError} 
+                error={draftPostsError}
+                isError={draftPostsIsError}
               />
             </TabsContent>
           </Tabs>
