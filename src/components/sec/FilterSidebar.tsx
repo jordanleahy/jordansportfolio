@@ -113,7 +113,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const hasActiveFilters = filters.industries.length > 0 || searchQuery.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
   return <Card className="flex flex-col h-full relative z-10 bg-transparent border-0">
       
-      <CardContent className="flex-1 overflow-y-auto space-y-6 bg-transparent">
+      <CardContent className="flex-1 overflow-y-auto space-y-6 bg-transparent px-0">
         {/* Search Filter */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Search</Label>
