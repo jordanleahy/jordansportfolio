@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+// Removed framer-motion for better mobile scrolling
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,35 +68,19 @@ const Blog = () => {
         {/* Hero Section */}
         <section className="py-16 px-4 pt-24">
           <div className="max-w-4xl mx-auto">
-            <motion.div initial={{
-            opacity: 0,
-            y: 30
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.6
-          }} className="text-center mb-12">
+            <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-5xl font-bold mb-4">Design Stories</h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Insights, learnings, and behind-the-scenes stories from designing products that matter.
               </p>
-            </motion.div>
+            </div>
           </div>
         </section>
 
         {/* Empty State */}
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.2
-          }} className="text-center space-y-6">
+            <div className="text-center space-y-6">
               <FileText className="h-16 w-16 text-muted-foreground/50 mx-auto" />
               <div className="space-y-3">
                 <h2 className="text-3xl font-bold">No blog posts yet</h2>
@@ -114,22 +98,14 @@ const Blog = () => {
                     </Link>
                   </Button>
                 </div>}
-            </motion.div>
+            </div>
           </div>
         </section>
 
         {/* Newsletter Signup */}
         <section className="py-16 px-4 bg-muted/30">
           <div className="max-w-2xl mx-auto text-center">
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }}>
+            <div>
               <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
               <p className="text-muted-foreground mb-8">
                 Get notified when new design insights and case studies are published.
@@ -138,7 +114,7 @@ const Blog = () => {
                 <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" />
                 <Button>Subscribe</Button>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       </PageLayout>;
@@ -151,15 +127,7 @@ const Blog = () => {
       {/* Featured Post */}
       {featuredPost && <section className="py-8 px-4">
           <div className="max-w-6xl mx-auto">
-            <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.2
-        }}>
+            <div>
               <Link to={`/blog/${featuredPost.slug}`} onMouseEnter={() => handleMouseEnter(featuredPost.slug)}>
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                   <div className="md:flex">
@@ -204,7 +172,7 @@ const Blog = () => {
                   </div>
                 </Card>
               </Link>
-            </motion.div>
+            </div>
           </div>
         </section>}
 
@@ -212,15 +180,9 @@ const Blog = () => {
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <motion.h2 initial={{
-            opacity: 0
-          }} whileInView={{
-            opacity: 1
-          }} viewport={{
-            once: true
-          }} className="text-2xl font-bold">
+            <h2 className="text-2xl font-bold">
               {featuredPost ? 'Latest Stories' : 'All Stories'}
-            </motion.h2>
+            </h2>
             
             {user && <Button asChild variant="outline">
                 <Link to="/blog-editor">
@@ -231,17 +193,7 @@ const Blog = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {otherPosts.map((post, index) => <motion.div key={post.id} initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }} transition={{
-            delay: index * 0.1
-          }}>
+            {otherPosts.map((post, index) => <div key={post.id}>
                 <Link to={`/blog/${post.slug}`} onMouseEnter={() => handleMouseEnter(post.slug)}>
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
                     {post.hero_image_url ? <img src={post.hero_image_url} alt={post.hero_headline} className="aspect-video w-full object-cover" /> : <div className="aspect-video bg-muted"></div>}
@@ -277,7 +229,7 @@ const Blog = () => {
                     </CardContent>
                   </Card>
                 </Link>
-              </motion.div>)}
+              </div>)}
           </div>
         </div>
       </section>
@@ -285,15 +237,7 @@ const Blog = () => {
       {/* Newsletter Signup */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-2xl mx-auto text-center">
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} viewport={{
-          once: true
-        }}>
+          <div>
             <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
             <p className="text-muted-foreground mb-8">
               Get notified when I publish new design insights and case studies.
@@ -302,7 +246,7 @@ const Blog = () => {
               <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-2 rounded-lg border border-input bg-background" />
               <Button>Subscribe</Button>
             </div>
-          </motion.div>
+          </div>
         </div>
         </section>
     </PageLayout>;
