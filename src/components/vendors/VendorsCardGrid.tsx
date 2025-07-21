@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building, Calendar } from 'lucide-react';
+import { Building, Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { type Vendor } from '@/types/vendor';
+import { type Vendor, type VendorFiltersState } from '@/types/vendor';
 import { EditableVendorCard } from './EditableVendorCard';
+import { VendorFilters } from './VendorFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 
@@ -14,33 +15,54 @@ interface VendorsCardGridProps {
   onVendorClick?: (vendor: Vendor) => void;
   onDeleteClick?: (vendor: Vendor) => void;
   onSave?: () => void;
+  filters?: VendorFiltersState;
+  onFiltersChange?: (filters: VendorFiltersState) => void;
+  allVendors?: Vendor[];
+  user?: any;
+  isLoadingAuth?: boolean;
+  onAddVendor?: () => void;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
 
-export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, onSave }: VendorsCardGridProps) {
+export function VendorsCardGrid({ 
+  vendors, 
+  onVendorClick, 
+  onDeleteClick, 
+  onSave,
+  filters,
+  onFiltersChange,
+  allVendors,
+  user: propUser,
+  isLoadingAuth,
+  onAddVendor
+}: VendorsCardGridProps) {
   const navigate = useNavigate();
   const { slugname } = useParams<{ slugname: string }>();
   const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [user, setUser] = useState<any>(null);
+  // Use the user from props if available, otherwise get from local state
+  const [localUser, setLocalUser] = useState<any>(null);
+  const currentUser = propUser !== undefined ? propUser : localUser;
 
-  // Check authentication status
+  // Check authentication status only if no user prop is provided
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    
-    checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
+    if (propUser === undefined) {
+      const checkAuth = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setLocalUser(user);
+      };
+      
+      checkAuth();
+      
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        setLocalUser(session?.user ?? null);
+      });
 
-    return () => subscription.unsubscribe();
-  }, []);
+      return () => subscription.unsubscribe();
+    }
+  }, [propUser]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -80,9 +102,19 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, onSave 
 
   return (
     <div className="space-y-6">
-      {/* Sorting Controls */}
+      {/* Toolbar with Filters, Sort Controls, and Add Vendor */}
       <div className="flex flex-wrap gap-2 items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center">
+          {/* Filters Button */}
+          {filters && onFiltersChange && allVendors && (
+            <VendorFilters 
+              filters={filters} 
+              onFiltersChange={onFiltersChange} 
+              vendors={allVendors} 
+            />
+          )}
+          
+          {/* Sort Controls */}
           <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
           <Button
             variant={sortField === 'company_name' ? 'default' : 'outline'}
@@ -119,6 +151,33 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, onSave 
             )}
           </Button>
         </div>
+        
+        {/* Add Vendor Button */}
+        {onAddVendor && (
+          <div>
+            {isLoadingAuth ? (
+              <Button disabled size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Loading...
+              </Button>
+            ) : currentUser ? (
+              <Button onClick={onAddVendor} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Vendor
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => alert('Please log in to add vendors')} 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Vendor (Login Required)
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Responsive Card Grid */}
@@ -130,7 +189,7 @@ export function VendorsCardGrid({ vendors, onVendorClick, onDeleteClick, onSave 
             onVendorClick={handleVendorClick}
             onDeleteClick={onDeleteClick}
             onSave={onSave}
-            canEdit={!!user}
+            canEdit={!!currentUser}
           />
         ))}
         {sortedVendors.length === 0 && (

@@ -265,24 +265,20 @@ export default function VendorsIndex() {
             
           </div>
 
-          <div className="flex items-center gap-4 mb-6">
-            <VendorFilters filters={filters} onFiltersChange={setFilters} vendors={allVendors} />
-            {isLoadingAuth ? <Button disabled className="gap-2">
-                <Plus className="h-4 w-4" />
-                Loading...
-              </Button> : user ? <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Vendor
-              </Button> : <Button onClick={() => alert('Please log in to add vendors')} variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Vendor (Login Required)
-              </Button>}
-          </div>
-
-          <VendorsCardGrid vendors={filteredVendors.map(vendor => ({
-          ...vendor,
-          category: getVendorCategory(vendor)
-        }))} onDeleteClick={handleDeleteVendor} onSave={handleVendorSaved} />
+          <VendorsCardGrid 
+            vendors={filteredVendors.map(vendor => ({
+              ...vendor,
+              category: getVendorCategory(vendor)
+            }))} 
+            onDeleteClick={handleDeleteVendor} 
+            onSave={handleVendorSaved}
+            filters={filters}
+            onFiltersChange={setFilters}
+            allVendors={allVendors}
+            user={user}
+            isLoadingAuth={isLoadingAuth}
+            onAddVendor={() => setIsAddModalOpen(true)}
+          />
         </div>
         
         <AddVendorModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onVendorAdded={handleVendorAdded} />
