@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { Button } from "@/components/ui/button";

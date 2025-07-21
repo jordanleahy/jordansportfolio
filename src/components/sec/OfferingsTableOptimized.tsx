@@ -31,6 +31,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { OfferingFilters } from "@/types/sec";
 import { OfferingDetailModal } from "./OfferingDetailModal";
 import { OfferingCard } from "./OfferingCard";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { AuthRequiredModal } from "@/components/auth/AuthRequiredModal";
 
 interface OfferingsTableOptimizedProps {
   filters: any;
@@ -48,6 +50,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   const [selectedOfferingId, setSelectedOfferingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [enhancingOfferings, setEnhancingOfferings] = useState<Set<string>>(new Set());
+  const { guardedAction, showAuthModal, closeAuthModal } = useAuthGuard();
   const itemsPerPage = 50;
   const { toast } = useToast();
 
@@ -117,6 +120,12 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
   };
 
   const handleEnhanceOffering = async (offering: any) => {
+    return guardedAction(async () => {
+      await performEnhanceOffering(offering);
+    });
+  };
+
+  const performEnhanceOffering = async (offering: any) => {
     const offeringId = offering.accessionnumber;
     const companyName = offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company';
     
@@ -545,6 +554,12 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
           setIsModalOpen(false);
           setSelectedOfferingId(null);
         }}
+      />
+
+      <AuthRequiredModal
+        open={showAuthModal}
+        onClose={closeAuthModal}
+        feature="enhance company profiles"
       />
     </Card>
   );
