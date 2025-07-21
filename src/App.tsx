@@ -22,6 +22,7 @@ import AscertainToTheMoon from "./pages/AscertainToTheMoon";
 import Vendors from "./pages/Vendors";
 import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
+import PublicVendorView from "./components/vendors/PublicVendorView";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
@@ -109,6 +110,7 @@ function App() {
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/homehealth" element={<HomeHealth />} />
                 <Route path="/comparison" element={<Comparison />} />
                 <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />

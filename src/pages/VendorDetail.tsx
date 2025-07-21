@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Trash2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Trash2, Eye, EyeOff, Globe } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useVendorPublish } from '@/hooks/useVendorPublish';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import {
@@ -218,6 +219,12 @@ export default function VendorDetail() {
   const queryClient = useQueryClient();
   
   const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
+  
+  const { togglePublishStatus, getPublicUrl, isPublishing } = useVendorPublish({
+    vendorId: vendor?.id || '',
+    vendorSlug: vendorSlug || '',
+    category: category || ''
+  });
 
   console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
@@ -772,6 +779,30 @@ export default function VendorDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:flex-shrink-0">
+                {/* Admin-only Publish Button */}
+                {isAdmin && (
+                  <Button
+                    variant={vendor.status === 'published' ? "outline" : "default"}
+                    size={isMobile ? "icon" : "default"}
+                    onClick={() => togglePublishStatus(vendor.status || 'draft')}
+                    disabled={isPublishing}
+                    className="min-h-[44px]"
+                    aria-label={vendor.status === 'published' ? "Unpublish vendor" : "Publish vendor"}
+                  >
+                    {vendor.status === 'published' ? (
+                      <>
+                        <EyeOff className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">Unpublish</span>}
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="h-4 w-4" />
+                        {!isMobile && <span className="ml-2">Publish</span>}
+                      </>
+                    )}
+                  </Button>
+                )}
+                
                 {vendor.website_url && (
                   <>
                     <Button asChild size={isMobile ? "icon" : "default"} className="min-h-[44px]">
