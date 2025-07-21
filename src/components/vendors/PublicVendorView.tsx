@@ -181,6 +181,41 @@ export default function PublicVendorView() {
                 </div>
               </div>
 
+              {/* Company Overview Section */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-semibold">Company Overview</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">Basic company information and description</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-base font-semibold mb-3">Description</h3>
+                    <p className="text-muted-foreground leading-relaxed">{vendor.description}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-base font-semibold mb-2">Headquarters</h3>
+                    <p className="text-muted-foreground">{vendor.headquarters}</p>
+                  </div>
+                  
+                  {vendor.founding_year && (
+                    <div>
+                      <h3 className="text-base font-semibold mb-2">Founded</h3>
+                      <p className="text-muted-foreground">{vendor.founding_year}</p>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <h3 className="text-base font-semibold mb-2">Company Type</h3>
+                    <p className="text-muted-foreground">{vendor.company_type}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Services and Capabilities - Single Column */}
               <div className="space-y-6">
                 {renderArrayField(vendor.core_services, "Core Services", <Target className="h-5 w-5" />)}
