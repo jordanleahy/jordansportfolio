@@ -8,11 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import type { User, Session } from "@supabase/supabase-js";
+import { useAuth } from "@/contexts/AuthContext";
 const Auth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,41 +21,12 @@ const Auth = () => {
     toast
   } = useToast();
 
-  // Auth state management
+  // Redirect authenticated users to main page
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Redirect authenticated users to main page
-      if (session?.user) {
-        window.location.href = '/';
-      }
-    });
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Redirect if already authenticated
-      if (session?.user) {
-        window.location.href = '/';
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    if (user) {
+      window.location.href = '/';
+    }
+  }, [user]);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,

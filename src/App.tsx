@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SEC from "./pages/SEC";
@@ -37,6 +39,7 @@ function App() {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -45,21 +48,22 @@ function App() {
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/blog-editor" element={<BlogEditor />} />
-              <Route path="/admin-blog" element={<AdminBlog />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/admin-blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
+              <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+              <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
               <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-              <Route path="/agents" element={<Agents />} />
-              <Route path="/agents/sepsis" element={<Sepsis />} />
+              <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
+              <Route path="/agents/sepsis" element={<ProtectedRoute><Sepsis /></ProtectedRoute>} />
               <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
-              <Route path="/vendors" element={<VendorsIndex />} />
-              <Route path="/vendors/:slugname" element={<Vendors />} />
-              <Route path="/vendors/:slugname/:vendorSlug" element={<VendorDetail />} />
+              <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
+              <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
+              <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
               <Route path="/cases/case1" element={<Case1 />} />
               <Route path="/cases/case3" element={<Case3 />} />
               <Route path="/cases/case4" element={<Case4 />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
       </HelmetProvider>

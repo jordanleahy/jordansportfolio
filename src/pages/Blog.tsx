@@ -10,10 +10,11 @@ import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Blog = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const { isAdmin } = useUserRole();
   
   // Use TanStack Query for blog posts
@@ -25,14 +26,6 @@ const Blog = () => {
   
   const prefetchBlogPost = usePrefetchBlogPost();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    checkUser();
-  }, []);
 
   // Handle prefetching on hover for performance
   const handleMouseEnter = (slug: string) => {
@@ -44,23 +37,21 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+      <PageLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
             <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
           </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+      <PageLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center space-y-4 max-w-md mx-auto px-4">
             <FileText className="h-12 w-12 text-destructive mx-auto" />
             <h2 className="text-2xl font-bold">Failed to load blog posts</h2>
@@ -72,15 +63,14 @@ const Blog = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   // Empty state when no published blogs exist
   if (blogPosts.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         
         {/* Hero Section */}
         <section className="py-16 px-4 pt-24">
@@ -154,13 +144,12 @@ const Blog = () => {
             </motion.div>
           </div>
         </section>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <PageLayout>
 
       {/* Hero Section */}
       <section className="py-16 px-4 pt-24">
@@ -366,8 +355,8 @@ const Blog = () => {
             </div>
           </motion.div>
         </div>
-      </section>
-    </div>
+        </section>
+    </PageLayout>
   );
 };
 
