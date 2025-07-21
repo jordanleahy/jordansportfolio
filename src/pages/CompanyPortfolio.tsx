@@ -6,7 +6,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
 
 const CompanyPortfolio = () => {
-  const { companySlug } = useParams();
+  const { company: companySlug } = useParams();
   const navigate = useNavigate();
   const { data: portfolio, isLoading, error, refetch } = useCompanyPortfolio(companySlug || "");
 
