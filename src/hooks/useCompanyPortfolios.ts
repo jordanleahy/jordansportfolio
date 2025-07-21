@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyPortfolio, CompanyPortfolioInput } from "@/types/companyPortfolio";
@@ -14,7 +13,10 @@ export const useCompanyPortfolios = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as CompanyPortfolio[];
+      return data.map(item => ({
+        ...item,
+        generated_content: item.generated_content as any
+      })) as CompanyPortfolio[];
     },
   });
 };
@@ -63,7 +65,12 @@ export const useCompanyPortfolio = (companySlug: string) => {
         matches_auth: data?.user_id === user?.id
       });
       
-      return data as CompanyPortfolio & { 
+      if (!data) return null;
+      
+      return {
+        ...data,
+        generated_content: data.generated_content as any
+      } as CompanyPortfolio & { 
         job_applications?: { 
           job_description: string; 
           job_description_link?: string; 
@@ -71,7 +78,7 @@ export const useCompanyPortfolio = (companySlug: string) => {
           cover_letter_link?: string; 
           created_at: string; 
         }; 
-      } | null;
+      };
     },
     enabled: !!companySlug,
     retry: 3,
@@ -92,12 +99,19 @@ export const useCreateCompanyPortfolio = () => {
 
       const { data, error } = await supabase
         .from("company_portfolios")
-        .insert([{ ...input, user_id: user.id }])
+        .insert({ 
+          ...input, 
+          user_id: user.id, 
+          generated_content: input.generated_content ? input.generated_content as any : null
+        })
         .select()
         .single();
 
       if (error) throw error;
-      return data as CompanyPortfolio;
+      return {
+        ...data,
+        generated_content: data.generated_content as any
+      } as CompanyPortfolio;
     },
     onSuccess: (data) => {
       // Invalidate all related queries to ensure fresh data
@@ -127,15 +141,23 @@ export const useUpdateCompanyPortfolio = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...input }: { id: string } & Partial<CompanyPortfolioInput>) => {
+      const updateData: any = { ...input };
+      if (updateData.generated_content) {
+        updateData.generated_content = updateData.generated_content as any;
+      }
+      
       const { data, error } = await supabase
         .from("company_portfolios")
-        .update(input)
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as CompanyPortfolio;
+      return {
+        ...data,
+        generated_content: data.generated_content as any
+      } as CompanyPortfolio;
     },
     onSuccess: (data) => {
       // Invalidate all related queries

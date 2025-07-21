@@ -18,7 +18,6 @@ interface PublicPortfolioViewProps {
 }
 
 const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
-  const generatedContent = portfolio.generated_content;
   const jobApplication = portfolio.job_applications;
 
   return (
@@ -34,11 +33,11 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-            {generatedContent?.hero_section?.headline || `Why I'm Perfect for ${portfolio.company_name}`}
+            Why I'm Perfect for {portfolio.company_name}
           </h1>
           
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            {generatedContent?.hero_section?.subheadline || `Discover how my skills and experience align perfectly with your team's needs`}
+            Discover how my skills and experience align perfectly with your team's needs
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -61,112 +60,6 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
           </div>
         </div>
       </section>
-
-      {/* Value Proposition Section */}
-      {generatedContent?.hero_section?.value_proposition && (
-        <section className="py-16 px-4 bg-white/50">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">My Value Proposition</h2>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-8">
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {generatedContent.hero_section.value_proposition}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
-
-      {/* Skills Alignment Section */}
-      {generatedContent?.skills_alignment && generatedContent.skills_alignment.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Skills Alignment</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {generatedContent.skills_alignment.map((skill, index) => (
-                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-blue-600">{skill.skill}</h3>
-                    <p className="text-muted-foreground mb-4">{skill.relevance}</p>
-                    {skill.examples && skill.examples.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Examples:</h4>
-                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                          {skill.examples.map((example, exampleIndex) => (
-                            <li key={exampleIndex}>{example}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Company Analysis Section */}
-      {generatedContent?.company_analysis && (
-        <section className="py-16 px-4 bg-white/50">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Why {portfolio.company_name}?</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4 text-purple-600">Mission Alignment</h3>
-                  <p className="text-muted-foreground">
-                    {generatedContent.company_analysis.mission_alignment}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4 text-green-600">Culture Fit</h3>
-                  <p className="text-muted-foreground">
-                    {generatedContent.company_analysis.culture_fit}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4 text-orange-600">Growth Opportunities</h3>
-                  <p className="text-muted-foreground">
-                    {generatedContent.company_analysis.growth_opportunities}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Relevant Projects Section */}
-      {generatedContent?.relevant_projects && generatedContent.relevant_projects.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Relevant Experience</h2>
-            <div className="space-y-6">
-              {generatedContent.relevant_projects.map((project, index) => (
-                <Card key={index} className="border-0 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-xl font-semibold">Project {index + 1}</h3>
-                      <Badge variant="outline">
-                        {Math.round(project.relevance_score * 100)}% relevant
-                      </Badge>
-                    </div>
-                    <p className="text-muted-foreground">
-                      {project.customized_description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Cover Letter Section */}
       {portfolio.cover_letter && (
