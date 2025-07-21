@@ -25,9 +25,9 @@ const Navigation = () => {
   const mobileMenuItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
-    { href: "/#about", label: "About", icon: User },
-    { href: "/sec", label: "SEC Data", icon: Database },
     { href: "/blog", label: "Blog", icon: FileText },
+    { href: "/sec", label: "SEC", icon: Database },
+    { href: "/#about", label: "About", icon: User },
   ];
 
   const handleAnchorClick = (e: React.MouseEvent, href: string) => {
@@ -60,11 +60,24 @@ const Navigation = () => {
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <Link
-                      to="/sec"
-                      className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
+                      to="/"
+                      className={cn(navLinkStyles, isActive("/") && "bg-accent text-accent-foreground")}
                     >
-                      <Database className="mr-2 h-4 w-4" />
-                      SEC Data
+                      <Home className="mr-2 h-4 w-4" />
+                      Home
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/#case-studies"
+                      className={cn(navLinkStyles, isActive("/#case-studies") && "bg-accent text-accent-foreground")}
+                      onClick={(e) => handleAnchorClick(e, "/#case-studies")}
+                    >
+                      <Target className="mr-2 h-4 w-4" />
+                      Case Studies
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
@@ -84,11 +97,24 @@ const Navigation = () => {
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <Link
-                      to="/ascertain-to-the-moon"
-                      className={cn(navLinkStyles, isActive("/ascertain-to-the-moon") && "bg-accent text-accent-foreground")}
+                      to="/sec"
+                      className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
                     >
-                      <Rocket className="mr-2 h-4 w-4" />
-                      To The Moon
+                      <Database className="mr-2 h-4 w-4" />
+                      SEC
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/#about"
+                      className={cn(navLinkStyles, isActive("/#about") && "bg-accent text-accent-foreground")}
+                      onClick={(e) => handleAnchorClick(e, "/#about")}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      About
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
