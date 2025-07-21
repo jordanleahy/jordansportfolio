@@ -12,8 +12,8 @@ import { Save, Eye, Trash2, Send, Plus } from "lucide-react";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
-import { useAutoSave } from "@/hooks/useAutoSave";
-import { AutoSaveStatus } from "@/components/blog/AutoSaveStatus";
+// import { useAutoSave } from "@/hooks/useAutoSave";
+// import { AutoSaveStatus } from "@/components/blog/AutoSaveStatus";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
@@ -67,16 +67,8 @@ const BlogEditor = () => {
 
   const [slug, setSlug] = useState("");
 
-  // Auto-save hook
-  const { triggerAutoSave } = useAutoSave(existingPost?.id, formData, {
-    enabled: !!existingPost?.id,
-    onAutoSave: (status) => {
-      setAutoSaveStatus(status);
-      if (status === 'saved') {
-        setLastSaved(new Date());
-      }
-    }
-  });
+  // Auto-save hook - temporarily disabled
+  const triggerAutoSave = (data: any) => {}; // no-op function
 
   // Initialize form data when existing post loads
   useEffect(() => {
@@ -290,10 +282,7 @@ const BlogEditor = () => {
                   {formData.status}
                 </Badge>
               </div>
-              <AutoSaveStatus 
-                status={autoSaveStatus} 
-                lastSaved={lastSaved}
-              />
+              {/* AutoSaveStatus temporarily disabled */}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-3 justify-end sm:justify-start">
               <AlertDialog>
