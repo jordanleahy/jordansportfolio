@@ -2,13 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3 } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Simplified active state logic
@@ -31,7 +35,20 @@ const Navigation = () => {
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
+    // Authenticated user items
+    ...(user ? [
+      { href: "/vendors", label: "Vendors", icon: Building2 },
+      { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/jobs", label: "Jobs", icon: FileText },
+      { href: "/agents", label: "AI Agents", icon: Settings },
+      ...(isAdmin ? [{ href: "/admin-blog", label: "Blog Admin", icon: BookOpen }] : [])
+    ] : [])
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const handleAnchorClick = (e: React.MouseEvent, href: string) => {
     if (href.includes('#')) {
@@ -134,7 +151,84 @@ const Navigation = () => {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                {!user && (
+                {user && (
+                  <>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/vendors"
+                          className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
+                        >
+                          <Building2 className="mr-2 h-4 w-4" />
+                          Vendors
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/calendar"
+                          className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Calendar
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/jobs"
+                          className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          Jobs
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/agents"
+                          className={cn(navLinkStyles, isActive("/agents") && "bg-accent text-accent-foreground")}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          AI Agents
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/admin-blog"
+                            className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
+                          >
+                            <BookOpen className="mr-2 h-4 w-4" />
+                            Blog Admin
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </>
+                )}
+
+                {user ? (
+                  <NavigationMenuItem>
+                    <Button
+                      variant="ghost"
+                      onClick={handleSignOut}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </NavigationMenuItem>
+                ) : (
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
                       <Link
@@ -213,10 +307,10 @@ const Navigation = () => {
                     <SheetClose asChild>
                       {user ? (
                         <Button 
-                          onClick={signOut}
+                          onClick={handleSignOut}
                           className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium w-full bg-secondary text-secondary-foreground rounded-lg transition-all duration-200 hover:bg-secondary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/20"
                         >
-                          <LogIn className="h-5 w-5 rotate-180" />
+                          <LogOut className="h-5 w-5" />
                           <span>Sign Out</span>
                         </Button>
                       ) : (
