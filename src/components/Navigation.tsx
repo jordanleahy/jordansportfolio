@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
 
   // Simplified active state logic
@@ -164,20 +164,28 @@ const Navigation = () => {
                     })}
                   </nav>
                   
-                  {/* Login Button */}
-                  {!user && (
-                    <div className="p-4 border-t border-border/50">
-                      <SheetClose asChild>
+                  {/* Auth Button */}
+                  <div className="p-4 border-t border-border/50">
+                    <SheetClose asChild>
+                      {user ? (
+                        <Button 
+                          onClick={signOut}
+                          className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium w-full bg-secondary text-secondary-foreground rounded-lg transition-all duration-200 hover:bg-secondary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                        >
+                          <LogIn className="h-5 w-5 rotate-180" />
+                          <span>Sign Out</span>
+                        </Button>
+                      ) : (
                         <Link 
                           to="/auth" 
                           className="flex items-center justify-center gap-3 py-3 px-6 text-base font-medium bg-primary text-primary-foreground rounded-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
                           <LogIn className="h-5 w-5" />
-                          <span>Login</span>
+                          <span>Sign In</span>
                         </Link>
-                      </SheetClose>
-                    </div>
-                  )}
+                      )}
+                    </SheetClose>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
