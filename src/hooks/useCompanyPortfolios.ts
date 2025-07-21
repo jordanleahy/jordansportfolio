@@ -24,15 +24,23 @@ export const useCompanyPortfolio = (companySlug: string) => {
     queryKey: ["company-portfolio", companySlug],
     queryFn: async () => {
       console.log('🔍 DEBUG: Starting portfolio fetch for slug:', companySlug);
-      console.log('🔍 DEBUG: Current user:', await supabase.auth.getUser());
+      
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('🔍 DEBUG: Auth error:', authError);
+        throw authError;
+      }
+      
+      console.log('🔍 DEBUG: Current user:', user?.id);
       
       // First, let's see all portfolios for this user
       const { data: allPortfolios, error: allError } = await supabase
         .from("company_portfolios")
-        .select("id, company_slug, company_name")
+        .select("id, company_slug, company_name, user_id")
         .order("created_at", { ascending: false });
       
       console.log('🔍 DEBUG: All portfolios:', allPortfolios);
+      console.log('🔍 DEBUG: Looking for slug:', companySlug);
       
       const { data, error } = await supabase
         .from("company_portfolios")
@@ -50,7 +58,9 @@ export const useCompanyPortfolio = (companySlug: string) => {
         id: data?.id,
         company_name: data?.company_name,
         user_id: data?.user_id,
-        slug: data?.company_slug
+        slug: data?.company_slug,
+        auth_user_id: user?.id,
+        matches_auth: data?.user_id === user?.id
       });
       
       return data as CompanyPortfolio & { 
@@ -64,6 +74,10 @@ export const useCompanyPortfolio = (companySlug: string) => {
       } | null;
     },
     enabled: !!companySlug,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch to ensure fresh data
   });
 };
 
@@ -86,8 +100,11 @@ export const useCreateCompanyPortfolio = () => {
       return data as CompanyPortfolio;
     },
     onSuccess: (data) => {
+      // Invalidate all related queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["company-portfolios"] });
       queryClient.invalidateQueries({ queryKey: ["company-portfolio", data.company_slug] });
+      queryClient.invalidateQueries({ queryKey: ["company-portfolio"] }); // Invalidate all portfolio queries
+      
       toast({
         title: "Portfolio created",
         description: "Company portfolio has been created successfully.",
@@ -121,8 +138,11 @@ export const useUpdateCompanyPortfolio = () => {
       return data as CompanyPortfolio;
     },
     onSuccess: (data) => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ["company-portfolios"] });
       queryClient.invalidateQueries({ queryKey: ["company-portfolio", data.company_slug] });
+      queryClient.invalidateQueries({ queryKey: ["company-portfolio"] });
+      
       toast({
         title: "Portfolio updated",
         description: "Company portfolio has been updated successfully.",

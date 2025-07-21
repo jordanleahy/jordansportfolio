@@ -142,6 +142,9 @@ export const createPersonalizedPortfolio = async (
       job_application_id: data?.job_application_id
     });
     
+    // Add a small delay to ensure the database transaction is fully committed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     return data;
   } catch (error: any) {
     console.error("🚀 Error creating personalized portfolio:", error);
