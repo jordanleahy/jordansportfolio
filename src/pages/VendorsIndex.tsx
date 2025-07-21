@@ -256,12 +256,7 @@ export default function VendorsIndex() {
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Building className="h-8 w-8" />
-              <h1 className="text-3xl font-bold tracking-tight">
-                All Vendors
-              </h1>
-            </div>
+            
             
             
             <p className="text-sm text-muted-foreground mb-4">
