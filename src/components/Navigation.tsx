@@ -29,20 +29,23 @@ const Navigation = () => {
   const navLinkStyles = "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50";
   const mobileNavItemStyles = "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20";
 
+  // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
-    { href: "/calendar", label: "Calendar", icon: Calendar },
-    { href: "/jobs", label: "Jobs", icon: FileText },
-    { href: "/agents", label: "AI Agents", icon: Settings },
-    ...(isAdmin ? [{ href: "/admin-blog", label: "Blog Admin", icon: BookOpen }] : [])
+    // Admin-only items
+    ...(isAdmin ? [
+      { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/jobs", label: "Jobs", icon: FileText },
+      { href: "/agents", label: "AI Agents", icon: Settings },
+      { href: "/admin-blog", label: "Blog Admin", icon: BookOpen }
+    ] : [])
   ] : [
     // Public items
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
-    
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
   ];
@@ -118,54 +121,57 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/calendar"
-                          className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Calendar
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/jobs"
-                          className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          Jobs
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/agents"
-                          className={cn(navLinkStyles, isActive("/agents") && "bg-accent text-accent-foreground")}
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          AI Agents
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-
+                    {/* Admin-only navigation items */}
                     {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/admin-blog"
-                            className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
-                          >
-                            <BookOpen className="mr-2 h-4 w-4" />
-                            Blog Admin
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
+                      <>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/calendar"
+                              className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              Calendar
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/jobs"
+                              className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Jobs
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/agents"
+                              className={cn(navLinkStyles, isActive("/agents") && "bg-accent text-accent-foreground")}
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              AI Agents
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin-blog"
+                              className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
+                            >
+                              <BookOpen className="mr-2 h-4 w-4" />
+                              Blog Admin
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+                      </>
                     )}
 
                     <NavigationMenuItem>
@@ -218,7 +224,6 @@ const Navigation = () => {
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -287,43 +292,46 @@ const Navigation = () => {
                     >
                       <Building2 className="h-4 w-4" />
                     </Link>
-                    <Link
-                      to="/calendar"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/calendar") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Calendar className="h-4 w-4" />
-                    </Link>
-                    <Link
-                      to="/jobs"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/jobs") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Link>
-                    <Link
-                      to="/agents"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/agents") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Link>
+                    {/* Admin-only quick access icons */}
                     {isAdmin && (
-                      <Link
-                        to="/admin-blog"
-                        className={cn(
-                          "p-2 rounded-lg transition-colors hover:bg-accent",
-                          isActive("/admin-blog") && "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        <BookOpen className="h-4 w-4" />
-                      </Link>
+                      <>
+                        <Link
+                          to="/calendar"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/calendar") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </Link>
+                        <Link
+                          to="/jobs"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/jobs") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Link>
+                        <Link
+                          to="/agents"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/agents") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Link>
+                        <Link
+                          to="/admin-blog"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/admin-blog") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <BookOpen className="h-4 w-4" />
+                        </Link>
+                      </>
                     )}
                   </>
                 ) : (

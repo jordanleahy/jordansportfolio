@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -28,6 +29,7 @@ import Sepsis from "./pages/agents/Sepsis";
 import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
+import Home from "./pages/Home";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -69,36 +71,37 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/sec" element={<SEC />} />
                 <Route path="/sec/data-dictionary" element={<DataDictionary />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/blog-editor" element={<BlogEditor />} />
                 <Route path="/blog-editor/:id" element={<BlogEditor />} />
-                <Route path="/admin-blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
+                <Route path="/admin-blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
                 <Route 
                   path="/calendar" 
                   element={
-                    <ProtectedRoute>
+                    <AdminRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
                         <OptimizedCalendar />
                       </Suspense>
-                    </ProtectedRoute>
+                    </AdminRoute>
                   } 
                 />
                 <Route 
                   path="/jobs" 
                   element={
-                    <ProtectedRoute>
+                    <AdminRoute>
                       <Suspense fallback={<JobsSkeletonLoader />}>
                         <OptimizedJobs />
                       </Suspense>
-                    </ProtectedRoute>
+                    </AdminRoute>
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-                <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
-                <Route path="/agents/sepsis" element={<ProtectedRoute><Sepsis /></ProtectedRoute>} />
+                <Route path="/agents" element={<AdminRoute><Agents /></AdminRoute>} />
+                <Route path="/agents/sepsis" element={<AdminRoute><Sepsis /></AdminRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
