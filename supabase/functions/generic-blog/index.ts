@@ -66,25 +66,19 @@ Generate a JSON response with the following structure:
   "intro_content": "Expanded introduction (50-75 words) that builds on the original description",
   "visual_sections": [
     {
-      "headline": "Section 1 headline (5-6 words)",
-      "content": "Content that breaks down part of the main concept (60-80 words)",
-      "image_url": "",
-      "cta_text": "",
-      "cta_url": ""
+      "headline": "Section 1 headline (6 words max)",
+      "content": "Content that breaks down part of the main concept (300-480 characters)",
+      "image_url": ""
     },
     {
-      "headline": "Section 2 headline (5-6 words)", 
-      "content": "Content that explores another aspect (60-80 words)",
-      "image_url": "",
-      "cta_text": "",
-      "cta_url": ""
+      "headline": "Section 2 headline (6 words max)", 
+      "content": "Content that explores another aspect (300-480 characters)",
+      "image_url": ""
     },
     {
-      "headline": "Section 3 headline (5-6 words)",
-      "content": "Content that provides practical insights (60-80 words)", 
-      "image_url": "",
-      "cta_text": "",
-      "cta_url": ""
+      "headline": "Section 3 headline (6 words max)",
+      "content": "Content that provides practical insights (300-480 characters)", 
+      "image_url": ""
     }
   ],
   "tldr_bullets": [
