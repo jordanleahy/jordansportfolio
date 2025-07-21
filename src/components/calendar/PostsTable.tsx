@@ -811,9 +811,9 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   <TableHead>Title</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>16:9 Image</TableHead>
-                  <TableHead>16:9 Vid</TableHead>
+                  <TableHead>16:9</TableHead>
                   <TableHead>3:4 Image</TableHead>
-                  <TableHead>3:4 Vid</TableHead>
+                  <TableHead>3:4</TableHead>
                   <TableHead>Video</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
