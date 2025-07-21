@@ -30,7 +30,15 @@ export const useCompanyPortfolio = (companySlug: string) => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as CompanyPortfolio & { 
+        job_applications?: { 
+          job_description: string; 
+          job_description_link?: string; 
+          resume_link?: string; 
+          cover_letter_link?: string; 
+          created_at: string; 
+        }; 
+      };
     },
     enabled: !!companySlug,
   });

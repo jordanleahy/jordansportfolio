@@ -43,4 +43,6 @@ export interface GeneratedContent {
     culture_fit: string;
     growth_opportunities: string;
   };
+  cover_letter?: string;
+  [key: string]: any;
 }

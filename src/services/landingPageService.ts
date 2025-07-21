@@ -40,15 +40,15 @@ export const createPersonalizedPortfolio = async (
 
     const { data, error } = await supabase
       .from("company_portfolios")
-      .insert([{
+      .insert({
         job_application_id: jobApplication.id,
         company_name: jobApplication.company_name,
         company_slug: companySlug,
-        generated_content: generatedContent,
+        generated_content: generatedContent as any,
         cover_letter: generatedContent.cover_letter,
-        status: 'completed',
+        status: 'completed' as const,
         user_id: user.id
-      }])
+      })
       .select()
       .single();
 
