@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3 } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Calendar, File, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -115,16 +115,24 @@ const Navigation = () => {
               {user && (
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <User className="h-4 w-4" />
-                    <span className="sr-only">Profile</span>
+                    <File className="h-4 w-4" />
+                    <span className="sr-only">Documents</span>
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="sr-only">Dashboard</span>
+                    <Calendar className="h-4 w-4" />
+                    <span className="sr-only">Calendar</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-accent/50">
+                    <FileText className="h-4 w-4" />
+                    <span className="sr-only">Active Document</span>
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                     <Settings className="h-4 w-4" />
                     <span className="sr-only">Settings</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="sr-only">Documentation</span>
                   </Button>
                 </div>
               )}
