@@ -47,15 +47,13 @@ const Navigation = () => {
       e.preventDefault();
       const element = document.getElementById(anchor);
       if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:sticky md:left-auto md:right-auto">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
