@@ -23,12 +23,8 @@ import {
   Users,
   Briefcase,
   UserCheck,
-  Brain,
   Plus
 } from "lucide-react";
-import { InvestmentResearchView } from "./InvestmentResearchView";
-import { useInvestmentResearch, useSaveInvestmentResearch } from "@/hooks/useInvestmentResearch";
-import { useState } from "react";
 
 interface OfferingDetailModalProps {
   offering: any;
@@ -43,67 +39,6 @@ export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
   isLoading = false,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState("overview");
-  
-  // Get investment research for this offering
-  const { data: investmentResearch, isLoading: researchLoading } = useInvestmentResearch(
-    offering?.accessionnumber
-  );
-  const saveResearch = useSaveInvestmentResearch();
-
-  // Sample research data for demo (would normally come from AI generation)
-  const sampleResearchData = {
-    company_overview: {
-      legal_entity: offering?.issuers?.[0]?.entityname || "Unknown Company",
-      headquarters: offering?.issuers?.[0]?.city ? `${offering.issuers[0].city}, ${offering.issuers[0].stateorcountrydescription}` : "Not specified",
-      executive_signer: offering?.signatures?.[0]?.nameofsigner || "Not specified",
-      corporate_structure: `${offering?.issuers?.[0]?.entitytype || "Unknown"} incorporated in ${offering?.issuers?.[0]?.jurisdictionofinc || "Unknown"}`,
-      business_description: "Business description not available from SEC filings. Further research required to determine specific business operations and market focus.",
-      notable_feature: "Company has filed for private placement offering under Regulation D."
-    },
-    financial_profile: {
-      sec_form_filed: offering?.formd_submission?.filing_date || "Not specified",
-      security_offered: offering?.isequitytype ? "Equity" : offering?.isdebttype ? "Debt" : "Other",
-      total_offering: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(offering?.totalofferingamount || 0),
-      amount_sold: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(offering?.totalamountsold || 0),
-      remaining: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(offering?.totalremaining || 0),
-      minimum_investment: offering?.minimuminvestmentaccepted ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(offering.minimuminvestmentaccepted) : "Not disclosed",
-      prior_funding: ["Previous funding history not available in SEC filings"],
-      revenue_metrics: "Revenue information not disclosed in current filings",
-      burn_rate: "Financial metrics require additional research beyond SEC filings"
-    },
-    market_position: {
-      target_market: offering?.industrygrouptype || "Industry not specified in filings",
-      competitive_landscape: ["Competitive analysis requires market research beyond SEC data"],
-      technology: ["Technology stack information not available in regulatory filings"]
-    },
-    risk_assessment: {
-      regulatory: ["Private placement under Regulation D exemption", "Must comply with federal securities laws"],
-      leadership_check: `Executive signer: ${offering?.signatures?.[0]?.nameofsigner || "Not specified"}. Further background check recommended.`,
-      litigation: "No litigation information available in current SEC filings",
-      concerns: offering?.totalofferingamount > 100000000 ? ["Large offering amount relative to typical private placements"] : []
-    },
-    next_steps: [
-      "Request complete business plan and financial statements",
-      "Conduct management team background checks",
-      "Analyze competitive landscape and market opportunity",
-      "Review legal documentation and offering memorandum",
-      "Validate business model and revenue projections"
-    ]
-  };
-
-  const handleGenerateResearch = async () => {
-    if (!offering?.accessionnumber) return;
-    
-    try {
-      await saveResearch.mutateAsync({
-        accessionnumber: offering.accessionnumber,
-        researchData: sampleResearchData
-      });
-    } catch (error) {
-      console.error("Failed to generate research:", error);
-    }
-  };
 
   if (!isOpen) return null;
   
@@ -180,22 +115,8 @@ export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">SEC Filing</span>
-              <span className="sm:hidden">Filing</span>
-            </TabsTrigger>
-            <TabsTrigger value="research" className="flex items-center gap-2">
-              <Brain className="h-4 w-4" />
-              <span className="hidden sm:inline">Investment Analysis</span>
-              <span className="sm:hidden">Analysis</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
+        {/* SEC Filing Details */}
+        <div className="space-y-6">
             {/* People Information Tabs */}
             <Card>
               <CardHeader>
@@ -644,85 +565,7 @@ export const OfferingDetailModal: React.FC<OfferingDetailModalProps> = ({
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="research" className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h3 className="text-lg font-semibold">Investment Due Diligence</h3>
-                <p className="text-sm text-muted-foreground">
-                  AI-powered analysis based on SEC filings and public data
-                </p>
-              </div>
-              
-              {!investmentResearch && (
-                <Button 
-                  onClick={handleGenerateResearch}
-                  disabled={saveResearch.isPending}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {saveResearch.isPending ? "Generating..." : "Generate Analysis"}
-                </Button>
-              )}
-            </div>
-
-            {investmentResearch ? (
-              <InvestmentResearchView 
-                data={investmentResearch.research_data}
-                generatedAt={investmentResearch.generated_at}
-              />
-            ) : researchLoading ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {[...Array(4)].map((_, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <div className="h-4 bg-muted rounded animate-pulse" />
-                          <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <div className="h-5 bg-muted rounded animate-pulse w-1/3" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="h-4 bg-muted rounded animate-pulse" />
-                        <div className="h-4 bg-muted rounded animate-pulse w-4/5" />
-                        <div className="h-4 bg-muted rounded animate-pulse w-3/5" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="border-dashed">
-                <CardContent className="p-8 text-center">
-                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Investment Analysis Available</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Generate an AI-powered investment analysis based on available SEC filing data.
-                  </p>
-                  <Button 
-                    onClick={handleGenerateResearch}
-                    disabled={saveResearch.isPending}
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Generate Analysis
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   );
