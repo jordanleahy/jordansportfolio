@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink, Building, Edit, Save, X, Upload } from 'lucide-react';
@@ -172,7 +173,7 @@ export function EditableVendorCard({
       </CardHeader>
       
       <CardContent className="space-y-3 flex-1 flex flex-col" onClick={(e) => isEditing && e.stopPropagation()}>
-        <div className="flex-1">
+        <div>
           <div className="text-sm font-medium mb-1">Description</div>
           {isEditing ? (
             <TextEditor
