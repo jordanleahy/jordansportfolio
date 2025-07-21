@@ -1,20 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Eye, Plus } from "lucide-react";
+import { ArrowLeft, Edit, Eye, Plus, Trash2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useAdminAllBlogPosts, useAdminDraftBlogPosts } from "@/hooks/useAdminBlogQueries";
+import { useAdminAllBlogPosts, useAdminDraftBlogPosts, useDeleteBlogPost } from "@/hooks/useAdminBlogQueries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageLayout } from '@/components/layout/PageLayout';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminBlog = () => {
   const navigate = useNavigate();
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<any>(null);
   
   const { 
     data: allPosts = [], 
@@ -27,6 +39,21 @@ const AdminBlog = () => {
     isLoading: draftPostsLoading, 
     error: draftPostsError 
   } = useAdminDraftBlogPosts();
+
+  const deleteBlogPost = useDeleteBlogPost();
+
+  const handleDeleteClick = (post: any) => {
+    setPostToDelete(post);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (postToDelete) {
+      deleteBlogPost.mutate(postToDelete.id);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+    }
+  };
 
   // Redirect if not admin
   useEffect(() => {
@@ -135,7 +162,7 @@ const AdminBlog = () => {
                   <TableCell>
                     {post.published_at ? formatDate(post.published_at) : '-'}
                   </TableCell>
-                  <TableCell className="text-right">
+                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       {post.status === 'published' && (
                         <Link to={`/blog/${post.slug}`}>
@@ -149,6 +176,14 @@ const AdminBlog = () => {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDeleteClick(post)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -213,6 +248,15 @@ const AdminBlog = () => {
                       Edit
                     </Button>
                   </Link>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteClick(post)}
+                    className="flex items-center gap-2 text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -262,6 +306,30 @@ const AdminBlog = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{postToDelete?.hero_headline || 'this post'}"? 
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </PageLayout>
   );
 };
