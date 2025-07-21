@@ -59,7 +59,7 @@ Use a professional healthcare palette—bright but not neon:
 
 📐 Aspect Ratio & Safe Zone
 - **Safe Zone:** Keep all critical elements—text, icons, human figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
-- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
+- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to 4:3 aspect ratio never cuts off your core content.`;
 
 const CONTRACTS_SYSTEM_PROMPT = `💼 Contracts & RCM Image Prompt Instructions:
 Business Vector Illustration Generator
@@ -105,7 +105,7 @@ Use a professional business palette—trustworthy and corporate:
 
 📐 Aspect Ratio & Safe Zone
 - **Safe Zone:** Keep all critical elements—text, icons, figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
-- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
+- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to 4:3 aspect ratio never cuts off your core content.`;
 
 export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'cdi' }: BlogVisualPromptProps) => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
@@ -128,7 +128,7 @@ Based on the following content, create a detailed image generation prompt that f
 
 ${userContent}
 
-Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType} vector illustration that incorporates the headline and content provided. The prompt should include specific visual elements, color palette, composition details, and ensure all elements stay within the safe zone for proper cropping.`,
+Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType} vector illustration that incorporates the headline and content provided. The prompt should include specific visual elements, color palette, composition details, and ensure all elements stay within the safe zone for proper cropping.`,
           type: 'image_prompt'
         }
       });
