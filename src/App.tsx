@@ -26,6 +26,7 @@ import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
 import Sepsis from "./pages/agents/Sepsis";
 import DataDictionary from "./pages/sec/DataDictionary";
+import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
@@ -102,6 +103,7 @@ function App() {
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                <Route path="/homehealth" element={<HomeHealth />} />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
