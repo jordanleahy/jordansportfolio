@@ -1,302 +1,264 @@
-
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Vendor, VENDOR_CATEGORIES } from '@/types/vendor';
-import PageLayout from '@/components/layout/PageLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { VendorFilters } from '@/components/vendors/VendorFilters';
+import { useVendors } from '@/hooks/useVendors';
+import { type VendorFiltersState } from '@/types/vendor';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Building2, MapPin, Users, DollarSign, Target, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Building, Calendar } from 'lucide-react';
+import { EditableVendorCard } from '@/components/vendors/EditableVendorCard';
 
-const RCMCompanies = () => {
-  const { data: vendors, isLoading } = useQuery({
-    queryKey: ['public-rcm-vendors'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('vendors')
-        .select('*')
-        .eq('status', 'published')
-        .or('core_services.cs.{"Revenue Cycle Management"},core_services.cs.{"RCM"},core_services.cs.{"Medical Billing"},specialties.cs.{"Revenue Cycle"},specialties.cs.{"RCM"},company_type.ilike.%rcm%')
-        .order('company_name');
+type SortField = 'company_name' | 'founding_year' | 'company_type';
+type SortDirection = 'asc' | 'desc';
+
+export default function RCMCompanies() {
+  const navigate = useNavigate();
+  const [filters, setFilters] = useState<VendorFiltersState>({});
+  const [sortField, setSortField] = useState<SortField>('company_name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  
+  // Fetch all vendors and filter for RCM companies
+  const { data: allVendors = [], isLoading, error } = useVendors();
+  
+  // Filter to show only published RCM companies
+  const rcmCompanies = useMemo(() => {
+    return allVendors.filter(vendor => 
+      vendor.status === 'published' && 
+      (vendor.core_services.some(service => 
+        service.toLowerCase().includes('revenue cycle') || 
+        service.toLowerCase().includes('rcm') ||
+        service.toLowerCase().includes('billing') ||
+        service.toLowerCase().includes('coding')
+      ) ||
+      vendor.specialties.some(specialty => 
+        specialty.toLowerCase().includes('revenue cycle') || 
+        specialty.toLowerCase().includes('rcm') ||
+        specialty.toLowerCase().includes('billing') ||
+        specialty.toLowerCase().includes('coding')
+      ))
+    );
+  }, [allVendors]);
+
+  // Apply additional filters
+  const filteredCompanies = useMemo(() => {
+    let filtered = rcmCompanies;
+
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      filtered = filtered.filter(vendor => 
+        vendor.company_name.toLowerCase().includes(query) ||
+        vendor.description.toLowerCase().includes(query) ||
+        vendor.headquarters.toLowerCase().includes(query)
+      );
+    }
+
+    if (filters.companyType?.length) {
+      filtered = filtered.filter(vendor => 
+        filters.companyType!.includes(vendor.company_type)
+      );
+    }
+
+    if (filters.specialties?.length) {
+      filtered = filtered.filter(vendor => 
+        vendor.specialties.some(specialty => 
+          filters.specialties!.some(filterSpecialty => 
+            specialty.toLowerCase().includes(filterSpecialty.toLowerCase())
+          )
+        )
+      );
+    }
+
+    if (filters.services?.length) {
+      filtered = filtered.filter(vendor => 
+        vendor.core_services.some(service => 
+          filters.services!.some(filterService => 
+            service.toLowerCase().includes(filterService.toLowerCase())
+          )
+        )
+      );
+    }
+
+    if (filters.customers?.length) {
+      filtered = filtered.filter(vendor => 
+        vendor.customers.some(customer => 
+          filters.customers!.some(filterCustomer => 
+            customer.toLowerCase().includes(filterCustomer.toLowerCase())
+          )
+        )
+      );
+    }
+
+    if (filters.fundingRange?.length) {
+      filtered = filtered.filter(vendor => {
+        const fundingStr = vendor.total_funding;
+        if (!fundingStr) return filters.fundingRange!.includes('no-funding');
+        
+        const fundingAmount = parseFloat(fundingStr.replace(/[$M,]/g, '')) * 1000000;
+        
+        return filters.fundingRange!.some(range => {
+          switch (range) {
+            case 'under-10m': return fundingAmount < 10000000;
+            case '10m-50m': return fundingAmount >= 10000000 && fundingAmount < 50000000;
+            case '50m-100m': return fundingAmount >= 50000000 && fundingAmount < 100000000;
+            case 'over-100m': return fundingAmount >= 100000000;
+            case 'no-funding': return !fundingStr;
+            default: return true;
+          }
+        });
+      });
+    }
+
+    return filtered;
+  }, [rcmCompanies, filters]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleVendorClick = (vendor: any) => {
+    navigate(`/rcmcompanies/${vendor.slug}`);
+  };
+
+  // Sort companies
+  const sortedCompanies = useMemo(() => {
+    return [...filteredCompanies].sort((a, b) => {
+      let aVal: any = a[sortField];
+      let bVal: any = b[sortField];
       
-      if (error) throw error;
-      return data as Vendor[];
-    },
-  });
-
-  const category = VENDOR_CATEGORIES.rcm;
+      if (typeof aVal === 'string') {
+        aVal = aVal.toLowerCase();
+        bVal = bVal.toLowerCase();
+      }
+      
+      if (sortDirection === 'asc') {
+        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      } else {
+        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+      }
+    });
+  }, [filteredCompanies, sortField, sortDirection]);
 
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-          <div className="container mx-auto px-4 py-8">
-            {/* Breadcrumb */}
-            <Breadcrumb className="mb-6">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>RCM Companies</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4"></div>
-                    <div className="h-4 bg-muted rounded w-1/2"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-muted rounded"></div>
-                      <div className="h-4 bg-muted rounded w-5/6"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+        <div className="container mx-auto py-8 px-4">
+          <div className="text-center">Loading RCM companies...</div>
         </div>
       </PageLayout>
     );
   }
 
-  const getCompanyTypeBadgeColor = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'startup':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-800/20 dark:text-emerald-300';
-      case 'private':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300';
-      case 'public':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300';
-      case 'subsidiary':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-800/20 dark:text-orange-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
-    }
-  };
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto py-8 px-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold mb-2">Error Loading RCM Companies</h1>
+                <p className="text-muted-foreground">
+                  Unable to load RCM company data. Please try again later.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-          <div className="container mx-auto px-4 py-16">
-            <div className="max-w-4xl mx-auto">
-              {/* Breadcrumb */}
-              <Breadcrumb className="mb-6">
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>RCM Companies</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+      <div className="container mx-auto py-8 px-4">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Revenue Cycle Management (RCM) Companies
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Showing {sortedCompanies.length} of {rcmCompanies.length} companies
+            </p>
+          </div>
 
-              <div className="text-center">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-                  <Building2 className="h-4 w-4" />
-                  Vendor Intelligence
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  {category.title}
-                </h1>
-                <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-                  {category.description}
-                </p>
-                <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    <span>{vendors?.length || 0} Companies</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    <span>Funding Analysis</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>Market Intelligence</span>
-                  </div>
-                </div>
-              </div>
+          {/* Toolbar with Filters and Sort Controls */}
+          <div className="flex flex-wrap gap-2 items-center justify-between">
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* Filters Button */}
+              <VendorFilters 
+                filters={filters} 
+                onFiltersChange={setFilters} 
+                vendors={rcmCompanies} 
+              />
+              
+              {/* Sort Controls */}
+              <Button 
+                variant={sortField === 'company_name' ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => handleSort('company_name')} 
+                className="gap-2"
+              >
+                <Building className="h-4 w-4" />
+                Company
+                {sortField === 'company_name' && (
+                  <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                )}
+              </Button>
+              
+              <Button 
+                variant={sortField === 'company_type' ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => handleSort('company_type')}
+              >
+                Type
+                {sortField === 'company_type' && (
+                  <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                )}
+              </Button>
+              
+              <Button 
+                variant={sortField === 'founding_year' ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => handleSort('founding_year')} 
+                className="gap-2"
+              >
+                <Calendar className="h-4 w-4" />
+                Founded
+                {sortField === 'founding_year' && (
+                  <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                )}
+              </Button>
             </div>
           </div>
-        </div>
 
-        {/* Companies Grid */}
-        <div className="container mx-auto px-4 py-12">
-          {vendors && vendors.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {vendors.map((vendor) => (
-                <Card key={vendor.id} className="group hover:shadow-lg transition-all duration-300 border hover:border-primary/20 h-full">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 flex-wrap mb-2">
-                          <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
-                            {vendor.company_name}
-                          </CardTitle>
-                          <Badge className={getCompanyTypeBadgeColor(vendor.company_type)}>
-                            {vendor.company_type}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          {vendor.headquarters && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {vendor.headquarters}
-                            </span>
-                          )}
-                          {vendor.founding_year && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              Founded {vendor.founding_year}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {vendor.website_url && (
-                        <a
-                          href={vendor.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-lg hover:bg-muted transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                    
-                    <CardDescription className="line-clamp-3 text-sm leading-relaxed mb-4">
-                      {vendor.description}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0 flex-1 flex flex-col">
-                    <div className="space-y-4 flex-1">
-                      {/* Company Overview Stats */}
-                      <div className="grid grid-cols-2 gap-4 text-xs bg-muted/30 p-3 rounded-lg">
-                        {vendor.employee_count_range && (
-                          <div>
-                            <span className="text-muted-foreground">Employees:</span>
-                            <p className="font-medium">{vendor.employee_count_range}</p>
-                          </div>
-                        )}
-                        {vendor.funding_stage && (
-                          <div>
-                            <span className="text-muted-foreground">Funding:</span>
-                            <p className="font-medium">{vendor.funding_stage}</p>
-                          </div>
-                        )}
-                        {vendor.total_funding && (
-                          <div>
-                            <span className="text-muted-foreground">Total Funding:</span>
-                            <p className="font-medium">{vendor.total_funding}</p>
-                          </div>
-                        )}
-                        {vendor.business_model && (
-                          <div>
-                            <span className="text-muted-foreground">Model:</span>
-                            <p className="font-medium">{vendor.business_model}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Core Services */}
-                      {vendor.core_services && vendor.core_services.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide flex items-center gap-1">
-                            <Target className="h-3 w-3" />
-                            Core Services
-                          </h4>
-                          <div className="flex flex-wrap gap-1">
-                            {vendor.core_services.slice(0, 3).map((service, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {service}
-                              </Badge>
-                            ))}
-                            {vendor.core_services.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{vendor.core_services.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Target Customers */}
-                      {vendor.customers && vendor.customers.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            Target Customers
-                          </h4>
-                          <div className="flex flex-wrap gap-1">
-                            {vendor.customers.slice(0, 2).map((customer, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {customer}
-                              </Badge>
-                            ))}
-                            {vendor.customers.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{vendor.customers.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* View Details Button */}
-                    <Link 
-                      to={`/vendors/rcm/${vendor.slug}`}
-                      className="block mt-6"
-                    >
-                      <Button 
-                        variant="outline" 
-                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                      >
-                        View Company Details
-                      </Button>
-                    </Link>
+          {/* Responsive Card Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {sortedCompanies.map(vendor => (
+              <EditableVendorCard 
+                key={vendor.id} 
+                vendor={vendor} 
+                onVendorClick={handleVendorClick}
+                canEdit={false} // Read-only for public view
+              />
+            ))}
+            
+            {sortedCompanies.length === 0 && (
+              <div className="col-span-full">
+                <Card>
+                  <CardContent className="text-center py-8 text-muted-foreground">
+                    No RCM companies found matching your filters.
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No RCM Companies Found</h3>
-              <p className="text-muted-foreground">
-                No published RCM companies are currently available. Check back later for updates.
-              </p>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </PageLayout>
   );
-};
-
-export default RCMCompanies;
+}
