@@ -96,7 +96,6 @@ const Navigation = () => {
           <nav className="flex flex-col gap-4">
             <NavLink href="/sec">SEC Data</NavLink>
             <NavLink href="/blog">Blog</NavLink>
-            <NavLink href="/ascertain-to-the-moon">To The Moon</NavLink>
           </nav>
         </SheetContent>
       </Sheet>
