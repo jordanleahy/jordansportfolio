@@ -782,14 +782,14 @@ export default function VendorDetail() {
                 {/* Admin-only Publish Button */}
                 {isAdmin && (
                   <Button
-                    variant={vendor.status === 'published' ? "outline" : "default"}
+                    variant={vendor.status === 'completed' ? "outline" : "default"}
                     size={isMobile ? "icon" : "default"}
                     onClick={() => togglePublishStatus(vendor.status || 'draft')}
                     disabled={isPublishing}
                     className="min-h-[44px]"
-                    aria-label={vendor.status === 'published' ? "Unpublish vendor" : "Publish vendor"}
+                    aria-label={vendor.status === 'completed' ? "Unpublish vendor" : "Publish vendor"}
                   >
-                    {vendor.status === 'published' ? (
+                    {vendor.status === 'completed' ? (
                       <>
                         <EyeOff className="h-4 w-4" />
                         {!isMobile && <span className="ml-2">Unpublish</span>}

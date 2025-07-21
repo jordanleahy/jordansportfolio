@@ -36,7 +36,7 @@ export default function PublicVendorView() {
     );
   }
 
-  if (error || !vendor || vendor.status !== 'published') {
+  if (error || !vendor || vendor.status !== 'completed') {
     return <Navigate to="/404" replace />;
   }
 
