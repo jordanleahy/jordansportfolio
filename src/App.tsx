@@ -118,6 +118,7 @@ function App() {
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
                 <Route path="/rcmcompanies" element={<RCMCompanies />} />
+                <Route path="/rcmcompanies/:slug" element={<PublicVendorView />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
