@@ -10,7 +10,6 @@ import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useIndustries } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
-
 interface FilterSidebarProps {
   filters: {
     industries: string[];
@@ -23,7 +22,6 @@ interface FilterSidebarProps {
   onFiltersChange: (filters: any) => void;
   onClose?: () => void;
 }
-
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filters,
   onFiltersChange,
@@ -68,7 +66,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     code: "TN",
     name: "Tennessee"
   }];
-
   const handleIndustryToggle = (industry: string) => {
     const updatedIndustries = filters.industries.includes(industry) ? filters.industries.filter(i => i !== industry) : [...filters.industries, industry];
     onFiltersChange({
@@ -76,11 +73,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       industries: updatedIndustries
     });
   };
-
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
   };
-
   const handleAmountRangeToggle = (range: string) => {
     const updatedRanges = filters.amountRanges?.includes(range) ? filters.amountRanges.filter(r => r !== range) : [...(filters.amountRanges || []), range];
     onFiltersChange({
@@ -88,7 +83,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       amountRanges: updatedRanges
     });
   };
-
   const handleMaxRaisedToggle = (range: string) => {
     const updatedRanges = filters.maxRaisedRanges?.includes(range) ? filters.maxRaisedRanges.filter(r => r !== range) : [...(filters.maxRaisedRanges || []), range];
     onFiltersChange({
@@ -96,7 +90,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       maxRaisedRanges: updatedRanges
     });
   };
-
   const handleStateToggle = (stateCode: string) => {
     const updatedStates = filters.states?.includes(stateCode) ? filters.states.filter(s => s !== stateCode) : [...(filters.states || []), stateCode];
     onFiltersChange({
@@ -104,7 +97,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       states: updatedStates
     });
   };
-
   const resetFilters = () => {
     const resetFilters = {
       industries: ['Other Technology'],
@@ -118,9 +110,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     setSearchQuery("");
     onFiltersChange(resetFilters);
   };
-
   const hasActiveFilters = filters.industries.length > 0 || searchQuery.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
-
   return (
     <div className="h-full relative z-10 bg-background">
       {/* Header */}
@@ -139,141 +129,159 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Content */}
-      <div className="overflow-y-auto p-4 space-y-4">
+      <div className="overflow-y-auto p-4 space-y-6">
         {/* Search */}
-        <Label className="text-sm font-medium">Search</Label>
-        <Input 
-          placeholder="Search companies, industries..." 
-          value={searchQuery} 
-          onChange={e => handleSearchChange(e.target.value)} 
-        />
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Search</Label>
+          <Input 
+            placeholder="Search companies, industries..." 
+            value={searchQuery} 
+            onChange={e => handleSearchChange(e.target.value)} 
+          />
+        </div>
 
         {/* Technology Industry */}
-        <Label className="text-sm font-medium">Technology Industry</Label>
-        {techIndustries.map(industry => (
-          <div key={industry} className="flex items-center space-x-2">
-            <Checkbox 
-              id={industry} 
-              checked={filters.industries.includes(industry)} 
-              onCheckedChange={() => handleIndustryToggle(industry)} 
-            />
-            <Label htmlFor={industry} className="text-sm cursor-pointer flex-1">
-              {industry}
-            </Label>
-          </div>
-        ))}
-        
-        {filters.industries.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {filters.industries.map(industry => (
-              <Badge 
-                key={industry} 
-                variant="secondary" 
-                className="text-xs cursor-pointer" 
-                onClick={() => handleIndustryToggle(industry)}
-              >
-                {industry}
-                <X className="ml-1 h-3 w-3" />
-              </Badge>
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Technology Industry</Label>
+          <div className="space-y-2">
+            {techIndustries.map(industry => (
+              <div key={industry} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={industry} 
+                  checked={filters.industries.includes(industry)} 
+                  onCheckedChange={() => handleIndustryToggle(industry)} 
+                />
+                <Label htmlFor={industry} className="text-sm cursor-pointer flex-1">
+                  {industry}
+                </Label>
+              </div>
             ))}
           </div>
-        )}
-
-        {/* Amount Raised */}
-        <Label className="text-sm font-medium">Amount Raised</Label>
-        {amountRanges.map(range => (
-          <div key={range} className="flex items-center space-x-2">
-            <Checkbox 
-              id={range} 
-              checked={filters.amountRanges?.includes(range) || false} 
-              onCheckedChange={() => handleAmountRangeToggle(range)} 
-            />
-            <Label htmlFor={range} className="text-sm cursor-pointer flex-1">
-              {range}
-            </Label>
-          </div>
-        ))}
-        
-        {(filters.amountRanges?.length || 0) > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {filters.amountRanges?.map(range => (
-              <Badge 
-                key={range} 
-                variant="secondary" 
-                className="text-xs cursor-pointer" 
-                onClick={() => handleAmountRangeToggle(range)}
-              >
-                {range}
-                <X className="ml-1 h-3 w-3" />
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* Amount Sold */}
-        <Label className="text-sm font-medium">Amount Sold</Label>
-        {maxRaisedRanges.map(range => (
-          <div key={range} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`max-${range}`} 
-              checked={filters.maxRaisedRanges?.includes(range) || false} 
-              onCheckedChange={() => handleMaxRaisedToggle(range)} 
-            />
-            <Label htmlFor={`max-${range}`} className="text-sm cursor-pointer flex-1">
-              {range}
-            </Label>
-          </div>
-        ))}
-        
-        {(filters.maxRaisedRanges?.length || 0) > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {filters.maxRaisedRanges?.map(range => (
-              <Badge 
-                key={range} 
-                variant="secondary" 
-                className="text-xs cursor-pointer" 
-                onClick={() => handleMaxRaisedToggle(range)}
-              >
-                {range}
-                <X className="ml-1 h-3 w-3" />
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* State */}
-        <Label className="text-sm font-medium">State</Label>
-        {states.map(state => (
-          <div key={state.code} className="flex items-center space-x-2">
-            <Checkbox 
-              id={state.code} 
-              checked={filters.states?.includes(state.code) || false} 
-              onCheckedChange={() => handleStateToggle(state.code)} 
-            />
-            <Label htmlFor={state.code} className="text-sm cursor-pointer flex-1">
-              {state.name} ({state.code})
-            </Label>
-          </div>
-        ))}
-        
-        {(filters.states?.length || 0) > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {filters.states?.map(stateCode => {
-              const state = states.find(s => s.code === stateCode);
-              return (
+          
+          {filters.industries.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {filters.industries.map(industry => (
                 <Badge 
-                  key={stateCode} 
+                  key={industry} 
                   variant="secondary" 
                   className="text-xs cursor-pointer" 
-                  onClick={() => handleStateToggle(stateCode)}
+                  onClick={() => handleIndustryToggle(industry)}
                 >
-                  {state?.name || stateCode}
+                  {industry}
                   <X className="ml-1 h-3 w-3" />
                 </Badge>
-              );
-            })}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Amount Raised */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Amount Raised</Label>
+          <div className="space-y-2">
+            {amountRanges.map(range => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={range} 
+                  checked={filters.amountRanges?.includes(range) || false} 
+                  onCheckedChange={() => handleAmountRangeToggle(range)} 
+                />
+                <Label htmlFor={range} className="text-sm cursor-pointer flex-1">
+                  {range}
+                </Label>
+              </div>
+            ))}
           </div>
-        )}
+          
+          {(filters.amountRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {filters.amountRanges?.map(range => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer" 
+                  onClick={() => handleAmountRangeToggle(range)}
+                >
+                  {range}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Amount Sold */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Amount Sold</Label>
+          <div className="space-y-2">
+            {maxRaisedRanges.map(range => (
+              <div key={range} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`max-${range}`} 
+                  checked={filters.maxRaisedRanges?.includes(range) || false} 
+                  onCheckedChange={() => handleMaxRaisedToggle(range)} 
+                />
+                <Label htmlFor={`max-${range}`} className="text-sm cursor-pointer flex-1">
+                  {range}
+                </Label>
+              </div>
+            ))}
+          </div>
+          
+          {(filters.maxRaisedRanges?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {filters.maxRaisedRanges?.map(range => (
+                <Badge 
+                  key={range} 
+                  variant="secondary" 
+                  className="text-xs cursor-pointer" 
+                  onClick={() => handleMaxRaisedToggle(range)}
+                >
+                  {range}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* State */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">State</Label>
+          <div className="space-y-2">
+            {states.map(state => (
+              <div key={state.code} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={state.code} 
+                  checked={filters.states?.includes(state.code) || false} 
+                  onCheckedChange={() => handleStateToggle(state.code)} 
+                />
+                <Label htmlFor={state.code} className="text-sm cursor-pointer flex-1">
+                  {state.name} ({state.code})
+                </Label>
+              </div>
+            ))}
+          </div>
+          
+          {(filters.states?.length || 0) > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {filters.states?.map(stateCode => {
+                const state = states.find(s => s.code === stateCode);
+                return (
+                  <Badge 
+                    key={stateCode} 
+                    variant="secondary" 
+                    className="text-xs cursor-pointer" 
+                    onClick={() => handleStateToggle(stateCode)}
+                  >
+                    {state?.name || stateCode}
+                    <X className="ml-1 h-3 w-3" />
+                  </Badge>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {hasActiveFilters && (
           <p className="text-xs text-muted-foreground text-center">
@@ -282,15 +290,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         )}
         
         {/* Data Dictionary Button */}
-        <Button asChild variant="outline" size="sm" className="w-full">
-          <Link to="/sec/data-dictionary" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Data Dictionary
-          </Link>
-        </Button>
-        <p className="text-xs text-muted-foreground text-center">
-          Learn about all available data fields and filtering options
-        </p>
+        <div className="space-y-2">
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link to="/sec/data-dictionary" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Data Dictionary
+            </Link>
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            Learn about all available data fields and filtering options
+          </p>
+        </div>
       </div>
     </div>
   );
