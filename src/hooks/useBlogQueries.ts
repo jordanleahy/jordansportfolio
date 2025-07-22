@@ -36,20 +36,29 @@ const isUUID = (value: string): boolean => {
 export const useBlogPost = (identifier: string | undefined, includeUnpublished = false) => {
   return useQuery({
     queryKey: blogKeys.detail(identifier || ''),
-    queryFn: () => {
+    queryFn: async () => {
       if (!identifier) return null;
+      
+      console.log('useBlogPost - Fetching post with identifier:', identifier, 'includeUnpublished:', includeUnpublished);
       
       // If it's a UUID, fetch by ID (for editor), otherwise by slug (for public)
       if (isUUID(identifier)) {
-        return BlogService.getPostById(identifier);
+        console.log('useBlogPost - Fetching by ID');
+        const result = await BlogService.getPostById(identifier);
+        console.log('useBlogPost - Result by ID:', result);
+        return result;
       } else {
-        return BlogService.getPostBySlug(identifier, includeUnpublished);
+        console.log('useBlogPost - Fetching by slug');
+        const result = await BlogService.getPostBySlug(identifier, includeUnpublished);
+        console.log('useBlogPost - Result by slug:', result);
+        return result;
       }
     },
     enabled: !!identifier,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: (failureCount, error) => {
+      console.log('useBlogPost - Retry attempt:', failureCount, 'Error:', error);
       // Don't retry for 404s
       if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
         return false;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,8 +13,6 @@ import { Save, Eye, Trash2, Send, Plus } from "lucide-react";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
-// import { useAutoSave } from "@/hooks/useAutoSave";
-// import { AutoSaveStatus } from "@/components/blog/AutoSaveStatus";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
@@ -24,11 +23,17 @@ const BlogEditor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // TanStack Query hooks
-  const { data: existingPost, isLoading: loading } = useBlogPost(id);
+  console.log('BlogEditor - Route param id:', id);
+  
+  // TanStack Query hooks - fetch by ID if it exists, and allow unpublished posts
+  const { data: existingPost, isLoading: loading, error } = useBlogPost(id, true);
   const createPostMutation = useCreateBlogPost();
   const updatePostMutation = useUpdateBlogPost();
   const deletePostMutation = useDeleteBlogPost();
+
+  console.log('BlogEditor - Existing post data:', existingPost);
+  console.log('BlogEditor - Loading state:', loading);
+  console.log('BlogEditor - Error:', error);
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
@@ -73,31 +78,40 @@ const BlogEditor = () => {
   // Initialize form data when existing post loads
   useEffect(() => {
     if (existingPost) {
-      setFormData({
-        hero_headline: existingPost.hero_headline,
-        hero_subhead: existingPost.hero_subhead,
+      console.log('BlogEditor - Populating form with existing post:', existingPost);
+      
+      const populatedData = {
+        hero_headline: existingPost.hero_headline || "",
+        hero_subhead: existingPost.hero_subhead || "",
         hero_image_url: existingPost.hero_image_url || "",
         hero_video_url: existingPost.hero_video_url || "",
         hero_badge: existingPost.hero_badge || "",
-        intro_content: existingPost.intro_content,
-        visual_sections: existingPost.visual_sections as VisualSectionInput[],
-        tldr_title: existingPost.tldr_title,
-        tldr_bullets: existingPost.tldr_bullets as string[],
+        intro_content: existingPost.intro_content || "",
+        visual_sections: (existingPost.visual_sections as VisualSectionInput[]) || [
+          { headline: "", content: "", image_url: "", cta_text: "", cta_url: "" },
+          { headline: "", content: "", image_url: "", cta_text: "", cta_url: "" },
+          { headline: "", content: "", image_url: "", cta_text: "", cta_url: "" }
+        ],
+        tldr_title: existingPost.tldr_title || "TL;DR",
+        tldr_bullets: (existingPost.tldr_bullets as string[]) || ["", "", ""],
         deep_dive_title: existingPost.deep_dive_title || "",
         deep_dive_content: existingPost.deep_dive_content || "",
-        cta_text: existingPost.cta_text,
+        cta_text: existingPost.cta_text || "",
         cta_url: existingPost.cta_url || "",
-        meta_title: existingPost.meta_title,
-        meta_description: existingPost.meta_description,
+        meta_title: existingPost.meta_title || "",
+        meta_description: existingPost.meta_description || "",
         meta_keywords: (existingPost.meta_keywords as string[]) || [],
         og_image_url: existingPost.og_image_url || "",
-        category: existingPost.category,
+        category: existingPost.category || "",
         tags: (existingPost.tags as string[]) || [],
-        featured: existingPost.featured,
-        share_enabled: existingPost.share_enabled,
-        status: existingPost.status as "draft" | "published" | "archived"
-      });
-      setSlug(existingPost.slug);
+        featured: existingPost.featured || false,
+        share_enabled: existingPost.share_enabled !== false,
+        status: (existingPost.status as "draft" | "published" | "archived") || "draft"
+      };
+      
+      console.log('BlogEditor - Setting form data:', populatedData);
+      setFormData(populatedData);
+      setSlug(existingPost.slug || "");
     }
   }, [existingPost]);
 
@@ -269,6 +283,20 @@ const BlogEditor = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading blog post...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('BlogEditor - Error loading post:', error);
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive">Error loading blog post</p>
+          <Button onClick={() => navigate('/admin-blog')} className="mt-4">
+            Back to Blog Admin
+          </Button>
         </div>
       </div>
     );
