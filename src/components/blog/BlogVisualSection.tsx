@@ -30,7 +30,7 @@ export const BlogVisualSection = ({
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">
-              <div className="h-full min-h-[400px] bg-muted relative overflow-hidden">
+              <div className="h-full bg-muted relative overflow-hidden">
                 <img
                   src={imageUrl}
                   alt={headline}
