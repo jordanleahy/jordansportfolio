@@ -766,12 +766,14 @@ export default function VendorDetail() {
                       href={vendor.website_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors cursor-pointer"
+                      className="hover:text-primary transition-colors cursor-pointer hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4"
                     >
                       {vendor.company_name}
                     </a>
                   ) : (
-                    vendor.company_name
+                    <span className="hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4 transition-all duration-200 cursor-default">
+                      {vendor.company_name}
+                    </span>
                   )}
                 </h1>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
