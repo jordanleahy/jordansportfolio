@@ -39,6 +39,7 @@ export const useCreateVendorJob = () => {
   return useMutation({
     mutationFn: async (jobData: {
       vendor_id: string;
+      job_title: string;
       job_url: string;
       job_description: string;
     }) => {
@@ -83,16 +84,18 @@ export const useUpdateVendorJob = () => {
   return useMutation({
     mutationFn: async ({
       id,
+      job_title,
       job_url,
       job_description,
     }: {
       id: string;
+      job_title: string;
       job_url: string;
       job_description: string;
     }) => {
       const { data, error } = await supabase
         .from("vendor_jobs")
-        .update({ job_url, job_description })
+        .update({ job_title, job_url, job_description })
         .eq("id", id)
         .select()
         .single();

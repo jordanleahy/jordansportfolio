@@ -302,6 +302,19 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
           {(isAddingJob || editingJobId) && (
             <div className="p-4 border rounded-lg bg-muted/50 space-y-4">
               <div className="space-y-2">
+                <label className="text-sm font-medium">Job Title</label>
+                <Input
+                  placeholder="e.g., Product Lead Engineer"
+                  value={formData.job_title}
+                  onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+                  className={errors.job_title ? "border-destructive" : ""}
+                />
+                {errors.job_title && (
+                  <p className="text-sm text-destructive">{errors.job_title}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Job URL</label>
                 <Input
                   placeholder="https://company.com/careers/job-posting"
@@ -454,6 +467,9 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                   {/* Job content */}
                   <div className="p-4 pt-0">
                     <div className="space-y-2">
+                      {job.job_title && (
+                        <h4 className="font-medium text-foreground">{job.job_title}</h4>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {job.job_description}
                       </p>
