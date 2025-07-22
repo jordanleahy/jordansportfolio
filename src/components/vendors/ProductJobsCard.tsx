@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -389,7 +390,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                           rel="noopener noreferrer"
                           className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
                         >
-                          View Job Posting
+                          View {job.job_title || "Job Posting"}
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       </div>
