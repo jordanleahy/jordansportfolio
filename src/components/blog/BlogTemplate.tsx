@@ -25,6 +25,14 @@ export const BlogTemplate = ({
 }: BlogTemplateProps) => {
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
 
+  // Use production domain for OG metadata
+  const baseUrl = "https://www.jordanleahy.com";
+  const postUrl = `${baseUrl}/blog/${post.slug}`;
+  
+  // Determine the best OG image with fallback logic
+  const ogImageUrl = post.og_image_url || post.hero_image_16_9_url || post.hero_image_url;
+  const fullOgImageUrl = ogImageUrl ? (ogImageUrl.startsWith('http') ? ogImageUrl : `${baseUrl}${ogImageUrl}`) : undefined;
+
   // Fetch next blog post
   useEffect(() => {
     const fetchNextPost = async () => {
@@ -58,22 +66,31 @@ export const BlogTemplate = ({
         {/* Open Graph */}
         <meta property="og:title" content={post.meta_title} />
         <meta property="og:description" content={post.meta_description} />
-        <meta property="og:image" content={post.og_image_url || post.hero_image_url} />
-        <meta property="og:url" content={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
+        {fullOgImageUrl && <meta property="og:image" content={fullOgImageUrl} />}
+        <meta property="og:url" content={postUrl} />
         <meta property="og:type" content="article" />
-        <link rel="canonical" href={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
+        <meta property="og:site_name" content="Jordan Leigh Portfolio" />
+        <link rel="canonical" href={postUrl} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.meta_title} />
         <meta name="twitter:description" content={post.meta_description} />
-        <meta name="twitter:image" content={post.og_image_url || post.hero_image_url} />
+        {fullOgImageUrl && <meta name="twitter:image" content={fullOgImageUrl} />}
+        <meta name="twitter:site" content="@jordanleahy" />
         
         {/* Article metadata */}
         <meta property="article:published_time" content={post.published_at} />
+        <meta property="article:modified_time" content={post.updated_at} />
         <meta property="article:author" content="Jordan Leigh" />
         <meta property="article:section" content={post.category} />
         {(post.tags as unknown as string[])?.map(tag => <meta key={tag} property="article:tag" content={tag} />)}
+        
+        {/* Additional SEO improvements */}
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Jordan Leigh" />
+        {post.read_time && <meta name="twitter:label1" content="Reading time" />}
+        {post.read_time && <meta name="twitter:data1" content={`${post.read_time} min read`} />}
       </Helmet>
 
       {/* Header */}
@@ -136,7 +153,7 @@ export const BlogTemplate = ({
             ctaUrl={post.cta_url} 
             shareEnabled={post.share_enabled} 
             title={post.meta_title} 
-            url={window.location.href} 
+            url={postUrl} 
           />
         </section>
 
@@ -153,21 +170,32 @@ export const BlogTemplate = ({
           "@type": "Article",
           "headline": post.meta_title,
           "description": post.meta_description,
-          "image": post.hero_image_url,
+          "image": fullOgImageUrl,
+          "url": postUrl,
           "author": {
             "@type": "Person",
-            "name": "Jordan Leigh"
+            "name": "Jordan Leigh",
+            "url": baseUrl
           },
           "publisher": {
             "@type": "Organization",
-            "name": "Jordan Leigh Portfolio"
+            "name": "Jordan Leigh Portfolio",
+            "url": baseUrl,
+            "logo": {
+              "@type": "ImageObject",
+              "url": `${baseUrl}/logo.png`
+            }
           },
           "datePublished": post.published_at,
           "dateModified": post.updated_at,
           "wordCount": post.word_count,
           "timeRequired": `PT${post.read_time}M`,
           "articleSection": post.category,
-          "keywords": (post.meta_keywords as unknown as string[])?.join(', ')
+          "keywords": (post.meta_keywords as unknown as string[])?.join(', '),
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": postUrl
+          }
         })
       }} />
     </div>
