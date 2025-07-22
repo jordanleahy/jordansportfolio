@@ -19,7 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    const { jobDescription, companyName, jobDescriptionLink, userId } = await req.json();
+    const { jobDescription, companyName, jobDescriptionLink, userId, companyInfo } = await req.json();
     
     if (!jobDescription || !companyName || !userId) {
       throw new Error('Job description, company name, and user ID are required');
@@ -127,6 +127,21 @@ About Jordan Leahy:
       });
     }
 
+    // Add target company information if provided
+    if (companyInfo) {
+      personalizedProfile += `\nTarget Company Research:\n`;
+      personalizedProfile += `- ${companyName}: ${companyInfo.description}\n`;
+      if (companyInfo.services && companyInfo.services.length > 0) {
+        personalizedProfile += `  Services: ${companyInfo.services.join(', ')}\n`;
+      }
+      if (companyInfo.specialties && companyInfo.specialties.length > 0) {
+        personalizedProfile += `  Specialties: ${companyInfo.specialties.join(', ')}\n`;
+      }
+      if (companyInfo.website) {
+        personalizedProfile += `  Website: ${companyInfo.website}\n`;
+      }
+    }
+
     // Add thought leadership
     if (blogPosts && blogPosts.length > 0) {
       personalizedProfile += `\nThought Leadership:\n`;
@@ -166,7 +181,7 @@ Return ONLY the cover letter text, no JSON formatting or additional structure.
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'o3-2025-04-16',
         messages: [
           { 
             role: 'system', 

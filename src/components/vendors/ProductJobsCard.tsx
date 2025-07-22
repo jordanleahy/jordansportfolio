@@ -26,9 +26,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useVendorJobs, useCreateVendorJob, useUpdateVendorJob, useDeleteVendorJob, type VendorJob } from "@/hooks/useVendorJobs";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useVendorBySlug } from "@/hooks/useVendors";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface ProductJobsCardProps {
   vendorId: string;
+  vendorSlug?: string;
 }
 
 interface JobFormData {
@@ -45,9 +50,12 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
-export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId }) => {
+export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vendorSlug }) => {
   const { isAdmin } = useUserRole();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const { data: jobs = [], isLoading } = useVendorJobs(vendorId);
+  const { data: vendor } = useVendorBySlug(vendorSlug || '');
   const createJobMutation = useCreateVendorJob();
   const updateJobMutation = useUpdateVendorJob();
   const deleteJobMutation = useDeleteVendorJob();
@@ -130,6 +138,106 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId }) =>
       await deleteJobMutation.mutateAsync(jobId);
     } catch (error) {
       // Error handling is done in the mutation hook
+    }
+  };
+
+  const handleCreateCoverLetter = async (job: VendorJob) => {
+    if (!vendor) {
+      toast({
+        title: "Error",
+        description: "Company information not available",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "Generating Cover Letter",
+        description: "Creating personalized cover letter...",
+      });
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to generate cover letters",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create job application
+      const { data: jobApp, error: jobError } = await supabase
+        .from('job_applications')
+        .insert({
+          company_name: vendor.company_name,
+          job_description: job.job_description,
+          job_description_link: job.job_url,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (jobError) throw jobError;
+
+      // Generate company slug
+      const companySlug = vendor.company_name.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+
+      // Call the enhanced edge function
+      const { data, error } = await supabase.functions.invoke("generate-portfolio-content", {
+        body: { 
+          jobDescription: job.job_description,
+          companyName: vendor.company_name,
+          jobDescriptionLink: job.job_url,
+          userId: user.id,
+          companyInfo: {
+            description: vendor.description,
+            services: vendor.core_services,
+            specialties: vendor.specialties,
+            website: vendor.website_url
+          }
+        },
+      });
+
+      if (error) throw error;
+
+      // Create portfolio record
+      const { error: portfolioError } = await supabase
+        .from("company_portfolios")
+        .upsert({
+          job_application_id: jobApp.id,
+          company_name: vendor.company_name,
+          company_slug: companySlug,
+          generated_content: { cover_letter: data.cover_letter },
+          cover_letter: data.cover_letter,
+          status: 'completed',
+          user_id: user.id
+        }, {
+          onConflict: 'user_id,company_slug'
+        });
+
+      if (portfolioError) throw portfolioError;
+
+      toast({
+        title: "Success!",
+        description: "Cover letter generated successfully",
+      });
+
+      // Navigate to the portfolio page
+      navigate(`/company-portfolio/${companySlug}`);
+
+    } catch (error: any) {
+      console.error('Error generating cover letter:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate cover letter",
+        variant: "destructive"
+      });
     }
   };
 
@@ -247,6 +355,15 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId }) =>
                   </div>
                   
                   <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleCreateCoverLetter(job)}
+                      className="text-xs"
+                    >
+                      Create Cover Page
+                    </Button>
+                    
                     <Button
                       size="sm"
                       variant="ghost"
