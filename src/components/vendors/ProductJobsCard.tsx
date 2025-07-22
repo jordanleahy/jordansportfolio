@@ -331,76 +331,82 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="p-3 border rounded-lg bg-card space-y-2"
+                className="border rounded-lg bg-card space-y-4"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 space-y-1">
+                {/* Header with buttons */}
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <a
                         href={job.job_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                        className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
                       >
                         View Job Posting
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleCreateCoverLetter(job)}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        Create Cover Page
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditing(job)}
+                        disabled={editingJobId === job.id}
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this job posting? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(job.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job content */}
+                <div className="p-4 pt-0">
+                  <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">
                       {job.job_description}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Added {new Date(job.created_at).toLocaleDateString()}
                     </p>
-                  </div>
-                  
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleCreateCoverLetter(job)}
-                      className="text-xs"
-                    >
-                      Create Cover Page
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => startEditing(job)}
-                      disabled={editingJobId === job.id}
-                    >
-                      <Edit3 className="h-3 w-3" />
-                    </Button>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this job posting? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(job.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
                 </div>
               </div>
