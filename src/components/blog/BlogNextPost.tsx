@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
@@ -13,7 +14,7 @@ interface BlogNextPostProps {
 export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) => {
   if (!nextPost) {
     return (
-      <section className={`py-16 px-4 ${className}`}>
+      <div className={`py-16 px-4 ${className}`}>
         <div className="max-w-4xl mx-auto">
           <Card className="p-8 text-center bg-gradient-to-br from-muted/50 to-background border-muted">
             <h2 className="text-2xl font-bold mb-4 text-muted-foreground">
@@ -24,7 +25,7 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
             </p>
           </Card>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -34,7 +35,7 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
     : nextPost.intro_content;
 
   return (
-    <section className={`py-16 px-4 bg-gradient-to-br from-background to-muted/20 ${className}`}>
+    <div className={`py-16 px-4 bg-gradient-to-br from-background to-muted/20 ${className}`}>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
@@ -115,6 +116,6 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
           </Card>
         </div>
       </div>
-    </section>
+    </div>
   );
 };

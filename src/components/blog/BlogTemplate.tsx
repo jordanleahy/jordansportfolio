@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BlogPost } from "@/types/blog";
 import { BlogHero } from "./BlogHero";
@@ -80,10 +81,10 @@ export const BlogTemplate = ({
         
       </header>
 
-      {/* Blog Content - Enforced Structure */}
-      <article className="relative">
+      {/* Blog Content - Enforced Structure with Consistent Spacing */}
+      <article className="relative space-y-16">
         {/* 1. Hero Section (Above-the-Fold) */}
-        <div>
+        <section>
           <BlogHero 
             headline={post.hero_headline} 
             subhead={post.hero_subhead} 
@@ -94,45 +95,55 @@ export const BlogTemplate = ({
             readTime={post.read_time} 
             onCTAClick={handleHeroClick} 
           />
-        </div>
+        </section>
 
         {/* 2. Intro Paragraph (50–75 words) */}
-        <div id="blog-intro">
+        <section id="blog-intro">
           <BlogIntro content={post.intro_content} />
-        </div>
+        </section>
 
-        {/* 3. Exactly 3 Scrollable Visual-First Sections - Simplified container */}
-        {(post.visual_sections as unknown as import("@/types/blog").VisualSection[]).map((section, index) => (
-          <BlogVisualSection 
-            key={index} 
-            headline={section.headline} 
-            content={section.content} 
-            imageUrl={section.image_url} 
-            ctaText={section.cta_text} 
-            ctaUrl={section.cta_url} 
-            index={index} 
-          />
-        ))}
+        {/* 3. Visual-First Sections - With spacing between each */}
+        <section className="space-y-12">
+          {(post.visual_sections as unknown as import("@/types/blog").VisualSection[]).map((section, index) => (
+            <BlogVisualSection 
+              key={index} 
+              headline={section.headline} 
+              content={section.content} 
+              imageUrl={section.image_url} 
+              ctaText={section.cta_text} 
+              ctaUrl={section.cta_url} 
+              index={index} 
+            />
+          ))}
+        </section>
 
         {/* 4. Quick Summary (TL;DR Style) */}
-        <BlogTLDR title={post.tldr_title} bullets={post.tldr_bullets as unknown as string[]} />
+        <section>
+          <BlogTLDR title={post.tldr_title} bullets={post.tldr_bullets as unknown as string[]} />
+        </section>
 
         {/* 5. Optional Deep Dive (Max 250 words) */}
         {post.deep_dive_content && (
-          <BlogDeepDive title={post.deep_dive_title} content={post.deep_dive_content} />
+          <section>
+            <BlogDeepDive title={post.deep_dive_title} content={post.deep_dive_content} />
+          </section>
         )}
 
         {/* 6. CTA & Share Section */}
-        <BlogCTAShare 
-          ctaText={post.cta_text} 
-          ctaUrl={post.cta_url} 
-          shareEnabled={post.share_enabled} 
-          title={post.meta_title} 
-          url={window.location.href} 
-        />
+        <section>
+          <BlogCTAShare 
+            ctaText={post.cta_text} 
+            ctaUrl={post.cta_url} 
+            shareEnabled={post.share_enabled} 
+            title={post.meta_title} 
+            url={window.location.href} 
+          />
+        </section>
 
         {/* 7. Next Blog Post Preview */}
-        <BlogNextPost nextPost={nextPost} />
+        <section>
+          <BlogNextPost nextPost={nextPost} />
+        </section>
       </article>
 
       {/* Article Schema.org JSON-LD */}

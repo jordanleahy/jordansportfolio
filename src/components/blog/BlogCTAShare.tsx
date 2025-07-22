@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Share2, Copy, MessageSquare } from "lucide-react";
@@ -48,7 +49,7 @@ export const BlogCTAShare = ({
   };
 
   return (
-    <section className={`py-16 px-4 ${className}`}>
+    <div className={`py-16 px-4 ${className}`}>
       <div className="max-w-4xl mx-auto">
         <Card className="p-8 md:p-12 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 border-green-200 dark:border-green-800">
           <div className="text-center">
@@ -125,6 +126,6 @@ export const BlogCTAShare = ({
           </div>
         </Card>
       </div>
-    </section>
+    </div>
   );
 };

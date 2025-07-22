@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -16,7 +17,7 @@ export const BlogDeepDive = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section className={`py-8 px-4 ${className}`}>
+    <div className={`py-16 px-4 ${className}`}>
       <div className="max-w-4xl mx-auto">
         <Card className="overflow-hidden border-dashed border-2 border-muted hover:border-primary/30 transition-colors">
           <button
@@ -57,6 +58,6 @@ export const BlogDeepDive = ({
           </div>
         </Card>
       </div>
-    </section>
+    </div>
   );
 };

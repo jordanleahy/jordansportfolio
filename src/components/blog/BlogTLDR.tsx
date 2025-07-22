@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 
 interface BlogTLDRProps {
@@ -12,7 +13,7 @@ export const BlogTLDR = ({
   className = "" 
 }: BlogTLDRProps) => {
   return (
-    <section className={`py-16 px-4 ${className}`}>
+    <div className={`py-16 px-4 ${className}`}>
       <div className="max-w-4xl mx-auto">
         <Card className="p-8 md:p-12 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
           <div className="text-center mb-8">
@@ -42,6 +43,6 @@ export const BlogTLDR = ({
           </div>
         </Card>
       </div>
-    </section>
+    </div>
   );
 };

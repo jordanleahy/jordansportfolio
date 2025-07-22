@@ -23,7 +23,7 @@ export const BlogVisualSection = ({
   const isEven = index % 2 === 0;
 
   return (
-    <section className={`px-4 ${className}`}>
+    <div className={`py-12 px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
         {/* Apply Card styles directly to eliminate component overhead */}
         <div className="rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden">
@@ -69,6 +69,6 @@ export const BlogVisualSection = ({
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
