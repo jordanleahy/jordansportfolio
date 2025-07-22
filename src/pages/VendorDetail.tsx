@@ -761,7 +761,18 @@ export default function VendorDetail() {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="space-y-3">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
-                  {vendor.company_name}
+                  {vendor.website_url ? (
+                    <a 
+                      href={vendor.website_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors cursor-pointer"
+                    >
+                      {vendor.company_name}
+                    </a>
+                  ) : (
+                    vendor.company_name
+                  )}
                 </h1>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
                   <div className="flex items-center gap-1">
