@@ -1,5 +1,4 @@
 
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -25,24 +24,12 @@ export const BlogVisualSection = ({
   const isEven = index % 2 === 0;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={`px-4 ${className}`}
-    >
+    <section className={`px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
         <Card className="overflow-hidden border-0 shadow-lg">
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="md:w-1/2"
-            >
+            <div className="md:w-1/2">
               <div className="h-full min-h-[400px] bg-muted relative overflow-hidden">
                 <img
                   src={imageUrl}
@@ -51,40 +38,23 @@ export const BlogVisualSection = ({
                   loading="lazy"
                 />
               </div>
-            </motion.div>
+            </div>
 
             {/* Content Side */}
             <div className="md:w-1/2 px-8 pb-8 pt-0 md:p-12 flex flex-col justify-center">
-              <motion.h2
-                initial={{ opacity: 0, x: isEven ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-3xl md:text-4xl font-bold mb-6 leading-tight"
-              >
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
                 {headline}
-              </motion.h2>
+              </h2>
 
-              <motion.div
-                initial={{ opacity: 0, x: isEven ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="prose prose-lg max-w-none mb-8"
-              >
+              <div className="prose prose-lg max-w-none mb-8">
                 <p className="text-lg leading-relaxed text-foreground/90">
                   {content}
                 </p>
-              </motion.div>
+              </div>
 
               {/* Optional CTA */}
               {ctaText && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                >
+                <div>
                   <Button 
                     variant="outline" 
                     size="lg"
@@ -93,12 +63,12 @@ export const BlogVisualSection = ({
                   >
                     {ctaText}
                   </Button>
-                </motion.div>
+                </div>
               )}
             </div>
           </div>
         </Card>
       </div>
-    </motion.section>
+    </section>
   );
 };
