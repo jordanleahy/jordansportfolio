@@ -77,65 +77,56 @@ Focus on skills and potential rather than fabricated project details.
 `;
     }
 
-    // Create enhanced cover letter generation prompt with structured output
-    const coverLetterPrompt = `
-You are an expert career consultant who writes compelling, SCANNABLE cover letters optimized for 15-second reviews. Create a structured cover letter for Jordan Leahy applying to ${companyName}.
+    // Build OpenAI messages with function calling
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are an expert career consultant who writes highly targeted, SCANNABLE cover letters. Always respond with VALID JSON or N/A—never invent metrics or projects.'
+      },
+      { role: 'system', content: caseStudyContext.trim() },
+      {
+        role: 'user',
+        content: `Create a structured cover letter for Jordan Leahy applying to ${companyName}. Use only information from the REAL PROJECT PORTFOLIO above. If a requirement has no match, use "N/A". Output only JSON matching the schema.
 
 COMPANY: ${companyName}
 JOB DESCRIPTION: ${jobDescription}
 ${jobDescriptionLink ? `JOB POSTING URL: ${jobDescriptionLink}` : ''}
 
-${caseStudyContext}
+CRITICAL: Only reference actual case studies listed above. Do not fabricate any information.`
+      }
+    ];
 
-CRITICAL INSTRUCTIONS - ACCURACY IS PARAMOUNT:
-1. ONLY use information from the REAL PROJECT PORTFOLIO above
-2. Do NOT fabricate metrics, achievements, or project details
-3. Match job requirements to ACTUAL project experience listed
-4. If no relevant projects exist, focus on potential and general skills
-5. Analyze the job description to identify key requirements and match them to real projects
-
-FORMATTING REQUIREMENTS FOR SCANNABILITY:
-- Structure as 4 distinct, visually scannable sections
-- Use bullet points, bold text, and specific project names
-- Keep sentences under 20 words each
-- Reference actual project titles and real technologies used
-- Make it scannable in under 15 seconds
-
-MATCHING PROCESS:
-1. Extract 3-5 key requirements from the job description
-2. Match each requirement to specific projects from the portfolio
-3. Use actual project outcomes, not invented metrics
-4. If no direct match exists, explain transferable skills
-
-Return ONLY a JSON object with this EXACT structure:
-{
-  "opening_hook": "One powerful sentence connecting a specific real project to [Company] needs from job description",
-  "key_achievements": [
-    "• **[Case Study Project Name]**: Brief description of actual project outcome from portfolio above",
-    "• **[Case Study Project Name]**: Another specific project result from portfolio above", 
-    "• **[Case Study Project Name]**: Third concrete project achievement from portfolio above"
-  ],
-  "strategic_fit": [
-    "Specific connection between [Real Project] and [Company] need from job description",
-    "Another concrete match between actual experience and stated requirements"
-  ],
-  "call_to_action": "Confident, specific next step that references the role or company challenge"
-}
-
-CRITICAL FOR KEY ACHIEVEMENTS:
-- ONLY use actual case study project names from the REAL PROJECT PORTFOLIO section above
-- Each bullet must reference a specific case study title exactly as listed
-- Do NOT create generic achievements - only project-specific results
-- If fewer than 3 case studies exist, only create bullets for the projects that exist
-- Use the actual project outcomes, technologies, and results documented in each case study
-
-ACCURACY REQUIREMENTS:
-- Reference actual project titles from the portfolio
-- Use real technologies and methodologies listed
-- Only mention outcomes that are documented
-- If insufficient real data exists, be honest about potential vs. proven results
-- Match job keywords to actual project experience where possible
-`;
+    // Define the function schema for structured output
+    const functions = [
+      {
+        name: 'create_cover_letter',
+        description: 'Creates a structured cover letter based on real project portfolio',
+        parameters: {
+          type: 'object',
+          properties: {
+            opening_hook: {
+              type: 'string',
+              description: 'One powerful sentence connecting a specific real project to company needs'
+            },
+            key_achievements: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of 2-3 bullet points using ONLY actual case study project names and outcomes'
+            },
+            strategic_fit: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of 2 specific connections between real projects and company needs'
+            },
+            call_to_action: {
+              type: 'string',
+              description: 'Confident next step referencing the role or company challenge'
+            }
+          },
+          required: ['opening_hook', 'key_achievements', 'strategic_fit', 'call_to_action']
+        }
+      }
+    ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -145,14 +136,10 @@ ACCURACY REQUIREMENTS:
       },
       body: JSON.stringify({
         model: 'gpt-4.1-2025-04-14',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert career consultant who creates highly targeted, SCANNABLE cover letters optimized for quick review. Always respond with valid JSON only.' 
-          },
-          { role: 'user', content: coverLetterPrompt }
-        ],
-        temperature: 0.7,
+        temperature: 0,
+        messages,
+        functions,
+        function_call: { name: 'create_cover_letter' },
         max_tokens: 1200,
       }),
     });
@@ -162,20 +149,41 @@ ACCURACY REQUIREMENTS:
     }
 
     const data = await response.json();
-    let coverLetterContent = data.choices[0].message.content;
-
-    // Parse the JSON response
+    
+    // Parse function call response
     let structuredContent;
     try {
-      structuredContent = JSON.parse(coverLetterContent);
+      const functionCall = data.choices[0].message.function_call;
+      if (functionCall && functionCall.name === 'create_cover_letter') {
+        structuredContent = JSON.parse(functionCall.arguments);
+      } else {
+        throw new Error('No function call found in response');
+      }
     } catch (parseError) {
-      console.error('Failed to parse JSON response, using fallback format');
-      structuredContent = {
-        opening_hook: coverLetterContent,
-        key_achievements: [],
-        strategic_fit: [],
-        call_to_action: "I would love to discuss how my experience can contribute to your team's success."
-      };
+      console.error('Failed to parse function call response:', parseError);
+      console.error('Full response:', JSON.stringify(data, null, 2));
+      
+      // Fallback to parsing message content if available
+      const messageContent = data.choices[0].message.content;
+      if (messageContent) {
+        try {
+          structuredContent = JSON.parse(messageContent);
+        } catch (contentParseError) {
+          structuredContent = {
+            opening_hook: messageContent || "I am excited to apply my healthcare technology experience to this role.",
+            key_achievements: ["N/A - No case studies available"],
+            strategic_fit: ["N/A - Unable to match requirements"],
+            call_to_action: "I would love to discuss how my experience can contribute to your team's success."
+          };
+        }
+      } else {
+        structuredContent = {
+          opening_hook: "I am excited to apply my healthcare technology experience to this role.",
+          key_achievements: ["N/A - No case studies available"],
+          strategic_fit: ["N/A - Unable to match requirements"],
+          call_to_action: "I would love to discuss how my experience can contribute to your team's success."
+        };
+      }
     }
 
     return new Response(JSON.stringify({ 
