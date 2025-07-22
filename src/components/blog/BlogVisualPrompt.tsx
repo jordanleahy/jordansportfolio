@@ -118,6 +118,20 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
     setIsGenerating(true);
     try {
       const userContent = `Headline: ${headline}\nContent: ${content}`;
+      const cacheKey = `blog_visual_prompt_${category}_${btoa(userContent).slice(0, 20)}`;
+      
+      // Check if we have a cached prompt
+      const { data: cachedData } = await supabase
+        .from('cached_prompts')
+        .select('prompt_text')
+        .eq('cache_key', cacheKey)
+        .single();
+
+      if (cachedData?.prompt_text) {
+        setGeneratedPrompt(cachedData.prompt_text);
+        return;
+      }
+
       const systemPrompt = category === 'contracts' ? CONTRACTS_SYSTEM_PROMPT : HEALTHCARE_SYSTEM_PROMPT;
       const promptType = category === 'contracts' ? 'business' : 'healthcare';
       
@@ -145,6 +159,16 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
       if (!generatedText) {
         throw new Error('No generated text received from function');
       }
+      
+      // Cache the generated prompt
+      await supabase
+        .from('cached_prompts')
+        .upsert({
+          cache_key: cacheKey,
+          prompt_text: generatedText,
+          category: 'blog_visual',
+          metadata: { headline, content, category }
+        });
       
       setGeneratedPrompt(generatedText);
     } catch (error) {
