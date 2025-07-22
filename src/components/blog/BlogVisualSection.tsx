@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 interface BlogVisualSectionProps {
   headline: string;
@@ -26,7 +25,8 @@ export const BlogVisualSection = ({
   return (
     <section className={`px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
-        <Card className="overflow-hidden border-0 shadow-lg">
+        {/* Apply Card styles directly to eliminate component overhead */}
+        <div className="rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden">
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">
@@ -40,8 +40,8 @@ export const BlogVisualSection = ({
               </div>
             </div>
 
-            {/* Content Side */}
-            <div className="md:w-1/2 px-8 pb-8 pt-0 md:p-12 flex flex-col justify-center">
+            {/* Content Side - Simplified consistent padding */}
+            <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
                 {headline}
               </h2>
@@ -67,7 +67,7 @@ export const BlogVisualSection = ({
               )}
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </section>
   );

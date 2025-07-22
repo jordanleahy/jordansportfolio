@@ -101,20 +101,18 @@ export const BlogTemplate = ({
           <BlogIntro content={post.intro_content} />
         </div>
 
-        {/* 3. Exactly 3 Scrollable Visual-First Sections */}
-        <div className="space-y-0">
-          {(post.visual_sections as unknown as import("@/types/blog").VisualSection[]).map((section, index) => (
-            <BlogVisualSection 
-              key={index} 
-              headline={section.headline} 
-              content={section.content} 
-              imageUrl={section.image_url} 
-              ctaText={section.cta_text} 
-              ctaUrl={section.cta_url} 
-              index={index} 
-            />
-          ))}
-        </div>
+        {/* 3. Exactly 3 Scrollable Visual-First Sections - Simplified container */}
+        {(post.visual_sections as unknown as import("@/types/blog").VisualSection[]).map((section, index) => (
+          <BlogVisualSection 
+            key={index} 
+            headline={section.headline} 
+            content={section.content} 
+            imageUrl={section.image_url} 
+            ctaText={section.cta_text} 
+            ctaUrl={section.cta_url} 
+            index={index} 
+          />
+        ))}
 
         {/* 4. Quick Summary (TL;DR Style) */}
         <BlogTLDR title={post.tldr_title} bullets={post.tldr_bullets as unknown as string[]} />
