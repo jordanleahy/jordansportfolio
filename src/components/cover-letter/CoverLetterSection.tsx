@@ -13,7 +13,7 @@ interface StructuredCoverLetter {
 
 interface CoverLetterContent {
   recipient: string;
-  paragraphs: string[];
+  paragraphs: (string | StructuredCoverLetter)[];
   signature: {
     name: string;
     website: string;
@@ -27,18 +27,13 @@ interface CoverLetterSectionProps {
 }
 
 export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({ content }) => {
-  // Check if we have structured content from the new AI format
-  const hasStructuredContent = content.structured || 
-    (typeof content.paragraphs[0] === 'object' && content.paragraphs[0].opening_hook);
-
   // Parse structured content if it exists
   let structuredContent: StructuredCoverLetter | null = null;
-  if (hasStructuredContent) {
-    if (content.structured) {
-      structuredContent = content.structured;
-    } else if (typeof content.paragraphs[0] === 'object') {
-      structuredContent = content.paragraphs[0] as any;
-    }
+  
+  if (content.structured) {
+    structuredContent = content.structured;
+  } else if (content.paragraphs.length > 0 && typeof content.paragraphs[0] === 'object') {
+    structuredContent = content.paragraphs[0] as StructuredCoverLetter;
   }
 
   return (
@@ -113,7 +108,7 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({ content 
             // Fallback to original format for legacy content
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               {content.paragraphs.map((paragraph, index) => (
-                <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />
+                <p key={index} dangerouslySetInnerHTML={{ __html: typeof paragraph === 'string' ? paragraph : '' }} />
               ))}
             </div>
           )}

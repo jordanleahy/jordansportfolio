@@ -118,7 +118,9 @@ export const createPersonalizedPortfolio = async (
         company_name: jobApplication.company_name,
         company_slug: companySlug,
         generated_content: generatedContent as any,
-        cover_letter: generatedContent.cover_letter,
+        cover_letter: typeof generatedContent.cover_letter === 'string' 
+          ? generatedContent.cover_letter 
+          : JSON.stringify(generatedContent.cover_letter),
         status: 'completed' as const,
         user_id: user.id
       }, {

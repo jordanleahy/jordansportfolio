@@ -46,7 +46,7 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
     if (typeof portfolio.generated_content.cover_letter === 'object') {
       // New structured format
       coverLetterContent.structured = portfolio.generated_content.cover_letter;
-      coverLetterContent.paragraphs = [portfolio.generated_content.cover_letter];
+      coverLetterContent.paragraphs = []; // Empty for structured format
     } else {
       // Legacy string format
       coverLetterContent.paragraphs = [portfolio.generated_content.cover_letter];
