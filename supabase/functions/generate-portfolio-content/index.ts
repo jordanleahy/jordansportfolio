@@ -120,7 +120,7 @@ About Jordan Leahy:
 
     // Create enhanced cover letter generation prompt
     const coverLetterPrompt = `
-You are an expert career consultant who writes compelling, personalized cover letters. Create a professional cover letter for Jordan Leahy applying to ${companyName}.
+You are an expert career consultant who writes compelling, high-impact cover letters. Create a professional cover letter for Jordan Leahy applying to ${companyName}.
 
 Company Name: ${companyName}
 Job Description: ${jobDescription}
@@ -128,18 +128,31 @@ ${jobDescriptionLink ? `Job Posting URL: ${jobDescriptionLink}` : ''}
 
 ${personalizedProfile}
 
-Write a compelling cover letter that:
-1. Addresses the hiring manager professionally
-2. Demonstrates deep understanding of the company's mission and challenges
-3. Shows specific alignment between Jordan's ACTUAL experience and the job requirements
-4. Highlights quantifiable achievements from the real projects listed above
-5. References specific case studies or work that directly relate to the job requirements
-6. Expresses genuine enthusiasm for the opportunity
-7. Maintains a confident, professional tone throughout
+CRITICAL FORMATTING REQUIREMENTS:
+- Structure as distinct, impactful paragraphs (3-4 paragraphs total)
+- Start each paragraph with a strong opening sentence
+- Use specific metrics, numbers, and concrete achievements
+- Keep paragraphs focused on one key message each
+- End with a confident call-to-action
 
-The cover letter should be 500-700 words and feel personal, not templated. Focus on specific value Jordan can bring based on the real project experience above.
+Write a compelling cover letter with this EXACT structure:
 
-Return ONLY the cover letter text, no JSON formatting or additional structure.
+PARAGRAPH 1 (Opening Hook): Start with a powerful statement about Jordan's specific expertise that directly connects to the role. Mention the company by name and demonstrate immediate understanding of their challenges/goals.
+
+PARAGRAPH 2 (Proven Impact): Focus on 1-2 specific achievements from the case studies above. Include concrete metrics, technologies used, and measurable outcomes that directly relate to the job requirements.
+
+PARAGRAPH 3 (Strategic Alignment): Show deep understanding of the company's mission and explain how Jordan's unique experience positions him to drive specific value. Reference relevant thought leadership or projects.
+
+PARAGRAPH 4 (Confident Close): Express genuine enthusiasm and propose next steps. Include a confident statement about the value Jordan will bring.
+
+Requirements:
+- Each paragraph should be 2-4 sentences maximum
+- Include specific metrics and achievements from the real projects
+- Use confident, action-oriented language
+- Target 400-500 words total
+- Feel personal and authentic, not templated
+
+Return ONLY the cover letter text with clear paragraph breaks, no JSON formatting or additional structure.
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
