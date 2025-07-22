@@ -229,6 +229,11 @@ const BlogEditor = () => {
         navigate(`/blog-editor/${result.slug}`);
       }
 
+      // Update local state to reflect the changes
+      if (shouldPublish) {
+        setFormData(prev => ({ ...prev, status: "published" }));
+      }
+
       toast({
         title: "Success",
         description: shouldPublish ? "Blog post published successfully" : "Blog post saved successfully"
@@ -279,7 +284,10 @@ const BlogEditor = () => {
               <div className="flex items-center gap-3">
                 <h2 className="text-sm font-medium text-muted-foreground">Status:</h2>
                 <Badge variant={formData.status === 'published' ? 'default' : 'secondary'}>
-                  {formData.status}
+                  {formData.status === 'published' 
+                    ? `published ${existingPost?.published_at ? new Date(existingPost.published_at).toLocaleDateString() : 'today'}`
+                    : formData.status
+                  }
                 </Badge>
               </div>
               {/* AutoSaveStatus temporarily disabled */}
