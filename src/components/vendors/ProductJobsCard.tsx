@@ -11,7 +11,8 @@ import {
   Trash2, 
   Save, 
   X,
-  Briefcase
+  Briefcase,
+  Image
 } from "lucide-react";
 import {
   AlertDialog,
@@ -30,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "@/types/vendor";
+import { JobVisualPrompt } from "@/components/jobs/JobVisualPrompt";
 
 interface ProductJobsCardProps {
   vendorId: string;
@@ -66,6 +68,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     job_description: "",
   });
   const [errors, setErrors] = useState<Partial<JobFormData>>({});
+  const [visualPromptJob, setVisualPromptJob] = useState<VendorJob | null>(null);
 
   // Only show to admins
   if (!isAdmin) {
@@ -240,179 +243,205 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     }
   };
 
+  const handleOpenVisualPrompt = (job: VendorJob) => {
+    setVisualPromptJob(job);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" />
-            <CardTitle>Product Jobs</CardTitle>
-            <Badge variant="secondary" className="text-xs">
-              {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
-            </Badge>
-          </div>
-          {!isAddingJob && !editingJobId && (
-            <Button
-              onClick={() => setIsAddingJob(true)}
-              size="sm"
-              variant="outline"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Job
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Add/Edit Form */}
-        {(isAddingJob || editingJobId) && (
-          <div className="p-4 border rounded-lg bg-muted/50 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Job URL</label>
-              <Input
-                placeholder="https://company.com/careers/job-posting"
-                value={formData.job_url}
-                onChange={(e) => setFormData({ ...formData, job_url: e.target.value })}
-                className={errors.job_url ? "border-destructive" : ""}
-              />
-              {errors.job_url && (
-                <p className="text-sm text-destructive">{errors.job_url}</p>
-              )}
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-primary" />
+              <CardTitle>Product Jobs</CardTitle>
+              <Badge variant="secondary" className="text-xs">
+                {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
+              </Badge>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Job Description</label>
-              <Textarea
-                placeholder="Brief description of the job position..."
-                value={formData.job_description}
-                onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
-                className={errors.job_description ? "border-destructive" : ""}
-                rows={3}
-              />
-              {errors.job_description && (
-                <p className="text-sm text-destructive">{errors.job_description}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                {formData.job_description.length} characters
-              </p>
-            </div>
-
-            <div className="flex gap-2">
+            {!isAddingJob && !editingJobId && (
               <Button
-                onClick={handleSubmit}
-                size="sm"
-                disabled={createJobMutation.isPending || updateJobMutation.isPending}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {editingJobId ? 'Update' : 'Save'}
-              </Button>
-              <Button
-                onClick={handleCancel}
+                onClick={() => setIsAddingJob(true)}
                 size="sm"
                 variant="outline"
               >
-                <X className="h-4 w-4 mr-2" />
-                Cancel
+                <Plus className="h-4 w-4 mr-2" />
+                Add Job
               </Button>
-            </div>
+            )}
           </div>
-        )}
-
-        {/* Jobs List */}
-        {isLoading ? (
-          <div className="text-sm text-muted-foreground">Loading jobs...</div>
-        ) : jobs.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No job postings yet. Add the first one!
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className="border rounded-lg bg-card space-y-4"
-              >
-                {/* Header with buttons */}
-                <div className="p-4 border-b bg-muted/30">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={job.job_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
-                      >
-                        View Job Posting
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleCreateCoverLetter(job)}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      >
-                        Create Cover Page
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => startEditing(job)}
-                        disabled={editingJobId === job.id}
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this job posting? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(job.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Job content */}
-                <div className="p-4 pt-0">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      {job.job_description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Added {new Date(job.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add/Edit Form */}
+          {(isAddingJob || editingJobId) && (
+            <div className="p-4 border rounded-lg bg-muted/50 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Job URL</label>
+                <Input
+                  placeholder="https://company.com/careers/job-posting"
+                  value={formData.job_url}
+                  onChange={(e) => setFormData({ ...formData, job_url: e.target.value })}
+                  className={errors.job_url ? "border-destructive" : ""}
+                />
+                {errors.job_url && (
+                  <p className="text-sm text-destructive">{errors.job_url}</p>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Job Description</label>
+                <Textarea
+                  placeholder="Brief description of the job position..."
+                  value={formData.job_description}
+                  onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
+                  className={errors.job_description ? "border-destructive" : ""}
+                  rows={3}
+                />
+                {errors.job_description && (
+                  <p className="text-sm text-destructive">{errors.job_description}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {formData.job_description.length} characters
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSubmit}
+                  size="sm"
+                  disabled={createJobMutation.isPending || updateJobMutation.isPending}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {editingJobId ? 'Update' : 'Save'}
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  size="sm"
+                  variant="outline"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Jobs List */}
+          {isLoading ? (
+            <div className="text-sm text-muted-foreground">Loading jobs...</div>
+          ) : jobs.length === 0 ? (
+            <div className="text-sm text-muted-foreground">
+              No job postings yet. Add the first one!
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {jobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="border rounded-lg bg-card space-y-4"
+                >
+                  {/* Header with buttons */}
+                  <div className="p-4 border-b bg-muted/30">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={job.job_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
+                        >
+                          View Job Posting
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleCreateCoverLetter(job)}
+                          className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                          Create Cover Page
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenVisualPrompt(job)}
+                          className="text-primary border-primary hover:bg-primary/10"
+                        >
+                          <Image className="h-4 w-4" />
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => startEditing(job)}
+                          disabled={editingJobId === job.id}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this job posting? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(job.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Job content */}
+                  <div className="p-4 pt-0">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {job.job_description}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Added {new Date(job.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Job Visual Prompt Modal */}
+      {visualPromptJob && (
+        <JobVisualPrompt
+          isOpen={!!visualPromptJob}
+          onClose={() => setVisualPromptJob(null)}
+          jobTitle={`Job Position at ${vendor.company_name}`}
+          jobDescription={visualPromptJob.job_description}
+          companyName={vendor.company_name}
+        />
+      )}
+    </>
   );
 };
