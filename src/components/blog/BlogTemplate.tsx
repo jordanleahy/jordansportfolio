@@ -31,7 +31,7 @@ export const BlogTemplate = ({
   
   // Determine the best OG image with fallback logic
   const ogImageUrl = post.og_image_url || post.hero_image_16_9_url || post.hero_image_url;
-  const fullOgImageUrl = ogImageUrl ? (ogImageUrl.startsWith('http') ? ogImageUrl : `${baseUrl}${ogImageUrl}`) : undefined;
+  const fullOgImageUrl = ogImageUrl ? (ogImageUrl.startsWith('http') ? ogImageUrl : `${baseUrl}${ogImageUrl}`) : `${baseUrl}/placeholder.svg`;
 
   // Fetch next blog post
   useEffect(() => {
