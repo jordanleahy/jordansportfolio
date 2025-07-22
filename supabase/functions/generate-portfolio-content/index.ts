@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -51,25 +52,6 @@ serve(async (req) => {
       console.log('Case studies fetch error:', caseStudiesError);
     }
 
-
-    // Fetch recent blog posts for thought leadership
-    const { data: blogPosts, error: blogError } = await supabase
-      .from('blog_posts')
-      .select(`
-        meta_title,
-        meta_description,
-        category,
-        tags
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(3);
-
-    if (blogError) {
-      console.log('Blog posts fetch error:', blogError);
-    }
-
     // Build detailed case study context for accurate matching
     let caseStudyContext = '';
     if (caseStudies && caseStudies.length > 0) {
@@ -95,16 +77,13 @@ Focus on skills and potential rather than fabricated project details.
 `;
     }
 
-    // Add blog posts context
-    let thoughtLeadershipContext = '';
-    if (blogPosts && blogPosts.length > 0) {
-      thoughtLeadershipContext = `
-ACTUAL THOUGHT LEADERSHIP:
-${blogPosts.map(post => `- ${post.meta_title} (${post.category})`).join('\n')}
-`;
-    }
-
-
+    TARGET COMPANY INFORMATION:
+${companyInfo ? `
+- Company: ${companyName}
+- Description: ${companyInfo.description || 'Healthcare technology company'}
+- Services: ${companyInfo.services?.join(', ') || 'Not specified'}
+- Specialties: ${companyInfo.specialties?.join(', ') || 'Not specified'}
+` : `Company: ${companyName} (analyze job description for company details)`}
 
     // Create enhanced cover letter generation prompt with structured output
     const coverLetterPrompt = `
@@ -115,16 +94,6 @@ JOB DESCRIPTION: ${jobDescription}
 ${jobDescriptionLink ? `JOB POSTING URL: ${jobDescriptionLink}` : ''}
 
 ${caseStudyContext}
-
-${thoughtLeadershipContext}
-
-TARGET COMPANY INFORMATION:
-${companyInfo ? `
-- Company: ${companyName}
-- Description: ${companyInfo.description || 'Healthcare technology company'}
-- Services: ${companyInfo.services?.join(', ') || 'Not specified'}
-- Specialties: ${companyInfo.specialties?.join(', ') || 'Not specified'}
-` : `Company: ${companyName} (analyze job description for company details)`}
 
 CRITICAL INSTRUCTIONS - ACCURACY IS PARAMOUNT:
 1. ONLY use information from the REAL PROJECT PORTFOLIO above
@@ -219,8 +188,7 @@ ACCURACY REQUIREMENTS:
 
     return new Response(JSON.stringify({ 
       cover_letter: structuredContent,
-      case_studies_used: caseStudies?.length || 0,
-      blog_posts_used: blogPosts?.length || 0
+      case_studies_used: caseStudies?.length || 0
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
