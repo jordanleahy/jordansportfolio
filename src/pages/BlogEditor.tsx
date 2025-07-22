@@ -16,6 +16,7 @@ import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
+import { ImageUploadCard } from "@/components/calendar/ImageUploadCard";
 import { Sparkles } from "lucide-react";
 
 const BlogEditor = () => {
@@ -435,14 +436,13 @@ const BlogEditor = () => {
                   <p className="text-xs text-muted-foreground mt-1">Required, 80-150 characters (15-25 words)</p>
                 </div>
                 <div>
-                  <Label htmlFor="hero_image_url">Hero Image URL (optional)</Label>
-                  <Input
-                    id="hero_image_url"
-                    value={formData.hero_image_url}
-                    onChange={(e) => handleInputChange('hero_image_url', e.target.value)}
-                    placeholder="https://example.com/hero-image.jpg"
+                  <ImageUploadCard
+                    title="Hero Image (optional)"
+                    aspectRatio="16:9"
+                    imageUrl={formData.hero_image_url}
+                    onImageUpload={(url) => handleInputChange('hero_image_url', url)}
+                    onImageRemove={() => handleInputChange('hero_image_url', '')}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Must be a valid URL if provided</p>
                 </div>
                 <div>
                   <Label htmlFor="hero_video_url">Hero Video URL (optional)</Label>
