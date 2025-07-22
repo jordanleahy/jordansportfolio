@@ -82,7 +82,12 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
     setIsGenerating(true);
     try {
       const userContent = `Job Title: ${jobTitle}\nCompany: ${companyName}\nJob Description: ${jobDescription}`;
-      const cacheKey = `job_visual_prompt_${btoa(userContent).slice(0, 20)}`;
+      // Fix btoa encoding issue by using a safer method for cache key generation
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode(userContent);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encodedData);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const cacheKey = `job_visual_prompt_${hashArray.slice(0, 10).map(b => b.toString(16).padStart(2, '0')).join('')}`;
       
       // Check if we have a cached prompt
       const { data: cachedData } = await supabase
@@ -97,18 +102,12 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('generate-content', {
+      // Use the new hero job visual function
+      const { data: functionData, error } = await supabase.functions.invoke('generate-hero-job-visual', {
         body: {
-          prompt: `${JOB_ROLE_SYSTEM_PROMPT}
-
-Based on the following job role information, create a detailed 9:16 vertical image generation prompt that follows the professional job role illustration guidelines above:
-
-${userContent}
-
-Please create a complete, ready-to-use prompt for generating a 9:16 vertical professional vector illustration that showcases this job role opportunity. The prompt should include specific visual elements, modern color palette, vertical composition details, and ensure all elements stay within the safe zone for social media optimization.
-
-Focus on the professional tools, workspace environment, and abstract representations of the role's responsibilities and growth opportunities. Do not include any human figures or people in the illustration.`,
-          type: 'image_prompt'
+          jobTitle,
+          companyName,
+          jobDescription
         }
       });
 
@@ -117,10 +116,10 @@ Focus on the professional tools, workspace environment, and abstract representat
         throw error;
       }
 
-      const generatedText = data.generatedText;
+      const generatedText = functionData?.generatedPrompt;
       
       if (!generatedText) {
-        throw new Error('No generated text received from function');
+        throw new Error('No generated prompt received from function');
       }
       
       // Cache the generated prompt
@@ -131,8 +130,8 @@ Focus on the professional tools, workspace environment, and abstract representat
           .upsert({
             cache_key: cacheKey,
             prompt_text: generatedText,
-            category: 'job_visual',
-            metadata: { jobTitle, jobDescription, companyName },
+            category: 'job_visual_hero',
+            metadata: { jobTitle, jobDescription, companyName, style: 'hero' },
             user_id: currentUser.data.user.id
           });
       }
