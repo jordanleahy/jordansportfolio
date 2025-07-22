@@ -150,9 +150,9 @@ Return ONLY a JSON object with this EXACT structure:
 {
   "opening_hook": "One powerful sentence connecting a specific real project to [Company] needs from job description",
   "key_achievements": [
-    "• **[Real Project Name]**: Brief description of actual project outcome",
-    "• **[Actual Technology Used]**: Context from real project experience", 
-    "• **[Real Result/Skill]**: Concrete skill or outcome from portfolio"
+    "• **[Case Study Project Name]**: Brief description of actual project outcome from portfolio above",
+    "• **[Case Study Project Name]**: Another specific project result from portfolio above", 
+    "• **[Case Study Project Name]**: Third concrete project achievement from portfolio above"
   ],
   "strategic_fit": [
     "Specific connection between [Real Project] and [Company] need from job description",
@@ -160,6 +160,13 @@ Return ONLY a JSON object with this EXACT structure:
   ],
   "call_to_action": "Confident, specific next step that references the role or company challenge"
 }
+
+CRITICAL FOR KEY ACHIEVEMENTS:
+- ONLY use actual case study project names from the REAL PROJECT PORTFOLIO section above
+- Each bullet must reference a specific case study title exactly as listed
+- Do NOT create generic achievements - only project-specific results
+- If fewer than 3 case studies exist, only create bullets for the projects that exist
+- Use the actual project outcomes, technologies, and results documented in each case study
 
 ACCURACY REQUIREMENTS:
 - Reference actual project titles from the portfolio
