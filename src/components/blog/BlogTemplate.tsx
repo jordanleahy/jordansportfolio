@@ -8,11 +8,10 @@ import { BlogTLDR } from "./BlogTLDR";
 import { BlogDeepDive } from "./BlogDeepDive";
 import { BlogCTAShare } from "./BlogCTAShare";
 import { BlogNextPost } from "./BlogNextPost";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, BookmarkPlus, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { OGMetadata } from "@/components/seo/OGMetadata";
+import { JSONLDSchema } from "@/components/seo/JSONLDSchema";
 import { BlogService } from "@/services/blogService";
+import { SEO_CONFIG, getCleanUrl } from "@/config/seo";
 
 interface BlogTemplateProps {
   post: BlogPost;
@@ -25,13 +24,9 @@ export const BlogTemplate = ({
 }: BlogTemplateProps) => {
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
 
-  // Use production domain for OG metadata
-  const baseUrl = "https://www.jordanleahy.com";
-  const postUrl = `${baseUrl}/blog/${post.slug}`;
-  
-  // Determine the best OG image with fallback logic
-  const ogImageUrl = post.og_image_url || post.hero_image_16_9_url || post.hero_image_url;
-  const fullOgImageUrl = ogImageUrl ? (ogImageUrl.startsWith('http') ? ogImageUrl : `${baseUrl}${ogImageUrl}`) : `${baseUrl}/placeholder.svg`;
+  const postPath = `/blog/${post.slug}`;
+  const postUrl = `${SEO_CONFIG.baseUrl}${postPath}`;
+  const cleanUrl = getCleanUrl(postUrl);
 
   // Fetch next blog post
   useEffect(() => {
@@ -57,41 +52,35 @@ export const BlogTemplate = ({
 
   return (
     <div className={`min-h-screen bg-background overflow-x-hidden ${className}`}>
-      {/* SEO Head */}
-      <Helmet>
-        <title>{post.meta_title}</title>
-        <meta name="description" content={post.meta_description} />
-        <meta name="keywords" content={(post.meta_keywords as unknown as string[])?.join(', ')} />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={post.meta_title} />
-        <meta property="og:description" content={post.meta_description} />
-        {fullOgImageUrl && <meta property="og:image" content={fullOgImageUrl} />}
-        <meta property="og:url" content={postUrl} />
-        <meta property="og:type" content="article" />
-        <meta property="og:site_name" content="Jordan Leigh Portfolio" />
-        <link rel="canonical" href={postUrl} />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.meta_title} />
-        <meta name="twitter:description" content={post.meta_description} />
-        {fullOgImageUrl && <meta name="twitter:image" content={fullOgImageUrl} />}
-        <meta name="twitter:site" content="@jordanleahy" />
-        
-        {/* Article metadata */}
-        <meta property="article:published_time" content={post.published_at} />
-        <meta property="article:modified_time" content={post.updated_at} />
-        <meta property="article:author" content="Jordan Leigh" />
-        <meta property="article:section" content={post.category} />
-        {(post.tags as unknown as string[])?.map(tag => <meta key={tag} property="article:tag" content={tag} />)}
-        
-        {/* Additional SEO improvements */}
-        <meta name="robots" content="index, follow" />
-        <meta name="author" content="Jordan Leigh" />
-        {post.read_time && <meta name="twitter:label1" content="Reading time" />}
-        {post.read_time && <meta name="twitter:data1" content={`${post.read_time} min read`} />}
-      </Helmet>
+      {/* SEO Metadata */}
+      <OGMetadata
+        title={post.meta_title}
+        description={post.meta_description}
+        path={postPath}
+        image={post.og_image_url}
+        heroImage16_9={post.hero_image_16_9_url}
+        heroImage={post.hero_image_url}
+        type="article"
+        publishedTime={post.published_at}
+        modifiedTime={post.updated_at}
+        keywords={post.meta_keywords as unknown as string[]}
+      />
+
+      {/* JSON-LD Schema */}
+      <JSONLDSchema
+        type="Article"
+        title={post.meta_title}
+        description={post.meta_description}
+        path={postPath}
+        image={post.og_image_url}
+        heroImage16_9={post.hero_image_16_9_url}
+        heroImage={post.hero_image_url}
+        publishedTime={post.published_at}
+        modifiedTime={post.updated_at}
+        wordCount={post.word_count}
+        readTime={post.read_time}
+        keywords={post.meta_keywords as unknown as string[]}
+      />
 
       {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-40">
@@ -153,7 +142,7 @@ export const BlogTemplate = ({
             ctaUrl={post.cta_url} 
             shareEnabled={post.share_enabled} 
             title={post.meta_title} 
-            url={postUrl} 
+            url={cleanUrl} 
           />
         </section>
 
@@ -162,42 +151,6 @@ export const BlogTemplate = ({
           <BlogNextPost nextPost={nextPost} />
         </section>
       </article>
-
-      {/* Article Schema.org JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          "headline": post.meta_title,
-          "description": post.meta_description,
-          "image": fullOgImageUrl,
-          "url": postUrl,
-          "author": {
-            "@type": "Person",
-            "name": "Jordan Leigh",
-            "url": baseUrl
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "Jordan Leigh Portfolio",
-            "url": baseUrl,
-            "logo": {
-              "@type": "ImageObject",
-              "url": `${baseUrl}/logo.png`
-            }
-          },
-          "datePublished": post.published_at,
-          "dateModified": post.updated_at,
-          "wordCount": post.word_count,
-          "timeRequired": `PT${post.read_time}M`,
-          "articleSection": post.category,
-          "keywords": (post.meta_keywords as unknown as string[])?.join(', '),
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": postUrl
-          }
-        })
-      }} />
     </div>
   );
 };
