@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
@@ -27,55 +26,30 @@ export const BlogHero = ({
   // Prioritize 16:9 image for hero section
   const heroImageUrl = image16_9_url || imageUrl;
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="relative overflow-hidden"
-    >
+    <section className="relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="text-center">
           {/* Badge */}
           {badge && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="mb-6"
-            >
+            <div className="mb-6">
               <Badge variant="secondary" className="text-sm font-medium">
                 {badge}
               </Badge>
-            </motion.div>
+            </div>
           )}
 
           {/* Headline - Max 8 words enforced */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
-          >
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
             {headline}
-          </motion.h1>
+          </h1>
 
           {/* Subhead - 15-25 words with emotional pull */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto"
-          >
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
             {subhead}
-          </motion.p>
+          </p>
 
           {/* Read Time & CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
-          >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             {readTime && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" />
@@ -89,15 +63,10 @@ export const BlogHero = ({
             >
               Start Reading
             </Button>
-          </motion.div>
+          </div>
 
           {/* Featured Image or Video - 16:9 ratio enforced */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="relative max-w-4xl mx-auto"
-          >
+          <div className="relative max-w-4xl mx-auto">
             {videoUrl ? (
               <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-muted">
                 <video
@@ -124,9 +93,9 @@ export const BlogHero = ({
                 <span className="text-muted-foreground text-lg">Featured Image</span>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 };

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Share2, Copy, MessageSquare } from "lucide-react";
@@ -49,34 +48,16 @@ export const BlogCTAShare = ({
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6 }}
-      className={`py-16 px-4 ${className}`}
-    >
+    <section className={`py-16 px-4 ${className}`}>
       <div className="max-w-4xl mx-auto">
         <Card className="p-8 md:p-12 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 border-green-200 dark:border-green-800">
           <div className="text-center">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-4xl font-bold mb-6 flex items-center justify-center gap-3"
-            >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 flex items-center justify-center gap-3">
               🚀 Take Action
-            </motion.h2>
+            </h2>
 
             {/* Primary CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mb-8"
-            >
+            <div className="mb-8">
               <Button 
                 size="lg"
                 className="text-lg px-8 py-4"
@@ -84,18 +65,12 @@ export const BlogCTAShare = ({
               >
                 {ctaText}
               </Button>
-            </motion.div>
+            </div>
 
             {shareEnabled && (
               <>
                 {/* Share Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="flex flex-wrap justify-center gap-3 mb-6"
-                >
+                <div className="flex flex-wrap justify-center gap-3 mb-6">
                   <Button
                     variant="outline"
                     size="sm"
@@ -135,27 +110,21 @@ export const BlogCTAShare = ({
                     <Share2 className="h-4 w-4" />
                     WhatsApp
                   </Button>
-                </motion.div>
+                </div>
 
                 {/* Engagement Options */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                  className="text-sm text-muted-foreground border-t border-muted pt-6"
-                >
+                <div className="text-sm text-muted-foreground border-t border-muted pt-6">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <MessageSquare className="h-4 w-4" />
                     <span>💬 Leave a comment or reply via DM</span>
                   </div>
                   <p>🔗 Share: LinkedIn | X | WhatsApp</p>
-                </motion.div>
+                </div>
               </>
             )}
           </div>
         </Card>
       </div>
-    </motion.section>
+    </section>
   );
 };

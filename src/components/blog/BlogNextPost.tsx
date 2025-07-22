@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
@@ -14,30 +13,18 @@ interface BlogNextPostProps {
 export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) => {
   if (!nextPost) {
     return (
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6 }}
-        className={`py-16 px-4 ${className}`}
-      >
+      <section className={`py-16 px-4 ${className}`}>
         <div className="max-w-4xl mx-auto">
           <Card className="p-8 text-center bg-gradient-to-br from-muted/50 to-background border-muted">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-2xl font-bold mb-4 text-muted-foreground"
-            >
+            <h2 className="text-2xl font-bold mb-4 text-muted-foreground">
               📝 More content coming soon...
-            </motion.h2>
+            </h2>
             <p className="text-muted-foreground">
               Stay tuned for more insights and deep dives!
             </p>
           </Card>
         </div>
-      </motion.section>
+      </section>
     );
   }
 
@@ -47,33 +34,16 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
     : nextPost.intro_content;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6 }}
-      className={`py-16 px-4 bg-gradient-to-br from-background to-muted/20 ${className}`}
-    >
+    <section className={`py-16 px-4 bg-gradient-to-br from-background to-muted/20 ${className}`}>
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-center mb-8"
-        >
+        <div className="text-center mb-8">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Up Next
           </h2>
           <div className="w-12 h-0.5 bg-primary mx-auto"></div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div>
           <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
             <div className="md:flex">
               {/* Image */}
@@ -143,8 +113,8 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
               </div>
             </div>
           </Card>
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 };
