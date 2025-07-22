@@ -12,12 +12,15 @@ import { SummaryCards } from "@/components/sec/SummaryCards";
 import { OfferingsTableOptimized } from "@/components/sec/OfferingsTableOptimized";
 import { FilterSidebar } from "@/components/sec/FilterSidebar";
 import { CompanyModal } from "@/components/sec/CompanyModal";
+import { AddVendorModal } from "@/components/vendors/AddVendorModal";
 import { Badge } from "@/components/ui/badge";
+import { Plus } from "lucide-react";
 
 
 const SEC = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize filters from URL params
@@ -70,6 +73,14 @@ const SEC = () => {
   };
   const { toast } = useToast();
 
+  const handleVendorAdded = () => {
+    setIsAddVendorModalOpen(false);
+    toast({
+      title: "Success",
+      description: "Vendor added successfully! You can find it in the Vendors section.",
+    });
+  };
+
   return (
     <PageLayout>
       <Helmet>
@@ -97,6 +108,14 @@ const SEC = () => {
               </div>
               
               <div className="flex items-center gap-3">
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => setIsAddVendorModalOpen(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Vendor
+                </Button>
                 {!isDefaultView && (
                   <Button variant="outline" size="sm" onClick={handleResetToDefault}>
                     <RotateCcw className="h-4 w-4 mr-2" />
@@ -177,6 +196,13 @@ const SEC = () => {
         <CompanyModal 
           company={selectedCompany}
           onClose={() => setSelectedCompany(null)}
+        />
+
+        {/* Add Vendor Modal */}
+        <AddVendorModal
+          isOpen={isAddVendorModalOpen}
+          onClose={() => setIsAddVendorModalOpen(false)}
+          onVendorAdded={handleVendorAdded}
         />
       </div>
     </PageLayout>
