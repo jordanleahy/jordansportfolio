@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Check, Loader2 } from 'lucide-react';
+import { Copy, Check, Loader2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { socialMediaService } from '@/services/socialMediaService';
@@ -119,11 +119,22 @@ Use a professional business palette—trustworthy and corporate:
 - **Safe Zone:** Keep all critical elements—text, icons, figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
 - **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
 
+type AspectRatio = '16:9' | '3:4' | '9:16' | '4:3' | null;
+
 export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(null);
+  const [basePrompt, setBasePrompt] = useState('');
   const { toast } = useToast();
+
+  const aspectRatioOptions = [
+    { value: '16:9' as const, label: '16:9', description: 'widescreen format' },
+    { value: '3:4' as const, label: '3:4', description: 'portrait format' },
+    { value: '9:16' as const, label: '9:16', description: 'mobile/vertical format' },
+    { value: '4:3' as const, label: '4:3', description: 'standard format' }
+  ];
 
   const generateImagePrompt = async () => {
     setIsGenerating(true);
@@ -157,7 +168,9 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
         throw new Error('No generated text received from function');
       }
       
+      setBasePrompt(generatedText);
       setGeneratedPrompt(generatedText);
+      setSelectedAspectRatio(null);
 
       // Cache the generated prompt in the database
       try {
@@ -180,6 +193,25 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
     }
   };
 
+  const handleAspectRatioSelect = (ratio: AspectRatio) => {
+    if (!basePrompt) return;
+
+    if (selectedAspectRatio === ratio) {
+      // If clicking the same ratio, reset to base prompt
+      setSelectedAspectRatio(null);
+      setGeneratedPrompt(basePrompt);
+    } else {
+      setSelectedAspectRatio(ratio);
+      const aspectRatioInstruction = `\n\nAspect Ratio: ${ratio} (${aspectRatioOptions.find(opt => opt.value === ratio)?.description})`;
+      setGeneratedPrompt(basePrompt + aspectRatioInstruction);
+    }
+  };
+
+  const handleResetPrompt = () => {
+    setSelectedAspectRatio(null);
+    setGeneratedPrompt(basePrompt);
+  };
+
   const handleCopyPrompt = async () => {
     try {
       await navigator.clipboard.writeText(generatedPrompt);
@@ -198,7 +230,9 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
     if (isOpen) {
       if (cachedPrompt) {
         // Use cached prompt if available
+        setBasePrompt(cachedPrompt);
         setGeneratedPrompt(cachedPrompt);
+        setSelectedAspectRatio(null);
       } else if (!generatedPrompt && !isGenerating) {
         // Generate new prompt if no cache and no current prompt
         generateImagePrompt();
@@ -209,6 +243,8 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
   React.useEffect(() => {
     if (!isOpen) {
       setGeneratedPrompt('');
+      setBasePrompt('');
+      setSelectedAspectRatio(null);
       setCopied(false);
     }
   }, [isOpen]);
@@ -241,6 +277,41 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
                   className="min-h-[300px] mt-2 font-mono text-sm"
                 />
               </div>
+
+              {basePrompt && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Aspect Ratio Options:</label>
+                    {selectedAspectRatio && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleResetPrompt}
+                        className="text-xs"
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        Reset
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {aspectRatioOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedAspectRatio === option.value ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleAspectRatioSelect(option.value)}
+                        className="text-sm"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Click an aspect ratio to append it to your prompt, or click again to remove it.
+                  </p>
+                </div>
+              )}
               
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
