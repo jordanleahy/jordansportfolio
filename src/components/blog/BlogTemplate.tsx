@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BlogPost } from "@/types/blog";
 import { BlogHero } from "./BlogHero";
@@ -27,6 +26,15 @@ export const BlogTemplate = ({
   const postPath = `/blog/${post.slug}`;
   const postUrl = `${SEO_CONFIG.baseUrl}${postPath}`;
   const cleanUrl = getCleanUrl(postUrl);
+
+  // Debug URL generation
+  console.log('Blog post URL generation:', {
+    slug: post.slug,
+    postPath,
+    postUrl,
+    cleanUrl,
+    publishedAt: post.published_at
+  });
 
   // Fetch next blog post
   useEffect(() => {

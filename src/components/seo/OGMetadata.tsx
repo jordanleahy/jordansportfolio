@@ -33,6 +33,17 @@ export const OGMetadata = ({
   const ogImageUrl = getOgImageUrl(image, heroImage16_9, heroImage);
   const fullTitle = `${title} | ${SEO_CONFIG.siteName}`;
 
+  // Debug metadata generation
+  console.log('OG Metadata generation:', {
+    title,
+    fullTitle,
+    description,
+    fullUrl,
+    ogImageUrl,
+    type,
+    publishedTime
+  });
+
   return (
     <Helmet>
       {/* Basic Meta Tags */}

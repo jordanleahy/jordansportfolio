@@ -12,7 +12,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
-
+import { DefaultMetadata } from "@/components/seo/DefaultMetadata";
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
@@ -84,26 +84,31 @@ const Index = () => {
   }
 
   return (
-    <AppLayout>
-      {/* Hero Parallax Section */}
-      <Suspense fallback={
-        <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading hero section...</p>
-          </div>
-        </div>
-      }>
-        <HeroParallaxDemo />
-      </Suspense>
+    <>
+      {/* Default SEO Metadata for Homepage */}
+      <DefaultMetadata />
       
-      {/* Portfolio Content */}
-      <CompaniesSection />
-      <TestimonialsSection />
-      <ProjectCardsSection />
-      <BlogTeaser />
-      <ContactSection />
-    </AppLayout>
+      <AppLayout>
+        {/* Hero Parallax Section */}
+        <Suspense fallback={
+          <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Loading hero section...</p>
+            </div>
+          </div>
+        }>
+          <HeroParallaxDemo />
+        </Suspense>
+        
+        {/* Portfolio Content */}
+        <CompaniesSection />
+        <TestimonialsSection />
+        <ProjectCardsSection />
+        <BlogTeaser />
+        <ContactSection />
+      </AppLayout>
+    </>
   );
 };
 
