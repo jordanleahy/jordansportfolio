@@ -41,6 +41,7 @@ interface ProductJobsCardProps {
 }
 
 interface JobFormData {
+  job_title: string;
   job_url: string;
   job_description: string;
 }
@@ -76,6 +77,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   const [isAddingJob, setIsAddingJob] = useState(false);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
+    job_title: "",
     job_url: "",
     job_description: "",
   });
@@ -89,6 +91,12 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
 
   const validateForm = (): boolean => {
     const newErrors: Partial<JobFormData> = {};
+
+    if (!formData.job_title.trim()) {
+      newErrors.job_title = "Job title is required";
+    } else if (formData.job_title.length < 3) {
+      newErrors.job_title = "Job title must be at least 3 characters";
+    }
 
     if (!formData.job_url.trim()) {
       newErrors.job_url = "Job URL is required";
@@ -124,7 +132,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         setIsAddingJob(false);
       }
       
-      setFormData({ job_url: "", job_description: "" });
+      setFormData({ job_title: "", job_url: "", job_description: "" });
       setErrors({});
     } catch (error) {
       // Error handling is done in the mutation hooks
@@ -134,13 +142,14 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   const handleCancel = () => {
     setIsAddingJob(false);
     setEditingJobId(null);
-    setFormData({ job_url: "", job_description: "" });
+    setFormData({ job_title: "", job_url: "", job_description: "" });
     setErrors({});
   };
 
   const startEditing = (job: VendorJob) => {
     setEditingJobId(job.id);
     setFormData({
+      job_title: job.job_title || "",
       job_url: job.job_url,
       job_description: job.job_description,
     });

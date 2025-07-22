@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 export interface VendorJob {
   id: string;
   vendor_id: string;
+  job_title: string;
   job_url: string;
   job_description: string;
   user_id: string;
