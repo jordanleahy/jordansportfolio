@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Check, Loader2 } from 'lucide-react';
+import { Copy, Check, Loader2, Database, Sparkles, Settings, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { CacheManagement } from './CacheManagement';
 
 interface BlogVisualPromptProps {
   isOpen: boolean;
@@ -112,25 +114,31 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isFromCache, setIsFromCache] = useState(false);
+  const [cacheManagementOpen, setCacheManagementOpen] = useState(false);
   const { toast } = useToast();
 
-  const generateImagePrompt = async () => {
+  const generateImagePrompt = async (forceRegenerate = false) => {
     setIsGenerating(true);
+    setIsFromCache(false);
     try {
       const userContent = `Headline: ${headline}\nContent: ${content}`;
       const cacheKey = `blog_visual_prompt_${category}_${btoa(userContent).slice(0, 20)}`;
       
-      // Check if we have a cached prompt
-      const { data: cachedData } = await supabase
-        .from('cached_prompts')
-        .select('prompt_text')
-        .eq('cache_key', cacheKey)
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+      // Check if we have a cached prompt (unless forcing regeneration)
+      if (!forceRegenerate) {
+        const { data: cachedData } = await supabase
+          .from('cached_prompts')
+          .select('prompt_text')
+          .eq('cache_key', cacheKey)
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+          .single();
 
-      if (cachedData?.prompt_text) {
-        setGeneratedPrompt(cachedData.prompt_text);
-        return;
+        if (cachedData?.prompt_text) {
+          setGeneratedPrompt(cachedData.prompt_text);
+          setIsFromCache(true);
+          return;
+        }
       }
 
       const systemPrompt = category === 'contracts' ? CONTRACTS_SYSTEM_PROMPT : HEALTHCARE_SYSTEM_PROMPT;
@@ -176,6 +184,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
       }
       
       setGeneratedPrompt(generatedText);
+      setIsFromCache(false);
     } catch (error) {
       console.error('Error generating image prompt:', error);
       toast({
@@ -202,6 +211,10 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
     }
   };
 
+  const handleRegenerate = () => {
+    generateImagePrompt(true);
+  };
+
   React.useEffect(() => {
     if (isOpen && !generatedPrompt && !isGenerating) {
       generateImagePrompt();
@@ -212,64 +225,115 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
     if (!isOpen) {
       setGeneratedPrompt('');
       setCopied(false);
+      setIsFromCache(false);
     }
   }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Blog Visual Image Prompt Generator</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            <p><strong>Headline:</strong> {headline}</p>
-            <p><strong>Content:</strong> {content}</p>
-          </div>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Blog Visual Image Prompt Generator</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCacheManagementOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Manage Cache
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
           
-          {isGenerating ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin mr-2" />
-              <span>Generating {category === 'contracts' ? 'business' : 'healthcare'} image prompt...</span>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <p><strong>Headline:</strong> {headline}</p>
+              <p><strong>Content:</strong> {content}</p>
             </div>
-          ) : generatedPrompt ? (
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Generated Image Prompt:</label>
-                <Textarea
-                  value={generatedPrompt}
-                  readOnly
-                  className="min-h-[300px] mt-2 font-mono text-sm"
-                />
+            
+            {isGenerating ? (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                <span>Generating {category === 'contracts' ? 'business' : 'healthcare'} image prompt...</span>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
-                </p>
-                <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copy Prompt
-                    </>
-                  )}
-                </Button>
+            ) : generatedPrompt ? (
+              <div className="space-y-4">
+                {isFromCache && (
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <Database className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-800">
+                      This prompt was loaded from cache for faster access
+                    </span>
+                  </div>
+                )}
+                
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Generated Image Prompt:</label>
+                    <div className="flex items-center gap-2">
+                      {isFromCache && (
+                        <Button
+                          onClick={handleRegenerate}
+                          variant="ghost"
+                          size="sm"
+                          className="flex items-center gap-2 text-muted-foreground"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Regenerate
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Textarea
+                    value={generatedPrompt}
+                    readOnly
+                    className="min-h-[300px] mt-2 font-mono text-sm"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
+                    </p>
+                    {!isFromCache && (
+                      <div className="flex items-center gap-1 text-xs text-green-600">
+                        <Sparkles className="h-3 w-3" />
+                        Freshly generated
+                      </div>
+                    )}
+                  </div>
+                  <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy Prompt
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex justify-center p-8">
-              <Button onClick={generateImagePrompt}>Generate Image Prompt</Button>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            ) : (
+              <div className="flex justify-center p-8">
+                <Button onClick={() => generateImagePrompt()}>Generate Image Prompt</Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <CacheManagement 
+        isOpen={cacheManagementOpen} 
+        onClose={() => setCacheManagementOpen(false)} 
+      />
+    </>
   );
 };
