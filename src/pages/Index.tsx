@@ -1,7 +1,7 @@
 
 import React, { Suspense, lazy } from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,11 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Only show default metadata on the homepage
+  const isHomePage = location.pathname === '/';
 
   // Auth state management
   useEffect(() => {
@@ -86,7 +90,7 @@ const Index = () => {
   return (
     <>
       {/* Default SEO Metadata for Homepage */}
-      <DefaultMetadata />
+      {isHomePage && <DefaultMetadata />}
       
       <AppLayout>
         {/* Hero Parallax Section */}
