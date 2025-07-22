@@ -77,14 +77,6 @@ Focus on skills and potential rather than fabricated project details.
 `;
     }
 
-    TARGET COMPANY INFORMATION:
-${companyInfo ? `
-- Company: ${companyName}
-- Description: ${companyInfo.description || 'Healthcare technology company'}
-- Services: ${companyInfo.services?.join(', ') || 'Not specified'}
-- Specialties: ${companyInfo.specialties?.join(', ') || 'Not specified'}
-` : `Company: ${companyName} (analyze job description for company details)`}
-
     // Create enhanced cover letter generation prompt with structured output
     const coverLetterPrompt = `
 You are an expert career consultant who writes compelling, SCANNABLE cover letters optimized for 15-second reviews. Create a structured cover letter for Jordan Leahy applying to ${companyName}.
