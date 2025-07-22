@@ -32,20 +32,33 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
     "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//667F0B04-8D3D-429C-992C-1D8FB2883E9E%20(1)%20(1)%202.mov";
 
   // Create cover letter content using the generated cover letter or fallback
-  const coverLetterContent: CoverLetterContent = {
+  const coverLetterContent: CoverLetterContent & { structured?: any } = {
     recipient: `Dear ${portfolio.company_name} Team,`,
-    paragraphs: portfolio.generated_content?.cover_letter 
-      ? [portfolio.generated_content.cover_letter]
-      : [
-          `I'm writing to express my strong interest in joining ${portfolio.company_name}. With over 10 years of experience in healthcare technology and AI applications, I'm excited about the opportunity to contribute to your team's mission.`,
-          `My background in clinical documentation integrity, revenue cycle management, and healthcare data analytics aligns perfectly with your needs. I've successfully implemented technology solutions that improve patient outcomes and operational efficiency across multiple healthcare organizations.`,
-          `I would love to discuss how my experience can contribute to ${portfolio.company_name}'s continued success and growth. Thank you for considering my application.`
-        ],
+    paragraphs: [],
     signature: {
       name: "Jordan Leahy",
       website: "jordanwilliamleahy.com"
     }
   };
+
+  // Handle new structured format or legacy format
+  if (portfolio.generated_content?.cover_letter) {
+    if (typeof portfolio.generated_content.cover_letter === 'object') {
+      // New structured format
+      coverLetterContent.structured = portfolio.generated_content.cover_letter;
+      coverLetterContent.paragraphs = [portfolio.generated_content.cover_letter];
+    } else {
+      // Legacy string format
+      coverLetterContent.paragraphs = [portfolio.generated_content.cover_letter];
+    }
+  } else {
+    // Fallback content
+    coverLetterContent.paragraphs = [
+      `I'm writing to express my strong interest in joining ${portfolio.company_name}. With over 10 years of experience in healthcare technology and AI applications, I'm excited about the opportunity to contribute to your team's mission.`,
+      `My background in clinical documentation integrity, revenue cycle management, and healthcare data analytics aligns perfectly with your needs. I've successfully implemented technology solutions that improve patient outcomes and operational efficiency across multiple healthcare organizations.`,
+      `I would love to discuss how my experience can contribute to ${portfolio.company_name}'s continued success and growth. Thank you for considering my application.`
+    ];
+  }
 
   return (
     <CoverLetterPageLayout>

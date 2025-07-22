@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -118,9 +117,9 @@ About Jordan Leahy:
       });
     }
 
-    // Create enhanced cover letter generation prompt
+    // Create enhanced cover letter generation prompt with structured output
     const coverLetterPrompt = `
-You are an expert career consultant who writes compelling, high-impact cover letters. Create a professional cover letter for Jordan Leahy applying to ${companyName}.
+You are an expert career consultant who writes compelling, SCANNABLE cover letters optimized for 15-second reviews. Create a structured cover letter for Jordan Leahy applying to ${companyName}.
 
 Company Name: ${companyName}
 Job Description: ${jobDescription}
@@ -128,31 +127,36 @@ ${jobDescriptionLink ? `Job Posting URL: ${jobDescriptionLink}` : ''}
 
 ${personalizedProfile}
 
-CRITICAL FORMATTING REQUIREMENTS:
-- Structure as distinct, impactful paragraphs (3-4 paragraphs total)
-- Start each paragraph with a strong opening sentence
-- Use specific metrics, numbers, and concrete achievements
-- Keep paragraphs focused on one key message each
-- End with a confident call-to-action
+CRITICAL FORMATTING REQUIREMENTS FOR SCANNABILITY:
+- Structure as 4 distinct, visually scannable sections
+- Use bullet points, bold text, and numbers for key metrics
+- Keep sentences under 20 words each
+- Include specific metrics and achievements that pop visually
+- Make it scannable in under 15 seconds
 
-Write a compelling cover letter with this EXACT structure:
-
-PARAGRAPH 1 (Opening Hook): Start with a powerful statement about Jordan's specific expertise that directly connects to the role. Mention the company by name and demonstrate immediate understanding of their challenges/goals.
-
-PARAGRAPH 2 (Proven Impact): Focus on 1-2 specific achievements from the case studies above. Include concrete metrics, technologies used, and measurable outcomes that directly relate to the job requirements.
-
-PARAGRAPH 3 (Strategic Alignment): Show deep understanding of the company's mission and explain how Jordan's unique experience positions him to drive specific value. Reference relevant thought leadership or projects.
-
-PARAGRAPH 4 (Confident Close): Express genuine enthusiasm and propose next steps. Include a confident statement about the value Jordan will bring.
+Return ONLY a JSON object with this EXACT structure:
+{
+  "opening_hook": "One powerful sentence showing immediate value Jordan brings to [Company]. Include a key metric or achievement.",
+  "key_achievements": [
+    "• **[Metric/Number]**: Specific achievement with measurable impact",
+    "• **[Technology/Skill]**: Brief description of relevant expertise", 
+    "• **[Result/Outcome]**: Quantified success story"
+  ],
+  "strategic_fit": [
+    "Perfect alignment point #1 between Jordan's experience and company needs",
+    "Key connection #2 that shows deep understanding of their challenges"
+  ],
+  "call_to_action": "Confident, action-oriented closing that proposes specific next steps"
+}
 
 Requirements:
-- Each paragraph should be 2-4 sentences maximum
-- Include specific metrics and achievements from the real projects
-- Use confident, action-oriented language
-- Target 400-500 words total
-- Feel personal and authentic, not templated
+- Each achievement bullet must include a bold metric/keyword
+- Use specific numbers, percentages, and concrete results
+- Keep strategic_fit items under 25 words each
+- Make opening_hook attention-grabbing with immediate value
+- Ensure call_to_action is confident and specific
 
-Return ONLY the cover letter text with clear paragraph breaks, no JSON formatting or additional structure.
+Focus on healthcare technology expertise, AI/ML applications, revenue cycle management, and measurable business impact.
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -166,7 +170,7 @@ Return ONLY the cover letter text with clear paragraph breaks, no JSON formattin
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert career consultant who creates highly targeted, personalized cover letters. You understand how to analyze job descriptions and create compelling narratives that demonstrate perfect fit. Always respond with just the cover letter text.' 
+            content: 'You are an expert career consultant who creates highly targeted, SCANNABLE cover letters optimized for quick review. Always respond with valid JSON only.' 
           },
           { role: 'user', content: coverLetterPrompt }
         ],
@@ -180,10 +184,24 @@ Return ONLY the cover letter text with clear paragraph breaks, no JSON formattin
     }
 
     const data = await response.json();
-    const coverLetter = data.choices[0].message.content;
+    let coverLetterContent = data.choices[0].message.content;
+
+    // Parse the JSON response
+    let structuredContent;
+    try {
+      structuredContent = JSON.parse(coverLetterContent);
+    } catch (parseError) {
+      console.error('Failed to parse JSON response, using fallback format');
+      structuredContent = {
+        opening_hook: coverLetterContent,
+        key_achievements: [],
+        strategic_fit: [],
+        call_to_action: "I would love to discuss how my experience can contribute to your team's success."
+      };
+    }
 
     return new Response(JSON.stringify({ 
-      cover_letter: coverLetter,
+      cover_letter: structuredContent,
       case_studies_used: caseStudies?.length || 0,
       blog_posts_used: blogPosts?.length || 0
     }), {

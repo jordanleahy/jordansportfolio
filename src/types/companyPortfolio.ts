@@ -23,6 +23,13 @@ export interface CompanyPortfolioInput {
   status?: 'draft' | 'completed' | 'published';
 }
 
+export interface StructuredCoverLetter {
+  opening_hook: string;
+  key_achievements: string[];
+  strategic_fit: string[];
+  call_to_action: string;
+}
+
 export interface GeneratedContent {
-  cover_letter: string;
+  cover_letter: string | StructuredCoverLetter;
 }
