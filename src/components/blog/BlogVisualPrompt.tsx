@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,8 @@ interface BlogVisualPromptProps {
   content: string;
   category?: 'cdi' | 'contracts' | 'forms' | 'coding ai';
 }
+
+type AspectRatio = '16:9' | '3:4' | '9:16' | '4:3' | null;
 
 const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
 Healthcare Vector Illustration Generator
@@ -116,17 +117,44 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
   const [copied, setCopied] = useState(false);
   const [isFromCache, setIsFromCache] = useState(false);
   const [cacheManagementOpen, setCacheManagementOpen] = useState(false);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(null);
+  const [basePrompt, setBasePrompt] = useState('');
   const { toast } = useToast();
 
-  const generateImagePrompt = async (forceRegenerate = false) => {
+  const aspectRatioOptions = [
+    { value: '16:9' as const, label: '16:9', description: 'widescreen format' },
+    { value: '3:4' as const, label: '3:4', description: 'portrait format' },
+    { value: '9:16' as const, label: '9:16', description: 'mobile/vertical format' },
+    { value: '4:3' as const, label: '4:3', description: 'standard format' }
+  ];
+
+  const handleAspectRatioSelect = (ratio: AspectRatio) => {
+    if (!basePrompt) return;
+
+    if (selectedAspectRatio === ratio) {
+      // If clicking the same ratio, reset to base prompt
+      setSelectedAspectRatio(null);
+      setGeneratedPrompt(basePrompt);
+    } else {
+      setSelectedAspectRatio(ratio);
+      const aspectRatioInstruction = `Aspect Ratio: ${ratio} (${aspectRatioOptions.find(opt => opt.value === ratio)?.description})`;
+      setGeneratedPrompt(aspectRatioInstruction + '\n\n' + basePrompt);
+    }
+  };
+
+  const handleResetPrompt = () => {
+    setSelectedAspectRatio(null);
+    setGeneratedPrompt(basePrompt);
+  };
+
+  const generateImagePrompt = async () => {
     setIsGenerating(true);
-    setIsFromCache(false);
     try {
       const userContent = `Headline: ${headline}\nContent: ${content}`;
       const cacheKey = `blog_visual_prompt_${category}_${btoa(userContent).slice(0, 20)}`;
       
-      // Check if we have a cached prompt (unless forcing regeneration)
-      if (!forceRegenerate) {
+      // Check if we have a cached prompt
+      if (!isGenerating) {
         const { data: cachedData } = await supabase
           .from('cached_prompts')
           .select('prompt_text')
@@ -135,6 +163,7 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
           .single();
 
         if (cachedData?.prompt_text) {
+          setBasePrompt(cachedData.prompt_text);
           setGeneratedPrompt(cachedData.prompt_text);
           setIsFromCache(true);
           return;
@@ -164,7 +193,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
 
       console.log('Function response:', data);
       const generatedText = data.generatedText;
-      
+
       if (!generatedText) {
         throw new Error('No generated text received from function');
       }
@@ -183,6 +212,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
           });
       }
       
+      setBasePrompt(generatedText);
       setGeneratedPrompt(generatedText);
       setIsFromCache(false);
     } catch (error) {
@@ -212,7 +242,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
   };
 
   const handleRegenerate = () => {
-    generateImagePrompt(true);
+    generateImagePrompt();
   };
 
   React.useEffect(() => {
@@ -224,6 +254,8 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
   React.useEffect(() => {
     if (!isOpen) {
       setGeneratedPrompt('');
+      setBasePrompt('');
+      setSelectedAspectRatio(null);
       setCopied(false);
       setIsFromCache(false);
     }
@@ -276,7 +308,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                     <div className="flex items-center gap-2">
                       {isFromCache && (
                         <Button
-                          onClick={handleRegenerate}
+                          onClick={() => generateImagePrompt()}
                           variant="ghost"
                           size="sm"
                           className="flex items-center gap-2 text-muted-foreground"
@@ -293,16 +325,51 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                     className="min-h-[300px] mt-2 font-mono text-sm"
                   />
                 </div>
+
+                {basePrompt && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Aspect Ratio Options:</label>
+                      {selectedAspectRatio && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleResetPrompt}
+                          className="text-xs"
+                        >
+                          <RotateCcw className="h-3 w-3 mr-1" />
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {aspectRatioOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={selectedAspectRatio === option.value ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleAspectRatioSelect(option.value)}
+                          className="text-sm"
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Click an aspect ratio to append it to your prompt, or click again to remove it.
+                    </p>
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-1">
                     <p className="text-sm text-muted-foreground">
                       Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
                     </p>
-                    {!isFromCache && (
+                    {isFromCache && (
                       <div className="flex items-center gap-1 text-xs text-green-600">
                         <Sparkles className="h-3 w-3" />
-                        Freshly generated
+                        Using cached prompt
                       </div>
                     )}
                   </div>
