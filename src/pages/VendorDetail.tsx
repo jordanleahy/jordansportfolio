@@ -888,8 +888,8 @@ export default function VendorDetail() {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
             <div className="xl:col-span-2 space-y-6 lg:space-y-8">
-              {/* Product Jobs Card - Admin Only */}
-              <ProductJobsCard vendorId={vendor.id} />
+              {/* Product Jobs Card - Admin Only - Updated to pass vendor prop */}
+              <ProductJobsCard vendorId={vendor.id} vendor={vendor} />
               
               <EditableSection 
                 vendor={vendor} 

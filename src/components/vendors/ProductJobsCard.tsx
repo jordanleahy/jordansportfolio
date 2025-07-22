@@ -26,14 +26,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useVendorJobs, useCreateVendorJob, useUpdateVendorJob, useDeleteVendorJob, type VendorJob } from "@/hooks/useVendorJobs";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useVendorBySlug } from "@/hooks/useVendors";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import type { Vendor } from "@/types/vendor";
 
 interface ProductJobsCardProps {
   vendorId: string;
-  vendorSlug?: string;
+  vendor: Vendor;
 }
 
 interface JobFormData {
@@ -50,12 +50,11 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
-export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vendorSlug }) => {
+export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vendor }) => {
   const { isAdmin } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: jobs = [], isLoading } = useVendorJobs(vendorId);
-  const { data: vendor } = useVendorBySlug(vendorSlug || '');
   const createJobMutation = useCreateVendorJob();
   const updateJobMutation = useUpdateVendorJob();
   const deleteJobMutation = useDeleteVendorJob();
