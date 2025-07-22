@@ -14,9 +14,10 @@ interface AddVendorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onVendorAdded: () => void;
+  secAccessionnumber?: string;
 }
 
-export const AddVendorModal = ({ isOpen, onClose, onVendorAdded }: AddVendorModalProps) => {
+export const AddVendorModal = ({ isOpen, onClose, onVendorAdded, secAccessionnumber }: AddVendorModalProps) => {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -348,6 +349,7 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
         research_data: {},
         company_data: {},
         user_id: user.id,
+        sec_accession_number: secAccessionnumber || null,
       };
 
       const { error } = await supabase

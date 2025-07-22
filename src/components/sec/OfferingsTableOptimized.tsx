@@ -20,7 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  ExternalLink
+  ExternalLink,
+  Plus
 } from "lucide-react";
 import { useOfferings, useOfferingDetail } from "@/hooks/useSecQueries";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -33,11 +34,13 @@ import { OfferingCard } from "./OfferingCard";
 interface OfferingsTableOptimizedProps {
   filters: any;
   onCompanySelect: (company: any) => void;
+  onAddVendor?: (accessionnumber: string) => void;
 }
 
 export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = ({ 
   filters, 
-  onCompanySelect 
+  onCompanySelect,
+  onAddVendor
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("dateOfFirstSale");
@@ -247,6 +250,7 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                       setSelectedOfferingId(offeringId);
                       setIsModalOpen(true);
                     }}
+                    onAddVendor={onAddVendor}
                   />
                 ))}
               </div>
@@ -255,18 +259,19 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
         ) : (
           <div className="overflow-x-auto">
             <Table>
-               <TableHeader>
-                 <TableRow>
-                   <TableHead>
-                     <Button
-                      variant="ghost"
-                      onClick={() => handleSort("companyName")}
-                      className="h-auto p-0 font-semibold hover:bg-muted/50"
-                    >
-                      Company Name
-                      {getSortIcon("companyName")}
-                    </Button>
-                  </TableHead>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">Add</TableHead>
+                    <TableHead>
+                      <Button
+                       variant="ghost"
+                       onClick={() => handleSort("companyName")}
+                       className="h-auto p-0 font-semibold hover:bg-muted/50"
+                     >
+                       Company Name
+                       {getSortIcon("companyName")}
+                     </Button>
+                   </TableHead>
                   <TableHead>
                     <Button
                       variant="ghost"
@@ -321,9 +326,9 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 </TableRow>
               </TableHeader>
               <TableBody>
-                 {error ? (
-                   <TableRow>
-                     <TableCell colSpan={7} className="text-center py-8 text-red-500">
+                  {error ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-red-500">
                       <div>
                         <p className="font-semibold">Error loading SEC offerings</p>
                         <p className="text-sm mt-1">{error.message}</p>
@@ -338,18 +343,18 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                       </div>
                     </TableCell>
                   </TableRow>
-                 ) : isSearchTooShort ? (
-                   <TableRow>
-                     <TableCell colSpan={7} className="text-center py-8 text-amber-600">
+                  ) : isSearchTooShort ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-amber-600">
                       <div>
                         <p className="font-semibold">Search too short</p>
                         <p className="text-sm mt-1">Please type at least 2 characters to search</p>
                       </div>
                     </TableCell>
                   </TableRow>
-                 ) : offerings.length === 0 ? (
-                   <TableRow>
-                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  ) : offerings.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       <div>
                         <p className="font-semibold">No SEC offerings found</p>
                         <p className="text-sm mt-1">
@@ -364,17 +369,27 @@ export const OfferingsTableOptimized: React.FC<OfferingsTableOptimizedProps> = (
                 ) : (
                   offerings.map((offering: any) => {
                     return (
-                      <TableRow 
-                        key={offering.accessionnumber}
-                        className="hover:bg-muted/50 transition-colors"
-                      >
-                        <TableCell 
-                          className="font-medium cursor-pointer"
-                          onClick={() => {
-                            setSelectedOfferingId(offering.accessionnumber);
-                            setIsModalOpen(true);
-                          }}
-                        >
+                       <TableRow 
+                         key={offering.accessionnumber}
+                         className="hover:bg-muted/50 transition-colors"
+                       >
+                         <TableCell className="w-16">
+                           <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={() => onAddVendor?.(offering.accessionnumber)}
+                             className="h-8 w-8 p-0"
+                           >
+                             <Plus className="h-4 w-4" />
+                           </Button>
+                         </TableCell>
+                         <TableCell 
+                           className="font-medium cursor-pointer"
+                           onClick={() => {
+                             setSelectedOfferingId(offering.accessionnumber);
+                             setIsModalOpen(true);
+                           }}
+                         >
                           <div>
                             <div className="font-semibold">
                               {offering.issuers?.[0]?.entityname || offering.company_name || 'Unknown Company'}

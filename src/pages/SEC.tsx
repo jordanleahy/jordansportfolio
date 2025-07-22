@@ -21,6 +21,7 @@ const SEC = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  const [selectedSecAccessionNumber, setSelectedSecAccessionNumber] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize filters from URL params
@@ -75,10 +76,16 @@ const SEC = () => {
 
   const handleVendorAdded = () => {
     setIsAddVendorModalOpen(false);
+    setSelectedSecAccessionNumber(null);
     toast({
       title: "Success",
       description: "Vendor added successfully! You can find it in the Vendors section.",
     });
+  };
+
+  const handleAddVendor = (accessionnumber: string) => {
+    setSelectedSecAccessionNumber(accessionnumber);
+    setIsAddVendorModalOpen(true);
   };
 
   return (
@@ -184,10 +191,11 @@ const SEC = () => {
 
             {/* Main Table - Optimized - Full Width */}
             <div className="flex-1 min-w-0 pr-4">
-              <OfferingsTableOptimized 
-                filters={filters}
-                onCompanySelect={setSelectedCompany}
-              />
+            <OfferingsTableOptimized 
+              filters={filters} 
+              onCompanySelect={setSelectedCompany}
+              onAddVendor={handleAddVendor}
+            />
             </div>
           </div>
         </div>
@@ -201,8 +209,12 @@ const SEC = () => {
         {/* Add Vendor Modal */}
         <AddVendorModal
           isOpen={isAddVendorModalOpen}
-          onClose={() => setIsAddVendorModalOpen(false)}
+          onClose={() => {
+            setIsAddVendorModalOpen(false);
+            setSelectedSecAccessionNumber(null);
+          }}
           onVendorAdded={handleVendorAdded}
+          secAccessionnumber={selectedSecAccessionNumber || undefined}
         />
       </div>
     </PageLayout>

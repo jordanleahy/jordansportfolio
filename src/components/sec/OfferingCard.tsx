@@ -3,16 +3,18 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, DollarSign, Calendar, TrendingUp } from "lucide-react";
+import { MapPin, DollarSign, Calendar, TrendingUp, Plus } from "lucide-react";
 
 interface OfferingCardProps {
   offering: any;
   onViewDetails: (offeringId: string) => void;
+  onAddVendor?: (accessionnumber: string) => void;
 }
 
 export const OfferingCard: React.FC<OfferingCardProps> = ({
   offering,
-  onViewDetails
+  onViewDetails,
+  onAddVendor
 }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -116,6 +118,21 @@ export const OfferingCard: React.FC<OfferingCardProps> = ({
             {offering.signatures?.[0]?.nameofsigner || offering.primary_signer || 'Executive not specified'}
           </span>
         </div>
+
+        {/* Add to Vendors button */}
+        {onAddVendor && (
+          <div className="pt-3 border-t border-border/50">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onAddVendor(offering.accessionnumber)}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add to Vendors
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

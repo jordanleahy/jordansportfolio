@@ -1361,6 +1361,7 @@ export type Database = {
           partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
+          sec_accession_number: string | null
           sitemap_agent_id: string | null
           sitemap_fetched_at: string | null
           sitemap_tree: Json | null
@@ -1407,6 +1408,7 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
+          sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null
           sitemap_tree?: Json | null
@@ -1453,6 +1455,7 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
+          sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null
           sitemap_tree?: Json | null
@@ -1469,6 +1472,20 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendors_sec_accession_number_fkey"
+            columns: ["sec_accession_number"]
+            isOneToOne: false
+            referencedRelation: "mv_offerings_enriched"
+            referencedColumns: ["accessionnumber"]
+          },
+          {
+            foreignKeyName: "vendors_sec_accession_number_fkey"
+            columns: ["sec_accession_number"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["accessionnumber"]
+          },
           {
             foreignKeyName: "vendors_sitemap_agent_id_fkey"
             columns: ["sitemap_agent_id"]
