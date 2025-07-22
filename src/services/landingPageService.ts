@@ -7,17 +7,26 @@ export const generateLandingPageContent = async (
   jobApplication: JobApplication
 ): Promise<GeneratedContent> => {
   try {
+    // Get the current user for personalization
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      throw new Error('User authentication required for content generation');
+    }
+
     console.log('Calling generate-portfolio-content function with data:', {
       jobDescription: jobApplication.job_description?.substring(0, 100) + '...',
       companyName: jobApplication.company_name,
-      hasJobLink: !!jobApplication.job_description_link
+      hasJobLink: !!jobApplication.job_description_link,
+      userId: user.id
     });
 
     const { data, error } = await supabase.functions.invoke("generate-portfolio-content", {
       body: { 
         jobDescription: jobApplication.job_description,
         companyName: jobApplication.company_name,
-        jobDescriptionLink: jobApplication.job_description_link
+        jobDescriptionLink: jobApplication.job_description_link,
+        userId: user.id
       },
     });
 
@@ -30,7 +39,11 @@ export const generateLandingPageContent = async (
       throw new Error('No data returned from portfolio content generation');
     }
 
-    console.log('Generated cover letter successfully');
+    console.log('Generated cover letter successfully', {
+      caseStudiesUsed: data.case_studies_used || 0,
+      vendorsUsed: data.vendors_used || 0,
+      blogPostsUsed: data.blog_posts_used || 0
+    });
     return { cover_letter: data.cover_letter };
   } catch (error: any) {
     console.error("Error generating landing page content:", error);
