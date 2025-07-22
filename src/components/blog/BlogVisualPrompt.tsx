@@ -125,6 +125,7 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
         .from('cached_prompts')
         .select('prompt_text')
         .eq('cache_key', cacheKey)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .single();
 
       if (cachedData?.prompt_text) {
@@ -161,14 +162,18 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
       }
       
       // Cache the generated prompt
-      await supabase
-        .from('cached_prompts')
-        .upsert({
-          cache_key: cacheKey,
-          prompt_text: generatedText,
-          category: 'blog_visual',
-          metadata: { headline, content, category }
-        });
+      const currentUser = await supabase.auth.getUser();
+      if (currentUser.data.user) {
+        await supabase
+          .from('cached_prompts')
+          .upsert({
+            cache_key: cacheKey,
+            prompt_text: generatedText,
+            category: 'blog_visual',
+            metadata: { headline, content, category },
+            user_id: currentUser.data.user.id
+          });
+      }
       
       setGeneratedPrompt(generatedText);
     } catch (error) {

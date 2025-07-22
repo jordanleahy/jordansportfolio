@@ -119,6 +119,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cached_prompts: {
+        Row: {
+          cache_key: string
+          category: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          prompt_text: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cache_key: string
+          category: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          prompt_text: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cache_key?: string
+          category?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          prompt_text?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       case_studies: {
         Row: {
           created_at: string
