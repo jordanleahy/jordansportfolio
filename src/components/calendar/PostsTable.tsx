@@ -810,7 +810,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableProps) => {
                   <TableHead>Day</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>16:9 Image</TableHead>
+                   <TableHead>16:9</TableHead>
                   <TableHead>16:9</TableHead>
                   <TableHead>3:4 Image</TableHead>
                   <TableHead>4:3</TableHead>
