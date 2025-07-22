@@ -54,7 +54,7 @@ export const BlogVisualSection = ({
             </motion.div>
 
             {/* Content Side */}
-            <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+            <div className="md:w-1/2 px-8 pb-8 pt-0 md:p-12 flex flex-col justify-center">
               <motion.h2
                 initial={{ opacity: 0, x: isEven ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
