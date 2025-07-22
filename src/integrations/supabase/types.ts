@@ -487,6 +487,7 @@ export type Database = {
           company_slug: string
           cover_letter: string | null
           created_at: string
+          custom_image_url: string | null
           custom_video_url: string | null
           generated_content: Json | null
           id: string
@@ -500,6 +501,7 @@ export type Database = {
           company_slug: string
           cover_letter?: string | null
           created_at?: string
+          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string
@@ -513,6 +515,7 @@ export type Database = {
           company_slug?: string
           cover_letter?: string | null
           created_at?: string
+          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string
