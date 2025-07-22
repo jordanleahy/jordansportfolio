@@ -181,7 +181,7 @@ Return ONLY the cover letter text, no JSON formatting or additional structure.
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'o3-2025-04-16',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { 
             role: 'system', 
