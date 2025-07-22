@@ -13,6 +13,7 @@ export interface BlogPost {
   hero_subhead: string;
   hero_image_url?: string;
   hero_image_16_9_url?: string;
+  hero_image_4_3_url?: string;
   hero_video_url?: string;
   hero_badge?: string;
   
@@ -76,6 +77,7 @@ export const BlogPostSchema = z.object({
   hero_headline: z.string().optional(),
   hero_subhead: z.string().optional(),
   hero_image_url: z.string().nullable().optional(),
+  hero_image_4_3_url: z.string().nullable().optional(),
   hero_video_url: z.string().nullable().optional(),
   hero_badge: z.string().optional(),
   
