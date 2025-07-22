@@ -15,31 +15,17 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, type } = await req.json();
-    console.log('Received request:', { type, promptLength: prompt?.length });
+    const { prompt, type = 'general' } = await req.json();
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    let systemPrompt = '';
-    
-    switch (type) {
-      case 'title':
-        systemPrompt = 'You are a social media expert. Generate engaging, concise titles for social media posts. Keep them under 60 characters and make them attention-grabbing.';
-        break;
-      case 'description':
-        systemPrompt = 'You are a social media content creator. Write engaging descriptions for social media posts. Include relevant hashtags and keep the tone conversational and engaging. Aim for 100-200 characters.';
-        break;
-      case 'complete':
-        systemPrompt = 'You are a social media expert. Generate both a catchy title (under 60 characters) and an engaging description (100-200 characters with hashtags) for a social media post. Format your response as JSON with "title" and "description" fields.';
-        break;
-      case 'image_prompt':
-        systemPrompt = 'You are an AI image prompt specialist. Create detailed, specific prompts for generating high-quality images based on the user requirements. Focus on visual composition, style, colors, and technical specifications.';
-        break;
-      default:
-        systemPrompt = 'You are a helpful social media content assistant.';
+    if (!prompt) {
+      throw new Error('Prompt is required');
     }
+
+    console.log(`Generating content for type: ${type}`);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -50,48 +36,42 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: systemPrompt },
+          { 
+            role: 'system', 
+            content: type === 'image_prompt' 
+              ? 'You are an expert at creating detailed, professional image generation prompts for AI image generators. Focus on creating clear, specific prompts that will generate high-quality, professional visuals.'
+              : 'You are a helpful assistant that generates high-quality content based on user prompts.'
+          },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Failed to generate content');
+      const errorData = await response.text();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const generatedContent = data.choices[0].message.content;
-    console.log('Generated content length:', generatedContent?.length);
-
-    // Try to parse as JSON for complete type, otherwise return as text
-    let result;
-    if (type === 'complete') {
-      try {
-        result = JSON.parse(generatedContent);
-      } catch {
-        // If JSON parsing fails, extract title and description manually
-        const lines = generatedContent.split('\n').filter(line => line.trim());
-        result = {
-          title: lines[0]?.replace(/^(Title:|title:|\*\*Title:\*\*)/i, '').trim() || 'Generated Title',
-          description: lines.slice(1).join(' ').trim() || 'Generated description'
-        };
-      }
-    } else if (type === 'image_prompt') {
-      result = { generatedText: generatedContent };
-    } else {
-      result = { content: generatedContent };
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response from OpenAI API');
     }
 
-    return new Response(JSON.stringify(result), {
+    const generatedText = data.choices[0].message.content;
+
+    return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in generate-content function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: 'Failed to generate content. Please check your request and try again.'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
