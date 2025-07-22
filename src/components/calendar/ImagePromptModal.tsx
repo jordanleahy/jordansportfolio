@@ -202,8 +202,8 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
       setGeneratedPrompt(basePrompt);
     } else {
       setSelectedAspectRatio(ratio);
-      const aspectRatioInstruction = `\n\nAspect Ratio: ${ratio} (${aspectRatioOptions.find(opt => opt.value === ratio)?.description})`;
-      setGeneratedPrompt(basePrompt + aspectRatioInstruction);
+      const aspectRatioInstruction = `Aspect Ratio: ${ratio} (${aspectRatioOptions.find(opt => opt.value === ratio)?.description})`;
+      setGeneratedPrompt(aspectRatioInstruction + '\n\n' + basePrompt);
     }
   };
 
