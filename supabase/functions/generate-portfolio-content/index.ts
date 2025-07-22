@@ -52,25 +52,6 @@ serve(async (req) => {
       console.log('Case studies fetch error:', caseStudiesError);
     }
 
-    // Fetch user's vendor work for additional context
-    const { data: vendors, error: vendorsError } = await supabase
-      .from('vendors')
-      .select(`
-        company_name,
-        description,
-        core_services,
-        specialties,
-        key_features,
-        competitive_advantages,
-        notable_customers
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'published')
-      .limit(3);
-
-    if (vendorsError) {
-      console.log('Vendors fetch error:', vendorsError);
-    }
 
     // Fetch recent blog posts for thought leadership
     const { data: blogPosts, error: blogError } = await supabase
@@ -113,19 +94,6 @@ About Jordan Leahy:
       });
     }
 
-    // Add vendor/company work highlights
-    if (vendors && vendors.length > 0) {
-      personalizedProfile += `\nIndustry Experience:\n`;
-      vendors.forEach((vendor, index) => {
-        personalizedProfile += `- ${vendor.company_name}: ${vendor.description}\n`;
-        if (vendor.core_services && vendor.core_services.length > 0) {
-          personalizedProfile += `  Specialties: ${vendor.core_services.join(', ')}\n`;
-        }
-        if (vendor.notable_customers && vendor.notable_customers.length > 0) {
-          personalizedProfile += `  Notable clients: ${vendor.notable_customers.slice(0, 3).join(', ')}\n`;
-        }
-      });
-    }
 
     // Add target company information if provided
     if (companyInfo) {
@@ -204,7 +172,6 @@ Return ONLY the cover letter text, no JSON formatting or additional structure.
     return new Response(JSON.stringify({ 
       cover_letter: coverLetter,
       case_studies_used: caseStudies?.length || 0,
-      vendors_used: vendors?.length || 0,
       blog_posts_used: blogPosts?.length || 0
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
