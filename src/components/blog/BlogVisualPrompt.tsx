@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -24,15 +23,16 @@ Create text prompts that generate flat, modern vector illustrations used in heal
 ✍️ Prompt Format (Template)
 "A healthcare-style vector illustration showing [USER INPUT SCENE] in a clinical or office setting. The design should reflect the same tone and style as corporate infographics—clean, clear, and visually educational."
 
-Focus on the scene, setting, and layout, not on narrative backstory or detailed character attributes.
+Focus on the scene, setting, and layout, not on narrative backstory. Do not include human figures, people, or characters in the generated images.
 
 🧩 Example Scene Elements
 - EHR/chart review screens, audit flags, code sets (#ICD-10, #CPT)
-- Clinicians or coders at desks, laptops, clipboards
+- Coding workstations, laptops, digital interfaces, clipboards
 - Document stacks, magnifying-glass icons, checkmarks/x-marks
 - Dashboards with metrics (e.g., "Denial Rate," "Pre-bill Accuracy")
 - Clocks or timers indicating turnaround
 - Hospital corridors, office partitions, meeting rooms
+- Medical necessity documentation systems and workflows
 
 ✅ Updated Visual Style & Layout Guidance
 
@@ -48,17 +48,17 @@ Use a professional healthcare palette—bright but not neon:
 - Flat vector design only
 - No gradients, no textures, no outlines
 - Minimal soft shadows for element separation
-- Simplified, geometric shapes for people and objects
+- Simplified, geometric shapes for objects and interfaces
 - No photorealism—keep forms schematic and iconographic
 
 🏙️ Composition & Scene Layout
-- **Foreground:** Primary action (e.g., coder reviewing a flagged chart) centered and prominent
+- **Foreground:** Primary system or process (e.g., coding dashboard displaying flagged charts) centered and prominent
 - **Mid-ground:** Supporting elements (dashboards, document icons, audit alerts)
 - **Background:** Abstracted clinic/office environment—desks, partitions, simple window shapes
 - **Iconography:** Embed symbols (checkmarks, clocks, alert triangles) naturally—don't float them arbitrarily
 
 📐 Aspect Ratio & Safe Zone
-- **Safe Zone:** Keep all critical elements—text, icons, human figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
+- **Safe Zone:** Keep all critical elements—text, icons, charts, interfaces—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
 - **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to 4:3 aspect ratio never cuts off your core content.`;
 
 const CONTRACTS_SYSTEM_PROMPT = `💼 Contracts & RCM Image Prompt Instructions:
@@ -70,15 +70,16 @@ Create text prompts that generate flat, modern vector illustrations used in heal
 ✍️ Prompt Format (Template)
 "A professional business-style vector illustration showing [USER INPUT SCENE] in a corporate office or healthcare business setting. The design should reflect the same tone and style as business infographics—clean, professional, and visually educational."
 
-Focus on the business scene, office setting, and professional layout, not on narrative backstory or detailed character attributes.
+Focus on the business scene, office setting, and professional layout, not on narrative backstory. Do not include human figures, people, or characters in the generated images.
 
 🧩 Example Scene Elements
-- Contract documents, billing systems, payer portals, claim processing screens
-- Business professionals at desks, conference tables, presentation screens
+- Contract management systems, billing interfaces, payer portals, claim processing screens
+- Business workstations, presentation screens, digital dashboards
 - Charts with revenue metrics, denial rates, payment timelines
-- Handshakes, contract signatures, approval workflows
+- Contract documents, approval workflows, signature systems
 - Office buildings, meeting rooms, corporate environments
 - Filing systems, audit trails, compliance documentation
+- Payer coverage determination systems and workflows
 
 ✅ Updated Visual Style & Layout Guidance
 
@@ -94,17 +95,17 @@ Use a professional business palette—trustworthy and corporate:
 - Flat vector design only
 - No gradients, no textures, no outlines
 - Minimal soft shadows for element separation
-- Simplified, geometric shapes for people and objects
+- Simplified, geometric shapes for objects and interfaces
 - No photorealism—keep forms schematic and iconographic
 
 🏙️ Composition & Scene Layout
-- **Foreground:** Primary business action (e.g., contract review, billing dashboard) centered and prominent
+- **Foreground:** Primary business system or process (e.g., contract management dashboard, billing workflow) centered and prominent
 - **Mid-ground:** Supporting elements (charts, documents, approval workflows)
 - **Background:** Professional office environment—desks, meeting rooms, corporate settings
-- **Iconography:** Embed business symbols (handshakes, documents, charts) naturally—don't float them arbitrarily
+- **Iconography:** Embed business symbols (documents, charts, approval indicators) naturally—don't float them arbitrarily
 
 📐 Aspect Ratio & Safe Zone
-- **Safe Zone:** Keep all critical elements—text, icons, figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
+- **Safe Zone:** Keep all critical elements—text, icons, charts, interfaces—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
 - **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to 4:3 aspect ratio never cuts off your core content.`;
 
 export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'cdi' }: BlogVisualPromptProps) => {
