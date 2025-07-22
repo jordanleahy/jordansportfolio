@@ -26,7 +26,7 @@ Create text prompts that generate flat, modern vector illustrations used in heal
 ✍️ Prompt Format (Template)
 "A healthcare-style vector illustration showing [USER INPUT SCENE] in a clinical or office setting. The design should reflect the same tone and style as corporate infographics—clean, clear, and visually educational."
 
-Focus on the scene, setting, and layout, not on narrative backstory or detailed character attributes.
+Focus on the scene, setting, and layout, not on narrative backstory or detailed character attributes. Do not include titles or aspect ratio specifications in the output.
 
 🧩 Example Scene Elements
 - EHR/chart review screens, audit flags, code sets (#ICD-10, #CPT)
