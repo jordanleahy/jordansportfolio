@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, FileText, Edit, Save, X } from "lucide-react";
+import { ExternalLink, FileText, Edit, Save, X, Upload, Image, Video } from "lucide-react";
 import { CoverLetterPageLayout } from "@/components/cover-letter/CoverLetterPageLayout";
 import { VideoWithCoverLetterLayout } from "@/components/cover-letter/VideoWithCoverLetterLayout";
 import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
 import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
 import { CoverLetterContent } from "@/data/coverLetterContent";
 import { PortfolioVideoUploadSection } from "./PortfolioVideoUploadSection";
+import { FileUpload } from "@/components/ui/file-upload";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { toast } from "sonner";
 
 interface CoverLetterPortfolioViewProps {
@@ -33,7 +35,14 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const updatePortfolio = useUpdateCompanyPortfolio();
+  const { uploadFile, uploading } = useFileUpload({ 
+    bucket: 'general', 
+    folder: 'portfolio-media' 
+  });
+  
   const [isEditing, setIsEditing] = useState(false);
+  const [showMediaUpload, setShowMediaUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editData, setEditData] = useState({
     opening_hook: '',
     key_achievements: [''],
@@ -42,6 +51,43 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
   });
   
   const jobApplication = portfolio.job_applications;
+
+  const handleFileSelect = (file: File | null) => {
+    setSelectedFile(file);
+  };
+
+  const handleMediaUpload = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file to upload");
+      return;
+    }
+
+    try {
+      const uploadedUrl = await uploadFile(selectedFile);
+      if (uploadedUrl) {
+        // Update portfolio with new media URL
+        const isVideo = selectedFile.type.startsWith('video/');
+        const updateData = isVideo 
+          ? { custom_video_url: uploadedUrl }
+          : { generated_content: { 
+              ...portfolio.generated_content, 
+              hero_image_url: uploadedUrl 
+            }};
+
+        await updatePortfolio.mutateAsync({
+          id: portfolio.id,
+          ...updateData
+        });
+
+        toast.success(`${isVideo ? 'Video' : 'Image'} uploaded successfully!`);
+        setShowMediaUpload(false);
+        setSelectedFile(null);
+      }
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      toast.error("Failed to upload media. Please try again.");
+    }
+  };
 
   // Initialize edit data when entering edit mode
   const handleStartEdit = () => {
@@ -256,6 +302,82 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
                     placeholder="Confident next step referencing the role or company challenge"
                     rows={2}
                   />
+                </div>
+              </CardContent>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* Media Upload Section - Available to all users */}
+      {user && (
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Add Photo or Video</CardTitle>
+                <Button 
+                  onClick={() => setShowMediaUpload(!showMediaUpload)} 
+                  size="sm"
+                  variant="outline"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {showMediaUpload ? 'Hide Upload' : 'Upload Media'}
+                </Button>
+              </div>
+            </CardHeader>
+            {showMediaUpload && (
+              <CardContent className="space-y-4">
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  accept="image/*,video/*"
+                  maxSize={100}
+                  label="Choose Photo or Video"
+                  description="Upload a photo or video to personalize your portfolio"
+                  preview={true}
+                />
+                
+                {selectedFile && (
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      onClick={handleMediaUpload} 
+                      disabled={uploading || updatePortfolio.isPending}
+                      className="flex-1"
+                    >
+                      {uploading ? (
+                        <>
+                          <Upload className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : updatePortfolio.isPending ? (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload {selectedFile.type.startsWith('video/') ? 'Video' : 'Photo'}
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setShowMediaUpload(false);
+                      }}
+                      variant="outline"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+                
+                <div className="text-sm text-muted-foreground">
+                  <p>• Photos will be used as hero images</p>
+                  <p>• Videos will replace the default video</p>
+                  <p>• Maximum file size: 100MB</p>
                 </div>
               </CardContent>
             )}
