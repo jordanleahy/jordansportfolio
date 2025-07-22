@@ -669,6 +669,54 @@ export type Database = {
         }
         Relationships: []
       }
+      home_health: {
+        Row: {
+          address: string | null
+          address1: string | null
+          city: string | null
+          created_at: string
+          home_health_agency_name: string | null
+          id: number
+          region: string | null
+          state: string | null
+          total_medicare_patients: number | null
+          total_medicare_visits: number | null
+          total_patients: number | null
+          website: string | null
+          zip: number | null
+        }
+        Insert: {
+          address?: string | null
+          address1?: string | null
+          city?: string | null
+          created_at?: string
+          home_health_agency_name?: string | null
+          id?: number
+          region?: string | null
+          state?: string | null
+          total_medicare_patients?: number | null
+          total_medicare_visits?: number | null
+          total_patients?: number | null
+          website?: string | null
+          zip?: number | null
+        }
+        Update: {
+          address?: string | null
+          address1?: string | null
+          city?: string | null
+          created_at?: string
+          home_health_agency_name?: string | null
+          id?: number
+          region?: string | null
+          state?: string | null
+          total_medicare_patients?: number | null
+          total_medicare_visits?: number | null
+          total_patients?: number | null
+          website?: string | null
+          zip?: number | null
+        }
+        Relationships: []
+      }
       issuers: {
         Row: {
           accessionnumber: string
@@ -766,6 +814,9 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          attachment_filename: string | null
+          attachment_type: string | null
+          attachment_url: string | null
           company_name: string
           cover_letter_link: string | null
           created_at: string
@@ -777,6 +828,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attachment_filename?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
           company_name: string
           cover_letter_link?: string | null
           created_at?: string
@@ -788,6 +842,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attachment_filename?: string | null
+          attachment_type?: string | null
+          attachment_url?: string | null
           company_name?: string
           cover_letter_link?: string | null
           created_at?: string

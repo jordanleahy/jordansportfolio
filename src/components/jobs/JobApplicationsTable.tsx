@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Edit, Trash2, FileText, Building2 } from "lucide-react";
+import { ExternalLink, Edit, Trash2, FileText, Building2, Paperclip, Image, Video } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,20 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   const { data: portfolios } = useCompanyPortfolios();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const getAttachmentIcon = (attachmentType?: string) => {
+    if (!attachmentType) return <Paperclip className="h-3 w-3" />;
+    if (attachmentType.startsWith('image/')) return <Image className="h-3 w-3" />;
+    if (attachmentType.startsWith('video/')) return <Video className="h-3 w-3" />;
+    return <Paperclip className="h-3 w-3" />;
+  };
+
+  const getAttachmentLabel = (attachmentType?: string) => {
+    if (!attachmentType) return "File";
+    if (attachmentType.startsWith('image/')) return "Image";
+    if (attachmentType.startsWith('video/')) return "Video";
+    return "File";
+  };
 
   const handleDelete = (id: string) => {
     onDelete(id);
@@ -189,6 +203,19 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     </a>
                   </Button>
                 ) : null}
+                {application.attachment_url ? (
+                  <Button variant="outline" size="sm" asChild>
+                    <a 
+                      href={application.attachment_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1"
+                    >
+                      {getAttachmentIcon(application.attachment_type)}
+                      {getAttachmentLabel(application.attachment_type)}
+                    </a>
+                  </Button>
+                ) : null}
               </div>
               
               {/* Applied Date */}
@@ -271,6 +298,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
               <TableHead>Job Link</TableHead>
               <TableHead>Resume</TableHead>
               <TableHead>Cover Letter</TableHead>
+              <TableHead>Attachment</TableHead>
               <TableHead>Applied</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -350,6 +378,29 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     </Button>
                   ) : (
                     <Badge variant="secondary">No link</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {application.attachment_url ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="p-1 h-auto"
+                    >
+                      <a 
+                        href={application.attachment_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                        title={application.attachment_filename}
+                      >
+                        {getAttachmentIcon(application.attachment_type)}
+                        <span className="sr-only">View {getAttachmentLabel(application.attachment_type)}</span>
+                      </a>
+                    </Button>
+                  ) : (
+                    <Badge variant="secondary">No file</Badge>
                   )}
                 </TableCell>
                 <TableCell>

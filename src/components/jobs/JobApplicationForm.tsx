@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileUpload } from "@/components/ui/file-upload";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { JobApplication, JobApplicationInput } from "@/types/jobApplication";
+import { toast } from "sonner";
 
 interface JobApplicationFormProps {
   onSubmit: (data: JobApplicationInput) => void;
@@ -20,15 +23,49 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
     job_description_link: initialData?.job_description_link || "",
     resume_link: initialData?.resume_link || "",
     cover_letter_link: initialData?.cover_letter_link || "",
+    attachment_url: initialData?.attachment_url || "",
+    attachment_filename: initialData?.attachment_filename || "",
+    attachment_type: initialData?.attachment_type || "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { uploadFile, uploading } = useFileUpload({ 
+    bucket: 'general', 
+    folder: 'job-applications' 
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    let finalFormData = { ...formData };
+
+    // Upload file if one is selected
+    if (selectedFile) {
+      try {
+        const uploadedUrl = await uploadFile(selectedFile);
+        if (uploadedUrl) {
+          finalFormData = {
+            ...finalFormData,
+            attachment_url: uploadedUrl,
+            attachment_filename: selectedFile.name,
+            attachment_type: selectedFile.type,
+          };
+        }
+      } catch (error) {
+        toast.error("Failed to upload file. Please try again.");
+        return;
+      }
+    }
+
+    onSubmit(finalFormData);
   };
 
   const handleChange = (field: keyof JobApplicationInput, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileSelect = (file: File | null) => {
+    setSelectedFile(file);
   };
 
   return (
@@ -94,9 +131,18 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
             />
           </div>
 
+          <FileUpload
+            onFileSelect={handleFileSelect}
+            accept="image/*,video/*"
+            maxSize={50}
+            label="Upload Photo or Video"
+            description="Add a photo or video to your job application"
+            currentFile={formData.attachment_filename}
+          />
+
           <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? "Saving..." : initialData ? "Update Application" : "Add Application"}
+            <Button type="submit" disabled={isLoading || uploading} className="flex-1">
+              {uploading ? "Uploading..." : isLoading ? "Saving..." : initialData ? "Update Application" : "Add Application"}
             </Button>
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
