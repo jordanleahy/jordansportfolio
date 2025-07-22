@@ -30,7 +30,7 @@ export const BlogVisualSection = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={`py-16 px-4 ${className}`}
+      className={`px-4 ${className}`}
     >
       <div className="max-w-6xl mx-auto">
         <Card className="overflow-hidden border-0 shadow-lg">
