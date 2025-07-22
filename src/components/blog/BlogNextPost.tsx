@@ -49,7 +49,7 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
             <div className="md:flex">
               {/* Image */}
               {(nextPost.hero_image_4_3_url || nextPost.hero_image_url) && (
-                <div className="md:w-1/3 overflow-hidden aspect-[4/3]">
+                <div className="md:w-1/3 overflow-hidden">
                   <OptimizedImage
                     src={nextPost.hero_image_4_3_url || nextPost.hero_image_url!}
                     alt={nextPost.hero_headline}
