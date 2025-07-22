@@ -797,7 +797,7 @@ export const PostsTable = ({
                             </ImageHoverOverlay> : <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                               {uploading916PostId === post.id ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <div className="flex flex-col items-center">
                                   <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground">16:9 Vid</span>
+                                  <span className="text-xs text-muted-foreground">16:9</span>
                                 </div>}
                             </div>}
                         </div>
@@ -950,7 +950,7 @@ export const PostsTable = ({
                   <TableHead>Title</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>16:9 Image</TableHead>
-                  <TableHead>16:9 Vid</TableHead>
+                  <TableHead>16:9</TableHead>
                   <TableHead>3:4 Image</TableHead>
                   <TableHead>3:4 Vid</TableHead>
                   <TableHead>Video</TableHead>
@@ -1012,7 +1012,7 @@ export const PostsTable = ({
                             </ImageHoverOverlay> : <div className="w-12 h-20 rounded border border-dashed border-muted-foreground/50 flex items-center justify-center bg-muted/30 hover:bg-muted/50 transition-colors">
                               {uploading916PostId === post.id ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <div className="flex flex-col items-center">
                                   <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-xs text-muted-foreground">16:9 Vid</span>
+                                  <span className="text-xs text-muted-foreground">16:9</span>
                                 </div>}
                             </div>}
                         </div>

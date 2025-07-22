@@ -246,7 +246,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
 
           <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
             <VideoUploadCard
-              title="16:9 Vid"
+              title="16:9"
               aspectRatio="16/9"
               videoUrl={formData.image_16_9_video_url}
               onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_video_url: url }))}
