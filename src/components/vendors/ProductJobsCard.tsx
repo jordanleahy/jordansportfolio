@@ -243,7 +243,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
       });
 
       // Navigate to the portfolio page
-      navigate(`/company-portfolio/${companySlug}`);
+      navigate(`/portfolio/${companySlug}`);
 
     } catch (error: any) {
       console.error('Error generating cover letter:', error);
@@ -256,7 +256,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   };
 
   const handleViewCoverPage = () => {
-    const portfolioUrl = `/company-portfolio/${companySlug}`;
+    const portfolioUrl = `/portfolio/${companySlug}`;
     window.open(portfolioUrl, '_blank');
   };
 
