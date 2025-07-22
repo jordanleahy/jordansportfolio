@@ -12,7 +12,8 @@ import {
   Save, 
   X,
   Briefcase,
-  Image
+  Image,
+  Eye
 } from "lucide-react";
 import {
   AlertDialog,
@@ -32,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "@/types/vendor";
 import { JobVisualPrompt } from "@/components/jobs/JobVisualPrompt";
+import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 
 interface ProductJobsCardProps {
   vendorId: string;
@@ -60,6 +62,16 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   const createJobMutation = useCreateVendorJob();
   const updateJobMutation = useUpdateVendorJob();
   const deleteJobMutation = useDeleteVendorJob();
+
+  // Generate company slug (same logic as in handleCreateCoverLetter)
+  const companySlug = vendor.company_name.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+
+  // Check if cover page exists for this company
+  const { data: existingPortfolio } = useCompanyPortfolio(companySlug);
 
   const [isAddingJob, setIsAddingJob] = useState(false);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
@@ -243,6 +255,11 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     }
   };
 
+  const handleViewCoverPage = () => {
+    const portfolioUrl = `/company-portfolio/${companySlug}`;
+    window.open(portfolioUrl, '_blank');
+  };
+
   const handleOpenVisualPrompt = (job: VendorJob) => {
     setVisualPromptJob(job);
   };
@@ -363,6 +380,17 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         >
                           Create Cover Page
                         </Button>
+                        
+                        {existingPortfolio && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleViewCoverPage}
+                            className="text-primary border-primary hover:bg-primary/10"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
                         
                         <Button
                           size="sm"
