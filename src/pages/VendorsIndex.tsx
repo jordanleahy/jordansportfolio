@@ -2,17 +2,14 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
-import { VendorFilters } from '@/components/vendors/VendorFilters';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { useVendors } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES, type VendorFiltersState, type VendorCategory } from '@/types/vendor';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Building } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+
 export default function VendorsIndex() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<VendorFiltersState>({});
@@ -265,16 +262,6 @@ export default function VendorsIndex() {
   return <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="space-y-6">
-          <div>
-            
-            
-            
-            
-
-            {/* Category Statistics */}
-            
-          </div>
-
           <VendorsCardGrid 
             vendors={filteredVendors.map(vendor => ({
               ...vendor,
