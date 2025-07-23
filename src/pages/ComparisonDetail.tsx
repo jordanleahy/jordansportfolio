@@ -52,8 +52,8 @@ const ComparisonDetail = () => {
       </Helmet>
       
       <AppLayout>
-        {/* Breadcrumb Navigation */}
-        <div className="bg-muted/30 border-b">
+        {/* Breadcrumb Navigation - Hidden */}
+        {/* <div className="bg-muted/30 border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-2 text-sm">
               <Link 
@@ -83,7 +83,7 @@ const ComparisonDetail = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <ComparisonHero data={data} />
         
