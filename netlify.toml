@@ -2,8 +2,6 @@
   publish = "dist"
   command = "npm run build"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # Enable prerendering for social media crawlers
 [dev]
