@@ -45,7 +45,7 @@ export interface ComparisonData {
 }
 
 export const smarterdxVsIodineData: ComparisonData = {
-  title: "Iodine Software vs. SmarterDx: A Head-to-Head Comparison of Clinical AI Platforms",
+  title: "Iodine vs SmarterDx",
   metaTitle: "Iodine vs. SmarterDx",
   metaDescription: "Compare Iodine Software and SmarterDx.",
   company1: {
