@@ -1247,6 +1247,7 @@ export type Database = {
           job_description: string
           job_title: string | null
           job_url: string
+          resume_text: string | null
           updated_at: string
           user_id: string
           vendor_id: string
@@ -1257,6 +1258,7 @@ export type Database = {
           job_description: string
           job_title?: string | null
           job_url: string
+          resume_text?: string | null
           updated_at?: string
           user_id: string
           vendor_id: string
@@ -1267,6 +1269,7 @@ export type Database = {
           job_description?: string
           job_title?: string | null
           job_url?: string
+          resume_text?: string | null
           updated_at?: string
           user_id?: string
           vendor_id?: string
@@ -1313,7 +1316,6 @@ export type Database = {
           partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
-          resume_text: string | null
           sec_accession_number: string | null
           sitemap_agent_id: string | null
           sitemap_fetched_at: string | null
@@ -1361,7 +1363,6 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
-          resume_text?: string | null
           sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null
@@ -1409,7 +1410,6 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
-          resume_text?: string | null
           sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null

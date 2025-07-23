@@ -46,7 +46,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
         if (error) {
           console.error('Error fetching job resume:', error);
         } else {
-          setResumeText(data?.resume_text || '');
+          setResumeText((data as any)?.resume_text || '');
         }
       };
       
@@ -68,7 +68,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
     try {
       const { error } = await supabase
         .from('vendor_jobs')
-        .update({ resume_text: resumeText.trim() })
+        .update({ resume_text: resumeText.trim() } as any)
         .eq('id', jobId);
 
       if (error) throw error;
