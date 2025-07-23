@@ -27,6 +27,7 @@ export type Database = {
           hero_badge: string | null
           hero_headline: string
           hero_image_16_9_url: string | null
+          hero_image_4_3_url: string | null
           hero_image_url: string | null
           hero_subhead: string
           hero_video_url: string | null
@@ -61,6 +62,7 @@ export type Database = {
           hero_badge?: string | null
           hero_headline: string
           hero_image_16_9_url?: string | null
+          hero_image_4_3_url?: string | null
           hero_image_url?: string | null
           hero_subhead: string
           hero_video_url?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           hero_badge?: string | null
           hero_headline?: string
           hero_image_16_9_url?: string | null
+          hero_image_4_3_url?: string | null
           hero_image_url?: string | null
           hero_subhead?: string
           hero_video_url?: string | null
@@ -487,6 +490,7 @@ export type Database = {
           company_slug: string
           cover_letter: string | null
           created_at: string
+          custom_image_url: string | null
           custom_video_url: string | null
           generated_content: Json | null
           id: string
@@ -500,6 +504,7 @@ export type Database = {
           company_slug: string
           cover_letter?: string | null
           created_at?: string
+          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string
@@ -513,6 +518,7 @@ export type Database = {
           company_slug?: string
           cover_letter?: string | null
           created_at?: string
+          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string
@@ -714,6 +720,81 @@ export type Database = {
           total_patients?: number | null
           website?: string | null
           zip?: number | null
+        }
+        Relationships: []
+      }
+      investors: {
+        Row: {
+          address: string | null
+          check_size_max: number | null
+          check_size_min: number | null
+          city: string | null
+          contact_email: string | null
+          created_at: string
+          firm_name: string
+          id: string
+          latest_fund_name: string | null
+          latest_fund_size: number | null
+          latest_fund_year: number | null
+          lead_partner: string | null
+          sector_focus: string[]
+          slug: string
+          stage: string | null
+          state: string | null
+          status: string
+          total_aum: number | null
+          updated_at: string
+          user_id: string
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          check_size_max?: number | null
+          check_size_min?: number | null
+          city?: string | null
+          contact_email?: string | null
+          created_at?: string
+          firm_name: string
+          id?: string
+          latest_fund_name?: string | null
+          latest_fund_size?: number | null
+          latest_fund_year?: number | null
+          lead_partner?: string | null
+          sector_focus?: string[]
+          slug: string
+          stage?: string | null
+          state?: string | null
+          status?: string
+          total_aum?: number | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          check_size_max?: number | null
+          check_size_min?: number | null
+          city?: string | null
+          contact_email?: string | null
+          created_at?: string
+          firm_name?: string
+          id?: string
+          latest_fund_name?: string | null
+          latest_fund_size?: number | null
+          latest_fund_year?: number | null
+          lead_partner?: string | null
+          sector_focus?: string[]
+          slug?: string
+          stage?: string | null
+          state?: string | null
+          status?: string
+          total_aum?: number | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          zip?: string | null
         }
         Relationships: []
       }
