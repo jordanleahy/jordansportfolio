@@ -49,10 +49,21 @@ export const BlogTemplate = ({
   };
 
   // Generate optimized SEO metadata using the helper
+  // Ensure OG image is domain-hosted, fallback to default
+  const getOptimizedOGImage = () => {
+    if (post.og_image_url?.startsWith('https://jordanleahy.com')) {
+      return post.og_image_url;
+    }
+    if (post.hero_image_url?.startsWith('https://jordanleahy.com')) {
+      return post.hero_image_url;
+    }
+    return 'https://jordanleahy.com/og-blog-template.png';
+  };
+
   const seoData = generateSEOMetadata({
     title: post.meta_title,
     description: post.meta_description,
-    image: post.og_image_url || post.hero_image_url,
+    image: getOptimizedOGImage(),
     url: `/blog/${post.slug}`,
     type: 'article'
   });

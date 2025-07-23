@@ -59,7 +59,15 @@ exports.handler = async (event, context) => {
     const postUrl = `${siteUrl}/blog/${post.slug}`;
 
     // Determine the best image to use - prefer domain-hosted images
-    const ogImage = post.og_image_url || post.hero_image_url || `${siteUrl}/og-default.png`;
+    // Fix any potential double slash issues in URLs
+    const cleanImageUrl = (url) => {
+      if (!url) return null;
+      return url.replace(/([^:]\/)\/+/g, '$1');
+    };
+    
+    const ogImage = cleanImageUrl(post.og_image_url) || 
+                   cleanImageUrl(post.hero_image_url) || 
+                   `${siteUrl}/og-default.png`;
 
     // Escape HTML entities in content
     const escapeHtml = (text) => {
@@ -99,7 +107,7 @@ exports.handler = async (event, context) => {
     <meta property="og:url" content="${postUrl}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Jordan Leigh">
-    <meta property="article:published_time" content="${post.published_at || post.created_at}">
+    <meta property="article:published_time" content="${(post.published_at || post.created_at) ? new Date(post.published_at || post.created_at).toISOString() : ''}">
     <meta property="article:author" content="Jordan Leigh">
     
     <!-- Twitter -->
