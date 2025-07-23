@@ -22,8 +22,6 @@ import EventsCalendar from "./pages/EventsCalendar";
 import AgentDashboard from "./pages/AgentDashboard";
 import PromptLibrary from "./pages/PromptLibrary";
 import Auth from "./pages/Auth";
-import Comparison from "./pages/Comparison";
-import ComparisonDetail from "./pages/ComparisonDetail";
 
 const queryClient = new QueryClient();
 
@@ -51,8 +49,6 @@ const App = () => (
             <Route path="/agents" element={<AgentDashboard />} />
             <Route path="/prompt-library" element={<PromptLibrary />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/comparisons" element={<Comparison />} />
-            <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

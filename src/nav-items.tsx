@@ -11,7 +11,6 @@ import {
   Lightbulb,
   Home,
   LogIn,
-  Scale,
 } from "lucide-react";
 
 export const navItems = [
@@ -49,11 +48,6 @@ export const navItems = [
     title: "Vendor Directory",
     to: "/vendor-directory",
     icon: <Building className="h-4 w-4" />,
-  },
-  {
-    title: "Company Comparisons",
-    to: "/comparisons",
-    icon: <Scale className="h-4 w-4" />,
   },
   {
     title: "Events Calendar",
