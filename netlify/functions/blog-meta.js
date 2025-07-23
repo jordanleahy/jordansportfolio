@@ -1,4 +1,3 @@
-
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -46,17 +45,17 @@ exports.handler = async (event, context) => {
     }
 
     console.log('Found blog post:', {
-      title: post.meta_title,
+      title: post.meta_title || post.title || post.hero_headline,
       hasOgImage: !!post.og_image_url,
       hasHeroImage: !!post.hero_image_url
     });
 
-    // Determine the best image to use - prefer domain-hosted images
-    const ogImage = post.og_image_url || post.hero_image_url || `${siteUrl}/og-default.png`;
-    
     // Use the correct domain - jordanleahy.com
     const siteUrl = 'https://jordanleahy.com';
     const postUrl = `${siteUrl}/blog/${post.slug}`;
+
+    // Determine the best image to use - prefer domain-hosted images
+    const ogImage = post.og_image_url || post.hero_image_url || `${siteUrl}/og-default.png`;
 
     // Escape HTML entities in content
     const escapeHtml = (text) => {
@@ -69,18 +68,22 @@ exports.handler = async (event, context) => {
         .replace(/'/g, '&#39;');
     };
 
+    // Get proper metadata with fallbacks
+    const title = post.meta_title || post.title || post.hero_headline || 'Jordan Leigh - Healthcare Product Designer';
+    const description = post.meta_description || post.intro_content || 'Healthcare Product Designer specializing in user-centered design solutions that improve patient experiences and clinical workflows.';
+
     // Generate the HTML with proper OG tags
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(post.meta_title)}</title>
-    <meta name="description" content="${escapeHtml(post.meta_description)}">
+    <title>${escapeHtml(title)}</title>
+    <meta name="description" content="${escapeHtml(description)}">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="${escapeHtml(post.meta_title)}">
-    <meta property="og:description" content="${escapeHtml(post.meta_description)}">
+    <meta property="og:title" content="${escapeHtml(title)}">
+    <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:image" content="${ogImage}">
     <meta property="og:url" content="${postUrl}">
     <meta property="og:type" content="article">
@@ -90,8 +93,8 @@ exports.handler = async (event, context) => {
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${escapeHtml(post.meta_title)}">
-    <meta name="twitter:description" content="${escapeHtml(post.meta_description)}">
+    <meta name="twitter:title" content="${escapeHtml(title)}">
+    <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${ogImage}">
     
     <!-- Canonical URL -->
@@ -104,7 +107,7 @@ exports.handler = async (event, context) => {
     </script>
 </head>
 <body>
-    <h1>${escapeHtml(post.title || post.hero_headline)}</h1>
+    <h1>${escapeHtml(title)}</h1>
     <p>If you are not redirected automatically, <a href="/blog/${post.slug}">click here</a>.</p>
 </body>
 </html>`;
