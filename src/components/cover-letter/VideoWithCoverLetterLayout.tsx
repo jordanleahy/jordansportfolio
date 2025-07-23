@@ -20,6 +20,17 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
   showTimer = true,
   portfolio
 }) => {
+  // Only show video section if there's a custom video uploaded
+  const hasCustomVideo = portfolio?.custom_video_url;
+  
+  if (!hasCustomVideo) {
+    return (
+      <div className="mb-12">
+        <CoverLetterSection content={coverLetterContent} />
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
       <VideoSection 
