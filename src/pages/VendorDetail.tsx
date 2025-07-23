@@ -622,14 +622,14 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         <meta name="keywords" content={`${vendor.company_name}, ${categoryConfig.title}, ${vendor.specialties.join(', ')}, ${vendor.core_services.join(', ')}`} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/og-images/default-hero.png" />
-        <meta property="og:url" content={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/vendors/${category}/${vendorSlug}`} />
+        <meta property="og:image" content="https://jordanleahy.com/og-default.png" />
+        <meta property="og:url" content={`https://jordanleahy.com/vendors/${category}/${vendorSlug}`} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Jordan's Portfolio" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/og-images/default-hero.png" />
+        <meta name="twitter:image" content="https://jordanleahy.com/og-default.png" />
         <link rel="canonical" href={`/vendors/${category}/${vendorSlug}`} />
         
         <script type="application/ld+json">

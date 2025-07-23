@@ -99,14 +99,14 @@ export default function PublicVendorView() {
         <meta name="description" content={vendor.description || `${vendor.company_name} company profile and information`} />
         <meta property="og:title" content={`${vendor.company_name} - Company Profile`} />
         <meta property="og:description" content={vendor.description || `${vendor.company_name} company profile and information`} />
-        <meta property="og:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/og-images/default-hero.png" />
-        <meta property="og:url" content={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/vendors/${actualCategory}/${vendorSlug}`} />
+        <meta property="og:image" content="https://jordanleahy.com/og-default.png" />
+        <meta property="og:url" content={`https://jordanleahy.com/vendors/${actualCategory}/${vendorSlug}`} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Jordan's Portfolio" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${vendor.company_name} - Company Profile`} />
         <meta name="twitter:description" content={vendor.description || `${vendor.company_name} company profile and information`} />
-        <meta name="twitter:image" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/og-images/default-hero.png" />
+        <meta name="twitter:image" content="https://jordanleahy.com/og-default.png" />
       </Helmet>
 
       <PageLayout>
