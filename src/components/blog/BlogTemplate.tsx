@@ -13,7 +13,7 @@ import { ArrowLeft, Share2, BookmarkPlus, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BlogService } from "@/services/blogService";
-import { generateSEOMetadata } from "@/utils/seoHelpers";
+
 
 interface BlogTemplateProps {
   post: BlogPost;
@@ -48,54 +48,19 @@ export const BlogTemplate = ({
     }
   };
 
-  // Generate optimized SEO metadata using the helper
-  // Ensure OG image is domain-hosted, fallback to default
-  const getOptimizedOGImage = () => {
-    if (post.og_image_url?.startsWith('https://jordanleahy.com')) {
-      return post.og_image_url;
-    }
-    if (post.hero_image_url?.startsWith('https://jordanleahy.com')) {
-      return post.hero_image_url;
-    }
-    return 'https://jordanleahy.com/og-blog-template.png';
-  };
-
-  const seoData = generateSEOMetadata({
-    title: post.meta_title,
-    description: post.meta_description,
-    image: getOptimizedOGImage(),
-    url: `/blog/${post.slug}`,
-    type: 'article'
-  });
+  // Basic SEO for SPA (crawlers get static HTML from edge function)
+  const pageTitle = post.meta_title || post.hero_headline || 'Blog Post';
+  const pageDescription = post.meta_description || post.intro_content || '';
+  const canonicalUrl = `https://jordanleahy.com/blog/${post.slug}`;
 
   return (
     <div className={`min-h-screen bg-background overflow-x-hidden ${className}`}>
-      {/* SEO Head */}
+      {/* Basic SEO for SPA users (crawlers get static HTML from edge function) */}
       <Helmet>
-        <title>{seoData.title}</title>
-        <meta name="description" content={seoData.description} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <meta name="keywords" content={(post.meta_keywords as unknown as string[])?.join(', ')} />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={seoData.ogTitle} />
-        <meta property="og:description" content={seoData.ogDescription} />
-        <meta property="og:image" content={seoData.image} />
-        <meta property="og:url" content={seoData.url} />
-        <meta property="og:type" content={seoData.type} />
-        <meta property="og:site_name" content={seoData.siteName} />
-        <link rel="canonical" href={seoData.url} />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoData.ogTitle} />
-        <meta name="twitter:description" content={seoData.ogDescription} />
-        <meta name="twitter:image" content={seoData.image} />
-        
-        {/* Article metadata */}
-        <meta property="article:published_time" content={post.published_at} />
-        <meta property="article:author" content="Jordan Leigh" />
-        <meta property="article:section" content={post.category} />
-        {(post.tags as unknown as string[])?.map(tag => <meta key={tag} property="article:tag" content={tag} />)}
+        <link rel="canonical" href={canonicalUrl} />
       </Helmet>
 
       {/* Header */}
@@ -158,7 +123,7 @@ export const BlogTemplate = ({
             ctaUrl={post.cta_url} 
             shareEnabled={post.share_enabled} 
             title={post.meta_title} 
-            url={seoData.url} 
+            url={canonicalUrl} 
           />
         </section>
 
