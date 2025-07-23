@@ -293,12 +293,23 @@ ${rawJson}`;
 function validateFundingFields(data: any, warnings: string[], errors: string[]): any {
   const validated: any = { ...data };
   
-  // Required fields validation
-  const requiredFields = ['company_name', 'headquarters', 'company_type', 'description'];
+  // For funding data, only require fields that are typically available
+  const requiredFields = ['company_name'];
   for (const field of requiredFields) {
     if (!validated[field] || (typeof validated[field] === 'string' && validated[field].trim() === '')) {
       errors.push(`Missing required field: ${field}`);
     }
+  }
+  
+  // Set defaults for commonly missing fields in funding data
+  if (!validated.company_type) {
+    validated.company_type = 'Private';
+  }
+  if (!validated.headquarters) {
+    validated.headquarters = 'Not specified';
+  }
+  if (!validated.description) {
+    validated.description = 'Investment firm or venture capital fund.';
   }
   
   // Validate company_type
@@ -341,7 +352,7 @@ function validateFundingFields(data: any, warnings: string[], errors: string[]):
     }
   }
   
-  // Ensure array fields are arrays
+  // Ensure array fields are arrays (no warnings for funding data)
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'competitors', 'key_features', 
     'key_benefits', 'competitive_advantages', 'key_investors', 'notable_customers'
@@ -350,7 +361,7 @@ function validateFundingFields(data: any, warnings: string[], errors: string[]):
   for (const field of arrayFields) {
     if (!validated[field] || !Array.isArray(validated[field])) {
       validated[field] = [];
-      warnings.push(`Set empty array for required field: ${field}`);
+      // No warning for funding data as these fields are often missing
     }
   }
   
