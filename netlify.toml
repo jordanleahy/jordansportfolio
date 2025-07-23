@@ -2,12 +2,17 @@
   publish = "dist"
   command = "npm run build"
 
-
 # Enable prerendering for social media crawlers
 [dev]
   command = "npm run dev"
 
-# Redirect rules for SPA
+# Handle blog posts with crawler detection
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/.netlify/functions/blog-og-handler?slug=:slug"
+  status = 200
+
+# Redirect rules for SPA (catch-all)
 [[redirects]]
   from = "/*"
   to = "/index.html"
