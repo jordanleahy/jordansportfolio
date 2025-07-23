@@ -2,6 +2,7 @@
 import React, { Suspense, lazy } from "react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +13,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
+import { generateSEOMetadata } from "@/utils/seoHelpers";
 
 
 // Lazy load heavy HeroParallax component
@@ -23,6 +25,15 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Generate SEO metadata for homepage
+  const homeSEO = generateSEOMetadata({
+    title: "Jordan Leigh - Healthcare Technology & Product Development",
+    description: "Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.",
+    image: "/og-portfolio.png",
+    url: "/",
+    type: "website"
+  });
 
   // Auth state management
   useEffect(() => {
@@ -84,7 +95,22 @@ const Index = () => {
   }
 
   return (
-    <AppLayout>
+    <>
+      <Helmet>
+        <title>{homeSEO.title}</title>
+        <meta name="description" content={homeSEO.description} />
+        <meta property="og:title" content={homeSEO.ogTitle} />
+        <meta property="og:description" content={homeSEO.ogDescription} />
+        <meta property="og:image" content={homeSEO.image} />
+        <meta property="og:url" content={homeSEO.url} />
+        <meta property="og:type" content={homeSEO.type} />
+        <meta property="og:site_name" content={homeSEO.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={homeSEO.ogTitle} />
+        <meta name="twitter:description" content={homeSEO.ogDescription} />
+        <meta name="twitter:image" content={homeSEO.image} />
+      </Helmet>
+      <AppLayout>
       {/* Hero Parallax Section */}
       <Suspense fallback={
         <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
@@ -104,6 +130,7 @@ const Index = () => {
       <BlogTeaser />
       <ContactSection />
     </AppLayout>
+    </>
   );
 };
 

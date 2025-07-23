@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
+import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,15 @@ const Auth = () => {
   const {
     toast
   } = useToast();
+
+  // Generate SEO metadata for auth page
+  const authSEO = generateSEOMetadata({
+    title: "Sign In - Job Watcher",
+    description: "Sign in to access Job Watcher and track your dream jobs. Secure authentication for healthcare technology professionals.",
+    image: "/og-default.png",
+    url: "/auth",
+    type: "website"
+  });
 
   // Redirect authenticated users to main page
   useEffect(() => {
@@ -134,8 +144,18 @@ const Auth = () => {
   }
   return <>
       <Helmet>
-        <title>Sign In - Job Watcher</title>
-        <meta name="description" content="Sign in to access Job Watcher and track your dream jobs" />
+        <title>{authSEO.title}</title>
+        <meta name="description" content={authSEO.description} />
+        <meta property="og:title" content={authSEO.ogTitle} />
+        <meta property="og:description" content={authSEO.ogDescription} />
+        <meta property="og:image" content={authSEO.image} />
+        <meta property="og:url" content={authSEO.url} />
+        <meta property="og:type" content={authSEO.type} />
+        <meta property="og:site_name" content={authSEO.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={authSEO.ogTitle} />
+        <meta name="twitter:description" content={authSEO.ogDescription} />
+        <meta name="twitter:image" content={authSEO.image} />
       </Helmet>
 
       <div className="min-h-screen bg-background flex items-center justify-center p-4">

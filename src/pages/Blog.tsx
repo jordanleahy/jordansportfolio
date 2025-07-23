@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +9,20 @@ import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import { generateSEOMetadata } from "@/utils/seoHelpers";
 
 const Blog = () => {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
+
+  // Generate SEO metadata for blog page
+  const blogSEO = generateSEOMetadata({
+    title: "Design Stories - Insights & Case Studies",
+    description: "Explore design insights, learnings, and behind-the-scenes stories from creating products that matter. Healthcare technology, UX design, and product development insights.",
+    image: "/og-blog.png",
+    url: "/blog",
+    type: "website"
+  });
 
   // Use TanStack Query for blog posts
   const {
@@ -128,7 +139,22 @@ const Blog = () => {
   }
 
   return (
-    <PageLayout>
+    <>
+      <Helmet>
+        <title>{blogSEO.title}</title>
+        <meta name="description" content={blogSEO.description} />
+        <meta property="og:title" content={blogSEO.ogTitle} />
+        <meta property="og:description" content={blogSEO.ogDescription} />
+        <meta property="og:image" content={blogSEO.image} />
+        <meta property="og:url" content={blogSEO.url} />
+        <meta property="og:type" content={blogSEO.type} />
+        <meta property="og:site_name" content={blogSEO.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={blogSEO.ogTitle} />
+        <meta name="twitter:description" content={blogSEO.ogDescription} />
+        <meta name="twitter:image" content={blogSEO.image} />
+      </Helmet>
+      <PageLayout>
       {/* Hero Section */}
       <section className="py-16 px-4 pt-24">
         <div className="max-w-4xl mx-auto">
@@ -310,7 +336,8 @@ const Blog = () => {
           </div>
         </div>
       </section>
-    </PageLayout>
+      </PageLayout>
+    </>
   );
 };
 

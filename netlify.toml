@@ -1,47 +1,31 @@
-
 [build]
-  command = "npm run build"
   publish = "dist"
+  command = "npm run build"
 
-[build.processing]
-  skip_processing = false
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
-[build.processing.css]
-  bundle = true
-  minify = true
+# Enable prerendering for social media crawlers
+[dev]
+  command = "npm run dev"
 
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.html]
-  pretty_urls = true
-
-# Build environment
-[build.environment]
-  NETLIFY_SKIP_PNPM_INSTALL = "true"
-
-# Headers for better caching and social media crawlers
-[[headers]]
-  for = "/blog/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Social media crawler redirects to function for proper OG tags
-[[redirects]]
-  from = "/blog/:slug"
-  to = "/.netlify/functions/blog-meta?slug=:slug"
-  status = 200
-  force = false
-  conditions = {User-Agent = "facebookexternalhit*,LinkedInBot*,Twitterbot*,WhatsApp*,SkypeUriPreview*,SlackBot*,TelegramBot*,bingbot*,GoogleBot*"}
-
-# SPA fallback for regular users
+# Redirect rules for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
+
+# Prerender settings for better social media crawler support
+[build.environment]
+  NETLIFY_PRERENDER_ENABLED = "true"
+
+# Cache headers for images
+[[headers]]
+  for = "/og-*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+    
+[[headers]]
+  for = "/lovable-uploads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
