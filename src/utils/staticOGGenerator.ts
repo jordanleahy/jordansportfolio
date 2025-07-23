@@ -2,12 +2,13 @@ import type { BlogPost } from '../types/blog';
 
 // Re-export the shared utilities pattern for consistency
 export const SEO_CONSTANTS = {
-  siteUrl: 'https://app.lovable.dev',
-  siteName: 'Lovable Blog',
-  defaultTitle: 'Build Beautiful Apps with AI',
-  defaultDescription: 'Create stunning web applications using AI-powered development tools',
-  defaultImage: '/og-default.png',
-  twitterHandle: '@lovabledev'
+  siteUrl: 'https://jordanleahy.com',
+  siteName: 'Jordan Leigh',
+  defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
+  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
+  // Use absolute URL for default OG image to ensure compatibility with crawlers
+  defaultImage: 'https://jordanleahy.com/og-default.png',
+  twitterHandle: '@jordanleigh'
 };
 
 // Minimal blog post interface for OG generation
@@ -69,7 +70,7 @@ function generateBlogSEOMetadata(post: BlogPostForOG) {
     url: `${SEO_CONSTANTS.siteUrl}/blog/${post.slug}`,
     type: 'article',
     publishedTime: post.published_at,
-    author: 'Lovable Team',
+    author: 'Jordan Leigh',
     siteName: SEO_CONSTANTS.siteName,
     twitterHandle: SEO_CONSTANTS.twitterHandle
   };
@@ -143,7 +144,7 @@ function generateCrawlerHTML(metadata: any, bodyContent = ''): string {
     "datePublished": "${metadata.publishedTime || new Date().toISOString()}",
     "author": {
       "@type": "Organization",
-      "name": "${escapedAuthor || 'Lovable Team'}"
+      "name": "${escapedAuthor || 'Jordan Leigh'}"
     },
     "publisher": {
       "@type": "Organization",
