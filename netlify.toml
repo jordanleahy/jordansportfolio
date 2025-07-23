@@ -6,12 +6,6 @@
 [dev]
   command = "npm run dev"
 
-# Handle blog posts with crawler detection
-[[redirects]]
-  from = "/blog/:slug"
-  to = "/.netlify/functions/blog-og-handler?slug=:slug"
-  status = 200
-
 # Redirect rules for SPA (catch-all)
 [[redirects]]
   from = "/*"
