@@ -46,8 +46,8 @@ export interface ComparisonData {
 
 export const smarterdxVsIodineData: ComparisonData = {
   title: "Iodine Software vs. SmarterDx: A Head-to-Head Comparison of Clinical AI Platforms",
-  metaTitle: "Iodine vs. SmarterDx: Clinical AI Platform Comparison",
-  metaDescription: "Compare Iodine Software and SmarterDx across AI capabilities, CDI tools, pricing models, and outcomes to help healthcare leaders choose the right platform.",
+  metaTitle: "Iodine vs. SmarterDx",
+  metaDescription: "Compare Iodine Software and SmarterDx.",
   company1: {
     name: "Iodine Software",
     founded: "2010",
