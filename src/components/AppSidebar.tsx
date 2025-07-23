@@ -44,7 +44,7 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar className={sidebarState === "collapsed" ? "w-14" : "w-60"} collapsible>
+    <Sidebar className={sidebarState === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
