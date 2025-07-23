@@ -36,14 +36,22 @@ export default function VendorDetail() {
 
   useEffect(() => {
     const fetchVendor = async () => {
-      if (!slug) return;
+      if (!slug) {
+        console.log('No slug provided');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Fetching vendor with slug:', slug);
       
       try {
         const { data, error } = await supabase
           .from('vendors')
           .select('*')
           .eq('slug', slug)
-          .single();
+          .maybeSingle();
+
+        console.log('Vendor fetch result:', { data, error });
 
         if (error) {
           console.error('Error fetching vendor:', error);
@@ -52,9 +60,22 @@ export default function VendorDetail() {
             description: "Failed to load vendor details",
             variant: "destructive",
           });
+          setIsLoading(false);
           return;
         }
 
+        if (!data) {
+          console.log('No vendor found for slug:', slug);
+          toast({
+            title: "Vendor not found",
+            description: "The vendor you're looking for doesn't exist.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('Setting vendor data:', data);
         setVendor(data);
       } catch (error) {
         console.error('Error:', error);
