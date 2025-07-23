@@ -19,7 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    const { jobDescription, companyName, jobDescriptionLink, userId, companyInfo } = await req.json();
+    const { jobDescription, companyName, jobDescriptionLink, userId, companyInfo, jobId } = await req.json();
     
     if (!jobDescription || !companyName || !userId) {
       throw new Error('Job description, company name, and user ID are required');
@@ -27,6 +27,22 @@ serve(async (req) => {
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch job-specific resume text if jobId is provided
+    let resumeText = '';
+    if (jobId) {
+      const { data: jobData, error: jobError } = await supabase
+        .from('vendor_jobs')
+        .select('resume_text')
+        .eq('id', jobId)
+        .single();
+      
+      if (jobError) {
+        console.log('Job resume fetch error:', jobError);
+      } else {
+        resumeText = jobData?.resume_text || '';
+      }
+    }
 
     // Fetch user's case studies for real project data
     const { data: caseStudies, error: caseStudiesError } = await supabase
@@ -52,11 +68,23 @@ serve(async (req) => {
       console.log('Case studies fetch error:', caseStudiesError);
     }
 
-    // Build detailed case study context for accurate matching
-    let caseStudyContext = '';
+    // Build detailed case study and resume context for accurate matching
+    let contextContent = '';
+    
+    // Add resume text if available
+    if (resumeText) {
+      contextContent += `
+RESUME CONTENT:
+${resumeText}
+
+`;
+    }
+    
+    // Add case studies
     if (caseStudies && caseStudies.length > 0) {
-      caseStudyContext = `
-REAL PROJECT PORTFOLIO - USE THESE EXACT PROJECTS:
+      contextContent += `
+REAL PROJECT PORTFOLIO - USE THESE EXACT PROJECTS:`;
+      contextContent += `
 ${caseStudies.map((study, index) => `
 Project ${index + 1}: ${study.title}
 - Description: ${study.description}
@@ -70,9 +98,9 @@ Project ${index + 1}: ${study.title}
 
 IMPORTANT: Only reference these ACTUAL projects. Do not invent or hallucinate any projects, metrics, or achievements not listed above.
 `;
-    } else {
-      caseStudyContext = `
-NO CASE STUDIES AVAILABLE - Use only general healthcare technology experience without specific project claims.
+    } else if (!resumeText) {
+      contextContent += `
+NO CASE STUDIES OR RESUME AVAILABLE - Use only general healthcare technology experience without specific project claims.
 Focus on skills and potential rather than fabricated project details.
 `;
     }
@@ -83,16 +111,16 @@ Focus on skills and potential rather than fabricated project details.
         role: 'system',
         content: 'You are an expert career consultant who writes highly targeted, SCANNABLE cover letters. Always respond with VALID JSON or N/A—never invent metrics or projects.'
       },
-      { role: 'system', content: caseStudyContext.trim() },
+      { role: 'system', content: contextContent.trim() },
       {
         role: 'user',
-        content: `Create a structured cover letter for Jordan Leahy applying to ${companyName}. Use only information from the REAL PROJECT PORTFOLIO above. If a requirement has no match, use "N/A". Output only JSON matching the schema.
+        content: `Create a structured cover letter for Jordan Leahy applying to ${companyName}. Use information from the resume content and REAL PROJECT PORTFOLIO above. If a requirement has no match, use "N/A". Output only JSON matching the schema.
 
 COMPANY: ${companyName}
 JOB DESCRIPTION: ${jobDescription}
 ${jobDescriptionLink ? `JOB POSTING URL: ${jobDescriptionLink}` : ''}
 
-CRITICAL: Only reference actual case studies listed above. Do not fabricate any information.`
+CRITICAL: Only reference actual case studies and resume information listed above. Do not fabricate any information.`
       }
     ];
 

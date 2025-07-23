@@ -8,6 +8,7 @@ export interface VendorJob {
   job_title: string;
   job_url: string;
   job_description: string;
+  resume_text?: string;
   user_id: string;
   created_at: string;
   updated_at: string;

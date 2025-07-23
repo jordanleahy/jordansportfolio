@@ -18,14 +18,14 @@ import { useQueryClient } from "@tanstack/react-query";
 interface ResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  vendorId: string;
+  jobId: string;
   companyName: string;
 }
 
 export const ResumeModal: React.FC<ResumeModalProps> = ({
   isOpen,
   onClose,
-  vendorId,
+  jobId,
   companyName
 }) => {
   const [resumeText, setResumeText] = useState('');
@@ -35,24 +35,24 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
 
   // Load existing resume text when modal opens
   useEffect(() => {
-    if (isOpen && vendorId) {
-      const fetchVendorResume = async () => {
+    if (isOpen && jobId) {
+      const fetchJobResume = async () => {
         const { data, error } = await supabase
-          .from('vendors')
+          .from('vendor_jobs')
           .select('resume_text')
-          .eq('id', vendorId)
+          .eq('id', jobId)
           .single();
         
         if (error) {
-          console.error('Error fetching vendor resume:', error);
+          console.error('Error fetching job resume:', error);
         } else {
           setResumeText(data?.resume_text || '');
         }
       };
       
-      fetchVendorResume();
+      fetchJobResume();
     }
-  }, [isOpen, vendorId]);
+  }, [isOpen, jobId]);
 
   const handleSave = async () => {
     if (!resumeText.trim()) {
@@ -67,9 +67,9 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
     setIsSaving(true);
     try {
       const { error } = await supabase
-        .from('vendors')
+        .from('vendor_jobs')
         .update({ resume_text: resumeText.trim() })
-        .eq('id', vendorId);
+        .eq('id', jobId);
 
       if (error) throw error;
 
@@ -78,9 +78,8 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
         description: "Resume text saved successfully",
       });
 
-      // Invalidate vendor queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['vendors'] });
-      queryClient.invalidateQueries({ queryKey: ['vendor'] });
+      // Invalidate vendor job queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['vendor-jobs'] });
 
       onClose();
     } catch (error: any) {

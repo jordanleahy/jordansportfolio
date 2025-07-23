@@ -519,7 +519,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         <ResumeModal
           isOpen={!!resumeModalJob}
           onClose={() => setResumeModalJob(null)}
-          vendorId={vendorId}
+          jobId={resumeModalJob.id}
           companyName={vendor.company_name}
         />
       )}
