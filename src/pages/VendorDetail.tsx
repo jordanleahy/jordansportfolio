@@ -230,9 +230,9 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
         )}
         
         <div className="flex flex-wrap gap-2 mb-6">
-          {vendor.website && (
+          {vendor.website_url && (
             <Button variant="outline" size="sm" asChild>
-              <a href={vendor.website} target="_blank" rel="noopener noreferrer">
+              <a href={vendor.website_url} target="_blank" rel="noopener noreferrer">
                 <Globe className="mr-2 h-4 w-4" />
                 Visit Website
                 <ExternalLink className="ml-1 h-3 w-3" />
@@ -298,16 +298,16 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Founded {vendor.founded_year || 'Unknown'}</span>
+              <span>Founded {vendor.founding_year || 'Unknown'}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{vendor.employee_count || 'Not specified'} employees</span>
+              <span>{vendor.employee_count_range || 'Not specified'} employees</span>
             </div>
           </CardContent>
         </Card>
 
-        {vendor.products && vendor.products.length > 0 && (
+        {vendor.core_services && vendor.core_services.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -317,15 +317,15 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {vendor.products.slice(0, 5).map((product, index) => (
+                {vendor.core_services.slice(0, 5).map((service, index) => (
                   <li key={index} className="text-sm flex items-start gap-2">
                     <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
-                    {product}
+                    {service}
                   </li>
                 ))}
-                {vendor.products.length > 5 && (
+                {vendor.core_services.length > 5 && (
                   <li className="text-sm text-muted-foreground">
-                    +{vendor.products.length - 5} more...
+                    +{vendor.core_services.length - 5} more...
                   </li>
                 )}
               </ul>
