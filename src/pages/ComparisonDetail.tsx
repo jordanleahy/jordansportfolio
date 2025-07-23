@@ -22,8 +22,12 @@ const ComparisonDetail = () => {
   if (!comparisonType || !comparisonDataMap[comparisonType]) {
     return (
       <AppLayout>
+        <div className="container mx-auto px-4 py-4">
+          <div className="max-w-6xl mx-auto">
+            <ComparisonBreadcrumb />
+          </div>
+        </div>
         <div className="container mx-auto px-4 py-16">
-          <ComparisonBreadcrumb />
           <div className="text-center">
             <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
             <p className="text-muted-foreground">
@@ -54,11 +58,16 @@ const ComparisonDetail = () => {
       </Helmet>
       
       <AppLayout>
+        <div className="container mx-auto px-4 py-4">
+          <div className="max-w-6xl mx-auto">
+            <ComparisonBreadcrumb comparisonTitle={data.title} />
+          </div>
+        </div>
+        
         <ComparisonHero data={data} />
         
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-6xl mx-auto">
-            <ComparisonBreadcrumb comparisonTitle={data.title} />
             
             <div className="space-y-8">
               <div>
