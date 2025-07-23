@@ -1058,6 +1058,18 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 vendor={vendor} 
                 config={fundingConfig} 
                 canEdit={isAdmin}
+                extraButton={
+                  isAdmin && vendor.key_investors && vendor.key_investors.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name)}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Research Investors
+                    </Button>
+                  )
+                }
               />
 
               <EditableSection 
@@ -1137,22 +1149,10 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               {(vendor.total_funding || vendor.funding_stage || (vendor.key_investors && vendor.key_investors.length > 0)) && (
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                        <DollarSign className="h-5 w-5" />
-                        Funding Information
-                      </CardTitle>
-                      {isAdmin && vendor.key_investors && vendor.key_investors.length > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name)}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Research Investors
-                        </Button>
-                      )}
-                    </div>
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                      <DollarSign className="h-5 w-5" />
+                      Funding Information Summary
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {vendor.total_funding && (

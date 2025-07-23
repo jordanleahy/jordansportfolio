@@ -33,9 +33,10 @@ interface EditableSectionProps {
   config: SectionConfig;
   onSave?: () => void;
   canEdit: boolean;
+  extraButton?: React.ReactNode;
 }
 
-export function EditableSection({ vendor, config, onSave, canEdit }: EditableSectionProps) {
+export function EditableSection({ vendor, config, onSave, canEdit, extraButton }: EditableSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   
   const {
@@ -203,38 +204,41 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
             )}
           </div>
           
-          {canEdit && (
-            <div className="flex items-center gap-2">
-              {isEditing ? (
-                <>
+          <div className="flex items-center gap-2">
+            {extraButton}
+            {canEdit && (
+              <>
+                {isEditing ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                      disabled={isSaving}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={!hasChanges || isSaving}
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={cancelEdit}
-                    disabled={isSaving}
+                    onClick={startEdit}
                   >
-                    <X className="h-4 w-4" />
+                    <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={!hasChanges || isSaving}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    Save
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={startEdit}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
       </CardHeader>
       
