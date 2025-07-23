@@ -378,7 +378,7 @@ Research all ${investors.length} firms listed above and return comprehensive dat
 
     setIsProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('process-vendor-json', {
+      const { data, error } = await supabase.functions.invoke('process-funding-json', {
         body: { rawJson: pasteContent }
       });
 
