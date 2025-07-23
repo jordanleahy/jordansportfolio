@@ -4,7 +4,9 @@ export const SEO_DEFAULTS = {
   siteName: 'Jordan Leigh',
   defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
   defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
-  defaultImage: 'https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/screencapture-jordanleahy-2025-07-16-10_54_07-edit.png',
+  // Use a site-relative path for the default OG image so it works across
+  // environments without depending on the Supabase URL.
+  defaultImage: '/og-default.png',
   twitterHandle: '@jordanleigh',
 } as const;
 
