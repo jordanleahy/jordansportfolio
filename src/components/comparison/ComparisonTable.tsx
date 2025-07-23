@@ -32,75 +32,66 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   return (
     <Card className="mb-8">
       <CardContent className="p-0">
-        {/* Mobile-friendly scrollable container */}
-        <div className="overflow-x-auto overscroll-x-contain">
-          <div className="min-w-[600px]"> {/* Ensure minimum width for readability */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-1/3 font-semibold sticky left-0 bg-background z-10 border-r">{/* Sticky first column */}
-                    Category
-                  </TableHead>
-                  <TableHead className="w-1/3 font-semibold text-center px-4 whitespace-nowrap">{company1.name}</TableHead>
-                  <TableHead className="w-1/3 font-semibold text-center px-4 whitespace-nowrap">{company2.name}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {comparisonRows.map((row, index) => (
-                  <TableRow key={index} className="border-b">
-                    <TableCell className="font-medium sticky left-0 bg-background z-10 border-r whitespace-nowrap">
-                      {row.label}
-                    </TableCell>
-                    <TableCell className="text-center px-4 text-sm">{row.value1}</TableCell>
-                    <TableCell className="text-center px-4 text-sm">{row.value2}</TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="border-b">
-                  <TableCell className="font-medium sticky left-0 bg-background z-10 border-r whitespace-nowrap">
-                    Key Benefits
-                  </TableCell>
-                  <TableCell className="text-center px-4">
-                    <ul className="space-y-1 text-left">
-                      {company1.keyBenefits.map((benefit, idx) => (
-                        <li key={idx} className="text-xs">• {benefit}</li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell className="text-center px-4">
-                    <ul className="space-y-1 text-left">
-                      {company2.keyBenefits.map((benefit, idx) => (
-                        <li key={idx} className="text-xs">• {benefit}</li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium sticky left-0 bg-background z-10 border-r whitespace-nowrap">
-                    Unique Strengths
-                  </TableCell>
-                  <TableCell className="text-center px-4">
-                    <ul className="space-y-1 text-left">
-                      {company1.uniqueStrengths.map((strength, idx) => (
-                        <li key={idx} className="text-xs">• {strength}</li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell className="text-center px-4">
-                    <ul className="space-y-1 text-left">
-                      {company2.uniqueStrengths.map((strength, idx) => (
-                        <li key={idx} className="text-xs">• {strength}</li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-        {/* Mobile scroll hint */}
-        <div className="md:hidden text-center py-2 text-xs text-muted-foreground border-t">
-          ← Scroll horizontally to see all data →
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-1/3 font-semibold border-r hidden md:table-cell">
+                Category
+              </TableHead>
+              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{company1.name}</TableHead>
+              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{company2.name}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {comparisonRows.map((row, index) => (
+              <TableRow key={index} className="border-b">
+                <TableCell className="font-medium border-r hidden md:table-cell">
+                  {row.label}
+                </TableCell>
+                <TableCell className="w-1/2 md:w-1/3 text-center px-4 text-sm">{row.value1}</TableCell>
+                <TableCell className="w-1/2 md:w-1/3 text-center px-4 text-sm">{row.value2}</TableCell>
+              </TableRow>
+            ))}
+            <TableRow className="border-b">
+              <TableCell className="font-medium border-r hidden md:table-cell">
+                Key Benefits
+              </TableCell>
+              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
+                <ul className="space-y-1 text-left">
+                  {company1.keyBenefits.map((benefit, idx) => (
+                    <li key={idx} className="text-xs">• {benefit}</li>
+                  ))}
+                </ul>
+              </TableCell>
+              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
+                <ul className="space-y-1 text-left">
+                  {company2.keyBenefits.map((benefit, idx) => (
+                    <li key={idx} className="text-xs">• {benefit}</li>
+                  ))}
+                </ul>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium border-r hidden md:table-cell">
+                Unique Strengths
+              </TableCell>
+              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
+                <ul className="space-y-1 text-left">
+                  {company1.uniqueStrengths.map((strength, idx) => (
+                    <li key={idx} className="text-xs">• {strength}</li>
+                  ))}
+                </ul>
+              </TableCell>
+              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
+                <ul className="space-y-1 text-left">
+                  {company2.uniqueStrengths.map((strength, idx) => (
+                    <li key={idx} className="text-xs">• {strength}</li>
+                  ))}
+                </ul>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
