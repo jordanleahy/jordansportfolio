@@ -1,6 +1,6 @@
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Trash2, Eye, EyeOff, Globe } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Copy, Clipboard, Trash2, Eye, EyeOff, Globe, Download } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -206,6 +206,7 @@ export default function VendorDetail() {
   const { slugname: category, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
   const navigate = useNavigate();
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isPasteOpen, setIsPasteOpen] = useState(false);
   const [pasteContent, setPasteContent] = useState("");
@@ -277,6 +278,66 @@ export default function VendorDetail() {
     toast({
       title: "Copied!",
       description: "Advanced research prompt copied to clipboard.",
+    });
+  };
+
+  const generateInvestorResearchPrompt = (investors: string[], companyName: string) => {
+    const prompt = `You are an expert investment research analyst. Research these specific venture capital and investment firms that have invested in ${companyName}. For each firm, extract comprehensive information that matches our investor database schema.
+
+**SPECIFIC FIRMS TO RESEARCH:**
+${investors.map(investor => `- ${investor}`).join('\n')}
+
+**RESEARCH METHODOLOGY:**
+1. For each firm listed above, research from multiple sources:
+   - Official firm websites and about pages
+   - Crunchbase, PitchBook, and investment databases
+   - Recent news and press releases
+   - LinkedIn profiles of key partners
+   - Portfolio company pages and case studies
+   - SEC filings (if applicable)
+
+2. Focus specifically on these firms since they've shown interest in ${companyName}'s sector
+
+**OUTPUT REQUIREMENTS:**
+Return ONLY valid JSON array with detailed information for each of these specific investors. Each record must match our database schema exactly.
+
+**DETAILED FIELD INSTRUCTIONS:**
+[
+  {
+    "firm_name": "Official name of the investment firm",
+    "address": "Street address of main office (if available)",
+    "city": "Primary office city",
+    "state": "State/Province code (e.g., 'CA', 'NY')",
+    "zip": "ZIP/Postal code",
+    "website": "Primary website URL",
+    "sector_focus": ["Array of investment sectors", "based on portfolio companies"],
+    "stage": "Primary investment stage (e.g., 'Series A', 'Growth Equity', 'Early Stage')",
+    "check_size_min": 10, // Minimum investment size in millions (numeric only)
+    "check_size_max": 100, // Maximum investment size in millions (numeric only)
+    "latest_fund_name": "Name of most recent fund",
+    "latest_fund_year": 2023, // Year of latest fund (numeric)
+    "latest_fund_size": 500, // Fund size in millions (numeric only)
+    "total_aum": 2000, // Total assets under management in millions (numeric only)
+    "lead_partner": "Name and title of key partner",
+    "contact_email": "General contact email"
+  }
+]
+
+**SPECIFIC RESEARCH FOCUS:**
+- Since these firms invested in ${companyName}, look for their investment thesis in related sectors
+- Check if they've made other investments in similar companies
+- Look for their typical check sizes and stage preferences
+- Find recent fund announcements and portfolio activity
+- Get accurate contact information and key partner details
+
+Research all ${investors.length} firms listed above and return comprehensive data for each one.`;
+
+    setGeneratedPrompt(prompt);
+    setIsPromptModalOpen(true);
+    
+    toast({
+      title: "Research Prompt Generated", 
+      description: `Generated targeted research prompt for ${investors.length} investor(s)`,
     });
   };
 
@@ -735,6 +796,50 @@ export default function VendorDetail() {
         </DialogContent>
       </Dialog>
 
+      {/* Investor Research Prompt Modal */}
+      <Dialog open={isPromptModalOpen} onOpenChange={setIsPromptModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">Investor Research Prompt</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Copy this prompt and use it with ChatGPT or Claude to research these specific investors:
+            </div>
+            
+            <Textarea
+              value={generatedPrompt}
+              readOnly
+              className="min-h-[300px] sm:min-h-[400px] font-mono text-xs"
+            />
+            
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsPromptModalOpen(false)}
+                className="flex-1 order-2 sm:order-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedPrompt);
+                  toast({
+                    title: "Copied!",
+                    description: "Investor research prompt copied to clipboard.",
+                  });
+                }}
+                className="flex-1 order-1 sm:order-2"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Prompt
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="container mx-auto py-4 sm:py-8 px-4">
         <div className="space-y-4 sm:space-y-6">
           <Breadcrumb>
@@ -1032,10 +1137,22 @@ export default function VendorDetail() {
               {(vendor.total_funding || vendor.funding_stage || (vendor.key_investors && vendor.key_investors.length > 0)) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                      <DollarSign className="h-5 w-5" />
-                      Funding Information
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                        <DollarSign className="h-5 w-5" />
+                        Funding Information
+                      </CardTitle>
+                      {isAdmin && vendor.key_investors && vendor.key_investors.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name)}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          Research Investors
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {vendor.total_funding && (
