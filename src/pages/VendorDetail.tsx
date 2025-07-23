@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Fixed TypeScript property references
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { InvestorResearchModal } from '@/components/investors/InvestorResearchModal';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { type Vendor } from '@/types/vendor';
 
 export default function VendorDetail() {
@@ -143,7 +144,7 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <PageLayout className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-4 bg-gray-200 rounded w-2/3 mb-8"></div>
@@ -152,22 +153,21 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
             <div className="h-64 bg-gray-200 rounded"></div>
           </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (!vendor) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <PageLayout className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Vendor Not Found</h1>
           <p className="text-muted-foreground">The vendor you're looking for doesn't exist.</p>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
-  // Configuration objects for different sections
   const basicInfoConfig = {
     title: "Basic Information",
     fields: [
@@ -228,7 +228,7 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <PageLayout className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <Button 
           variant="ghost" 
@@ -403,6 +403,6 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
         onInvestorsAdded={handleInvestorsAdded}
         initialStep={investorModalStep}
       />
-    </div>
+    </PageLayout>
   );
 }
