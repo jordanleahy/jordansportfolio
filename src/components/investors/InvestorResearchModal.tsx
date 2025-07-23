@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Copy, Download, Upload, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Copy, Download, Upload, Loader2, AlertCircle, CheckCircle2, Clipboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,12 +14,18 @@ interface InvestorResearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInvestorsAdded?: (count: number) => void;
+  initialStep?: 'prompt' | 'import';
 }
 
-export const InvestorResearchModal = ({ isOpen, onClose, onInvestorsAdded }: InvestorResearchModalProps) => {
+export const InvestorResearchModal = ({ 
+  isOpen, 
+  onClose, 
+  onInvestorsAdded,
+  initialStep = 'prompt'
+}: InvestorResearchModalProps) => {
   const { toast } = useToast();
   const { isAdmin } = useUserRole();
-  const [step, setStep] = useState<'prompt' | 'import'>('prompt');
+  const [step, setStep] = useState<'prompt' | 'import'>(initialStep);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [importJson, setImportJson] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -29,6 +35,13 @@ export const InvestorResearchModal = ({ isOpen, onClose, onInvestorsAdded }: Inv
   if (!isAdmin) {
     return null;
   }
+
+  // Reset step when modal opens/closes
+  useState(() => {
+    if (isOpen) {
+      setStep(initialStep);
+    }
+  }, [isOpen, initialStep]);
 
   const generateInvestorPrompt = () => {
     const prompt = `You are an expert investment research analyst with advanced web browsing capabilities. Your task is to conduct comprehensive research on venture capital firms, private equity firms, angel investor groups, and other investment organizations. Extract detailed information that matches our exact database schema.
@@ -218,7 +231,7 @@ Research 15-25 high-quality investor records and return them as a clean JSON arr
   };
 
   const resetModal = () => {
-    setStep('prompt');
+    setStep(initialStep);
     setGeneratedPrompt('');
     setImportJson('');
     setProcessingResult(null);
@@ -234,11 +247,14 @@ Research 15-25 high-quality investor records and return them as a clean JSON arr
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5" />
-            Generate Investor Research
+            {step === 'prompt' ? <Download className="h-5 w-5" /> : <Clipboard className="h-5 w-5" />}
+            {step === 'prompt' ? 'Generate Investor Research' : 'Import Investor Data'}
           </DialogTitle>
           <DialogDescription>
-            Admin tool to research and import investor firm data using AI
+            {step === 'prompt' 
+              ? 'Admin tool to research and import investor firm data using AI'
+              : 'Paste your JSON research results to import investor data'
+            }
           </DialogDescription>
         </DialogHeader>
 
