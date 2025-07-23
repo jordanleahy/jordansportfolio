@@ -109,7 +109,25 @@ async function processFundingJsonWithAI(rawJson: string, startTime: number): Pro
     }
 
     // Validate the processed data
-    const validatedData = validateFundingFields(result.data, warnings, errors);
+    let validatedData;
+    if (Array.isArray(result.data)) {
+      // Handle array of companies
+      validatedData = result.data.map(company => validateFundingFields(company, warnings, errors));
+    } else if (typeof result.data === 'object' && result.data !== null) {
+      // Check if it's an object with numeric keys (array-like)
+      const keys = Object.keys(result.data);
+      const isArrayLike = keys.every(key => /^\d+$/.test(key));
+      
+      if (isArrayLike) {
+        // Convert array-like object to array and validate each item
+        validatedData = keys.map(key => validateFundingFields(result.data[key], warnings, errors));
+      } else {
+        // Handle single company object
+        validatedData = validateFundingFields(result.data, warnings, errors);
+      }
+    } else {
+      validatedData = validateFundingFields(result.data, warnings, errors);
+    }
     
     const processingTime = Date.now() - startTime;
     console.log(`Funding AI processing completed in ${processingTime}ms. Warnings: ${warnings.length}, Errors: ${errors.length}`);
