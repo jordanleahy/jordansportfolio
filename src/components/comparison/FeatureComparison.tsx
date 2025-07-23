@@ -33,9 +33,9 @@ export const FeatureComparison: React.FC<FeatureComparisonProps> = ({ data }) =>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/2 font-semibold">Feature</TableHead>
-                <TableHead className="w-1/4 font-semibold text-center">{data.company1.name}</TableHead>
-                <TableHead className="w-1/4 font-semibold text-center">{data.company2.name}</TableHead>
+                <TableHead className="w-2/5 font-semibold">Feature</TableHead>
+                <TableHead className="w-3/10 font-semibold text-center">{data.company1.name}</TableHead>
+                <TableHead className="w-3/10 font-semibold text-center">{data.company2.name}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
