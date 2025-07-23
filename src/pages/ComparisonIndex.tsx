@@ -95,9 +95,7 @@ const ComparisonIndex = () => {
 
           {/* Coming Soon Section */}
           <div className="mt-16 text-center">
-            <Card className="max-w-2xl mx-auto border-dashed">
-              
-            </Card>
+            
           </div>
         </div>
 
