@@ -237,7 +237,14 @@ ${rawJson}`;
     }
 
     const data = await response.json();
-    const processedJson = data.choices[0].message.content.trim();
+    let processedJson = data.choices[0].message.content.trim();
+    
+    // Clean the completion response to handle markdown wrapping
+    if (processedJson.startsWith('```json')) {
+      processedJson = processedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (processedJson.startsWith('```')) {
+      processedJson = processedJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
     
     // Validate the returned JSON
     const parsedData = JSON.parse(processedJson);
