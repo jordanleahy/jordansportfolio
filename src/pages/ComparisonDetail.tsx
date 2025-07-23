@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AppLayout from '@/components/layout/AppLayout';
 import { ComparisonHero } from '@/components/comparison/ComparisonHero';
+import { ComparisonTable } from '@/components/comparison/ComparisonTable';
 import { ComparisonCards } from '@/components/comparison/ComparisonCards';
 import { FeatureComparison } from '@/components/comparison/FeatureComparison';
 import { SummaryInsights } from '@/components/comparison/SummaryInsights';
@@ -70,8 +71,10 @@ const ComparisonDetail = () => {
           <div className="max-w-6xl mx-auto">
             
             <div className="space-y-8">
+              <ComparisonTable data={data} />
+              
               <div>
-                <h2 className="text-2xl font-bold mb-6">Technology Company Comparison</h2>
+                <h2 className="text-2xl font-bold mb-6">Company Overview</h2>
                 <ComparisonCards data={data} />
               </div>
               
