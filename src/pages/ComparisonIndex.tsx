@@ -28,37 +28,6 @@ const ComparisonIndex = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-background/50">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-4xl mx-auto">
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <GitCompare className="h-8 w-8 text-primary" />
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  Healthcare Platform Comparisons
-                </h1>
-              </div>
-              <p className="text-xl text-muted-foreground mb-8">
-                Expert analysis and side-by-side comparisons of leading healthcare AI platforms, 
-                clinical documentation improvement tools, and revenue cycle management solutions.
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Expert Analysis
-                </Badge>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  Data-Driven
-                </Badge>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  <Star className="h-3 w-3 mr-1" />
-                  Unbiased
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Available Comparisons */}
         <div className="container mx-auto px-4 py-16">
