@@ -226,7 +226,7 @@ ${JSON.stringify(fundingSchema, null, 2)}
 REMEMBER: 
 - Keep citations in the original text format 【document†line】 - don't remove them
 - Focus on accurate funding data extraction and normalization
-- Map similar fields intelligently (e.g., "services" → "core_services")
+- Map similar fields intelligently (e.g., "firm_name" → "company_name", "services" → "core_services")
 - Be precise with funding stages and amounts
 
 RAW FUNDING DATA TO PROCESS:
