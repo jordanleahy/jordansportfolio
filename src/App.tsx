@@ -22,6 +22,7 @@ import VendorProfile from "./pages/VendorProfile";
 import EventsCalendar from "./pages/EventsCalendar";
 import AgentDashboard from "./pages/AgentDashboard";
 import PromptLibrary from "./pages/PromptLibrary";
+import ComparisonDetail from "./pages/ComparisonDetail";
 import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/events" element={<EventsCalendar />} />
             <Route path="/agents" element={<AgentDashboard />} />
             <Route path="/prompt-library" element={<PromptLibrary />} />
+            <Route path="/:comparisonType" element={<ComparisonDetail />} />
             <Route path="/auth" element={<Auth />} />
           </Routes>
         </BrowserRouter>
