@@ -200,7 +200,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
+
 
 export default function VendorDetail() {
   const { slugname: category, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
@@ -1118,9 +1118,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 canEdit={isAdmin}
               />
 
-              {vendor.performance_metrics && (
-                <PerformanceMetrics metrics={vendor.performance_metrics} />
-              )}
 
               <VendorRichData 
                 companyData={vendor.company_data}

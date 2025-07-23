@@ -10,7 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { useVendorBySlug } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
-import { PerformanceMetrics } from '@/components/vendors/PerformanceMetrics';
+
 
 export default function PublicVendorView() {
   const {
@@ -308,8 +308,6 @@ export default function PublicVendorView() {
             </div>
           </div>
 
-          {/* Performance Metrics - At Bottom */}
-          {vendor.performance_metrics && Object.keys(vendor.performance_metrics).length > 0 && <PerformanceMetrics metrics={vendor.performance_metrics} />}
         </div>
       </PageLayout>
     </>;
