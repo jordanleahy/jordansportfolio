@@ -104,56 +104,6 @@ const ComparisonIndex = () => {
               </Card>
             ))}
           </div>
-
-          {/* Coming Soon Section */}
-          <div className="mt-16 text-center">
-            <Card className="max-w-2xl mx-auto border-dashed">
-              <CardContent className="py-12">
-                <GitCompare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">More Comparisons Coming Soon</h3>
-                <p className="text-muted-foreground mb-6">
-                  We're constantly adding new platform comparisons based on market demand and reader requests.
-                </p>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>• Epic vs Cerner EHR Integration</p>
-                  <p>• Athenahealth vs eClinicalWorks</p>
-                  <p>• More Clinical AI Platforms</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Value Proposition */}
-        <div className="bg-muted/30 py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold text-foreground mb-6">Why Our Comparisons Matter</h2>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="space-y-4">
-                  <CheckCircle className="h-8 w-8 text-primary mx-auto" />
-                  <h3 className="text-lg font-semibold">Real-World Experience</h3>
-                  <p className="text-muted-foreground">
-                    Analysis based on hands-on experience implementing these platforms in healthcare environments.
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <TrendingUp className="h-8 w-8 text-primary mx-auto" />
-                  <h3 className="text-lg font-semibold">Data-Driven Insights</h3>
-                  <p className="text-muted-foreground">
-                    Feature comparisons backed by real performance metrics and ROI analysis.
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <Star className="h-8 w-8 text-primary mx-auto" />
-                  <h3 className="text-lg font-semibold">Unbiased Analysis</h3>
-                  <p className="text-muted-foreground">
-                    Independent evaluations without vendor influence, focused on your success.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </AppLayout>
