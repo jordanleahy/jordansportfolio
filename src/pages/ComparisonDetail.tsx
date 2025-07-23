@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AppLayout from '@/components/layout/AppLayout';
 import { ComparisonHero } from '@/components/comparison/ComparisonHero';
-import { ComparisonTable } from '@/components/comparison/ComparisonTable';
+import { ComparisonCards } from '@/components/comparison/ComparisonCards';
 import { FeatureComparison } from '@/components/comparison/FeatureComparison';
 import { SummaryInsights } from '@/components/comparison/SummaryInsights';
 import { UseCaseSuitability } from '@/components/comparison/UseCaseSuitability';
@@ -61,12 +61,10 @@ const ComparisonDetail = () => {
             <ComparisonBreadcrumb comparisonTitle={data.title} />
             
             <div className="space-y-8">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold mb-6">Technology Company Comparison</h2>
-                  <ComparisonTable data={data} />
-                </CardContent>
-              </Card>
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Technology Company Comparison</h2>
+                <ComparisonCards data={data} />
+              </div>
               
               <FeatureComparison data={data} />
               
