@@ -25,7 +25,7 @@ import { InvestorResearchModal } from '@/components/investors/InvestorResearchMo
 import { type Vendor } from '@/types/vendor';
 
 export default function VendorDetail() {
-  const { slug } = useParams<{ slug: string }>();
+  const { vendorSlug } = useParams<{ vendorSlug: string }>();
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInvestorModalOpen, setIsInvestorModalOpen] = useState(false);
@@ -36,19 +36,19 @@ export default function VendorDetail() {
 
   useEffect(() => {
     const fetchVendor = async () => {
-      if (!slug) {
-        console.log('No slug provided');
+      if (!vendorSlug) {
+        console.log('No vendorSlug provided');
         setIsLoading(false);
         return;
       }
       
-      console.log('Fetching vendor with slug:', slug);
+      console.log('Fetching vendor with slug:', vendorSlug);
       
       try {
         const { data, error } = await supabase
           .from('vendors')
           .select('*')
-          .eq('slug', slug)
+          .eq('slug', vendorSlug)
           .maybeSingle();
 
         console.log('Vendor fetch result:', { data, error });
@@ -65,7 +65,7 @@ export default function VendorDetail() {
         }
 
         if (!data) {
-          console.log('No vendor found for slug:', slug);
+          console.log('No vendor found for slug:', vendorSlug);
           toast({
             title: "Vendor not found",
             description: "The vendor you're looking for doesn't exist.",
@@ -90,7 +90,7 @@ export default function VendorDetail() {
     };
 
     fetchVendor();
-  }, [slug, toast]);
+  }, [vendorSlug, toast]);
 
   const generateInvestorResearchPrompt = (keyInvestors: string[], companyName: string) => {
     const investorList = keyInvestors.map(investor => `- ${investor}`).join('\n');
