@@ -14,7 +14,8 @@ import {
   X,
   Briefcase,
   Image,
-  Eye
+  Eye,
+  FileText
 } from "lucide-react";
 import {
   AlertDialog,
@@ -35,6 +36,7 @@ import { useNavigate } from "react-router-dom";
 import type { Vendor } from "@/types/vendor";
 import { JobVisualPrompt } from "@/components/jobs/JobVisualPrompt";
 import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
+import { ResumeModal } from "@/components/jobs/ResumeModal";
 
 interface ProductJobsCardProps {
   vendorId: string;
@@ -84,6 +86,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   });
   const [errors, setErrors] = useState<Partial<JobFormData>>({});
   const [visualPromptJob, setVisualPromptJob] = useState<VendorJob | null>(null);
+  const [resumeModalJob, setResumeModalJob] = useState<VendorJob | null>(null);
 
   // Only show to admins
   if (!isAdmin) {
@@ -274,6 +277,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     setVisualPromptJob(job);
   };
 
+  const handleOpenResumeModal = (job: VendorJob) => {
+    setResumeModalJob(job);
+  };
+
   return (
     <>
       <Card>
@@ -404,6 +411,16 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                           Create Cover Page
                         </Button>
                         
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenResumeModal(job)}
+                          className="text-primary border-primary hover:bg-primary/10"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Add Resume
+                        </Button>
+                        
                         {existingPortfolio && (
                           <Button
                             size="sm"
@@ -494,6 +511,17 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
           jobTitle={`Job Position at ${vendor.company_name}`}
           jobDescription={visualPromptJob.job_description}
           companyName={vendor.company_name}
+        />
+      )}
+
+      {/* Resume Modal */}
+      {resumeModalJob && (
+        <ResumeModal
+          isOpen={!!resumeModalJob}
+          onClose={() => setResumeModalJob(null)}
+          companyName={vendor.company_name}
+          jobDescription={resumeModalJob.job_description}
+          jobDescriptionLink={resumeModalJob.job_url}
         />
       )}
     </>
