@@ -26,6 +26,12 @@ export interface SectionConfig {
   fields: FieldConfig[];
   description?: string;
   badge?: string;
+  actionButton?: {
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+    condition?: boolean;
+  };
 }
 
 interface EditableSectionProps {
@@ -203,38 +209,53 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
             )}
           </div>
           
-          {canEdit && (
-            <div className="flex items-center gap-2">
-              {isEditing ? (
-                <>
+          <div className="flex items-center gap-2">
+            {config.actionButton && config.actionButton.condition && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={config.actionButton.onClick}
+              >
+                {config.actionButton.icon && (
+                  <config.actionButton.icon className="mr-2 h-4 w-4" />
+                )}
+                {config.actionButton.label}
+              </Button>
+            )}
+            
+            {canEdit && (
+              <>
+                {isEditing ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                      disabled={isSaving}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={!hasChanges || isSaving}
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={cancelEdit}
-                    disabled={isSaving}
+                    onClick={startEdit}
                   >
-                    <X className="h-4 w-4" />
+                    <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={!hasChanges || isSaving}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    Save
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={startEdit}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
       </CardHeader>
       

@@ -1056,7 +1056,15 @@ Research all ${investors.length} firms listed above and return comprehensive dat
 
               <EditableSection 
                 vendor={vendor} 
-                config={fundingConfig} 
+                config={{
+                  ...fundingConfig,
+                  actionButton: {
+                    label: 'Research Investors',
+                    icon: Download,
+                    onClick: () => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name),
+                    condition: isAdmin && vendor.key_investors && vendor.key_investors.length > 0
+                  }
+                }}
                 canEdit={isAdmin}
               />
 
@@ -1134,63 +1142,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 </CardContent>
               </Card>
 
-              {(vendor.total_funding || vendor.funding_stage || (vendor.key_investors && vendor.key_investors.length > 0)) && (
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                        <DollarSign className="h-5 w-5" />
-                        Funding Information
-                      </CardTitle>
-                      {isAdmin && vendor.key_investors && vendor.key_investors.length > 0 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name)}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Research Investors
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {vendor.total_funding && (
-                      <>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">Total Funding</p>
-                          <p className="text-xl sm:text-2xl font-bold text-primary break-words">
-                            {vendor.total_funding}
-                          </p>
-                        </div>
-                        <Separator />
-                      </>
-                    )}
-                    {vendor.funding_stage && (
-                      <>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">Funding Stage</p>
-                          <p className="font-medium text-sm sm:text-base">{vendor.funding_stage}</p>
-                        </div>
-                        <Separator />
-                      </>
-                    )}
-                    {vendor.key_investors && vendor.key_investors.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Key Investors</p>
-                        <ul className="space-y-1">
-                          {vendor.key_investors.map((investor, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm">
-                              <span className="text-primary mt-1 flex-shrink-0">•</span>
-                              <span>{investor}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </div>
         </div>
