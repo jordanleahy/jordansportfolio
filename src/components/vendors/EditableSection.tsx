@@ -33,10 +33,9 @@ interface EditableSectionProps {
   config: SectionConfig;
   onSave?: () => void;
   canEdit: boolean;
-  extraButton?: React.ReactNode;
 }
 
-export function EditableSection({ vendor, config, onSave, canEdit, extraButton }: EditableSectionProps) {
+export function EditableSection({ vendor, config, onSave, canEdit }: EditableSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   
   const {
@@ -204,41 +203,38 @@ export function EditableSection({ vendor, config, onSave, canEdit, extraButton }
             )}
           </div>
           
-          <div className="flex items-center gap-2">
-            {extraButton}
-            {canEdit && (
-              <>
-                {isEditing ? (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={cancelEdit}
-                      disabled={isSaving}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      disabled={!hasChanges || isSaving}
-                    >
-                      <Save className="h-4 w-4 mr-1" />
-                      Save
-                    </Button>
-                  </>
-                ) : (
+          {canEdit && (
+            <div className="flex items-center gap-2">
+              {isEditing ? (
+                <>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={startEdit}
+                    onClick={cancelEdit}
+                    disabled={isSaving}
                   >
-                    <Edit className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
-                )}
-              </>
-            )}
-          </div>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={!hasChanges || isSaving}
+                  >
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={startEdit}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </CardHeader>
       
