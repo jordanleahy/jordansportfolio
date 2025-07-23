@@ -31,17 +31,17 @@ export const InvestorResearchModal = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingResult, setProcessingResult] = useState<any>(null);
 
-  // Admin check
-  if (!isAdmin) {
-    return null;
-  }
-
   // Reset step when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setStep(initialStep);
     }
   }, [isOpen, initialStep]);
+
+  // Admin check
+  if (!isAdmin) {
+    return null;
+  }
 
   const generateInvestorPrompt = () => {
     const prompt = `You are an expert investment research analyst with advanced web browsing capabilities. Your task is to conduct comprehensive research on venture capital firms, private equity firms, angel investor groups, and other investment organizations. Extract detailed information that matches our exact database schema.
