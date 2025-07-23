@@ -1,6 +1,6 @@
 export interface Investor {
   id: string;
-  firm_name: string;
+  company_name: string;  // Changed from firm_name to match database
   address?: string;
   city?: string;
   state?: string;

@@ -70,7 +70,7 @@ const Investors = () => {
   });
 
   const handleDeleteInvestor = (investor: Investor) => {
-    if (window.confirm(`Are you sure you want to delete ${investor.firm_name}?`)) {
+    if (window.confirm(`Are you sure you want to delete ${investor.company_name}?`)) {
       deleteInvestorMutation.mutate(investor.id);
     }
   };

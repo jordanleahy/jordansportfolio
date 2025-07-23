@@ -16,7 +16,7 @@ interface InvestorsTableViewProps {
   onDeleteClick?: (investor: Investor) => void;
 }
 
-type SortField = 'firm_name' | 'city' | 'state' | 'updated_at';
+type SortField = 'company_name' | 'city' | 'state' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
 
 export function InvestorsTableView({ 
@@ -94,11 +94,11 @@ export function InvestorsTableView({
               <TableRow>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50 min-w-[200px]"
-                  onClick={() => handleSort('firm_name')}
+                  onClick={() => handleSort('company_name')}
                 >
                   <div className="flex items-center gap-2">
                     Firm Name
-                    {sortField === 'firm_name' && (
+                    {sortField === 'company_name' && (
                       <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
@@ -153,7 +153,7 @@ export function InvestorsTableView({
                 >
                   <TableCell>
                     <div>
-                      <div className="font-medium hover:text-primary">{investor.firm_name}</div>
+                      <div className="font-medium hover:text-primary">{investor.company_name}</div>
                       {investor.lead_partner && (
                         <div className="text-sm text-muted-foreground mt-1">
                           {investor.lead_partner}
