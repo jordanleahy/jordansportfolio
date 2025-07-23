@@ -8,9 +8,6 @@ import { BlogTLDR } from "./BlogTLDR";
 import { BlogDeepDive } from "./BlogDeepDive";
 import { BlogCTAShare } from "./BlogCTAShare";
 import { BlogNextPost } from "./BlogNextPost";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, BookmarkPlus, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BlogService } from "@/services/blogService";
 
@@ -63,10 +60,6 @@ export const BlogTemplate = ({
         <link rel="canonical" href={canonicalUrl} />
       </Helmet>
 
-      {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-40">
-        
-      </header>
 
       {/* Blog Content - Enforced Structure with Consistent Spacing */}
       <article className="relative space-y-16">
