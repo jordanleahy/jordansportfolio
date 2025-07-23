@@ -61,10 +61,7 @@ export default function OptimizedJobs() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div className="space-y-1">
-              <div className="space-y-1">
-                
-                <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
-              </div>
+              <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
               <p className="text-muted-foreground">
                 Track your job applications and stay organized in your job search.
               </p>
