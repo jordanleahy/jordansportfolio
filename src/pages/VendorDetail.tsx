@@ -151,10 +151,10 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
     title: "Basic Information",
     fields: [
       { key: 'company_name' as keyof Vendor, type: 'text' as const, label: 'Company Name' },
-      { key: 'website' as keyof Vendor, type: 'text' as const, label: 'Website' },
+      { key: 'website_url' as keyof Vendor, type: 'text' as const, label: 'Website' },
       { key: 'headquarters' as keyof Vendor, type: 'text' as const, label: 'Headquarters' },
-      { key: 'founded_year' as keyof Vendor, type: 'number' as const, label: 'Founded Year' },
-      { key: 'employee_count' as keyof Vendor, type: 'text' as const, label: 'Employee Count' },
+      { key: 'founding_year' as keyof Vendor, type: 'number' as const, label: 'Founded Year' },
+      { key: 'employee_count_range' as keyof Vendor, type: 'text' as const, label: 'Employee Count' },
     ]
   };
 
@@ -168,7 +168,7 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
   const productsConfig = {
     title: "Products & Services",
     fields: [
-      { key: 'products' as keyof Vendor, type: 'array' as const, label: 'Products/Services', maxItems: 10 },
+      { key: 'core_services' as keyof Vendor, type: 'array' as const, label: 'Products/Services', maxItems: 10 },
     ]
   };
 
@@ -184,24 +184,24 @@ Extract ONLY factual information from reliable sources. For missing data, use nu
   const technicalConfig = {
     title: "Technical Information",
     fields: [
-      { key: 'technology_stack' as keyof Vendor, type: 'array' as const, label: 'Technology Stack', maxItems: 15 },
-      { key: 'integration_capabilities' as keyof Vendor, type: 'array' as const, label: 'Integration Capabilities', maxItems: 15 },
+      { key: 'tech_stack' as keyof Vendor, type: 'array' as const, label: 'Technology Stack', maxItems: 15 },
+      { key: 'key_features' as keyof Vendor, type: 'array' as const, label: 'Integration Capabilities', maxItems: 15 },
     ]
   };
 
   const complianceConfig = {
     title: "Compliance & Security",
     fields: [
-      { key: 'compliance_certifications' as keyof Vendor, type: 'array' as const, label: 'Compliance Certifications', maxItems: 10 },
-      { key: 'security_features' as keyof Vendor, type: 'array' as const, label: 'Security Features', maxItems: 10 },
+      { key: 'certifications' as keyof Vendor, type: 'array' as const, label: 'Compliance Certifications', maxItems: 10 },
+      { key: 'key_features' as keyof Vendor, type: 'array' as const, label: 'Security Features', maxItems: 10 },
     ]
   };
 
   const businessConfig = {
     title: "Business Model",
     fields: [
-      { key: 'pricing_model' as keyof Vendor, type: 'text' as const, label: 'Pricing Model' },
-      { key: 'target_market' as keyof Vendor, type: 'text' as const, label: 'Target Market' },
+      { key: 'business_model' as keyof Vendor, type: 'text' as const, label: 'Pricing Model' },
+      { key: 'customers' as keyof Vendor, type: 'array' as const, label: 'Target Market', maxItems: 10 },
       { key: 'competitors' as keyof Vendor, type: 'array' as const, label: 'Competitors', maxItems: 10 },
     ]
   };
