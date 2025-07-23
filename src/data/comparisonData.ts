@@ -46,8 +46,8 @@ export interface ComparisonData {
 
 export const smarterdxVsIodineData: ComparisonData = {
   title: "Iodine vs SmarterDx",
-  metaTitle: "Iodine vs. SmarterDx",
-  metaDescription: "Compare Iodine Software and SmarterDx.",
+  metaTitle: "SmarterDx vs Iodine",
+  metaDescription: "Is SmarterDx better than Iodine?",
   company1: {
     name: "Iodine Software",
     founded: "2010",
