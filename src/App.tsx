@@ -51,8 +51,9 @@ const App = () => (
             <Route path="/events" element={<EventsCalendar />} />
             <Route path="/agents" element={<AgentDashboard />} />
             <Route path="/prompt-library" element={<PromptLibrary />} />
-            <Route path="/:comparisonType" element={<ComparisonDetail />} />
             <Route path="/auth" element={<Auth />} />
+            {/* Catch-all route for comparison pages - must be last */}
+            <Route path="/:comparisonType" element={<ComparisonDetail />} />
           </Routes>
         </BrowserRouter>
         </TooltipProvider>
