@@ -304,7 +304,7 @@ Return ONLY valid JSON array with detailed information for each of these specifi
 **DETAILED FIELD INSTRUCTIONS:**
 [
   {
-    "firm_name": "Official name of the investment firm",
+    "company_name": "Official name of the investment firm",
     "address": "Street address of main office (if available)",
     "city": "Primary office city",
     "state": "State/Province code (e.g., 'CA', 'NY')",
