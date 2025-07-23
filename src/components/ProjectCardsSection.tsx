@@ -1,110 +1,103 @@
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
 
-const projects = [
-  {
-    id: "case1",
-    title: "Inpatient Revenue Cycle Management",
-    company: "Healthcare Analytics",
-    description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
-    tags: ["#RCM", "#LLM", "#ICD-10"],
-    icon: Brain,
-    color: "bg-blue-500",
-    path: "/cases/case1"
-  },
-  {
-    id: "case4",
-    title: "Drug Prior Auth and Validation",
-    company: "Digital Health Platform",
-    description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#ML", "#Workflow"],
-    icon: Shield,
-    color: "bg-green-500",
-    path: "/cases/case4"
-  },
-  {
-    id: "case3",
-    title: "Denial and Appeal Resolution",
-    company: "Revenue Cycle Solutions",
-    description: "Designed a denial and appeal resolution application for managing denials, including the drafting of templates and sending to payer.",
-    tags: ["#Appeals", "#Research", "#UX"],
-    icon: FileText,
-    color: "bg-purple-500",
-    path: "/cases/case3"
-  }
-];
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight, TrendingUp, FileText, Users, BarChart3 } from 'lucide-react';
 
 const ProjectCardsSection = () => {
+  const projects = [
+    {
+      id: 1,
+      title: "Platform Comparisons",
+      description: "Comprehensive side-by-side comparisons of leading healthcare technology platforms with detailed analysis of features, pricing, and capabilities.",
+      icon: BarChart3,
+      badge: "New",
+      badgeVariant: "default" as const,
+      link: "/comparison",
+      highlights: ["Expert Analysis", "Detailed Features", "Pricing Insights"]
+    },
+    {
+      id: 2,
+      title: "Revenue Cycle Analytics",
+      description: "Advanced analytics and insights for healthcare revenue cycle management, featuring AI-powered documentation and optimization tools.",
+      icon: TrendingUp,
+      badge: "Analytics",
+      badgeVariant: "secondary" as const,
+      link: "/rcmcompanies",
+      highlights: ["AI-Powered", "Real-time Data", "ROI Tracking"]
+    },
+    {
+      id: 3,
+      title: "Clinical Documentation",
+      description: "Comprehensive resources and tools for clinical documentation improvement, featuring CDI best practices and automated solutions.",
+      icon: FileText,
+      badge: "Documentation",
+      badgeVariant: "outline" as const,
+      link: "/blog",
+      highlights: ["Best Practices", "Automation", "Compliance"]
+    },
+    {
+      id: 4,
+      title: "Healthcare Insights",
+      description: "In-depth analysis and insights into healthcare technology trends, market dynamics, and industry developments.",
+      icon: Users,
+      badge: "Insights",
+      badgeVariant: "secondary" as const,
+      link: "/blog",
+      highlights: ["Market Analysis", "Industry Trends", "Expert Opinions"]
+    }
+  ];
+
   return (
-    <section id="case-studies" className="py-24 px-4 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
-          <p className="text-muted-foreground text-lg">
-            Case studies showcasing healthcare design innovation
+    <section className="py-16 bg-muted/30">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Explore Our Resources
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Discover comprehensive tools and insights to help you make informed decisions about healthcare technology platforms.
           </p>
-        </motion.div>
+        </div>
         
-        <div className="grid lg:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -8, rotate: -1 }}
-            >
-              <Link to={project.path}>
-                <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-accent/20 hover:border-accent">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="p-3 rounded-lg bg-accent/10 mb-4">
-                      <project.icon className="h-6 w-6 text-accent" />
-                    </div>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-                    </motion.div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
-                  </div>
-                </CardHeader>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {projects.map((project) => (
+            <Card key={project.id} className="hover:shadow-lg transition-shadow group">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <project.icon className="h-8 w-8 text-primary" />
+                  <Badge variant={project.badgeVariant}>{project.badge}</Badge>
+                </div>
+                <CardTitle className="text-xl">{project.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                  {project.description}
+                </p>
                 
-                <CardContent className="pt-0">
-                  <p className="text-card-foreground mb-4 leading-relaxed">
-                    {project.description}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
-                        {tag}
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-1">
+                    {project.highlights.map((highlight, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {highlight}
                       </Badge>
                     ))}
                   </div>
                   
-                  <Button variant="outline" className="w-full">
-                    View Case Study
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
+                  <Link to={project.link} className="block">
+                    <Button 
+                      variant="outline" 
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                    >
+                      Explore
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

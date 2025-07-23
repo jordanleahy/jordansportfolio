@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AppLayout from '@/components/layout/AppLayout';
 import { ComparisonHero } from '@/components/comparison/ComparisonHero';
@@ -10,6 +10,14 @@ import { SummaryInsights } from '@/components/comparison/SummaryInsights';
 import { UseCaseSuitability } from '@/components/comparison/UseCaseSuitability';
 import { comparisonDataMap } from '@/data/comparisonData';
 import { Card, CardContent } from '@/components/ui/card';
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink, 
+  BreadcrumbList, 
+  BreadcrumbPage, 
+  BreadcrumbSeparator 
+} from '@/components/ui/breadcrumb';
 
 const ComparisonDetail = () => {
   const { comparisonType } = useParams<{ comparisonType: string }>();
@@ -23,9 +31,12 @@ const ComparisonDetail = () => {
       <AppLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-6">
             The comparison you're looking for doesn't exist or has been moved.
           </p>
+          <Link to="/comparison" className="text-primary hover:underline">
+            ← Back to Comparisons
+          </Link>
           <p className="text-sm text-muted-foreground mt-4">
             Requested: {comparisonType} | Available: {Object.keys(comparisonDataMap).join(', ')}
           </p>
@@ -50,6 +61,31 @@ const ComparisonDetail = () => {
       </Helmet>
       
       <AppLayout>
+        {/* Breadcrumbs */}
+        <div className="bg-muted/30 py-4">
+          <div className="container mx-auto px-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/comparison">Comparisons</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{data.company1.name} vs {data.company2.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
+
         <ComparisonHero data={data} />
         
         <div className="container mx-auto px-4 py-12">
@@ -75,6 +111,16 @@ const ComparisonDetail = () => {
                 </p>
               </CardContent>
             </Card>
+
+            {/* Navigation */}
+            <div className="flex justify-center pt-8">
+              <Link 
+                to="/comparison" 
+                className="text-primary hover:underline flex items-center gap-2"
+              >
+                ← Back to All Comparisons
+              </Link>
+            </div>
           </div>
         </div>
       </AppLayout>
