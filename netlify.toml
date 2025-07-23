@@ -31,7 +31,15 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SPA fallback
+# Social media crawler redirects to function for proper OG tags
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/.netlify/functions/blog-meta?slug=:slug"
+  status = 200
+  force = false
+  conditions = {User-Agent = "facebookexternalhit,linkedinbot,twitterbot,slackbot,whatsapp"}
+
+# SPA fallback for regular users
 [[redirects]]
   from = "/*"
   to = "/index.html"
