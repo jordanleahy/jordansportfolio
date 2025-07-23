@@ -1,3 +1,4 @@
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -10,9 +11,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 exports.handler = async (event, context) => {
+  // Add debugging
+  console.log('Blog meta function called with:', {
+    slug: event.queryStringParameters?.slug,
+    userAgent: event.headers['user-agent'],
+    method: event.httpMethod
+  });
+
   const { slug } = event.queryStringParameters || {};
   
   if (!slug) {
+    console.log('Missing slug parameter');
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Missing slug parameter' })
@@ -29,37 +38,64 @@ exports.handler = async (event, context) => {
       .single();
 
     if (error || !post) {
+      console.log('Blog post not found:', error);
       return {
         statusCode: 404,
         body: JSON.stringify({ error: 'Blog post not found' })
       };
     }
 
+    console.log('Found blog post:', {
+      title: post.meta_title,
+      hasOgImage: !!post.og_image_url,
+      hasHeroImage: !!post.hero_image_url
+    });
+
+    // Determine the best image to use
+    const ogImage = post.og_image_url || post.hero_image_url;
+    
+    // Use the correct domain - jordanleahy.com
+    const siteUrl = 'https://jordanleahy.com';
+    const postUrl = `${siteUrl}/blog/${post.slug}`;
+
+    // Escape HTML entities in content
+    const escapeHtml = (text) => {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    };
+
     // Generate the HTML with proper OG tags
-    const html = `
-<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${post.meta_title}</title>
-    <meta name="description" content="${post.meta_description}">
+    <title>${escapeHtml(post.meta_title)}</title>
+    <meta name="description" content="${escapeHtml(post.meta_description)}">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="${post.meta_title}">
-    <meta property="og:description" content="${post.meta_description}">
-    <meta property="og:image" content="${post.og_image_url || post.hero_image_url}">
-    <meta property="og:url" content="https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}">
+    <meta property="og:title" content="${escapeHtml(post.meta_title)}">
+    <meta property="og:description" content="${escapeHtml(post.meta_description)}">
+    <meta property="og:image" content="${ogImage}">
+    <meta property="og:url" content="${postUrl}">
     <meta property="og:type" content="article">
-    <meta property="og:site_name" content="Jordan's Portfolio">
+    <meta property="og:site_name" content="Jordan Leigh">
     <meta property="article:published_time" content="${post.published_at}">
     <meta property="article:author" content="Jordan Leigh">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${post.meta_title}">
-    <meta name="twitter:description" content="${post.meta_description}">
-    <meta name="twitter:image" content="${post.og_image_url || post.hero_image_url}">
+    <meta name="twitter:title" content="${escapeHtml(post.meta_title)}">
+    <meta name="twitter:description" content="${escapeHtml(post.meta_description)}">
+    <meta name="twitter:image" content="${ogImage}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="${postUrl}">
     
     <!-- Redirect to actual blog post -->
     <meta http-equiv="refresh" content="0;url=/blog/${post.slug}">
@@ -68,10 +104,12 @@ exports.handler = async (event, context) => {
     </script>
 </head>
 <body>
-    <h1>${post.title}</h1>
+    <h1>${escapeHtml(post.title || post.hero_headline)}</h1>
     <p>If you are not redirected automatically, <a href="/blog/${post.slug}">click here</a>.</p>
 </body>
 </html>`;
+
+    console.log('Generated HTML with OG tags for:', post.slug);
 
     return {
       statusCode: 200,

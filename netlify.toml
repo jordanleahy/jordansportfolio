@@ -37,7 +37,7 @@
   to = "/.netlify/functions/blog-meta?slug=:slug"
   status = 200
   force = false
-  conditions = {User-Agent = "facebookexternalhit,linkedinbot,twitterbot,slackbot,whatsapp"}
+  conditions = {User-Agent = "facebookexternalhit*,LinkedInBot*,Twitterbot*,WhatsApp*,SkypeUriPreview*,SlackBot*,TelegramBot*,bingbot*,GoogleBot*"}
 
 # SPA fallback for regular users
 [[redirects]]

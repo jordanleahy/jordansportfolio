@@ -47,6 +47,10 @@ export const BlogTemplate = ({
     }
   };
 
+  // Use the correct domain
+  const siteUrl = 'https://jordanleahy.com';
+  const postUrl = `${siteUrl}/blog/${post.slug}`;
+
   return (
     <div className={`min-h-screen bg-background overflow-x-hidden ${className}`}>
       {/* SEO Head */}
@@ -59,9 +63,9 @@ export const BlogTemplate = ({
         <meta property="og:title" content={post.meta_title} />
         <meta property="og:description" content={post.meta_description} />
         <meta property="og:image" content={post.og_image_url || post.hero_image_url} />
-        <meta property="og:url" content={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
+        <meta property="og:url" content={postUrl} />
         <meta property="og:type" content="article" />
-        <link rel="canonical" href={`https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com/blog/${post.slug}`} />
+        <link rel="canonical" href={postUrl} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -136,7 +140,7 @@ export const BlogTemplate = ({
             ctaUrl={post.cta_url} 
             shareEnabled={post.share_enabled} 
             title={post.meta_title} 
-            url={window.location.href} 
+            url={postUrl} 
           />
         </section>
 

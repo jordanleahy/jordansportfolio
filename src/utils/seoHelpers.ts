@@ -1,7 +1,8 @@
+
 export const SEO_DEFAULTS = {
-  siteUrl: 'https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com',
-  siteName: 'Jordan\'s Portfolio',
-  defaultTitle: 'Jordan\'s Portfolio - Healthcare Technology & Product Development',
+  siteUrl: 'https://jordanleahy.com',
+  siteName: 'Jordan Leigh',
+  defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
   defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
   defaultImage: '/og-images/default-hero.png',
   twitterHandle: '@jordanleigh',
