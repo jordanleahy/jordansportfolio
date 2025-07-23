@@ -31,7 +31,7 @@ import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
-import Comparison from "./pages/Comparison";
+
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
 import RCMCompanies from "./pages/RCMCompanies";
@@ -114,7 +114,7 @@ function App() {
                 <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
                 <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/homehealth" element={<HomeHealth />} />
-                <Route path="/comparison" element={<Comparison />} />
+                
                 <Route path="/comparisons" element={<ComparisonIndex />} />
                 <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
                 <Route path="/cases/case1" element={<Case1 />} />
