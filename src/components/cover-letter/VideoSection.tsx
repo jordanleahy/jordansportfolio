@@ -8,7 +8,7 @@ import { Upload, Trash2, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { uploadVideoToStorage, isVideoFile } from "@/utils/videoUpload";
 import { useToast } from "@/hooks/use-toast";
 
 interface VideoSectionProps {
@@ -27,33 +27,18 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const updatePortfolio = useUpdateCompanyPortfolio();
-  const { uploadFile } = useFileUpload({ bucket: 'general', folder: 'portfolio-media' });
   const [isUploading, setIsUploading] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
-  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !portfolio) return;
 
-    // Validate file type
-    const isVideo = file.type.startsWith('video/');
-    const isImage = file.type.startsWith('image/');
-    
-    if (!isVideo && !isImage) {
+    const validation = isVideoFile(file);
+    if (!validation.isValid) {
       toast({
         title: "Invalid File Type",
-        description: "Please select a video or image file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (50MB for videos, 10MB for images)
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast({
-        title: "File Too Large",
-        description: `File size must be less than ${isVideo ? '50MB' : '10MB'}`,
+        description: validation.reason,
         variant: "destructive",
       });
       return;
@@ -62,32 +47,30 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     setIsUploading(true);
 
     try {
-      const uploadedUrl = await uploadFile(file);
+      const result = await uploadVideoToStorage(file, 'general', 'portfolio-videos');
       
-      if (uploadedUrl) {
-        // Update portfolio with new media URL
-        const updateData = isVideo 
-          ? { id: portfolio.id, custom_video_url: uploadedUrl }
-          : { id: portfolio.id, custom_image_url: uploadedUrl };
-        
-        await updatePortfolio.mutateAsync(updateData);
+      if (result.success && result.url) {
+        await updatePortfolio.mutateAsync({
+          id: portfolio.id,
+          custom_video_url: result.url
+        });
         
         toast({
-          title: `${isVideo ? 'Video' : 'Photo'} Updated`,
-          description: `Your portfolio ${isVideo ? 'video' : 'photo'} has been updated successfully.`,
+          title: "Video Updated",
+          description: "Your portfolio video has been updated successfully.",
         });
       } else {
         toast({
           title: "Upload Failed",
-          description: "Failed to upload file. Please try again.",
+          description: result.error || "Failed to upload video.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Media upload error:', error);
+      console.error('Video upload error:', error);
       toast({
         title: "Upload Error",
-        description: "An error occurred while uploading the file.",
+        description: "An error occurred while uploading the video.",
         variant: "destructive",
       });
     } finally {
@@ -96,33 +79,24 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     }
   };
 
-  const handleMediaRemove = async () => {
+  const handleVideoRemove = async () => {
     if (!portfolio) return;
     
-    const hasCustomImage = !!portfolio.custom_image_url;
-    const hasCustomVideo = !!portfolio.custom_video_url;
-    
     try {
-      const updateData: any = { id: portfolio.id };
-      
-      if (hasCustomImage) {
-        updateData.custom_image_url = null;
-      }
-      if (hasCustomVideo) {
-        updateData.custom_video_url = null;
-      }
-      
-      await updatePortfolio.mutateAsync(updateData);
+      await updatePortfolio.mutateAsync({
+        id: portfolio.id,
+        custom_video_url: null
+      });
       
       toast({
-        title: "Media Removed",
-        description: "Custom media removed. Default content will be used.",
+        title: "Video Removed",
+        description: "Custom video removed. Default video will be used.",
       });
     } catch (error) {
-      console.error('Media removal error:', error);
+      console.error('Video removal error:', error);
       toast({
         title: "Removal Error",
-        description: "Failed to remove custom media.",
+        description: "Failed to remove custom video.",
         variant: "destructive",
       });
     }
@@ -137,37 +111,29 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
           >
-            {portfolio?.custom_image_url ? (
-              <img 
-                src={portfolio.custom_image_url}
-                alt="Custom portfolio image"
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : (
-              <video 
-                className="w-full h-full object-cover rounded-lg"
-                controls
-                preload="metadata"
-                muted
-                autoPlay={false}
-                poster={posterSrc}
-              >
-                <source src={videoSrc} type="video/mp4" />
-                <source src={videoSrc} type="video/quicktime" />
-                Your browser does not support the video tag.
-              </video>
-            )}
+            <video 
+              className="w-full h-full object-cover rounded-lg"
+              controls
+              preload="metadata"
+              muted
+              autoPlay={false}
+              poster={posterSrc}
+            >
+              <source src={videoSrc} type="video/mp4" />
+              <source src={videoSrc} type="video/quicktime" />
+              Your browser does not support the video tag.
+            </video>
             
             {user && portfolio && (
               <div className={`absolute top-2 right-2 transition-opacity duration-200 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="flex gap-1">
                   <input
                     type="file"
-                    accept="video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv,image/*,.jpg,.jpeg,.png,.webp,.gif"
-                    onChange={handleMediaUpload}
+                    accept="video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv"
+                    onChange={handleVideoUpload}
                     disabled={isUploading}
                     className="hidden"
-                    id="media-upload"
+                    id="video-upload"
                   />
                   <Button
                     variant="secondary"
@@ -176,16 +142,16 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     asChild
                     className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
                   >
-                    <label htmlFor="media-upload" className="cursor-pointer">
+                    <label htmlFor="video-upload" className="cursor-pointer">
                       <Upload className="w-4 h-4 text-white" />
                     </label>
                   </Button>
                   
-                  {(portfolio.custom_video_url || portfolio.custom_image_url) && (
+                  {portfolio.custom_video_url && (
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={handleMediaRemove}
+                      onClick={handleVideoRemove}
                       disabled={updatePortfolio.isPending}
                       className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
                     >

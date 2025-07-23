@@ -27,7 +27,6 @@ export type Database = {
           hero_badge: string | null
           hero_headline: string
           hero_image_16_9_url: string | null
-          hero_image_4_3_url: string | null
           hero_image_url: string | null
           hero_subhead: string
           hero_video_url: string | null
@@ -62,7 +61,6 @@ export type Database = {
           hero_badge?: string | null
           hero_headline: string
           hero_image_16_9_url?: string | null
-          hero_image_4_3_url?: string | null
           hero_image_url?: string | null
           hero_subhead: string
           hero_video_url?: string | null
@@ -97,7 +95,6 @@ export type Database = {
           hero_badge?: string | null
           hero_headline?: string
           hero_image_16_9_url?: string | null
-          hero_image_4_3_url?: string | null
           hero_image_url?: string | null
           hero_subhead?: string
           hero_video_url?: string | null
@@ -490,7 +487,6 @@ export type Database = {
           company_slug: string
           cover_letter: string | null
           created_at: string
-          custom_image_url: string | null
           custom_video_url: string | null
           generated_content: Json | null
           id: string
@@ -504,7 +500,6 @@ export type Database = {
           company_slug: string
           cover_letter?: string | null
           created_at?: string
-          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string
@@ -518,7 +513,6 @@ export type Database = {
           company_slug?: string
           cover_letter?: string | null
           created_at?: string
-          custom_image_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
           id?: string

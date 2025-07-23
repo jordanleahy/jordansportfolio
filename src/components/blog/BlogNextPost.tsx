@@ -48,18 +48,18 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
           <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
             <div className="md:flex">
               {/* Image */}
-              {(nextPost.hero_image_4_3_url || nextPost.hero_image_url) && (
-                <div className="md:w-1/3 overflow-hidden aspect-[4/3]">
+              {nextPost.hero_image_url && (
+                <div className="md:w-1/3 overflow-hidden">
                   <OptimizedImage
-                    src={nextPost.hero_image_4_3_url || nextPost.hero_image_url!}
+                    src={nextPost.hero_image_url}
                     alt={nextPost.hero_headline}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               )}
               
               {/* Content */}
-              <div className={`${(nextPost.hero_image_4_3_url || nextPost.hero_image_url) ? 'md:w-2/3' : 'w-full'} p-6 md:p-8`}>
+              <div className={`${nextPost.hero_image_url ? 'md:w-2/3' : 'w-full'} p-6 md:p-8`}>
                 {/* Badge */}
                 {nextPost.hero_badge && (
                   <div className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full mb-3">
