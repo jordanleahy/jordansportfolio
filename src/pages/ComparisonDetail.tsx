@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -12,17 +11,17 @@ import { comparisonDataMap } from '@/data/comparisonData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
-
 const ComparisonDetail = () => {
-  const { comparisonType } = useParams<{ comparisonType: string }>();
-  
+  const {
+    comparisonType
+  } = useParams<{
+    comparisonType: string;
+  }>();
   console.log('Comparison Type:', comparisonType);
   console.log('Available keys:', Object.keys(comparisonDataMap));
   console.log('Data found:', !!comparisonDataMap[comparisonType || '']);
-  
   if (!comparisonType || !comparisonDataMap[comparisonType]) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
           <p className="text-muted-foreground">
@@ -32,14 +31,10 @@ const ComparisonDetail = () => {
             Requested: {comparisonType} | Available: {Object.keys(comparisonDataMap).join(', ')}
           </p>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
-
   const data = comparisonDataMap[comparisonType];
-
-  return (
-    <>
+  return <>
       <Helmet>
         <title>{data.metaTitle}</title>
         <meta name="description" content={data.metaDescription} />
@@ -83,7 +78,7 @@ const ComparisonDetail = () => {
               </Button>
             </div>
           </div>
-        </div> */}
+         </div> */}
 
         <ComparisonHero data={data} />
         
@@ -103,18 +98,11 @@ const ComparisonDetail = () => {
             <UseCaseSuitability data={data} />
             
             <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground">
-                  Need help choosing the right platform for your healthcare organization? 
-                  Contact us for a personalized consultation.
-                </p>
-              </CardContent>
+              
             </Card>
           </div>
         </div>
       </AppLayout>
-    </>
-  );
+    </>;
 };
-
 export default ComparisonDetail;
