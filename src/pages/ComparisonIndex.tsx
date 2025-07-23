@@ -31,12 +31,6 @@ const ComparisonIndex = () => {
 
         {/* Available Comparisons */}
         <div className="container mx-auto px-4 py-16">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Available Comparisons</h2>
-            <p className="text-lg text-muted-foreground">
-              Detailed feature-by-feature comparisons to help you make informed technology decisions.
-            </p>
-          </div>
 
           <div className="grid gap-8 max-w-4xl mx-auto">
             {availableComparisons.map((comparison) => (
