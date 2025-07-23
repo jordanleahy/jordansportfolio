@@ -4,7 +4,7 @@ export const SEO_DEFAULTS = {
   siteName: 'Jordan Leigh',
   defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
   defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
-  defaultImage: '/og-images/default-hero.png',
+  defaultImage: 'https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/screencapture-jordanleahy-2025-07-16-10_54_07-edit.png',
   twitterHandle: '@jordanleigh',
 } as const;
 
