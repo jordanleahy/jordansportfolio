@@ -6,7 +6,120 @@
 [dev]
   command = "npm run dev"
 
-# Redirect rules for SPA (catch-all)
+# Blog post redirects for social media crawlers
+# Facebook/Meta crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "facebookexternalhit/*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Facebot/*"}
+
+# Twitter/X crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Twitterbot/*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "twitterbot/*"}
+
+# LinkedIn crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "LinkedInBot/*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "linkedin/*"}
+
+# WhatsApp crawler
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "WhatsApp/*"}
+
+# Slack crawler
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Slackbot/*"}
+
+# Discord crawler
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Discordbot/*"}
+
+# Telegram crawler
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "TelegramBot/*"}
+
+# Generic social media crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "*bot*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "*crawler*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "*spider*"}
+
+# Google and other search engine crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Googlebot/*"}
+
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "Bingbot/*"}
+
+# Fallback for any other crawlers
+[[redirects]]
+  from = "/blog/:slug"
+  to = "/blog/:slug.html"
+  status = 200
+  conditions = {User-Agent = "*crawling*"}
+
+# Regular users get the SPA (catch-all)
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+
+# Main SPA redirect rules for other routes (catch-all)
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -15,6 +128,15 @@
 # Prerender settings for better social media crawler support
 [build.environment]
   NETLIFY_PRERENDER_ENABLED = "true"
+
+# Cache headers for static blog OG files
+[[headers]]
+  for = "/blog/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, s-maxage=7200"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
 
 # Cache headers for images
 [[headers]]
@@ -26,3 +148,12 @@
   for = "/lovable-uploads/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000"
+
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
