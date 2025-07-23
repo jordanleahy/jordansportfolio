@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,6 +34,7 @@ const Navigation = () => {
     // Authenticated user items
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
+    { href: "/investors", label: "Investors", icon: TrendingUp },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/calendar", label: "Calendar", icon: Calendar },
