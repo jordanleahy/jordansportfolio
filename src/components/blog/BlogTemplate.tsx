@@ -13,6 +13,7 @@ import { ArrowLeft, Share2, BookmarkPlus, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BlogService } from "@/services/blogService";
+import { generateSEOMetadata } from "@/utils/seoHelpers";
 
 interface BlogTemplateProps {
   post: BlogPost;
@@ -47,31 +48,37 @@ export const BlogTemplate = ({
     }
   };
 
-  // Use the correct domain
-  const siteUrl = 'https://jordanleahy.com';
-  const postUrl = `${siteUrl}/blog/${post.slug}`;
+  // Generate optimized SEO metadata using the helper
+  const seoData = generateSEOMetadata({
+    title: post.meta_title,
+    description: post.meta_description,
+    image: post.og_image_url || post.hero_image_url,
+    url: `/blog/${post.slug}`,
+    type: 'article'
+  });
 
   return (
     <div className={`min-h-screen bg-background overflow-x-hidden ${className}`}>
       {/* SEO Head */}
       <Helmet>
-        <title>{post.meta_title}</title>
-        <meta name="description" content={post.meta_description} />
+        <title>{seoData.title}</title>
+        <meta name="description" content={seoData.description} />
         <meta name="keywords" content={(post.meta_keywords as unknown as string[])?.join(', ')} />
         
         {/* Open Graph */}
-        <meta property="og:title" content={post.meta_title} />
-        <meta property="og:description" content={post.meta_description} />
-        <meta property="og:image" content={post.og_image_url || post.hero_image_url} />
-        <meta property="og:url" content={postUrl} />
-        <meta property="og:type" content="article" />
-        <link rel="canonical" href={postUrl} />
+        <meta property="og:title" content={seoData.ogTitle} />
+        <meta property="og:description" content={seoData.ogDescription} />
+        <meta property="og:image" content={seoData.image} />
+        <meta property="og:url" content={seoData.url} />
+        <meta property="og:type" content={seoData.type} />
+        <meta property="og:site_name" content={seoData.siteName} />
+        <link rel="canonical" href={seoData.url} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.meta_title} />
-        <meta name="twitter:description" content={post.meta_description} />
-        <meta name="twitter:image" content={post.og_image_url || post.hero_image_url} />
+        <meta name="twitter:title" content={seoData.ogTitle} />
+        <meta name="twitter:description" content={seoData.ogDescription} />
+        <meta name="twitter:image" content={seoData.image} />
         
         {/* Article metadata */}
         <meta property="article:published_time" content={post.published_at} />
@@ -140,7 +147,7 @@ export const BlogTemplate = ({
             ctaUrl={post.cta_url} 
             shareEnabled={post.share_enabled} 
             title={post.meta_title} 
-            url={postUrl} 
+            url={seoData.url} 
           />
         </section>
 
