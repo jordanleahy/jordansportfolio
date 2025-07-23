@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import { navItems } from "./nav-items";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
@@ -22,7 +21,6 @@ import VendorProfile from "./pages/VendorProfile";
 import EventsCalendar from "./pages/EventsCalendar";
 import AgentDashboard from "./pages/AgentDashboard";
 import PromptLibrary from "./pages/PromptLibrary";
-import ComparisonDetail from "./pages/ComparisonDetail";
 import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
@@ -30,11 +28,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <HelmetProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/blog-editor" element={<BlogEditor />} />
@@ -52,12 +49,9 @@ const App = () => (
             <Route path="/agents" element={<AgentDashboard />} />
             <Route path="/prompt-library" element={<PromptLibrary />} />
             <Route path="/auth" element={<Auth />} />
-            {/* Catch-all route for comparison pages - must be last */}
-            <Route path="/:comparisonType" element={<ComparisonDetail />} />
           </Routes>
         </BrowserRouter>
-        </TooltipProvider>
-      </HelmetProvider>
+      </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
