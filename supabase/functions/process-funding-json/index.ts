@@ -269,10 +269,13 @@ ${rawJson}`;
     
     // Validate the returned JSON
     const parsedData = JSON.parse(processedJson);
+    console.log('AI processed data:', JSON.stringify(parsedData, null, 2));
     
     // Add slug generation
     if (parsedData.company_name) {
       parsedData.slug = generateSlug(parsedData.company_name);
+    } else {
+      console.log('WARNING: No company_name found in AI processed data');
     }
     
     return {
@@ -293,11 +296,17 @@ ${rawJson}`;
 function validateFundingFields(data: any, warnings: string[], errors: string[]): any {
   const validated: any = { ...data };
   
+  console.log('Validating funding fields for data:', JSON.stringify(validated, null, 2));
+  
   // For funding data, only require fields that are typically available
   const requiredFields = ['company_name'];
   for (const field of requiredFields) {
+    console.log(`Checking required field: ${field}, value:`, validated[field], 'type:', typeof validated[field]);
     if (!validated[field] || (typeof validated[field] === 'string' && validated[field].trim() === '')) {
+      console.log(`VALIDATION ERROR: Missing required field: ${field}`);
       errors.push(`Missing required field: ${field}`);
+    } else {
+      console.log(`VALIDATION SUCCESS: Field ${field} is valid`);
     }
   }
   
