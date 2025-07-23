@@ -44,6 +44,3 @@ verify_jwt = false
 
 [functions.send-auth-email]
 verify_jwt = false
-
-[functions.blog-og-handler]
-verify_jwt = false
