@@ -1,4 +1,6 @@
-import { Helmet } from 'react-helmet-async';
+
+import { OGMetadata } from '@/components/seo/OGMetadata';
+import { JSONLDSchema } from '@/components/seo/JSONLDSchema';
 
 interface SEOHeadProps {
   title: string;
@@ -8,22 +10,23 @@ interface SEOHeadProps {
 }
 
 export const SEOHead = ({ title, description, image, path }: SEOHeadProps) => {
-  const fullImageUrl = `https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com${image}`;
-  const fullUrl = `https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com${path}`;
-
   return (
-    <Helmet>
-      <title>{title} | Jordan's Portfolio</title>
-      <meta name="description" content={description} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={fullImageUrl} />
-      <meta property="og:url" content={fullUrl} />
-      <meta property="og:type" content="article" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={fullImageUrl} />
-    </Helmet>
+    <>
+      <OGMetadata
+        title={title}
+        description={description}
+        path={path}
+        image={image}
+        type="website"
+      />
+      
+      <JSONLDSchema
+        type="WebPage"
+        title={title}
+        description={description}
+        path={path}
+        image={image}
+      />
+    </>
   );
 };
