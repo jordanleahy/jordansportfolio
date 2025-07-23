@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ComparisonData } from '@/data/comparisonData';
@@ -30,55 +30,84 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   ];
 
   return (
-    <Card className="mb-8">
+    <Card className="shadow-lg border-0 bg-white">
+      <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+        <CardTitle className="text-2xl font-bold text-center">Company Comparison</CardTitle>
+      </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/3 font-semibold">Category</TableHead>
-                <TableHead className="w-1/3 font-semibold text-center">{company1.name}</TableHead>
-                <TableHead className="w-1/3 font-semibold text-center">{company2.name}</TableHead>
+              <TableRow className="bg-gray-50/50">
+                <TableHead className="w-1/3 font-bold text-gray-700 py-4 px-6">Category</TableHead>
+                <TableHead className="w-1/3 font-bold text-center py-4 px-6 text-primary">
+                  {company1.name}
+                </TableHead>
+                <TableHead className="w-1/3 font-bold text-center py-4 px-6 text-secondary">
+                  {company2.name}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {comparisonRows.map((row, index) => (
-                <TableRow key={index} className="border-b">
-                  <TableCell className="font-medium">{row.label}</TableCell>
-                  <TableCell className="text-center">{row.value1}</TableCell>
-                  <TableCell className="text-center">{row.value2}</TableCell>
+                <TableRow key={index} className="hover:bg-gray-50/50 transition-colors">
+                  <TableCell className="font-semibold text-gray-700 py-4 px-6 border-r border-gray-100">
+                    {row.label}
+                  </TableCell>
+                  <TableCell className="text-center py-4 px-6 bg-primary/5 border-r border-gray-100">
+                    <div className="text-sm font-medium text-gray-800">{row.value1}</div>
+                  </TableCell>
+                  <TableCell className="text-center py-4 px-6 bg-secondary/5">
+                    <div className="text-sm font-medium text-gray-800">{row.value2}</div>
+                  </TableCell>
                 </TableRow>
               ))}
-              <TableRow className="border-b">
-                <TableCell className="font-medium">Key Benefits</TableCell>
-                <TableCell className="text-center">
-                  <ul className="space-y-1">
+              <TableRow className="hover:bg-gray-50/50 transition-colors">
+                <TableCell className="font-semibold text-gray-700 py-4 px-6 border-r border-gray-100">
+                  Key Benefits
+                </TableCell>
+                <TableCell className="text-center py-4 px-6 bg-primary/5 border-r border-gray-100">
+                  <ul className="space-y-2 text-left">
                     {company1.keyBenefits.map((benefit, idx) => (
-                      <li key={idx} className="text-sm">• {benefit}</li>
+                      <li key={idx} className="text-sm font-medium text-gray-800 flex items-start">
+                        <span className="text-primary mr-2 mt-1">•</span>
+                        {benefit}
+                      </li>
                     ))}
                   </ul>
                 </TableCell>
-                <TableCell className="text-center">
-                  <ul className="space-y-1">
+                <TableCell className="text-center py-4 px-6 bg-secondary/5">
+                  <ul className="space-y-2 text-left">
                     {company2.keyBenefits.map((benefit, idx) => (
-                      <li key={idx} className="text-sm">• {benefit}</li>
+                      <li key={idx} className="text-sm font-medium text-gray-800 flex items-start">
+                        <span className="text-secondary mr-2 mt-1">•</span>
+                        {benefit}
+                      </li>
                     ))}
                   </ul>
                 </TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Unique Strengths</TableCell>
-                <TableCell className="text-center">
-                  <ul className="space-y-1">
+              <TableRow className="hover:bg-gray-50/50 transition-colors">
+                <TableCell className="font-semibold text-gray-700 py-4 px-6 border-r border-gray-100">
+                  Unique Strengths
+                </TableCell>
+                <TableCell className="text-center py-4 px-6 bg-primary/5 border-r border-gray-100">
+                  <ul className="space-y-2 text-left">
                     {company1.uniqueStrengths.map((strength, idx) => (
-                      <li key={idx} className="text-sm">• {strength}</li>
+                      <li key={idx} className="text-sm font-medium text-gray-800 flex items-start">
+                        <span className="text-primary mr-2 mt-1">•</span>
+                        {strength}
+                      </li>
                     ))}
                   </ul>
                 </TableCell>
-                <TableCell className="text-center">
-                  <ul className="space-y-1">
+                <TableCell className="text-center py-4 px-6 bg-secondary/5">
+                  <ul className="space-y-2 text-left">
                     {company2.uniqueStrengths.map((strength, idx) => (
-                      <li key={idx} className="text-sm">• {strength}</li>
+                      <li key={idx} className="text-sm font-medium text-gray-800 flex items-start">
+                        <span className="text-secondary mr-2 mt-1">•</span>
+                        {strength}
+                      </li>
                     ))}
                   </ul>
                 </TableCell>
