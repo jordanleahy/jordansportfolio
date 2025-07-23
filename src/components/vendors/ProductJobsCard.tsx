@@ -519,9 +519,8 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         <ResumeModal
           isOpen={!!resumeModalJob}
           onClose={() => setResumeModalJob(null)}
+          vendorId={vendorId}
           companyName={vendor.company_name}
-          jobDescription={resumeModalJob.job_description}
-          jobDescriptionLink={resumeModalJob.job_url}
         />
       )}
     </>

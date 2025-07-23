@@ -10,39 +10,49 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useJobApplicationByCompany, useCreateOrUpdateJobApplication } from "@/hooks/useJobApplications";
 import { useToast } from "@/hooks/use-toast";
 import { Save, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  vendorId: string;
   companyName: string;
-  jobDescription: string;
-  jobDescriptionLink?: string;
 }
 
 export const ResumeModal: React.FC<ResumeModalProps> = ({
   isOpen,
   onClose,
-  companyName,
-  jobDescription,
-  jobDescriptionLink
+  vendorId,
+  companyName
 }) => {
   const [resumeText, setResumeText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const { data: existingApp } = useJobApplicationByCompany(companyName, jobDescriptionLink);
-  const createOrUpdateMutation = useCreateOrUpdateJobApplication();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Load existing resume text when modal opens or data changes
+  // Load existing resume text when modal opens
   useEffect(() => {
-    if (isOpen && existingApp?.resume_text) {
-      setResumeText(existingApp.resume_text);
-    } else if (isOpen && !existingApp) {
-      setResumeText('');
+    if (isOpen && vendorId) {
+      const fetchVendorResume = async () => {
+        const { data, error } = await supabase
+          .from('vendors')
+          .select('resume_text')
+          .eq('id', vendorId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching vendor resume:', error);
+        } else {
+          setResumeText(data?.resume_text || '');
+        }
+      };
+      
+      fetchVendorResume();
     }
-  }, [isOpen, existingApp]);
+  }, [isOpen, vendorId]);
 
   const handleSave = async () => {
     if (!resumeText.trim()) {
@@ -56,16 +66,30 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
 
     setIsSaving(true);
     try {
-      await createOrUpdateMutation.mutateAsync({
-        company_name: companyName,
-        job_description: jobDescription,
-        job_description_link: jobDescriptionLink,
-        resume_text: resumeText.trim()
+      const { error } = await supabase
+        .from('vendors')
+        .update({ resume_text: resumeText.trim() })
+        .eq('id', vendorId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Resume text saved successfully",
       });
 
+      // Invalidate vendor queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+      queryClient.invalidateQueries({ queryKey: ['vendor'] });
+
       onClose();
-    } catch (error) {
-      // Error handling is done in the hook
+    } catch (error: any) {
+      console.error('Error saving resume:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save resume text",
+        variant: "destructive"
+      });
     } finally {
       setIsSaving(false);
     }
@@ -84,7 +108,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
             Add Resume for {companyName}
           </DialogTitle>
           <DialogDescription>
-            Paste your resume text below. This will be stored for future comparison with job descriptions.
+            Paste your resume text below. This will be stored for this vendor for future job applications.
           </DialogDescription>
         </DialogHeader>
 

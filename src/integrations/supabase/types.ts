@@ -1313,6 +1313,7 @@ export type Database = {
           partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
+          resume_text: string | null
           sec_accession_number: string | null
           sitemap_agent_id: string | null
           sitemap_fetched_at: string | null
@@ -1360,6 +1361,7 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
+          resume_text?: string | null
           sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null
@@ -1407,6 +1409,7 @@ export type Database = {
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
+          resume_text?: string | null
           sec_accession_number?: string | null
           sitemap_agent_id?: string | null
           sitemap_fetched_at?: string | null
