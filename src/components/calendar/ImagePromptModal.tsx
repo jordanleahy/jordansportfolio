@@ -217,10 +217,6 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast({
-        title: "Copied successfully!",
-        description: "Image prompt is ready to use in your AI image generator",
-      });
     } catch (error) {
       toast({
         title: "Copy failed",
@@ -255,72 +251,35 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="h-screen max-w-4xl flex flex-col bg-gradient-to-br from-background to-muted/20 m-0 rounded-none">
-        <DialogHeader className="space-y-6 pb-6">
-          <DialogTitle className="text-xl font-bold tracking-tight">
-            {category === 'contracts' ? 'Business' : 'Healthcare'} Image Prompt Generator
-          </DialogTitle>
-          
-          <div className="space-y-4">
-            <div className="text-sm text-muted-foreground">
-              <p><strong>Post Title:</strong> {title}</p>
-              <p><strong>Description:</strong> {description}</p>
-            </div>
-
-            {generatedPrompt && (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
-                </p>
-                
-                <Button
-                  onClick={handleCopyPrompt}
-                  disabled={isGenerating}
-                  className="w-full sm:w-auto h-12 px-8 text-base font-semibold transition-all duration-200 hover:scale-105"
-                  size="lg"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-5 w-5 mr-2" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-5 w-5 mr-2" />
-                      Copy Prompt
-                    </>
-                  )}
-                </Button>
-
-                {cachedPrompt && (
-                  <p className="text-xs text-green-600">
-                    ✓ Using cached prompt (no API call needed)
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>{category === 'contracts' ? 'Business' : 'Healthcare'} Image Prompt Generator</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 min-h-0 space-y-4">
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            <p><strong>Post Title:</strong> {title}</p>
+            <p><strong>Description:</strong> {description}</p>
+          </div>
+          
           {isGenerating ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin mr-2" />
               <span>Generating {category === 'contracts' ? 'business' : 'healthcare'} image prompt...</span>
             </div>
           ) : generatedPrompt ? (
-            <div className="h-full flex flex-col space-y-4">
-              <div className="bg-card/50 backdrop-blur-sm rounded-lg border p-4 flex-1 min-h-0">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Generated Image Prompt:</label>
                 <Textarea
                   value={generatedPrompt}
                   readOnly
-                  className="h-full min-h-[400px] font-mono text-sm resize-none border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  placeholder="Generated prompt will appear here..."
+                  className="min-h-[300px] mt-2 font-mono text-sm"
                 />
               </div>
 
               {basePrompt && (
-                <div className="space-y-3 bg-card/30 backdrop-blur-sm rounded-lg border p-4">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium">Aspect Ratio Options:</label>
                     {selectedAspectRatio && (
@@ -353,12 +312,36 @@ Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType
                   </p>
                 </div>
               )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
+                  </p>
+                  {cachedPrompt && (
+                    <p className="text-xs text-green-600">
+                      ✓ Using cached prompt (no API call needed)
+                    </p>
+                  )}
+                </div>
+                <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copy Prompt
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center h-full">
-              <Button onClick={generateImagePrompt} size="lg">
-                Generate Image Prompt
-              </Button>
+            <div className="flex justify-center p-8">
+              <Button onClick={generateImagePrompt}>Generate Image Prompt</Button>
             </div>
           )}
         </div>

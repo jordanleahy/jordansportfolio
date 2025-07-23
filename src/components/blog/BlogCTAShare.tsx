@@ -1,8 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Share2, Copy, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getCleanUrl } from "@/config/seo";
 
 interface BlogCTAShareProps {
   ctaText: string;
@@ -18,16 +18,14 @@ export const BlogCTAShare = ({
   ctaUrl, 
   shareEnabled = true, 
   title = "Blog Post",
-  url,
+  url = window.location.href,
   className = "" 
 }: BlogCTAShareProps) => {
-  // Clean URL by removing preview parameters and ensuring we use the canonical URL
-  const cleanUrl = url ? getCleanUrl(url) : getCleanUrl(window.location.href);
   const { toast } = useToast();
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(cleanUrl);
+      await navigator.clipboard.writeText(url);
       toast({
         title: "Copied!",
         description: "Link copied to clipboard",
@@ -38,7 +36,7 @@ export const BlogCTAShare = ({
   };
 
   const handleShare = (platform: 'linkedin' | 'twitter' | 'whatsapp') => {
-    const encodedUrl = encodeURIComponent(cleanUrl);
+    const encodedUrl = encodeURIComponent(url);
     const encodedTitle = encodeURIComponent(title);
     
     const shareUrls = {

@@ -1,5 +1,4 @@
 
-
 [build]
   command = "npm run build"
   publish = "dist"
@@ -22,11 +21,6 @@
 [build.environment]
   NETLIFY_SKIP_PNPM_INSTALL = "true"
 
-# Edge Functions
-[[edge_functions]]
-  function = "blog-meta"
-  path = "/blog/*"
-
 # Headers for better caching and social media crawlers
 [[headers]]
   for = "/blog/*"
@@ -37,17 +31,9 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SPA fallback - exclude blog paths for crawlers
-[[redirects]]
-  from = "/blog/*"
-  to = "/blog/:splat"
-  status = 200
-  force = false
-  conditions = {Role = ["admin"], Country = ["US"]}
-
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = false
-
