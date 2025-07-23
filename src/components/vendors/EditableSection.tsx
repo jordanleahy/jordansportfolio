@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +31,12 @@ export interface SectionConfig {
     onClick: () => void;
     condition?: boolean;
   };
+  actionButtons?: {
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+    condition?: boolean;
+  }[];
 }
 
 interface EditableSectionProps {
@@ -189,6 +194,10 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
     }
   };
 
+  // Get action buttons - support both single and multiple buttons
+  const actionButtons = config.actionButtons || (config.actionButton ? [config.actionButton] : []);
+  const visibleActionButtons = actionButtons.filter(button => button.condition !== false);
+
   return (
     <Card>
       <CardHeader>
@@ -210,18 +219,19 @@ export function EditableSection({ vendor, config, onSave, canEdit }: EditableSec
           </div>
           
           <div className="flex items-center gap-2">
-            {config.actionButton && config.actionButton.condition && (
+            {visibleActionButtons.map((button, index) => (
               <Button
+                key={index}
                 variant="outline"
                 size="sm"
-                onClick={config.actionButton.onClick}
+                onClick={button.onClick}
               >
-                {config.actionButton.icon && (
-                  <config.actionButton.icon className="mr-2 h-4 w-4" />
+                {button.icon && (
+                  <button.icon className="mr-2 h-4 w-4" />
                 )}
-                {config.actionButton.label}
+                {button.label}
               </Button>
-            )}
+            ))}
             
             {canEdit && (
               <>

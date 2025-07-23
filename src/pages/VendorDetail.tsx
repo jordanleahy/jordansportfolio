@@ -1058,12 +1058,20 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 vendor={vendor} 
                 config={{
                   ...fundingConfig,
-                  actionButton: {
-                    label: 'Research Investors',
-                    icon: Download,
-                    onClick: () => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name),
-                    condition: isAdmin && vendor.key_investors && vendor.key_investors.length > 0
-                  }
+                  actionButtons: [
+                    {
+                      label: 'Research Investors',
+                      icon: Download,
+                      onClick: () => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name),
+                      condition: isAdmin && vendor.key_investors && vendor.key_investors.length > 0
+                    },
+                    {
+                      label: 'Paste ChatGPT Response',
+                      icon: Clipboard,
+                      onClick: openPasteModal,
+                      condition: isAdmin
+                    }
+                  ]
                 }}
                 canEdit={isAdmin}
               />
