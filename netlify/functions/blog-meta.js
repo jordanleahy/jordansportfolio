@@ -51,8 +51,8 @@ exports.handler = async (event, context) => {
       hasHeroImage: !!post.hero_image_url
     });
 
-    // Determine the best image to use
-    const ogImage = post.og_image_url || post.hero_image_url;
+    // Determine the best image to use - prefer domain-hosted images
+    const ogImage = post.og_image_url || post.hero_image_url || `${siteUrl}/og-default.png`;
     
     // Use the correct domain - jordanleahy.com
     const siteUrl = 'https://jordanleahy.com';
@@ -85,7 +85,7 @@ exports.handler = async (event, context) => {
     <meta property="og:url" content="${postUrl}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Jordan Leigh">
-    <meta property="article:published_time" content="${post.published_at}">
+    <meta property="article:published_time" content="${post.published_at || post.created_at}">
     <meta property="article:author" content="Jordan Leigh">
     
     <!-- Twitter -->
