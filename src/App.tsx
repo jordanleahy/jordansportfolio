@@ -33,6 +33,7 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import Comparison from "./pages/Comparison";
 import ComparisonDetail from "./pages/ComparisonDetail";
+import ComparisonIndex from "./pages/ComparisonIndex";
 import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -114,6 +115,7 @@ function App() {
                 <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/homehealth" element={<HomeHealth />} />
                 <Route path="/comparison" element={<Comparison />} />
+                <Route path="/comparisons" element={<ComparisonIndex />} />
                 <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AppLayout from '@/components/layout/AppLayout';
 import { ComparisonHero } from '@/components/comparison/ComparisonHero';
@@ -10,6 +10,8 @@ import { SummaryInsights } from '@/components/comparison/SummaryInsights';
 import { UseCaseSuitability } from '@/components/comparison/UseCaseSuitability';
 import { comparisonDataMap } from '@/data/comparisonData';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronRight, ArrowLeft } from 'lucide-react';
 
 const ComparisonDetail = () => {
   const { comparisonType } = useParams<{ comparisonType: string }>();
@@ -50,6 +52,39 @@ const ComparisonDetail = () => {
       </Helmet>
       
       <AppLayout>
+        {/* Breadcrumb Navigation */}
+        <div className="bg-muted/30 border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Link 
+                to="/" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Home
+              </Link>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <Link 
+                to="/comparisons" 
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Comparisons
+              </Link>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <span className="text-foreground font-medium">
+                {data.company1.name} vs {data.company2.name}
+              </span>
+            </div>
+            <div className="mt-3">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/comparisons">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Comparisons
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <ComparisonHero data={data} />
         
         <div className="container mx-auto px-4 py-12">

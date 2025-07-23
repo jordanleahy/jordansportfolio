@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +35,7 @@ const Navigation = () => {
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
     { href: "/investors", label: "Investors", icon: TrendingUp },
+    { href: "/comparisons", label: "Comparisons", icon: GitCompare },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/calendar", label: "Calendar", icon: Calendar },
@@ -48,6 +49,7 @@ const Navigation = () => {
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/rcmcompanies", label: "RCM Companies", icon: Heart },
+    { href: "/comparisons", label: "Comparisons", icon: GitCompare },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
   ];
@@ -119,6 +121,18 @@ const Navigation = () => {
                         >
                           <Building2 className="mr-2 h-4 w-4" />
                           Vendors
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/comparisons"
+                          className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
+                        >
+                          <GitCompare className="mr-2 h-4 w-4" />
+                          Comparisons
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -235,6 +249,18 @@ const Navigation = () => {
                         >
                           <Heart className="mr-2 h-4 w-4" />
                           RCM Companies
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/comparisons"
+                          className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
+                        >
+                          <GitCompare className="mr-2 h-4 w-4" />
+                          Comparisons
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
