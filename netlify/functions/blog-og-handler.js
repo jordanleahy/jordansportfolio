@@ -77,9 +77,16 @@ exports.handler = async (event, context) => {
       const siteUrl = 'https://jordanleahy.com';
       const postUrl = `${siteUrl}/blog/${post.slug}`;
 
-      // Clean image URLs and prefer domain-hosted images
+      // Clean image URLs and ensure they're absolute
       const cleanImageUrl = (url) => {
         if (!url) return null;
+        
+        // If it's a relative URL, prepend the site domain
+        if (url.startsWith('/')) {
+          return `${siteUrl}${url}`;
+        }
+        
+        // If it's absolute, remove double slashes
         return url.replace(/([^:]\/)\/+/g, '$1');
       };
 
