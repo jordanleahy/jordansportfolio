@@ -1,29 +1,36 @@
 import { Helmet } from 'react-helmet-async';
+import { generateSEOMetadata } from '@/utils/seoHelpers';
 
 interface SEOHeadProps {
   title: string;
   description: string;
-  image: string;
+  image?: string;
   path: string;
 }
 
 export const SEOHead = ({ title, description, image, path }: SEOHeadProps) => {
-  const fullImageUrl = `https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com${image}`;
-  const fullUrl = `https://265639ae-98fe-47f5-888f-bed563c20e8d.lovableproject.com${path}`;
+  const seoData = generateSEOMetadata({
+    title,
+    description,
+    image,
+    url: path,
+    type: 'article'
+  });
 
   return (
     <Helmet>
-      <title>{title} | Jordan's Portfolio</title>
-      <meta name="description" content={description} />
+      <title>{seoData.title}</title>
+      <meta name="description" content={seoData.description} />
       <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={fullImageUrl} />
-      <meta property="og:url" content={fullUrl} />
-      <meta property="og:type" content="article" />
+      <meta property="og:description" content={seoData.description} />
+      <meta property="og:image" content={seoData.image} />
+      <meta property="og:url" content={seoData.url} />
+      <meta property="og:type" content={seoData.type} />
+      <meta property="og:site_name" content={seoData.siteName} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={fullImageUrl} />
+      <meta name="twitter:description" content={seoData.description} />
+      <meta name="twitter:image" content={seoData.image} />
     </Helmet>
   );
 };
