@@ -45,9 +45,13 @@ exports.handler = async (event, context) => {
     }
 
     console.log('Found blog post:', {
-      title: post.meta_title || post.title || post.hero_headline,
-      hasOgImage: !!post.og_image_url,
-      hasHeroImage: !!post.hero_image_url
+      meta_title: post.meta_title,
+      hero_headline: post.hero_headline,
+      meta_description: post.meta_description,
+      intro_content: post.intro_content,
+      og_image_url: post.og_image_url,
+      hero_image_url: post.hero_image_url,
+      published_at: post.published_at
     });
 
     // Use the correct domain - jordanleahy.com
@@ -68,9 +72,16 @@ exports.handler = async (event, context) => {
         .replace(/'/g, '&#39;');
     };
 
-    // Get proper metadata with fallbacks
-    const title = post.meta_title || post.title || post.hero_headline || 'Jordan Leigh - Healthcare Product Designer';
+    // Get proper metadata with fallbacks (note: there is no 'title' field in blog_posts schema)
+    const title = post.meta_title || post.hero_headline || 'Jordan Leigh - Healthcare Product Designer';
     const description = post.meta_description || post.intro_content || 'Healthcare Product Designer specializing in user-centered design solutions that improve patient experiences and clinical workflows.';
+    
+    console.log('Using metadata:', {
+      finalTitle: title,
+      finalDescription: description,
+      finalImage: ogImage,
+      publishedAt: post.published_at || post.created_at
+    });
 
     // Generate the HTML with proper OG tags
     const html = `<!DOCTYPE html>
