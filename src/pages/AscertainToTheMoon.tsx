@@ -13,7 +13,7 @@ const AscertainToTheMoon = () => {
   // Generate SEO metadata for cover letter page
   const coverLetterSEO = generateSEOMetadata({
     title: "Cover Letter - Ascertain to the Moon",
-    description: "A personal cover letter and introduction from Jordan Leigh for Ascertain. Healthcare technology leadership and product development expertise.",
+    description: "A personal cover letter and introduction from Jordan Leahy for Ascertain. Healthcare technology leadership and product development expertise.",
     image: "/og-default.png",
     url: "/ascertain-to-the-moon",
     type: "article"
