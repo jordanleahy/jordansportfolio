@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAdminComparisons, useDeleteComparison } from '@/hooks/useComparisons';
+import { DeleteComparisonModal } from '@/components/admin/DeleteComparisonModal';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -14,16 +15,29 @@ export const AdminComparisons: React.FC = () => {
   const navigate = useNavigate();
   const { data: comparisons, isLoading } = useAdminComparisons();
   const deleteComparison = useDeleteComparison();
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; comparison: any | null }>({
+    isOpen: false,
+    comparison: null
+  });
 
-  const handleDelete = async (id: string, title: string) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
-      try {
-        await deleteComparison.mutateAsync(id);
-        toast.success('Comparison deleted successfully');
-      } catch (error) {
-        toast.error('Failed to delete comparison');
-      }
+  const handleDeleteClick = (comparison: any) => {
+    setDeleteModal({ isOpen: true, comparison });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.comparison) return;
+    
+    try {
+      await deleteComparison.mutateAsync(deleteModal.comparison.id);
+      toast.success('Comparison deleted successfully');
+      setDeleteModal({ isOpen: false, comparison: null });
+    } catch (error) {
+      toast.error('Failed to delete comparison');
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, comparison: null });
   };
 
   return (
@@ -106,7 +120,7 @@ export const AdminComparisons: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(comparison.id, comparison.title)}
+                      onClick={() => handleDeleteClick(comparison)}
                       className="gap-1"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -134,6 +148,14 @@ export const AdminComparisons: React.FC = () => {
           </Card>
         )}
       </div>
+
+      <DeleteComparisonModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        comparisonTitle={deleteModal.comparison?.title || ''}
+        isDeleting={deleteComparison.isPending}
+      />
     </AppLayout>
   );
 };
