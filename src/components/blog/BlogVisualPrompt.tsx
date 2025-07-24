@@ -341,7 +341,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
           {generatedPrompt && basePrompt && (
             <div className="flex-shrink-0 border-t bg-background/80 backdrop-blur-sm">
               <div className="p-4 space-y-4">
-                {/* Aspect Ratio Section */}
+                {/* Aspect Ratio and Copy Button Row */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium">Aspect Ratio Options:</label>
@@ -357,54 +357,54 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                       </Button>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {aspectRatioOptions.map((option) => (
-                      <Button
-                        key={option.value}
-                        variant={selectedAspectRatio === option.value ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleAspectRatioSelect(option.value)}
-                        className="text-sm min-h-[44px] sm:min-h-auto"
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
+                  
+                  {/* Aspect Ratio Buttons and Copy Button in same row */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      {aspectRatioOptions.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={selectedAspectRatio === option.value ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleAspectRatioSelect(option.value)}
+                          className="text-sm min-h-[44px] sm:min-h-auto"
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    <Button 
+                      onClick={handleCopyPrompt} 
+                      className="flex items-center gap-2 min-h-[44px] sm:min-h-auto w-full sm:w-auto sm:ml-auto"
+                      size="lg"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          Copy Prompt
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Click an aspect ratio to append it to your prompt, or click again to remove it.
-                  </p>
-                </div>
-                
-                {/* Copy Button Section */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm text-muted-foreground">
-                      Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
-                    </p>
-                    {isFromCache && (
-                      <div className="flex items-center gap-1 text-xs text-green-600">
-                        <Sparkles className="h-3 w-3" />
-                        Using cached prompt
-                      </div>
-                    )}
+                  
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p>Click an aspect ratio to append it to your prompt, or click again to remove it.</p>
+                    <div className="flex items-center justify-between">
+                      <span>Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.</span>
+                      {isFromCache && (
+                        <div className="flex items-center gap-1 text-green-600">
+                          <Sparkles className="h-3 w-3" />
+                          Using cached prompt
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <Button 
-                    onClick={handleCopyPrompt} 
-                    className="flex items-center gap-2 min-h-[44px] sm:min-h-auto w-full sm:w-auto"
-                    size="lg"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-4 w-4" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4" />
-                        Copy Prompt
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
             </div>
