@@ -178,39 +178,46 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Job Role Visual Prompt Generator (9:16)</DialogTitle>
+      <DialogContent className="h-screen max-w-4xl flex flex-col bg-gradient-to-br from-background to-muted/20 m-0 rounded-none">
+        <DialogHeader className="space-y-4 pb-4 border-b">
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            Job Role Visual Prompt Generator (9:16)
+          </DialogTitle>
+          
+          {/* Collapsible job details */}
+          <details className="text-sm text-muted-foreground bg-card/50 rounded-lg p-3 border">
+            <summary className="font-medium cursor-pointer hover:text-foreground transition-colors">
+              Job Details (click to expand)
+            </summary>
+            <div className="mt-3 space-y-2 pl-2 border-l-2 border-muted">
+              <p><strong>Job Title:</strong> {jobTitle}</p>
+              <p><strong>Company:</strong> {companyName}</p>
+              <p><strong>Description:</strong> {jobDescription}</p>
+            </div>
+          </details>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            <p><strong>Job Title:</strong> {jobTitle}</p>
-            <p><strong>Company:</strong> {companyName}</p>
-            <p><strong>Description:</strong> {jobDescription}</p>
-          </div>
-          
+        {/* Scrollable content area */}
+        <div className="flex-1 min-h-0 py-4">
           {isGenerating ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin mr-2" />
-              <span>Generating 9:16 job role illustration prompt...</span>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+                <p className="text-lg font-medium">Generating 9:16 job role illustration prompt...</p>
+                <p className="text-sm text-muted-foreground">This may take a few moments</p>
+              </div>
             </div>
           ) : generatedPrompt ? (
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Generated 9:16 Job Visual Prompt:</label>
-                <Textarea
-                  value={generatedPrompt}
-                  readOnly
-                  className="min-h-[300px] mt-2 font-mono text-sm"
-                />
-              </div>
-              
+            <div className="h-full flex flex-col space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Copy this prompt and paste it into OpenAI's image creator to generate your 9:16 job role illustration for social media.
-                </p>
-                <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
+                <label className="text-sm font-medium">Generated 9:16 Job Visual Prompt:</label>
+                {/* Secondary copy button in header */}
+                <Button
+                  onClick={handleCopyPrompt}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
                   {copied ? (
                     <>
                       <Check className="h-4 w-4" />
@@ -219,18 +226,62 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
                   ) : (
                     <>
                       <Copy className="h-4 w-4" />
-                      Copy Prompt
+                      Copy
                     </>
                   )}
                 </Button>
               </div>
+              
+              <div className="flex-1 min-h-0 bg-card/50 backdrop-blur-sm rounded-lg border p-4">
+                <Textarea
+                  value={generatedPrompt}
+                  readOnly
+                  className="h-full font-mono text-sm resize-none border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Prompt will appear here..."
+                />
+              </div>
+              
+              <div className="text-xs text-muted-foreground text-center">
+                Prompt length: {generatedPrompt.length} characters
+              </div>
             </div>
           ) : (
-            <div className="flex justify-center p-8">
-              <Button onClick={generateJobVisualPrompt}>Generate Job Visual Prompt</Button>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <p className="text-lg font-medium">Ready to generate your job visual prompt</p>
+                <Button onClick={generateJobVisualPrompt} size="lg" className="px-8">
+                  Generate Job Visual Prompt
+                </Button>
+              </div>
             </div>
           )}
         </div>
+        
+        {/* Sticky footer with main copy button */}
+        {generatedPrompt && !isGenerating && (
+          <div className="border-t bg-background/95 backdrop-blur-sm p-4 space-y-3">
+            <p className="text-sm text-muted-foreground text-center">
+              Copy this prompt and paste it into OpenAI's image creator to generate your 9:16 job role illustration for social media.
+            </p>
+            <Button
+              onClick={handleCopyPrompt}
+              className="w-full h-12 text-base font-semibold transition-all duration-200 hover:scale-105"
+              size="lg"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-5 w-5 mr-2" />
+                  Copied to Clipboard!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-5 w-5 mr-2" />
+                  Copy Prompt to Clipboard
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
