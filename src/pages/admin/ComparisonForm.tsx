@@ -477,83 +477,116 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="company1">Company 1</Label>
-                    <Select value={formData.company1_id} onValueChange={(value) => 
-                      setFormData(prev => ({ ...prev, company1_id: value }))
-                    }>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select first company" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border border-border shadow-lg z-50">
-                        {vendors?.map(vendor => (
-                          <SelectItem key={vendor.id} value={vendor.id}>
-                            {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="company2">Company 2</Label>
-                    <Select value={formData.company2_id} onValueChange={(value) => 
-                      setFormData(prev => ({ ...prev, company2_id: value }))
-                    }>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select second company" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border border-border shadow-lg z-50">
-                        {vendors?.filter(v => v.id !== formData.company1_id).map(vendor => (
-                          <SelectItem key={vendor.id} value={vendor.id}>
-                            {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                {generateComparison.isPending ? (
+                  <>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-10 w-full" />
+                      </div>
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-10 w-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-12" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-20 w-full" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="company1">Company 1</Label>
+                        <Select value={formData.company1_id} onValueChange={(value) => 
+                          setFormData(prev => ({ ...prev, company1_id: value }))
+                        }>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select first company" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border border-border shadow-lg z-50">
+                            {vendors?.map(vendor => (
+                              <SelectItem key={vendor.id} value={vendor.id}>
+                                {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="company2">Company 2</Label>
+                        <Select value={formData.company2_id} onValueChange={(value) => 
+                          setFormData(prev => ({ ...prev, company2_id: value }))
+                        }>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select second company" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border border-border shadow-lg z-50">
+                            {vendors?.filter(v => v.id !== formData.company1_id).map(vendor => (
+                              <SelectItem key={vendor.id} value={vendor.id}>
+                                {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g., SmarterDx vs Iodine Software"
-                  />
-                </div>
+                    <div>
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g., SmarterDx vs Iodine Software"
+                      />
+                    </div>
 
-                <div>
-                  <Label htmlFor="slug">URL Slug</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                    placeholder="e.g., smarterdx-vs-iodine"
-                  />
-                </div>
+                    <div>
+                      <Label htmlFor="slug">URL Slug</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                        placeholder="e.g., smarterdx-vs-iodine"
+                      />
+                    </div>
 
-                <div>
-                  <Label htmlFor="meta_title">Meta Title</Label>
-                  <Input
-                    id="meta_title"
-                    value={formData.meta_title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
-                    placeholder="SEO title"
-                  />
-                </div>
+                    <div>
+                      <Label htmlFor="meta_title">Meta Title</Label>
+                      <Input
+                        id="meta_title"
+                        value={formData.meta_title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                        placeholder="SEO title"
+                      />
+                    </div>
 
-                <div>
-                  <Label htmlFor="meta_description">Meta Description</Label>
-                  <Textarea
-                    id="meta_description"
-                    value={formData.meta_description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                    placeholder="SEO description"
-                    rows={3}
-                  />
-                </div>
+                    <div>
+                      <Label htmlFor="meta_description">Meta Description</Label>
+                      <Textarea
+                        id="meta_description"
+                        value={formData.meta_description}
+                        onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                        placeholder="SEO description"
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
