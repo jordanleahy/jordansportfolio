@@ -36,6 +36,8 @@ import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
 import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
+import { AdminComparisons } from "./pages/admin/AdminComparisons";
+import { ComparisonForm } from "./pages/admin/ComparisonForm";
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -117,6 +119,9 @@ function App() {
                 
                 <Route path="/comparisons" element={<ComparisonIndex />} />
                 <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
+                <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
+                <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />

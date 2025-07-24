@@ -10,30 +10,68 @@ import { UseCaseSuitability } from '@/components/comparison/UseCaseSuitability';
 import { comparisonDataMap } from '@/data/comparisonData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ArrowLeft } from 'lucide-react';
+import { ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { useComparisonBySlug } from '@/hooks/useComparisons';
 const ComparisonDetail = () => {
-  const {
-    comparisonType
-  } = useParams<{
-    comparisonType: string;
-  }>();
-  console.log('Comparison Type:', comparisonType);
-  console.log('Available keys:', Object.keys(comparisonDataMap));
-  console.log('Data found:', !!comparisonDataMap[comparisonType || '']);
-  if (!comparisonType || !comparisonDataMap[comparisonType]) {
-    return <AppLayout>
+  const { comparisonType } = useParams<{ comparisonType: string }>();
+  const { data: dynamicComparison, isLoading } = useComparisonBySlug(comparisonType || '');
+
+  if (!comparisonType) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
+          <p className="text-muted-foreground">The comparison you're looking for doesn't exist.</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading comparison...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Try dynamic comparison first, fallback to static data
+  let data = null;
+  
+  if (dynamicComparison) {
+    // Transform dynamic comparison to match static format
+    data = {
+      title: dynamicComparison.title,
+      metaTitle: dynamicComparison.meta_title,
+      metaDescription: dynamicComparison.meta_description,
+      company1: dynamicComparison.company1_data,
+      company2: dynamicComparison.company2_data,
+      features: dynamicComparison.features,
+      summaryInsights: dynamicComparison.summary_insights,
+      useCases: dynamicComparison.use_cases,
+    };
+  } else {
+    // Fallback to static data
+    data = comparisonDataMap[comparisonType];
+  }
+
+  if (!data) {
+    return (
+      <AppLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
           <p className="text-muted-foreground">
             The comparison you're looking for doesn't exist or has been moved.
           </p>
-          <p className="text-sm text-muted-foreground mt-4">
-            Requested: {comparisonType} | Available: {Object.keys(comparisonDataMap).join(', ')}
-          </p>
         </div>
-      </AppLayout>;
+      </AppLayout>
+    );
   }
-  const data = comparisonDataMap[comparisonType];
   return <>
       <Helmet>
         <title>{data.metaTitle}</title>
