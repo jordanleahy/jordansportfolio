@@ -53,6 +53,8 @@ For company info fields, extract from vendor data:
 - Primary Solutions: Use core_services (limit to 2-3 main ones)
 - AI Core: Extract AI/technology details from description and specialties
 - EHR Integration: Look for integration details in key_features
+- Notable Customers: Use notable_customers field (join with commas, max 3-4 top names)
+- Partnerships: Use partnerships field (join with commas, focus on major tech partners)
 - Client Base: Use performance_metrics.customer_count if available
 - Certifications: Extract from certifications field
 - Awards: Use any awards or recognition mentioned
@@ -103,7 +105,9 @@ OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION
     {"category": "Target Customers", "company1_value": "Hospitals", "company2_value": "Health Systems", "sort_order": 7},
     {"category": "Primary Solutions", "company1_value": "Solution A", "company2_value": "Solution B", "sort_order": 8},
     {"category": "AI Core", "company1_value": "ML Engine", "company2_value": "AI Platform", "sort_order": 9},
-    {"category": "EHR Integration", "company1_value": "Epic, Cerner", "company2_value": "All major", "sort_order": 10}
+    {"category": "EHR Integration", "company1_value": "Epic, Cerner", "company2_value": "All major", "sort_order": 10},
+    {"category": "Notable Customers", "company1_value": "Customer1, Customer2", "company2_value": "Customer3, Customer4", "sort_order": 11},
+    {"category": "Partnerships", "company1_value": "Partner1, Partner2", "company2_value": "Partner3, Partner4", "sort_order": 12}
   ],
   "features": [
     {"feature_name": "Real-time Analytics", "company1_value": "Yes", "company2_value": "Yes", "sort_order": 0},

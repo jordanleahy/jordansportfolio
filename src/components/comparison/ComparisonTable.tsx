@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Building, Users } from 'lucide-react';
 import { ComparisonData } from '@/types/comparison';
 
 interface ComparisonTableProps {
