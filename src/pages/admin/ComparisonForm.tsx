@@ -118,6 +118,59 @@ export const ComparisonForm: React.FC = () => {
     }
   }, [selectedCompany1, selectedCompany2, isEdit]);
 
+  // Load existing comparison data when editing
+  useEffect(() => {
+    if (isEdit && structuredComparison) {
+      // Populate basic form data
+      setFormData({
+        title: structuredComparison.title,
+        meta_title: structuredComparison.meta_title,
+        meta_description: structuredComparison.meta_description,
+        slug: structuredComparison.slug,
+        company1_id: structuredComparison.companies?.[0]?.vendor_id || '',
+        company2_id: structuredComparison.companies?.[1]?.vendor_id || '',
+        status: structuredComparison.status as 'draft' | 'published',
+      });
+
+      // Populate basic info rows
+      if (structuredComparison.basic_info && structuredComparison.basic_info.length > 0) {
+        setBasicInfo(structuredComparison.basic_info.map(info => ({
+          category: info.category,
+          company1: info.company1_value,
+          company2: info.company2_value,
+        })));
+      }
+
+      // Populate features
+      if (structuredComparison.features && structuredComparison.features.length > 0) {
+        setFeatures(structuredComparison.features.map(feature => ({
+          feature: feature.feature_name,
+          company1: feature.company1_value,
+          company2: feature.company2_value,
+        })));
+      }
+
+      // Populate use cases
+      if (structuredComparison.use_cases && structuredComparison.use_cases.length > 0) {
+        setUseCases(structuredComparison.use_cases.map(useCase => ({
+          useCase: useCase.use_case,
+          bestFit: useCase.best_fit,
+        })));
+      }
+
+      // Populate insights
+      if (structuredComparison.insights && structuredComparison.insights.length > 0) {
+        const company1Insight = structuredComparison.insights.find(i => i.company_position === 1);
+        const company2Insight = structuredComparison.insights.find(i => i.company_position === 2);
+        
+        setSummaryInsights({
+          company1: company1Insight?.insight_text || '',
+          company2: company2Insight?.insight_text || '',
+        });
+      }
+    }
+  }, [isEdit, structuredComparison]);
+
   const addFeature = () => {
     setFeatures([...features, { feature: '', company1: '', company2: '' }]);
   };
