@@ -64,7 +64,6 @@ export const CaseStudyHero = ({
             <div>
               <h3 className="font-semibold text-muted-foreground mb-2">Timeline</h3>
               <p>{timeline}</p>
-              {timelineDetails && <p className="text-sm text-muted-foreground">{timelineDetails}</p>}
             </div>
           </div>
 
