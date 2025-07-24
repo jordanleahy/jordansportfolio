@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVendors } from '@/hooks/useVendors';
-import { useCreateComparison, useUpdateComparison, useComparisonBySlug } from '@/hooks/useComparisons';
 import { useCreateStructuredComparison, useUpdateStructuredComparison, useStructuredComparison } from '@/hooks/useComparisonsStructured';
 import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
@@ -43,12 +42,9 @@ export const ComparisonForm: React.FC = () => {
   const isEdit = !!id;
 
   const { data: vendors } = useVendors();
-  const { data: existingComparison } = useComparisonBySlug(id || '');
   const { data: structuredComparison } = useStructuredComparison(id || '');
   
-  // Use both old and new create/update hooks during transition
-  const createComparison = useCreateComparison();
-  const updateComparison = useUpdateComparison();
+  // Use only structured comparison hooks
   const createStructuredComparison = useCreateStructuredComparison();
   const updateStructuredComparison = useUpdateStructuredComparison();
   const generateComparison = useGenerateComparison();
@@ -195,108 +191,62 @@ export const ComparisonForm: React.FC = () => {
   };
 
   const handleGenerateComparison = async () => {
-    if (!formData.company1_id || !formData.company2_id) {
-      toast.error("Please select both companies first");
-      return;
-    }
-
-    const vendor1 = vendors?.find(v => v.id === formData.company1_id);
-    const vendor2 = vendors?.find(v => v.id === formData.company2_id);
-
-    if (!vendor1 || !vendor2) {
-      toast.error("Could not find vendor data");
+    if (!selectedCompany1 || !selectedCompany2) {
+      toast.error('Please select both companies');
       return;
     }
 
     try {
-      const result = await generateComparison.mutateAsync({ vendor1, vendor2 });
+      const result = await generateComparison.mutateAsync({ vendor1: selectedCompany1, vendor2: selectedCompany2 });
       const parsedData = JSON.parse(result.generatedText);
       
-      // Store the full generated data for preview
+      // Store the structured generated data for preview
       setGeneratedData(parsedData);
       
-      // Populate form with generated data
-      setFormData({
-        ...formData,
-        title: parsedData.title,
-        meta_title: parsedData.metaTitle,
-        meta_description: parsedData.metaDescription,
-      });
-      
-      // Map company data to basicInfo array
-      if (parsedData.company1 && parsedData.company2) {
-        const updatedBasicInfo = basicInfo.map(info => {
-          let company1Value = '';
-          let company2Value = '';
-          
-          switch (info.category) {
-            case 'Founded':
-              company1Value = parsedData.company1.founded || '';
-              company2Value = parsedData.company2.founded || '';
-              break;
-            case 'Headquarters':
-              company1Value = parsedData.company1.headquarters || '';
-              company2Value = parsedData.company2.headquarters || '';
-              break;
-            case 'Company Type':
-              company1Value = parsedData.company1.companyType || '';
-              company2Value = parsedData.company2.companyType || '';
-              break;
-            case 'Funding':
-              company1Value = parsedData.company1.funding || '';
-              company2Value = parsedData.company2.funding || '';
-              break;
-            case 'Investors':
-              company1Value = parsedData.company1.investors || '';
-              company2Value = parsedData.company2.investors || '';
-              break;
-            case 'Employee Size':
-              company1Value = parsedData.company1.employeeSize || '';
-              company2Value = parsedData.company2.employeeSize || '';
-              break;
-            case 'Delivery Model':
-              company1Value = parsedData.company1.deliveryModel || '';
-              company2Value = parsedData.company2.deliveryModel || '';
-              break;
-            case 'Target Customers':
-              company1Value = parsedData.company1.targetCustomers || '';
-              company2Value = parsedData.company2.targetCustomers || '';
-              break;
-            case 'Primary Solutions':
-              company1Value = parsedData.company1.primarySolutions || '';
-              company2Value = parsedData.company2.primarySolutions || '';
-              break;
-            case 'AI Core':
-              company1Value = parsedData.company1.aiCore || '';
-              company2Value = parsedData.company2.aiCore || '';
-              break;
-            case 'EHR Integration':
-              company1Value = parsedData.company1.ehrIntegration || '';
-              company2Value = parsedData.company2.ehrIntegration || '';
-              break;
-            default:
-              company1Value = info.company1;
-              company2Value = info.company2;
-          }
-          
-          return {
-            ...info,
-            company1: company1Value,
-            company2: company2Value
-          };
-        });
-        
-        setBasicInfo(updatedBasicInfo);
+      // Update form data with generated metadata
+      if (parsedData.comparison) {
+        setFormData(prev => ({
+          ...prev,
+          title: parsedData.comparison.title || '',
+          meta_title: parsedData.comparison.meta_title || '', 
+          meta_description: parsedData.comparison.meta_description || '',
+          slug: generateSlug(parsedData.comparison.title || '')
+        }));
+      }
+
+      // Update structured data arrays
+      if (parsedData.basic_info) {
+        setBasicInfo(parsedData.basic_info);
       }
       
-      setFeatures(parsedData.features);
-      setSummaryInsights(parsedData.summaryInsights);
-      setUseCases(parsedData.useCases);
+      if (parsedData.features) {
+        setFeatures(parsedData.features.map((f: any) => ({
+          feature: f.feature_name,
+          company1: f.company1_value,
+          company2: f.company2_value
+        })));
+      }
       
-      toast.success("Comparison generated successfully! Please review and edit as needed.");
+      if (parsedData.insights) {
+        const insight1 = parsedData.insights.find((i: any) => i.company_position === 1);
+        const insight2 = parsedData.insights.find((i: any) => i.company_position === 2);
+        setSummaryInsights({
+          company1: insight1?.insight_text || '',
+          company2: insight2?.insight_text || ''
+        });
+      }
+      
+      if (parsedData.use_cases) {
+        setUseCases(parsedData.use_cases.map((uc: any) => ({
+          useCase: uc.use_case,
+          bestFit: uc.best_fit
+        })));
+      }
+
+      toast.success('Comparison generated successfully');
     } catch (error) {
-      console.error('Generation failed:', error);
-      toast.error("Failed to generate comparison. Please try again.");
+      console.error('Error generating comparison:', error);
+      toast.error('Failed to generate comparison');
     }
   };
 
@@ -388,9 +338,9 @@ export const ComparisonForm: React.FC = () => {
       ]
     };
 
-      if (isEdit && (existingComparison || structuredComparison)) {
+      if (isEdit && structuredComparison) {
         // Update using structured approach
-        const comparisonId = existingComparison?.id || structuredComparison?.id;
+        const comparisonId = structuredComparison?.id;
         if (comparisonId) {
           const updateData = {
             id: comparisonId,

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useAdminComparisons, useDeleteComparison } from '@/hooks/useComparisons';
+import { useAdminComparisons, useDeleteComparison } from '@/hooks/useComparisonsStructured';
 import { DeleteComparisonModal } from '@/components/admin/DeleteComparisonModal';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';

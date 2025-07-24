@@ -249,6 +249,69 @@ export const useStructuredComparisonBySlug = (slug: string) => {
   });
 };
 
+// Hook to fetch published comparisons for public index page
+export const useComparisons = () => {
+  return useQuery({
+    queryKey: ["comparisons"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("comparisons")
+        .select("*")
+        .eq("status", "published")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};
+
+// Hook to fetch all comparisons for admin
+export const useAdminComparisons = () => {
+  return useQuery({
+    queryKey: ["admin-comparisons"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("comparisons")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};
+
+// Hook to delete a comparison
+export const useDeleteComparison = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("comparisons")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comparisons"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-comparisons"] });
+      queryClient.invalidateQueries({ queryKey: ["structured-comparison"] });
+      queryClient.invalidateQueries({ queryKey: ["structured-comparison-slug"] });
+    },
+  });
+};
+
 // Hook to create a structured comparison
 export const useCreateStructuredComparison = () => {
   const queryClient = useQueryClient();

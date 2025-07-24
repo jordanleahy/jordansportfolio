@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GitCompare, ArrowRight, Star, TrendingUp, CheckCircle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useComparisons } from '@/hooks/useComparisons';
+import { useComparisons } from '@/hooks/useComparisonsStructured';
 
 const ComparisonIndex = () => {
   const { data: comparisons, isLoading } = useComparisons();
