@@ -12,6 +12,7 @@ import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVendors } from '@/hooks/useVendors';
 import { useCreateComparison, useUpdateComparison, useComparisonBySlug } from '@/hooks/useComparisons';
+import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -36,6 +37,7 @@ export const ComparisonForm: React.FC = () => {
   const { data: existingComparison } = useComparisonBySlug(id || '');
   const createComparison = useCreateComparison();
   const updateComparison = useUpdateComparison();
+  const generateComparison = useGenerateComparison();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -107,6 +109,43 @@ export const ComparisonForm: React.FC = () => {
 
   const removeUseCase = (index: number) => {
     setUseCases(useCases.filter((_, i) => i !== index));
+  };
+
+  const handleGenerateComparison = async () => {
+    if (!formData.company1_id || !formData.company2_id) {
+      toast.error("Please select both companies first");
+      return;
+    }
+
+    const vendor1 = vendors?.find(v => v.id === formData.company1_id);
+    const vendor2 = vendors?.find(v => v.id === formData.company2_id);
+
+    if (!vendor1 || !vendor2) {
+      toast.error("Could not find vendor data");
+      return;
+    }
+
+    try {
+      const result = await generateComparison.mutateAsync({ vendor1, vendor2 });
+      const parsedData = JSON.parse(result.generatedText);
+      
+      // Populate form with generated data
+      setFormData({
+        ...formData,
+        title: parsedData.title,
+        meta_title: parsedData.metaTitle,
+        meta_description: parsedData.metaDescription,
+      });
+      
+      setFeatures(parsedData.features);
+      setSummaryInsights(parsedData.summaryInsights);
+      setUseCases(parsedData.useCases);
+      
+      toast.success("Comparison generated successfully! Please review and edit as needed.");
+    } catch (error) {
+      console.error('Generation failed:', error);
+      toast.error("Failed to generate comparison. Please try again.");
+    }
   };
 
   const updateUseCase = (index: number, field: keyof UseCaseRow, value: string) => {
@@ -417,6 +456,16 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {formData.company1_id && formData.company2_id && (
+                  <Button
+                    onClick={handleGenerateComparison}
+                    disabled={generateComparison.isPending}
+                    variant="secondary"
+                    className="w-full gap-2"
+                  >
+                    {generateComparison.isPending ? 'Generating...' : '🤖 Generate with AI'}
+                  </Button>
+                )}
                 <Button
                   onClick={() => handleSubmit('draft')}
                   variant="outline"
