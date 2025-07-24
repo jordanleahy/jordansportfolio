@@ -77,7 +77,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="h-screen max-w-4xl flex flex-col bg-gradient-to-br from-background to-muted/20 m-0 rounded-none">
+      <DialogContent className="max-h-[80vh] max-w-4xl flex flex-col bg-gradient-to-br from-background to-muted/20">
         <DialogHeader className="space-y-6 pb-6">
           <DialogDescription className="sr-only">
             AI-powered research prompt for comprehensive company analysis

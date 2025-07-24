@@ -264,7 +264,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl h-screen flex flex-col p-0">
+        <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col p-0">
           {/* Fixed Header */}
           <div className="flex-shrink-0 p-6 border-b">
             <DialogHeader>
