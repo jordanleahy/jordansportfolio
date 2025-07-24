@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVendors } from '@/hooks/useVendors';
@@ -569,42 +570,62 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {basicInfo.map((info, index) => (
-                    <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
-                      <div>
-                        <Label>Category</Label>
-                        <Input
-                          value={info.category}
-                          onChange={(e) => updateBasicInfo(index, 'category', e.target.value)}
-                          placeholder="e.g., Founded, Headquarters"
-                        />
+                  {generateComparison.isPending ? (
+                    Array.from({ length: 11 }, (_, index) => (
+                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-16" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-10" />
                       </div>
-                      <div>
-                        <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
-                        <Input
-                          value={info.company1}
-                          onChange={(e) => updateBasicInfo(index, 'company1', e.target.value)}
-                          placeholder="Company 1 value"
-                        />
+                    ))
+                  ) : (
+                    basicInfo.map((info, index) => (
+                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                        <div>
+                          <Label>Category</Label>
+                          <Input
+                            value={info.category}
+                            onChange={(e) => updateBasicInfo(index, 'category', e.target.value)}
+                            placeholder="e.g., Founded, Headquarters"
+                          />
+                        </div>
+                        <div>
+                          <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
+                          <Input
+                            value={info.company1}
+                            onChange={(e) => updateBasicInfo(index, 'company1', e.target.value)}
+                            placeholder="Company 1 value"
+                          />
+                        </div>
+                        <div>
+                          <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
+                          <Input
+                            value={info.company2}
+                            onChange={(e) => updateBasicInfo(index, 'company2', e.target.value)}
+                            placeholder="Company 2 value"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeBasicInfo(index)}
+                          disabled={basicInfo.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <div>
-                        <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
-                        <Input
-                          value={info.company2}
-                          onChange={(e) => updateBasicInfo(index, 'company2', e.target.value)}
-                          placeholder="Company 2 value"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeBasicInfo(index)}
-                        disabled={basicInfo.length === 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -622,42 +643,62 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {features.map((feature, index) => (
-                    <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
-                      <div>
-                        <Label>Feature</Label>
-                        <Input
-                          value={feature.feature}
-                          onChange={(e) => updateFeature(index, 'feature', e.target.value)}
-                          placeholder="Feature name"
-                        />
+                  {generateComparison.isPending ? (
+                    Array.from({ length: 5 }, (_, index) => (
+                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-12" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-10" />
                       </div>
-                      <div>
-                        <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
-                        <Input
-                          value={feature.company1.toString()}
-                          onChange={(e) => updateFeature(index, 'company1', e.target.value)}
-                          placeholder="Yes/No or description"
-                        />
+                    ))
+                  ) : (
+                    features.map((feature, index) => (
+                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                        <div>
+                          <Label>Feature</Label>
+                          <Input
+                            value={feature.feature}
+                            onChange={(e) => updateFeature(index, 'feature', e.target.value)}
+                            placeholder="Feature name"
+                          />
+                        </div>
+                        <div>
+                          <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
+                          <Input
+                            value={feature.company1.toString()}
+                            onChange={(e) => updateFeature(index, 'company1', e.target.value)}
+                            placeholder="Yes/No or description"
+                          />
+                        </div>
+                        <div>
+                          <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
+                          <Input
+                            value={feature.company2.toString()}
+                            onChange={(e) => updateFeature(index, 'company2', e.target.value)}
+                            placeholder="Yes/No or description"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeFeature(index)}
+                          disabled={features.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <div>
-                        <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
-                        <Input
-                          value={feature.company2.toString()}
-                          onChange={(e) => updateFeature(index, 'company2', e.target.value)}
-                          placeholder="Yes/No or description"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeFeature(index)}
-                        disabled={features.length === 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -668,24 +709,39 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Summary Insights</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label>{selectedCompany1?.company_name || 'Company 1'} Summary</Label>
-                  <Textarea
-                    value={summaryInsights.company1}
-                    onChange={(e) => setSummaryInsights(prev => ({ ...prev, company1: e.target.value }))}
-                    placeholder="Summary insight for company 1"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <Label>{selectedCompany2?.company_name || 'Company 2'} Summary</Label>
-                  <Textarea
-                    value={summaryInsights.company2}
-                    onChange={(e) => setSummaryInsights(prev => ({ ...prev, company2: e.target.value }))}
-                    placeholder="Summary insight for company 2"
-                    rows={4}
-                  />
-                </div>
+                {generateComparison.isPending ? (
+                  <>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-24 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-24 w-full" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <Label>{selectedCompany1?.company_name || 'Company 1'} Summary</Label>
+                      <Textarea
+                        value={summaryInsights.company1}
+                        onChange={(e) => setSummaryInsights(prev => ({ ...prev, company1: e.target.value }))}
+                        placeholder="Summary insight for company 1"
+                        rows={4}
+                      />
+                    </div>
+                    <div>
+                      <Label>{selectedCompany2?.company_name || 'Company 2'} Summary</Label>
+                      <Textarea
+                        value={summaryInsights.company2}
+                        onChange={(e) => setSummaryInsights(prev => ({ ...prev, company2: e.target.value }))}
+                        placeholder="Summary insight for company 2"
+                        rows={4}
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -702,46 +758,62 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {useCases.map((useCase, index) => (
-                    <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
-                      <div className="md:col-span-1">
-                        <Label>Use Case</Label>
-                        <Input
-                          value={useCase.useCase}
-                          onChange={(e) => updateUseCase(index, 'useCase', e.target.value)}
-                          placeholder="Use case description"
-                        />
+                  {generateComparison.isPending ? (
+                    Array.from({ length: 3 }, (_, index) => (
+                      <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
+                        <div className="md:col-span-1 space-y-2">
+                          <Skeleton className="h-4 w-16" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-16" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-10" />
                       </div>
-                      <div>
-                        <Label>Best Fit</Label>
-                        <Select
-                          value={useCase.bestFit}
-                          onValueChange={(value) => updateUseCase(index, 'bestFit', value)}
+                    ))
+                  ) : (
+                    useCases.map((useCase, index) => (
+                      <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
+                        <div className="md:col-span-1">
+                          <Label>Use Case</Label>
+                          <Input
+                            value={useCase.useCase}
+                            onChange={(e) => updateUseCase(index, 'useCase', e.target.value)}
+                            placeholder="Use case description"
+                          />
+                        </div>
+                        <div>
+                          <Label>Best Fit</Label>
+                          <Select
+                            value={useCase.bestFit}
+                            onValueChange={(value) => updateUseCase(index, 'bestFit', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select best fit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Both">Both</SelectItem>
+                              <SelectItem value={selectedCompany1?.company_name || 'Company 1'}>
+                                {selectedCompany1?.company_name || 'Company 1'}
+                              </SelectItem>
+                              <SelectItem value={selectedCompany2?.company_name || 'Company 2'}>
+                                {selectedCompany2?.company_name || 'Company 2'}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeUseCase(index)}
+                          disabled={useCases.length === 1}
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select best fit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Both">Both</SelectItem>
-                            <SelectItem value={selectedCompany1?.company_name || 'Company 1'}>
-                              {selectedCompany1?.company_name || 'Company 1'}
-                            </SelectItem>
-                            <SelectItem value={selectedCompany2?.company_name || 'Company 2'}>
-                              {selectedCompany2?.company_name || 'Company 2'}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeUseCase(index)}
-                        disabled={useCases.length === 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
