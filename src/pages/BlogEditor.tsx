@@ -223,9 +223,9 @@ const BlogEditor = () => {
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-');
 
-      // Ensure OG image is set - use domain-hosted default if empty
-      const finalOgImage = formData.og_image_url || 
-                          (formData.hero_image_url?.startsWith('https://jordanleahy.com') ? formData.hero_image_url : null) ||
+      // Ensure OG image is set - prefer provided OG image or hero image
+      const finalOgImage = formData.og_image_url ||
+                          formData.hero_image_url ||
                           '/og-blog-template.png';
 
       const postData = {
