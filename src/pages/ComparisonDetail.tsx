@@ -65,23 +65,56 @@ const ComparisonDetail = () => {
   const insight1 = structuredComparison.insights?.find(i => i.company_position === 1);
   const insight2 = structuredComparison.insights?.find(i => i.company_position === 2);
   
+  // Create lookup from basic_info table
+  const basicInfoLookup = structuredComparison.basic_info?.reduce((acc, info) => {
+    acc[info.category] = {
+      company1: info.company1_value,
+      company2: info.company2_value
+    };
+    return acc;
+  }, {} as Record<string, { company1: string; company2: string }>) || {};
+  
   const data = {
     title: structuredComparison.title,
     metaTitle: structuredComparison.meta_title,
     metaDescription: structuredComparison.meta_description,
     company1: {
       name: company1?.name || 'Company 1',
-      location: company1?.headquarters || 'N/A',
-      founded: company1?.founded || 'N/A',
-      headquarters: company1?.headquarters || 'N/A',
+      founded: company1?.founded || basicInfoLookup['Founded']?.company1 || 'N/A',
+      headquarters: company1?.headquarters || basicInfoLookup['Headquarters']?.company1 || 'N/A',
+      companyType: basicInfoLookup['Company Type']?.company1 || 'N/A',
+      funding: basicInfoLookup['Funding']?.company1 || 'N/A',
+      investors: basicInfoLookup['Investors']?.company1 || 'N/A',
+      employeeSize: basicInfoLookup['Employee Size']?.company1 || 'N/A',
+      deliveryModel: basicInfoLookup['Delivery Model']?.company1 || 'N/A',
+      targetCustomers: basicInfoLookup['Target Customers']?.company1 || 'N/A',
+      primarySolutions: basicInfoLookup['Primary Solutions']?.company1 || 'N/A',
+      aiCore: basicInfoLookup['AI Core']?.company1 || 'N/A',
+      ehrIntegration: basicInfoLookup['EHR Integration']?.company1 || 'N/A',
+      clientBase: basicInfoLookup['Client Base']?.company1 || 'N/A',
+      certifications: basicInfoLookup['Certifications']?.company1 || 'N/A',
+      awards: basicInfoLookup['Awards']?.company1 || 'N/A',
+      location: company1?.headquarters || basicInfoLookup['Headquarters']?.company1 || 'N/A',
       keyBenefits: company1?.key_benefits || [],
       uniqueStrengths: company1?.unique_strengths || []
     },
     company2: {
-      name: company2?.name || 'Company 2', 
-      location: company2?.headquarters || 'N/A',
-      founded: company2?.founded || 'N/A',
-      headquarters: company2?.headquarters || 'N/A',
+      name: company2?.name || 'Company 2',
+      founded: company2?.founded || basicInfoLookup['Founded']?.company2 || 'N/A',
+      headquarters: company2?.headquarters || basicInfoLookup['Headquarters']?.company2 || 'N/A',
+      companyType: basicInfoLookup['Company Type']?.company2 || 'N/A',
+      funding: basicInfoLookup['Funding']?.company2 || 'N/A',
+      investors: basicInfoLookup['Investors']?.company2 || 'N/A',
+      employeeSize: basicInfoLookup['Employee Size']?.company2 || 'N/A',
+      deliveryModel: basicInfoLookup['Delivery Model']?.company2 || 'N/A',
+      targetCustomers: basicInfoLookup['Target Customers']?.company2 || 'N/A',
+      primarySolutions: basicInfoLookup['Primary Solutions']?.company2 || 'N/A',
+      aiCore: basicInfoLookup['AI Core']?.company2 || 'N/A',
+      ehrIntegration: basicInfoLookup['EHR Integration']?.company2 || 'N/A',
+      clientBase: basicInfoLookup['Client Base']?.company2 || 'N/A',
+      certifications: basicInfoLookup['Certifications']?.company2 || 'N/A',
+      awards: basicInfoLookup['Awards']?.company2 || 'N/A',
+      location: company2?.headquarters || basicInfoLookup['Headquarters']?.company2 || 'N/A',
       keyBenefits: company2?.key_benefits || [],
       uniqueStrengths: company2?.unique_strengths || []
     },
