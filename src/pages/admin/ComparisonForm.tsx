@@ -326,6 +326,11 @@ export const ComparisonForm: React.FC = () => {
       return;
     }
 
+    // Show loading toast
+    const loadingToast = toast.loading(`${status === 'draft' ? 'Saving draft' : 'Publishing'} comparison...`);
+    
+    try {
+
     // Prepare data for the new structured format
     const structuredData = {
       title: formData.title,
@@ -383,7 +388,6 @@ export const ComparisonForm: React.FC = () => {
       ]
     };
 
-    try {
       if (isEdit && (existingComparison || structuredComparison)) {
         // Update using structured approach
         const comparisonId = existingComparison?.id || structuredComparison?.id;
@@ -417,17 +421,20 @@ export const ComparisonForm: React.FC = () => {
             }))
           };
           await updateStructuredComparison.mutateAsync(updateData);
-          toast.success('Comparison updated successfully');
+          toast.dismiss(loadingToast);
+          toast.success(`Comparison ${status === 'draft' ? 'saved as draft' : 'published'} successfully`);
         }
       } else {
         // Create using structured approach
         await createStructuredComparison.mutateAsync(structuredData);
-        toast.success('Comparison created successfully');
+        toast.dismiss(loadingToast);
+        toast.success(`Comparison ${status === 'draft' ? 'saved as draft' : 'published'} successfully`);
       }
       navigate('/admin/comparisons');
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('Failed to save comparison');
+      toast.dismiss(loadingToast);
+      toast.error(`Failed to ${status === 'draft' ? 'save' : 'publish'} comparison`);
     }
   };
 
@@ -873,18 +880,18 @@ export const ComparisonForm: React.FC = () => {
                   onClick={() => handleSubmit('draft')}
                   variant="outline"
                   className="w-full gap-2"
-                  disabled={createComparison.isPending || updateComparison.isPending}
+                  disabled={createStructuredComparison.isPending || updateStructuredComparison.isPending}
                 >
                   <Save className="h-4 w-4" />
-                  Save as Draft
+                  {(createStructuredComparison.isPending || updateStructuredComparison.isPending) ? 'Saving...' : 'Save as Draft'}
                 </Button>
                 <Button
                   onClick={() => handleSubmit('published')}
                   className="w-full gap-2"
-                  disabled={createComparison.isPending || updateComparison.isPending}
+                  disabled={createStructuredComparison.isPending || updateStructuredComparison.isPending}
                 >
                   <Eye className="h-4 w-4" />
-                  Publish
+                  {(createStructuredComparison.isPending || updateStructuredComparison.isPending) ? 'Publishing...' : 'Publish'}
                 </Button>
               </CardContent>
             </Card>

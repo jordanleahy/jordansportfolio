@@ -32,14 +32,49 @@ export const AdminComparisons: React.FC = () => {
           schema: 'public',
           table: 'comparisons'
         },
-        () => {
+        (payload) => {
+          console.log('Real-time comparison change detected:', payload);
           // Refetch data when any comparison changes
           refetch();
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comparison_companies'
+        },
+        (payload) => {
+          console.log('Real-time comparison companies change detected:', payload);
+          refetch();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comparison_basic_info'
+        },
+        (payload) => {
+          console.log('Real-time comparison basic info change detected:', payload);
+          refetch();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Real-time subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to real-time updates');
+        } else if (status === 'CLOSED') {
+          console.log('Real-time subscription closed');
+        } else {
+          console.error('Real-time subscription error:', status);
+        }
+      });
 
     return () => {
+      console.log('Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
   }, [refetch]);

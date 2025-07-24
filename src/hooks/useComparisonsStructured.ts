@@ -252,9 +252,13 @@ export const useCreateStructuredComparison = () => {
       return comparison;
     },
     onSuccess: () => {
+      // Invalidate all comparison-related queries
       queryClient.invalidateQueries({ queryKey: ["comparisons"] });
       queryClient.invalidateQueries({ queryKey: ["admin-comparisons"] });
       queryClient.invalidateQueries({ queryKey: ["structured-comparison"] });
+      queryClient.invalidateQueries({ queryKey: ["structured-comparison-slug"] });
+      // Also invalidate the old comparison queries during transition
+      queryClient.invalidateQueries({ queryKey: ["comparison"] });
     },
   });
 };
@@ -359,10 +363,17 @@ export const useUpdateStructuredComparison = () => {
 
       return { id };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Invalidate all comparison-related queries
       queryClient.invalidateQueries({ queryKey: ["comparisons"] });
       queryClient.invalidateQueries({ queryKey: ["admin-comparisons"] });
       queryClient.invalidateQueries({ queryKey: ["structured-comparison"] });
+      queryClient.invalidateQueries({ queryKey: ["structured-comparison-slug"] });
+      // Also invalidate the old comparison queries during transition
+      queryClient.invalidateQueries({ queryKey: ["comparison"] });
+      
+      // Immediately refetch the admin comparisons to ensure real-time update
+      queryClient.refetchQueries({ queryKey: ["admin-comparisons"] });
     },
   });
 };
