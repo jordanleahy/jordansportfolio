@@ -28,9 +28,9 @@ const Index = () => {
 
   // Generate SEO metadata for homepage
   const homeSEO = generateSEOMetadata({
-    title: "Jordan Leigh - Healthcare Technology & Product Development",
-    description: "Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.",
-    image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
+    title: "Jordan Leahy - Healthcare Technology & Product Development",
+    description: "Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.",
+    image: "/og-portfolio.png",
     url: "/",
     type: "website"
   });
