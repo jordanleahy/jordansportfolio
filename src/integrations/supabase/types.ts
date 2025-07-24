@@ -1803,6 +1803,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_sirs_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
