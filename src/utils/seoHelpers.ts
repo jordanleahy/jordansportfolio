@@ -6,7 +6,7 @@ export const SEO_DEFAULTS = {
   defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.',
   // Use the absolute URL for the default OG image to ensure it works properly
   // with social media crawlers
-  defaultImage: 'https://jordanleahy.com/og-default.png',
+  defaultImage: 'https://jordanleahy.com/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png',
   blogTemplateImage: 'https://jordanleahy.com/og-blog-template.png',
   twitterHandle: '@jordanleigh',
 } as const;
