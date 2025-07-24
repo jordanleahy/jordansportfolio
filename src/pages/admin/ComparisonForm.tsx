@@ -201,10 +201,10 @@ export const ComparisonForm: React.FC = () => {
                       <SelectTrigger>
                         <SelectValue placeholder="Select first company" />
                       </SelectTrigger>
-                      <SelectContent>
-                        {vendors?.filter(v => v.status === 'published').map(vendor => (
+                      <SelectContent className="bg-background border border-border shadow-lg z-50">
+                        {vendors?.map(vendor => (
                           <SelectItem key={vendor.id} value={vendor.id}>
-                            {vendor.company_name}
+                            {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -218,10 +218,10 @@ export const ComparisonForm: React.FC = () => {
                       <SelectTrigger>
                         <SelectValue placeholder="Select second company" />
                       </SelectTrigger>
-                      <SelectContent>
-                        {vendors?.filter(v => v.status === 'published' && v.id !== formData.company1_id).map(vendor => (
+                      <SelectContent className="bg-background border border-border shadow-lg z-50">
+                        {vendors?.filter(v => v.id !== formData.company1_id).map(vendor => (
                           <SelectItem key={vendor.id} value={vendor.id}>
-                            {vendor.company_name}
+                            {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
                           </SelectItem>
                         ))}
                       </SelectContent>
