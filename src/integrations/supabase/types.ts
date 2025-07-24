@@ -314,6 +314,7 @@ export type Database = {
       }
       comparisons: {
         Row: {
+          basic_info: Json
           company1_data: Json
           company2_data: Json
           created_at: string
@@ -330,6 +331,7 @@ export type Database = {
           use_cases: Json
         }
         Insert: {
+          basic_info?: Json
           company1_data: Json
           company2_data: Json
           created_at?: string
@@ -346,6 +348,7 @@ export type Database = {
           use_cases?: Json
         }
         Update: {
+          basic_info?: Json
           company1_data?: Json
           company2_data?: Json
           created_at?: string
