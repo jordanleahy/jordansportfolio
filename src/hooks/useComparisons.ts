@@ -42,12 +42,26 @@ export const useComparisonBySlug = (slug: string) => {
   return useQuery({
     queryKey: ["comparison", slug],
     queryFn: async (): Promise<Comparison | null> => {
-      const { data, error } = await supabase
+      // Check if user is admin
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+        .single();
+      
+      const isAdmin = userRoles?.role === 'admin';
+      
+      let query = supabase
         .from("comparisons")
         .select("*")
-        .eq("slug", slug)
-        .eq("status", "published")
-        .single();
+        .eq("slug", slug);
+      
+      // Only filter by published status if user is not admin
+      if (!isAdmin) {
+        query = query.eq("status", "published");
+      }
+      
+      const { data, error } = await query.single();
 
       if (error) {
         if (error.code === "PGRST116") {
