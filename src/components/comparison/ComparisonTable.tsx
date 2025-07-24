@@ -12,21 +12,62 @@ interface ComparisonTableProps {
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   const { company1, company2 } = data;
 
+  // Add fallbacks for missing data
+  const safeCompany1 = {
+    name: company1?.name || 'Company 1',
+    founded: company1?.founded || 'N/A',
+    headquarters: company1?.headquarters || 'N/A',
+    companyType: company1?.companyType || 'N/A',
+    funding: company1?.funding || 'N/A',
+    investors: company1?.investors || 'N/A',
+    employeeSize: company1?.employeeSize || 'N/A',
+    deliveryModel: company1?.deliveryModel || 'N/A',
+    targetCustomers: company1?.targetCustomers || 'N/A',
+    primarySolutions: company1?.primarySolutions || 'N/A',
+    aiCore: company1?.aiCore || 'N/A',
+    ehrIntegration: company1?.ehrIntegration || 'N/A',
+    clientBase: company1?.clientBase || 'N/A',
+    certifications: company1?.certifications || 'N/A',
+    awards: company1?.awards || 'N/A',
+    keyBenefits: company1?.keyBenefits || [],
+    uniqueStrengths: company1?.uniqueStrengths || []
+  };
+
+  const safeCompany2 = {
+    name: company2?.name || 'Company 2',
+    founded: company2?.founded || 'N/A',
+    headquarters: company2?.headquarters || 'N/A',
+    companyType: company2?.companyType || 'N/A',
+    funding: company2?.funding || 'N/A',
+    investors: company2?.investors || 'N/A',
+    employeeSize: company2?.employeeSize || 'N/A',
+    deliveryModel: company2?.deliveryModel || 'N/A',
+    targetCustomers: company2?.targetCustomers || 'N/A',
+    primarySolutions: company2?.primarySolutions || 'N/A',
+    aiCore: company2?.aiCore || 'N/A',
+    ehrIntegration: company2?.ehrIntegration || 'N/A',
+    clientBase: company2?.clientBase || 'N/A',
+    certifications: company2?.certifications || 'N/A',
+    awards: company2?.awards || 'N/A',
+    keyBenefits: company2?.keyBenefits || [],
+    uniqueStrengths: company2?.uniqueStrengths || []
+  };
+
   const comparisonRows = [
-    { label: 'Founded', value1: company1.founded, value2: company2.founded },
-    { label: 'Headquarters', value1: company1.headquarters, value2: company2.headquarters },
-    { label: 'Company Type', value1: company1.companyType, value2: company2.companyType },
-    { label: 'Funding', value1: company1.funding, value2: company2.funding },
-    { label: 'Investors', value1: company1.investors, value2: company2.investors },
-    { label: 'Employee Size', value1: company1.employeeSize, value2: company2.employeeSize },
-    { label: 'Delivery Model', value1: company1.deliveryModel, value2: company2.deliveryModel },
-    { label: 'Target Customers', value1: company1.targetCustomers, value2: company2.targetCustomers },
-    { label: 'Primary Solutions', value1: company1.primarySolutions, value2: company2.primarySolutions },
-    { label: 'AI Core', value1: company1.aiCore, value2: company2.aiCore },
-    { label: 'EHR Integration', value1: company1.ehrIntegration, value2: company2.ehrIntegration },
-    { label: 'Client Base', value1: company1.clientBase, value2: company2.clientBase },
-    { label: 'Certifications', value1: company1.certifications, value2: company2.certifications },
-    { label: 'Awards & Recognition', value1: company1.awards, value2: company2.awards },
+    { label: 'Founded', value1: safeCompany1.founded, value2: safeCompany2.founded },
+    { label: 'Headquarters', value1: safeCompany1.headquarters, value2: safeCompany2.headquarters },
+    { label: 'Company Type', value1: safeCompany1.companyType, value2: safeCompany2.companyType },
+    { label: 'Funding', value1: safeCompany1.funding, value2: safeCompany2.funding },
+    { label: 'Investors', value1: safeCompany1.investors, value2: safeCompany2.investors },
+    { label: 'Employee Size', value1: safeCompany1.employeeSize, value2: safeCompany2.employeeSize },
+    { label: 'Delivery Model', value1: safeCompany1.deliveryModel, value2: safeCompany2.deliveryModel },
+    { label: 'Target Customers', value1: safeCompany1.targetCustomers, value2: safeCompany2.targetCustomers },
+    { label: 'Primary Solutions', value1: safeCompany1.primarySolutions, value2: safeCompany2.primarySolutions },
+    { label: 'AI Core', value1: safeCompany1.aiCore, value2: safeCompany2.aiCore },
+    { label: 'EHR Integration', value1: safeCompany1.ehrIntegration, value2: safeCompany2.ehrIntegration },
+    { label: 'Client Base', value1: safeCompany1.clientBase, value2: safeCompany2.clientBase },
+    { label: 'Certifications', value1: safeCompany1.certifications, value2: safeCompany2.certifications },
+    { label: 'Awards & Recognition', value1: safeCompany1.awards, value2: safeCompany2.awards },
   ];
 
   return (
@@ -38,8 +79,8 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
               <TableHead className="w-1/3 font-semibold border-r hidden md:table-cell">
                 Category
               </TableHead>
-              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{company1.name}</TableHead>
-              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{company2.name}</TableHead>
+              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{safeCompany1.name}</TableHead>
+              <TableHead className="w-1/2 md:w-1/3 font-semibold text-center px-4">{safeCompany2.name}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -58,16 +99,22 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
               </TableCell>
               <TableCell className="w-1/2 md:w-1/3 text-center px-4">
                 <ul className="space-y-1 text-left">
-                  {company1.keyBenefits.map((benefit, idx) => (
+                  {safeCompany1.keyBenefits.map((benefit, idx) => (
                     <li key={idx} className="text-xs">• {benefit}</li>
                   ))}
+                  {safeCompany1.keyBenefits.length === 0 && (
+                    <li className="text-xs text-muted-foreground">No data available</li>
+                  )}
                 </ul>
               </TableCell>
               <TableCell className="w-1/2 md:w-1/3 text-center px-4">
                 <ul className="space-y-1 text-left">
-                  {company2.keyBenefits.map((benefit, idx) => (
+                  {safeCompany2.keyBenefits.map((benefit, idx) => (
                     <li key={idx} className="text-xs">• {benefit}</li>
                   ))}
+                  {safeCompany2.keyBenefits.length === 0 && (
+                    <li className="text-xs text-muted-foreground">No data available</li>
+                  )}
                 </ul>
               </TableCell>
             </TableRow>
@@ -77,16 +124,22 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
               </TableCell>
               <TableCell className="w-1/2 md:w-1/3 text-center px-4">
                 <ul className="space-y-1 text-left">
-                  {company1.uniqueStrengths.map((strength, idx) => (
+                  {safeCompany1.uniqueStrengths.map((strength, idx) => (
                     <li key={idx} className="text-xs">• {strength}</li>
                   ))}
+                  {safeCompany1.uniqueStrengths.length === 0 && (
+                    <li className="text-xs text-muted-foreground">No data available</li>
+                  )}
                 </ul>
               </TableCell>
               <TableCell className="w-1/2 md:w-1/3 text-center px-4">
                 <ul className="space-y-1 text-left">
-                  {company2.uniqueStrengths.map((strength, idx) => (
+                  {safeCompany2.uniqueStrengths.map((strength, idx) => (
                     <li key={idx} className="text-xs">• {strength}</li>
                   ))}
+                  {safeCompany2.uniqueStrengths.length === 0 && (
+                    <li className="text-xs text-muted-foreground">No data available</li>
+                  )}
                 </ul>
               </TableCell>
             </TableRow>
