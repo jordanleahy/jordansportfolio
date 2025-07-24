@@ -12,6 +12,7 @@ import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVendors } from '@/hooks/useVendors';
 import { useCreateComparison, useUpdateComparison, useComparisonBySlug } from '@/hooks/useComparisons';
+import { useCreateStructuredComparison, useUpdateStructuredComparison, useStructuredComparison } from '@/hooks/useComparisonsStructured';
 import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,8 +43,13 @@ export const ComparisonForm: React.FC = () => {
 
   const { data: vendors } = useVendors();
   const { data: existingComparison } = useComparisonBySlug(id || '');
+  const { data: structuredComparison } = useStructuredComparison(id || '');
+  
+  // Use both old and new create/update hooks during transition
   const createComparison = useCreateComparison();
   const updateComparison = useUpdateComparison();
+  const createStructuredComparison = useCreateStructuredComparison();
+  const updateStructuredComparison = useUpdateStructuredComparison();
   const generateComparison = useGenerateComparison();
 
   const [formData, setFormData] = useState({
@@ -200,45 +206,107 @@ export const ComparisonForm: React.FC = () => {
       return;
     }
 
-    const comparisonData = {
+    // Prepare data for the new structured format
+    const structuredData = {
       title: formData.title,
       meta_title: formData.meta_title,
       meta_description: formData.meta_description,
       slug: formData.slug,
-      company1_data: {
-        id: selectedCompany1.id,
-        name: selectedCompany1.company_name,
-        founded: selectedCompany1.founding_year?.toString() || 'N/A',
-        headquarters: selectedCompany1.headquarters,
-        keyBenefits: selectedCompany1.key_benefits,
-        uniqueStrengths: selectedCompany1.competitive_advantages,
-      },
-      company2_data: {
-        id: selectedCompany2.id,
-        name: selectedCompany2.company_name,
-        founded: selectedCompany2.founding_year?.toString() || 'N/A',
-        headquarters: selectedCompany2.headquarters,
-        keyBenefits: selectedCompany2.key_benefits,
-        uniqueStrengths: selectedCompany2.competitive_advantages,
-      },
-      basic_info: basicInfo.filter(b => b.category.trim()),
-      features: features.filter(f => f.feature.trim()),
-      summary_insights: summaryInsights,
-      use_cases: useCases.filter(u => u.useCase.trim()),
       status,
       created_by: user.id,
+      companies: [
+        {
+          company_position: 1,
+          vendor_id: selectedCompany1.id,
+          name: selectedCompany1.company_name,
+          founded: selectedCompany1.founding_year?.toString() || 'N/A',
+          headquarters: selectedCompany1.headquarters,
+          key_benefits: selectedCompany1.key_benefits || [],
+          unique_strengths: selectedCompany1.competitive_advantages || [],
+        },
+        {
+          company_position: 2,
+          vendor_id: selectedCompany2.id,
+          name: selectedCompany2.company_name,
+          founded: selectedCompany2.founding_year?.toString() || 'N/A',
+          headquarters: selectedCompany2.headquarters,
+          key_benefits: selectedCompany2.key_benefits || [],
+          unique_strengths: selectedCompany2.competitive_advantages || [],
+        }
+      ],
+      basic_info: basicInfo.filter(b => b.category.trim()).map(info => ({
+        category: info.category,
+        company1_value: info.company1,
+        company2_value: info.company2,
+        sort_order: 0 // Will be set automatically
+      })),
+      features: features.filter(f => f.feature.trim()).map(feature => ({
+        feature_name: feature.feature,
+        company1_value: feature.company1.toString(),
+        company2_value: feature.company2.toString(),
+        sort_order: 0 // Will be set automatically
+      })),
+      use_cases: useCases.filter(u => u.useCase.trim()).map(useCase => ({
+        use_case: useCase.useCase,
+        best_fit: useCase.bestFit,
+        sort_order: 0 // Will be set automatically
+      })),
+      insights: [
+        ...(summaryInsights.company1 ? [{
+          company_position: 1,
+          insight_text: summaryInsights.company1
+        }] : []),
+        ...(summaryInsights.company2 ? [{
+          company_position: 2,
+          insight_text: summaryInsights.company2
+        }] : [])
+      ]
     };
 
     try {
-      if (isEdit && existingComparison) {
-        await updateComparison.mutateAsync({ id: existingComparison.id, ...comparisonData });
-        toast.success('Comparison updated successfully');
+      if (isEdit && (existingComparison || structuredComparison)) {
+        // Update using structured approach
+        const comparisonId = existingComparison?.id || structuredComparison?.id;
+        if (comparisonId) {
+          const updateData = {
+            id: comparisonId,
+            title: structuredData.title,
+            meta_title: structuredData.meta_title,
+            meta_description: structuredData.meta_description,
+            slug: structuredData.slug,
+            status: structuredData.status,
+            companies: structuredData.companies.map(company => ({ 
+              id: '', // Temporary ID, will be generated
+              ...company 
+            })),
+            basic_info: structuredData.basic_info.map(info => ({ 
+              id: '', // Temporary ID, will be generated
+              ...info 
+            })),
+            features: structuredData.features.map(feature => ({ 
+              id: '', // Temporary ID, will be generated
+              ...feature 
+            })),
+            use_cases: structuredData.use_cases.map(useCase => ({ 
+              id: '', // Temporary ID, will be generated
+              ...useCase 
+            })),
+            insights: structuredData.insights.map(insight => ({ 
+              id: '', // Temporary ID, will be generated
+              ...insight 
+            }))
+          };
+          await updateStructuredComparison.mutateAsync(updateData);
+          toast.success('Comparison updated successfully');
+        }
       } else {
-        await createComparison.mutateAsync(comparisonData);
+        // Create using structured approach
+        await createStructuredComparison.mutateAsync(structuredData);
         toast.success('Comparison created successfully');
       }
       navigate('/admin/comparisons');
     } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save comparison');
     }
   };

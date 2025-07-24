@@ -312,6 +312,203 @@ export type Database = {
           },
         ]
       }
+      comparison_basic_info: {
+        Row: {
+          category: string
+          company1_value: string
+          company2_value: string
+          comparison_id: string
+          created_at: string
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          category: string
+          company1_value: string
+          company2_value: string
+          comparison_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          company1_value?: string
+          company2_value?: string
+          comparison_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_basic_info_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "comparisons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_companies: {
+        Row: {
+          company_position: number
+          comparison_id: string
+          created_at: string
+          founded: string | null
+          headquarters: string | null
+          id: string
+          key_benefits: string[] | null
+          name: string
+          unique_strengths: string[] | null
+          vendor_id: string | null
+        }
+        Insert: {
+          company_position: number
+          comparison_id: string
+          created_at?: string
+          founded?: string | null
+          headquarters?: string | null
+          id?: string
+          key_benefits?: string[] | null
+          name: string
+          unique_strengths?: string[] | null
+          vendor_id?: string | null
+        }
+        Update: {
+          company_position?: number
+          comparison_id?: string
+          created_at?: string
+          founded?: string | null
+          headquarters?: string | null
+          id?: string
+          key_benefits?: string[] | null
+          name?: string
+          unique_strengths?: string[] | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_companies_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "comparisons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comparison_companies_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_features: {
+        Row: {
+          company1_value: string
+          company2_value: string
+          comparison_id: string
+          created_at: string
+          feature_name: string
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          company1_value: string
+          company2_value: string
+          comparison_id: string
+          created_at?: string
+          feature_name: string
+          id?: string
+          sort_order?: number
+        }
+        Update: {
+          company1_value?: string
+          company2_value?: string
+          comparison_id?: string
+          created_at?: string
+          feature_name?: string
+          id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_features_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "comparisons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_insights: {
+        Row: {
+          company_position: number
+          comparison_id: string
+          created_at: string
+          id: string
+          insight_text: string
+        }
+        Insert: {
+          company_position: number
+          comparison_id: string
+          created_at?: string
+          id?: string
+          insight_text: string
+        }
+        Update: {
+          company_position?: number
+          comparison_id?: string
+          created_at?: string
+          id?: string
+          insight_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_insights_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "comparisons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparison_use_cases: {
+        Row: {
+          best_fit: string
+          comparison_id: string
+          created_at: string
+          id: string
+          sort_order: number
+          use_case: string
+        }
+        Insert: {
+          best_fit: string
+          comparison_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          use_case: string
+        }
+        Update: {
+          best_fit?: string
+          comparison_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          use_case?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparison_use_cases_comparison_id_fkey"
+            columns: ["comparison_id"]
+            isOneToOne: false
+            referencedRelation: "comparisons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comparisons: {
         Row: {
           basic_info: Json
