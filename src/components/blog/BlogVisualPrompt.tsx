@@ -264,35 +264,39 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Blog Visual Image Prompt Generator</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCacheManagementOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Manage Cache
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="text-sm text-muted-foreground">
+        <DialogContent className="max-w-4xl h-screen flex flex-col p-0">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 p-6 border-b">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>Blog Visual Image Prompt Generator</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCacheManagementOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Manage Cache
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="text-sm text-muted-foreground mt-4">
               <p><strong>Headline:</strong> {headline}</p>
               <p><strong>Content:</strong> {content}</p>
             </div>
-            
+          </div>
+          
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-auto px-6">
             {isGenerating ? (
-              <div className="flex items-center justify-center p-8">
+              <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin mr-2" />
                 <span>Generating {category === 'contracts' ? 'business' : 'healthcare'} image prompt...</span>
               </div>
             ) : generatedPrompt ? (
-              <div className="space-y-4">
+              <div className="py-4 space-y-4">
                 {isFromCache && (
                   <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <Database className="h-4 w-4 text-blue-600" />
@@ -322,46 +326,57 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                   <Textarea
                     value={generatedPrompt}
                     readOnly
-                    className="min-h-[300px] mt-2 font-mono text-sm"
+                    className="min-h-[200px] sm:min-h-[250px] mt-2 font-mono text-sm"
                   />
                 </div>
+              </div>
+            ) : (
+              <div className="flex justify-center py-12">
+                <Button onClick={() => generateImagePrompt()}>Generate Image Prompt</Button>
+              </div>
+            )}
+          </div>
 
-                {basePrompt && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium">Aspect Ratio Options:</label>
-                      {selectedAspectRatio && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleResetPrompt}
-                          className="text-xs"
-                        >
-                          <RotateCcw className="h-3 w-3 mr-1" />
-                          Reset
-                        </Button>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {aspectRatioOptions.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={selectedAspectRatio === option.value ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleAspectRatioSelect(option.value)}
-                          className="text-sm"
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Click an aspect ratio to append it to your prompt, or click again to remove it.
-                    </p>
+          {/* Fixed Footer - Always Visible */}
+          {generatedPrompt && basePrompt && (
+            <div className="flex-shrink-0 border-t bg-background/80 backdrop-blur-sm">
+              <div className="p-4 space-y-4">
+                {/* Aspect Ratio Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Aspect Ratio Options:</label>
+                    {selectedAspectRatio && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleResetPrompt}
+                        className="text-xs"
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        Reset
+                      </Button>
+                    )}
                   </div>
-                )}
+                  <div className="flex flex-wrap gap-2">
+                    {aspectRatioOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedAspectRatio === option.value ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleAspectRatioSelect(option.value)}
+                        className="text-sm min-h-[44px] sm:min-h-auto"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Click an aspect ratio to append it to your prompt, or click again to remove it.
+                  </p>
+                </div>
                 
-                <div className="flex items-center justify-between">
+                {/* Copy Button Section */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t">
                   <div className="flex flex-col gap-1">
                     <p className="text-sm text-muted-foreground">
                       Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
@@ -373,7 +388,11 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                       </div>
                     )}
                   </div>
-                  <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
+                  <Button 
+                    onClick={handleCopyPrompt} 
+                    className="flex items-center gap-2 min-h-[44px] sm:min-h-auto w-full sm:w-auto"
+                    size="lg"
+                  >
                     {copied ? (
                       <>
                         <Check className="h-4 w-4" />
@@ -388,12 +407,8 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                   </Button>
                 </div>
               </div>
-            ) : (
-              <div className="flex justify-center p-8">
-                <Button onClick={() => generateImagePrompt()}>Generate Image Prompt</Button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
