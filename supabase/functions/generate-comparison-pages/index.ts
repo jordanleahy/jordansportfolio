@@ -27,14 +27,18 @@ serve(async (req) => {
 
     console.log(`Generating comparison between ${vendor1.company_name} and ${vendor2.company_name}`);
 
-    const systemContent = `You are the GenerateComparisonPages AI agent. Your task is to create healthcare company comparisons that match the exact style, tone, and structure of the SmarterDx vs Iodine comparison.
+    const systemContent = `You are the GenerateComparisonPages AI agent. Your task is to create healthcare company comparisons with clean, concise content.
 
 CRITICAL REQUIREMENTS:
 - ALL fields must be populated with accurate, concise information
 - NO empty fields or missing data allowed
 - Use vendor data provided to fill every field completely
-- Keep text punchy and professional
+- Keep text clean, punchy and professional - NO verbose paragraphs
 - Focus on practical differentiators
+- NO citation references or bracketed numbers
+- Key Benefits: Maximum 15 words per bullet point
+- Unique Strengths: Maximum 20 words per bullet point  
+- Summary Insights: Maximum 50 words per company paragraph
 
 DATA MAPPING INSTRUCTIONS:
 For company info fields, extract from vendor data:
