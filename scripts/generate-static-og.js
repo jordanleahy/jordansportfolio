@@ -27,9 +27,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // SEO utilities for OG generation
 const SEO_CONSTANTS = {
   siteUrl: 'https://jordanleahy.com',
-  siteName: 'Jordan Leigh',
-  defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
-  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
+  siteName: 'Jordan Leahy',
+  defaultTitle: 'Jordan Leahy - Healthcare Technology & Product Development',
+  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.',
   // Use absolute URL for default OG image to ensure compatibility with crawlers
   defaultImage: 'https://jordanleahy.com/og-default.png',
   twitterHandle: '@jordanleigh'
@@ -66,7 +66,7 @@ function generateBlogSEOMetadata(post) {
     url: `${SEO_CONSTANTS.siteUrl}/blog/${post.slug}`,
     type: 'article',
     publishedTime: post.published_at,
-    author: 'Jordan Leigh',
+    author: 'Jordan Leahy',
     siteName: SEO_CONSTANTS.siteName,
     twitterHandle: SEO_CONSTANTS.twitterHandle
   };
@@ -146,7 +146,7 @@ function generateCrawlerHTML(metadata, bodyContent = '') {
     "datePublished": "${metadata.publishedTime || new Date().toISOString()}",
     "author": {
       "@type": "Organization",
-      "name": "${escapedAuthor || 'Jordan Leigh'}"
+      "name": "${escapedAuthor || 'Jordan Leahy'}"
     },
     "publisher": {
       "@type": "Organization",
