@@ -52,7 +52,7 @@ STRUCTURE TO FOLLOW:
 5. Summary Insights: One paragraph per company highlighting their ideal use case and strengths
 6. Use Cases: 5 specific scenarios with clear "best fit" designations
 
-OUTPUT FORMAT: Return a valid JSON object with this exact structure:
+OUTPUT FORMAT: Return ONLY a valid JSON object (no markdown, no code blocks, no formatting). Start directly with { and end with }:
 {
   "title": "Company1 vs Company2",
   "metaTitle": "Company1 vs Company2 Comparison",
@@ -97,7 +97,9 @@ ${JSON.stringify(vendor1, null, 2)}
 COMPANY 2: ${vendor2.company_name}
 ${JSON.stringify(vendor2, null, 2)}
 
-Create a comprehensive comparison following the exact style and structure of the SmarterDx vs Iodine example. Focus on their healthcare solutions, AI capabilities, market positioning, and practical differentiators.`;
+Create a comprehensive comparison following the exact style and structure of the SmarterDx vs Iodine example. Focus on their healthcare solutions, AI capabilities, market positioning, and practical differentiators.
+
+CRITICAL: Return ONLY the JSON object. Do not include any markdown formatting, code blocks, or explanatory text.`;
     } else if (type === 'image_prompt') {
       systemContent = 'You are an expert at creating detailed, professional image generation prompts for AI image generators. Focus on creating clear, specific prompts that will generate high-quality, professional visuals.';
     } else {
