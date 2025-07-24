@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { AgentStatusBadge } from './AgentStatusBadge';
 import { CreateAgentModal } from './CreateAgentModal';
@@ -28,6 +29,7 @@ import { AgentStatus, OpenAIAgent } from '@/types/openaiAgent';
 import { useUpdateAgent, useDeleteAgent } from '@/hooks/useOpenAIAgents';
 
 export const AgentsTable = () => {
+  const navigate = useNavigate();
   const { data: agents, isLoading } = useOpenAIAgents();
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
@@ -109,7 +111,10 @@ export const AgentsTable = () => {
               {filteredAgents?.map((agent) => (
                 <TableRow key={agent.id}>
                   <TableCell>
-                    <div>
+                    <div 
+                      className="cursor-pointer hover:text-primary"
+                      onClick={() => navigate(`/agents/${agent.id}`)}
+                    >
                       <div className="font-medium">{agent.name}</div>
                       <div className="text-sm text-muted-foreground truncate max-w-[200px]">
                         {agent.purpose}

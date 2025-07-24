@@ -27,6 +27,7 @@ import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
 import Sepsis from "./pages/agents/Sepsis";
+import { AgentDetail } from "./pages/agents/AgentDetail";
 import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
@@ -108,8 +109,9 @@ function App() {
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-                <Route path="/agents" element={<AdminRoute><Agents /></AdminRoute>} />
-                <Route path="/agents/sepsis" element={<AdminRoute><Sepsis /></AdminRoute>} />
+                 <Route path="/agents" element={<AdminRoute><Agents /></AdminRoute>} />
+                 <Route path="/agents/:id" element={<AdminRoute><AgentDetail /></AdminRoute>} />
+                 <Route path="/agents/sepsis" element={<AdminRoute><Sepsis /></AdminRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
