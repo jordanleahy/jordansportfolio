@@ -44,6 +44,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const OptimizedCalendar = lazy(() => import("./pages/OptimizedCalendar"));
+const SIRSDiagnostic = lazy(() => import("./pages/agents/SIRSDiagnostic"));
 
 // Optimized QueryClient configuration
 const queryClient = new QueryClient({
@@ -112,6 +113,7 @@ function App() {
                  <Route path="/agents" element={<AdminRoute><Agents /></AdminRoute>} />
                  <Route path="/agents/:id" element={<AdminRoute><AgentDetail /></AdminRoute>} />
                  <Route path="/agents/sepsis" element={<AdminRoute><Sepsis /></AdminRoute>} />
+                 <Route path="/agents/sirs-diagnostic" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><SIRSDiagnostic /></Suspense></AdminRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
