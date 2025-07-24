@@ -1,6 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, BlogPostInput, BlogPostSchema, calculateWordCount, calculateReadTime, generateSlug, VisualSection } from "@/types/blog";
 
+interface SocialMediaPost {
+  title: string;
+  description: string;
+  day?: number;
+  theme?: string;
+  category?: string;
+}
+
 export class BlogService {
   
   static async getAllPublishedPosts(): Promise<BlogPost[]> {
@@ -331,6 +339,37 @@ export class BlogService {
 
     if (error) {
       throw new Error(`Failed to delete image: ${error.message}`);
+    }
+  }
+
+  // Generate blog content from social media post using dedicated AI agent
+  static async generateBlogFromSocialPost(socialMediaPost: SocialMediaPost, checkExisting = false): Promise<{
+    success: boolean;
+    blog_post?: BlogPost;
+    redirect_url?: string;
+    message: string;
+    exists?: boolean;
+    existing_post?: any;
+  }> {
+    try {
+      // Create the blog agent entry for the user if it doesn't exist
+      await supabase.rpc('insert_blog_agent');
+
+      const { data, error } = await supabase.functions.invoke('generate-blog-content', {
+        body: {
+          socialMediaPost,
+          checkExisting
+        }
+      });
+
+      if (error) {
+        throw new Error(`Blog generation failed: ${error.message}`);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Error generating blog from social post:', error);
+      throw new Error(`Failed to generate blog content: ${error.message}`);
     }
   }
 

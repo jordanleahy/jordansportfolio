@@ -1787,6 +1787,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_blog_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       insert_category_content: {
         Args: { category_name: string; posts_data: Json }
         Returns: number
