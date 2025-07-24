@@ -28,6 +28,12 @@ interface UseCaseRow {
   bestFit: string;
 }
 
+interface BasicInfoRow {
+  category: string;
+  company1: string;
+  company2: string;
+}
+
 export const ComparisonForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -61,6 +67,20 @@ export const ComparisonForm: React.FC = () => {
 
   const [useCases, setUseCases] = useState<UseCaseRow[]>([
     { useCase: '', bestFit: '' }
+  ]);
+
+  const [basicInfo, setBasicInfo] = useState<BasicInfoRow[]>([
+    { category: 'Founded', company1: '', company2: '' },
+    { category: 'Headquarters', company1: '', company2: '' },
+    { category: 'Company Type', company1: '', company2: '' },
+    { category: 'Funding', company1: '', company2: '' },
+    { category: 'Investors', company1: '', company2: '' },
+    { category: 'Employee Size', company1: '', company2: '' },
+    { category: 'Delivery Model', company1: '', company2: '' },
+    { category: 'Target Customers', company1: '', company2: '' },
+    { category: 'Primary Solutions', company1: '', company2: '' },
+    { category: 'AI Core', company1: '', company2: '' },
+    { category: 'EHR Integration', company1: '', company2: '' }
   ]);
 
   const [generatedData, setGeneratedData] = useState<any>(null);
@@ -160,6 +180,20 @@ export const ComparisonForm: React.FC = () => {
     ));
   };
 
+  const addBasicInfo = () => {
+    setBasicInfo([...basicInfo, { category: '', company1: '', company2: '' }]);
+  };
+
+  const removeBasicInfo = (index: number) => {
+    setBasicInfo(basicInfo.filter((_, i) => i !== index));
+  };
+
+  const updateBasicInfo = (index: number, field: keyof BasicInfoRow, value: string) => {
+    setBasicInfo(basicInfo.map((info, i) => 
+      i === index ? { ...info, [field]: value } : info
+    ));
+  };
+
   const handleSubmit = async (status: 'draft' | 'published') => {
     if (!selectedCompany1 || !selectedCompany2 || !user) {
       toast.error('Please select both companies');
@@ -187,6 +221,7 @@ export const ComparisonForm: React.FC = () => {
         keyBenefits: selectedCompany2.key_benefits,
         uniqueStrengths: selectedCompany2.competitive_advantages,
       },
+      basic_info: basicInfo.filter(b => b.category.trim()),
       features: features.filter(f => f.feature.trim()),
       summary_insights: summaryInsights,
       use_cases: useCases.filter(u => u.useCase.trim()),
@@ -330,6 +365,59 @@ export const ComparisonForm: React.FC = () => {
                     placeholder="SEO description"
                     rows={3}
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Basic Company Information Table */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Basic Company Information</CardTitle>
+                  <Button onClick={addBasicInfo} size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Row
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {basicInfo.map((info, index) => (
+                    <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                      <div>
+                        <Label>Category</Label>
+                        <Input
+                          value={info.category}
+                          onChange={(e) => updateBasicInfo(index, 'category', e.target.value)}
+                          placeholder="e.g., Founded, Headquarters"
+                        />
+                      </div>
+                      <div>
+                        <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
+                        <Input
+                          value={info.company1}
+                          onChange={(e) => updateBasicInfo(index, 'company1', e.target.value)}
+                          placeholder="Company 1 value"
+                        />
+                      </div>
+                      <div>
+                        <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
+                        <Input
+                          value={info.company2}
+                          onChange={(e) => updateBasicInfo(index, 'company2', e.target.value)}
+                          placeholder="Company 2 value"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeBasicInfo(index)}
+                        disabled={basicInfo.length === 1}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
