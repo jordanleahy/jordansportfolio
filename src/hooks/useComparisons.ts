@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ComparisonData } from "@/data/comparisonData";
+import { ComparisonData } from "@/types/comparison";
 
 export interface Comparison {
   id: string;

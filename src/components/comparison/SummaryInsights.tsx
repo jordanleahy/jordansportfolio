@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ComparisonData } from '@/data/comparisonData';
+import { ComparisonData } from '@/types/comparison';
 
 interface SummaryInsightsProps {
   data: ComparisonData;

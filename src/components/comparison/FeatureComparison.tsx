@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { FeatureComparison as FeatureComparisonType, ComparisonData } from '@/data/comparisonData';
+import { FeatureComparison as FeatureComparisonType, ComparisonData } from '@/types/comparison';
 
 interface FeatureComparisonProps {
   data: ComparisonData;

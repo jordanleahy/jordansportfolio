@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ComparisonData } from '@/data/comparisonData';
+import { ComparisonData } from '@/types/comparison';
 
 interface ComparisonHeroProps {
   data: ComparisonData;
