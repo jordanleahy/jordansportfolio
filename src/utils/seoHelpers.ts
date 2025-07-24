@@ -79,9 +79,11 @@ export const generateBlogSEOMetadata = (post: BlogPost): SEOMetadata => {
   // Description priority: meta_description > intro_content > default
   const description = post.meta_description || post.intro_content || SEO_DEFAULTS.defaultDescription;
   
-  // Image priority: og_image_url > hero_image_url > blog template > default
-  const image = cleanImageUrl(post.og_image_url) || 
-               cleanImageUrl(post.hero_image_url) || 
+  // Image priority: og_image_url (if not default) > hero_image_url > blog template > default
+  const ogImage = cleanImageUrl(post.og_image_url);
+  const heroImage = cleanImageUrl(post.hero_image_url);
+  const image = (ogImage && !ogImage.includes('og-blog-template.png') ? ogImage : null) ||
+               heroImage ||
                SEO_DEFAULTS.blogTemplateImage;
   
   // Published date from published_at or created_at
