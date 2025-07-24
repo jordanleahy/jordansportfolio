@@ -337,7 +337,7 @@ export const ComparisonForm: React.FC = () => {
       companies: [
         {
           company_position: 1,
-          vendor_id: selectedCompany1.id,
+          vendor_id: selectedCompany1.id || undefined,
           name: selectedCompany1.company_name,
           founded: selectedCompany1.founding_year?.toString() || 'N/A',
           headquarters: selectedCompany1.headquarters,
@@ -346,7 +346,7 @@ export const ComparisonForm: React.FC = () => {
         },
         {
           company_position: 2,
-          vendor_id: selectedCompany2.id,
+          vendor_id: selectedCompany2.id || undefined,
           name: selectedCompany2.company_name,
           founded: selectedCompany2.founding_year?.toString() || 'N/A',
           headquarters: selectedCompany2.headquarters,

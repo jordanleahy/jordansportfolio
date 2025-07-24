@@ -12,9 +12,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { useComparisonBySlug } from '@/hooks/useComparisons';
+import { useStructuredComparisonBySlug } from '@/hooks/useComparisonsStructured';
 const ComparisonDetail = () => {
   const { comparisonType } = useParams<{ comparisonType: string }>();
   const { data: dynamicComparison, isLoading } = useComparisonBySlug(comparisonType || '');
+  const { data: structuredComparison, isLoading: isLoadingStructured } = useStructuredComparisonBySlug(comparisonType || '');
 
   if (!comparisonType) {
     return (
@@ -27,7 +29,7 @@ const ComparisonDetail = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || isLoadingStructured) {
     return (
       <AppLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
@@ -40,10 +42,51 @@ const ComparisonDetail = () => {
     );
   }
 
-  // Try dynamic comparison first, fallback to static data
+  // Try structured comparison first, then dynamic comparison, then fallback to static data
   let data = null;
   
-  if (dynamicComparison) {
+  if (structuredComparison) {
+    // Transform structured comparison to match static format
+    const company1 = structuredComparison.companies?.find(c => c.company_position === 1);
+    const company2 = structuredComparison.companies?.find(c => c.company_position === 2);
+    const insight1 = structuredComparison.insights?.find(i => i.company_position === 1);
+    const insight2 = structuredComparison.insights?.find(i => i.company_position === 2);
+    
+    data = {
+      title: structuredComparison.title,
+      metaTitle: structuredComparison.meta_title,
+      metaDescription: structuredComparison.meta_description,
+      company1: {
+        name: company1?.name || 'Company 1',
+        location: company1?.headquarters || 'N/A',
+        founded: company1?.founded || 'N/A',
+        headquarters: company1?.headquarters || 'N/A',
+        keyBenefits: company1?.key_benefits || [],
+        uniqueStrengths: company1?.unique_strengths || []
+      },
+      company2: {
+        name: company2?.name || 'Company 2', 
+        location: company2?.headquarters || 'N/A',
+        founded: company2?.founded || 'N/A',
+        headquarters: company2?.headquarters || 'N/A',
+        keyBenefits: company2?.key_benefits || [],
+        uniqueStrengths: company2?.unique_strengths || []
+      },
+      features: structuredComparison.features?.map(f => ({
+        feature: f.feature_name,
+        company1: f.company1_value,
+        company2: f.company2_value
+      })) || [],
+      summaryInsights: {
+        company1: insight1?.insight_text || '',
+        company2: insight2?.insight_text || ''
+      },
+      useCases: structuredComparison.use_cases?.map(u => ({
+        useCase: u.use_case,
+        bestFit: u.best_fit
+      })) || [],
+    };
+  } else if (dynamicComparison) {
     // Transform dynamic comparison to match static format
     data = {
       title: dynamicComparison.title,
