@@ -1,9 +1,9 @@
 
 export const SEO_DEFAULTS = {
   siteUrl: 'https://jordanleahy.com',
-  siteName: 'Jordan Leigh',
-  defaultTitle: 'Jordan Leigh - Healthcare Technology & Product Development',
-  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leigh.',
+  siteName: 'Jordan Leahy',
+  defaultTitle: 'Jordan Leahy - Healthcare Technology & Product Development',
+  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.',
   // Use the absolute URL for the default OG image to ensure it works properly
   // with social media crawlers
   defaultImage: 'https://jordanleahy.com/og-default.png',
@@ -98,7 +98,7 @@ export const generateBlogSEOMetadata = (post: BlogPost): SEOMetadata => {
     url: postUrl,
     type: 'article',
     publishedDate,
-    author: 'Jordan Leigh'
+    author: 'Jordan Leahy'
   };
 };
 
