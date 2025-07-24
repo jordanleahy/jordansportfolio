@@ -136,11 +136,11 @@ export const BlogTemplate = ({
           "image": post.hero_image_url,
           "author": {
             "@type": "Person",
-            "name": "Jordan Leigh"
+            "name": "Jordan Leahy"
           },
           "publisher": {
             "@type": "Organization",
-            "name": "Jordan Leigh Portfolio"
+            "name": "Jordan Leahy Portfolio"
           },
           "datePublished": post.published_at,
           "dateModified": post.updated_at,
