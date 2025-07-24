@@ -27,18 +27,18 @@ serve(async (req) => {
 
     console.log(`Generating comparison between ${vendor1.company_name} and ${vendor2.company_name}`);
 
-    const systemContent = `You are the GenerateComparisonPages AI agent. Your task is to create healthcare company comparisons with clean, concise content.
+    const systemContent = `You are the GenerateComparisonPages AI agent. Create clean, scannable healthcare company comparisons.
 
-CRITICAL REQUIREMENTS:
-- ALL fields must be populated with accurate, concise information
-- NO empty fields or missing data allowed
-- Use vendor data provided to fill every field completely
-- Keep text clean, punchy and professional - NO verbose paragraphs
-- Focus on practical differentiators
-- NO citation references or bracketed numbers
-- Key Benefits: Maximum 15 words per bullet point
-- Unique Strengths: Maximum 20 words per bullet point  
-- Summary Insights: Maximum 50 words per company paragraph
+ABSOLUTELY CRITICAL - ENFORCE STRICTLY:
+- ABSOLUTELY NO CITATIONS, REFERENCES, OR BRACKETED NUMBERS ANYWHERE
+- ABSOLUTELY NO verbose paragraphs or lengthy explanations
+- MUST BE scan-friendly with bullet points and short phrases
+- Key Benefits: MAXIMUM 8 words per bullet point
+- Unique Strengths: MAXIMUM 12 words per bullet point  
+- Summary Insights: MAXIMUM 30 words per company paragraph
+- ALL content MUST BE concise, punchy, and immediately readable
+- Focus ONLY on key differentiators that matter for quick comparison
+- Use short, impactful phrases - NOT full sentences
 
 DATA MAPPING INSTRUCTIONS:
 For company info fields, extract from vendor data:
@@ -110,9 +110,18 @@ ${JSON.stringify(vendor1, null, 2)}
 COMPANY 2: ${vendor2.company_name}
 ${JSON.stringify(vendor2, null, 2)}
 
-Create a comprehensive comparison following the exact style and structure of the SmarterDx vs Iodine example. Focus on their healthcare solutions, AI capabilities, market positioning, and practical differentiators.
+Create a CONCISE, SCANNABLE comparison. NO citations, references, or verbose text allowed.
 
-CRITICAL: Return ONLY the JSON object. Do not include any markdown formatting, code blocks, or explanatory text.`;
+EXAMPLE GOOD FORMAT:
+- Key Benefits: "Real-time alerts", "Easy integration", "Cost reduction"
+- Unique Strengths: "AI-powered insights", "Cloud-native platform", "Enterprise security"
+- Summary: "Best for hospitals needing real-time clinical decision support"
+
+EXAMPLE BAD FORMAT (DO NOT USE):
+- "Comprehensive clinical decision support platform with advanced machine learning algorithms for predictive analytics [1]"
+- "The company provides extensive integration capabilities with over 200+ EHR systems worldwide, offering seamless data exchange [2]"
+
+CRITICAL: Return ONLY the JSON object. No markdown, explanations, or citations.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -121,13 +130,13 @@ CRITICAL: Return ONLY the JSON object. Do not include any markdown formatting, c
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: systemContent },
           { role: 'user', content: finalPrompt }
         ],
-        temperature: 0.3,
-        max_tokens: 4000,
+        temperature: 0.1,
+        max_tokens: 2500,
       }),
     });
 
@@ -143,7 +152,10 @@ CRITICAL: Return ONLY the JSON object. Do not include any markdown formatting, c
       throw new Error('Invalid response from OpenAI API');
     }
 
-    const generatedText = data.choices[0].message.content;
+    let generatedText = data.choices[0].message.content;
+    
+    // Post-process to remove any citations or references that might have slipped through
+    generatedText = generatedText.replace(/\[\d+\]/g, '').replace(/\([^)]*\d[^)]*\)/g, '').trim();
 
     console.log('Successfully generated comparison content');
 
