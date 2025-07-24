@@ -222,6 +222,72 @@ export const ComparisonForm: React.FC = () => {
         meta_description: parsedData.metaDescription,
       });
       
+      // Map company data to basicInfo array
+      if (parsedData.company1 && parsedData.company2) {
+        const updatedBasicInfo = basicInfo.map(info => {
+          let company1Value = '';
+          let company2Value = '';
+          
+          switch (info.category) {
+            case 'Founded':
+              company1Value = parsedData.company1.founded || '';
+              company2Value = parsedData.company2.founded || '';
+              break;
+            case 'Headquarters':
+              company1Value = parsedData.company1.headquarters || '';
+              company2Value = parsedData.company2.headquarters || '';
+              break;
+            case 'Company Type':
+              company1Value = parsedData.company1.companyType || '';
+              company2Value = parsedData.company2.companyType || '';
+              break;
+            case 'Funding':
+              company1Value = parsedData.company1.funding || '';
+              company2Value = parsedData.company2.funding || '';
+              break;
+            case 'Investors':
+              company1Value = parsedData.company1.investors || '';
+              company2Value = parsedData.company2.investors || '';
+              break;
+            case 'Employee Size':
+              company1Value = parsedData.company1.employeeSize || '';
+              company2Value = parsedData.company2.employeeSize || '';
+              break;
+            case 'Delivery Model':
+              company1Value = parsedData.company1.deliveryModel || '';
+              company2Value = parsedData.company2.deliveryModel || '';
+              break;
+            case 'Target Customers':
+              company1Value = parsedData.company1.targetCustomers || '';
+              company2Value = parsedData.company2.targetCustomers || '';
+              break;
+            case 'Primary Solutions':
+              company1Value = parsedData.company1.primarySolutions || '';
+              company2Value = parsedData.company2.primarySolutions || '';
+              break;
+            case 'AI Core':
+              company1Value = parsedData.company1.aiCore || '';
+              company2Value = parsedData.company2.aiCore || '';
+              break;
+            case 'EHR Integration':
+              company1Value = parsedData.company1.ehrIntegration || '';
+              company2Value = parsedData.company2.ehrIntegration || '';
+              break;
+            default:
+              company1Value = info.company1;
+              company2Value = info.company2;
+          }
+          
+          return {
+            ...info,
+            company1: company1Value,
+            company2: company2Value
+          };
+        });
+        
+        setBasicInfo(updatedBasicInfo);
+      }
+      
       setFeatures(parsedData.features);
       setSummaryInsights(parsedData.summaryInsights);
       setUseCases(parsedData.useCases);
