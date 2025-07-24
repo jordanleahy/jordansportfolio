@@ -12,6 +12,10 @@ interface ComparisonTableProps {
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   const { company1, company2 } = data;
 
+  console.log('📊 ComparisonTable - Received data:', { company1, company2 });
+  console.log('🏢 ComparisonTable - Company1 name:', company1?.name);
+  console.log('🏢 ComparisonTable - Company2 name:', company2?.name);
+
   // Add fallbacks for missing data
   const safeCompany1 = {
     name: company1?.name || 'Company 1',

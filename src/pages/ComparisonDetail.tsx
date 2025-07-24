@@ -13,7 +13,12 @@ import { ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { useStructuredComparisonBySlug } from '@/hooks/useComparisonsStructured';
 const ComparisonDetail = () => {
   const { comparisonType } = useParams<{ comparisonType: string }>();
-  const { data: structuredComparison, isLoading: isLoadingStructured } = useStructuredComparisonBySlug(comparisonType || '');
+  const { data: structuredComparison, isLoading: isLoadingStructured, error } = useStructuredComparisonBySlug(comparisonType || '');
+
+  console.log('🔍 ComparisonDetail - Slug:', comparisonType);
+  console.log('📊 ComparisonDetail - Data:', structuredComparison);
+  console.log('⏳ ComparisonDetail - Loading:', isLoadingStructured);
+  console.log('❌ ComparisonDetail - Error:', error);
 
   if (!comparisonType) {
     return (
@@ -59,6 +64,32 @@ const ComparisonDetail = () => {
     );
   }
 
+  // Add data validation - ensure we have minimum required data
+  const hasValidData = structuredComparison && 
+                      structuredComparison.companies?.length >= 2 &&
+                      (structuredComparison.basic_info?.length > 0 || 
+                       structuredComparison.features?.length > 0);
+
+  if (!hasValidData) {
+    console.warn('⚠️ ComparisonDetail - Invalid data structure:', structuredComparison);
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Comparison Data Incomplete</h1>
+            <p className="text-muted-foreground mb-6">This comparison is missing required data. Please try again later.</p>
+            <Button asChild>
+              <Link to="/comparisons">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Comparisons
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   // Transform structured comparison to match component format
   const company1 = structuredComparison.companies?.find(c => c.company_position === 1);
   const company2 = structuredComparison.companies?.find(c => c.company_position === 2);
@@ -73,6 +104,9 @@ const ComparisonDetail = () => {
     };
     return acc;
   }, {} as Record<string, { company1: string; company2: string }>) || {};
+
+  console.log('🏗️ ComparisonDetail - basicInfoLookup:', basicInfoLookup);
+  console.log('🏢 ComparisonDetail - Companies:', { company1, company2 });
   
   const data = {
     title: structuredComparison.title,

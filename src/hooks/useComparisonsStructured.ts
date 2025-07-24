@@ -116,6 +116,8 @@ export const useStructuredComparisonBySlug = (slug: string) => {
   return useQuery({
     queryKey: ["structured-comparison-slug", slug],
     queryFn: async (): Promise<StructuredComparison | null> => {
+      console.log('🔍 Fetching comparison for slug:', slug);
+      
       // First get the comparison ID from slug
       const { data: comparison, error: comparisonError } = await supabase
         .from("comparisons")
@@ -125,11 +127,15 @@ export const useStructuredComparisonBySlug = (slug: string) => {
         .single();
 
       if (comparisonError) {
+        console.error('❌ Error fetching comparison:', comparisonError);
         if (comparisonError.code === "PGRST116") {
+          console.log('📭 No comparison found for slug:', slug);
           return null;
         }
         throw comparisonError;
       }
+
+      console.log('✅ Found comparison:', comparison.title, 'ID:', comparison.id);
 
       // Fetch all related data in parallel
       const [
@@ -145,6 +151,90 @@ export const useStructuredComparisonBySlug = (slug: string) => {
         supabase.from("comparison_use_cases").select("*").eq("comparison_id", comparison.id).order("sort_order"),
         supabase.from("comparison_insights").select("*").eq("comparison_id", comparison.id).order("company_position")
       ]);
+
+      console.log('📊 Structured data counts:', {
+        companies: companies?.length || 0,
+        basicInfo: basicInfo?.length || 0,
+        features: features?.length || 0,
+        useCases: useCases?.length || 0,
+        insights: insights?.length || 0
+      });
+
+      // Check if we have enough structured data, if not fall back to JSON data
+      const hasStructuredData = (companies?.length || 0) > 0 && (basicInfo?.length || 0) > 0;
+      
+      if (!hasStructuredData) {
+        console.log('⚠️ No structured data found, checking for legacy JSON data...');
+        
+        // Check if we have legacy JSON data to fall back to
+        const hasLegacyData = comparison.company1_data && 
+                             comparison.company2_data && 
+                             Object.keys(comparison.company1_data as object).length > 0;
+        
+        if (hasLegacyData) {
+          console.log('🔄 Using legacy JSON data as fallback');
+          
+          // Transform legacy JSON data to structured format
+          const legacyCompany1 = comparison.company1_data as any;
+          const legacyCompany2 = comparison.company2_data as any;
+          const legacyFeatures = comparison.features as any[] || [];
+          const legacyUseCases = comparison.use_cases as any[] || [];
+          const legacySummaryInsights = comparison.summary_insights as any || {};
+          
+          return {
+            ...comparison,
+            companies: [
+              {
+                id: 'legacy-1',
+                comparison_id: comparison.id,
+                company_position: 1,
+                name: legacyCompany1.name || 'Company 1',
+                founded: legacyCompany1.founded,
+                headquarters: legacyCompany1.headquarters,
+                key_benefits: legacyCompany1.keyBenefits || [],
+                unique_strengths: legacyCompany1.uniqueStrengths || []
+              },
+              {
+                id: 'legacy-2',
+                comparison_id: comparison.id,
+                company_position: 2,
+                name: legacyCompany2.name || 'Company 2',
+                founded: legacyCompany2.founded,
+                headquarters: legacyCompany2.headquarters,
+                key_benefits: legacyCompany2.keyBenefits || [],
+                unique_strengths: legacyCompany2.uniqueStrengths || []
+              }
+            ],
+            basic_info: [
+              { id: 'legacy-founded', comparison_id: comparison.id, category: 'Founded', company1_value: legacyCompany1.founded || 'N/A', company2_value: legacyCompany2.founded || 'N/A', sort_order: 0 },
+              { id: 'legacy-headquarters', comparison_id: comparison.id, category: 'Headquarters', company1_value: legacyCompany1.headquarters || 'N/A', company2_value: legacyCompany2.headquarters || 'N/A', sort_order: 1 },
+              { id: 'legacy-type', comparison_id: comparison.id, category: 'Company Type', company1_value: legacyCompany1.companyType || 'N/A', company2_value: legacyCompany2.companyType || 'N/A', sort_order: 2 },
+              { id: 'legacy-funding', comparison_id: comparison.id, category: 'Funding', company1_value: legacyCompany1.funding || 'N/A', company2_value: legacyCompany2.funding || 'N/A', sort_order: 3 },
+              { id: 'legacy-investors', comparison_id: comparison.id, category: 'Investors', company1_value: legacyCompany1.investors || 'N/A', company2_value: legacyCompany2.investors || 'N/A', sort_order: 4 },
+              { id: 'legacy-size', comparison_id: comparison.id, category: 'Employee Size', company1_value: legacyCompany1.employeeSize || 'N/A', company2_value: legacyCompany2.employeeSize || 'N/A', sort_order: 5 }
+            ],
+            features: legacyFeatures.map((f, idx) => ({
+              id: `legacy-feature-${idx}`,
+              comparison_id: comparison.id,
+              feature_name: f.feature,
+              company1_value: f.company1,
+              company2_value: f.company2,
+              sort_order: idx
+            })),
+            use_cases: legacyUseCases.map((u, idx) => ({
+              id: `legacy-usecase-${idx}`,
+              comparison_id: comparison.id,
+              use_case: u.useCase,
+              best_fit: u.bestFit,
+              sort_order: idx
+            })),
+            insights: [
+              { id: 'legacy-insight-1', comparison_id: comparison.id, company_position: 1, insight_text: legacySummaryInsights.company1 || '' },
+              { id: 'legacy-insight-2', comparison_id: comparison.id, company_position: 2, insight_text: legacySummaryInsights.company2 || '' }
+            ]
+          } as StructuredComparison;
+        }
+      }
 
       return {
         ...comparison,
