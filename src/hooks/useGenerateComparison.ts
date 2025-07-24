@@ -47,10 +47,8 @@ export const useGenerateComparison = () => {
       // Ensure the agent exists in the system
       await ensureComparisonAgentExists();
 
-      const { data, error } = await supabase.functions.invoke('generate-content', {
+      const { data, error } = await supabase.functions.invoke('generate-comparison-pages', {
         body: {
-          prompt: 'Generate a detailed comparison between these two healthcare companies',
-          type: 'comparison',
           vendor1,
           vendor2
         }
