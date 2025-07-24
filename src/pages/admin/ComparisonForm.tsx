@@ -15,6 +15,7 @@ import { useCreateComparison, useUpdateComparison, useComparisonBySlug } from '@
 import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { ComparisonPreview } from '@/components/admin/ComparisonPreview';
 
 interface FeatureRow {
   feature: string;
@@ -61,6 +62,8 @@ export const ComparisonForm: React.FC = () => {
   const [useCases, setUseCases] = useState<UseCaseRow[]>([
     { useCase: '', bestFit: '' }
   ]);
+
+  const [generatedData, setGeneratedData] = useState<any>(null);
 
   const selectedCompany1 = vendors?.find(v => v.id === formData.company1_id);
   const selectedCompany2 = vendors?.find(v => v.id === formData.company2_id);
@@ -128,6 +131,9 @@ export const ComparisonForm: React.FC = () => {
     try {
       const result = await generateComparison.mutateAsync({ vendor1, vendor2 });
       const parsedData = JSON.parse(result.generatedText);
+      
+      // Store the full generated data for preview
+      setGeneratedData(parsedData);
       
       // Populate form with generated data
       setFormData({
@@ -222,6 +228,23 @@ export const ComparisonForm: React.FC = () => {
             {isEdit ? 'Edit' : 'Create'} Comparison
           </h1>
         </div>
+
+        {/* Generated Comparison Preview */}
+        {generatedData && (
+          <div className="mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Generated Comparison Preview</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Review the AI-generated comparison below. You can edit the fields in the form to customize it.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ComparisonPreview data={generatedData} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
