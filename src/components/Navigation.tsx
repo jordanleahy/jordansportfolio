@@ -38,6 +38,7 @@ const Navigation = () => {
     { href: "/comparisons", label: "Comparisons", icon: GitCompare },
     // Admin-only items
     ...(isAdmin ? [
+      { href: "/admin/comparisons", label: "Admin Comparisons", icon: BarChart3 },
       { href: "/calendar", label: "Calendar", icon: Calendar },
       { href: "/jobs", label: "Jobs", icon: FileText },
       { href: "/agents", label: "AI Agents", icon: Settings },
@@ -137,9 +138,21 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    {/* Admin-only navigation items */}
+                     {/* Admin-only navigation items */}
                     {isAdmin && (
                       <>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin/comparisons"
+                              className={cn(navLinkStyles, isActive("/admin/comparisons") && "bg-accent text-accent-foreground")}
+                            >
+                              <BarChart3 className="mr-2 h-4 w-4" />
+                              Admin Comparisons
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+
                         <NavigationMenuItem>
                           <NavigationMenuLink asChild>
                             <Link
@@ -335,6 +348,15 @@ const Navigation = () => {
                     {/* Admin-only quick access icons */}
                     {isAdmin && (
                       <>
+                        <Link
+                          to="/admin/comparisons"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/admin/comparisons") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                        </Link>
                         <Link
                           to="/calendar"
                           className={cn(
