@@ -28,7 +28,7 @@ export const teamData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "3-month scope",
+      description: "6 months",
       items: [
         "2 hospital pilot programs",
         "Real time ML model integration",
