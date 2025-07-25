@@ -77,15 +77,21 @@ export const mapStructuredComparisonToFormState = (
  */
 export const mapGeneratedDataToFormState = (
   parsedData: any,
-  generateSlugFn: (title: string) => string
+  generateSlugFn: (title: string) => string,
+  existingFormData?: Partial<ComparisonFormData>
 ): Partial<ComparisonFormState> => {
   const updates: Partial<ComparisonFormState> = {
     generatedData: parsedData
   };
 
-  // Update form data with generated metadata
+  // Update form data with generated metadata WHILE PRESERVING existing company selections
   if (parsedData.comparison) {
     updates.formData = {
+      // Preserve existing company selections
+      company1_id: existingFormData?.company1_id || '',
+      company2_id: existingFormData?.company2_id || '',
+      status: existingFormData?.status || 'draft',
+      // Update with AI-generated data
       title: parsedData.comparison.title || '',
       meta_title: parsedData.comparison.meta_title || '',
       meta_description: parsedData.comparison.meta_description || '',

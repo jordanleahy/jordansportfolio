@@ -158,10 +158,12 @@ export const useComparisonForm = ({
       const result = await generateComparison.mutateAsync({ vendor1, vendor2 });
       const parsedData = JSON.parse(result.generatedText);
       
-      const mappedUpdates = mapGeneratedDataToFormState(parsedData, generateSlug);
-      setState(prev => produce(prev, draft => {
-        Object.assign(draft, mappedUpdates);
-      }));
+      setState(prev => {
+        const mappedUpdates = mapGeneratedDataToFormState(parsedData, generateSlug, prev.formData);
+        return produce(prev, draft => {
+          Object.assign(draft, mappedUpdates);
+        });
+      });
 
       toast.success('Comparison generated successfully');
     } catch (error) {
