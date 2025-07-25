@@ -9,6 +9,14 @@ interface StructuredComparisonData {
     meta_title: string;
     meta_description: string;
   };
+  companies?: Array<{
+    company_position: number;
+    name: string;
+    founded: string;
+    headquarters: string;
+    key_benefits: string[];
+    unique_strengths: string[];
+  }>;
   basic_info?: Array<{
     category: string;
     company1_value: string;
@@ -40,9 +48,12 @@ interface StructuredComparisonPreviewProps {
 
 export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewProps> = ({ 
   data, 
-  company1Name = "Company 1", 
-  company2Name = "Company 2" 
+  company1Name, 
+  company2Name 
 }) => {
+  // Extract company names from the generated data if props are not provided
+  const actualCompany1Name = company1Name || data.companies?.[0]?.name || "Company 1";
+  const actualCompany2Name = company2Name || data.companies?.[1]?.name || "Company 2";
   if (!data || (!data.comparison && !data.basic_info && !data.features)) {
     return (
       <div className="p-8 text-center">
@@ -100,7 +111,7 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {company1Name}
+                {actualCompany1Name}
                 {company1Info['Company Type'] && (
                   <Badge variant="outline">{company1Info['Company Type']}</Badge>
                 )}
@@ -121,7 +132,7 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {company2Name}
+                {actualCompany2Name}
                 {company2Info['Company Type'] && (
                   <Badge variant="outline">{company2Info['Company Type']}</Badge>
                 )}
@@ -153,8 +164,8 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-3 font-medium">Feature</th>
-                    <th className="text-center p-3 font-medium">{company1Name}</th>
-                    <th className="text-center p-3 font-medium">{company2Name}</th>
+                    <th className="text-center p-3 font-medium">{actualCompany1Name}</th>
+                    <th className="text-center p-3 font-medium">{actualCompany2Name}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,7 +191,7 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Info className="h-5 w-5" />
-                  {company1Name} Summary
+                  {actualCompany1Name} Summary
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -194,7 +205,7 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Info className="h-5 w-5" />
-                  {company2Name} Summary
+                  {actualCompany2Name} Summary
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -219,7 +230,7 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
                     <p className="font-medium">{useCase.use_case}</p>
                   </div>
                   <Badge 
-                    variant={getBestFitBadgeColor(useCase.best_fit, company1Name)}
+                    variant={getBestFitBadgeColor(useCase.best_fit, actualCompany1Name)}
                     className="ml-3"
                   >
                     {useCase.best_fit}
