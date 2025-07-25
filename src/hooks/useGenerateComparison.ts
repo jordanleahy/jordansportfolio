@@ -73,6 +73,23 @@ export const useGenerateComparison = () => {
       }
 
       console.log('📥 [Frontend] Edge function response:', data);
+      
+      // Parse the generated text to check company names
+      try {
+        const parsedResponse = JSON.parse(data.generatedText);
+        console.log('🔍 [Frontend] Parsed response structure:', {
+          hasComparison: !!parsedResponse.comparison,
+          hasCompanies: !!parsedResponse.companies,
+          companiesCount: parsedResponse.companies?.length,
+          company1Name: parsedResponse.companies?.[0]?.name,
+          company2Name: parsedResponse.companies?.[1]?.name,
+          comparisonTitle: parsedResponse.comparison?.title
+        });
+      } catch (parseError) {
+        console.error('❌ [Frontend] Failed to parse response:', parseError);
+        console.log('🔍 [Frontend] Raw response:', data.generatedText);
+      }
+      
       return data;
     },
   });
