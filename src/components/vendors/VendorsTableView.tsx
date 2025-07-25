@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { type Vendor } from '@/types/vendor';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface VendorsTableViewProps {
   vendors: Vendor[];
@@ -28,6 +29,16 @@ export function VendorsTableView({
   // Default sort by most recent activity (updated_at)
   const [sortField, setSortField] = useState<SortField>('updated_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  
+  // Check if user is authenticated to show/hide delete functionality
+  // Use try-catch to handle cases where AuthProvider is not available
+  let user = null;
+  try {
+    const auth = useAuth();
+    user = auth.user;
+  } catch {
+    // Component used outside AuthProvider - user remains null
+  }
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -131,7 +142,7 @@ export function VendorsTableView({
                   <TableCell>{formatDate(vendor.updated_at)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {onDeleteClick && (
+                      {onDeleteClick && user && (
                         <Button
                           size="sm"
                           variant="ghost"

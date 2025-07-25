@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building, Calendar } from 'lucide-react';
 import { EditableVendorCard } from '@/components/vendors/EditableVendorCard';
+import { VendorsTableView } from '@/components/vendors/VendorsTableView';
+import { ViewToggle, type ViewMode } from '@/components/vendors/ViewToggle';
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
 type SortDirection = 'asc' | 'desc';
@@ -17,6 +19,7 @@ export default function RCMCompanies() {
   const [filters, setFilters] = useState<VendorFiltersState>({});
   const [sortField, setSortField] = useState<SortField>('company_name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
   
   // Fetch all vendors and filter for RCM companies
   const { data: allVendors = [], isLoading, error } = useVendors();
@@ -234,29 +237,40 @@ export default function RCMCompanies() {
                 )}
               </Button>
             </div>
+            
+            {/* View Toggle */}
+            <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           </div>
 
-          {/* Responsive Card Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {sortedCompanies.map(vendor => (
-              <EditableVendorCard 
-                key={vendor.id} 
-                vendor={vendor} 
-                onVendorClick={handleVendorClick}
-                canEdit={false} // Read-only for public view
-              />
-            ))}
-            
-            {sortedCompanies.length === 0 && (
-              <div className="col-span-full">
-                <Card>
-                  <CardContent className="text-center py-8 text-muted-foreground">
-                    No RCM companies found matching your filters.
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
+          {/* Content View */}
+          {viewMode === 'card' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {sortedCompanies.map(vendor => (
+                <EditableVendorCard 
+                  key={vendor.id} 
+                  vendor={vendor} 
+                  onVendorClick={handleVendorClick}
+                  canEdit={false} // Read-only for public view
+                />
+              ))}
+              
+              {sortedCompanies.length === 0 && (
+                <div className="col-span-full">
+                  <Card>
+                    <CardContent className="text-center py-8 text-muted-foreground">
+                      No RCM companies found matching your filters.
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          ) : (
+            <VendorsTableView 
+              vendors={sortedCompanies}
+              onVendorClick={handleVendorClick}
+              // No onDeleteClick for public view - removes delete functionality
+            />
+          )}
         </div>
       </div>
     </PageLayout>
