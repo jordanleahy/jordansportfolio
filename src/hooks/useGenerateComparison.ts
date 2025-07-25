@@ -44,9 +44,22 @@ export const useGenerateComparison = () => {
 
   return useMutation({
     mutationFn: async ({ vendor1, vendor2 }: GenerateComparisonRequest): Promise<GenerateComparisonResponse> => {
-      // Ensure the agent exists in the system
-      await ensureComparisonAgentExists();
+      console.log('🚀 [Frontend] Starting comparison generation');
+      console.log('📊 [Frontend] Company 1:', { 
+        name: vendor1.company_name, 
+        id: vendor1.id 
+      });
+      console.log('📊 [Frontend] Company 2:', { 
+        name: vendor2.company_name, 
+        id: vendor2.id 
+      });
 
+      // Ensure the agent exists in the system
+      console.log('🤖 [Frontend] Ensuring agent exists...');
+      await ensureComparisonAgentExists();
+      console.log('✅ [Frontend] Agent check complete');
+
+      console.log('📤 [Frontend] Calling edge function...');
       const { data, error } = await supabase.functions.invoke('generate-comparison-pages', {
         body: {
           vendor1,
@@ -55,9 +68,11 @@ export const useGenerateComparison = () => {
       });
 
       if (error) {
+        console.error('❌ [Frontend] Edge function error:', error);
         throw new Error(error.message || 'Failed to generate comparison');
       }
 
+      console.log('📥 [Frontend] Edge function response:', data);
       return data;
     },
   });
