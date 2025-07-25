@@ -35,10 +35,10 @@ const Navigation = () => {
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
     { href: "/investors", label: "Investors", icon: TrendingUp },
-    { href: "/comparisons", label: "Comparisons", icon: GitCompare },
+    { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     // Admin-only items
     ...(isAdmin ? [
-      { href: "/admin/comparisons", label: "Admin Comparisons", icon: BarChart3 },
+      { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
       { href: "/calendar", label: "Calendar", icon: Calendar },
       { href: "/jobs", label: "Jobs", icon: FileText },
       { href: "/agents", label: "AI Agents", icon: Settings },
@@ -50,7 +50,7 @@ const Navigation = () => {
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/rcmcompanies", label: "RCM Companies", icon: Heart },
-    { href: "/comparisons", label: "Comparisons", icon: GitCompare },
+    { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
   ];
@@ -133,7 +133,7 @@ const Navigation = () => {
                           className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
                         >
                           <GitCompare className="mr-2 h-4 w-4" />
-                          Comparisons
+                          Battlecards
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -148,7 +148,7 @@ const Navigation = () => {
                               className={cn(navLinkStyles, isActive("/admin/comparisons") && "bg-accent text-accent-foreground")}
                             >
                               <BarChart3 className="mr-2 h-4 w-4" />
-                              Admin Comparisons
+                              Admin Battlecards
                             </Link>
                           </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -273,7 +273,7 @@ const Navigation = () => {
                           className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
                         >
                           <GitCompare className="mr-2 h-4 w-4" />
-                          Comparisons
+                          Battlecards
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
