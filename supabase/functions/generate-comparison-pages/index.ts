@@ -25,11 +25,28 @@ serve(async (req) => {
       throw new Error('Both vendor1 and vendor2 data are required for comparison generation');
     }
 
+    console.log(`🚀 Starting comparison generation`);
+    console.log(`📊 Company 1 Data:`, { 
+      name: vendor1.company_name, 
+      id: vendor1.id,
+      dataKeys: Object.keys(vendor1)
+    });
+    console.log(`📊 Company 2 Data:`, { 
+      name: vendor2.company_name, 
+      id: vendor2.id,
+      dataKeys: Object.keys(vendor2)
+    });
+
     console.log(`Generating comparison between ${vendor1.company_name} and ${vendor2.company_name}`);
 
     // Create slug-friendly company names
     const company1Slug = vendor1.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     const company2Slug = vendor2.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+    console.log(`🔗 Generated slugs:`, { 
+      company1Slug, 
+      company2Slug 
+    });
 
     const systemContent = `You are the GenerateComparisonPages AI agent. Create clean, scannable healthcare company comparisons for STRUCTURED DATABASE STORAGE.
 
@@ -155,7 +172,14 @@ EXAMPLE BAD FORMAT (DO NOT USE):
 - "Comprehensive clinical decision support platform with advanced machine learning algorithms for predictive analytics [1]"
 - "The company provides extensive integration capabilities with over 200+ EHR systems worldwide, offering seamless data exchange [2]"
 
-CRITICAL: Return ONLY the structured JSON object for database insertion. No markdown, explanations, or citations.`;
+    CRITICAL: Return ONLY the structured JSON object for database insertion. No markdown, explanations, or citations.`;
+
+    console.log(`📝 System prompt contains companies:`, {
+      promptContains1: systemContent.includes(vendor1.company_name),
+      promptContains2: systemContent.includes(vendor2.company_name)
+    });
+
+    console.log(`🤖 Sending request to OpenAI...`);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -182,16 +206,44 @@ CRITICAL: Return ONLY the structured JSON object for database insertion. No mark
 
     const data = await response.json();
     
+    console.log(`✅ OpenAI Response received:`, {
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      hasMessage: !!data.choices?.[0]?.message,
+      usage: data.usage
+    });
+    
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error(`❌ Invalid OpenAI response structure:`, data);
       throw new Error('Invalid response from OpenAI API');
     }
 
     let generatedText = data.choices[0].message.content;
     
+    console.log(`📄 Raw AI response (first 500 chars):`, generatedText.substring(0, 500));
+    
     // Post-process to remove any citations or references that might have slipped through
     generatedText = generatedText.replace(/\[\d+\]/g, '').replace(/\([^)]*\d[^)]*\)/g, '').trim();
 
-    console.log('Successfully generated comparison content');
+    console.log(`🧹 Cleaned response (first 500 chars):`, generatedText.substring(0, 500));
+
+    // Try to parse JSON to check structure
+    try {
+      const parsedJSON = JSON.parse(generatedText);
+      console.log(`📋 Parsed JSON structure:`, {
+        hasComparison: !!parsedJSON.comparison,
+        hasCompanies: !!parsedJSON.companies,
+        companiesCount: parsedJSON.companies?.length,
+        company1Name: parsedJSON.companies?.[0]?.name,
+        company2Name: parsedJSON.companies?.[1]?.name,
+        topLevelKeys: Object.keys(parsedJSON)
+      });
+    } catch (parseError) {
+      console.error(`❌ JSON parsing failed:`, parseError);
+      console.log(`🔍 Problematic JSON:`, generatedText);
+    }
+
+    console.log('✅ Successfully generated comparison content');
 
     return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
