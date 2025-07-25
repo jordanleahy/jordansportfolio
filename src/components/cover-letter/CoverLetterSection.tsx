@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Target, TrendingUp, ArrowRight } from "lucide-react";
+import { personalInfo } from '@/config/personalInfo';
 interface StructuredCoverLetter {
   opening_hook: string;
   key_achievements: string[];
@@ -34,7 +35,7 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
   return <Card>
       <CardContent className="p-8">
         <div className="prose prose-lg max-w-none">
-          <h2 className="text-2xl font-semibold mb-6">Dear Carlos, Eli and Hoshi,</h2>
+          <h2 className="text-2xl font-semibold mb-6">{content.recipient}</h2>
           
           {structuredContent ?
         // New structured, scannable format
@@ -97,10 +98,10 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
           <div className="mt-8 pt-6 border-t">
             <p className="text-lg font-medium">
               Best regards,<br />
-              {content.signature.name}
+              {personalInfo.name}
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              {content.signature.website}
+              {personalInfo.website}
             </p>
           </div>
         </div>

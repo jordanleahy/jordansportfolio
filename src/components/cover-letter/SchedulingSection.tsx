@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { personalInfo } from '@/config/personalInfo';
 
 interface SchedulingSectionProps {
   title?: string;
