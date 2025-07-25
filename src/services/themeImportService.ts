@@ -194,14 +194,29 @@ export class ThemeImportService {
   }
 
   private async bulkInsertPosts(category: string, posts: ThemePost[]): Promise<number> {
-    const { data, error } = await supabase
-      .rpc('insert_category_content', {
-        category_name: category,
-        posts_data: posts as any
-      });
+    try {
+      console.log('Inserting posts for category:', category, 'Posts:', posts);
+      
+      // Convert ThemePost array to JSON for the database function
+      const postsAsJson = JSON.parse(JSON.stringify(posts));
+      
+      const { data, error } = await supabase
+        .rpc('insert_category_content', {
+          category_name: category,
+          posts_data: postsAsJson
+        });
 
-    if (error) throw error;
-    return data || 0;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Insert successful, count:', data);
+      return data || 0;
+    } catch (error) {
+      console.error('Insert failed:', error);
+      throw new Error(`Failed to insert posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   private sanitizeText(text: string): string {
