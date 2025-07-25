@@ -6,6 +6,7 @@ export interface ComparisonFormData {
   company1_id: string;
   company2_id: string;
   status: 'draft' | 'published';
+  og_image_url?: string;
 }
 
 export interface FeatureRow {

@@ -50,6 +50,7 @@ export const useComparisonForm = ({
       company1_id: '',
       company2_id: '',
       status: 'draft',
+      og_image_url: '',
     },
     features: getDefaultFeatures(),
     summaryInsights: {

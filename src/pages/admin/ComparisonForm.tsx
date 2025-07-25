@@ -15,12 +15,16 @@ import { useStructuredComparison } from '@/hooks/useComparisonsStructured';
 import { useAuth } from '@/contexts/AuthContext';
 import { StructuredComparisonPreview } from '@/components/admin/StructuredComparisonPreview';
 import { useComparisonForm } from '@/hooks/useComparisonForm';
+import { FileUpload } from '@/components/ui/file-upload';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 export const ComparisonForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEdit = !!id;
+  
+  const { uploadFile } = useFileUpload({ bucket: 'images', folder: 'comparisons' });
 
   const { data: vendors } = useVendors();
   const { data: structuredComparison } = useStructuredComparison(id || '');
@@ -228,6 +232,24 @@ export const ComparisonForm: React.FC = () => {
                         onChange={(e) => updateFormData({ meta_description: e.target.value })}
                         placeholder="SEO description"
                         rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="og_image">Open Graph Image</Label>
+                      <FileUpload
+                        onFileSelect={async (file) => {
+                          const url = await uploadFile(file);
+                          if (url) {
+                            updateFormData({ og_image_url: url });
+                          }
+                        }}
+                        accept="image/*"
+                        maxSize={5 * 1024 * 1024} // 5MB
+                        preview={true}
+                        currentFile={state.formData.og_image_url}
+                        label="Upload OG image for social media sharing"
+                        description="Recommended size: 1200x630px. Max file size: 5MB"
                       />
                     </div>
                   </>
