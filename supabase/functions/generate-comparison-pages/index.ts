@@ -266,54 +266,89 @@ CRITICAL: Return ONLY the structured JSON object for database insertion. No mark
       const parsedJSON = JSON.parse(generatedText);
       
       // Move key_benefits and unique_strengths from companies to basic_info
-      if (parsedJSON.companies) {
-        parsedJSON.companies.forEach((company, index) => {
-          const companyPosition = index + 1;
+      if (parsedJSON.companies && parsedJSON.companies.length >= 2) {
+        const company1 = parsedJSON.companies[0];
+        const company2 = parsedJSON.companies[1];
+        
+        if (!parsedJSON.basic_info) parsedJSON.basic_info = [];
+        
+        // Process key_benefits - find the maximum number between both companies
+        const maxBenefits = Math.max(
+          (company1.key_benefits || []).length,
+          (company2.key_benefits || []).length
+        );
+        
+        for (let i = 0; i < maxBenefits; i++) {
+          const benefit1 = company1.key_benefits?.[i];
+          const benefit2 = company2.key_benefits?.[i];
           
-          // Process key_benefits and add to basic_info
-          if (company.key_benefits) {
-            company.key_benefits.forEach((benefit, benefitIndex) => {
-              let cleaned = benefit.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
-              const words = cleaned.split(' ');
-              if (words.length > 8) {
-                cleaned = words.slice(0, 8).join(' ');
-              }
-              
-              // Add to basic_info
-              if (!parsedJSON.basic_info) parsedJSON.basic_info = [];
-              parsedJSON.basic_info.push({
-                category: `Key Benefits ${benefitIndex + 1}`,
-                [`company${companyPosition}_value`]: cleaned,
-                [`company${companyPosition === 1 ? 2 : 1}_value`]: 'N/A'
-              });
-            });
-            
-            // Remove from company object
-            delete company.key_benefits;
+          let cleaned1 = 'N/A';
+          let cleaned2 = 'N/A';
+          
+          if (benefit1) {
+            cleaned1 = benefit1.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+            const words = cleaned1.split(' ');
+            if (words.length > 8) {
+              cleaned1 = words.slice(0, 8).join(' ');
+            }
           }
           
-          // Process unique_strengths and add to basic_info
-          if (company.unique_strengths) {
-            company.unique_strengths.forEach((strength, strengthIndex) => {
-              let cleaned = strength.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
-              const words = cleaned.split(' ');
-              if (words.length > 12) {
-                cleaned = words.slice(0, 12).join(' ');
-              }
-              
-              // Add to basic_info
-              if (!parsedJSON.basic_info) parsedJSON.basic_info = [];
-              parsedJSON.basic_info.push({
-                category: `Unique Strengths ${strengthIndex + 1}`,
-                [`company${companyPosition}_value`]: cleaned,
-                [`company${companyPosition === 1 ? 2 : 1}_value`]: 'N/A'
-              });
-            });
-            
-            // Remove from company object
-            delete company.unique_strengths;
+          if (benefit2) {
+            cleaned2 = benefit2.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+            const words = cleaned2.split(' ');
+            if (words.length > 8) {
+              cleaned2 = words.slice(0, 8).join(' ');
+            }
           }
-        });
+          
+          parsedJSON.basic_info.push({
+            category: `Key Benefits ${i + 1}`,
+            company1_value: cleaned1,
+            company2_value: cleaned2
+          });
+        }
+        
+        // Process unique_strengths - find the maximum number between both companies
+        const maxStrengths = Math.max(
+          (company1.unique_strengths || []).length,
+          (company2.unique_strengths || []).length
+        );
+        
+        for (let i = 0; i < maxStrengths; i++) {
+          const strength1 = company1.unique_strengths?.[i];
+          const strength2 = company2.unique_strengths?.[i];
+          
+          let cleaned1 = 'N/A';
+          let cleaned2 = 'N/A';
+          
+          if (strength1) {
+            cleaned1 = strength1.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+            const words = cleaned1.split(' ');
+            if (words.length > 12) {
+              cleaned1 = words.slice(0, 12).join(' ');
+            }
+          }
+          
+          if (strength2) {
+            cleaned2 = strength2.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+            const words = cleaned2.split(' ');
+            if (words.length > 12) {
+              cleaned2 = words.slice(0, 12).join(' ');
+            }
+          }
+          
+          parsedJSON.basic_info.push({
+            category: `Unique Strengths ${i + 1}`,
+            company1_value: cleaned1,
+            company2_value: cleaned2
+          });
+        }
+        
+        // Remove from company objects
+        if (company1.key_benefits) delete company1.key_benefits;
+        if (company1.unique_strengths) delete company1.unique_strengths;
+        if (company2.key_benefits) delete company2.key_benefits;
+        if (company2.unique_strengths) delete company2.unique_strengths;
       }
       
       generatedText = JSON.stringify(parsedJSON);
