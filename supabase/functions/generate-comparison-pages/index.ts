@@ -60,6 +60,12 @@ Extract real data from vendor objects. Use "N/A" only if field is truly missing:
 CRITICAL: DO NOT use placeholder text like "Company1", "Series C", "Investor1". 
 Extract the ACTUAL data from the vendor objects provided. If a field is missing, use "N/A".
 
+COMPANIES TO COMPARE:
+- COMPANY 1: ${vendor1.company_name}
+- COMPANY 2: ${vendor2.company_name}
+
+MANDATORY: Use these EXACT company names in ALL output fields. Do NOT use placeholders.
+
 STRUCTURE TO FOLLOW:
 1. Main comparison metadata (title, meta_title, meta_description, slug)
 2. Company data (name, founded, headquarters, key_benefits array, unique_strengths array)
@@ -71,44 +77,44 @@ STRUCTURE TO FOLLOW:
 OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION (no markdown, no code blocks, no formatting). Start directly with { and end with }:
 {
   "comparison": {
-    "title": "Company1 vs Company2",
-    "meta_title": "Company1 vs Company2 Comparison", 
-    "meta_description": "Compare Company1 and Company2 healthcare solutions",
-    "slug": "company1-vs-company2",
+    "title": "${vendor1.company_name} vs ${vendor2.company_name}",
+    "meta_title": "${vendor1.company_name} vs ${vendor2.company_name} Comparison", 
+    "meta_description": "Compare ${vendor1.company_name} and ${vendor2.company_name} healthcare solutions",
+    "slug": "${vendor1.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-vs-${vendor2.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-')}",
     "status": "published"
   },
   "companies": [
     {
       "company_position": 1,
-      "name": "Company1 Name",
-      "founded": "2010",
-      "headquarters": "City, State, Country",
+      "name": "${vendor1.company_name}",
+      "founded": "ACTUAL_YEAR_FROM_VENDOR1",
+      "headquarters": "ACTUAL_HQ_FROM_VENDOR1",
       "key_benefits": ["benefit1", "benefit2", "benefit3"],
       "unique_strengths": ["strength1", "strength2", "strength3"]
     },
     {
       "company_position": 2,
-      "name": "Company2 Name", 
-      "founded": "2015",
-      "headquarters": "City, State, Country",
+      "name": "${vendor2.company_name}", 
+      "founded": "ACTUAL_YEAR_FROM_VENDOR2",
+      "headquarters": "ACTUAL_HQ_FROM_VENDOR2",
       "key_benefits": ["benefit1", "benefit2", "benefit3"],
       "unique_strengths": ["strength1", "strength2", "strength3"]
     }
   ],
   "basic_info": [
-    {"category": "Founded", "company1_value": "2010", "company2_value": "2015", "sort_order": 0},
-    {"category": "Headquarters", "company1_value": "Austin, TX", "company2_value": "Boston, MA", "sort_order": 1},
-    {"category": "Company Type", "company1_value": "Private", "company2_value": "Public", "sort_order": 2},
-    {"category": "Funding", "company1_value": "Series C", "company2_value": "IPO", "sort_order": 3},
-    {"category": "Investors", "company1_value": "Investor1, Investor2", "company2_value": "Investor3, Investor4", "sort_order": 4},
-    {"category": "Employee Size", "company1_value": "201-500", "company2_value": "1000+", "sort_order": 5},
-    {"category": "Delivery Model", "company1_value": "Cloud SaaS", "company2_value": "Hybrid", "sort_order": 6},
-    {"category": "Target Customers", "company1_value": "Hospitals", "company2_value": "Health Systems", "sort_order": 7},
-    {"category": "Primary Solutions", "company1_value": "Solution A", "company2_value": "Solution B", "sort_order": 8},
-    {"category": "AI Core", "company1_value": "ML Engine", "company2_value": "AI Platform", "sort_order": 9},
-    {"category": "EHR Integration", "company1_value": "Epic, Cerner", "company2_value": "All major", "sort_order": 10},
-    {"category": "Notable Customers", "company1_value": "Customer1, Customer2", "company2_value": "Customer3, Customer4", "sort_order": 11},
-    {"category": "Partnerships", "company1_value": "Partner1, Partner2", "company2_value": "Partner3, Partner4", "sort_order": 12}
+    {"category": "Founded", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 0},
+    {"category": "Headquarters", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 1},
+    {"category": "Company Type", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 2},
+    {"category": "Funding", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 3},
+    {"category": "Investors", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 4},
+    {"category": "Employee Size", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 5},
+    {"category": "Delivery Model", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 6},
+    {"category": "Target Customers", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 7},
+    {"category": "Primary Solutions", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 8},
+    {"category": "AI Core", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 9},
+    {"category": "EHR Integration", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 10},
+    {"category": "Notable Customers", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 11},
+    {"category": "Partnerships", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 12}
   ],
   "features": [
     {"feature_name": "Real-time Analytics", "company1_value": "Yes", "company2_value": "Yes", "sort_order": 0},
@@ -116,12 +122,12 @@ OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION
     {"feature_name": "Custom Dashboards", "company1_value": "Yes", "company2_value": "Limited", "sort_order": 2}
   ],
   "insights": [
-    {"company_position": 1, "insight_text": "Best for hospitals needing real-time clinical decision support"},
-    {"company_position": 2, "insight_text": "Ideal for large health systems requiring comprehensive workflow automation"}
+    {"company_position": 1, "insight_text": "Best use case for ${vendor1.company_name}"},
+    {"company_position": 2, "insight_text": "Best use case for ${vendor2.company_name}"}
   ],
   "use_cases": [
-    {"use_case": "Large hospital system implementation", "best_fit": "Company2", "sort_order": 0},
-    {"use_case": "Mid-size hospital efficiency", "best_fit": "Company1", "sort_order": 1},
+    {"use_case": "Large hospital system implementation", "best_fit": "${vendor1.company_name} or ${vendor2.company_name}", "sort_order": 0},
+    {"use_case": "Mid-size hospital efficiency", "best_fit": "${vendor1.company_name} or ${vendor2.company_name}", "sort_order": 1},
     {"use_case": "Academic medical center", "best_fit": "Both", "sort_order": 2}
   ]
 }`;
