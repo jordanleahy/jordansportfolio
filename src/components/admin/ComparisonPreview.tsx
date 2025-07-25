@@ -55,6 +55,15 @@ interface ComparisonPreviewProps {
 }
 
 export const ComparisonPreview: React.FC<ComparisonPreviewProps> = ({ data }) => {
+  // Add safety checks for data structure
+  if (!data || !data.company1 || !data.company2) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">No comparison data available</p>
+      </div>
+    );
+  }
+
   const renderFeatureValue = (value: boolean | string) => {
     if (typeof value === 'boolean') {
       return value ? (
