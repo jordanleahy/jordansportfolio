@@ -26,7 +26,7 @@ import PublicVendorView from "./components/vendors/PublicVendorView";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
-import Sepsis from "./pages/agents/Sepsis";
+
 import { AgentDetail } from "./pages/agents/AgentDetail";
 import { AgentEdit } from "./pages/agents/AgentEdit";
 import DataDictionary from "./pages/sec/DataDictionary";
@@ -46,7 +46,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const OptimizedCalendar = lazy(() => import("./pages/OptimizedCalendar"));
-const SIRSDiagnostic = lazy(() => import("./pages/agents/SIRSDiagnostic"));
+
 
 // Optimized QueryClient configuration
 const queryClient = new QueryClient({
@@ -116,8 +116,6 @@ function App() {
                  <Route path="/agents/:id" element={<AdminRoute><AgentDetail /></AdminRoute>} />
                  <Route path="/agents/:id/edit" element={<AdminRoute><AgentEdit /></AdminRoute>} />
                  <Route path="/agents/new" element={<AdminRoute><AgentEdit /></AdminRoute>} />
-                 <Route path="/agents/sepsis" element={<AdminRoute><Sepsis /></AdminRoute>} />
-                 <Route path="/agents/sirs-diagnostic" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><SIRSDiagnostic /></Suspense></AdminRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
