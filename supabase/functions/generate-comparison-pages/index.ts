@@ -40,24 +40,25 @@ ABSOLUTELY CRITICAL - ENFORCE STRICTLY:
 - Focus ONLY on key differentiators that matter for quick comparison
 - Use short, impactful phrases - NOT full sentences
 
-DATA MAPPING INSTRUCTIONS:
-For company info fields, extract from vendor data:
-- Founded: Use founding_year from vendor data
-- Headquarters: Use headquarters from vendor data  
-- Company Type: Use company_type from vendor data
-- Funding: Use total_funding and funding_stage from vendor data
-- Investors: Use key_investors from vendor data (join with commas)
-- Employee Size: Use employee_count_range or estimate from company size
-- Delivery Model: Extract from business_model or core_services
-- Target Customers: Use customers field from vendor data
-- Primary Solutions: Use core_services (limit to 2-3 main ones)
-- AI Core: Extract AI/technology details from description and specialties
-- EHR Integration: Look for integration details in key_features
-- Notable Customers: Use notable_customers field (join with commas, max 3-4 top names)
-- Partnerships: Use partnerships field (join with commas, focus on major tech partners)
-- Client Base: Use performance_metrics.customer_count if available
-- Certifications: Extract from certifications field
-- Awards: Use any awards or recognition mentioned
+DATA MAPPING INSTRUCTIONS - USE ACTUAL VENDOR DATA:
+Extract real data from vendor objects. Use "N/A" only if field is truly missing:
+
+- Founded: vendor.founding_year (convert to string) or "N/A"
+- Headquarters: vendor.headquarters or "N/A"
+- Company Type: vendor.company_type or "N/A"
+- Funding: vendor.total_funding + " (" + vendor.funding_stage + ")" or vendor.funding_stage or "N/A"
+- Investors: vendor.key_investors.join(", ") (limit to top 3-4) or "N/A"
+- Employee Size: vendor.employee_count_range or "N/A"
+- Delivery Model: vendor.business_model or extract from vendor.core_services or "N/A"
+- Target Customers: vendor.customers.join(", ") (limit to top 3) or "N/A"
+- Primary Solutions: vendor.core_services.slice(0,3).join(", ") or "N/A"
+- AI Core: extract AI/ML terms from vendor.specialties or vendor.description or "N/A"
+- EHR Integration: extract EHR systems from vendor.key_features or vendor.specialties or "N/A"
+- Notable Customers: vendor.notable_customers.join(", ") (limit to top 3-4) or "N/A"
+- Partnerships: vendor.partnerships.join(", ") (focus on major tech partners) or "N/A"
+
+CRITICAL: DO NOT use placeholder text like "Company1", "Series C", "Investor1". 
+Extract the ACTUAL data from the vendor objects provided. If a field is missing, use "N/A".
 
 STRUCTURE TO FOLLOW:
 1. Main comparison metadata (title, meta_title, meta_description, slug)
