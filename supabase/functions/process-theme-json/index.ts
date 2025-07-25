@@ -273,9 +273,6 @@ async function validateThemeFields(data: any, fixes: string[], warnings: string[
     // Validate title
     if (!validatedPost.title || typeof validatedPost.title !== 'string') {
       errors.push(`Post ${index + 1}: Title is required and must be a string`);
-    } else if (validatedPost.title.length > 100) {
-      validatedPost.title = validatedPost.title.substring(0, 97) + '...';
-      fixes.push(`Truncated title for post ${index + 1}`);
     }
 
     // Validate description
@@ -284,9 +281,6 @@ async function validateThemeFields(data: any, fixes: string[], warnings: string[
     } else {
       if (validatedPost.description.length < 100) {
         warnings.push(`Post ${index + 1}: Description is quite short (${validatedPost.description.length} chars)`);
-      } else if (validatedPost.description.length > 500) {
-        validatedPost.description = validatedPost.description.substring(0, 497) + '...';
-        fixes.push(`Truncated description for post ${index + 1}`);
       }
     }
 

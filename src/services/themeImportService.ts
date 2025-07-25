@@ -2,8 +2,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ThemeImportData, ThemePost, ValidationResult, ProcessingResult } from "@/types/themeImport";
 
 export class ThemeImportService {
-  private readonly MAX_TITLE_LENGTH = 200;
-  private readonly MAX_DESCRIPTION_LENGTH = 2000;
   private readonly MAX_POSTS_PER_IMPORT = 100;
   private readonly ALLOWED_STATUSES = ['draft', 'scheduled', 'published'] as const;
 
@@ -48,16 +46,10 @@ export class ThemeImportService {
         
         if (!post.title || typeof post.title !== 'string') {
           postErrors.push(`Post ${index + 1}: Title is required`);
-        } else if (post.title.length > this.MAX_TITLE_LENGTH) {
-          warnings.push(`Post ${index + 1}: Title truncated to ${this.MAX_TITLE_LENGTH} characters`);
-          post.title = post.title.substring(0, this.MAX_TITLE_LENGTH);
         }
         
         if (!post.description || typeof post.description !== 'string') {
           postErrors.push(`Post ${index + 1}: Description is required`);
-        } else if (post.description.length > this.MAX_DESCRIPTION_LENGTH) {
-          warnings.push(`Post ${index + 1}: Description truncated to ${this.MAX_DESCRIPTION_LENGTH} characters`);
-          post.description = post.description.substring(0, this.MAX_DESCRIPTION_LENGTH);
         }
         
         // Validate day if provided
