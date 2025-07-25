@@ -99,56 +99,6 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
                 <TableCell className="w-1/2 md:w-1/3 text-center px-4 text-sm">{row.value2}</TableCell>
               </TableRow>
             ))}
-            <TableRow className="border-b">
-              <TableCell className="font-medium border-r hidden md:table-cell">
-                Key Benefits
-              </TableCell>
-              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
-                <ul className="space-y-1 text-left">
-                  {safeCompany1.keyBenefits.map((benefit, idx) => (
-                    <li key={idx} className="text-xs">• {benefit}</li>
-                  ))}
-                  {safeCompany1.keyBenefits.length === 0 && (
-                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
-                  )}
-                </ul>
-              </TableCell>
-              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
-                <ul className="space-y-1 text-left">
-                  {safeCompany2.keyBenefits.map((benefit, idx) => (
-                    <li key={idx} className="text-xs">• {benefit}</li>
-                  ))}
-                  {safeCompany2.keyBenefits.length === 0 && (
-                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
-                  )}
-                </ul>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium border-r hidden md:table-cell">
-                Unique Strengths
-              </TableCell>
-              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
-                <ul className="space-y-1 text-left">
-                  {safeCompany1.uniqueStrengths.map((strength, idx) => (
-                    <li key={idx} className="text-xs">• {strength}</li>
-                  ))}
-                  {safeCompany1.uniqueStrengths.length === 0 && (
-                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
-                  )}
-                </ul>
-              </TableCell>
-              <TableCell className="w-1/2 md:w-1/3 text-center px-4">
-                <ul className="space-y-1 text-left">
-                  {safeCompany2.uniqueStrengths.map((strength, idx) => (
-                    <li key={idx} className="text-xs">• {strength}</li>
-                  ))}
-                  {safeCompany2.uniqueStrengths.length === 0 && (
-                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
-                  )}
-                </ul>
-              </TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </CardContent>
