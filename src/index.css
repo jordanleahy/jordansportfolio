@@ -95,6 +95,14 @@
     --section-padding: 6rem;
     --container-max-width: 1400px;
     --content-max-width: 1200px;
+}
+}
+
+@layer components {
+  .blog-index-image {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    object-fit: cover;
   }
 }
 

@@ -183,10 +183,10 @@ const Blog = () => {
                         <img 
                           src={featuredPost.hero_image_url} 
                           alt={featuredPost.hero_headline} 
-                          className="aspect-video w-full object-cover" 
+                          className="blog-index-image" 
                         />
                       ) : (
-                        <div className="aspect-video bg-muted"></div>
+                        <div className="blog-index-image bg-muted"></div>
                       )}
                     </div>
                     <div className="md:w-1/2 p-8">
@@ -268,10 +268,10 @@ const Blog = () => {
                       <img 
                         src={post.hero_image_url} 
                         alt={post.hero_headline} 
-                        className="aspect-video w-full object-cover" 
+                        className="blog-index-image" 
                       />
                     ) : (
-                      <div className="aspect-video bg-muted"></div>
+                      <div className="blog-index-image bg-muted"></div>
                     )}
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
