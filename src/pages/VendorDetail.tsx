@@ -230,6 +230,12 @@ export default function VendorDetail() {
     category: category || ''
   });
 
+  // Initialize vendor edit hook (must be called before any conditional returns)
+  const vendorEdit = useVendorEdit({ 
+    vendor: vendor || {} as Vendor, 
+    onSave: () => queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] }) 
+  });
+
   console.log('VendorDetail params:', { category, vendorSlug });
   console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
   console.log('Category exists:', category && VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES]);
@@ -621,11 +627,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   const pageTitle = ogTitle;
   const pageDescription = ogDescription;
 
-  // Initialize vendor edit hook for OG metadata
-  const vendorEdit = useVendorEdit({ 
-    vendor, 
-    onSave: () => queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] }) 
-  });
 
   return (
     <PageLayout>
