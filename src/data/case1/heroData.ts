@@ -1,6 +1,6 @@
 export const heroData = {
-  title: "AI Sepsis Prediction System: UX Case Study - Early Detection Dashboard Design",
-  description: "How I designed an AI-powered sepsis detection dashboard that reduced patient mortality by 23% through real-time SIRS monitoring, clinical decision support, and intuitive healthcare UX design. Learn about the UX research, design process, and impact RCM revenue.",
+  title: "AI Sepsis Prediction System: UX Case Study - Better CDI validation",
+  description: "Sepsis monitoring, DCI, and intuitive healthcare UX design. Learn about the UX research, design process, and impact on inpatient revenue.",
   heroImage: "/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png",
   heroImageAlt: "Sepsis diagnosis interface showing patient data, SIRS criteria, infection markers, and clinical decision support",
   role: "Senior Product Designer", 
