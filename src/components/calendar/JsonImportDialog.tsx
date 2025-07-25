@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, Eye, Download } from 'lucide-react';
+import { Upload, FileText, Eye, Download, Copy } from 'lucide-react';
 import { socialMediaService } from '@/services/socialMediaService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,6 +158,37 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     URL.revokeObjectURL(url);
   };
 
+  const copyJsonSchema = async () => {
+    const schema = `{
+  "category": "string (required)",
+  "theme": "string (optional)", 
+  "description": "string (optional)",
+  "posts": [
+    {
+      "day": "number (optional)",
+      "title": "string (required)",
+      "description": "string (required)",
+      "theme": "string (optional)",
+      "status": "draft | scheduled | published (optional, defaults to draft)"
+    }
+  ]
+}`;
+
+    try {
+      await navigator.clipboard.writeText(schema);
+      toast({
+        title: "Schema Copied",
+        description: "JSON schema has been copied to clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy schema to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -182,6 +213,10 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
               <Button variant="outline" onClick={downloadTemplate} className="gap-2">
                 <Download className="h-4 w-4" />
                 Download Template
+              </Button>
+              <Button variant="outline" onClick={copyJsonSchema} className="gap-2">
+                <Copy className="h-4 w-4" />
+                Copy JSON Schema
               </Button>
               <div className="relative">
                 <input
