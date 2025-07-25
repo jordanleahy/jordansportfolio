@@ -227,6 +227,8 @@ const ComparisonDetail = () => {
         
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-6xl mx-auto space-y-8">
+            <SummaryInsights data={data} />
+            
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-6">Technology Company Comparison</h2>
@@ -305,8 +307,6 @@ const ComparisonDetail = () => {
             )}
 
             <FeatureComparison data={data} />
-            
-            <SummaryInsights data={data} />
             
             <UseCaseSuitability data={data} />
             
