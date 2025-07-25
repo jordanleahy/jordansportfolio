@@ -23,7 +23,7 @@ export const DualVideoSection: React.FC<DualVideoSectionProps> = ({
     <div className="space-y-4">
       <VideoSection 
         videoSrc={topVideoSrc}
-        posterSrc={topPosterSrc}
+        posterSrc=""
         showTimer={false}
         portfolio={portfolio}
       />
