@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check, Loader2, Database, Sparkles, Settings, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { CacheManagement } from './CacheManagement';
+import { EnhancedCacheManagement } from './EnhancedCacheManagement';
 
 interface BlogVisualPromptProps {
   isOpen: boolean;
@@ -416,7 +416,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
         </DialogContent>
       </Dialog>
 
-      <CacheManagement 
+      <EnhancedCacheManagement 
         isOpen={cacheManagementOpen} 
         onClose={() => setCacheManagementOpen(false)} 
       />
