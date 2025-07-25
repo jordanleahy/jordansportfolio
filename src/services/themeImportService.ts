@@ -197,8 +197,11 @@ export class ThemeImportService {
     try {
       console.log('Inserting posts for category:', category, 'Posts:', posts);
       
-      // Convert ThemePost array to JSON for the database function
-      const postsAsJson = JSON.parse(JSON.stringify(posts));
+      // Convert ThemePost array to JSON and ensure status is properly typed
+      const postsAsJson = posts.map(post => ({
+        ...post,
+        status: post.status || 'draft' // Ensure status has a default
+      }));
       
       const { data, error } = await supabase
         .rpc('insert_category_content', {
