@@ -1104,6 +1104,8 @@ export type Database = {
           purpose: string
           schedule: string
           status: Database["public"]["Enums"]["agent_status"]
+          supported_categories: string[] | null
+          system_prompts: Json | null
           tags: string[] | null
           trigger: string
           updated_at: string
@@ -1123,6 +1125,8 @@ export type Database = {
           purpose: string
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
+          supported_categories?: string[] | null
+          system_prompts?: Json | null
           tags?: string[] | null
           trigger: string
           updated_at?: string
@@ -1142,6 +1146,8 @@ export type Database = {
           purpose?: string
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
+          supported_categories?: string[] | null
+          system_prompts?: Json | null
           tags?: string[] | null
           trigger?: string
           updated_at?: string
@@ -1773,6 +1779,10 @@ export type Database = {
         Returns: boolean
       }
       insert_blog_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      insert_blog_visual_agent: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
