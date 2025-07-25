@@ -505,55 +505,37 @@ export type Database = {
       }
       comparisons: {
         Row: {
-          basic_info: Json
-          company1_data: Json
-          company2_data: Json
           created_at: string
           created_by: string
-          features: Json
           id: string
           meta_description: string
           meta_title: string
           slug: string
           status: string
-          summary_insights: Json
           title: string
           updated_at: string
-          use_cases: Json
         }
         Insert: {
-          basic_info?: Json
-          company1_data: Json
-          company2_data: Json
           created_at?: string
           created_by: string
-          features?: Json
           id?: string
           meta_description: string
           meta_title: string
           slug: string
           status?: string
-          summary_insights?: Json
           title: string
           updated_at?: string
-          use_cases?: Json
         }
         Update: {
-          basic_info?: Json
-          company1_data?: Json
-          company2_data?: Json
           created_at?: string
           created_by?: string
-          features?: Json
           id?: string
           meta_description?: string
           meta_title?: string
           slug?: string
           status?: string
-          summary_insights?: Json
           title?: string
           updated_at?: string
-          use_cases?: Json
         }
         Relationships: []
       }
