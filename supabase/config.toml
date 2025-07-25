@@ -36,14 +36,5 @@ port = 54329
 enabled = true
 port = 54330
 
-[functions.job-scraper]
-verify_jwt = false
-
-[functions.job-monitor]
-verify_jwt = false
-
-[functions.send-auth-email]
-verify_jwt = false
-
 [functions.generate-comparison-pages]
 verify_jwt = false
