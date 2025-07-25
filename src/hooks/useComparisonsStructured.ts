@@ -256,6 +256,10 @@ export const useCreateStructuredComparison = () => {
       insights: Omit<ComparisonInsight, 'id' | 'comparison_id'>[];
     }) => {
       // Start a transaction by creating the main comparison first
+      // Create company data objects for legacy table structure
+      const company1 = data.companies.find(c => c.company_position === 1);
+      const company2 = data.companies.find(c => c.company_position === 2);
+      
       const { data: comparison, error: comparisonError } = await supabase
         .from("comparisons")
           .insert([{
@@ -265,6 +269,25 @@ export const useCreateStructuredComparison = () => {
           slug: data.slug,
           status: data.status,
           created_by: data.created_by,
+          // Legacy fields required by the database schema
+          company1_data: company1 ? {
+            name: company1.name,
+            founded: company1.founded,
+            headquarters: company1.headquarters,
+            key_benefits: company1.key_benefits,
+            unique_strengths: company1.unique_strengths
+          } : {},
+          company2_data: company2 ? {
+            name: company2.name,
+            founded: company2.founded,
+            headquarters: company2.headquarters,
+            key_benefits: company2.key_benefits,
+            unique_strengths: company2.unique_strengths
+          } : {},
+          features: [],
+          summary_insights: {},
+          use_cases: [],
+          basic_info: []
         }])
         .select()
         .single();
