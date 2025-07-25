@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
+import { COMPARISON_DEFAULTS } from '@/constants/comparisonConstants';
 
 interface StructuredComparisonData {
   comparison?: {
@@ -52,12 +53,13 @@ export const StructuredComparisonPreview: React.FC<StructuredComparisonPreviewPr
   company2Name 
 }) => {
   // Extract company names from the generated data if props are not provided
-  const actualCompany1Name = company1Name || data.companies?.[0]?.name || "Company 1";
-  const actualCompany2Name = company2Name || data.companies?.[1]?.name || "Company 2";
+  const actualCompany1Name = company1Name || data.companies?.[0]?.name || COMPARISON_DEFAULTS.COMPANY_FALLBACKS.FIRST;
+  const actualCompany2Name = company2Name || data.companies?.[1]?.name || COMPARISON_DEFAULTS.COMPANY_FALLBACKS.SECOND;
+  
   if (!data || (!data.comparison && !data.basic_info && !data.features)) {
     return (
       <div className="p-8 text-center">
-        <p className="text-muted-foreground">No comparison data available</p>
+        <p className="text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</p>
       </div>
     );
   }

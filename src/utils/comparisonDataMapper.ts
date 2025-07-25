@@ -9,6 +9,7 @@ import type {
   BasicInfoRow,
   SummaryInsights
 } from '@/types/comparisonForm';
+import { COMPARISON_DEFAULTS } from '@/constants/comparisonConstants';
 
 /**
  * Map vendor data to form state
@@ -224,19 +225,13 @@ export const generateSlug = (title: string): string => {
 /**
  * Get default basic info rows
  */
-export const getDefaultBasicInfo = (): BasicInfoRow[] => [
-  { id: uuidv4(), category: 'Founded', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Headquarters', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Company Type', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Funding', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Investors', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Employee Size', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Delivery Model', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Target Customers', company1: '', company2: '' },
-  { id: uuidv4(), category: 'Primary Solutions', company1: '', company2: '' },
-  { id: uuidv4(), category: 'AI Core', company1: '', company2: '' },
-  { id: uuidv4(), category: 'EHR Integration', company1: '', company2: '' }
-];
+export const getDefaultBasicInfo = (): BasicInfoRow[] => 
+  COMPARISON_DEFAULTS.BASIC_INFO_CATEGORIES.map(category => ({
+    id: uuidv4(),
+    category,
+    company1: '',
+    company2: ''
+  }));
 
 /**
  * Get default feature rows

@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Building, Users } from 'lucide-react';
 import { ComparisonData } from '@/types/comparison';
+import { COMPARISON_DEFAULTS } from '@/constants/comparisonConstants';
 
 interface ComparisonTableProps {
   data: ComparisonData;
@@ -17,43 +18,43 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   console.log('🏢 ComparisonTable - Company1 name:', company1?.name);
   console.log('🏢 ComparisonTable - Company2 name:', company2?.name);
 
-  // Add fallbacks for missing data
+  // Add fallbacks for missing data - use dynamic fallbacks
   const safeCompany1 = {
-    name: company1?.name || 'Company 1',
-    founded: company1?.founded || 'N/A',
-    headquarters: company1?.headquarters || 'N/A',
-    companyType: company1?.companyType || 'N/A',
-    funding: company1?.funding || 'N/A',
-    investors: company1?.investors || 'N/A',
-    employeeSize: company1?.employeeSize || 'N/A',
-    deliveryModel: company1?.deliveryModel || 'N/A',
-    targetCustomers: company1?.targetCustomers || 'N/A',
-    primarySolutions: company1?.primarySolutions || 'N/A',
-    aiCore: company1?.aiCore || 'N/A',
-    ehrIntegration: company1?.ehrIntegration || 'N/A',
-    clientBase: company1?.clientBase || 'N/A',
-    certifications: company1?.certifications || 'N/A',
-    awards: company1?.awards || 'N/A',
+    name: company1?.name || `${data.title?.split(' vs ')[0] || COMPARISON_DEFAULTS.COMPANY_FALLBACKS.FIRST}`,
+    founded: company1?.founded || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    headquarters: company1?.headquarters || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    companyType: company1?.companyType || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    funding: company1?.funding || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    investors: company1?.investors || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    employeeSize: company1?.employeeSize || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    deliveryModel: company1?.deliveryModel || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    targetCustomers: company1?.targetCustomers || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    primarySolutions: company1?.primarySolutions || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    aiCore: company1?.aiCore || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    ehrIntegration: company1?.ehrIntegration || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    clientBase: company1?.clientBase || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    certifications: company1?.certifications || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    awards: company1?.awards || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
     keyBenefits: company1?.keyBenefits || [],
     uniqueStrengths: company1?.uniqueStrengths || []
   };
 
   const safeCompany2 = {
-    name: company2?.name || 'Company 2',
-    founded: company2?.founded || 'N/A',
-    headquarters: company2?.headquarters || 'N/A',
-    companyType: company2?.companyType || 'N/A',
-    funding: company2?.funding || 'N/A',
-    investors: company2?.investors || 'N/A',
-    employeeSize: company2?.employeeSize || 'N/A',
-    deliveryModel: company2?.deliveryModel || 'N/A',
-    targetCustomers: company2?.targetCustomers || 'N/A',
-    primarySolutions: company2?.primarySolutions || 'N/A',
-    aiCore: company2?.aiCore || 'N/A',
-    ehrIntegration: company2?.ehrIntegration || 'N/A',
-    clientBase: company2?.clientBase || 'N/A',
-    certifications: company2?.certifications || 'N/A',
-    awards: company2?.awards || 'N/A',
+    name: company2?.name || `${data.title?.split(' vs ')[1] || COMPARISON_DEFAULTS.COMPANY_FALLBACKS.SECOND}`,
+    founded: company2?.founded || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    headquarters: company2?.headquarters || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    companyType: company2?.companyType || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    funding: company2?.funding || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    investors: company2?.investors || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    employeeSize: company2?.employeeSize || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    deliveryModel: company2?.deliveryModel || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    targetCustomers: company2?.targetCustomers || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    primarySolutions: company2?.primarySolutions || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    aiCore: company2?.aiCore || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    ehrIntegration: company2?.ehrIntegration || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    clientBase: company2?.clientBase || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    certifications: company2?.certifications || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
+    awards: company2?.awards || COMPARISON_DEFAULTS.MISSING_DATA_PLACEHOLDER,
     keyBenefits: company2?.keyBenefits || [],
     uniqueStrengths: company2?.uniqueStrengths || []
   };
@@ -108,7 +109,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
                     <li key={idx} className="text-xs">• {benefit}</li>
                   ))}
                   {safeCompany1.keyBenefits.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No data available</li>
+                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
                   )}
                 </ul>
               </TableCell>
@@ -118,7 +119,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
                     <li key={idx} className="text-xs">• {benefit}</li>
                   ))}
                   {safeCompany2.keyBenefits.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No data available</li>
+                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
                   )}
                 </ul>
               </TableCell>
@@ -133,7 +134,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
                     <li key={idx} className="text-xs">• {strength}</li>
                   ))}
                   {safeCompany1.uniqueStrengths.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No data available</li>
+                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
                   )}
                 </ul>
               </TableCell>
@@ -143,7 +144,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
                     <li key={idx} className="text-xs">• {strength}</li>
                   ))}
                   {safeCompany2.uniqueStrengths.length === 0 && (
-                    <li className="text-xs text-muted-foreground">No data available</li>
+                    <li className="text-xs text-muted-foreground">{COMPARISON_DEFAULTS.UI_TEXT.NO_DATA_MESSAGE}</li>
                   )}
                 </ul>
               </TableCell>

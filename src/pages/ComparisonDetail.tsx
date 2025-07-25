@@ -113,7 +113,7 @@ const ComparisonDetail = () => {
     metaTitle: structuredComparison.meta_title,
     metaDescription: structuredComparison.meta_description,
     company1: {
-      name: company1?.name || 'Company 1',
+      name: company1?.name || `${structuredComparison.title?.split(' vs ')[0] || 'First Company'}`,
       founded: company1?.founded || basicInfoLookup['Founded']?.company1 || 'N/A',
       headquarters: company1?.headquarters || basicInfoLookup['Headquarters']?.company1 || 'N/A',
       companyType: basicInfoLookup['Company Type']?.company1 || 'N/A',
@@ -133,7 +133,7 @@ const ComparisonDetail = () => {
       uniqueStrengths: company1?.unique_strengths || []
     },
     company2: {
-      name: company2?.name || 'Company 2',
+      name: company2?.name || `${structuredComparison.title?.split(' vs ')[1] || 'Second Company'}`,
       founded: company2?.founded || basicInfoLookup['Founded']?.company2 || 'N/A',
       headquarters: company2?.headquarters || basicInfoLookup['Headquarters']?.company2 || 'N/A',
       companyType: basicInfoLookup['Company Type']?.company2 || 'N/A',
