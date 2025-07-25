@@ -48,18 +48,36 @@ serve(async (req) => {
       company2Slug 
     });
 
-    const systemContent = `You are the GenerateComparisonPages AI agent. Create clean, scannable healthcare company comparisons for STRUCTURED DATABASE STORAGE.
+    const systemContent = `🚨 ABSOLUTE FORMATTING REQUIREMENTS - MANDATORY COMPLIANCE 🚨
 
-ABSOLUTELY CRITICAL - ENFORCE STRICTLY:
-- ABSOLUTELY NO CITATIONS, REFERENCES, OR BRACKETED NUMBERS ANYWHERE
-- ABSOLUTELY NO verbose paragraphs or lengthy explanations
-- MUST BE scan-friendly with bullet points and short phrases
-- Key Benefits: MAXIMUM 8 words per bullet point
-- Unique Strengths: MAXIMUM 12 words per bullet point  
-- Summary Insights: MAXIMUM 30 words per company paragraph
-- ALL content MUST BE concise, punchy, and immediately readable
-- Focus ONLY on key differentiators that matter for quick comparison
-- Use short, impactful phrases - NOT full sentences
+1. Key Benefits: MAXIMUM 8 WORDS per bullet (50 chars max) - NO EXCEPTIONS
+2. Unique Strengths: MAXIMUM 12 WORDS per bullet (80 chars max) - NO EXCEPTIONS  
+3. NO CITATIONS, NO REFERENCES, NO BRACKETED NUMBERS - REMOVE ALL [1], (ref), etc.
+4. Use action verbs and concrete benefits ONLY
+5. NO fluff words: "comprehensive", "robust", "innovative", "advanced"
+
+EXAMPLES OF CORRECT FORMAT:
+Key Benefits (8 words max):
+✅ "Reduces denials by 46%" (4 words)
+✅ "Accelerates cash flow" (3 words)
+✅ "Automates revenue cycle" (3 words)
+❌ "Provides comprehensive revenue cycle management solutions with advanced AI capabilities [1]"
+
+Unique Strengths (12 words max):
+✅ "Unified cloud-based platform for revenue management" (7 words)
+✅ "AltitudeAI predicts denials before submission" (6 words)
+❌ "Offers a comprehensive, cloud-based platform that provides unified revenue cycle management [ref]"
+
+You are the GenerateComparisonPages AI agent. Create clean, scannable healthcare company comparisons for STRUCTURED DATABASE STORAGE.
+
+🚨 CRITICAL ENFORCEMENT - NO EXCEPTIONS:
+- ZERO CITATIONS: No [1], (ref), [reference], etc. - REMOVE ALL
+- ZERO VERBOSE TEXT: Only short, punchy phrases
+- Key Benefits: 8 WORDS MAX (action verb + benefit)
+- Unique Strengths: 12 WORDS MAX (specific differentiator)
+- Summary Insights: 30 WORDS MAX per company
+- Use bullet points, NOT paragraphs
+- Focus ONLY on key differentiators for quick scanning
 
 DATA MAPPING INSTRUCTIONS - USE ACTUAL VENDOR DATA:
 Extract real data from vendor objects. Use "N/A" only if field is truly missing:
@@ -157,7 +175,12 @@ OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION
   ]
 }`;
 
-    const finalPrompt = `Generate a comparison between these two healthcare companies using the provided vendor data:
+    const finalPrompt = `🚨 FINAL WORD LIMIT ENFORCEMENT 🚨
+
+Key Benefits: STRICTLY 8 WORDS MAX per bullet (Examples: "Reduces denials 46%", "Speeds cash flow")
+Unique Strengths: STRICTLY 12 WORDS MAX per bullet (Examples: "Cloud platform with predictive analytics", "Real-time clinical alerts")
+
+Generate a comparison between these two healthcare companies using the provided vendor data:
 
 COMPANY 1: ${vendor1.company_name}
 ${JSON.stringify(vendor1, null, 2)}
@@ -165,18 +188,21 @@ ${JSON.stringify(vendor1, null, 2)}
 COMPANY 2: ${vendor2.company_name}
 ${JSON.stringify(vendor2, null, 2)}
 
-Create a CONCISE, SCANNABLE comparison for STRUCTURED DATABASE STORAGE. NO citations, references, or verbose text allowed.
+🚨 MANDATORY COMPLIANCE:
+- NO CITATIONS: Strip ALL [1], (ref), [reference] patterns
+- NO VERBOSE TEXT: Only action verbs + concrete benefits
+- WORD LIMITS: Count every word - exceed limits = FAILURE
+- CHARACTER LIMITS: Key Benefits 50 chars, Unique Strengths 80 chars
 
-EXAMPLE GOOD FORMAT:
-- Key Benefits: "Real-time alerts", "Easy integration", "Cost reduction"
-- Unique Strengths: "AI-powered insights", "Cloud-native platform", "Enterprise security"
-- Summary: "Best for hospitals needing real-time clinical decision support"
+VALID EXAMPLES:
+Key Benefits: ["Reduces denials 46%", "Speeds revenue cycle", "Automates workflows"]
+Unique Strengths: ["Cloud-native RCM platform", "AI predicts claim denials", "Real-time dashboard analytics"]
 
-EXAMPLE BAD FORMAT (DO NOT USE):
-- "Comprehensive clinical decision support platform with advanced machine learning algorithms for predictive analytics [1]"
-- "The company provides extensive integration capabilities with over 200+ EHR systems worldwide, offering seamless data exchange [2]"
+INVALID EXAMPLES:
+❌ "Provides comprehensive revenue cycle management with advanced AI"
+❌ "Comprehensive platform offering extensive integration capabilities [1]"
 
-    CRITICAL: Return ONLY the structured JSON object for database insertion. No markdown, explanations, or citations.`;
+CRITICAL: Return ONLY the structured JSON object for database insertion. No markdown, explanations, or citations.`;
 
     console.log(`📝 System prompt contains companies:`, {
       promptContains1: systemContent.includes(vendor1.company_name),
