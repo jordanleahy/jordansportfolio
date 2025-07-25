@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenAIAgents, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
 import { AgentStatusBadge } from './AgentStatusBadge';
@@ -50,6 +50,89 @@ import { CreateAgentModal } from './CreateAgentModal';
 type SortField = 'name' | 'status' | 'model_version' | 'owner' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
 
+interface TableState {
+  searchTerm: string;
+  statusFilter: AgentStatus | 'all';
+  selectedAgents: Set<string>;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  pageSize: number;
+  currentPage: number;
+  deleteModalAgent: OpenAIAgent | null;
+}
+
+type TableAction = 
+  | { type: 'SET_SEARCH_TERM'; payload: string }
+  | { type: 'SET_STATUS_FILTER'; payload: AgentStatus | 'all' }
+  | { type: 'SET_SELECTED_AGENTS'; payload: Set<string> }
+  | { type: 'TOGGLE_AGENT_SELECTION'; payload: { agentId: string; checked: boolean } }
+  | { type: 'SELECT_ALL'; payload: { agentIds: string[]; checked: boolean } }
+  | { type: 'CLEAR_SELECTION' }
+  | { type: 'SET_SORT'; payload: { field: SortField; direction?: SortDirection } }
+  | { type: 'SET_PAGE_SIZE'; payload: number }
+  | { type: 'SET_CURRENT_PAGE'; payload: number }
+  | { type: 'SET_DELETE_MODAL_AGENT'; payload: OpenAIAgent | null }
+  | { type: 'RESET_PAGE' };
+
+const initialState: TableState = {
+  searchTerm: '',
+  statusFilter: 'all',
+  selectedAgents: new Set(),
+  sortField: 'updated_at',
+  sortDirection: 'desc',
+  pageSize: 10,
+  currentPage: 1,
+  deleteModalAgent: null,
+};
+
+function tableReducer(state: TableState, action: TableAction): TableState {
+  switch (action.type) {
+    case 'SET_SEARCH_TERM':
+      return { ...state, searchTerm: action.payload, currentPage: 1 };
+    case 'SET_STATUS_FILTER':
+      return { ...state, statusFilter: action.payload, currentPage: 1 };
+    case 'SET_SELECTED_AGENTS':
+      return { ...state, selectedAgents: action.payload };
+    case 'TOGGLE_AGENT_SELECTION': {
+      const newSelected = new Set(state.selectedAgents);
+      if (action.payload.checked) {
+        newSelected.add(action.payload.agentId);
+      } else {
+        newSelected.delete(action.payload.agentId);
+      }
+      return { ...state, selectedAgents: newSelected };
+    }
+    case 'SELECT_ALL':
+      return { 
+        ...state, 
+        selectedAgents: action.payload.checked ? new Set(action.payload.agentIds) : new Set() 
+      };
+    case 'CLEAR_SELECTION':
+      return { ...state, selectedAgents: new Set() };
+    case 'SET_SORT': {
+      const newDirection = action.payload.direction || 
+        (state.sortField === action.payload.field ? 
+          (state.sortDirection === 'asc' ? 'desc' : 'asc') : 'asc');
+      return {
+        ...state,
+        sortField: action.payload.field,
+        sortDirection: newDirection,
+        currentPage: 1
+      };
+    }
+    case 'SET_PAGE_SIZE':
+      return { ...state, pageSize: action.payload, currentPage: 1 };
+    case 'SET_CURRENT_PAGE':
+      return { ...state, currentPage: action.payload };
+    case 'SET_DELETE_MODAL_AGENT':
+      return { ...state, deleteModalAgent: action.payload };
+    case 'RESET_PAGE':
+      return { ...state, currentPage: 1 };
+    default:
+      return state;
+  }
+}
+
 export const EnhancedAgentsTable = () => {
   const navigate = useNavigate();
   const { data: agents, isLoading } = useOpenAIAgents();
@@ -57,15 +140,7 @@ export const EnhancedAgentsTable = () => {
   const deleteAgent = useDeleteAgent();
   const createAgent = useCreateAgent();
 
-  // State for search, filters, pagination
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<AgentStatus | 'all'>('all');
-  const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
-  const [sortField, setSortField] = useState<SortField>('updated_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [pageSize, setPageSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [deleteModalAgent, setDeleteModalAgent] = useState<OpenAIAgent | null>(null);
+  const [state, dispatch] = useReducer(tableReducer, initialState);
 
   // Featured agents
   const featuredAgents = [
@@ -92,19 +167,19 @@ export const EnhancedAgentsTable = () => {
     if (!agents) return [];
 
     let filtered = agents.filter((agent) => {
-      const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           agent.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           agent.owner.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || agent.status === statusFilter;
+      const matchesSearch = agent.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                           agent.purpose.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+                           agent.owner.toLowerCase().includes(state.searchTerm.toLowerCase());
+      const matchesStatus = state.statusFilter === 'all' || agent.status === state.statusFilter;
       return matchesSearch && matchesStatus;
     });
 
     // Sort
     filtered.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: any = a[state.sortField];
+      let bValue: any = b[state.sortField];
 
-      if (sortField === 'updated_at') {
+      if (state.sortField === 'updated_at') {
         aValue = new Date(aValue).getTime();
         bValue = new Date(bValue).getTime();
       } else if (typeof aValue === 'string') {
@@ -112,7 +187,7 @@ export const EnhancedAgentsTable = () => {
         bValue = bValue.toLowerCase();
       }
 
-      if (sortDirection === 'asc') {
+      if (state.sortDirection === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
@@ -120,52 +195,37 @@ export const EnhancedAgentsTable = () => {
     });
 
     return filtered;
-  }, [agents, searchTerm, statusFilter, sortField, sortDirection]);
+  }, [agents, state.searchTerm, state.statusFilter, state.sortField, state.sortDirection]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredAndSortedAgents.length / pageSize);
+  const totalPages = Math.ceil(filteredAndSortedAgents.length / state.pageSize);
   const paginatedAgents = filteredAndSortedAgents.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    (state.currentPage - 1) * state.pageSize,
+    state.currentPage * state.pageSize
   );
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
+    dispatch({ type: 'SET_SORT', payload: { field } });
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+    if (state.sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return state.sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
   };
 
   const handleSelectAgent = (agentId: string, checked: boolean) => {
-    const newSelected = new Set(selectedAgents);
-    if (checked) {
-      newSelected.add(agentId);
-    } else {
-      newSelected.delete(agentId);
-    }
-    setSelectedAgents(newSelected);
+    dispatch({ type: 'TOGGLE_AGENT_SELECTION', payload: { agentId, checked } });
   };
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedAgents(new Set(paginatedAgents.map(agent => agent.id)));
-    } else {
-      setSelectedAgents(new Set());
-    }
+    dispatch({ type: 'SELECT_ALL', payload: { agentIds: paginatedAgents.map(agent => agent.id), checked } });
   };
 
   const handleBulkStatusUpdate = (status: AgentStatus) => {
-    selectedAgents.forEach(agentId => {
+    state.selectedAgents.forEach(agentId => {
       updateAgent.mutate({ id: agentId, status });
     });
-    setSelectedAgents(new Set());
+    dispatch({ type: 'CLEAR_SELECTION' });
   };
 
   const handleToggleStatus = (agent: OpenAIAgent) => {
@@ -247,12 +307,15 @@ export const EnhancedAgentsTable = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search agents..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={state.searchTerm}
+                onChange={(e) => dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value })}
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AgentStatus | 'all')}>
+            <Select 
+              value={state.statusFilter} 
+              onValueChange={(value) => dispatch({ type: 'SET_STATUS_FILTER', payload: value as AgentStatus | 'all' })}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -266,10 +329,10 @@ export const EnhancedAgentsTable = () => {
           </div>
 
           {/* Bulk Actions */}
-          {selectedAgents.size > 0 && (
+          {state.selectedAgents.size > 0 && (
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <span className="text-sm font-medium">
-                {selectedAgents.size} agent(s) selected
+                {state.selectedAgents.size} agent(s) selected
               </span>
               <Button 
                 size="sm" 
@@ -288,7 +351,7 @@ export const EnhancedAgentsTable = () => {
               <Button 
                 size="sm" 
                 variant="outline" 
-                onClick={() => setSelectedAgents(new Set())}
+                onClick={() => dispatch({ type: 'CLEAR_SELECTION' })}
               >
                 Clear Selection
               </Button>
@@ -303,7 +366,7 @@ export const EnhancedAgentsTable = () => {
                 <TableRow>
                   <TableHead className="w-12">
                     <Checkbox
-                      checked={paginatedAgents.length > 0 && selectedAgents.size === paginatedAgents.length}
+                      checked={paginatedAgents.length > 0 && state.selectedAgents.size === paginatedAgents.length}
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
@@ -363,7 +426,7 @@ export const EnhancedAgentsTable = () => {
                   <TableRow key={agent.id}>
                     <TableCell>
                       <Checkbox
-                        checked={selectedAgents.has(agent.id)}
+                        checked={state.selectedAgents.has(agent.id)}
                         onCheckedChange={(checked) => handleSelectAgent(agent.id, checked as boolean)}
                       />
                     </TableCell>
@@ -449,7 +512,7 @@ export const EnhancedAgentsTable = () => {
                               Clone Agent
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              onClick={() => setDeleteModalAgent(agent)}
+                              onClick={() => dispatch({ type: 'SET_DELETE_MODAL_AGENT', payload: agent })}
                               className="text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
@@ -470,9 +533,12 @@ export const EnhancedAgentsTable = () => {
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredAndSortedAgents.length)} of {filteredAndSortedAgents.length} results
+                  Showing {(state.currentPage - 1) * state.pageSize + 1} to {Math.min(state.currentPage * state.pageSize, filteredAndSortedAgents.length)} of {filteredAndSortedAgents.length} results
                 </span>
-                <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number(value))}>
+                <Select 
+                  value={state.pageSize.toString()} 
+                  onValueChange={(value) => dispatch({ type: 'SET_PAGE_SIZE', payload: Number(value) })}
+                >
                   <SelectTrigger className="w-20">
                     <SelectValue />
                   </SelectTrigger>
@@ -488,19 +554,19 @@ export const EnhancedAgentsTable = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={state.currentPage <= 1}
+                  onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: state.currentPage - 1 })}
                 >
                   Previous
                 </Button>
                 <span className="text-sm">
-                  Page {currentPage} of {totalPages}
+                  Page {state.currentPage} of {totalPages}
                 </span>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={state.currentPage >= totalPages}
+                  onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: state.currentPage + 1 })}
                 >
                   Next
                 </Button>
@@ -511,7 +577,7 @@ export const EnhancedAgentsTable = () => {
           {filteredAndSortedAgents?.length === 0 && (
             <div className="text-center py-12">
               <div className="text-muted-foreground">
-                {searchTerm || statusFilter !== 'all' 
+                {state.searchTerm || state.statusFilter !== 'all' 
                   ? 'No agents match your filters.' 
                   : 'No agents created yet. Create your first agent to get started.'}
               </div>
@@ -521,14 +587,14 @@ export const EnhancedAgentsTable = () => {
       </Card>
 
       {/* Delete Confirmation Modal */}
-      {deleteModalAgent && (
+      {state.deleteModalAgent && (
         <AgentDeleteModal
-          agent={deleteModalAgent}
-          open={!!deleteModalAgent}
-          onOpenChange={(open) => !open && setDeleteModalAgent(null)}
+          agent={state.deleteModalAgent}
+          open={!!state.deleteModalAgent}
+          onOpenChange={(open) => !open && dispatch({ type: 'SET_DELETE_MODAL_AGENT', payload: null })}
           onConfirm={() => {
-            deleteAgent.mutate(deleteModalAgent.id);
-            setDeleteModalAgent(null);
+            deleteAgent.mutate(state.deleteModalAgent!.id);
+            dispatch({ type: 'SET_DELETE_MODAL_AGENT', payload: null });
           }}
         />
       )}
