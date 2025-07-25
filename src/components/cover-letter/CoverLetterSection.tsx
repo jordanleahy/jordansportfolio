@@ -40,7 +40,7 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({ content 
     <Card>
       <CardContent className="p-8">
         <div className="prose prose-lg max-w-none">
-          <h2 className="text-2xl font-semibold mb-6">{content.recipient}</h2>
+          <h2 className="text-2xl font-semibold mb-6">Dear, Carlos, Eli and Hoshi,</h2>
           
           {structuredContent ? (
             // New structured, scannable format
