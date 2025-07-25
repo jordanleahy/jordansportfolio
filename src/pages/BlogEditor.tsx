@@ -486,7 +486,6 @@ const BlogEditor = () => {
                     onChange={(e) => handleInputChange('intro_content', e.target.value)}
                     placeholder="Write a compelling introduction that hooks the reader..."
                     rows={4}
-                    maxLength={450}
                   />
                   
                 </div>
