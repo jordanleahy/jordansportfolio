@@ -92,7 +92,7 @@ export const ComparisonForm: React.FC = () => {
         </div>
 
         {/* Generated Comparison Preview */}
-        {state.generatedData && (
+        {state.generatedData && selectedCompany1 && selectedCompany2 && (
           <div className="mb-8">
             <Card>
               <CardHeader>
@@ -104,8 +104,8 @@ export const ComparisonForm: React.FC = () => {
               <CardContent>
                 <StructuredComparisonPreview 
                   data={state.generatedData} 
-                  company1Name={selectedCompany1?.company_name}
-                  company2Name={selectedCompany2?.company_name}
+                  company1Name={selectedCompany1.company_name}
+                  company2Name={selectedCompany2.company_name}
                 />
               </CardContent>
             </Card>
