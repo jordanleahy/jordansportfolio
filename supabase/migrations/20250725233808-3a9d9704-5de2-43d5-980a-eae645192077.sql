@@ -1,0 +1,1 @@
+SELECT public.insert_calendar_theme_json_processor();
