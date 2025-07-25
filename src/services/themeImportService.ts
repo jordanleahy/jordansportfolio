@@ -172,6 +172,25 @@ export class ThemeImportService {
     return this.validateThemeData(rawData);
   }
 
+  /**
+   * Process theme data using AI for cleaning and enhancement
+   */
+  async processWithAI(rawData: any): Promise<ProcessingResult> {
+    try {
+      const response = await supabase.functions.invoke('process-theme-json', {
+        body: { rawJson: rawData }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      return response.data;
+    } catch (error) {
+      throw new Error(`AI processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   private async getExistingCategories(): Promise<string[]> {
     const { data, error } = await supabase
       .from('social_media_posts')

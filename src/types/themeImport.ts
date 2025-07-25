@@ -26,4 +26,8 @@ export interface ProcessingResult {
   errors: string[];
   warnings: string[];
   cleanedData?: ThemeImportData;
+  originalData?: any;
+  fixes?: string[];
+  modelUsed?: string;
+  processingTimeMs?: number;
 }

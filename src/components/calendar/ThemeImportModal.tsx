@@ -54,6 +54,50 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
     }
   };
 
+  const handleAIProcess = async () => {
+    if (!jsonInput.trim()) {
+      toast({
+        title: "No data to process",
+        description: "Please enter JSON data first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const result = await themeImportService.processWithAI(JSON.parse(jsonInput));
+      
+      if (result.success) {
+        setValidation({
+          isValid: true,
+          errors: result.errors || [],
+          warnings: result.warnings || [],
+          cleanedData: result.cleanedData
+        });
+        setShowPreview(true);
+        toast({
+          title: "AI processing completed",
+          description: `Applied ${result.fixes?.length || 0} fixes and found ${result.warnings?.length || 0} warnings`,
+        });
+      } else {
+        toast({
+          title: "AI processing failed",
+          description: result.errors?.join(', ') || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "AI processing failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleImport = async () => {
     if (!validation?.isValid) {
       toast({
@@ -176,6 +220,15 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
             >
               <Eye className="w-4 h-4 mr-2" />
               Preview
+            </Button>
+
+            <Button
+              onClick={handleAIProcess}
+              disabled={isProcessing || !jsonInput.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Process JSON (AI-Powered)
             </Button>
             
             <Button

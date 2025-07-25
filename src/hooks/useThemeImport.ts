@@ -53,6 +53,39 @@ export const useThemeImport = () => {
     }
   });
 
+  const aiProcessMutation = useMutation({
+    mutationFn: async (jsonData: string) => {
+      return await themeImportService.processWithAI(JSON.parse(jsonData));
+    },
+    onSuccess: (result: ProcessingResult) => {
+      if (result.success) {
+        setValidation({
+          isValid: true,
+          errors: result.errors,
+          warnings: result.warnings,
+          cleanedData: result.cleanedData
+        });
+        toast({
+          title: "AI processing completed",
+          description: `Applied ${result.fixes.length} fixes and found ${result.warnings.length} warnings`,
+        });
+      } else {
+        toast({
+          title: "AI processing failed",
+          description: result.errors.join(', '),
+          variant: "destructive"
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "AI processing failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    }
+  });
+
   const cleanupMutation = useMutation({
     mutationFn: async () => {
       return await themeImportService.runCleanupAgent();
@@ -88,11 +121,13 @@ export const useThemeImport = () => {
   return {
     validation,
     previewImport: previewMutation.mutate,
+    processWithAI: aiProcessMutation.mutate,
     importData: importMutation.mutate,
     runCleanup: cleanupMutation.mutate,
     resetValidation,
-    isProcessing: previewMutation.isPending || importMutation.isPending || cleanupMutation.isPending,
+    isProcessing: previewMutation.isPending || aiProcessMutation.isPending || importMutation.isPending || cleanupMutation.isPending,
     isPreviewLoading: previewMutation.isPending,
+    isAIProcessing: aiProcessMutation.isPending,
     isImportLoading: importMutation.isPending,
     isCleanupLoading: cleanupMutation.isPending
   };
