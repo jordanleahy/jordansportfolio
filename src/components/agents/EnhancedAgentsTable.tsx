@@ -46,6 +46,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { AgentStatus, OpenAIAgent, CreateAgentData } from '@/types/openaiAgent';
 import { CreateAgentModal } from './CreateAgentModal';
+import { FEATURED_AGENTS } from '@/constants/featuredAgents';
 
 type SortField = 'name' | 'status' | 'model_version' | 'owner' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
@@ -141,26 +142,6 @@ export const EnhancedAgentsTable = () => {
   const createAgent = useCreateAgent();
 
   const [state, dispatch] = useReducer(tableReducer, initialState);
-
-  // Featured agents
-  const featuredAgents = [
-    {
-      name: 'SIRS Diagnostic Agent',
-      description: 'Rules-based clinical agent for Systemic Inflammatory Response Syndrome diagnosis',
-      icon: Activity,
-      path: '/agents/sirs-diagnostic',
-      status: 'Clinical Ready',
-      tags: ['Clinical', 'Diagnostic', 'SIRS']
-    },
-    {
-      name: 'Sepsis Agent',
-      description: 'AI-powered sepsis detection and management system',
-      icon: Zap,
-      path: '/agents/sepsis',
-      status: 'Available',
-      tags: ['Clinical', 'Sepsis', 'Management']
-    }
-  ];
 
   // Filter and sort agents
   const filteredAndSortedAgents = useMemo(() => {
@@ -263,7 +244,7 @@ export const EnhancedAgentsTable = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {featuredAgents.map((agent) => (
+            {FEATURED_AGENTS.map((agent) => (
               <div 
                 key={agent.name}
                 className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
