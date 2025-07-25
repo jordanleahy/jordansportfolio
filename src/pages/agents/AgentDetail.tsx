@@ -78,6 +78,14 @@ export const AgentDetail = () => {
           <div className="flex gap-2">
             <Button
               variant="outline"
+              onClick={() => navigate(`/agents/${agent.id}/edit`)}
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
               onClick={handleToggleStatus}
               disabled={agent.status === 'deprecated' || updateAgent.isPending}
               className="gap-2"

@@ -71,7 +71,7 @@ export const CreateAgentModal = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button onClick={() => window.location.href = '/agents/new'}>
           <Plus className="h-4 w-4 mr-2" />
           Create Agent
         </Button>

@@ -1,4 +1,4 @@
-import { AgentsTable } from '@/components/agents/AgentsTable';
+import { EnhancedAgentsTable } from '@/components/agents/EnhancedAgentsTable';
 import { PageLayout } from '@/components/layout/PageLayout';
 
 const Agents = () => {
@@ -9,7 +9,7 @@ const Agents = () => {
           <h1 className="text-3xl font-bold">OpenAI Agents</h1>
           <p className="text-muted-foreground">Manage your AI agents and automation</p>
         </div>
-        <AgentsTable />
+        <EnhancedAgentsTable />
       </div>
     </PageLayout>
   );
