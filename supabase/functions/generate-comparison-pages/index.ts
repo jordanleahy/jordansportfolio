@@ -252,8 +252,51 @@ CRITICAL: Return ONLY the structured JSON object for database insertion. No mark
     
     console.log(`📄 Raw AI response (first 500 chars):`, generatedText.substring(0, 500));
     
-    // Post-process to remove any citations or references that might have slipped through
-    generatedText = generatedText.replace(/\[\d+\]/g, '').replace(/\([^)]*\d[^)]*\)/g, '').trim();
+    // Aggressive post-processing to enforce word limits and remove citations
+    generatedText = generatedText
+      .replace(/\[\d+\]/g, '') // Remove [1], [2], etc.
+      .replace(/\([^)]*\d[^)]*\)/g, '') // Remove (ref), (reference), etc.
+      .replace(/\[.*?\]/g, '') // Remove any bracketed content
+      .replace(/【.*?】/g, '') // Remove unicode brackets
+      .replace(/\*[A-Z0-9-]+/g, '') // Remove citation patterns like *L288-L314
+      .trim();
+
+    // Parse and clean up the JSON structure
+    try {
+      const parsedJSON = JSON.parse(generatedText);
+      
+      // Clean up key_benefits arrays (max 8 words each)
+      if (parsedJSON.companies) {
+        parsedJSON.companies.forEach(company => {
+          if (company.key_benefits) {
+            company.key_benefits = company.key_benefits.map(benefit => {
+              let cleaned = benefit.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+              const words = cleaned.split(' ');
+              if (words.length > 8) {
+                cleaned = words.slice(0, 8).join(' ');
+              }
+              return cleaned;
+            });
+          }
+          
+          // Clean up unique_strengths arrays (max 12 words each)
+          if (company.unique_strengths) {
+            company.unique_strengths = company.unique_strengths.map(strength => {
+              let cleaned = strength.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
+              const words = cleaned.split(' ');
+              if (words.length > 12) {
+                cleaned = words.slice(0, 12).join(' ');
+              }
+              return cleaned;
+            });
+          }
+        });
+      }
+      
+      generatedText = JSON.stringify(parsedJSON);
+    } catch (parseError) {
+      console.error('JSON parsing failed during cleanup:', parseError);
+    }
 
     console.log(`🧹 Cleaned response (first 500 chars):`, generatedText.substring(0, 500));
 
