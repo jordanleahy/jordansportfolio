@@ -1540,6 +1540,9 @@ export type Database = {
           linkedin_url: string | null
           notable_customers: string[]
           office_locations: string[] | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
           partnerships: string[] | null
           performance_metrics: Json | null
           research_data: Json | null
@@ -1587,6 +1590,9 @@ export type Database = {
           linkedin_url?: string | null
           notable_customers?: string[]
           office_locations?: string[] | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null
@@ -1634,6 +1640,9 @@ export type Database = {
           linkedin_url?: string | null
           notable_customers?: string[]
           office_locations?: string[] | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           partnerships?: string[] | null
           performance_metrics?: Json | null
           research_data?: Json | null

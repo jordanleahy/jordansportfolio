@@ -21,6 +21,8 @@ import { useVendorPublish } from '@/hooks/useVendorPublish';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { ProductJobsCard } from '@/components/vendors/ProductJobsCard';
+import { OGMetadataCard } from '@/components/vendors/OGMetadataCard';
+import { useVendorEdit } from '@/hooks/useVendorEdit';
 import {
   companyOverviewConfig,
   servicesConfig,
@@ -611,8 +613,19 @@ Research all ${investors.length} firms listed above and return comprehensive dat
     }
   };
 
-  const pageTitle = `${vendor.company_name} - ${categoryConfig.title} Vendor Profile`;
-  const pageDescription = `${vendor.description} ${vendor.founding_year ? `Founded in ${vendor.founding_year}, ` : ''}${vendor.company_name} offers ${vendor.core_services.join(', ')} for ${vendor.customers.join(', ')}.`;
+  // OG metadata with custom fallbacks
+  const ogTitle = vendor.og_title || `${vendor.company_name} - ${categoryConfig.title} Vendor Profile`;
+  const ogDescription = vendor.og_description || `${vendor.description} ${vendor.founding_year ? `Founded in ${vendor.founding_year}, ` : ''}${vendor.company_name} offers ${vendor.core_services.join(', ')} for ${vendor.customers.join(', ')}.`;
+  const ogImage = vendor.og_image_url || '/og-default.png';
+  
+  const pageTitle = ogTitle;
+  const pageDescription = ogDescription;
+
+  // Initialize vendor edit hook for OG metadata
+  const vendorEdit = useVendorEdit({ 
+    vendor, 
+    onSave: () => queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] }) 
+  });
 
   return (
     <PageLayout>
@@ -620,16 +633,16 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         <title>{pageTitle} | Competitive Intelligence</title>
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content={`${vendor.company_name}, ${categoryConfig.title}, ${vendor.specialties.join(', ')}, ${vendor.core_services.join(', ')}`} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content="/og-default.png" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
         <meta property="og:url" content={`https://jordanleahy.com/vendors/${category}/${vendorSlug}`} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Jordan's Portfolio" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content="/og-default.png" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        <meta name="twitter:image" content={ogImage} />
         <link rel="canonical" href={`/vendors/${category}/${vendorSlug}`} />
         
         <script type="application/ld+json">
@@ -1112,6 +1125,22 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 config={technologyConfig} 
                 canEdit={isAdmin}
               />
+
+              {/* OG Metadata Card - Admin Only */}
+              {isAdmin && (
+                <OGMetadataCard
+                  vendor={vendor}
+                  isEditing={vendorEdit.isEditing}
+                  onEdit={vendorEdit.startEdit}
+                  onSave={vendorEdit.publishChanges}
+                  onCancel={vendorEdit.cancelEdit}
+                  onUpdateField={vendorEdit.updateField}
+                  editData={vendorEdit.editData}
+                  isSaving={vendorEdit.isSaving}
+                  hasChanges={vendorEdit.hasChanges}
+                  canEdit={isAdmin}
+                />
+              )}
 
               <VendorImageGallery 
                 vendor={vendor} 

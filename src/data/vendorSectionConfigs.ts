@@ -301,3 +301,30 @@ export const technologyConfig: SectionConfig = {
     },
   ],
 };
+
+export const ogMetadataConfig: SectionConfig = {
+  title: 'Open Graph Metadata',
+  description: 'Control how this vendor appears when shared on social media',
+  fields: [
+    {
+      key: 'og_title',
+      type: 'text',
+      label: 'OG Title',
+      placeholder: 'Custom title for social media sharing',
+      maxLength: 100,
+    },
+    {
+      key: 'og_description',
+      type: 'multiline',
+      label: 'OG Description',
+      placeholder: 'Custom description for social media sharing',
+      maxLength: 300,
+    },
+    {
+      key: 'og_image_url',
+      type: 'text',
+      label: 'OG Image URL',
+      placeholder: 'https://example.com/image.jpg',
+    },
+  ],
+};
