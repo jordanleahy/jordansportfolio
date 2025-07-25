@@ -261,34 +261,57 @@ CRITICAL: Return ONLY the structured JSON object for database insertion. No mark
       .replace(/\*[A-Z0-9-]+/g, '') // Remove citation patterns like *L288-L314
       .trim();
 
-    // Parse and clean up the JSON structure
+    // Parse and clean up the JSON structure, moving key_benefits and unique_strengths to basic_info
     try {
       const parsedJSON = JSON.parse(generatedText);
       
-      // Clean up key_benefits arrays (max 8 words each)
+      // Move key_benefits and unique_strengths from companies to basic_info
       if (parsedJSON.companies) {
-        parsedJSON.companies.forEach(company => {
+        parsedJSON.companies.forEach((company, index) => {
+          const companyPosition = index + 1;
+          
+          // Process key_benefits and add to basic_info
           if (company.key_benefits) {
-            company.key_benefits = company.key_benefits.map(benefit => {
+            company.key_benefits.forEach((benefit, benefitIndex) => {
               let cleaned = benefit.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
               const words = cleaned.split(' ');
               if (words.length > 8) {
                 cleaned = words.slice(0, 8).join(' ');
               }
-              return cleaned;
+              
+              // Add to basic_info
+              if (!parsedJSON.basic_info) parsedJSON.basic_info = [];
+              parsedJSON.basic_info.push({
+                category: `Key Benefits ${benefitIndex + 1}`,
+                [`company${companyPosition}_value`]: cleaned,
+                [`company${companyPosition === 1 ? 2 : 1}_value`]: 'N/A'
+              });
             });
+            
+            // Remove from company object
+            delete company.key_benefits;
           }
           
-          // Clean up unique_strengths arrays (max 12 words each)
+          // Process unique_strengths and add to basic_info
           if (company.unique_strengths) {
-            company.unique_strengths = company.unique_strengths.map(strength => {
+            company.unique_strengths.forEach((strength, strengthIndex) => {
               let cleaned = strength.replace(/\[.*?\]/g, '').replace(/\*[A-Z0-9-]+/g, '').trim();
               const words = cleaned.split(' ');
               if (words.length > 12) {
                 cleaned = words.slice(0, 12).join(' ');
               }
-              return cleaned;
+              
+              // Add to basic_info
+              if (!parsedJSON.basic_info) parsedJSON.basic_info = [];
+              parsedJSON.basic_info.push({
+                category: `Unique Strengths ${strengthIndex + 1}`,
+                [`company${companyPosition}_value`]: cleaned,
+                [`company${companyPosition === 1 ? 2 : 1}_value`]: 'N/A'
+              });
             });
+            
+            // Remove from company object
+            delete company.unique_strengths;
           }
         });
       }

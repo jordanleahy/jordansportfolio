@@ -56,8 +56,6 @@ export interface ComparisonStructuredData {
     name: string;
     founded: string;
     headquarters: string;
-    key_benefits: string[];
-    unique_strengths: string[];
   }>;
   basic_info: Array<{
     id: string;

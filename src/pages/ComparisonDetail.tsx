@@ -105,6 +105,14 @@ const ComparisonDetail = () => {
     return acc;
   }, {} as Record<string, { company1: string; company2: string }>) || {};
 
+  // Separate key benefits and unique strengths from basic info
+  const keyBenefits = structuredComparison.basic_info?.filter(info => 
+    info.category.startsWith('Key Benefits')
+  ) || [];
+  const uniqueStrengths = structuredComparison.basic_info?.filter(info => 
+    info.category.startsWith('Unique Strengths')
+  ) || [];
+
   console.log('🏗️ ComparisonDetail - basicInfoLookup:', basicInfoLookup);
   console.log('🏢 ComparisonDetail - Companies:', { company1, company2 });
   
@@ -129,8 +137,8 @@ const ComparisonDetail = () => {
       certifications: basicInfoLookup['Certifications']?.company1 || 'N/A',
       awards: basicInfoLookup['Awards & Recognition']?.company1 || 'N/A',
       location: company1?.headquarters || basicInfoLookup['Headquarters']?.company1 || 'N/A',
-      keyBenefits: company1?.key_benefits || [],
-      uniqueStrengths: company1?.unique_strengths || []
+      keyBenefits: keyBenefits.map(kb => kb.company1_value).filter(val => val !== 'N/A'),
+      uniqueStrengths: uniqueStrengths.map(us => us.company1_value).filter(val => val !== 'N/A')
     },
     company2: {
       name: company2?.name || `${structuredComparison.title?.split(' vs ')[1] || 'Second Company'}`,
@@ -149,8 +157,8 @@ const ComparisonDetail = () => {
       certifications: basicInfoLookup['Certifications']?.company2 || 'N/A',
       awards: basicInfoLookup['Awards & Recognition']?.company2 || 'N/A',
       location: company2?.headquarters || basicInfoLookup['Headquarters']?.company2 || 'N/A',
-      keyBenefits: company2?.key_benefits || [],
-      uniqueStrengths: company2?.unique_strengths || []
+      keyBenefits: keyBenefits.map(kb => kb.company2_value).filter(val => val !== 'N/A'),
+      uniqueStrengths: uniqueStrengths.map(us => us.company2_value).filter(val => val !== 'N/A')
     },
     features: structuredComparison.features?.map(f => ({
       feature: f.feature_name,
@@ -223,6 +231,76 @@ const ComparisonDetail = () => {
               </CardContent>
             </Card>
             
+            {/* Key Benefits Section */}
+            {(data.company1.keyBenefits.length > 0 || data.company2.keyBenefits.length > 0) && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    ⭐ Key Benefits
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-primary">{data.company1.name}</h3>
+                      <div className="space-y-2">
+                        {data.company1.keyBenefits.map((benefit, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                            <span className="text-muted-foreground">{benefit}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-primary">{data.company2.name}</h3>
+                      <div className="space-y-2">
+                        {data.company2.keyBenefits.map((benefit, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                            <span className="text-muted-foreground">{benefit}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Unique Strengths Section */}
+            {(data.company1.uniqueStrengths.length > 0 || data.company2.uniqueStrengths.length > 0) && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    💎 Unique Strengths
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-primary">{data.company1.name}</h3>
+                      <div className="space-y-2">
+                        {data.company1.uniqueStrengths.map((strength, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                            <span className="text-muted-foreground">{strength}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-primary">{data.company2.name}</h3>
+                      <div className="space-y-2">
+                        {data.company2.uniqueStrengths.map((strength, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                            <span className="text-muted-foreground">{strength}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <FeatureComparison data={data} />
             
             <SummaryInsights data={data} />

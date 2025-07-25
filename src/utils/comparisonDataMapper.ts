@@ -163,8 +163,6 @@ export const mapFormStateToStructuredData = (
         name: vendor1.company_name,
         founded: vendor1.founding_year?.toString() || 'N/A',
         headquarters: vendor1.headquarters,
-        key_benefits: vendor1.key_benefits || [],
-        unique_strengths: vendor1.competitive_advantages || [],
       },
       {
         id: uuidv4(),
@@ -173,8 +171,6 @@ export const mapFormStateToStructuredData = (
         name: vendor2.company_name,
         founded: vendor2.founding_year?.toString() || 'N/A',
         headquarters: vendor2.headquarters,
-        key_benefits: vendor2.key_benefits || [],
-        unique_strengths: vendor2.competitive_advantages || [],
       }
     ],
     basic_info: formState.basicInfo
