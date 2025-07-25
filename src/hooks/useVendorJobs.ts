@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useEntityActions } from './useEntityActions';
+import { useEntityActionsWrapper } from './useEntityActionsWrapper';
 
 export interface VendorJob {
   id: string;
@@ -42,7 +42,7 @@ interface VendorJobInput {
   job_description: string;
 }
 
-const vendorJobActions = useEntityActions<VendorJob, VendorJobInput>({
+const vendorJobActions = useEntityActionsWrapper<VendorJob, VendorJobInput>({
   tableName: 'vendor_jobs',
   queryKey: ['vendor-jobs'],
   entityName: 'Job posting',
@@ -57,24 +57,6 @@ const vendorJobActions = useEntityActions<VendorJob, VendorJobInput>({
   ],
 });
 
-export const useCreateVendorJob = () => {
-  const { create } = vendorJobActions;
-  return {
-    ...create,
-    mutate: (data: VendorJobInput, options?: any) => create.mutate({ data }, options),
-    mutateAsync: (data: VendorJobInput) => create.mutateAsync({ data }),
-  };
-};
-
-export const useUpdateVendorJob = () => {
-  const { update } = vendorJobActions;
-  return {
-    ...update,
-    mutate: ({ id, ...data }: { id: string } & Partial<VendorJobInput>, options?: any) => 
-      update.mutate({ id, data }, options),
-    mutateAsync: ({ id, ...data }: { id: string } & Partial<VendorJobInput>) => 
-      update.mutateAsync({ id, data }),
-  };
-};
-
+export const useCreateVendorJob = () => vendorJobActions.create;
+export const useUpdateVendorJob = () => vendorJobActions.update;
 export const useDeleteVendorJob = () => vendorJobActions.delete;

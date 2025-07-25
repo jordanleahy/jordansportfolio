@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { JobApplication, JobApplicationInput } from "@/types/jobApplication";
 import { useToast } from "@/hooks/use-toast";
-import { useEntityActions } from './useEntityActions';
+import { useEntityActionsWrapper } from './useEntityActionsWrapper';
 
 export const useJobApplications = () => {
   return useQuery({
@@ -19,7 +19,7 @@ export const useJobApplications = () => {
   });
 };
 
-const jobApplicationActions = useEntityActions<JobApplication, JobApplicationInput>({
+const jobApplicationActions = useEntityActionsWrapper<JobApplication, JobApplicationInput>({
   tableName: 'job_applications',
   queryKey: ['job-applications'],
   entityName: 'Application',
@@ -30,26 +30,8 @@ const jobApplicationActions = useEntityActions<JobApplication, JobApplicationInp
   },
 });
 
-export const useCreateJobApplication = () => {
-  const { create } = jobApplicationActions;
-  return {
-    ...create,
-    mutate: (data: JobApplicationInput, options?: any) => create.mutate({ data }, options),
-    mutateAsync: (data: JobApplicationInput) => create.mutateAsync({ data }),
-  };
-};
-
-export const useUpdateJobApplication = () => {
-  const { update } = jobApplicationActions;
-  return {
-    ...update,
-    mutate: ({ id, ...data }: { id: string } & JobApplicationInput, options?: any) => 
-      update.mutate({ id, data }, options),
-    mutateAsync: ({ id, ...data }: { id: string } & JobApplicationInput) => 
-      update.mutateAsync({ id, data }),
-  };
-};
-
+export const useCreateJobApplication = () => jobApplicationActions.create;
+export const useUpdateJobApplication = () => jobApplicationActions.update;
 export const useDeleteJobApplication = () => jobApplicationActions.delete;
 
 export const useJobApplicationByCompany = (companyName: string, jobDescriptionLink?: string) => {

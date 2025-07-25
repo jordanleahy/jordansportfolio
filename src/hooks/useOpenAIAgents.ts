@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { OpenAIAgent, CreateAgentData, UpdateAgentData } from '@/types/openaiAgent';
-import { useEntityActions } from './useEntityActions';
+import { useEntityActionsWrapper } from './useEntityActionsWrapper';
 
 export const useOpenAIAgents = () => {
   return useQuery({
@@ -35,7 +35,7 @@ export const useOpenAIAgent = (id: string) => {
   });
 };
 
-const agentActions = useEntityActions<OpenAIAgent, CreateAgentData>({
+const agentActions = useEntityActionsWrapper<OpenAIAgent, CreateAgentData>({
   tableName: 'openai_agents',
   queryKey: ['openai-agents'],
   entityName: 'Agent',
@@ -50,22 +50,6 @@ const agentActions = useEntityActions<OpenAIAgent, CreateAgentData>({
   ],
 });
 
-export const useCreateAgent = () => {
-  const { create } = agentActions;
-  return {
-    ...create,
-    mutate: (data: CreateAgentData, options?: any) => create.mutate({ data }, options),
-    mutateAsync: (data: CreateAgentData) => create.mutateAsync({ data }),
-  };
-};
-
-export const useUpdateAgent = () => {
-  const { update } = agentActions;
-  return {
-    ...update,
-    mutate: ({ id, ...data }: UpdateAgentData, options?: any) => update.mutate({ id, data }, options),
-    mutateAsync: ({ id, ...data }: UpdateAgentData) => update.mutateAsync({ id, data }),
-  };
-};
-
+export const useCreateAgent = () => agentActions.create;
+export const useUpdateAgent = () => agentActions.update;
 export const useDeleteAgent = () => agentActions.delete;
