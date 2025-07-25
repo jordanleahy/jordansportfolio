@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,35 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useVendors } from '@/hooks/useVendors';
-import { useCreateStructuredComparison, useUpdateStructuredComparison, useStructuredComparison } from '@/hooks/useComparisonsStructured';
-import { useGenerateComparison } from '@/hooks/useGenerateComparison';
-import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
+import { useStructuredComparison } from '@/hooks/useComparisonsStructured';
 import { useAuth } from '@/contexts/AuthContext';
 import { StructuredComparisonPreview } from '@/components/admin/StructuredComparisonPreview';
-
-interface FeatureRow {
-  feature: string;
-  company1: boolean | string;
-  company2: boolean | string;
-}
-
-interface UseCaseRow {
-  useCase: string;
-  bestFit: string;
-}
-
-interface BasicInfoRow {
-  category: string;
-  company1: string;
-  company2: string;
-}
+import { useComparisonForm } from '@/hooks/useComparisonForm';
 
 export const ComparisonForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,347 +25,48 @@ export const ComparisonForm: React.FC = () => {
   const { data: vendors } = useVendors();
   const { data: structuredComparison } = useStructuredComparison(id || '');
   
-  // Use only structured comparison hooks
-  const createStructuredComparison = useCreateStructuredComparison();
-  const updateStructuredComparison = useUpdateStructuredComparison();
-  const generateComparison = useGenerateComparison();
-
-  const [formData, setFormData] = useState({
-    title: '',
-    meta_title: '',
-    meta_description: '',
-    slug: '',
-    company1_id: '',
-    company2_id: '',
-    status: 'draft' as 'draft' | 'published',
+  // Use the new refactored hook
+  const {
+    state,
+    updateFromVendors,
+    updateFormData,
+    updateSummaryInsights,
+    addFeature,
+    removeFeature,
+    updateFeature,
+    addUseCase,
+    removeUseCase,
+    updateUseCase,
+    addBasicInfo,
+    removeBasicInfo,
+    updateBasicInfo,
+    handleGenerateComparison,
+    handleSubmit,
+    isGenerating,
+    isSubmitting,
+  } = useComparisonForm({
+    isEdit,
+    structuredComparison,
+    userId: user?.id
   });
 
-  const [features, setFeatures] = useState<FeatureRow[]>([
-    { feature: '', company1: '', company2: '' }
-  ]);
+  const selectedCompany1 = vendors?.find(v => v.id === state.formData.company1_id);
+  const selectedCompany2 = vendors?.find(v => v.id === state.formData.company2_id);
 
-  const [summaryInsights, setSummaryInsights] = useState({
-    company1: '',
-    company2: ''
-  });
-
-  const [useCases, setUseCases] = useState<UseCaseRow[]>([
-    { useCase: '', bestFit: '' }
-  ]);
-
-  const [basicInfo, setBasicInfo] = useState<BasicInfoRow[]>([
-    { category: 'Founded', company1: '', company2: '' },
-    { category: 'Headquarters', company1: '', company2: '' },
-    { category: 'Company Type', company1: '', company2: '' },
-    { category: 'Funding', company1: '', company2: '' },
-    { category: 'Investors', company1: '', company2: '' },
-    { category: 'Employee Size', company1: '', company2: '' },
-    { category: 'Delivery Model', company1: '', company2: '' },
-    { category: 'Target Customers', company1: '', company2: '' },
-    { category: 'Primary Solutions', company1: '', company2: '' },
-    { category: 'AI Core', company1: '', company2: '' },
-    { category: 'EHR Integration', company1: '', company2: '' }
-  ]);
-
-  const [generatedData, setGeneratedData] = useState<any>(null);
-
-  const selectedCompany1 = vendors?.find(v => v.id === formData.company1_id);
-  const selectedCompany2 = vendors?.find(v => v.id === formData.company2_id);
-
-  // Generate slug from title
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-  };
-
-  // Auto-generate title and slug when companies are selected
+  // Auto-generate form data when companies are selected
   useEffect(() => {
-    if (selectedCompany1 && selectedCompany2 && !isEdit) {
-      const title = `${selectedCompany1.company_name} vs ${selectedCompany2.company_name}`;
-      const slug = generateSlug(`${selectedCompany1.company_name}vs${selectedCompany2.company_name}`);
-      
-      setFormData(prev => ({
-        ...prev,
-        title,
-        slug,
-        meta_title: `${title} - Detailed Comparison`,
-        meta_description: `Compare ${selectedCompany1.company_name} and ${selectedCompany2.company_name}. Detailed analysis of features, pricing, and use cases.`
-      }));
-    }
-  }, [selectedCompany1, selectedCompany2, isEdit]);
+    updateFromVendors(selectedCompany1, selectedCompany2);
+  }, [selectedCompany1, selectedCompany2, updateFromVendors]);
 
-  // Load existing comparison data when editing
-  useEffect(() => {
-    if (isEdit && structuredComparison) {
-      // Populate basic form data
-      setFormData({
-        title: structuredComparison.title,
-        meta_title: structuredComparison.meta_title,
-        meta_description: structuredComparison.meta_description,
-        slug: structuredComparison.slug,
-        company1_id: structuredComparison.companies?.[0]?.vendor_id || '',
-        company2_id: structuredComparison.companies?.[1]?.vendor_id || '',
-        status: structuredComparison.status as 'draft' | 'published',
-      });
-
-      // Populate basic info rows
-      if (structuredComparison.basic_info && structuredComparison.basic_info.length > 0) {
-        setBasicInfo(structuredComparison.basic_info.map(info => ({
-          category: info.category,
-          company1: info.company1_value,
-          company2: info.company2_value,
-        })));
-      }
-
-      // Populate features
-      if (structuredComparison.features && structuredComparison.features.length > 0) {
-        setFeatures(structuredComparison.features.map(feature => ({
-          feature: feature.feature_name,
-          company1: feature.company1_value,
-          company2: feature.company2_value,
-        })));
-      }
-
-      // Populate use cases
-      if (structuredComparison.use_cases && structuredComparison.use_cases.length > 0) {
-        setUseCases(structuredComparison.use_cases.map(useCase => ({
-          useCase: useCase.use_case,
-          bestFit: useCase.best_fit,
-        })));
-      }
-
-      // Populate insights
-      if (structuredComparison.insights && structuredComparison.insights.length > 0) {
-        const company1Insight = structuredComparison.insights.find(i => i.company_position === 1);
-        const company2Insight = structuredComparison.insights.find(i => i.company_position === 2);
-        
-        setSummaryInsights({
-          company1: company1Insight?.insight_text || '',
-          company2: company2Insight?.insight_text || '',
-        });
-      }
-    }
-  }, [isEdit, structuredComparison]);
-
-  const addFeature = () => {
-    setFeatures([...features, { feature: '', company1: '', company2: '' }]);
-  };
-
-  const removeFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
-  };
-
-  const updateFeature = (index: number, field: keyof FeatureRow, value: string | boolean) => {
-    setFeatures(features.map((feature, i) => 
-      i === index ? { ...feature, [field]: value } : feature
-    ));
-  };
-
-  const addUseCase = () => {
-    setUseCases([...useCases, { useCase: '', bestFit: '' }]);
-  };
-
-  const removeUseCase = (index: number) => {
-    setUseCases(useCases.filter((_, i) => i !== index));
-  };
-
-  const handleGenerateComparison = async () => {
-    if (!selectedCompany1 || !selectedCompany2) {
-      toast.error('Please select both companies');
-      return;
-    }
-
-    try {
-      const result = await generateComparison.mutateAsync({ vendor1: selectedCompany1, vendor2: selectedCompany2 });
-      const parsedData = JSON.parse(result.generatedText);
-      
-      // Store the structured generated data for preview
-      setGeneratedData(parsedData);
-      
-      // Update form data with generated metadata
-      if (parsedData.comparison) {
-        setFormData(prev => ({
-          ...prev,
-          title: parsedData.comparison.title || '',
-          meta_title: parsedData.comparison.meta_title || '', 
-          meta_description: parsedData.comparison.meta_description || '',
-          slug: generateSlug(parsedData.comparison.title || '')
-        }));
-      }
-
-      // Update structured data arrays
-      if (parsedData.basic_info) {
-        setBasicInfo(parsedData.basic_info);
-      }
-      
-      if (parsedData.features) {
-        setFeatures(parsedData.features.map((f: any) => ({
-          feature: f.feature_name,
-          company1: f.company1_value,
-          company2: f.company2_value
-        })));
-      }
-      
-      if (parsedData.insights) {
-        const insight1 = parsedData.insights.find((i: any) => i.company_position === 1);
-        const insight2 = parsedData.insights.find((i: any) => i.company_position === 2);
-        setSummaryInsights({
-          company1: insight1?.insight_text || '',
-          company2: insight2?.insight_text || ''
-        });
-      }
-      
-      if (parsedData.use_cases) {
-        setUseCases(parsedData.use_cases.map((uc: any) => ({
-          useCase: uc.use_case,
-          bestFit: uc.best_fit
-        })));
-      }
-
-      toast.success('Comparison generated successfully');
-    } catch (error) {
-      console.error('Error generating comparison:', error);
-      toast.error('Failed to generate comparison');
+  const handleGenerateClick = async () => {
+    if (selectedCompany1 && selectedCompany2) {
+      await handleGenerateComparison(selectedCompany1, selectedCompany2);
     }
   };
 
-  const updateUseCase = (index: number, field: keyof UseCaseRow, value: string) => {
-    setUseCases(useCases.map((useCase, i) => 
-      i === index ? { ...useCase, [field]: value } : useCase
-    ));
-  };
-
-  const addBasicInfo = () => {
-    setBasicInfo([...basicInfo, { category: '', company1: '', company2: '' }]);
-  };
-
-  const removeBasicInfo = (index: number) => {
-    setBasicInfo(basicInfo.filter((_, i) => i !== index));
-  };
-
-  const updateBasicInfo = (index: number, field: keyof BasicInfoRow, value: string) => {
-    setBasicInfo(basicInfo.map((info, i) => 
-      i === index ? { ...info, [field]: value } : info
-    ));
-  };
-
-  const handleSubmit = async (status: 'draft' | 'published') => {
-    if (!selectedCompany1 || !selectedCompany2 || !user) {
-      toast.error('Please select both companies');
-      return;
-    }
-
-    // Show loading toast
-    const loadingToast = toast.loading(`${status === 'draft' ? 'Saving draft' : 'Publishing'} comparison...`);
-    
-    try {
-
-    // Prepare data for the new structured format
-    const structuredData = {
-      title: formData.title,
-      meta_title: formData.meta_title,
-      meta_description: formData.meta_description,
-      slug: formData.slug,
-      status,
-      created_by: user.id,
-      companies: [
-        {
-          company_position: 1,
-          vendor_id: selectedCompany1.id || undefined,
-          name: selectedCompany1.company_name,
-          founded: selectedCompany1.founding_year?.toString() || 'N/A',
-          headquarters: selectedCompany1.headquarters,
-          key_benefits: selectedCompany1.key_benefits || [],
-          unique_strengths: selectedCompany1.competitive_advantages || [],
-        },
-        {
-          company_position: 2,
-          vendor_id: selectedCompany2.id || undefined,
-          name: selectedCompany2.company_name,
-          founded: selectedCompany2.founding_year?.toString() || 'N/A',
-          headquarters: selectedCompany2.headquarters,
-          key_benefits: selectedCompany2.key_benefits || [],
-          unique_strengths: selectedCompany2.competitive_advantages || [],
-        }
-      ],
-      basic_info: basicInfo.filter(b => b.category.trim()).map(info => ({
-        category: info.category,
-        company1_value: info.company1,
-        company2_value: info.company2,
-        sort_order: 0 // Will be set automatically
-      })),
-      features: features.filter(f => f.feature.trim()).map(feature => ({
-        feature_name: feature.feature,
-        company1_value: feature.company1.toString(),
-        company2_value: feature.company2.toString(),
-        sort_order: 0 // Will be set automatically
-      })),
-      use_cases: useCases.filter(u => u.useCase.trim()).map(useCase => ({
-        use_case: useCase.useCase,
-        best_fit: useCase.bestFit,
-        sort_order: 0 // Will be set automatically
-      })),
-      insights: [
-        ...(summaryInsights.company1 ? [{
-          company_position: 1,
-          insight_text: summaryInsights.company1
-        }] : []),
-        ...(summaryInsights.company2 ? [{
-          company_position: 2,
-          insight_text: summaryInsights.company2
-        }] : [])
-      ]
-    };
-
-      if (isEdit && structuredComparison) {
-        // Update using structured approach
-        const comparisonId = structuredComparison?.id;
-        if (comparisonId) {
-          const updateData = {
-            id: comparisonId,
-            title: structuredData.title,
-            meta_title: structuredData.meta_title,
-            meta_description: structuredData.meta_description,
-            slug: structuredData.slug,
-            status: structuredData.status,
-            companies: structuredData.companies.map(company => ({ 
-              id: uuidv4(), 
-              ...company 
-            })),
-            basic_info: structuredData.basic_info.map(info => ({ 
-              id: uuidv4(), 
-              ...info 
-            })),
-            features: structuredData.features.map(feature => ({ 
-              id: uuidv4(), 
-              ...feature 
-            })),
-            use_cases: structuredData.use_cases.map(useCase => ({ 
-              id: uuidv4(), 
-              ...useCase 
-            })),
-            insights: structuredData.insights.map(insight => ({ 
-              id: uuidv4(), 
-              ...insight 
-            }))
-          };
-          await updateStructuredComparison.mutateAsync(updateData);
-          toast.dismiss(loadingToast);
-          toast.success(`Comparison ${status === 'draft' ? 'saved as draft' : 'published'} successfully`);
-        }
-      } else {
-        // Create using structured approach
-        await createStructuredComparison.mutateAsync(structuredData);
-        toast.dismiss(loadingToast);
-        toast.success(`Comparison ${status === 'draft' ? 'saved as draft' : 'published'} successfully`);
-      }
-      navigate('/admin/comparisons');
-    } catch (error) {
-      console.error('Save error:', error);
-      toast.dismiss(loadingToast);
-      toast.error(`Failed to ${status === 'draft' ? 'save' : 'publish'} comparison`);
+  const handleSaveClick = (status: 'draft' | 'published') => {
+    if (selectedCompany1 && selectedCompany2) {
+      handleSubmit(status, selectedCompany1, selectedCompany2);
     }
   };
 
@@ -411,7 +92,7 @@ export const ComparisonForm: React.FC = () => {
         </div>
 
         {/* Generated Comparison Preview */}
-        {generatedData && (
+        {state.generatedData && (
           <div className="mb-8">
             <Card>
               <CardHeader>
@@ -422,7 +103,7 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <StructuredComparisonPreview 
-                  data={generatedData} 
+                  data={state.generatedData} 
                   company1Name={selectedCompany1?.company_name}
                   company2Name={selectedCompany2?.company_name}
                 />
@@ -439,7 +120,7 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {generateComparison.isPending ? (
+                {isGenerating ? (
                   <>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -473,9 +154,10 @@ export const ComparisonForm: React.FC = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="company1">Company 1</Label>
-                        <Select value={formData.company1_id} onValueChange={(value) => 
-                          setFormData(prev => ({ ...prev, company1_id: value }))
-                        }>
+                        <Select 
+                          value={state.formData.company1_id} 
+                          onValueChange={(value) => updateFormData({ company1_id: value })}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select first company" />
                           </SelectTrigger>
@@ -490,14 +172,15 @@ export const ComparisonForm: React.FC = () => {
                       </div>
                       <div>
                         <Label htmlFor="company2">Company 2</Label>
-                        <Select value={formData.company2_id} onValueChange={(value) => 
-                          setFormData(prev => ({ ...prev, company2_id: value }))
-                        }>
+                        <Select 
+                          value={state.formData.company2_id} 
+                          onValueChange={(value) => updateFormData({ company2_id: value })}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select second company" />
                           </SelectTrigger>
                           <SelectContent className="bg-background border border-border shadow-lg z-50">
-                            {vendors?.filter(v => v.id !== formData.company1_id).map(vendor => (
+                            {vendors?.filter(v => v.id !== state.formData.company1_id).map(vendor => (
                               <SelectItem key={vendor.id} value={vendor.id}>
                                 {vendor.company_name} {vendor.status !== 'published' && '(Draft)'}
                               </SelectItem>
@@ -511,8 +194,8 @@ export const ComparisonForm: React.FC = () => {
                       <Label htmlFor="title">Title</Label>
                       <Input
                         id="title"
-                        value={formData.title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        value={state.formData.title}
+                        onChange={(e) => updateFormData({ title: e.target.value })}
                         placeholder="e.g., SmarterDx vs Iodine Software"
                       />
                     </div>
@@ -521,8 +204,8 @@ export const ComparisonForm: React.FC = () => {
                       <Label htmlFor="slug">URL Slug</Label>
                       <Input
                         id="slug"
-                        value={formData.slug}
-                        onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                        value={state.formData.slug}
+                        onChange={(e) => updateFormData({ slug: e.target.value })}
                         placeholder="e.g., smarterdx-vs-iodine"
                       />
                     </div>
@@ -531,8 +214,8 @@ export const ComparisonForm: React.FC = () => {
                       <Label htmlFor="meta_title">Meta Title</Label>
                       <Input
                         id="meta_title"
-                        value={formData.meta_title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                        value={state.formData.meta_title}
+                        onChange={(e) => updateFormData({ meta_title: e.target.value })}
                         placeholder="SEO title"
                       />
                     </div>
@@ -541,8 +224,8 @@ export const ComparisonForm: React.FC = () => {
                       <Label htmlFor="meta_description">Meta Description</Label>
                       <Textarea
                         id="meta_description"
-                        value={formData.meta_description}
-                        onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                        value={state.formData.meta_description}
+                        onChange={(e) => updateFormData({ meta_description: e.target.value })}
                         placeholder="SEO description"
                         rows={3}
                       />
@@ -565,7 +248,7 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {generateComparison.isPending ? (
+                  {isGenerating ? (
                     Array.from({ length: 11 }, (_, index) => (
                       <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
                         <div className="space-y-2">
@@ -584,13 +267,13 @@ export const ComparisonForm: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    basicInfo.map((info, index) => (
-                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                    state.basicInfo.map((info) => (
+                      <div key={info.id} className="grid md:grid-cols-4 gap-4 items-end">
                         <div>
                           <Label>Category</Label>
                           <Input
                             value={info.category}
-                            onChange={(e) => updateBasicInfo(index, 'category', e.target.value)}
+                            onChange={(e) => updateBasicInfo(info.id, { category: e.target.value })}
                             placeholder="e.g., Founded, Headquarters"
                           />
                         </div>
@@ -598,7 +281,7 @@ export const ComparisonForm: React.FC = () => {
                           <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
                           <Input
                             value={info.company1}
-                            onChange={(e) => updateBasicInfo(index, 'company1', e.target.value)}
+                            onChange={(e) => updateBasicInfo(info.id, { company1: e.target.value })}
                             placeholder="Company 1 value"
                           />
                         </div>
@@ -606,15 +289,15 @@ export const ComparisonForm: React.FC = () => {
                           <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
                           <Input
                             value={info.company2}
-                            onChange={(e) => updateBasicInfo(index, 'company2', e.target.value)}
+                            onChange={(e) => updateBasicInfo(info.id, { company2: e.target.value })}
                             placeholder="Company 2 value"
                           />
                         </div>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeBasicInfo(index)}
-                          disabled={basicInfo.length === 1}
+                          onClick={() => removeBasicInfo(info.id)}
+                          disabled={state.basicInfo.length === 1}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -638,7 +321,7 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {generateComparison.isPending ? (
+                  {isGenerating ? (
                     Array.from({ length: 5 }, (_, index) => (
                       <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
                         <div className="space-y-2">
@@ -657,13 +340,13 @@ export const ComparisonForm: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    features.map((feature, index) => (
-                      <div key={index} className="grid md:grid-cols-4 gap-4 items-end">
+                    state.features.map((feature) => (
+                      <div key={feature.id} className="grid md:grid-cols-4 gap-4 items-end">
                         <div>
                           <Label>Feature</Label>
                           <Input
                             value={feature.feature}
-                            onChange={(e) => updateFeature(index, 'feature', e.target.value)}
+                            onChange={(e) => updateFeature(feature.id, { feature: e.target.value })}
                             placeholder="Feature name"
                           />
                         </div>
@@ -671,7 +354,7 @@ export const ComparisonForm: React.FC = () => {
                           <Label>{selectedCompany1?.company_name || 'Company 1'}</Label>
                           <Input
                             value={feature.company1.toString()}
-                            onChange={(e) => updateFeature(index, 'company1', e.target.value)}
+                            onChange={(e) => updateFeature(feature.id, { company1: e.target.value })}
                             placeholder="Yes/No or description"
                           />
                         </div>
@@ -679,15 +362,15 @@ export const ComparisonForm: React.FC = () => {
                           <Label>{selectedCompany2?.company_name || 'Company 2'}</Label>
                           <Input
                             value={feature.company2.toString()}
-                            onChange={(e) => updateFeature(index, 'company2', e.target.value)}
+                            onChange={(e) => updateFeature(feature.id, { company2: e.target.value })}
                             placeholder="Yes/No or description"
                           />
                         </div>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeFeature(index)}
-                          disabled={features.length === 1}
+                          onClick={() => removeFeature(feature.id)}
+                          disabled={state.features.length === 1}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -704,7 +387,7 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Summary Insights</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {generateComparison.isPending ? (
+                {isGenerating ? (
                   <>
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-32" />
@@ -720,8 +403,8 @@ export const ComparisonForm: React.FC = () => {
                     <div>
                       <Label>{selectedCompany1?.company_name || 'Company 1'} Summary</Label>
                       <Textarea
-                        value={summaryInsights.company1}
-                        onChange={(e) => setSummaryInsights(prev => ({ ...prev, company1: e.target.value }))}
+                        value={state.summaryInsights.company1}
+                        onChange={(e) => updateSummaryInsights({ company1: e.target.value })}
                         placeholder="Summary insight for company 1"
                         rows={4}
                       />
@@ -729,8 +412,8 @@ export const ComparisonForm: React.FC = () => {
                     <div>
                       <Label>{selectedCompany2?.company_name || 'Company 2'} Summary</Label>
                       <Textarea
-                        value={summaryInsights.company2}
-                        onChange={(e) => setSummaryInsights(prev => ({ ...prev, company2: e.target.value }))}
+                        value={state.summaryInsights.company2}
+                        onChange={(e) => updateSummaryInsights({ company2: e.target.value })}
                         placeholder="Summary insight for company 2"
                         rows={4}
                       />
@@ -753,7 +436,7 @@ export const ComparisonForm: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {generateComparison.isPending ? (
+                  {isGenerating ? (
                     Array.from({ length: 3 }, (_, index) => (
                       <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
                         <div className="md:col-span-1 space-y-2">
@@ -768,13 +451,13 @@ export const ComparisonForm: React.FC = () => {
                       </div>
                     ))
                   ) : (
-                    useCases.map((useCase, index) => (
-                      <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
+                    state.useCases.map((useCase) => (
+                      <div key={useCase.id} className="grid md:grid-cols-3 gap-4 items-end">
                         <div className="md:col-span-1">
                           <Label>Use Case</Label>
                           <Input
                             value={useCase.useCase}
-                            onChange={(e) => updateUseCase(index, 'useCase', e.target.value)}
+                            onChange={(e) => updateUseCase(useCase.id, { useCase: e.target.value })}
                             placeholder="Use case description"
                           />
                         </div>
@@ -782,7 +465,7 @@ export const ComparisonForm: React.FC = () => {
                           <Label>Best Fit</Label>
                           <Select
                             value={useCase.bestFit}
-                            onValueChange={(value) => updateUseCase(index, 'bestFit', value)}
+                            onValueChange={(value) => updateUseCase(useCase.id, { bestFit: value })}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select best fit" />
@@ -801,8 +484,8 @@ export const ComparisonForm: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeUseCase(index)}
-                          disabled={useCases.length === 1}
+                          onClick={() => removeUseCase(useCase.id)}
+                          disabled={state.useCases.length === 1}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -821,32 +504,32 @@ export const ComparisonForm: React.FC = () => {
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {formData.company1_id && formData.company2_id && (
+                {state.formData.company1_id && state.formData.company2_id && (
                   <Button
-                    onClick={handleGenerateComparison}
-                    disabled={generateComparison.isPending}
+                    onClick={handleGenerateClick}
+                    disabled={isGenerating}
                     variant="secondary"
                     className="w-full gap-2"
                   >
-                    {generateComparison.isPending ? 'Generating...' : '🤖 Generate with AI'}
+                    {isGenerating ? 'Generating...' : '🤖 Generate with AI'}
                   </Button>
                 )}
                 <Button
-                  onClick={() => handleSubmit('draft')}
+                  onClick={() => handleSaveClick('draft')}
                   variant="outline"
                   className="w-full gap-2"
-                  disabled={createStructuredComparison.isPending || updateStructuredComparison.isPending}
+                  disabled={isSubmitting}
                 >
                   <Save className="h-4 w-4" />
-                  {(createStructuredComparison.isPending || updateStructuredComparison.isPending) ? 'Saving...' : 'Save as Draft'}
+                  {isSubmitting ? 'Saving...' : 'Save as Draft'}
                 </Button>
                 <Button
-                  onClick={() => handleSubmit('published')}
+                  onClick={() => handleSaveClick('published')}
                   className="w-full gap-2"
-                  disabled={createStructuredComparison.isPending || updateStructuredComparison.isPending}
+                  disabled={isSubmitting}
                 >
                   <Eye className="h-4 w-4" />
-                  {(createStructuredComparison.isPending || updateStructuredComparison.isPending) ? 'Publishing...' : 'Publish'}
+                  {isSubmitting ? 'Publishing...' : 'Publish'}
                 </Button>
               </CardContent>
             </Card>
