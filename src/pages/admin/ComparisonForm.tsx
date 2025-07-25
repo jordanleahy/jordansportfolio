@@ -16,7 +16,7 @@ import { useCreateStructuredComparison, useUpdateStructuredComparison, useStruct
 import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { ComparisonPreview } from '@/components/admin/ComparisonPreview';
+import { StructuredComparisonPreview } from '@/components/admin/StructuredComparisonPreview';
 
 interface FeatureRow {
   feature: string;
@@ -420,7 +420,11 @@ export const ComparisonForm: React.FC = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <ComparisonPreview data={generatedData} />
+                <StructuredComparisonPreview 
+                  data={generatedData} 
+                  company1Name={selectedCompany1?.company_name}
+                  company2Name={selectedCompany2?.company_name}
+                />
               </CardContent>
             </Card>
           </div>
