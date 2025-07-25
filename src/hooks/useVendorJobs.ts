@@ -42,7 +42,7 @@ interface VendorJobInput {
   job_description: string;
 }
 
-const vendorJobActions = useEntityActionsWrapper<VendorJob, VendorJobInput>({
+const useVendorJobActions = () => useEntityActionsWrapper<VendorJob, VendorJobInput>({
   tableName: 'vendor_jobs',
   queryKey: ['vendor-jobs'],
   entityName: 'Job posting',
@@ -57,6 +57,6 @@ const vendorJobActions = useEntityActionsWrapper<VendorJob, VendorJobInput>({
   ],
 });
 
-export const useCreateVendorJob = () => vendorJobActions.create;
-export const useUpdateVendorJob = () => vendorJobActions.update;
-export const useDeleteVendorJob = () => vendorJobActions.delete;
+export const useCreateVendorJob = () => useVendorJobActions().create;
+export const useUpdateVendorJob = () => useVendorJobActions().update;
+export const useDeleteVendorJob = () => useVendorJobActions().delete;

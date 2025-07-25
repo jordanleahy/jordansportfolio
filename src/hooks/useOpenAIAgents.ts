@@ -35,7 +35,7 @@ export const useOpenAIAgent = (id: string) => {
   });
 };
 
-const agentActions = useEntityActionsWrapper<OpenAIAgent, CreateAgentData>({
+const useAgentActions = () => useEntityActionsWrapper<OpenAIAgent, CreateAgentData>({
   tableName: 'openai_agents',
   queryKey: ['openai-agents'],
   entityName: 'Agent',
@@ -50,6 +50,6 @@ const agentActions = useEntityActionsWrapper<OpenAIAgent, CreateAgentData>({
   ],
 });
 
-export const useCreateAgent = () => agentActions.create;
-export const useUpdateAgent = () => agentActions.update;
-export const useDeleteAgent = () => agentActions.delete;
+export const useCreateAgent = () => useAgentActions().create;
+export const useUpdateAgent = () => useAgentActions().update;
+export const useDeleteAgent = () => useAgentActions().delete;

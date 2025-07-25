@@ -19,7 +19,7 @@ export const useJobApplications = () => {
   });
 };
 
-const jobApplicationActions = useEntityActionsWrapper<JobApplication, JobApplicationInput>({
+const useJobApplicationActions = () => useEntityActionsWrapper<JobApplication, JobApplicationInput>({
   tableName: 'job_applications',
   queryKey: ['job-applications'],
   entityName: 'Application',
@@ -30,9 +30,9 @@ const jobApplicationActions = useEntityActionsWrapper<JobApplication, JobApplica
   },
 });
 
-export const useCreateJobApplication = () => jobApplicationActions.create;
-export const useUpdateJobApplication = () => jobApplicationActions.update;
-export const useDeleteJobApplication = () => jobApplicationActions.delete;
+export const useCreateJobApplication = () => useJobApplicationActions().create;
+export const useUpdateJobApplication = () => useJobApplicationActions().update;
+export const useDeleteJobApplication = () => useJobApplicationActions().delete;
 
 export const useJobApplicationByCompany = (companyName: string, jobDescriptionLink?: string) => {
   return useQuery({
