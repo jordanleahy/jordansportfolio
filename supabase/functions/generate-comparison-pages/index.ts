@@ -27,6 +27,10 @@ serve(async (req) => {
 
     console.log(`Generating comparison between ${vendor1.company_name} and ${vendor2.company_name}`);
 
+    // Create slug-friendly company names
+    const company1Slug = vendor1.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const company2Slug = vendor2.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
     const systemContent = `You are the GenerateComparisonPages AI agent. Create clean, scannable healthcare company comparisons for STRUCTURED DATABASE STORAGE.
 
 ABSOLUTELY CRITICAL - ENFORCE STRICTLY:
@@ -80,7 +84,7 @@ OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION
     "title": "${vendor1.company_name} vs ${vendor2.company_name}",
     "meta_title": "${vendor1.company_name} vs ${vendor2.company_name} Comparison", 
     "meta_description": "Compare ${vendor1.company_name} and ${vendor2.company_name} healthcare solutions",
-    "slug": "${vendor1.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-vs-${vendor2.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-')}",
+    "slug": "${company1Slug}-vs-${company2Slug}",
     "status": "published"
   },
   "companies": [
