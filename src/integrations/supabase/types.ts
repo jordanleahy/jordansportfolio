@@ -1786,6 +1786,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_calendar_theme_json_processor: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       insert_category_content: {
         Args: { category_name: string; posts_data: Json }
         Returns: number
