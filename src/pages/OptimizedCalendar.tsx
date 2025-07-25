@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
@@ -13,13 +14,14 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 // Lazy load components
 const PostForm = React.lazy(() => import('@/components/calendar/PostForm').then(module => ({ default: module.PostForm })));
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
-const JsonImportDialog = React.lazy(() => import('@/components/calendar/JsonImportDialog').then(module => ({ default: module.JsonImportDialog })));
+const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModal').then(module => ({ default: module.ThemeImportModal })));
 
 type CategoryType = 'cdi' | 'contracts' | 'forms' | 'coding ai';
 
 export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<CategoryType>('cdi');
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const { toast } = useToast();
 
   // Use optimized queries with caching
@@ -84,9 +86,18 @@ export default function OptimizedCalendar() {
 
         <div className="flex justify-between items-center mb-8">
           <div></div>
-          <Suspense fallback={<div>Loading...</div>}>
-            <JsonImportDialog onImportComplete={handleImportComplete} />
-          </Suspense>
+          <div className="flex gap-2">
+            <Button onClick={() => setImportModalOpen(true)}>
+              Import Theme Data
+            </Button>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ThemeImportModal 
+                open={importModalOpen} 
+                onOpenChange={setImportModalOpen} 
+                onImportComplete={handleImportComplete} 
+              />
+            </Suspense>
+          </div>
         </div>
 
         <Tabs 
