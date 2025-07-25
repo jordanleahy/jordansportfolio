@@ -155,17 +155,6 @@ const Blog = () => {
         <meta name="twitter:image" content={blogSEO.image} />
       </Helmet>
       <PageLayout>
-      {/* Hero Section */}
-      <section className="py-16 px-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-5xl font-bold mb-4">Design Stories</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Insights, learnings, and behind-the-scenes stories from designing products that matter.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Featured Post */}
       {featuredPost && (
