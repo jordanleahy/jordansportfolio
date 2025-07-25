@@ -8,7 +8,7 @@ export const teamData = {
       description: "Senior Product Designer",
       items: [
         "Clinical workflow research & analysis",
-        "Predictive dashboard design", 
+        "End to end product design", 
         "User testing with medical staff",
         "Design system implementation"
       ]
