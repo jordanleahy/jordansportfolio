@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from 'lucide-react';
 import { CreateAgentData, AgentStatus } from '@/types/openaiAgent';
+import { AgentTemplateSelector } from './AgentTemplateSelector';
 
 export const CreateAgentModal = () => {
   const [open, setOpen] = useState(false);
@@ -36,7 +37,9 @@ export const CreateAgentModal = () => {
     owner: '',
     status: 'active' as AgentStatus,
     tags: [],
-    notes: ''
+    notes: '',
+    system_prompts: [],
+    supported_categories: []
   });
 
   const createAgent = useCreateAgent();
@@ -57,7 +60,9 @@ export const CreateAgentModal = () => {
           owner: '',
           status: 'active' as AgentStatus,
           tags: [],
-          notes: ''
+          notes: '',
+          system_prompts: [],
+          supported_categories: []
         });
       }
     });
@@ -66,6 +71,10 @@ export const CreateAgentModal = () => {
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag);
     setFormData({ ...formData, tags });
+  };
+
+  const handleTemplateSelect = (template: CreateAgentData) => {
+    setFormData(template);
   };
 
   return (
@@ -83,6 +92,8 @@ export const CreateAgentModal = () => {
             Add a new AI agent to track and manage automation workflows.
           </DialogDescription>
         </DialogHeader>
+
+        <AgentTemplateSelector onSelectTemplate={handleTemplateSelect} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

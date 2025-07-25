@@ -31,8 +31,9 @@ import {
 import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useOpenAIAgent, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
-import { AgentStatus, CreateAgentData } from '@/types/openaiAgent';
+import { AgentStatus, CreateAgentData, SystemPrompt } from '@/types/openaiAgent';
 import { AgentDeleteModal } from '@/components/agents/AgentDeleteModal';
+import { SystemPromptsTab } from '@/components/agents/SystemPromptsTab';
 import { toast } from 'sonner';
 
 const agentSchema = z.object({
@@ -47,6 +48,11 @@ const agentSchema = z.object({
   status: z.enum(['active', 'paused', 'deprecated']),
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
+  system_prompts: z.array(z.object({
+    category: z.string(),
+    prompt: z.string()
+  })).optional(),
+  supported_categories: z.array(z.string()).optional(),
   // Advanced settings
   temperature: z.number().min(0).max(2).optional(),
   max_tokens: z.number().min(1).max(4000).optional(),
@@ -68,7 +74,7 @@ export const AgentEdit = () => {
   const createAgent = useCreateAgent();
   
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'tools' | 'guardrails'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'prompts' | 'tools' | 'guardrails'>('basic');
 
   const form = useForm<AgentFormData>({
     resolver: zodResolver(agentSchema),
@@ -84,6 +90,8 @@ export const AgentEdit = () => {
       status: 'active',
       tags: [],
       notes: '',
+      system_prompts: [],
+      supported_categories: [],
       temperature: 0.7,
       max_tokens: 1000,
       top_p: 1,
@@ -106,6 +114,8 @@ export const AgentEdit = () => {
         status: agent.status,
         tags: agent.tags || [],
         notes: agent.notes || '',
+        system_prompts: agent.system_prompts || [],
+        supported_categories: agent.supported_categories || [],
         // Default advanced settings if not present
         temperature: 0.7,
         max_tokens: 1000,
@@ -136,6 +146,11 @@ export const AgentEdit = () => {
     }
   };
 
+  const handleSystemPromptsChange = (prompts: SystemPrompt[], categories: string[]) => {
+    form.setValue('system_prompts', prompts);
+    form.setValue('supported_categories', categories);
+  };
+
   const handleClone = () => {
     if (!agent) return;
     
@@ -150,7 +165,9 @@ export const AgentEdit = () => {
       owner: agent.owner,
       status: 'paused',
       tags: agent.tags || [],
-      notes: agent.notes || ''
+      notes: agent.notes || '',
+      system_prompts: agent.system_prompts || [],
+      supported_categories: agent.supported_categories || []
     };
     
     createAgent.mutate(cloneData, {
@@ -240,12 +257,13 @@ export const AgentEdit = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Tab Navigation */}
             <div className="flex gap-1 p-1 bg-muted rounded-lg">
-              {[
-                { id: 'basic', label: 'Basic Info', icon: Settings },
-                { id: 'advanced', label: 'Model Settings', icon: Zap },
-                { id: 'tools', label: 'Tools & Permissions', icon: Code },
-                { id: 'guardrails', label: 'Guardrails', icon: Shield },
-              ].map((tab) => (
+            {[
+              { id: 'basic', label: 'Basic Info', icon: Settings },
+              { id: 'advanced', label: 'Model Settings', icon: Zap },
+              { id: 'prompts', label: 'System Prompts', icon: Code },
+              { id: 'tools', label: 'Tools & Permissions', icon: Code },
+              { id: 'guardrails', label: 'Guardrails', icon: Shield },
+            ].map((tab) => (
                 <Button
                   key={tab.id}
                   type="button"
@@ -539,6 +557,15 @@ export const AgentEdit = () => {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* System Prompts Tab */}
+            {activeTab === 'prompts' && (
+              <SystemPromptsTab
+                systemPrompts={form.watch('system_prompts') || []}
+                supportedCategories={form.watch('supported_categories') || []}
+                onChange={handleSystemPromptsChange}
+              />
             )}
 
             {/* Tools & Permissions Tab */}
