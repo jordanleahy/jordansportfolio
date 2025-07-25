@@ -96,8 +96,11 @@ const ComparisonDetail = () => {
   const insight1 = structuredComparison.insights?.find(i => i.company_position === 1);
   const insight2 = structuredComparison.insights?.find(i => i.company_position === 2);
   
-  // Create lookup from basic_info table
-  const basicInfoLookup = structuredComparison.basic_info?.reduce((acc, info) => {
+  // Create lookup from basic_info table, excluding Key Benefits and Unique Strengths
+  const basicInfoLookup = structuredComparison.basic_info?.filter(info => 
+    !info.category.startsWith('Key Benefits') && 
+    !info.category.startsWith('Unique Strengths')
+  ).reduce((acc, info) => {
     acc[info.category] = {
       company1: info.company1_value,
       company2: info.company2_value
