@@ -488,7 +488,7 @@ const BlogEditor = () => {
                     rows={4}
                     maxLength={450}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Required, 250-450 characters (50-75 words)</p>
+                  
                 </div>
               </CardContent>
             </Card>
