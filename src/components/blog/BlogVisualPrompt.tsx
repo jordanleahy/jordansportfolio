@@ -151,7 +151,11 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
     setIsGenerating(true);
     try {
       const userContent = `Headline: ${headline}\nContent: ${content}`;
-      const cacheKey = `blog_visual_prompt_${category}_${btoa(userContent).slice(0, 20)}`;
+      // Create a more unique cache key using full content hash
+      const contentHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(userContent));
+      const hashArray = Array.from(new Uint8Array(contentHash));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const cacheKey = `blog_visual_prompt_${category}_${hashHex.slice(0, 16)}`;
       
       // Check if we have a cached prompt
       if (!isGenerating) {
