@@ -15,6 +15,7 @@ import { useVendors } from '@/hooks/useVendors';
 import { useCreateStructuredComparison, useUpdateStructuredComparison, useStructuredComparison } from '@/hooks/useComparisonsStructured';
 import { useGenerateComparison } from '@/hooks/useGenerateComparison';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/contexts/AuthContext';
 import { StructuredComparisonPreview } from '@/components/admin/StructuredComparisonPreview';
 
@@ -350,23 +351,23 @@ export const ComparisonForm: React.FC = () => {
             slug: structuredData.slug,
             status: structuredData.status,
             companies: structuredData.companies.map(company => ({ 
-              id: '', // Temporary ID, will be generated
+              id: uuidv4(), 
               ...company 
             })),
             basic_info: structuredData.basic_info.map(info => ({ 
-              id: '', // Temporary ID, will be generated
+              id: uuidv4(), 
               ...info 
             })),
             features: structuredData.features.map(feature => ({ 
-              id: '', // Temporary ID, will be generated
+              id: uuidv4(), 
               ...feature 
             })),
             use_cases: structuredData.use_cases.map(useCase => ({ 
-              id: '', // Temporary ID, will be generated
+              id: uuidv4(), 
               ...useCase 
             })),
             insights: structuredData.insights.map(insight => ({ 
-              id: '', // Temporary ID, will be generated
+              id: uuidv4(), 
               ...insight 
             }))
           };
