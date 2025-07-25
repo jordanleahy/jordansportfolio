@@ -27,7 +27,9 @@ export const COMPARISON_DEFAULTS = {
     'AI Core',
     'EHR Integration',
     'Notable Customers',
-    'Partnerships'
+    'Partnerships',
+    'Certifications',
+    'Awards & Recognition'
   ] as const,
   
   // Feature comparison defaults

@@ -127,7 +127,7 @@ const ComparisonDetail = () => {
       ehrIntegration: basicInfoLookup['EHR Integration']?.company1 || 'N/A',
       clientBase: basicInfoLookup['Notable Customers']?.company1 || 'N/A',
       certifications: basicInfoLookup['Certifications']?.company1 || 'N/A',
-      awards: basicInfoLookup['Awards']?.company1 || 'N/A',
+      awards: basicInfoLookup['Awards & Recognition']?.company1 || 'N/A',
       location: company1?.headquarters || basicInfoLookup['Headquarters']?.company1 || 'N/A',
       keyBenefits: company1?.key_benefits || [],
       uniqueStrengths: company1?.unique_strengths || []
@@ -147,7 +147,7 @@ const ComparisonDetail = () => {
       ehrIntegration: basicInfoLookup['EHR Integration']?.company2 || 'N/A',
       clientBase: basicInfoLookup['Notable Customers']?.company2 || 'N/A',
       certifications: basicInfoLookup['Certifications']?.company2 || 'N/A',
-      awards: basicInfoLookup['Awards']?.company2 || 'N/A',
+      awards: basicInfoLookup['Awards & Recognition']?.company2 || 'N/A',
       location: company2?.headquarters || basicInfoLookup['Headquarters']?.company2 || 'N/A',
       keyBenefits: company2?.key_benefits || [],
       uniqueStrengths: company2?.unique_strengths || []

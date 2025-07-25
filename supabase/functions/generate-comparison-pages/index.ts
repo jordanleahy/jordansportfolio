@@ -77,6 +77,8 @@ Extract real data from vendor objects. Use "N/A" only if field is truly missing:
 - EHR Integration: extract EHR systems from vendor.key_features or vendor.specialties or "N/A"
 - Notable Customers: vendor.notable_customers.join(", ") (limit to top 3-4) or "N/A"
 - Partnerships: vendor.partnerships.join(", ") (focus on major tech partners) or "N/A"
+- Certifications: vendor.certifications.join(", ") or "N/A"
+- Awards & Recognition: vendor.awards_recognition.join(", ") or "N/A"
 
 CRITICAL: DO NOT use placeholder text like "Company1", "Series C", "Investor1". 
 Extract the ACTUAL data from the vendor objects provided. If a field is missing, use "N/A".
@@ -135,7 +137,9 @@ OUTPUT FORMAT: Return ONLY a valid JSON object for STRUCTURED DATABASE INSERTION
     {"category": "AI Core", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 9},
     {"category": "EHR Integration", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 10},
     {"category": "Notable Customers", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 11},
-    {"category": "Partnerships", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 12}
+    {"category": "Partnerships", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 12},
+    {"category": "Certifications", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 13},
+    {"category": "Awards & Recognition", "company1_value": "ACTUAL_DATA", "company2_value": "ACTUAL_DATA", "sort_order": 14}
   ],
   "features": [
     {"feature_name": "Real-time Analytics", "company1_value": "Yes", "company2_value": "Yes", "sort_order": 0},
