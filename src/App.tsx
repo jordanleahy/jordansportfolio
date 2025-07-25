@@ -32,6 +32,7 @@ import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
 
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
@@ -132,6 +133,7 @@ function App() {
                 <Route path="/rcmcompanies" element={<RCMCompanies />} />
                 <Route path="/rcmcompanies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
+                <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
