@@ -1,6 +1,7 @@
 import { useState, useMemo, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenAIAgents, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
+import { useFilteredAndSortedAgents, useAgentPagination, SortField, SortDirection } from '@/hooks/useAgentTableLogic';
 import { AgentStatusBadge } from './AgentStatusBadge';
 import { AgentDeleteModal } from './AgentDeleteModal';
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,6 @@ import {
   Play, 
   Pause, 
   Trash2, 
-  Activity, 
-  Zap, 
   MoreHorizontal, 
   Copy, 
   ArrowUpDown, 
@@ -48,8 +47,6 @@ import { AgentStatus, OpenAIAgent, CreateAgentData } from '@/types/openaiAgent';
 import { CreateAgentModal } from './CreateAgentModal';
 import { FEATURED_AGENTS } from '@/constants/featuredAgents';
 
-type SortField = 'name' | 'status' | 'model_version' | 'owner' | 'updated_at';
-type SortDirection = 'asc' | 'desc';
 
 interface TableState {
   searchTerm: string;
@@ -143,47 +140,24 @@ export const EnhancedAgentsTable = () => {
 
   const [state, dispatch] = useReducer(tableReducer, initialState);
 
-  // Filter and sort agents
-  const filteredAndSortedAgents = useMemo(() => {
-    if (!agents) return [];
+  // Use custom hooks for filtering, sorting, and pagination
+  const filteredAndSortedAgents = useFilteredAndSortedAgents({
+    agents,
+    searchTerm: state.searchTerm,
+    statusFilter: state.statusFilter,
+    sortField: state.sortField,
+    sortDirection: state.sortDirection,
+  });
 
-    let filtered = agents.filter((agent) => {
-      const matchesSearch = agent.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           agent.purpose.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-                           agent.owner.toLowerCase().includes(state.searchTerm.toLowerCase());
-      const matchesStatus = state.statusFilter === 'all' || agent.status === state.statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-
-    // Sort
-    filtered.sort((a, b) => {
-      let aValue: any = a[state.sortField];
-      let bValue: any = b[state.sortField];
-
-      if (state.sortField === 'updated_at') {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
-      } else if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-      }
-
-      if (state.sortDirection === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-    return filtered;
-  }, [agents, state.searchTerm, state.statusFilter, state.sortField, state.sortDirection]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredAndSortedAgents.length / state.pageSize);
-  const paginatedAgents = filteredAndSortedAgents.slice(
-    (state.currentPage - 1) * state.pageSize,
-    state.currentPage * state.pageSize
-  );
+  const { 
+    paginatedAgents, 
+    totalPages, 
+    totalCount,
+    startIndex,
+    endIndex,
+    hasNextPage,
+    hasPreviousPage 
+  } = useAgentPagination(filteredAndSortedAgents, state.pageSize, state.currentPage);
 
   const handleSort = (field: SortField) => {
     dispatch({ type: 'SET_SORT', payload: { field } });
@@ -514,7 +488,7 @@ export const EnhancedAgentsTable = () => {
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Showing {(state.currentPage - 1) * state.pageSize + 1} to {Math.min(state.currentPage * state.pageSize, filteredAndSortedAgents.length)} of {filteredAndSortedAgents.length} results
+                  Showing {startIndex} to {endIndex} of {totalCount} results
                 </span>
                 <Select 
                   value={state.pageSize.toString()} 
@@ -535,7 +509,7 @@ export const EnhancedAgentsTable = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={state.currentPage <= 1}
+                  disabled={!hasPreviousPage}
                   onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: state.currentPage - 1 })}
                 >
                   Previous
@@ -546,7 +520,7 @@ export const EnhancedAgentsTable = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  disabled={state.currentPage >= totalPages}
+                  disabled={!hasNextPage}
                   onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: state.currentPage + 1 })}
                 >
                   Next
@@ -555,7 +529,7 @@ export const EnhancedAgentsTable = () => {
             </div>
           )}
 
-          {filteredAndSortedAgents?.length === 0 && (
+          {totalCount === 0 && (
             <div className="text-center py-12">
               <div className="text-muted-foreground">
                 {state.searchTerm || state.statusFilter !== 'all' 
