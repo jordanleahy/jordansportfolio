@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { JobApplication, JobApplicationInput } from "@/types/jobApplication";
 import { useToast } from "@/hooks/use-toast";
+import { useEntityActions } from './useEntityActions';
 
 export const useJobApplications = () => {
   return useQuery({
@@ -18,106 +19,38 @@ export const useJobApplications = () => {
   });
 };
 
+const jobApplicationActions = useEntityActions<JobApplication, JobApplicationInput>({
+  tableName: 'job_applications',
+  queryKey: ['job-applications'],
+  entityName: 'Application',
+  onSuccessMessage: {
+    create: 'Your job application has been saved successfully.',
+    update: 'Your job application has been updated successfully.',
+    delete: 'Your job application has been deleted successfully.',
+  },
+});
+
 export const useCreateJobApplication = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (input: JobApplicationInput) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const { data, error } = await supabase
-        .from("job_applications")
-        .insert([{ ...input, user_id: user.id }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as JobApplication;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["job-applications"] });
-      toast({
-        title: "Application added",
-        description: "Your job application has been saved successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to save job application. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Create job application error:", error);
-    },
-  });
+  const { create } = jobApplicationActions;
+  return {
+    ...create,
+    mutate: (data: JobApplicationInput, options?: any) => create.mutate({ data }, options),
+    mutateAsync: (data: JobApplicationInput) => create.mutateAsync({ data }),
+  };
 };
 
 export const useUpdateJobApplication = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async ({ id, ...input }: { id: string } & JobApplicationInput) => {
-      const { data, error } = await supabase
-        .from("job_applications")
-        .update(input)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as JobApplication;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["job-applications"] });
-      toast({
-        title: "Application updated",
-        description: "Your job application has been updated successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update job application. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Update job application error:", error);
-    },
-  });
+  const { update } = jobApplicationActions;
+  return {
+    ...update,
+    mutate: ({ id, ...data }: { id: string } & JobApplicationInput, options?: any) => 
+      update.mutate({ id, data }, options),
+    mutateAsync: ({ id, ...data }: { id: string } & JobApplicationInput) => 
+      update.mutateAsync({ id, data }),
+  };
 };
 
-export const useDeleteJobApplication = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("job_applications")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["job-applications"] });
-      toast({
-        title: "Application deleted",
-        description: "Your job application has been deleted successfully.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to delete job application. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Delete job application error:", error);
-    },
-  });
-};
+export const useDeleteJobApplication = () => jobApplicationActions.delete;
 
 export const useJobApplicationByCompany = (companyName: string, jobDescriptionLink?: string) => {
   return useQuery({

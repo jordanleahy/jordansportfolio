@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useEntityActions } from './useEntityActions';
 
 export interface VendorJob {
   id: string;
@@ -34,127 +35,46 @@ export const useVendorJobs = (vendorId: string) => {
   });
 };
 
+interface VendorJobInput {
+  vendor_id: string;
+  job_title: string;
+  job_url: string;
+  job_description: string;
+}
+
+const vendorJobActions = useEntityActions<VendorJob, VendorJobInput>({
+  tableName: 'vendor_jobs',
+  queryKey: ['vendor-jobs'],
+  entityName: 'Job posting',
+  onSuccessMessage: {
+    create: 'Job posting created successfully',
+    update: 'Job posting updated successfully',
+    delete: 'Job posting deleted successfully',
+  },
+  invalidateQueries: (job) => [
+    ['vendor-jobs'],
+    ...(job ? [['vendor-jobs', job.vendor_id]] : []),
+  ],
+});
+
 export const useCreateVendorJob = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (jobData: {
-      vendor_id: string;
-      job_title: string;
-      job_url: string;
-      job_description: string;
-    }) => {
-      const { data, error } = await supabase
-        .from("vendor_jobs")
-        .insert([
-          {
-            ...jobData,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["vendor-jobs", data.vendor_id] });
-      toast({
-        title: "Success",
-        description: "Job posting created successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to create job posting",
-        variant: "destructive",
-      });
-      console.error("Error creating job:", error);
-    },
-  });
+  const { create } = vendorJobActions;
+  return {
+    ...create,
+    mutate: (data: VendorJobInput, options?: any) => create.mutate({ data }, options),
+    mutateAsync: (data: VendorJobInput) => create.mutateAsync({ data }),
+  };
 };
 
 export const useUpdateVendorJob = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      id,
-      job_title,
-      job_url,
-      job_description,
-    }: {
-      id: string;
-      job_title: string;
-      job_url: string;
-      job_description: string;
-    }) => {
-      const { data, error } = await supabase
-        .from("vendor_jobs")
-        .update({ job_title, job_url, job_description })
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["vendor-jobs", data.vendor_id] });
-      toast({
-        title: "Success",
-        description: "Job posting updated successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update job posting",
-        variant: "destructive",
-      });
-      console.error("Error updating job:", error);
-    },
-  });
+  const { update } = vendorJobActions;
+  return {
+    ...update,
+    mutate: ({ id, ...data }: { id: string } & Partial<VendorJobInput>, options?: any) => 
+      update.mutate({ id, data }, options),
+    mutateAsync: ({ id, ...data }: { id: string } & Partial<VendorJobInput>) => 
+      update.mutateAsync({ id, data }),
+  };
 };
 
-export const useDeleteVendorJob = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("vendor_jobs")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        throw error;
-      }
-
-      return id;
-    },
-    onSuccess: (_, jobId) => {
-      queryClient.invalidateQueries({ queryKey: ["vendor-jobs"] });
-      toast({
-        title: "Success",
-        description: "Job posting deleted successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to delete job posting",
-        variant: "destructive",
-      });
-      console.error("Error deleting job:", error);
-    },
-  });
-};
+export const useDeleteVendorJob = () => vendorJobActions.delete;
