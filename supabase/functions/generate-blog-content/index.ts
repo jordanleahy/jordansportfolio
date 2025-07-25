@@ -132,18 +132,18 @@ Focus on providing genuine value, specific examples, and actionable insights tha
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert healthcare content strategist. Always respond with valid JSON that matches the exact structure requested.'
+            content: 'You are an expert healthcare content strategist with deep knowledge of clinical documentation, CCs/MCCs, DRG coding, and healthcare reimbursement. Always respond with valid JSON that matches the exact structure requested. Focus on providing accurate, specific healthcare content rather than generic placeholder text.'
           },
           {
             role: 'user',
             content: blogPrompt
           }
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 4000,
       }),
     });
@@ -172,25 +172,50 @@ Focus on providing genuine value, specific examples, and actionable insights tha
     // Validate and ensure visual_sections has exactly 3 sections
     function validateVisualSections(sections: any[]): any[] {
       if (!Array.isArray(sections) || sections.length !== 3) {
-        console.log('Visual sections validation failed, creating fallback sections');
+        console.log('Visual sections validation failed, creating topic-specific fallback sections');
+        // Create fallback sections based on the topic
+        const topic = socialMediaPost.title.toLowerCase();
+        if (topic.includes('cc') || topic.includes('mcc') || topic.includes('comorbid')) {
+          return [
+            {
+              headline: "Understanding CCs and MCCs",
+              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and reimbursement. CCs are conditions that increase the length of stay by at least one day in approximately 75% of patients, while MCCs are more severe conditions that typically extend stays even longer. These diagnoses are crucial for accurate DRG assignment and ensuring appropriate reimbursement for the resources required to treat more complex patients."
+            },
+            {
+              headline: "Impact on DRG Weight and Reimbursement", 
+              content: "When CCs or MCCs are properly documented and coded, they elevate the DRG weight, which directly increases reimbursement. For example, a simple pneumonia case might have a DRG weight of 0.7, but the same pneumonia with diabetes as a CC could have a weight of 1.2, representing a significant increase in payment. MCCs have an even greater impact, potentially doubling or tripling the DRG weight. This makes accurate documentation and coding of these conditions essential for hospital financial performance."
+            },
+            {
+              headline: "Best Practices for Documentation",
+              content: "Effective CC/MCC capture requires collaboration between physicians, clinical documentation improvement (CDI) specialists, and coders. Physicians must document the relationship between secondary conditions and the principal diagnosis, including how comorbidities affect treatment decisions or resource utilization. CDI specialists should query for missing diagnoses when clinical indicators suggest the presence of CCs or MCCs. Regular education and feedback help ensure consistent, compliant documentation that supports both quality care and appropriate reimbursement."
+            }
+          ];
+        }
+        // Generic healthcare fallback for non-CC/MCC topics
         return [
           {
             headline: "Understanding the Basics",
-            content: "This section provides foundational knowledge about the topic, helping readers understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations."
+            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations and patient outcomes."
           },
           {
             headline: "Implementation Strategies", 
-            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings. This includes best practices, common challenges, and proven strategies that have shown success across different organizations."
+            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings. This includes best practices, common challenges, and proven strategies that have shown success across different healthcare organizations."
           },
           {
             headline: "Future Considerations",
-            content: "Looking ahead, this section examines emerging trends and future developments that will shape this area. We'll discuss how to prepare for upcoming changes and position your organization for continued success."
+            content: "Looking ahead, this section examines emerging trends and future developments that will shape this area of healthcare. We'll discuss how to prepare for upcoming changes and position your organization for continued success and improved patient care."
           }
         ];
       }
-      return sections.map(section => ({
-        headline: section.headline || "Section Headline",
-        content: section.content || "Content for this section will provide valuable insights and practical information for healthcare professionals.",
+      
+      // Validate existing sections and ensure minimum content quality
+      return sections.map((section, index) => ({
+        headline: section.headline && section.headline.length > 0 && section.headline.length <= 40 
+          ? section.headline 
+          : `Key Aspect ${index + 1}`,
+        content: section.content && section.content.length >= 250 
+          ? section.content
+          : `This section provides important information about the topic, offering practical insights for healthcare professionals. The content here would typically include specific examples, best practices, and actionable guidance relevant to the healthcare industry.`,
         image_url: section.image_url || null,
         cta_text: section.cta_text || null,
         cta_url: section.cta_url || null

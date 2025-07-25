@@ -106,15 +106,15 @@ Requirements:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert content strategist who transforms social media posts into comprehensive blog posts. Focus on expanding existing content thoughtfully rather than creating entirely new content. Always respond with valid JSON only.' 
+            content: 'You are an expert healthcare content strategist with deep knowledge of clinical documentation, medical coding, and healthcare operations. Transform social media posts into comprehensive, accurate healthcare blog posts. Focus on expanding existing content with specific healthcare insights rather than generic text. Always respond with valid JSON only.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 2000,
       }),
     });
@@ -147,34 +147,56 @@ Requirements:
     // Validate and fix visual_sections to ensure database constraint compliance
     const validateVisualSections = (sections: any[]): any[] => {
       if (!Array.isArray(sections) || sections.length !== 3) {
-        // Generate fallback sections if invalid
+        // Generate topic-specific fallback sections
+        const title = socialMediaPost.title?.toLowerCase() || '';
+        if (title.includes('cc') || title.includes('mcc') || title.includes('comorbid')) {
+          return [
+            {
+              headline: "Understanding CCs and MCCs",
+              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and hospital reimbursement. These conditions extend beyond the principal diagnosis and require additional clinical attention, resources, and monitoring during the patient's stay.",
+              image_url: ""
+            },
+            {
+              headline: "DRG Impact and Reimbursement",
+              content: "When properly documented and coded, CCs and MCCs elevate the Diagnostic Related Group (DRG) weight, resulting in higher reimbursement rates. This reflects the increased resources, longer length of stay, and additional clinical complexity associated with treating patients who have these secondary conditions.",
+              image_url: ""
+            },
+            {
+              headline: "Documentation Best Practices",
+              content: "Successful CC/MCC capture requires precise clinical documentation that clearly establishes the relationship between secondary conditions and the patient's care. Healthcare providers must document how these conditions affect treatment decisions, resource utilization, and clinical outcomes throughout the episode of care.",
+              image_url: ""
+            }
+          ];
+        }
+        
+        // Generic healthcare fallback
         return [
           {
             headline: "Understanding the Basics",
-            content: "This section provides foundational knowledge about the topic, helping readers grasp the core concepts. We'll explore the fundamental principles that guide decision-making and implementation strategies in this area. Understanding these basics is crucial for anyone looking to apply these concepts effectively in their work or personal projects.",
+            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations and patient outcomes.",
             image_url: ""
           },
           {
             headline: "Practical Applications",
-            content: "Here we dive into real-world scenarios where these principles come into play. From day-to-day operations to strategic planning, these applications demonstrate the versatility and importance of mastering this subject. We'll examine case studies and examples that illustrate successful implementation across various contexts.",
+            content: "Here we dive into real-world healthcare scenarios where these principles come into play. From clinical operations to administrative processes, these applications demonstrate the importance of mastering this subject for improved patient care and organizational efficiency.",
             image_url: ""
           },
           {
             headline: "Implementation Strategy",
-            content: "The final section focuses on actionable steps you can take to implement these concepts. We'll provide clear guidelines, best practices, and common pitfalls to avoid. This practical roadmap will help you translate knowledge into measurable results and sustainable practices in your organization or personal endeavors.",
+            content: "The final section focuses on actionable steps healthcare organizations can take to implement these concepts. We'll provide clear guidelines, best practices, and common pitfalls to avoid in healthcare settings, helping translate knowledge into measurable improvements in patient care and operational efficiency.",
             image_url: ""
           }
         ];
       }
 
-      // Validate each section and fix if needed
+      // Validate existing sections with more flexible content requirements
       return sections.map((section, index) => ({
         headline: section.headline && section.headline.length <= 40 
           ? section.headline 
-          : `Key Insight ${index + 1}`,
-        content: section.content && section.content.length >= 300 && section.content.length <= 480
+          : `Healthcare Focus ${index + 1}`,
+        content: section.content && section.content.length >= 200
           ? section.content
-          : `This section explores important aspects of the topic, providing valuable insights and practical guidance. We'll examine key principles and their applications in real-world scenarios. Understanding these concepts will help you make informed decisions and implement effective strategies in your work. The information presented here builds upon previous sections to create a comprehensive understanding of the subject matter.`,
+          : `This section provides essential healthcare information and practical guidance for professionals in the field. The content covers important aspects of healthcare operations, clinical practices, and industry best practices that support quality patient care and organizational success.`,
         image_url: section.image_url || ""
       }));
     };
