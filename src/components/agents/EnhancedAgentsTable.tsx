@@ -45,7 +45,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { AgentStatus, OpenAIAgent, CreateAgentData } from '@/types/openaiAgent';
 import { CreateAgentModal } from './CreateAgentModal';
-import { FEATURED_AGENTS } from '@/constants/featuredAgents';
+
 
 
 interface TableState {
@@ -211,44 +211,6 @@ export const EnhancedAgentsTable = () => {
 
   return (
     <div className="space-y-6">
-      {/* Featured Agents Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Featured Clinical Agents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {FEATURED_AGENTS.map((agent) => (
-              <div 
-                key={agent.name}
-                className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => navigate(agent.path)}
-              >
-                <div className="flex items-start gap-3">
-                  <agent.icon className="h-8 w-8 text-primary mt-1" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{agent.name}</h3>
-                    <p className="text-muted-foreground text-sm mb-2">{agent.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1">
-                        {agent.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {agent.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
