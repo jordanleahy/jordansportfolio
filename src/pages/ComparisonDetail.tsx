@@ -12,42 +12,42 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { useStructuredComparisonBySlug } from '@/hooks/useComparisonsStructured';
 const ComparisonDetail = () => {
-  const { comparisonType } = useParams<{ comparisonType: string }>();
-  const { data: structuredComparison, isLoading: isLoadingStructured, error } = useStructuredComparisonBySlug(comparisonType || '');
-
+  const {
+    comparisonType
+  } = useParams<{
+    comparisonType: string;
+  }>();
+  const {
+    data: structuredComparison,
+    isLoading: isLoadingStructured,
+    error
+  } = useStructuredComparisonBySlug(comparisonType || '');
   console.log('🔍 ComparisonDetail - Slug:', comparisonType);
   console.log('📊 ComparisonDetail - Data:', structuredComparison);
   console.log('⏳ ComparisonDetail - Loading:', isLoadingStructured);
   console.log('❌ ComparisonDetail - Error:', error);
-
   if (!comparisonType) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Comparison Not Found</h1>
           <p className="text-muted-foreground">The comparison you're looking for doesn't exist.</p>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
-
   if (isLoadingStructured) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
             <p className="text-muted-foreground">Loading comparison...</p>
           </div>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
 
   // Use only structured comparison data
   if (!structuredComparison) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Comparison Not Found</h1>
@@ -60,20 +60,14 @@ const ComparisonDetail = () => {
             </Button>
           </div>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
 
   // Add data validation - ensure we have minimum required data
-  const hasValidData = structuredComparison && 
-                      structuredComparison.companies?.length >= 2 &&
-                      (structuredComparison.basic_info?.length > 0 || 
-                       structuredComparison.features?.length > 0);
-
+  const hasValidData = structuredComparison && structuredComparison.companies?.length >= 2 && (structuredComparison.basic_info?.length > 0 || structuredComparison.features?.length > 0);
   if (!hasValidData) {
     console.warn('⚠️ ComparisonDetail - Invalid data structure:', structuredComparison);
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Comparison Data Incomplete</h1>
@@ -86,8 +80,7 @@ const ComparisonDetail = () => {
             </Button>
           </div>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
 
   // Transform structured comparison to match component format
@@ -95,30 +88,27 @@ const ComparisonDetail = () => {
   const company2 = structuredComparison.companies?.find(c => c.company_position === 2);
   const insight1 = structuredComparison.insights?.find(i => i.company_position === 1);
   const insight2 = structuredComparison.insights?.find(i => i.company_position === 2);
-  
+
   // Create lookup from basic_info table, excluding Key Benefits and Unique Strengths
-  const basicInfoLookup = structuredComparison.basic_info?.filter(info => 
-    !info.category.startsWith('Key Benefits') && 
-    !info.category.startsWith('Unique Strengths')
-  ).reduce((acc, info) => {
+  const basicInfoLookup = structuredComparison.basic_info?.filter(info => !info.category.startsWith('Key Benefits') && !info.category.startsWith('Unique Strengths')).reduce((acc, info) => {
     acc[info.category] = {
       company1: info.company1_value,
       company2: info.company2_value
     };
     return acc;
-  }, {} as Record<string, { company1: string; company2: string }>) || {};
+  }, {} as Record<string, {
+    company1: string;
+    company2: string;
+  }>) || {};
 
   // Separate key benefits and unique strengths from basic info
-  const keyBenefits = structuredComparison.basic_info?.filter(info => 
-    info.category.startsWith('Key Benefits')
-  ) || [];
-  const uniqueStrengths = structuredComparison.basic_info?.filter(info => 
-    info.category.startsWith('Unique Strengths')
-  ) || [];
-
+  const keyBenefits = structuredComparison.basic_info?.filter(info => info.category.startsWith('Key Benefits')) || [];
+  const uniqueStrengths = structuredComparison.basic_info?.filter(info => info.category.startsWith('Unique Strengths')) || [];
   console.log('🏗️ ComparisonDetail - basicInfoLookup:', basicInfoLookup);
-  console.log('🏢 ComparisonDetail - Companies:', { company1, company2 });
-  
+  console.log('🏢 ComparisonDetail - Companies:', {
+    company1,
+    company2
+  });
   const data = {
     title: structuredComparison.title,
     metaTitle: structuredComparison.meta_title,
@@ -175,7 +165,7 @@ const ComparisonDetail = () => {
     useCases: structuredComparison.use_cases?.map(u => ({
       useCase: u.use_case,
       bestFit: u.best_fit
-    })) || [],
+    })) || []
   };
   return <>
       <Helmet>
@@ -231,14 +221,13 @@ const ComparisonDetail = () => {
             
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Technology Company Comparison</h2>
+                
                 <ComparisonTable data={data} />
               </CardContent>
             </Card>
             
             {/* Key Benefits Section */}
-            {(data.company1.keyBenefits.length > 0 || data.company2.keyBenefits.length > 0) && (
-              <Card>
+            {(data.company1.keyBenefits.length > 0 || data.company2.keyBenefits.length > 0) && <Card>
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                     ⭐ Key Benefits
@@ -247,33 +236,27 @@ const ComparisonDetail = () => {
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-primary">{data.company1.name}</h3>
                       <div className="space-y-2">
-                        {data.company1.keyBenefits.map((benefit, index) => (
-                          <div key={index} className="flex items-center gap-2">
+                        {data.company1.keyBenefits.map((benefit, index) => <div key={index} className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
                             <span className="text-muted-foreground">{benefit}</span>
-                          </div>
-                        ))}
+                          </div>)}
                       </div>
                     </div>
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-primary">{data.company2.name}</h3>
                       <div className="space-y-2">
-                        {data.company2.keyBenefits.map((benefit, index) => (
-                          <div key={index} className="flex items-center gap-2">
+                        {data.company2.keyBenefits.map((benefit, index) => <div key={index} className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
                             <span className="text-muted-foreground">{benefit}</span>
-                          </div>
-                        ))}
+                          </div>)}
                       </div>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Unique Strengths Section */}
-            {(data.company1.uniqueStrengths.length > 0 || data.company2.uniqueStrengths.length > 0) && (
-              <Card>
+            {(data.company1.uniqueStrengths.length > 0 || data.company2.uniqueStrengths.length > 0) && <Card>
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                     💎 Unique Strengths
@@ -282,29 +265,24 @@ const ComparisonDetail = () => {
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-primary">{data.company1.name}</h3>
                       <div className="space-y-2">
-                        {data.company1.uniqueStrengths.map((strength, index) => (
-                          <div key={index} className="flex items-center gap-2">
+                        {data.company1.uniqueStrengths.map((strength, index) => <div key={index} className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
                             <span className="text-muted-foreground">{strength}</span>
-                          </div>
-                        ))}
+                          </div>)}
                       </div>
                     </div>
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-primary">{data.company2.name}</h3>
                       <div className="space-y-2">
-                        {data.company2.uniqueStrengths.map((strength, index) => (
-                          <div key={index} className="flex items-center gap-2">
+                        {data.company2.uniqueStrengths.map((strength, index) => <div key={index} className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
                             <span className="text-muted-foreground">{strength}</span>
-                          </div>
-                        ))}
+                          </div>)}
                       </div>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             <FeatureComparison data={data} />
             
