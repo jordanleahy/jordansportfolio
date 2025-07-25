@@ -117,13 +117,8 @@ const BlogEditor = () => {
 
   // Unified form update function
   const updateFormData = useCallback((updates: Partial<BlogPostInput>) => {
-    setFormData(prev => {
-      const newData = { ...prev, ...updates };
-      // Trigger auto-save after state update
-      setTimeout(() => triggerAutoSave(newData), 0);
-      return newData;
-    });
-  }, [triggerAutoSave]);
+    setFormData(prev => ({ ...prev, ...updates }));
+  }, []);
 
   // Simplified event handlers
   const handleInputChange = useCallback((field: keyof BlogPostInput, value: any) => {
