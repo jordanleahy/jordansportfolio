@@ -37,6 +37,11 @@ export function OGMetadataCard({
   const [showPreview, setShowPreview] = useState(false);
   const { uploadFile, uploading } = useFileUpload({ bucket: 'images', folder: 'vendor-og' });
 
+  // Don't render anything if user can't edit
+  if (!canEdit) {
+    return null;
+  }
+
   const handleImageUpload = async (file: File) => {
     const url = await uploadFile(file);
     if (url) {

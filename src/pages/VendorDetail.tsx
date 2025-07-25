@@ -1127,20 +1127,18 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               />
 
               {/* OG Metadata Card - Admin Only */}
-              {isAdmin && (
-                <OGMetadataCard
-                  vendor={vendor}
-                  isEditing={vendorEdit.isEditing}
-                  onEdit={vendorEdit.startEdit}
-                  onSave={vendorEdit.publishChanges}
-                  onCancel={vendorEdit.cancelEdit}
-                  onUpdateField={vendorEdit.updateField}
-                  editData={vendorEdit.editData}
-                  isSaving={vendorEdit.isSaving}
-                  hasChanges={vendorEdit.hasChanges}
-                  canEdit={isAdmin}
-                />
-              )}
+              <OGMetadataCard
+                vendor={vendor}
+                isEditing={vendorEdit.isEditing}
+                onEdit={vendorEdit.startEdit}
+                onSave={vendorEdit.publishChanges}
+                onCancel={vendorEdit.cancelEdit}
+                onUpdateField={vendorEdit.updateField}
+                editData={vendorEdit.editData}
+                isSaving={vendorEdit.isSaving}
+                hasChanges={vendorEdit.hasChanges}
+                canEdit={isAdmin}
+              />
 
               <VendorImageGallery 
                 vendor={vendor} 
