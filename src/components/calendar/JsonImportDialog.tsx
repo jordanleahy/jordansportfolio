@@ -69,12 +69,16 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
   };
 
   const handlePreview = () => {
+    console.log('handlePreview called with jsonInput:', jsonInput);
     const validation = validateJson(jsonInput);
+    console.log('validation result:', validation);
     setErrors(validation.errors);
     
     if (validation.isValid && validation.data) {
+      console.log('Setting preview data:', validation.data);
       setPreviewData(validation.data);
     } else {
+      console.log('Validation failed or no data');
       setPreviewData(null);
     }
   };
