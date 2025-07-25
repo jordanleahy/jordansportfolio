@@ -12,18 +12,15 @@ interface TextEditorProps {
 }
 
 export function TextEditor({ value, onChange, multiline = false, placeholder, maxLength }: TextEditorProps) {
-  const [localValue, setLocalValue] = useState(value);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    setLocalValue(newValue);
     onChange(newValue);
   };
 
   if (multiline) {
     return (
       <Textarea
-        value={localValue}
+        value={value}
         onChange={handleChange}
         placeholder={placeholder}
         maxLength={maxLength}
@@ -34,7 +31,7 @@ export function TextEditor({ value, onChange, multiline = false, placeholder, ma
 
   return (
     <Input
-      value={localValue}
+      value={value}
       onChange={handleChange}
       placeholder={placeholder}
       maxLength={maxLength}
