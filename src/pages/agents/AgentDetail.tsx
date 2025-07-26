@@ -74,9 +74,9 @@ export const AgentDetail = () => {
           </Button>
           
           {/* Title and description */}
-          <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground break-words">{agent.name}</h1>
-            <p className="text-muted-foreground text-sm md:text-base break-words">{agent.purpose}</p>
+          <div className="space-y-2 overflow-hidden">
+            <h1 className="text-xl md:text-3xl font-bold text-foreground break-words overflow-wrap-anywhere leading-tight">{agent.name}</h1>
+            <p className="text-muted-foreground text-sm md:text-base break-words overflow-wrap-anywhere leading-relaxed">{agent.purpose}</p>
           </div>
           
           {/* Action buttons */}
