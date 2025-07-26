@@ -192,7 +192,7 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
 
   // Computed values
   const isProcessing = aiProcessMutation.isPending || importMutation.isPending;
-  const canImport = validationResult?.success && validationResult.data && state.type !== 'processing';
+  const canImport = validationResult?.success && validationResult.data && !isProcessing;
   const hasErrors = validationResult && !validationResult.success;
   const hasWarnings = validationResult && validationResult.warnings.length > 0;
 
