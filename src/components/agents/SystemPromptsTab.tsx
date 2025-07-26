@@ -115,9 +115,9 @@ export const SystemPromptsTab = ({
           {systemPrompts.length > 0 ? (
             systemPrompts.map((prompt, index) => (
               <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Category:</span>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="space-y-1">
+                    <span className="text-sm font-medium text-muted-foreground">Category:</span>
                     <Select 
                       value={prompt.category} 
                       onValueChange={(value) => updatePromptCategory(index, value)}
