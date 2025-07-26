@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ThemeImportData, ThemePost, ValidationResult, ProcessingResult } from "@/types/themeImport";
+import type { ThemeImportData, ThemePost, ProcessingResult } from "@/types/themeImport";
 
 export class ThemeImportService {
   private readonly MAX_POSTS_PER_IMPORT = 100;
@@ -8,7 +8,7 @@ export class ThemeImportService {
   /**
    * Validates and cleans JSON data before import
    */
-  validateThemeData(rawData: any): ValidationResult {
+  validateThemeData(rawData: any): ProcessingResult {
     const errors: string[] = [];
     const warnings: string[] = [];
     
@@ -27,7 +27,7 @@ export class ThemeImportService {
       
       if (!Array.isArray(data.posts)) {
         errors.push('Posts must be an array');
-        return { isValid: false, errors, warnings };
+        return { success: false, errors, warnings };
       }
       
       if (data.posts.length > this.MAX_POSTS_PER_IMPORT) {
@@ -74,7 +74,6 @@ export class ThemeImportService {
             title: this.sanitizeText(post.title),
             description: this.sanitizeText(post.description),
             day: post.day,
-            theme: data.theme,
             status: post.status || 'draft'
           });
         } else {
@@ -83,7 +82,7 @@ export class ThemeImportService {
       });
       
       if (errors.length > 0) {
-        return { isValid: false, errors, warnings };
+        return { success: false, errors, warnings };
       }
       
       const cleanedData: ThemeImportData = {
@@ -94,7 +93,7 @@ export class ThemeImportService {
       };
       
       return {
-        isValid: true,
+        success: true,
         errors: [],
         warnings,
         cleanedData
@@ -102,7 +101,7 @@ export class ThemeImportService {
       
     } catch (error) {
       return {
-        isValid: false,
+        success: false,
         errors: [`Invalid JSON format: ${error instanceof Error ? error.message : 'Unknown error'}`],
         warnings
       };
@@ -116,12 +115,8 @@ export class ThemeImportService {
     try {
       const validation = this.validateThemeData(rawData);
       
-      if (!validation.isValid || !validation.cleanedData) {
-        return {
-          success: false,
-          errors: validation.errors,
-          warnings: validation.warnings
-        };
+      if (!validation.success || !validation.cleanedData) {
+        return validation;
       }
       
       // Check for duplicate categories
@@ -160,7 +155,7 @@ export class ThemeImportService {
   /**
    * Preview what would be imported without actually importing
    */
-  async previewImport(rawData: any): Promise<ValidationResult> {
+  async previewImport(rawData: any): Promise<ProcessingResult> {
     return this.validateThemeData(rawData);
   }
 
@@ -229,49 +224,6 @@ export class ThemeImportService {
       .replace(/[<>]/g, '') // Remove angle brackets
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
-  }
-
-  /**
-   * Cleanup agent - removes invalid or corrupted data
-   */
-  async runCleanupAgent(): Promise<{
-    cleaned: number;
-    errors: string[];
-  }> {
-    const errors: string[] = [];
-    let cleanedCount = 0;
-
-    try {
-      // Find posts with invalid data
-      const { data: posts, error } = await supabase
-        .from('social_media_posts')
-        .select('id, title, description, category, theme')
-        .or('title.is.null,description.is.null,title.eq.,description.eq.');
-
-      if (error) throw error;
-
-      if (posts && posts.length > 0) {
-        // Delete posts with null/empty critical fields
-        const idsToDelete = posts.map(post => post.id);
-        const { error: deleteError } = await supabase
-          .from('social_media_posts')
-          .delete()
-          .in('id', idsToDelete);
-
-        if (deleteError) {
-          errors.push(`Failed to delete invalid posts: ${deleteError.message}`);
-        } else {
-          cleanedCount = posts.length;
-        }
-      }
-
-      return { cleaned: cleanedCount, errors };
-    } catch (error) {
-      return {
-        cleaned: 0,
-        errors: [`Cleanup failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
-      };
-    }
   }
 }
 
