@@ -211,52 +211,52 @@ export const AgentEdit = () => {
         <title>{isNew ? 'Create Agent' : `Edit ${agent?.name}`} - Agent Management</title>
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8 max-w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/agents')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Agents
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">
-                {isNew ? 'Create New Agent' : `Edit ${agent?.name}`}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {isNew ? 'Configure a new AI agent' : 'Modify agent settings and configuration'}
-              </p>
-            </div>
+        <div className="space-y-4 mb-6 md:mb-8">
+          {/* Back button */}
+          <Button
+            variant="outline"
+            onClick={() => navigate('/agents')}
+            className="gap-2 w-full sm:w-auto"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Agents
+          </Button>
+          
+          {/* Title and description */}
+          <div className="space-y-2 overflow-hidden">
+            <h1 className="text-xl md:text-3xl font-bold break-words overflow-wrap-anywhere leading-tight">
+              {isNew ? 'Create New Agent' : `Edit ${agent?.name}`}
+            </h1>
+            <p className="text-muted-foreground text-sm md:text-base break-words overflow-wrap-anywhere leading-relaxed">
+              {isNew ? 'Configure a new AI agent' : 'Modify agent settings and configuration'}
+            </p>
           </div>
           
-          <div className="flex gap-2">
-            {!isNew && (
-              <>
-                <Button variant="outline" onClick={handleClone} className="gap-2">
-                  <Copy className="h-4 w-4" />
-                  Clone
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowDeleteModal(true)}
-                  className="gap-2 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>
-              </>
-            )}
-          </div>
+          {/* Action buttons */}
+          {!isNew && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={handleClone} className="gap-2 flex-1 sm:flex-none">
+                <Copy className="h-4 w-4" />
+                <span className="sm:inline">Clone</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDeleteModal(true)}
+                className="gap-2 text-destructive hover:text-destructive flex-1 sm:flex-none"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sm:inline">Delete</span>
+              </Button>
+            </div>
+          )}
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
             {/* Tab Navigation */}
-            <div className="flex gap-1 p-1 bg-muted rounded-lg">
+            <div className="flex flex-wrap gap-1 p-1 bg-muted rounded-lg overflow-x-auto">
             {[
               { id: 'basic', label: 'Basic Info', icon: Settings },
               { id: 'advanced', label: 'Model Settings', icon: Zap },
@@ -270,10 +270,10 @@ export const AgentEdit = () => {
                   variant={activeTab === tab.id ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className="gap-2"
+                  className="gap-2 text-xs md:text-sm whitespace-nowrap"
                 >
                   <tab.icon className="h-4 w-4" />
-                  {tab.label}
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </Button>
               ))}
             </div>
@@ -285,7 +285,7 @@ export const AgentEdit = () => {
                   <CardTitle>Basic Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -331,7 +331,7 @@ export const AgentEdit = () => {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="status"
@@ -369,7 +369,7 @@ export const AgentEdit = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="trigger"
@@ -459,7 +459,7 @@ export const AgentEdit = () => {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="temperature"
@@ -507,7 +507,7 @@ export const AgentEdit = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="top_p"
@@ -599,18 +599,19 @@ export const AgentEdit = () => {
             )}
 
             {/* Submit Actions */}
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => navigate(isNew ? '/agents' : `/agents/${id}`)}
+                className="order-2 sm:order-1"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={updateAgent.isPending || createAgent.isPending}
-                className="gap-2"
+                className="gap-2 order-1 sm:order-2"
               >
                 <Save className="h-4 w-4" />
                 {isNew ? 'Create Agent' : 'Save Changes'}
