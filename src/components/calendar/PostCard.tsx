@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ interface PostCardProps {
   onCopy: (post: SocialMediaPost) => void;
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
+  onGenerateVoiceover?: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
@@ -34,6 +35,7 @@ export const PostCard = ({
   onCopy, 
   onDelete, 
   onGeneratePrompt, 
+  onGenerateVoiceover,
   onFileSelect, 
   onVideoUpload,
   onVideoRemove,
@@ -185,13 +187,24 @@ export const PostCard = ({
             >
               <Lightbulb className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
+            {onGenerateVoiceover ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onGenerateVoiceover(post)}
+                className="flex-1"
+              >
+                <Mic className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+              >
+                <BookOpen className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           
           <div className="flex gap-2">

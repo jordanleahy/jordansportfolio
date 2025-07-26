@@ -16,7 +16,8 @@ import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
-import { Sparkles } from "lucide-react";
+import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
+import { Sparkles, Mic } from "lucide-react";
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -37,6 +38,7 @@ const BlogEditor = () => {
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
+  const [voiceoverModalOpen, setVoiceoverModalOpen] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastSaved, setLastSaved] = useState<Date>();
 
@@ -396,11 +398,12 @@ const BlogEditor = () => {
         </div>
 
         <Tabs defaultValue="hero" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="hero">Hero</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="visuals">Visuals</TabsTrigger>
             <TabsTrigger value="summary">Summary</TabsTrigger>
+            <TabsTrigger value="voiceover">Voiceover</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -728,6 +731,40 @@ const BlogEditor = () => {
             </div>
           </TabsContent>
 
+          {/* Voiceover Section */}
+          <TabsContent value="voiceover">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mic className="h-5 w-5" />
+                  Voiceover Script Generation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-muted-foreground mb-4">
+                  Transform your blog content into teleprompter-style voiceover scripts for video content, 
+                  podcasts, or on-camera delivery. Choose from different tones and styles to match your brand voice.
+                </div>
+                
+                <Button 
+                  onClick={() => setVoiceoverModalOpen(true)}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Mic className="mr-2 h-4 w-4" />
+                  Generate Voiceover Script
+                </Button>
+
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• <strong>Engaging:</strong> Conversational and captivating for broad audiences</p>
+                  <p>• <strong>Confident:</strong> Authoritative and decisive for thought leadership</p>
+                  <p>• <strong>Educational:</strong> Clear and informative for training content</p>
+                  <p>• <strong>Energetic:</strong> Dynamic and enthusiastic for promotional videos</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* SEO Section */}
           <TabsContent value="seo">
             <Card>
@@ -854,6 +891,18 @@ const BlogEditor = () => {
             headline={formData.visual_sections[promptModalOpen]?.headline || ''}
             content={formData.visual_sections[promptModalOpen]?.content || ''}
             category={formData.category || 'healthcare'}
+          />
+        )}
+
+        {/* Voiceover Script Modal */}
+        {voiceoverModalOpen && existingPost && (
+          <VoiceoverScriptModal
+            isOpen={voiceoverModalOpen}
+            onClose={() => setVoiceoverModalOpen(false)}
+            sourceId={existingPost.id}
+            sourceType="blog_post"
+            originalContent={`${formData.hero_headline}\n\n${formData.hero_subhead}\n\n${formData.intro_content}\n\n${formData.deep_dive_content || ''}`}
+            contentType="blog_post"
           />
         )}
       </div>

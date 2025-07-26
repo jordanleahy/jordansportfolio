@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, NotebookPen } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, NotebookPen, Mic } from 'lucide-react';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -16,6 +16,7 @@ import { ImagePromptModal } from './ImagePromptModal';
 import { ImageWatermarkModal } from './ImageWatermarkModal';
 import { ImagePreviewModal } from '@/components/ui/image-preview-modal';
 import { PostCard } from './PostCard';
+import { VoiceoverScriptModal } from '@/components/voiceover/VoiceoverScriptModal';
 import type { SocialMediaPost } from '@/types/socialMedia';
 interface PostsTableProps {
   posts: SocialMediaPost[];
@@ -45,6 +46,10 @@ export const PostsTable = ({
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadType, setUploadType] = useState<'16_9' | '9_16' | '3_4' | '4_3'>('16_9');
+  const [voiceoverModal, setVoiceoverModal] = useState<{
+    isOpen: boolean;
+    post: SocialMediaPost | null;
+  }>({ isOpen: false, post: null });
   const [imagePromptModal, setImagePromptModal] = useState<{
     isOpen: boolean;
     postId: string;
@@ -126,6 +131,13 @@ export const PostsTable = ({
       });
     }
   };
+  const handleGenerateVoiceoverScript = (post: SocialMediaPost) => {
+    setVoiceoverModal({
+      isOpen: true,
+      post: post
+    });
+  };
+
   const handleGenerateImagePrompt = (post: SocialMediaPost) => {
     setImagePromptModal({
       isOpen: true,
@@ -692,12 +704,12 @@ export const PostsTable = ({
           </TabsList>
           
           <TabsContent value="draft" className="space-y-3 mt-4">
-            {draftPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map(post => <PostCard key={post.id} post={post} onCopy={handleCopyContent} onDelete={handleDeletePost} onGeneratePrompt={handleGenerateImagePrompt} onFileSelect={handleMobileFileSelect} onVideoUpload={handleVideoUpload} onVideoRemove={handleVideoRemove} onImageDelete={handleImageDelete} onStatusChange={handleStatusChange} uploadingStates={uploadingStates} />)}
+            {draftPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map(post => <PostCard key={post.id} post={post} onCopy={handleCopyContent} onDelete={handleDeletePost} onGeneratePrompt={handleGenerateImagePrompt} onGenerateVoiceover={handleGenerateVoiceoverScript} onFileSelect={handleMobileFileSelect} onVideoUpload={handleVideoUpload} onVideoRemove={handleVideoRemove} onImageDelete={handleImageDelete} onStatusChange={handleStatusChange} uploadingStates={uploadingStates} />)}
             {draftPosts.length === 0 && <p className="text-center text-muted-foreground py-8">No draft posts yet.</p>}
           </TabsContent>
           
           <TabsContent value="published" className="space-y-3 mt-4">
-            {publishedPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map(post => <PostCard key={post.id} post={post} onCopy={handleCopyContent} onDelete={handleDeletePost} onGeneratePrompt={handleGenerateImagePrompt} onFileSelect={handleMobileFileSelect} onVideoUpload={handleVideoUpload} onVideoRemove={handleVideoRemove} onImageDelete={handleImageDelete} onStatusChange={handleStatusChange} uploadingStates={uploadingStates} />)}
+            {publishedPosts.sort((a, b) => (a.day || 0) - (b.day || 0)).map(post => <PostCard key={post.id} post={post} onCopy={handleCopyContent} onDelete={handleDeletePost} onGeneratePrompt={handleGenerateImagePrompt} onGenerateVoiceover={handleGenerateVoiceoverScript} onFileSelect={handleMobileFileSelect} onVideoUpload={handleVideoUpload} onVideoRemove={handleVideoRemove} onImageDelete={handleImageDelete} onStatusChange={handleStatusChange} uploadingStates={uploadingStates} />)}
             {publishedPosts.length === 0 && <p className="text-center text-muted-foreground py-8">No published posts yet.</p>}
           </TabsContent>
         </Tabs>
@@ -924,6 +936,9 @@ export const PostsTable = ({
                         <Button size="sm" variant="outline" onClick={() => handleGenerateImagePrompt(post)} title="Generate image prompt" className="flex items-center gap-1">
                           <Lightbulb className="h-4 w-4" />
                         </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleGenerateVoiceoverScript(post)} title="Generate voiceover script">
+                          <Mic className="h-4 w-4" />
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => handleCopyContent(post)} title="Copy content to clipboard">
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -1133,6 +1148,9 @@ export const PostsTable = ({
                         <Button size="sm" variant="outline" onClick={() => handleGenerateImagePrompt(post)} title="Generate image prompt" className="flex items-center gap-1">
                           <Lightbulb className="h-4 w-4" />
                         </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleGenerateVoiceoverScript(post)} title="Generate voiceover script">
+                          <Mic className="h-4 w-4" />
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => handleCopyContent(post)} title="Copy content to clipboard">
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -1163,6 +1181,17 @@ export const PostsTable = ({
     })} title={imagePromptModal.title} description={imagePromptModal.description} postId={imagePromptModal.postId} cachedPrompt={imagePromptModal.cachedPrompt} category={imagePromptModal.category} />
 
       <ImageWatermarkModal isOpen={showWatermarkModal} onClose={() => setShowWatermarkModal(false)} file={selectedFile} onConfirm={handleWatermarkedUpload} />
+
+      {voiceoverModal.isOpen && voiceoverModal.post && (
+        <VoiceoverScriptModal
+          isOpen={voiceoverModal.isOpen}
+          onClose={() => setVoiceoverModal({ isOpen: false, post: null })}
+          sourceId={voiceoverModal.post.id}
+          sourceType="social_media_post"
+          originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`}
+          contentType="calendar_entry"
+        />
+      )}
 
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={() => setPreviewImage(null)} imageUrl={previewImage.url} alt={previewImage.alt} />}
     </Card>;
