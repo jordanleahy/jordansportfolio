@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { socialMediaService } from '@/services/socialMediaService';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useJobApplications } from '@/hooks/useJobApplications';
 
 export const useRoutePreloading = () => {
@@ -14,23 +14,24 @@ export const useRoutePreloading = () => {
 
     switch (route) {
       case '/calendar':
-        // Prefetch calendar data
+        // Prefetch calendar data - get available categories first, then prefetch popular ones
+        await queryClient.prefetchQuery({
+          queryKey: ['available-categories'],
+          queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
+          staleTime: 10 * 60 * 1000,
+        });
+        
+        // Prefetch popular categories
         await queryClient.prefetchQuery({
           queryKey: ['social-media-posts', 'cdi'],
-          queryFn: () => socialMediaService.getAllPosts('cdi'),
+          queryFn: () => optimizedSocialMediaService.getAllPosts('cdi'),
           staleTime: 5 * 60 * 1000, // 5 minutes
         });
         
         await queryClient.prefetchQuery({
           queryKey: ['social-media-posts', 'contracts'],
-          queryFn: () => socialMediaService.getAllPosts('contracts'),
+          queryFn: () => optimizedSocialMediaService.getAllPosts('contracts'),
           staleTime: 5 * 60 * 1000,
-        });
-        
-        await queryClient.prefetchQuery({
-          queryKey: ['available-categories'],
-          queryFn: () => socialMediaService.getAvailableCategories(),
-          staleTime: 10 * 60 * 1000,
         });
         break;
 

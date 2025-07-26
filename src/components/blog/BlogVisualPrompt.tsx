@@ -12,7 +12,7 @@ interface BlogVisualPromptProps {
   onClose: () => void;
   headline: string;
   content: string;
-  category?: 'cdi' | 'contracts' | 'forms' | 'coding ai';
+  category?: string;
 }
 
 type AspectRatio = '16:9' | '3:4' | '9:16' | '4:3' | null;

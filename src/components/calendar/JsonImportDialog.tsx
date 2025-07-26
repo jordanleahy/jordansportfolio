@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, Eye, Download, Copy } from 'lucide-react';
-import { socialMediaService } from '@/services/socialMediaService';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -88,7 +88,7 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     
     setIsLoading(true);
     try {
-      await socialMediaService.bulkImportPosts(previewData.category, previewData.posts);
+      await optimizedSocialMediaService.bulkImportPosts(previewData.category, previewData.posts);
       
       toast({
         title: "Import Successful",

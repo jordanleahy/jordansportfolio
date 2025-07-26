@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, NotebookPen } from 'lucide-react';
-import { socialMediaService } from '@/services/socialMediaService';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,7 +71,7 @@ export const PostsTable = ({
   const filteredPosts = activeTab === 'draft' ? draftPosts : publishedPosts;
   const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
     try {
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         status: newStatus
       });
       onPostsChange();
@@ -112,7 +112,7 @@ export const PostsTable = ({
   };
   const handleDeletePost = async (postId: string) => {
     try {
-      await socialMediaService.deletePost(postId);
+      await optimizedSocialMediaService.deletePost(postId);
       toast({
         title: "Post deleted",
         description: "The post has been successfully deleted."
@@ -225,7 +225,7 @@ export const PostsTable = ({
       } = supabase.storage.from('images').getPublicUrl(fileName);
 
       // Update the post with the new image URL
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         image_16_9_url: publicUrl
       });
       toast({
@@ -279,7 +279,7 @@ export const PostsTable = ({
       } = supabase.storage.from('images').getPublicUrl(fileName);
 
       // Update the post with the new image URL
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         image_9_16_url: publicUrl
       });
       toast({
@@ -333,7 +333,7 @@ export const PostsTable = ({
       } = supabase.storage.from('images').getPublicUrl(fileName);
 
       // Update the post with the new image URL
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         image_3_4_url: publicUrl
       });
       toast({
@@ -387,7 +387,7 @@ export const PostsTable = ({
       } = supabase.storage.from('images').getPublicUrl(fileName);
 
       // Update the post with the new image URL
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         image_4_3_url: publicUrl
       });
       toast({
@@ -569,7 +569,7 @@ export const PostsTable = ({
       } : {
         general_video_url: url
       };
-      await socialMediaService.updatePost(postId, updateData);
+      await optimizedSocialMediaService.updatePost(postId, updateData);
       toast({
         title: "Video uploaded",
         description: `${type === '16_9_video' ? '16:9' : type === '3_4_video' ? '3:4' : 'General'} video has been successfully uploaded.`
@@ -593,7 +593,7 @@ export const PostsTable = ({
       } : {
         general_video_url: null
       };
-      await socialMediaService.updatePost(postId, updateData);
+      await optimizedSocialMediaService.updatePost(postId, updateData);
       toast({
         title: "Video removed",
         description: `${type === '16_9_video' ? '16:9' : type === '3_4_video' ? '3:4' : 'General'} video has been removed.`
@@ -611,7 +611,7 @@ export const PostsTable = ({
   const handleImageDelete = async (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => {
     try {
       const fieldName = `image_${type}_url`;
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         [fieldName]: null
       });
       toast({

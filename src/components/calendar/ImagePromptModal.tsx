@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check, Loader2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { socialMediaService } from '@/services/socialMediaService';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -166,7 +166,7 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
       setSelectedAspectRatio(null);
       
       // Cache the prompt in the database
-      await socialMediaService.updatePost(postId, {
+      await optimizedSocialMediaService.updatePost(postId, {
         generated_image_prompt: prompt
       });
       

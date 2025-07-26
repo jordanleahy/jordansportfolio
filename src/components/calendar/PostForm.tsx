@@ -7,7 +7,7 @@ import { CategoryInput } from './CategoryInput';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
-import { socialMediaService } from '@/services/socialMediaService';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -46,7 +46,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
 
     setIsSubmitting(true);
     try {
-      await socialMediaService.createPost(formData);
+      await optimizedSocialMediaService.createPost(formData);
       toast({
         title: "Post created successfully",
         description: "Your social media post has been saved.",
