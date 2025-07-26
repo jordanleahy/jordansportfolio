@@ -87,12 +87,14 @@ export const ImagePromptGeneratorModal = ({
         throw new Error('No prompt received from the service');
       }
 
-      setBasePrompt(prompt);
+      // Clean any existing aspect ratio mentions from the received prompt
+      const cleanPrompt = prompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
+      setBasePrompt(cleanPrompt);
       
       // Apply aspect ratio if needed
       const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
-        ? `${prompt} ${selectedAspectRatio} aspect ratio`
-        : prompt;
+        ? `${selectedAspectRatio} aspect ratio. ${cleanPrompt}`
+        : cleanPrompt;
         
       setGeneratedPrompt(finalPrompt);
 
@@ -132,7 +134,10 @@ export const ImagePromptGeneratorModal = ({
   const handleAspectRatioSelect = (ratio: AspectRatio) => {
     setSelectedAspectRatio(ratio);
     if (basePrompt) {
-      const newPrompt = `${basePrompt} ${ratio} aspect ratio`;
+      // Clean any existing aspect ratio mentions from the base prompt
+      const cleanPrompt = basePrompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
+      // Add the new aspect ratio at the beginning for better AI attention
+      const newPrompt = `${ratio} aspect ratio. ${cleanPrompt}`;
       setGeneratedPrompt(newPrompt);
     }
   };
@@ -160,8 +165,16 @@ export const ImagePromptGeneratorModal = ({
   useEffect(() => {
     if (isOpen && content.primary && content.secondary) {
       if (cachedPrompt) {
-        setGeneratedPrompt(cachedPrompt);
-        setBasePrompt(cachedPrompt.replace(/ \d+:\d+ aspect ratio$/, ''));
+        // Clean any existing aspect ratio mentions from cached prompt
+        const cleanCachedPrompt = cachedPrompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
+        setBasePrompt(cleanCachedPrompt);
+        
+        // Apply current aspect ratio if needed
+        const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
+          ? `${selectedAspectRatio} aspect ratio. ${cleanCachedPrompt}`
+          : cleanCachedPrompt;
+          
+        setGeneratedPrompt(finalPrompt);
         setIsFromCache(true);
       } else {
         generateImagePrompt();

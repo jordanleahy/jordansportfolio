@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, category, aspectRatio = '16:9' } = await req.json();
+    const { title, description, category } = await req.json();
 
     if (!title || !description || !category) {
       throw new Error('Missing required fields: title, description, and category are required');
@@ -51,7 +51,7 @@ serve(async (req) => {
     }
 
     // Create the user message
-    const userMessage = `Generate a detailed image prompt for an ${aspectRatio} aspect ratio image based on this content:
+    const userMessage = `Generate a detailed image prompt based on this content:
 
 Title: ${title}
 Description: ${description}
@@ -92,7 +92,6 @@ Please create a professional, engaging image prompt that captures the essence of
     return new Response(JSON.stringify({ 
       generatedPrompt,
       category,
-      aspectRatio,
       agent: 'Blog Visual Prompt Generator'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
