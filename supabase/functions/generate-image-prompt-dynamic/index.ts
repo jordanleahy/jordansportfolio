@@ -44,10 +44,15 @@ serve(async (req) => {
 
     // Find the appropriate system prompt for the category
     const systemPrompts = agent.system_prompts as any[];
-    const categoryPrompt = systemPrompts?.find((prompt: any) => prompt.category === category);
+    let categoryPrompt = systemPrompts?.find((prompt: any) => prompt.category === category);
+    
+    // If no specific category prompt found, use the default one
+    if (!categoryPrompt) {
+      categoryPrompt = systemPrompts?.find((prompt: any) => prompt.category === 'default');
+    }
 
     if (!categoryPrompt) {
-      throw new Error(`No system prompt found for category: ${category}. Supported categories: ${agent.supported_categories?.join(', ')}`);
+      throw new Error(`No system prompt found for category: ${category}. Agent has prompts for: ${systemPrompts?.map((p: any) => p.category).join(', ')}`);
     }
 
     // Create the user message
