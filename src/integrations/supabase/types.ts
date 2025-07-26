@@ -1692,6 +1692,51 @@ export type Database = {
           },
         ]
       }
+      voiceover_scripts: {
+        Row: {
+          created_at: string
+          estimated_duration_seconds: number | null
+          generated_script: string
+          id: string
+          original_content: string
+          source_id: string
+          source_type: string
+          style: string
+          tone: string
+          updated_at: string
+          user_id: string
+          word_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          estimated_duration_seconds?: number | null
+          generated_script: string
+          id?: string
+          original_content: string
+          source_id: string
+          source_type: string
+          style?: string
+          tone?: string
+          updated_at?: string
+          user_id: string
+          word_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          estimated_duration_seconds?: number | null
+          generated_script?: string
+          id?: string
+          original_content?: string
+          source_id?: string
+          source_type?: string
+          style?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+          word_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       mv_offerings_enriched: {
