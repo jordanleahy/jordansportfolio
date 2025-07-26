@@ -16,7 +16,7 @@ const PostForm = React.lazy(() => import('@/components/calendar/PostForm').then(
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
 const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
-type CategoryType = 'cdi' | 'contracts' | 'coding ai' | 'ai agents';
+type CategoryType = string;
 
 export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
@@ -30,8 +30,10 @@ export default function OptimizedCalendar() {
     queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
     staleTime: 10 * 60 * 1000, // 10 minutes
     select: (data) => {
-      const allCategories = ['cdi', 'contracts', 'coding ai', 'ai agents', ...data.filter(c => c !== 'cdi' && c !== 'contracts' && c !== 'coding ai' && c !== 'ai agents')] as CategoryType[];
-      return allCategories;
+      // Ensure known categories appear first, followed by any dynamic categories
+      const knownCategories = ['cdi', 'contracts', 'coding ai', 'ai agents'];
+      const dynamicCategories = data.filter(c => !knownCategories.includes(c));
+      return [...knownCategories.filter(c => data.includes(c)), ...dynamicCategories] as CategoryType[];
     },
     enabled: !!user,
   });

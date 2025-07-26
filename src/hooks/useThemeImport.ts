@@ -97,16 +97,16 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
     mutationFn: async (data: ThemeImportData): Promise<ProcessingResult> => {
       setProgress({ step: 'importing', progress: 70, message: 'Importing to database...' });
       
-      // Check for existing categories
-      const { data: existingPosts } = await supabase
-        .from('social_media_posts')
-        .select('category')
-        .eq('category', data.category)
-        .limit(1);
+      // Optional: Check for existing categories (removed to allow dynamic categories)
+      // const { data: existingPosts } = await supabase
+      //   .from('social_media_posts')
+      //   .select('category')
+      //   .eq('category', data.category)
+      //   .limit(1);
 
-      if (existingPosts && existingPosts.length > 0) {
-        throw new Error(`Category '${data.category}' already exists`);
-      }
+      // if (existingPosts && existingPosts.length > 0) {
+      //   throw new Error(`Category '${data.category}' already exists`);
+      // }
 
       // Convert posts for database insertion
       const postsForDb = data.posts.map(post => ({

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CategoryInput } from './CategoryInput';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
@@ -15,7 +16,7 @@ import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
 interface PostFormProps {
   onPostCreated: () => void;
-  category?: 'cdi' | 'contracts';
+  category?: string;
 }
 
 export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => {
@@ -193,6 +194,14 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
                   {isMobile && <span className="ml-2">AI</span>}
                 </Button>
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Category</label>
+              <CategoryInput
+                value={formData.category || 'cdi'}
+                onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                placeholder="Select or create category..."
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Status</label>

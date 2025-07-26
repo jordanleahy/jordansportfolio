@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
-import { CATEGORY_TYPES, CATEGORY_LABELS } from '@/constants/categoryConstants';
+import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
 interface CategoryPromptEditorProps {
   category?: string;
@@ -54,9 +54,9 @@ export const CategoryPromptEditor = ({
               <SelectValue placeholder="Select a category type" />
             </SelectTrigger>
             <SelectContent>
-              {CATEGORY_TYPES.map((category) => (
+              {DEFAULT_CATEGORIES.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {CATEGORY_LABELS[category]}
+                  {getCategoryLabel(category)}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -74,7 +74,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 
   // Example data for placeholder
   const exampleData = useMemo(() => ({
-    category: "healthcare-tech",
+    category: "healthcare innovation",
     theme: "Healthcare Technology",
     description: "Posts about healthcare technology trends",
     posts: [

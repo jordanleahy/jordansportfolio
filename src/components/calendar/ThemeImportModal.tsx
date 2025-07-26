@@ -181,7 +181,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   const canImport = state === 'success' && result?.success;
 
   const exampleData = {
-    category: "healthcare-tech",
+    category: "healthcare innovation",
     theme: "Healthcare Technology",
     description: "Posts about healthcare technology trends",
     posts: [
