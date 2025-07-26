@@ -33,15 +33,41 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
 
   const processMutation = useMutation({
     mutationFn: async (data: string) => {
+      console.log('🚀 ThemeImportModal: Starting process mutation');
+      console.log('📝 Raw JSON input length:', data.length);
+      
       setState('processing');
-      // First process with AI to clean the data
-      const processed = await themeImportService.processWithAI(JSON.parse(data));
-      if (!processed.success) {
-        throw new Error(processed.errors.join(', '));
+      
+      try {
+        // Parse JSON first with detailed logging
+        console.log('📋 Parsing JSON input...');
+        const parsedData = JSON.parse(data);
+        console.log('✅ JSON parsed successfully:', parsedData);
+        
+        // First process with AI to clean the data
+        console.log('🤖 Calling AI processing...');
+        const processed = await themeImportService.processWithAI(parsedData);
+        console.log('🎯 AI processing result:', processed);
+        
+        if (!processed.success) {
+          console.error('❌ AI processing failed:', processed.errors);
+          throw new Error(processed.errors.join(', '));
+        }
+        
+        console.log('✅ Processing completed successfully');
+        return processed;
+      } catch (error) {
+        console.error('💥 Process mutation error:', error);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        throw error;
       }
-      return processed;
     },
     onSuccess: (processedResult) => {
+      console.log('🎉 Process mutation success:', processedResult);
       setResult(processedResult);
       setState('success');
       toast({
@@ -50,6 +76,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
       });
     },
     onError: (error) => {
+      console.error('🚨 Process mutation error handler:', error);
       setState('error');
       toast({
         title: "Processing failed",
@@ -61,11 +88,36 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
 
   const importMutation = useMutation({
     mutationFn: async () => {
-      if (!result?.cleanedData) throw new Error('No processed data to import');
-      return await themeImportService.importThemeData(JSON.stringify(result.cleanedData));
+      console.log('📦 Starting import mutation');
+      console.log('📋 Current result state:', result);
+      
+      if (!result?.cleanedData) {
+        console.error('❌ No processed data to import');
+        throw new Error('No processed data to import');
+      }
+      
+      console.log('🗂️ Cleaned data to import:', result.cleanedData);
+      console.log('📊 Posts count:', result.cleanedData.posts?.length);
+      
+      try {
+        const importResult = await themeImportService.importThemeData(JSON.stringify(result.cleanedData));
+        console.log('📥 Import service result:', importResult);
+        return importResult;
+      } catch (error) {
+        console.error('💥 Import mutation error:', error);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        throw error;
+      }
     },
     onSuccess: (importResult) => {
+      console.log('🎉 Import mutation success:', importResult);
+      
       if (importResult.success) {
+        console.log('✅ Import successful, invalidating queries...');
         queryClient.invalidateQueries({ queryKey: ['social-media-posts'] });
         queryClient.invalidateQueries({ queryKey: ['available-categories'] });
         toast({
@@ -76,6 +128,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
         onOpenChange(false);
         handleReset();
       } else {
+        console.error('❌ Import failed with errors:', importResult.errors);
         toast({
           title: "Import failed",
           description: importResult.errors.join(', '),
@@ -84,6 +137,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
       }
     },
     onError: (error) => {
+      console.error('🚨 Import mutation error handler:', error);
       toast({
         title: "Import failed",
         description: error instanceof Error ? error.message : "Unknown error",
@@ -93,7 +147,11 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   });
 
   const handleProcess = () => {
+    console.log('🔄 Handle process triggered');
+    console.log('📝 JSON input:', jsonInput.substring(0, 200) + (jsonInput.length > 200 ? '...' : ''));
+    
     if (!jsonInput.trim()) {
+      console.warn('⚠️ No JSON input provided');
       toast({
         title: "No data to process",
         description: "Please enter JSON data first",
@@ -101,10 +159,15 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
       });
       return;
     }
+    
+    console.log('🚀 Starting process mutation...');
     processMutation.mutate(jsonInput);
   };
 
   const handleImport = () => {
+    console.log('📦 Handle import triggered');
+    console.log('🔍 Can import:', canImport);
+    console.log('📋 Current result:', result);
     importMutation.mutate();
   };
 

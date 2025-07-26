@@ -15,25 +15,42 @@ interface ProcessingResult {
 }
 
 serve(async (req) => {
+  console.log('🚀 Edge Function: process-theme-json started');
+  console.log('📥 Request method:', req.method);
+  console.log('📋 Request headers:', Object.fromEntries(req.headers.entries()));
+  
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight request handled');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { rawJson } = await req.json();
-    console.log('Processing theme JSON data...');
+    console.log('📦 Parsing request body...');
+    const requestBody = await req.json();
+    console.log('📊 Request body keys:', Object.keys(requestBody));
+    console.log('📋 Raw JSON type:', typeof requestBody.rawJson);
+    console.log('📋 Raw JSON preview:', JSON.stringify(requestBody.rawJson, null, 2).substring(0, 500));
+    
+    const { rawJson } = requestBody;
+    console.log('🔄 Processing theme JSON data...');
 
     const result = await processThemeJsonWithAI(rawJson);
+    console.log('✅ Processing completed:', result);
     
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in process-theme-json function:', error);
+    console.error('💥 Error in process-theme-json function:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     
     return new Response(JSON.stringify({
       success: false,
-      errors: [error.message],
+      errors: [error.message || 'Unknown error occurred'],
       fixes: [],
       warnings: []
     }), {
@@ -44,23 +61,45 @@ serve(async (req) => {
 });
 
 async function processThemeJsonWithAI(rawData: any): Promise<ProcessingResult> {
+  console.log('🤖 Starting AI processing pipeline');
+  console.log('📊 Input data type:', typeof rawData);
+  console.log('📋 Input data structure:', JSON.stringify(rawData, null, 2).substring(0, 300));
+  
   const fixes: string[] = [];
   const warnings: string[] = [];
   const errors: string[] = [];
 
   try {
+    console.log('🔄 Calling AI processing...');
     const aiProcessedData = await aiProcessThemeData(rawData);
+    console.log('✅ AI processing completed');
+    console.log('📊 AI result type:', typeof aiProcessedData);
+    console.log('📋 AI result preview:', JSON.stringify(aiProcessedData, null, 2).substring(0, 300));
+    
+    console.log('🔍 Validating theme fields...');
     const validatedData = validateThemeFields(aiProcessedData, fixes, warnings, errors);
+    console.log('✅ Validation completed');
+    console.log('📊 Validation fixes:', fixes);
+    console.log('⚠️ Validation warnings:', warnings);
+    console.log('❌ Validation errors:', errors);
 
-    return {
+    const result = {
       success: errors.length === 0,
       cleanedData: validatedData,
       fixes,
       warnings,
       errors
     };
+    
+    console.log('🎯 Final processing result:', result);
+    return result;
   } catch (error) {
-    console.error('AI processing failed:', error);
+    console.error('💥 AI processing pipeline failed:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     errors.push(`AI processing failed: ${error.message}`);
     
     return {
@@ -73,10 +112,13 @@ async function processThemeJsonWithAI(rawData: any): Promise<ProcessingResult> {
 }
 
 async function aiProcessThemeData(rawData: any) {
+  console.log('🔐 Checking OpenAI API key...');
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
+    console.error('❌ OpenAI API key not configured');
     throw new Error('OpenAI API key not configured');
   }
+  console.log('✅ OpenAI API key found');
 
   const prompt = `Fix and clean this JSON data for a social media content calendar. 
 
@@ -108,15 +150,11 @@ ${JSON.stringify(rawData, null, 2)}
 
 Return only the cleaned JSON:`;
 
-  console.log('Calling OpenAI API for theme processing...');
+  console.log('🔗 Calling OpenAI API for theme processing...');
+  console.log('📋 Prompt length:', prompt.length);
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    const requestBody = {
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -130,26 +168,62 @@ Return only the cleaned JSON:`;
       ],
       temperature: 0.1,
       max_tokens: 3000,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json();
-  const aiResponse = result.choices[0].message.content.trim();
-
-  try {
-    const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
-    const processedData = JSON.parse(cleanJson);
+    };
     
-    console.log('AI processing completed successfully');
-    return processedData;
-  } catch (parseError) {
-    console.error('Failed to parse AI response:', parseError);
-    throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
+    console.log('📤 Sending request to OpenAI...');
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('📥 OpenAI response status:', response.status);
+    console.log('📋 OpenAI response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    }
+
+    console.log('✅ Parsing OpenAI response...');
+    const result = await response.json();
+    console.log('📊 OpenAI response structure:', Object.keys(result));
+    console.log('📋 OpenAI choices count:', result.choices?.length);
+    
+    const aiResponse = result.choices[0].message.content.trim();
+    console.log('📝 AI response length:', aiResponse.length);
+    console.log('📋 AI response preview:', aiResponse.substring(0, 200));
+
+    try {
+      console.log('🧹 Cleaning AI response...');
+      const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
+      console.log('📋 Clean JSON preview:', cleanJson.substring(0, 200));
+      
+      console.log('📊 Parsing cleaned JSON...');
+      const processedData = JSON.parse(cleanJson);
+      console.log('✅ JSON parsed successfully');
+      console.log('📊 Processed data type:', typeof processedData);
+      console.log('📋 Processed data keys:', Object.keys(processedData));
+      
+      return processedData;
+    } catch (parseError) {
+      console.error('💥 Failed to parse AI response:', parseError);
+      console.error('📋 Raw AI response:', aiResponse);
+      throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
+    }
+  } catch (error) {
+    console.error('💥 OpenAI API call failed:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
 }
 
