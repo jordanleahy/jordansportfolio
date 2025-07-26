@@ -253,16 +253,49 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
             />
           </div>
 
+          {/* Image Uploads */}
+          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-4'} gap-4`}>
+            <ImageUploadCard
+              title="Landscape (16:9)"
+              aspectRatio="16/9"
+              imageUrl={formData.image_16_9_url}
+              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_url: url }))}
+              onImageRemove={() => setFormData(prev => ({ ...prev, image_16_9_url: undefined }))}
+            />
+            <ImageUploadCard
+              title="Portrait (9:16)"
+              aspectRatio="9/16"
+              imageUrl={formData.image_9_16_url}
+              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_9_16_url: url }))}
+              onImageRemove={() => setFormData(prev => ({ ...prev, image_9_16_url: undefined }))}
+            />
+            <ImageUploadCard
+              title="Social (3:4)"
+              aspectRatio="3/4"
+              imageUrl={formData.image_3_4_url}
+              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_url: url }))}
+              onImageRemove={() => setFormData(prev => ({ ...prev, image_3_4_url: undefined }))}
+            />
+            <ImageUploadCard
+              title="Standard (4:3)"
+              aspectRatio="4/3"
+              imageUrl={formData.image_4_3_url}
+              onImageUpload={(url) => setFormData(prev => ({ ...prev, image_4_3_url: url }))}
+              onImageRemove={() => setFormData(prev => ({ ...prev, image_4_3_url: undefined }))}
+            />
+          </div>
+
+          {/* Video Uploads */}
           <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
             <VideoUploadCard
-              title="16:9"
+              title="16:9 Video"
               aspectRatio="16/9"
               videoUrl={formData.image_16_9_video_url}
               onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_video_url: url }))}
               onVideoRemove={() => setFormData(prev => ({ ...prev, image_16_9_video_url: undefined }))}
             />
             <VideoUploadCard
-              title="3:4 Vid"
+              title="3:4 Video"
               aspectRatio="3/4"
               videoUrl={formData.image_3_4_video_url}
               onVideoUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_video_url: url }))}
