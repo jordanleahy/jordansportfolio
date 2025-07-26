@@ -363,7 +363,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                   </div>
                   
                   {/* Aspect Ratio Buttons and Copy Button in same row */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap gap-2">
                       {aspectRatioOptions.map((option) => (
                         <Button
@@ -371,7 +371,7 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                           variant={selectedAspectRatio === option.value ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleAspectRatioSelect(option.value)}
-                          className="text-sm min-h-[44px] sm:min-h-auto"
+                          className="text-sm"
                         >
                           {option.label}
                         </Button>
@@ -380,8 +380,8 @@ Please create a complete, ready-to-use prompt for generating a 4:3 ${promptType}
                     
                     <Button 
                       onClick={handleCopyPrompt} 
-                      className="flex items-center gap-2 min-h-[44px] sm:min-h-auto w-full sm:w-auto sm:ml-auto"
-                      size="lg"
+                      className="flex items-center gap-2"
+                      size="default"
                     >
                       {copied ? (
                         <>
