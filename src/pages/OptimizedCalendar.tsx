@@ -9,6 +9,19 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useQuery } from '@tanstack/react-query';
+import { useUserRole } from '@/hooks/useUserRole';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Lazy load components
@@ -20,6 +33,7 @@ type CategoryType = string;
 
 export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
+  const { isAdmin } = useUserRole();
   const [activeTab, setActiveTab] = useState<CategoryType>('cdi');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const { toast } = useToast();
@@ -64,6 +78,34 @@ export default function OptimizedCalendar() {
     });
   };
 
+  const handleDeleteTheme = async (category: string) => {
+    try {
+      await optimizedSocialMediaService.deleteTheme(category);
+      toast({
+        title: "Theme Deleted",
+        description: `All posts in the "${category}" theme have been deleted.`,
+      });
+      
+      // If the deleted category was active, switch to the first available one
+      if (activeTab === category && availableCategories.length > 1) {
+        const remainingCategories = availableCategories.filter(c => c !== category);
+        if (remainingCategories.length > 0) {
+          setActiveTab(remainingCategories[0]);
+        }
+      }
+      
+      // Refresh categories and posts
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting theme:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete theme. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -80,10 +122,44 @@ export default function OptimizedCalendar() {
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">Social Media Calendar</h1>
-          <p className="text-muted-foreground mt-2">
-            Create and manage your social media content for LinkedIn and other platforms.
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight">Social Media Calendar</h1>
+              <p className="text-muted-foreground mt-2">
+                Create and manage your social media content for LinkedIn and other platforms.
+              </p>
+            </div>
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Theme:</span>
+                <span className="text-sm font-medium capitalize">{activeTab}</span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Theme</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteTheme(activeTab)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete Theme
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-between items-center mb-8">

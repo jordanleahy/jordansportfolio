@@ -143,6 +143,19 @@ export class OptimizedSocialMediaService {
     return filteredCategories;
   }
 
+  async deleteTheme(category: string): Promise<void> {
+    const { error } = await supabase
+      .from('social_media_posts')
+      .delete()
+      .eq('category', category);
+
+    if (error) throw error;
+
+    // Clear cache for this category and categories list
+    this.cache.delete(this.getCacheKey(category));
+    this.cache.delete(this.getCacheKey(undefined, 'categories'));
+  }
+
   private invalidateCache(category?: string) {
     if (category) {
       this.cache.delete(this.getCacheKey(category));
