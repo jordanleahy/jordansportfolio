@@ -7,9 +7,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/hooks/use-toast';
 
 interface ThemeImportModalOptimizedProps {
   open: boolean;
@@ -23,6 +24,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   onImportComplete
 }) => {
   const [jsonInput, setJsonInput] = useState('');
+  const { toast } = useToast();
   
   const {
     state,
@@ -71,6 +73,75 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     setJsonInput('');
     reset();
   }, [reset]);
+
+  const handleCopyInstructions = useCallback(async () => {
+    const instructions = `Please format your response as a JSON object with the following structure:
+
+{
+  "category": "string (1-100 characters, required)",
+  "theme": "string (1-200 characters, required)", 
+  "description": "string (max 1000 characters, optional)",
+  "posts": [
+    {
+      "day": number (1-365, optional),
+      "title": "string (1-500 characters, required)",
+      "description": "string (1-2000 characters, required)",
+      "status": "draft" | "scheduled" | "published" (default: "draft")
+    }
+  ]
+}
+
+REQUIREMENTS:
+- Category: Brief category name (e.g., "healthcare", "technology")
+- Theme: Descriptive theme title
+- Posts: Array of 1-100 posts maximum
+- Day: Optional numbering for sequence (1-365)
+- Status: Must be exactly "draft", "scheduled", or "published"
+- All strings must be non-empty and within character limits
+
+EXAMPLE:
+{
+  "category": "healthcare innovation",
+  "theme": "AI in Healthcare",
+  "description": "Weekly posts about AI applications in healthcare",
+  "posts": [
+    {
+      "day": 1,
+      "title": "AI Diagnostics Revolution", 
+      "description": "How artificial intelligence is transforming medical diagnostics and improving patient outcomes.",
+      "status": "draft"
+    },
+    {
+      "day": 2,
+      "title": "Machine Learning in Drug Discovery",
+      "description": "Exploring how ML algorithms accelerate pharmaceutical research and development.",
+      "status": "draft"
+    }
+  ]
+}
+
+AVOID:
+- Invalid JSON syntax (missing quotes, commas, brackets)
+- Empty strings for required fields
+- Exceeding character limits
+- Invalid status values
+- More than 100 posts
+- Missing required fields`;
+
+    try {
+      await navigator.clipboard.writeText(instructions);
+      toast({
+        title: "Instructions copied",
+        description: "JSON formatting instructions copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   // Example data for placeholder
   const exampleData = useMemo(() => ({
@@ -162,6 +233,14 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
               variant="ghost"
             >
               Reset
+            </Button>
+
+            <Button
+              onClick={handleCopyInstructions}
+              variant="outline"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy JSON Prompt Instructions
             </Button>
           </div>
 
