@@ -1,6 +1,7 @@
 import React from 'react';
 import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generator-modal';
 import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
+import { getCategoryLabel } from '@/constants/categoryConstants';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -20,14 +21,11 @@ const aspectRatioOptions: AspectRatioOption[] = [
 ];
 
 export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
-  // Determine which category to use for the edge function
-  const edgeCategory = category === 'contracts' ? 'contracts' : 'healthcare';
-
   const config: ImagePromptConfig = {
-    title: `${edgeCategory === 'contracts' ? 'Business' : 'Healthcare'} Image Prompt Generator`,
+    title: `${getCategoryLabel(category)} Image Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'generate-image-prompt-dynamic',
-    category: edgeCategory,
+    category: category,
     enableCaching: true,
     aspectRatioOptions,
     cacheKeyPrefix: 'calendar_image'
