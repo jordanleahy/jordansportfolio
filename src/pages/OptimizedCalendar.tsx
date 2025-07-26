@@ -14,7 +14,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 // Lazy load components
 const PostForm = React.lazy(() => import('@/components/calendar/PostForm').then(module => ({ default: module.PostForm })));
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
-const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModal').then(module => ({ default: module.ThemeImportModal })));
+const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
 type CategoryType = 'cdi' | 'contracts' | 'forms' | 'coding ai';
 
