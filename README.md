@@ -18,7 +18,7 @@ Changes made via Lovable will be committed automatically to this repo.
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating). For features that rely on Supabase, install the [Supabase CLI](https://supabase.com/docs/guides/cli) as well.
 
 Follow these steps:
 
@@ -58,7 +58,16 @@ This project is built with:
 - TypeScript
 - React
 - shadcn-ui
-- Tailwind CSS
+
+## Database migrations
+
+This project uses Supabase for data storage. After pulling new changes, run your migrations to keep the database schema in sync:
+
+```bash
+supabase db reset --use-migrations
+```
+
+This applies any new SQL files under `supabase/migrations` – including the migration that removes the `check_valid_category` constraint so custom post categories like `OpenAI Agents Basics` are allowed.
 
 ## How can I deploy this project?
 
