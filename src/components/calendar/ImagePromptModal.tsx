@@ -14,7 +14,7 @@ interface ImagePromptModalProps {
   description: string;
   postId: string;
   cachedPrompt?: string | null;
-  category?: 'cdi' | 'contracts' | 'forms' | 'coding ai';
+  category?: 'cdi' | 'contracts' | 'forms' | 'coding ai' | 'ai agents';
 }
 
 const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
@@ -136,53 +136,43 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
     { value: '4:3' as const, label: '4:3', description: 'standard format' }
   ];
 
+  const [error, setError] = useState<string | null>(null);
+
   const generateImagePrompt = async () => {
+    if (!title || !description) return;
+    
     setIsGenerating(true);
+    setError(null);
+    
     try {
-      const userContent = `Title: ${title}\nDescription: ${description}`;
-      const systemPrompt = category === 'contracts' ? CONTRACTS_SYSTEM_PROMPT : HEALTHCARE_SYSTEM_PROMPT;
-      const promptType = category === 'contracts' ? 'business' : 'healthcare';
-      
-      const { data, error } = await supabase.functions.invoke('generate-content', {
+      // Use the new dynamic edge function
+      const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          prompt: `${systemPrompt}
-
-Based on the following content, create a detailed image generation prompt that follows the ${promptType} vector illustration guidelines above:
-
-${userContent}
-
-Please create a complete, ready-to-use prompt for generating a 16:9 ${promptType} vector illustration that incorporates the title and description provided. The prompt should include specific visual elements, color palette, composition details, and ensure all elements stay within the safe zone for proper cropping.`,
-          type: 'image_prompt'
+          title,
+          description,
+          category: category || 'healthcare' // fallback to healthcare if no category
         }
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (error) throw error;
+      
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      console.log('Function response:', data);
-      const generatedText = data.generatedText;
-      
-      if (!generatedText) {
-        throw new Error('No generated text received from function');
-      }
-      
-      setBasePrompt(generatedText);
-      setGeneratedPrompt(generatedText);
+      const prompt = data.generatedPrompt;
+      setBasePrompt(prompt);
+      setGeneratedPrompt(prompt);
       setSelectedAspectRatio(null);
-
-      // Cache the generated prompt in the database
-      try {
-        await socialMediaService.updatePost(postId, {
-          generated_image_prompt: generatedText
-        });
-      } catch (cacheError) {
-        console.error('Error caching prompt:', cacheError);
-        // Don't show error to user since main functionality worked
-      }
+      
+      // Cache the prompt in the database
+      await socialMediaService.updatePost(postId, {
+        generated_image_prompt: prompt
+      });
+      
     } catch (error) {
       console.error('Error generating image prompt:', error);
+      setError(error instanceof Error ? error.message : 'Failed to generate image prompt');
       toast({
         title: "Generation failed",
         description: "Failed to generate image prompt. Please try again.",
