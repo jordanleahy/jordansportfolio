@@ -1,7 +1,9 @@
 export type AgentStatus = 'active' | 'paused' | 'deprecated';
 
+import { CategoryType } from '@/constants/categoryConstants';
+
 export interface SystemPrompt {
-  category: string;
+  category: CategoryType | string; // Allow string for backward compatibility
   prompt: string;
 }
 

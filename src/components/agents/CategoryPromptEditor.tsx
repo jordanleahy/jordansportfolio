@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
+import { CATEGORY_TYPES, CATEGORY_LABELS } from '@/constants/categoryConstants';
 
 interface CategoryPromptEditorProps {
   category?: string;
@@ -48,12 +49,18 @@ export const CategoryPromptEditor = ({
       {isNew && (
         <div>
           <Label htmlFor="category">Category</Label>
-          <Input
-            id="category"
-            value={localCategory}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            placeholder="e.g., healthcare, contracts, design"
-          />
+          <Select value={localCategory} onValueChange={handleCategoryChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a category type" />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORY_TYPES.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {CATEGORY_LABELS[category]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
       

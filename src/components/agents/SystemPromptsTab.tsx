@@ -6,6 +6,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { SystemPrompt } from '@/types/openaiAgent';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { PromptPresetSelector } from './PromptPresetSelector';
+import { CATEGORY_LABELS } from '@/constants/categoryConstants';
 
 interface SystemPromptsTabProps {
   systemPrompts: SystemPrompt[];
@@ -76,7 +77,7 @@ export const SystemPromptsTab = ({
             {supportedCategories.length > 0 ? (
               supportedCategories.map((category) => (
                 <Badge key={category} variant="secondary">
-                  {category}
+                  {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] || category}
                 </Badge>
               ))
             ) : (
@@ -92,7 +93,9 @@ export const SystemPromptsTab = ({
             systemPrompts.map((prompt, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline">{prompt.category}</Badge>
+                  <Badge variant="outline">
+                    {CATEGORY_LABELS[prompt.category as keyof typeof CATEGORY_LABELS] || prompt.category}
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
