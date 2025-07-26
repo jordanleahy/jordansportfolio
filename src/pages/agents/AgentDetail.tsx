@@ -60,45 +60,50 @@ export const AgentDetail = () => {
         <meta name="description" content={`Details for ${agent.name} AI agent`} />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8 max-w-full">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="space-y-4 mb-6 md:mb-8">
+          {/* Back button */}
           <Button
             variant="outline"
             onClick={() => navigate('/agents')}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Agents
           </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-foreground">{agent.name}</h1>
-            <p className="text-muted-foreground mt-1">{agent.purpose}</p>
+          
+          {/* Title and description */}
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground break-words">{agent.name}</h1>
+            <p className="text-muted-foreground text-sm md:text-base break-words">{agent.purpose}</p>
           </div>
-          <div className="flex gap-2">
+          
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => navigate(`/agents/${agent.id}/edit`)}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <Edit className="h-4 w-4" />
-              Edit
+              <span className="sm:inline">Edit</span>
             </Button>
             <Button
               variant="outline"
               onClick={handleToggleStatus}
               disabled={agent.status === 'deprecated' || updateAgent.isPending}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               {agent.status === 'active' ? (
                 <>
                   <Pause className="h-4 w-4" />
-                  Pause
+                  <span className="sm:inline">Pause</span>
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4" />
-                  Activate
+                  <span className="sm:inline">Activate</span>
                 </>
               )}
             </Button>
@@ -106,27 +111,27 @@ export const AgentDetail = () => {
               variant="outline"
               onClick={handleDelete}
               disabled={deleteAgent.isPending}
-              className="gap-2 text-destructive hover:text-destructive"
+              className="gap-2 text-destructive hover:text-destructive flex-1 sm:flex-none"
             >
               <Trash2 className="h-4 w-4" />
-              Delete
+              <span className="sm:inline">Delete</span>
             </Button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
           {/* Main Info */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Overview */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <Settings className="h-4 w-4 md:h-5 md:w-5" />
                   Overview
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Status</label>
                     <div className="mt-1">
@@ -136,24 +141,24 @@ export const AgentDetail = () => {
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Model</label>
                     <div className="mt-1">
-                      <code className="text-sm bg-muted px-2 py-1 rounded">{agent.model_version}</code>
+                      <code className="text-xs md:text-sm bg-muted px-2 py-1 rounded break-all">{agent.model_version}</code>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Owner</label>
-                    <p className="mt-1">{agent.owner}</p>
+                    <p className="mt-1 text-sm break-words">{agent.owner}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Trigger</label>
-                    <p className="mt-1 capitalize">{agent.trigger}</p>
+                    <p className="mt-1 text-sm capitalize break-words">{agent.trigger}</p>
                   </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground">Input Source</label>
-                    <p className="mt-1">{agent.input_source}</p>
+                    <p className="mt-1 text-sm break-words">{agent.input_source}</p>
                   </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="text-sm font-medium text-muted-foreground">Output Target</label>
-                    <p className="mt-1">{agent.output_target}</p>
+                    <p className="mt-1 text-sm break-words">{agent.output_target}</p>
                   </div>
                 </div>
               </CardContent>
@@ -162,39 +167,41 @@ export const AgentDetail = () => {
             {/* Schedule & Timing */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <Calendar className="h-4 w-4 md:h-5 md:w-5" />
                   Schedule & Timing
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Schedule</label>
-                  <p className="mt-1">{agent.schedule}</p>
+                  <p className="mt-1 text-sm break-words">{agent.schedule}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Last Run</label>
-                  <p className="mt-1">
+                  <p className="mt-1 text-sm">
                     {agent.last_run ? (
                       <span className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        {formatDistanceToNow(new Date(agent.last_run), { addSuffix: true })}
+                        <Clock className="h-4 w-4 flex-shrink-0" />
+                        <span className="break-words">
+                          {formatDistanceToNow(new Date(agent.last_run), { addSuffix: true })}
+                        </span>
                       </span>
                     ) : (
                       <span className="text-muted-foreground">Never</span>
                     )}
                   </p>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Created</label>
-                    <p className="mt-1 text-sm">
+                    <p className="mt-1 text-sm break-words">
                       {formatDistanceToNow(new Date(agent.created_at), { addSuffix: true })}
                     </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
-                    <p className="mt-1 text-sm">
+                    <p className="mt-1 text-sm break-words">
                       {formatDistanceToNow(new Date(agent.updated_at), { addSuffix: true })}
                     </p>
                   </div>
@@ -206,37 +213,37 @@ export const AgentDetail = () => {
             {agent.notes && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <FileText className="h-4 w-4 md:h-5 md:w-5" />
                     Notes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm leading-relaxed">{agent.notes}</p>
+                  <p className="text-sm leading-relaxed break-words">{agent.notes}</p>
                 </CardContent>
               </Card>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Performance Metrics */}
             {agent.metrics && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <Target className="h-4 w-4 md:h-5 md:w-5" />
                     Performance
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Latency</label>
-                    <p className="mt-1 text-lg font-semibold">{agent.metrics.latencyMs}ms</p>
+                    <p className="mt-1 text-lg font-semibold break-words">{agent.metrics.latencyMs}ms</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Error Rate</label>
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 text-lg font-semibold break-words">
                       {(agent.metrics.errorRate * 100).toFixed(1)}%
                     </p>
                   </div>
@@ -248,15 +255,15 @@ export const AgentDetail = () => {
             {agent.tags && agent.tags.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <Tag className="h-4 w-4 md:h-5 md:w-5" />
                     Tags
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {agent.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="outline" className="text-xs break-words">
                         {tag}
                       </Badge>
                     ))}
