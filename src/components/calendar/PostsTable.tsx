@@ -51,7 +51,7 @@ export const PostsTable = ({
     title: string;
     description: string;
     cachedPrompt?: string | null;
-    category?: 'cdi' | 'contracts' | 'forms' | 'coding ai' | 'ai agents';
+    category?: 'cdi' | 'contracts' | 'coding ai' | 'ai agents';
   }>({
     isOpen: false,
     postId: '',
@@ -133,7 +133,7 @@ export const PostsTable = ({
       title: post.title,
       description: post.description,
       cachedPrompt: post.generated_image_prompt,
-      category: post.category as 'cdi' | 'contracts' | 'forms' | 'coding ai' | 'ai agents'
+      category: post.category as 'cdi' | 'contracts' | 'coding ai' | 'ai agents'
     });
   };
   const handleCreateBlogPost = async (post: SocialMediaPost) => {

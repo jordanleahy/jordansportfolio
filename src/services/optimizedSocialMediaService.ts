@@ -25,7 +25,7 @@ export class OptimizedSocialMediaService {
     return cached?.data;
   }
 
-  async getAllPosts(category?: 'cdi' | 'contracts' | 'forms' | 'coding ai' | 'ai agents'): Promise<SocialMediaPost[]> {
+  async getAllPosts(category?: 'cdi' | 'contracts' | 'coding ai' | 'ai agents'): Promise<SocialMediaPost[]> {
     const cacheKey = this.getCacheKey(category);
     
     // Return cached data if valid
