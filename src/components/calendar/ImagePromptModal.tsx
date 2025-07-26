@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Copy, Check, Loader2, RotateCcw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
+import React from 'react';
+import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generator-modal';
+import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -17,325 +12,52 @@ interface ImagePromptModalProps {
   category?: string;
 }
 
-const HEALTHCARE_SYSTEM_PROMPT = `🧠 HC Image Prompt Instructions:
-Healthcare Vector Illustration Generator
-
-🎯 Project Goal
-Create text prompts that generate flat, modern vector illustrations used in healthcare-RCM storytelling, training materials, and executive summaries. Prompts should produce clean, trustworthy visuals with an informative tone—supporting clarity around coding workflows, audit processes, and documentation quality.
-
-✍️ Prompt Format (Template)
-"A healthcare-style vector illustration showing [USER INPUT SCENE] in a clinical or office setting. The design should reflect the same tone and style as corporate infographics—clean, clear, and visually educational."
-
-Focus on the scene, setting, and layout, not on narrative backstory or detailed character attributes. Do not include titles or aspect ratio specifications in the output.
-
-🧩 Example Scene Elements
-- EHR/chart review screens, audit flags, code sets (#ICD-10, #CPT)
-- Clinicians or coders at desks, laptops, clipboards
-- Document stacks, magnifying-glass icons, checkmarks/x-marks
-- Dashboards with metrics (e.g., "Denial Rate," "Pre-bill Accuracy")
-- Clocks or timers indicating turnaround
-- Hospital corridors, office partitions, meeting rooms
-
-👥 Gender Representation Requirements
-- When people are included: 70% women, 30% men
-- Ensure diverse representation in professional healthcare roles
-- Women should be prominently featured in leadership and technical positions
-
-✅ Updated Visual Style & Layout Guidance
-
-🎨 Color Palette
-Use a professional healthcare palette—bright but not neon:
-- Sky Blue for backgrounds and headers
-- Teal-Green for positive indicators and highlights
-- Burnt Orange for warnings or flags
-- Rich Gray for text, outlines, and neutral elements
-- Deep Navy for shadows and key iconography
-
-🧱 Style Details
-- Flat vector design only
-- No gradients, no textures, no outlines
-- Minimal soft shadows for element separation
-- Simplified, geometric shapes for people and objects
-- No photorealism—keep forms schematic and iconographic
-
-🏙️ Composition & Scene Layout
-- **Foreground:** Primary action (e.g., coder reviewing a flagged chart) centered and prominent
-- **Mid-ground:** Supporting elements (dashboards, document icons, audit alerts)
-- **Background:** Abstracted clinic/office environment—desks, partitions, simple window shapes
-- **Iconography:** Embed symbols (checkmarks, clocks, alert triangles) naturally—don't float them arbitrarily
-
-📐 Aspect Ratio & Safe Zone
-- **Safe Zone:** Keep all critical elements—text, icons, human figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
-- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
-
-const CONTRACTS_SYSTEM_PROMPT = `💼 Contracts & RCM Image Prompt Instructions:
-Business Vector Illustration Generator
-
-🎯 Project Goal
-Create text prompts that generate flat, modern vector illustrations used in healthcare contract management, revenue cycle, and payer relations storytelling. Prompts should produce professional, trustworthy business visuals with an informative tone—supporting clarity around contract workflows, billing processes, and payer relationships.
-
-✍️ Prompt Format (Template)
-"A professional business-style vector illustration showing [USER INPUT SCENE] in a corporate office or healthcare business setting. The design should reflect the same tone and style as business infographics—clean, professional, and visually educational."
-
-Focus on the business scene, office setting, and professional layout, not on narrative backstory or detailed character attributes.
-
-🧩 Example Scene Elements
-- Contract documents, billing systems, payer portals, claim processing screens
-- Business professionals at desks, conference tables, presentation screens
-- Charts with revenue metrics, denial rates, payment timelines
-- Handshakes, contract signatures, approval workflows
-- Office buildings, meeting rooms, corporate environments
-- Filing systems, audit trails, compliance documentation
-
-👥 Gender Representation Requirements
-- When people are included: 70% women, 30% men
-- Ensure diverse representation in professional business roles
-- Women should be prominently featured in leadership and decision-making positions
-
-✅ Updated Visual Style & Layout Guidance
-
-🎨 Color Palette
-Use a professional business palette—trustworthy and corporate:
-- Deep Blue for backgrounds and primary elements
-- Forest Green for success indicators and approvals
-- Gold/Amber for important highlights and warnings
-- Charcoal Gray for text, outlines, and neutral elements
-- Rich Navy for shadows and business iconography
-
-🧱 Style Details
-- Flat vector design only
-- No gradients, no textures, no outlines
-- Minimal soft shadows for element separation
-- Simplified, geometric shapes for people and objects
-- No photorealism—keep forms schematic and iconographic
-
-🏙️ Composition & Scene Layout
-- **Foreground:** Primary business action (e.g., contract review, billing dashboard) centered and prominent
-- **Mid-ground:** Supporting elements (charts, documents, approval workflows)
-- **Background:** Professional office environment—desks, meeting rooms, corporate settings
-- **Iconography:** Embed business symbols (handshakes, documents, charts) naturally—don't float them arbitrarily
-
-📐 Aspect Ratio & Safe Zone
-- **Safe Zone:** Keep all critical elements—text, icons, figures, charts—within the central 70–80% area of the frame (i.e., inset at least 10–15% from every edge).
-- **Margin Usage:** Use the outer 10–15% solely for background color or minimal decorative shapes (no labels or essential imagery). That way, any crop to standard ratios never cuts off your core content.`;
-
-type AspectRatio = '16:9' | '3:4' | '9:16' | '4:3' | null;
+const aspectRatioOptions: AspectRatioOption[] = [
+  { label: "Landscape (16:9)", value: "16:9" },
+  { label: "Portrait (3:4)", value: "3:4" },
+  { label: "Mobile (9:16)", value: "9:16" },
+  { label: "Standard (4:3)", value: "4:3" }
+];
 
 export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
-  const [generatedPrompt, setGeneratedPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(null);
-  const [basePrompt, setBasePrompt] = useState('');
-  const { toast } = useToast();
+  // Determine which category to use for the edge function
+  const edgeCategory = category === 'contracts' ? 'contracts' : 'healthcare';
 
-  const aspectRatioOptions = [
-    { value: '16:9' as const, label: '16:9', description: 'widescreen format' },
-    { value: '3:4' as const, label: '3:4', description: 'portrait format' },
-    { value: '9:16' as const, label: '9:16', description: 'mobile/vertical format' },
-    { value: '4:3' as const, label: '4:3', description: 'standard format' }
-  ];
+  const config: ImagePromptConfig = {
+    title: `${edgeCategory === 'contracts' ? 'Business' : 'Healthcare'} Image Prompt Generator`,
+    systemPrompt: '', // Will be handled by the edge function
+    edgeFunction: 'generate-image-prompt-dynamic',
+    category: edgeCategory,
+    enableCaching: true,
+    aspectRatioOptions,
+    cacheKeyPrefix: 'calendar_image'
+  };
 
-  const [error, setError] = useState<string | null>(null);
+  const content: ImagePromptContent = {
+    primary: title,
+    secondary: description
+  };
 
-  const generateImagePrompt = async () => {
-    if (!title || !description) return;
-    
-    setIsGenerating(true);
-    setError(null);
-    
+  const handlePromptGenerated = async (prompt: string) => {
+    // Update the post with the generated prompt
     try {
-      // Use the new dynamic edge function
-      const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-        body: {
-          title,
-          description,
-          category: category || 'healthcare' // fallback to healthcare if no category
-        }
-      });
-
-      if (error) throw error;
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      const prompt = data.generatedPrompt;
-      setBasePrompt(prompt);
-      setGeneratedPrompt(prompt);
-      setSelectedAspectRatio(null);
-      
-      // Cache the prompt in the database
+      const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
       await optimizedSocialMediaService.updatePost(postId, {
         generated_image_prompt: prompt
       });
-      
     } catch (error) {
-      console.error('Error generating image prompt:', error);
-      setError(error instanceof Error ? error.message : 'Failed to generate image prompt');
-      toast({
-        title: "Generation failed",
-        description: "Failed to generate image prompt. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
+      console.error('Failed to update post with generated prompt:', error);
     }
   };
-
-  const handleAspectRatioSelect = (ratio: AspectRatio) => {
-    if (!basePrompt) return;
-
-    if (selectedAspectRatio === ratio) {
-      // If clicking the same ratio, reset to base prompt
-      setSelectedAspectRatio(null);
-      setGeneratedPrompt(basePrompt);
-    } else {
-      setSelectedAspectRatio(ratio);
-      const aspectRatioInstruction = `Aspect Ratio: ${ratio} (${aspectRatioOptions.find(opt => opt.value === ratio)?.description})`;
-      setGeneratedPrompt(aspectRatioInstruction + '\n\n' + basePrompt);
-    }
-  };
-
-  const handleResetPrompt = () => {
-    setSelectedAspectRatio(null);
-    setGeneratedPrompt(basePrompt);
-  };
-
-  const handleCopyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(generatedPrompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast({
-        title: "Copy failed",
-        description: "Failed to copy prompt to clipboard.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  React.useEffect(() => {
-    if (isOpen) {
-      if (cachedPrompt) {
-        // Use cached prompt if available
-        setBasePrompt(cachedPrompt);
-        setGeneratedPrompt(cachedPrompt);
-        setSelectedAspectRatio(null);
-      } else if (!generatedPrompt && !isGenerating) {
-        // Generate new prompt if no cache and no current prompt
-        generateImagePrompt();
-      }
-    }
-  }, [isOpen, cachedPrompt]);
-
-  React.useEffect(() => {
-    if (!isOpen) {
-      setGeneratedPrompt('');
-      setBasePrompt('');
-      setSelectedAspectRatio(null);
-      setCopied(false);
-    }
-  }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>{category === 'contracts' ? 'Business' : 'Healthcare'} Image Prompt Generator</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            <p><strong>Post Title:</strong> {title}</p>
-            <p><strong>Description:</strong> {description}</p>
-          </div>
-          
-          {isGenerating ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin mr-2" />
-              <span>Generating {category === 'contracts' ? 'business' : 'healthcare'} image prompt...</span>
-            </div>
-          ) : generatedPrompt ? (
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Generated Image Prompt:</label>
-                <Textarea
-                  value={generatedPrompt}
-                  readOnly
-                  className="min-h-[300px] mt-2 font-mono text-sm"
-                />
-              </div>
-
-              {basePrompt && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Aspect Ratio Options:</label>
-                    {selectedAspectRatio && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleResetPrompt}
-                        className="text-xs"
-                      >
-                        <RotateCcw className="h-3 w-3 mr-1" />
-                        Reset
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {aspectRatioOptions.map((option) => (
-                      <Button
-                        key={option.value}
-                        variant={selectedAspectRatio === option.value ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleAspectRatioSelect(option.value)}
-                        className="text-sm"
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Click an aspect ratio to append it to your prompt, or click again to remove it.
-                  </p>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm text-muted-foreground">
-                    Copy this prompt and paste it into OpenAI's image creator to generate your {category === 'contracts' ? 'business' : 'healthcare'} vector illustration.
-                  </p>
-                  {cachedPrompt && (
-                    <p className="text-xs text-green-600">
-                      ✓ Using cached prompt (no API call needed)
-                    </p>
-                  )}
-                </div>
-                <Button onClick={handleCopyPrompt} className="flex items-center gap-2">
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copy Prompt
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center p-8">
-              <Button onClick={generateImagePrompt}>Generate Image Prompt</Button>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <ImagePromptGeneratorModal
+      isOpen={isOpen}
+      onClose={onClose}
+      config={config}
+      content={content}
+      cachedPrompt={cachedPrompt || undefined}
+      onPromptGenerated={handlePromptGenerated}
+    />
   );
 };
