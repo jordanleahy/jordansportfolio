@@ -853,7 +853,7 @@ const BlogEditor = () => {
             onClose={handleClosePromptModal}
             headline={formData.visual_sections[promptModalOpen]?.headline || ''}
             content={formData.visual_sections[promptModalOpen]?.content || ''}
-            category="cdi"
+            category={formData.category || 'healthcare'}
           />
         )}
       </div>
