@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { SystemPrompt } from '@/types/openaiAgent';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { PromptPresetSelector } from './PromptPresetSelector';
-import { CATEGORY_LABELS } from '@/constants/categoryConstants';
+import { CATEGORY_LABELS, CATEGORY_TYPES } from '@/constants/categoryConstants';
 
 interface SystemPromptsTabProps {
   systemPrompts: SystemPrompt[];
@@ -35,6 +36,28 @@ export const SystemPromptsTab = ({
     const newPrompts = [...systemPrompts];
     newPrompts[index] = { ...newPrompts[index], prompt };
     onChange(newPrompts, supportedCategories);
+  };
+
+  const updatePromptCategory = (index: number, category: string) => {
+    const newPrompts = [...systemPrompts];
+    const oldCategory = newPrompts[index].category;
+    newPrompts[index] = { ...newPrompts[index], category };
+    
+    // Update supported categories
+    let newCategories = [...supportedCategories];
+    
+    // Add new category if not present
+    if (!newCategories.includes(category)) {
+      newCategories.push(category);
+    }
+    
+    // Remove old category if no other prompts use it
+    const oldCategoryStillUsed = newPrompts.some(p => p.category === oldCategory);
+    if (!oldCategoryStillUsed) {
+      newCategories = newCategories.filter(c => c !== oldCategory);
+    }
+    
+    onChange(newPrompts, newCategories);
   };
 
   const removePrompt = (index: number) => {
@@ -93,9 +116,24 @@ export const SystemPromptsTab = ({
             systemPrompts.map((prompt, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline">
-                    {CATEGORY_LABELS[prompt.category as keyof typeof CATEGORY_LABELS] || prompt.category}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Category:</span>
+                    <Select 
+                      value={prompt.category} 
+                      onValueChange={(value) => updatePromptCategory(index, value)}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORY_TYPES.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {CATEGORY_LABELS[category]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
