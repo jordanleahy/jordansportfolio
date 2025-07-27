@@ -7,6 +7,7 @@ import { useVendorEdit } from '@/hooks/useVendorEdit';
 import { TextEditor } from './editors/TextEditor';
 import { ArrayEditor } from './editors/ArrayEditor';
 import { SelectEditor } from './editors/SelectEditor';
+import { VendorNameOrLogo } from './VendorNameOrLogo';
 import { Badge } from '@/components/ui/badge';
 import { VENDOR_CATEGORIES, type VendorCategory } from '@/types/vendor';
 
@@ -85,7 +86,7 @@ export function EditableVendorCard({
               </div>
             ) : (
               <>
-                <div className="font-semibold truncate">{vendor.company_name}</div>
+                <VendorNameOrLogo vendor={vendor} size="md" className="font-semibold" />
                 <div className="text-sm text-muted-foreground font-normal truncate">
                   {vendor.headquarters}
                 </div>

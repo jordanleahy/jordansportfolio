@@ -11,6 +11,7 @@ import { ExternalLink, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { type Vendor } from '@/types/vendor';
 import { useAuth } from '@/contexts/AuthContext';
+import { VendorNameOrLogo } from './VendorNameOrLogo';
 
 interface VendorsTableViewProps {
   vendors: Vendor[];
@@ -127,7 +128,7 @@ export function VendorsTableView({
                 >
                   <TableCell>
                     <div>
-                      <div className="font-medium hover:text-primary">{vendor.company_name}</div>
+                      <VendorNameOrLogo vendor={vendor} className="hover:text-primary" />
                       <Badge variant="outline" className="mt-1">
                         {vendor.company_type}
                       </Badge>

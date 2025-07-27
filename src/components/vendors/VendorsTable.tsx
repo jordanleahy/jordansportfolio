@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExternalLink, DollarSign, Users, Building, Calendar, Plus, Trash2 } from 'lucide-react';
+import { VendorNameOrLogo } from './VendorNameOrLogo';
 import {
   Table,
   TableBody,
@@ -283,7 +284,7 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick, onDeleteClick
                 >
                   <TableCell>
                     <div>
-                      <div className="font-medium hover:text-primary">{vendor.company_name}</div>
+                      <VendorNameOrLogo vendor={vendor} className="hover:text-primary" />
                       <div className="text-sm text-muted-foreground">
                         {vendor.headquarters}
                       </div>
