@@ -159,9 +159,9 @@ async function generateSystemPromptUsingAgent(userId: string, analysis: any) {
   // Use the agent's system prompt to generate a new system prompt
   const systemPrompt = contextAgent.system_prompts?.[0]?.prompt || '';
   
-  const userPrompt = `Create a flexible, content-adaptive system prompt for the Blog Visual Prompt Generator based on this analysis:
+  const userPrompt = `Based on this content analysis, generate a specialized system prompt for the Blog Visual Prompt Generator agent:
 
-**Content Analysis:**
+Analysis:
 - Visual Theme: ${analysis.visualTheme}
 - Industry Context: ${analysis.industryContext}
 - Target Audience: ${analysis.targetAudience}
@@ -170,16 +170,7 @@ async function generateSystemPromptUsingAgent(userId: string, analysis: any) {
 - Image Style: ${analysis.imageStyle}
 - Key Elements: ${analysis.keyElements.join(', ')}
 
-**Create a system prompt that:**
-- Guides the agent to analyze each piece of content individually
-- Encourages unique visual concepts based on specific themes
-- Promotes creative interpretation while maintaining professionalism
-- Adapts style and elements to match the content domain
-- Emphasizes clean, modern design appropriate for ${analysis.industryContext}
-- Always respects aspect ratio specifications
-- Generates image descriptions without text or headlines
-
-Make it conversational and principle-based rather than template-driven. Focus on helping the agent understand the content themes and create tailored visuals.`;
+Please generate a complete system prompt that follows the template structure shown in your system prompt. The new prompt should be specifically tailored for "${analysis.industryContext}" content.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

@@ -232,62 +232,60 @@ export const EnhancedCacheManagement = ({ isOpen, onClose }: EnhancedCacheManage
               )}
 
               {/* Prompts List */}
-              <ScrollArea className="flex-1 h-[400px]">
-                <div className="pr-4">
-                  {isLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Loading prompts...</div>
-                  ) : filteredPrompts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      {searchTerm || selectedCategory ? 'No prompts match your filters' : 'No cached prompts found'}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {filteredPrompts.map((prompt) => (
-                        <Card key={prompt.id} className="relative">
-                          <CardHeader className="pb-2">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3 flex-1">
-                                <Checkbox
-                                  checked={selectedPrompts.has(prompt.id)}
-                                  onCheckedChange={() => handleSelectPrompt(prompt.id)}
-                                  className="mt-1"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Badge className={categoryColors[prompt.category as keyof typeof categoryColors] || categoryColors.default}>
-                                      {categoryLabels[prompt.category as keyof typeof categoryLabels] || prompt.category}
-                                    </Badge>
-                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      {formatDistanceToNow(new Date(prompt.updated_at), { addSuffix: true })}
-                                    </div>
+              <ScrollArea className="flex-1 min-h-0">
+                {isLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading prompts...</div>
+                ) : filteredPrompts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchTerm || selectedCategory ? 'No prompts match your filters' : 'No cached prompts found'}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredPrompts.map((prompt) => (
+                      <Card key={prompt.id} className="relative">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <Checkbox
+                                checked={selectedPrompts.has(prompt.id)}
+                                onCheckedChange={() => handleSelectPrompt(prompt.id)}
+                                className="mt-1"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Badge className={categoryColors[prompt.category as keyof typeof categoryColors] || categoryColors.default}>
+                                    {categoryLabels[prompt.category as keyof typeof categoryLabels] || prompt.category}
+                                  </Badge>
+                                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <Clock className="h-3 w-3" />
+                                    {formatDistanceToNow(new Date(prompt.updated_at), { addSuffix: true })}
                                   </div>
-                                  {prompt.metadata?.headline && (
-                                    <CardTitle className="text-sm font-medium mb-1">
-                                      {prompt.metadata.headline}
-                                    </CardTitle>
-                                  )}
-                                  <CardDescription className="text-xs">
-                                    {getPromptPreview(prompt.prompt_text)}
-                                  </CardDescription>
                                 </div>
+                                {prompt.metadata?.headline && (
+                                  <CardTitle className="text-sm font-medium mb-1">
+                                    {prompt.metadata.headline}
+                                  </CardTitle>
+                                )}
+                                <CardDescription className="text-xs">
+                                  {getPromptPreview(prompt.prompt_text)}
+                                </CardDescription>
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deletePrompt.mutate(prompt.id)}
-                                disabled={deletePrompt.isPending}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
                             </div>
-                          </CardHeader>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deletePrompt.mutate(prompt.id)}
+                              disabled={deletePrompt.isPending}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </ScrollArea>
             </TabsContent>
 

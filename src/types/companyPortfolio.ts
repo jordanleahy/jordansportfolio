@@ -8,7 +8,6 @@ export interface CompanyPortfolio {
   generated_content?: GeneratedContent;
   cover_letter?: string;
   custom_video_url?: string;
-  custom_cover_image_url?: string;
   status: 'draft' | 'completed' | 'published';
   created_at: string;
   updated_at: string;
@@ -21,7 +20,6 @@ export interface CompanyPortfolioInput {
   generated_content?: GeneratedContent;
   cover_letter?: string;
   custom_video_url?: string;
-  custom_cover_image_url?: string;
   status?: 'draft' | 'completed' | 'published';
 }
 

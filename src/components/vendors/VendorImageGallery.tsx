@@ -313,14 +313,14 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
         
         <CardContent>
           {/* Logo Upload Sections */}
-          <div className="flex flex-col md:flex-row items-start gap-10 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Social Logo (1:1) */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-medium">Social Logo</h4>
                 <Badge variant="outline" className="text-xs">1:1</Badge>
               </div>
-              <div className="relative w-20 h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
                 {socialLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
@@ -368,13 +368,13 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                 <h4 className="text-sm font-medium">Landscape Logo</h4>
                 <Badge variant="outline" className="text-xs">300×75</Badge>
               </div>
-              <div className="relative w-80 h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+              <div className="relative w-full h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
                 {landscapeLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
                       src={landscapeLogoUrl}
                       alt="Landscape Logo"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                     />
                     {isEditing && (
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
