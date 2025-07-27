@@ -374,7 +374,7 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                     <img
                       src={landscapeLogoUrl}
                       alt="Landscape Logo"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                     {isEditing && (
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
