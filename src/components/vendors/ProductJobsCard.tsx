@@ -406,7 +406,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         onClick={() => handleCreateCoverLetter(job)}
                         className="bg-primary text-primary-foreground hover:bg-primary/90 md:px-3 px-2"
                       >
-                        <FileText className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
                         <span className="hidden md:inline ml-2">Create Cover Page</span>
                       </Button>
                       
