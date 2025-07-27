@@ -144,7 +144,15 @@ Return the response as a JSON object with this structure:
     // Try to parse as JSON, fallback to text format
     let coverLetterData;
     try {
-      coverLetterData = JSON.parse(generatedContent);
+      // Remove markdown code block formatting if present
+      let cleanContent = generatedContent.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      coverLetterData = JSON.parse(cleanContent);
     } catch (e) {
       console.log('Failed to parse as JSON, creating structured format from text');
       coverLetterData = {
