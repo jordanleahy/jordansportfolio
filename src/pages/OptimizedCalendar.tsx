@@ -224,8 +224,8 @@ export default function OptimizedCalendar() {
           onValueChange={(value) => setActiveTab(value as CategoryType)} 
           className="space-y-8"
         >
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+          <div className="overflow-x-auto bg-muted rounded-md p-1">
+            <TabsList className="inline-flex w-max min-w-full h-10 items-center justify-start bg-transparent p-0 text-muted-foreground">
               {availableCategories.map((category) => (
                 <TabsTrigger 
                   key={category} 
