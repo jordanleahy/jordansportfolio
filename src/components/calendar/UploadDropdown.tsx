@@ -67,7 +67,7 @@ export const UploadDropdown: React.FC<UploadDropdownProps> = ({
             className="cursor-pointer"
           >
             <ImageIcon className="mr-2 h-4 w-4" />
-            Image 16:9 (Landscape)
+            16:9 (Landscape)
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => file916InputRef.current?.click()}
@@ -75,7 +75,7 @@ export const UploadDropdown: React.FC<UploadDropdownProps> = ({
             className="cursor-pointer"
           >
             <ImageIcon className="mr-2 h-4 w-4" />
-            Image 9:16 (Portrait)
+            9:16 (Portrait)
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => file34InputRef.current?.click()}
@@ -83,7 +83,7 @@ export const UploadDropdown: React.FC<UploadDropdownProps> = ({
             className="cursor-pointer"
           >
             <ImageIcon className="mr-2 h-4 w-4" />
-            Image 3:4 (Portrait)
+            3:4 (Portrait)
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => file43InputRef.current?.click()}
@@ -91,7 +91,7 @@ export const UploadDropdown: React.FC<UploadDropdownProps> = ({
             className="cursor-pointer"
           >
             <ImageIcon className="mr-2 h-4 w-4" />
-            Image 4:3 (Landscape)
+            4:3 (Landscape)
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
