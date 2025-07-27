@@ -218,8 +218,7 @@ export const PostCard = ({
               onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
             >
-              <ImageIcon className="h-4 w-4 mr-2" />
-              Photos
+              <ImageIcon className="h-4 w-4" />
               {showPhotos ? (
                 <ChevronUp className="h-4 w-4 ml-1" />
               ) : (
@@ -232,8 +231,7 @@ export const PostCard = ({
               onClick={() => setShowVideos(!showVideos)}
               className="flex-1"
             >
-              <Video className="h-4 w-4 mr-2" />
-              Videos
+              <Video className="h-4 w-4" />
               {showVideos ? (
                 <ChevronUp className="h-4 w-4 ml-1" />
               ) : (
