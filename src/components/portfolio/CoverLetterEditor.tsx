@@ -165,24 +165,20 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
                     disabled={isRegenerating}
                     className="bg-gradient-to-r from-primary to-primary-glow"
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {isRegenerating ? 'Regenerating...' : 'Regenerate with AI'}
+                    <Sparkles className="w-4 h-4" />
                   </Button>
                 </div>
                 <Button onClick={handleStartEdit} size="sm" variant="outline">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Manual Edit
+                  <Edit className="w-4 h-4" />
                 </Button>
               </>
             ) : (
               <>
                 <Button onClick={handleSaveEdit} size="sm" disabled={updatePortfolio.isPending}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {updatePortfolio.isPending ? 'Saving...' : 'Save'}
+                  <Save className="w-4 h-4" />
                 </Button>
                 <Button onClick={handleCancelEdit} variant="outline" size="sm">
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
+                  <X className="w-4 h-4" />
                 </Button>
               </>
             )}
