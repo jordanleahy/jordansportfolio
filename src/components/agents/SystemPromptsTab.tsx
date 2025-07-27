@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2 } from 'lucide-react';
 import { SystemPrompt } from '@/types/openaiAgent';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
-import { PromptPresetSelector } from './PromptPresetSelector';
+
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
 interface SystemPromptsTabProps {
@@ -72,25 +72,11 @@ export const SystemPromptsTab = ({
     onChange(newPrompts, newCategories);
   };
 
-  const loadPreset = (category: string, prompt: string) => {
-    const existingIndex = systemPrompts.findIndex(p => p.category === category);
-    
-    if (existingIndex >= 0) {
-      // Update existing prompt
-      updatePrompt(existingIndex, prompt);
-    } else {
-      // Add new prompt
-      addNewPrompt(category, prompt);
-    }
-  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          System Prompts Configuration
-          <PromptPresetSelector onLoadPreset={loadPreset} />
-        </CardTitle>
+        <CardTitle>System Prompts Configuration</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Supported Categories Display */}
