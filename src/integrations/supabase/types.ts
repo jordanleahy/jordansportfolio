@@ -1847,6 +1847,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_cover_letter_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       insert_sample_agents: {
         Args: Record<PropertyKey, never>
         Returns: undefined
