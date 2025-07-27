@@ -266,8 +266,108 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
         </CardHeader>
         
         <CardContent>
+          {/* Logo Upload Sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Social Logo (1:1) */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-medium">Social Logo</h4>
+                <Badge variant="outline" className="text-xs">1:1</Badge>
+              </div>
+              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+                {vendor.social_logo_url ? (
+                  <div className="relative w-full h-full group">
+                    <img
+                      src={vendor.social_logo_url}
+                      alt="Social Logo"
+                      className="w-full h-full object-cover"
+                    />
+                    {isEditing && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateImageField('social_logo_url', '')}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : isEditing ? (
+                  <label className="flex items-center justify-center w-full h-full cursor-pointer hover:bg-muted-foreground/5 transition-colors">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">Upload Social Logo</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleLogoUpload(e, 'social_logo_url')}
+                      className="sr-only"
+                      disabled={isUploading}
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                    <p className="text-xs">No social logo</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Landscape Logo (300x75) */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-medium">Landscape Logo</h4>
+                <Badge variant="outline" className="text-xs">300×75</Badge>
+              </div>
+              <div className="relative w-full h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+                {vendor.landscape_logo_url ? (
+                  <div className="relative w-full h-full group">
+                    <img
+                      src={vendor.landscape_logo_url}
+                      alt="Landscape Logo"
+                      className="w-full h-full object-cover"
+                    />
+                    {isEditing && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateImageField('landscape_logo_url', '')}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : isEditing ? (
+                  <label className="flex items-center justify-center w-full h-full cursor-pointer hover:bg-muted-foreground/5 transition-colors">
+                    <div className="text-center">
+                      <Upload className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">Upload Landscape Logo</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleLogoUpload(e, 'landscape_logo_url')}
+                      className="sr-only"
+                      disabled={isUploading}
+                    />
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                    <p className="text-xs">No landscape logo</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {isEditing && (
             <div className="mb-6">
+              <h4 className="text-sm font-medium mb-3">Additional Images</h4>
               <label className="block cursor-pointer">
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
