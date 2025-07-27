@@ -320,7 +320,7 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                 <h4 className="text-sm font-medium">Social Logo</h4>
                 <Badge variant="outline" className="text-xs">1:1</Badge>
               </div>
-              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+              <div className="relative w-full h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
                 {socialLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
