@@ -63,16 +63,6 @@ export const AgentDetail = () => {
       <div className="container mx-auto px-4 py-4 md:py-8 max-w-full">
         {/* Header */}
         <div className="space-y-4 mb-6 md:mb-8">
-          {/* Back button */}
-          <Button
-            variant="outline"
-            onClick={() => navigate('/agents')}
-            className="gap-2 w-full sm:w-auto"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Agents
-          </Button>
-          
           {/* Title and description */}
           <div className="space-y-2 overflow-hidden">
             <h1 className="text-xl md:text-3xl font-bold text-foreground break-words overflow-wrap-anywhere leading-tight">{agent.name}</h1>
@@ -81,6 +71,14 @@ export const AgentDetail = () => {
           
           {/* Action buttons */}
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/agents')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Agents
+            </Button>
             <Button
               variant="outline"
               size="icon"
