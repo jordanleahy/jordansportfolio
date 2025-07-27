@@ -400,7 +400,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                       </a>
                     </div>
                     
-                    <div className="flex items-center justify-center gap-1 md:gap-2">
+                    <div className="flex items-center justify-start gap-1 md:gap-2">
                       <Button
                         size="sm"
                         onClick={() => handleCreateCoverLetter(job)}
