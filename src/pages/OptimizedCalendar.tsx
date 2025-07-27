@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Trash2 } from 'lucide-react';
 import {
@@ -34,6 +34,7 @@ type CategoryType = string;
 export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<CategoryType>('cdi');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const { toast } = useToast();
@@ -67,8 +68,8 @@ export default function OptimizedCalendar() {
   });
 
   const loadCategoryPosts = async (category: CategoryType) => {
-    // This will be handled by the optimized service cache
-    await optimizedSocialMediaService.getAllPosts(category as any);
+    // Invalidate and refetch the posts for this category
+    await queryClient.invalidateQueries({ queryKey: ['posts-by-category'] });
   };
 
   const handleImportComplete = async () => {
