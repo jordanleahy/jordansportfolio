@@ -459,7 +459,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-destructive hover:text-destructive md:px-3 px-2"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 md:px-3 px-2"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="hidden md:inline ml-2">Delete</span>
