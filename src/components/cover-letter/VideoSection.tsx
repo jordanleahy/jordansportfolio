@@ -4,11 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 import { Button } from "@/components/ui/button";
-import { Upload, Trash2, Settings, Image } from "lucide-react";
+import { Upload, Trash2, Image } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { uploadVideoToStorage, isVideoFile } from "@/utils/videoUpload";
+import { uploadImage } from "@/utils/imageUpload";
 import { useToast } from "@/hooks/use-toast";
 
 interface VideoSectionProps {
@@ -28,6 +29,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   const { toast } = useToast();
   const updatePortfolio = useUpdateCompanyPortfolio();
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +104,77 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !portfolio) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const imageUrl = await uploadImage(file, { folder: 'portfolio-covers' });
+      
+      if (imageUrl) {
+        await updatePortfolio.mutateAsync({
+          id: portfolio.id,
+          custom_cover_image_url: imageUrl
+        });
+        
+        toast({
+          title: "Cover Image Updated",
+          description: "Your cover image has been updated successfully.",
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload cover image.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload Error",
+        description: "An error occurred while uploading the image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (!portfolio) return;
+    
+    try {
+      await updatePortfolio.mutateAsync({
+        id: portfolio.id,
+        custom_cover_image_url: null
+      });
+      
+      toast({
+        title: "Cover Image Removed",
+        description: "Cover image removed. Default poster will be used.",
+      });
+    } catch (error) {
+      console.error('Image removal error:', error);
+      toast({
+        title: "Removal Error",
+        description: "Failed to remove cover image.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="bg-transparent border-none shadow-none">
       <CardContent className="p-0 space-y-4">
@@ -117,6 +190,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                 controls
                 loop
                 preload="metadata"
+                poster={portfolio?.custom_cover_image_url || posterSrc}
               >
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -136,6 +210,25 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     className="hidden"
                     id="video-upload"
                   />
+                  <input
+                    type="file"
+                    accept="image/*,.jpg,.jpeg,.png,.webp"
+                    onChange={handleImageUpload}
+                    disabled={isUploadingImage}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={isUploadingImage}
+                    asChild
+                    className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
+                  >
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Image className="w-4 h-4 text-white" />
+                    </label>
+                  </Button>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -153,6 +246,18 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                       variant="secondary"
                       size="sm"
                       onClick={handleVideoRemove}
+                      disabled={updatePortfolio.isPending}
+                      className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
+                    >
+                      <Trash2 className="w-4 h-4 text-white" />
+                    </Button>
+                  )}
+                  
+                  {portfolio.custom_cover_image_url && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleImageRemove}
                       disabled={updatePortfolio.isPending}
                       className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
                     >
