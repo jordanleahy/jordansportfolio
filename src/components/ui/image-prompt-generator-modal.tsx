@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
 import { ImagePromptGeneratorModalProps, AspectRatio } from '@/types/imagePromptGenerator';
 
@@ -16,6 +17,7 @@ export const ImagePromptGeneratorModal = ({
   cachedPrompt,
   onPromptGenerated
 }: ImagePromptGeneratorModalProps) => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -75,6 +77,17 @@ export const ImagePromptGeneratorModal = ({
           });
           break;
           
+        case 'generate-job-context-visual':
+          response = await supabase.functions.invoke('generate-job-context-visual', {
+            body: {
+              jobTitle: content.primary,
+              jobDescription: content.secondary,
+              companyName: content.tertiary || '',
+              userId: user?.id
+            }
+          });
+          break;
+          
         default:
           throw new Error(`Unknown edge function: ${config.edgeFunction}`);
       }
@@ -83,7 +96,9 @@ export const ImagePromptGeneratorModal = ({
         throw new Error(response.error.message || 'Failed to generate prompt');
       }
 
-      const prompt = response.data?.generatedText || response.data?.generatedPrompt || '';
+      const prompt = response.data?.generatedText || 
+                      response.data?.generatedPrompt || 
+                      response.data?.imagePrompt || '';
       const receivedSystemPrompt = response.data?.systemPrompt || '';
       
       if (!prompt) {
