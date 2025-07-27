@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 import { Button } from "@/components/ui/button";
-import { Upload, Trash2, Settings } from "lucide-react";
+import { Upload, Trash2, Settings, Image } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
@@ -111,18 +111,9 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
           >
-            <video 
-              className="w-full h-full object-cover rounded-lg"
-              controls
-              preload="metadata"
-              muted
-              autoPlay={false}
-              poster={posterSrc}
-            >
-              <source src={videoSrc} type="video/mp4" />
-              <source src={videoSrc} type="video/quicktime" />
-              Your browser does not support the video tag.
-            </video>
+            <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+              <Image className="w-16 h-16 text-muted-foreground" />
+            </div>
             
             {user && portfolio && (
               <div className={`absolute top-2 right-2 transition-opacity duration-200 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
