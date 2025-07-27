@@ -125,8 +125,8 @@ const Index = () => {
       
       {/* Portfolio Content */}
       <CompaniesSection />
-      <TestimonialsSection />
       <ProjectCardsSection />
+      <TestimonialsSection />
       <BlogTeaser />
       <ContactSection />
     </AppLayout>
