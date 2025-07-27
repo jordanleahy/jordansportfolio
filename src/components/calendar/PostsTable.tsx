@@ -133,10 +133,16 @@ export const PostsTable = ({
   };
   const handleGenerateVoiceoverScript = (post: SocialMediaPost) => {
     console.log('🎤 handleGenerateVoiceoverScript called for post:', post.id, post.title);
+    console.log('🎤 Setting voiceoverModal state:', { isOpen: true, post });
     setVoiceoverModal({
       isOpen: true,
       post: post
     });
+    
+    // Add a timeout to check if state was set correctly
+    setTimeout(() => {
+      console.log('🎤 Modal state check after 100ms:', voiceoverModal);
+    }, 100);
   };
 
   const handleGenerateImagePrompt = (post: SocialMediaPost) => {
@@ -1183,10 +1189,21 @@ export const PostsTable = ({
 
       <ImageWatermarkModal isOpen={showWatermarkModal} onClose={() => setShowWatermarkModal(false)} file={selectedFile} onConfirm={handleWatermarkedUpload} />
 
-      {voiceoverModal.isOpen && voiceoverModal.post && (
+      {(() => {
+        console.log('🎤 Checking modal render condition:', { 
+          isOpen: voiceoverModal.isOpen, 
+          hasPost: !!voiceoverModal.post,
+          postId: voiceoverModal.post?.id,
+          shouldRender: voiceoverModal.isOpen && voiceoverModal.post 
+        });
+        return voiceoverModal.isOpen && voiceoverModal.post;
+      })() && (
         <VoiceoverScriptModal
           isOpen={voiceoverModal.isOpen}
-          onClose={() => setVoiceoverModal({ isOpen: false, post: null })}
+          onClose={() => {
+            console.log('🎤 Closing voiceover modal');
+            setVoiceoverModal({ isOpen: false, post: null });
+          }}
           sourceId={voiceoverModal.post.id}
           sourceType="social_media_post"
           originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`}
