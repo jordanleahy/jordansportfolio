@@ -123,62 +123,101 @@ export default function OptimizedCalendar() {
   return (
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Social Media Calendar</h1>
-              <p className="text-muted-foreground mt-2">
-                Create and manage your social media content for LinkedIn and other platforms.
-              </p>
-            </div>
-            {isAdmin && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Theme:</span>
-                <span className="text-sm font-medium capitalize">{activeTab}</span>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Theme</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteTheme(activeTab)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete Theme
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+        {/* Hero Header Section */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border p-8 mb-8">
+          <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
+          <div className="relative">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Content Management
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
+                  Social Media Calendar
+                </h1>
+                <p className="text-lg text-muted-foreground mt-4 max-w-2xl leading-relaxed">
+                  Create, manage, and schedule your social media content for LinkedIn and other platforms with our powerful content management system.
+                </p>
+                
+                {/* Quick Stats */}
+                <div className="flex flex-wrap gap-6 mt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{Object.values(postsByCategory).flat().length}</div>
+                    <div className="text-sm text-muted-foreground">Total Posts</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
+                    <div className="text-sm text-muted-foreground">Active Themes</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{postsByCategory[activeTab]?.length || 0}</div>
+                    <div className="text-sm text-muted-foreground">Current Theme</div>
+                  </div>
+                </div>
               </div>
-            )}
+              
+              {/* Theme Management Panel */}
+              {isAdmin && (
+                <div className="lg:w-80 space-y-4">
+                  <div className="bg-card/50 backdrop-blur-sm border rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-sm">Current Theme</h3>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Theme</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteTheme(activeTab)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete Theme
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <div className="w-3 h-3 rounded-full bg-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium capitalize">{activeTab}</div>
+                        <div className="text-xs text-muted-foreground">{postsByCategory[activeTab]?.length || 0} posts</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => setImportModalOpen(true)}
+                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  >
+                    Import Theme Data
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-between items-center mb-8">
-          <div></div>
-          <div className="flex gap-2">
-            <Button onClick={() => setImportModalOpen(true)}>
-              Import Theme Data
-            </Button>
-            <Suspense fallback={<div>Loading...</div>}>
-              <ThemeImportModal 
-                open={importModalOpen} 
-                onOpenChange={setImportModalOpen} 
-                onImportComplete={handleImportComplete} 
-              />
-            </Suspense>
-          </div>
-        </div>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThemeImportModal 
+            open={importModalOpen} 
+            onOpenChange={setImportModalOpen} 
+            onImportComplete={handleImportComplete} 
+          />
+        </Suspense>
 
         <Tabs 
           value={activeTab} 
