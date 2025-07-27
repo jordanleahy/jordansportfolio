@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, category } = await req.json();
+    const { title, description, category, aspectRatio } = await req.json();
 
     if (!title || !description || !category) {
       throw new Error('Missing required fields: title, description, and category are required');
@@ -55,14 +55,24 @@ serve(async (req) => {
       throw new Error(`No system prompt found for category: ${category}. Agent has prompts for: ${systemPrompts?.map((p: any) => p.category).join(', ')}`);
     }
 
-    // Create the user message
-    const userMessage = `Generate a detailed image prompt based on this content:
+    // Format aspect ratio instruction
+    const aspectRatioText = aspectRatio ? ` The image should be in ${aspectRatio} aspect ratio.` : '';
 
-Title: ${title}
-Description: ${description}
+    // Create the user message with content analysis focus
+    const userMessage = `Analyze this blog content and create a unique, tailored image prompt:
+
+CONTENT TO ANALYZE:
+Title: "${title}"
+Description: "${description}"
 Category: ${category}
 
-Please create a professional, engaging image prompt that captures the essence of this content and follows the style guidelines for ${category} visuals.`;
+REQUIREMENTS:
+- Create a completely unique visual concept based on the specific content above
+- Adapt the style and elements to match the themes in the title and description
+- Generate a clean, professional image prompt without any meta-text or formatting
+- Focus purely on visual elements that represent the content's key concepts${aspectRatioText}
+
+Generate a detailed image prompt that captures the essence of this specific content:`;
 
     // Call OpenAI API with the dynamic system prompt
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
