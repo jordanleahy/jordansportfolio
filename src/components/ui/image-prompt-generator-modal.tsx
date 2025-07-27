@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Copy, Check, RefreshCw, Settings } from 'lucide-react';
+import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
@@ -26,6 +26,8 @@ export const ImagePromptGeneratorModal = ({
     config.fixedAspectRatio || config.aspectRatioOptions?.[0]?.value || "16:9"
   );
   const [basePrompt, setBasePrompt] = useState('');
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false);
 
   const generateImagePrompt = async () => {
     if (!content.primary.trim() || !content.secondary.trim()) {
@@ -82,9 +84,15 @@ export const ImagePromptGeneratorModal = ({
       }
 
       const prompt = response.data?.generatedText || response.data?.generatedPrompt || '';
+      const receivedSystemPrompt = response.data?.systemPrompt || '';
       
       if (!prompt) {
         throw new Error('No prompt received from the service');
+      }
+
+      // Store the system prompt if received
+      if (receivedSystemPrompt) {
+        setSystemPrompt(receivedSystemPrompt);
       }
 
       // Clean any existing aspect ratio mentions from the received prompt
@@ -186,6 +194,8 @@ export const ImagePromptGeneratorModal = ({
     if (!isOpen) {
       setGeneratedPrompt('');
       setBasePrompt('');
+      setSystemPrompt('');
+      setShowSystemPrompt(false);
       setIsGenerating(false);
       setCopied(false);
       setIsFromCache(false);
@@ -300,6 +310,32 @@ export const ImagePromptGeneratorModal = ({
                           </>
                         )}
                       </Button>
+                    </div>
+                  )}
+
+                  {/* System Prompt Section */}
+                  {systemPrompt && (
+                    <div className="border-t pt-4 mt-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        {showSystemPrompt ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        Show System Prompt Used
+                      </Button>
+                      
+                      {showSystemPrompt && (
+                        <div className="mt-3">
+                          <Textarea
+                            value={systemPrompt}
+                            readOnly
+                            className="min-h-[100px] resize-none text-sm bg-muted/50"
+                            placeholder="System prompt details..."
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

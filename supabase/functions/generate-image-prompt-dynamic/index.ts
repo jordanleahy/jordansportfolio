@@ -97,7 +97,8 @@ Please create a professional, engaging image prompt that captures the essence of
     return new Response(JSON.stringify({ 
       generatedPrompt,
       category,
-      agent: 'Blog Visual Prompt Generator'
+      agent: 'Blog Visual Prompt Generator',
+      systemPrompt: categoryPrompt.prompt
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
