@@ -215,23 +215,19 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         .replace(/-+/g, '-')
         .trim();
 
-      // Call the enhanced edge function
-      const { data, error } = await supabase.functions.invoke("generate-portfolio-content", {
+      // Call the cover-letter-agent function  
+      const { data, error } = await supabase.functions.invoke("cover-letter-agent", {
         body: { 
           jobDescription: job.job_description,
           companyName: vendor.company_name,
-          jobDescriptionLink: job.job_url,
-          userId: user.id,
-          companyInfo: {
-            description: vendor.description,
-            services: vendor.core_services,
-            specialties: vendor.specialties,
-            website: vendor.website_url
-          }
+          roleType: 'product_manager', // Default to product manager, could be made configurable
+          userId: user.id
         },
       });
 
-      if (error) throw error;
+      if (error || !data?.success) {
+        throw new Error(error?.message || 'Failed to generate cover letter');
+      }
 
       // Create portfolio record
       const { error: portfolioError } = await supabase
@@ -240,8 +236,8 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
           job_application_id: jobApp.id,
           company_name: vendor.company_name,
           company_slug: companySlug,
-          generated_content: { cover_letter: data.cover_letter },
-          cover_letter: data.cover_letter,
+          generated_content: { cover_letter: data.coverLetter },
+          cover_letter: JSON.stringify(data.coverLetter),
           status: 'completed',
           user_id: user.id
         }, {

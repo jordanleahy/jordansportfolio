@@ -181,25 +181,43 @@ export const useUpdateCompanyPortfolio = () => {
   });
 };
 
-export const useGeneratePortfolioContent = () => {
+export const useGenerateCoverLetterWithAgent = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (jobDescription: string) => {
-      const { data, error } = await supabase.functions.invoke("generate-portfolio-content", {
-        body: { jobDescription },
+    mutationFn: async ({ 
+      jobDescription, 
+      companyName, 
+      roleType = 'product_manager' 
+    }: { 
+      jobDescription: string; 
+      companyName: string; 
+      roleType?: 'product_manager' | 'product_designer';
+    }) => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User authentication required');
+      }
+
+      const { data, error } = await supabase.functions.invoke("cover-letter-agent", {
+        body: { 
+          jobDescription, 
+          companyName, 
+          roleType, 
+          userId: user.id 
+        },
       });
 
-      if (error) throw error;
+      if (error || !data?.success) throw new Error(error?.message || 'Failed to generate cover letter');
       return data;
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to generate portfolio content. Please try again.",
+        description: "Failed to generate cover letter. Please try again.",
         variant: "destructive",
       });
-      console.error("Generate portfolio content error:", error);
     },
   });
 };

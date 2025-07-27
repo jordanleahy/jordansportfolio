@@ -48,23 +48,7 @@ export const generateLandingPageContent = async (
 
     if (error) {
       console.error('Cover letter agent error:', error);
-      
-      // Fallback to old system if agent fails
-      console.log('Falling back to generate-portfolio-content...');
-      const fallbackData = await supabase.functions.invoke("generate-portfolio-content", {
-        body: { 
-          jobDescription: jobApplication.job_description,
-          companyName: jobApplication.company_name,
-          jobDescriptionLink: jobApplication.job_description_link,
-          userId: user.id
-        },
-      });
-      
-      if (fallbackData.error) {
-        throw new Error(`Both agent and fallback failed: ${error.message}`);
-      }
-      
-      return { cover_letter: fallbackData.data.cover_letter };
+      throw new Error(`Cover letter agent failed: ${error.message || 'Unknown error'}`);
     }
 
     if (!data || !data.success) {
