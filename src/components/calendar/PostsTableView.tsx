@@ -180,14 +180,6 @@ export const PostsTableView = memo(({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onDeletePost(post.id)}
-                  title="Delete post"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
                   onClick={() => onGenerateImagePrompt(post)}
                   title="Generate image prompt"
                 >
@@ -229,6 +221,14 @@ export const PostsTableView = memo(({
                   onImage34Upload={onImage34Upload}
                   onImage43Upload={onImage43Upload}
                 />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDeletePost(post.id)}
+                  title="Delete post"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </TableCell>
           </TableRow>
