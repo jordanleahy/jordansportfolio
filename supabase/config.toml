@@ -38,6 +38,3 @@ port = 54330
 
 [functions.generate-comparison-pages]
 verify_jwt = false
-
-[functions.generate-job-context-visual]
-verify_jwt = false
