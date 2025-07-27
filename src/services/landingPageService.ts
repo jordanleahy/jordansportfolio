@@ -3,8 +3,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { JobApplication } from "@/types/jobApplication";
 import { GeneratedContent } from "@/types/companyPortfolio";
 
+// Helper function to detect role type from job description
+const detectRoleType = (jobDescription: string): 'product_manager' | 'product_designer' => {
+  const description = jobDescription.toLowerCase();
+  const pmKeywords = ['product manager', 'product management', 'pm ', 'product strategy', 'roadmap', 'stakeholder'];
+  const designKeywords = ['product designer', 'ux designer', 'ui designer', 'design', 'figma', 'prototype', 'user experience'];
+  
+  const pmScore = pmKeywords.reduce((score, keyword) => score + (description.includes(keyword) ? 1 : 0), 0);
+  const designScore = designKeywords.reduce((score, keyword) => score + (description.includes(keyword) ? 1 : 0), 0);
+  
+  return designScore > pmScore ? 'product_designer' : 'product_manager';
+};
+
 export const generateLandingPageContent = async (
-  jobApplication: JobApplication
+  jobApplication: JobApplication,
+  roleType?: 'product_manager' | 'product_designer'
 ): Promise<GeneratedContent> => {
   try {
     // Get the current user for personalization
@@ -14,37 +27,56 @@ export const generateLandingPageContent = async (
       throw new Error('User authentication required for content generation');
     }
 
-    console.log('Calling generate-portfolio-content function with data:', {
+    // Detect role type if not provided
+    const detectedRoleType = roleType || detectRoleType(jobApplication.job_description || '');
+
+    console.log('Calling cover-letter-agent function with data:', {
       jobDescription: jobApplication.job_description?.substring(0, 100) + '...',
       companyName: jobApplication.company_name,
-      hasJobLink: !!jobApplication.job_description_link,
+      roleType: detectedRoleType,
       userId: user.id
     });
 
-    const { data, error } = await supabase.functions.invoke("generate-portfolio-content", {
+    const { data, error } = await supabase.functions.invoke("cover-letter-agent", {
       body: { 
         jobDescription: jobApplication.job_description,
         companyName: jobApplication.company_name,
-        jobDescriptionLink: jobApplication.job_description_link,
+        roleType: detectedRoleType,
         userId: user.id
       },
     });
 
     if (error) {
-      console.error('Supabase function error:', error);
-      throw new Error(`Function error: ${error.message || 'Unknown error'}`);
+      console.error('Cover letter agent error:', error);
+      
+      // Fallback to old system if agent fails
+      console.log('Falling back to generate-portfolio-content...');
+      const fallbackData = await supabase.functions.invoke("generate-portfolio-content", {
+        body: { 
+          jobDescription: jobApplication.job_description,
+          companyName: jobApplication.company_name,
+          jobDescriptionLink: jobApplication.job_description_link,
+          userId: user.id
+        },
+      });
+      
+      if (fallbackData.error) {
+        throw new Error(`Both agent and fallback failed: ${error.message}`);
+      }
+      
+      return { cover_letter: fallbackData.data.cover_letter };
     }
 
-    if (!data) {
-      throw new Error('No data returned from portfolio content generation');
+    if (!data || !data.success) {
+      throw new Error('No valid data returned from cover letter agent');
     }
 
-    console.log('Generated cover letter successfully', {
-      caseStudiesUsed: data.case_studies_used || 0,
-      vendorsUsed: data.vendors_used || 0,
-      blogPostsUsed: data.blog_posts_used || 0
+    console.log('Generated cover letter successfully with agent', {
+      caseStudiesUsed: data.caseStudiesUsed || 0,
+      roleType: detectedRoleType
     });
-    return { cover_letter: data.cover_letter };
+    
+    return { cover_letter: data.coverLetter };
   } catch (error: any) {
     console.error("Error generating landing page content:", error);
     

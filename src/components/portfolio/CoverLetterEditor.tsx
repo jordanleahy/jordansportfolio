@@ -2,18 +2,30 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Save, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Edit, Save, X, Sparkles } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CoverLetterEditorProps {
-  portfolio: CompanyPortfolio;
+  portfolio: CompanyPortfolio & {
+    job_applications?: {
+      job_description: string;
+      job_description_link?: string;
+      resume_link?: string;
+      cover_letter_link?: string;
+      created_at: string;
+    };
+  };
 }
 
 export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio }) => {
   const updatePortfolio = useUpdateCompanyPortfolio();
   const [isEditing, setIsEditing] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [selectedRoleType, setSelectedRoleType] = useState<'product_manager' | 'product_designer'>('product_manager');
   const [editData, setEditData] = useState<StructuredCoverLetter>({
     opening_hook: '',
     key_achievements: [''],
@@ -82,6 +94,53 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
     }
   };
 
+  const handleRegenerateWithAgent = async () => {
+    if (!portfolio.job_applications) {
+      toast.error("Job application data not found");
+      return;
+    }
+
+    setIsRegenerating(true);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('User authentication required');
+      }
+
+      const { data, error } = await supabase.functions.invoke("cover-letter-agent", {
+        body: { 
+          jobDescription: portfolio.job_applications.job_description,
+          companyName: portfolio.company_name,
+          roleType: selectedRoleType,
+          userId: user.id
+        },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(error?.message || 'Failed to regenerate cover letter');
+      }
+
+      const updatedContent = {
+        ...portfolio.generated_content,
+        cover_letter: data.coverLetter
+      };
+
+      await updatePortfolio.mutateAsync({
+        id: portfolio.id,
+        generated_content: updatedContent
+      });
+
+      toast.success(`Cover letter regenerated for ${selectedRoleType.replace('_', ' ')} role!`);
+      
+    } catch (error: any) {
+      console.error('Error regenerating cover letter:', error);
+      toast.error(`Failed to regenerate: ${error.message}`);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -89,10 +148,32 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
           <CardTitle>Admin: Cover Letter Editor</CardTitle>
           <div className="flex gap-2">
             {!isEditing ? (
-              <Button onClick={handleStartEdit} size="sm">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Cover Letter
-              </Button>
+              <>
+                <div className="flex items-center gap-2">
+                  <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product_manager">Product Manager</SelectItem>
+                      <SelectItem value="product_designer">Product Designer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={handleRegenerateWithAgent} 
+                    size="sm" 
+                    disabled={isRegenerating}
+                    className="bg-gradient-to-r from-primary to-primary-glow"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {isRegenerating ? 'Regenerating...' : 'Regenerate with AI'}
+                  </Button>
+                </div>
+                <Button onClick={handleStartEdit} size="sm" variant="outline">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Manual Edit
+                </Button>
+              </>
             ) : (
               <>
                 <Button onClick={handleSaveEdit} size="sm" disabled={updatePortfolio.isPending}>
