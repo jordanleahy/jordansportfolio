@@ -79,6 +79,14 @@ serve(async (req) => {
     const userPrompt = `
 Generate a personalized cover letter for a ${roleType.replace('_', ' ')} position at ${companyName}.
 
+CRITICAL INSTRUCTIONS - DATA ACCURACY:
+- ONLY use information explicitly provided in the candidate's resume and case studies below
+- NEVER fabricate achievements, metrics, percentages, or specific outcomes
+- If no specific metrics are provided in the source materials, do NOT invent them
+- Every achievement mentioned must be traceable to the provided resume or case study content
+- When referencing experience, use phrases like "As demonstrated in my work on..." or "Based on my experience with..." to ground claims in actual documented work
+- Focus on translating existing experience into Product Manager relevant skills rather than creating new achievements
+
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -97,16 +105,20 @@ ADDITIONAL CONTEXT:
 ${additionalContext}
 
 Please analyze the job description and create a compelling cover letter that:
-1. Uses specific examples from the resume and case studies
-2. Positions the candidate's background as valuable for this role
-3. Shows understanding of the company and role requirements
-4. Follows the structure outlined in the system prompt
+1. STRICTLY uses only information from the provided resume and case studies above
+2. Translates the candidate's actual Senior Product Designer experience into Product Manager relevant skills
+3. References specific projects from the case studies (sepsis detection system, healthcare UX work, etc.)
+4. Shows understanding of the company and role requirements based on actual domain expertise
+5. Follows the structure outlined in the system prompt
+6. If limited data is available, focus on quality over quantity - better to have fewer, authentic achievements than fabricated ones
+
+FORBIDDEN: Do NOT include any achievements, metrics, or outcomes that are not explicitly mentioned in the resume or case studies provided above.
 
 Return the response as a JSON object with this structure:
 {
-  "opening_hook": "Engaging opening paragraph",
-  "key_achievements": ["Achievement 1", "Achievement 2", "Achievement 3"],
-  "strategic_fit": ["Fit point 1", "Fit point 2"],
+  "opening_hook": "Engaging opening paragraph that references actual background",
+  "key_achievements": ["Real achievement from resume/case studies", "Another documented achievement", "Third authentic achievement"],
+  "strategic_fit": ["Actual fit based on documented experience", "Real connection to provided background"],
   "call_to_action": "Closing paragraph with next steps"
 }
 `;
