@@ -191,8 +191,12 @@ export const PostCard = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onGenerateVoiceover(post)}
+                onClick={() => {
+                  console.log('🎤 Voiceover button clicked for post:', post.id, post.title);
+                  onGenerateVoiceover(post);
+                }}
                 className="flex-1"
+                title="Generate Voiceover Script"
               >
                 <Mic className="h-4 w-4" />
               </Button>

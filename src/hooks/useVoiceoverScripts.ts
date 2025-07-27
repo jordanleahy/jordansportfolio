@@ -61,11 +61,18 @@ export const useGenerateVoiceoverScript = () => {
       tone: string;
       style: string;
     }) => {
+      console.log('🎤 useGenerateVoiceoverScript mutation called:', { content_type, tone, style, textLength: source_text?.length });
+      
       const { data, error } = await supabase.functions.invoke('generate-voiceover-script', {
         body: { content_type, source_text, tone, style }
       });
 
-      if (error) throw error;
+      console.log('🎤 Supabase function response:', { data, error });
+
+      if (error) {
+        console.error('🎤 Supabase function error:', error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {

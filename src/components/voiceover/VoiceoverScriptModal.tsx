@@ -48,7 +48,15 @@ export const VoiceoverScriptModal = ({
   const saveScript = useCreateVoiceoverScript();
 
   const handleGenerate = async () => {
+    console.log('🎤 Generate button clicked', { contentType, tone, style, originalContentLength: originalContent?.length });
+    
+    if (!originalContent) {
+      toast.error('No content available to generate script from');
+      return;
+    }
+
     try {
+      console.log('🎤 Calling generateScript.mutateAsync...');
       const result = await generateScript.mutateAsync({
         content_type: contentType,
         source_text: originalContent,
@@ -56,11 +64,18 @@ export const VoiceoverScriptModal = ({
         style
       });
 
+      console.log('🎤 Script generation successful:', { 
+        scriptLength: result.script?.length, 
+        wordCount: result.word_count, 
+        duration: result.estimated_duration_seconds 
+      });
+
       setGeneratedScript(result.script);
       setWordCount(result.word_count || 0);
       setEstimatedDuration(result.estimated_duration_seconds || 0);
     } catch (error) {
-      console.error('Failed to generate script:', error);
+      console.error('🎤 Failed to generate script:', error);
+      toast.error(`Failed to generate script: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -114,6 +129,8 @@ export const VoiceoverScriptModal = ({
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  console.log('🎤 VoiceoverScriptModal render:', { isOpen, sourceId, sourceType, contentLength: originalContent?.length });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

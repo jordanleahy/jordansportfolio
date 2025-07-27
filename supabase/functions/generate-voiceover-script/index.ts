@@ -42,14 +42,23 @@ serve(async (req) => {
 
     // Find the appropriate system prompt based on tone
     const systemPrompts = agent.system_prompts as Array<{category: string, prompt: string}>;
-    const selectedPrompt = systemPrompts.find(p => p.category === tone);
+    console.log('Available system prompts:', systemPrompts?.map(p => p.category));
+    
+    let selectedPrompt = systemPrompts?.find(p => p.category === tone);
     
     if (!selectedPrompt) {
-      console.error('Tone not supported:', tone, 'Available:', agent.supported_categories);
-      throw new Error(`Tone "${tone}" not supported. Available tones: ${agent.supported_categories.join(', ')}`);
+      console.error('Tone not supported:', tone, 'Available categories:', agent.supported_categories);
+      // Try to use first available prompt as fallback
+      const fallbackPrompt = systemPrompts?.[0];
+      if (fallbackPrompt) {
+        console.log('Using fallback prompt:', fallbackPrompt.category, 'instead of:', tone);
+        selectedPrompt = fallbackPrompt;
+      } else {
+        throw new Error(`No system prompts available. Agent may not be properly configured.`);
+      }
     }
 
-    console.log('Using system prompt for tone:', tone);
+    console.log('Using system prompt for tone:', selectedPrompt.category);
 
     // Prepare the user prompt
     const userPrompt = `Content Type: ${content_type}

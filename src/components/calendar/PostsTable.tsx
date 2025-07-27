@@ -132,6 +132,7 @@ export const PostsTable = ({
     }
   };
   const handleGenerateVoiceoverScript = (post: SocialMediaPost) => {
+    console.log('🎤 handleGenerateVoiceoverScript called for post:', post.id, post.title);
     setVoiceoverModal({
       isOpen: true,
       post: post
