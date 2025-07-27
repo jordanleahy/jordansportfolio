@@ -115,6 +115,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               <video 
                 className="w-full h-full object-cover rounded-lg"
                 controls
+                loop
                 preload="metadata"
               >
                 <source src={videoSrc} type="video/mp4" />
