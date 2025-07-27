@@ -368,7 +368,7 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                 <h4 className="text-sm font-medium">Landscape Logo</h4>
                 <Badge variant="outline" className="text-xs">300×75</Badge>
               </div>
-              <div className="relative w-full h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
+              <div className="relative w-80 h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
                 {landscapeLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
