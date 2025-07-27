@@ -3,7 +3,9 @@ export const DEFAULT_CATEGORIES = [
   'cdi',
   'contracts', 
   'coding ai',
-  'ai agents'
+  'ai agents',
+  'product_manager',
+  'product_designer'
 ] as const;
 
 // Category type is now flexible string instead of enum
@@ -14,7 +16,9 @@ export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
   'cdi': 'CDI',
   'contracts': 'Contracts',
   'coding ai': 'Coding AI',
-  'ai agents': 'AI Agents'
+  'ai agents': 'AI Agents',
+  'product_manager': 'Product Manager',
+  'product_designer': 'Product Designer'
 };
 
 // Helper functions for category management

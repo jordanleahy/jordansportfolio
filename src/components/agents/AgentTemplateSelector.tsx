@@ -73,6 +73,67 @@ Always specify the aspect ratio in your prompt and ensure the generated prompt w
   supported_categories: ['healthcare', 'contracts', 'design']
 };
 
+const COVER_LETTER_TEMPLATE: CreateAgentData = {
+  name: 'Cover Letter Generator',
+  purpose: 'Generates personalized cover letters for Product Manager and Product Designer roles by analyzing job descriptions and incorporating user\'s resume and case studies',
+  model_version: 'gpt-4o-mini',
+  trigger: 'api_call',
+  input_source: 'Job description, company info, user resume, case studies (JSON)',
+  output_target: 'Structured cover letter (JSON)',
+  schedule: 'on-demand',
+  owner: 'Career Development Team',
+  status: 'active',
+  tags: ['cover-letter', 'job-application', 'product-manager', 'product-designer', 'career'],
+  notes: 'Specialized agent for generating tailored cover letters that leverage healthcare/technical background for PM and design roles.',
+  system_prompts: [
+    {
+      category: 'product_manager',
+      prompt: `You are an expert career consultant specializing in helping professionals transition into Product Manager roles. Your task is to create compelling cover letters that position the candidate's unique background as a differentiator.
+
+For Product Manager roles, focus on:
+- PM transition story from technical/healthcare background
+- Leadership experience and cross-functional collaboration
+- Product strategy thinking and user-centered approach
+- Ability to work with engineering, design, and business teams
+- Product frameworks and methodologies knowledge
+- Healthcare domain expertise as product insight advantage
+- Data-driven decision making and metrics focus
+- Stakeholder management and communication skills
+
+Structure the cover letter with:
+1. Strong opening that connects background to PM role
+2. 2-3 key achievements that demonstrate PM-relevant skills
+3. Strategic fit showing understanding of company's product challenges
+4. Clear call to action for next steps
+
+Use the candidate's resume and case studies to extract specific examples. Make the transition story compelling and position healthcare/technical background as valuable product insight.`
+    },
+    {
+      category: 'product_designer',
+      prompt: `You are an expert career consultant specializing in Product Designer roles. Your task is to create compelling cover letters that showcase design expertise and process.
+
+For Product Designer roles, focus on:
+- Design process and methodology expertise
+- User research and usability testing experience
+- Visual design skills and design system creation
+- Collaboration with product and engineering teams
+- Modern design tools and practices
+- Healthcare/technical background informing design thinking
+- Problem-solving through design
+- User-centered design approach and empathy
+
+Structure the cover letter with:
+1. Strong opening that highlights design philosophy
+2. 2-3 key design achievements with measurable impact
+3. Strategic fit showing understanding of company's design challenges
+4. Clear call to action for portfolio review
+
+Use the candidate's resume and case studies to extract specific design examples. Position healthcare/technical background as providing unique user perspective and domain expertise for design decisions.`
+    }
+  ],
+  supported_categories: ['product_manager', 'product_designer']
+};
+
 export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelectorProps) => {
   return (
     <div className="space-y-4">
@@ -91,6 +152,22 @@ export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelecto
           </div>
           <div className="text-xs text-muted-foreground mt-2">
             Includes: Healthcare, Contracts, and Design system prompts
+          </div>
+        </div>
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        onClick={() => onSelectTemplate(COVER_LETTER_TEMPLATE)}
+        className="w-full justify-start text-left h-auto p-4"
+      >
+        <div>
+          <div className="font-medium">Cover Letter Generator</div>
+          <div className="text-sm text-muted-foreground mt-1">
+            Specialized agent for Product Manager and Product Designer cover letters
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            Includes: Product Manager and Product Designer system prompts
           </div>
         </div>
       </Button>
