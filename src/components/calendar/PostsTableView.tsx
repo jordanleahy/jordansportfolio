@@ -197,7 +197,7 @@ export const PostsTableView = memo(({
                   variant="ghost"
                   size="sm"
                   onClick={() => onCreateBlogPost(post)}
-                  disabled={creatingBlogIds.has(post.id)}
+                  disabled={creatingBlogIds.has(post.id) || !post.image_16_9_url || !post.image_9_16_url || !post.image_3_4_url || !post.image_4_3_url}
                   title="Create blog post"
                 >
                   {creatingBlogIds.has(post.id) ? (
