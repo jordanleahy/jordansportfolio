@@ -386,104 +386,102 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                   key={job.id}
                   className="border rounded-lg bg-card space-y-4"
                 >
-                  {/* Header with buttons */}
-                  <div className="p-4 border-b bg-muted/30">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={job.job_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
-                        >
-                          View {job.job_title || "Job Posting"}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
+                  {/* Header with View link */}
+                  <div className="p-4 border-b bg-muted/30 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={job.job_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-muted-foreground hover:underline flex items-center gap-1"
+                      >
+                        View {job.job_title || "Job Posting"}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-1 md:gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleCreateCoverLetter(job)}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 md:px-3 px-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="hidden md:inline ml-2">Create Cover Page</span>
+                      </Button>
                       
-                      <div className="flex items-center gap-1 md:gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleCreateCoverLetter(job)}
-                          className="bg-primary text-primary-foreground hover:bg-primary/90 md:px-3 px-2"
-                        >
-                          <FileText className="h-4 w-4" />
-                          <span className="hidden md:inline ml-2">Create Cover Page</span>
-                        </Button>
-                        
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenResumeModal(job)}
+                        className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="hidden md:inline ml-2">Add Resume</span>
+                      </Button>
+                      
+                      {existingPortfolio && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleOpenResumeModal(job)}
+                          onClick={handleViewCoverPage}
                           className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
                         >
-                          <FileText className="h-4 w-4" />
-                          <span className="hidden md:inline ml-2">Add Resume</span>
+                          <Eye className="h-4 w-4" />
+                          <span className="hidden md:inline ml-2">View</span>
                         </Button>
-                        
-                        {existingPortfolio && (
+                      )}
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenVisualPrompt(job)}
+                        className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
+                      >
+                        <Image className="h-4 w-4" />
+                        <span className="hidden md:inline ml-2">Visual</span>
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditing(job)}
+                        disabled={editingJobId === job.id}
+                        className="md:px-3 px-2"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                        <span className="hidden md:inline ml-2">Edit</span>
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={handleViewCoverPage}
-                            className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive md:px-3 px-2"
                           >
-                            <Eye className="h-4 w-4" />
-                            <span className="hidden md:inline ml-2">View</span>
+                            <Trash2 className="h-4 w-4" />
+                            <span className="hidden md:inline ml-2">Delete</span>
                           </Button>
-                        )}
-                        
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleOpenVisualPrompt(job)}
-                          className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
-                        >
-                          <Image className="h-4 w-4" />
-                          <span className="hidden md:inline ml-2">Visual</span>
-                        </Button>
-                        
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEditing(job)}
-                          disabled={editingJobId === job.id}
-                          className="md:px-3 px-2"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          <span className="hidden md:inline ml-2">Edit</span>
-                        </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-destructive hover:text-destructive md:px-3 px-2"
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this job posting? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(job.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="hidden md:inline ml-2">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Job Posting</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this job posting? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(job.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
 
