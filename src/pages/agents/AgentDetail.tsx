@@ -80,41 +80,37 @@ export const AgentDetail = () => {
           </div>
           
           {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
+              size="icon"
               onClick={() => navigate(`/agents/${agent.id}/edit`)}
-              className="gap-2 flex-1 sm:flex-none"
+              title="Edit"
             >
               <Edit className="h-4 w-4" />
-              <span className="sm:inline">Edit</span>
             </Button>
             <Button
               variant="outline"
+              size="icon"
               onClick={handleToggleStatus}
               disabled={agent.status === 'deprecated' || updateAgent.isPending}
-              className="gap-2 flex-1 sm:flex-none"
+              title={agent.status === 'active' ? 'Pause' : 'Activate'}
             >
               {agent.status === 'active' ? (
-                <>
-                  <Pause className="h-4 w-4" />
-                  <span className="sm:inline">Pause</span>
-                </>
+                <Pause className="h-4 w-4" />
               ) : (
-                <>
-                  <Play className="h-4 w-4" />
-                  <span className="sm:inline">Activate</span>
-                </>
+                <Play className="h-4 w-4" />
               )}
             </Button>
             <Button
               variant="outline"
+              size="icon"
               onClick={handleDelete}
               disabled={deleteAgent.isPending}
-              className="gap-2 text-destructive hover:text-destructive flex-1 sm:flex-none"
+              className="text-destructive hover:text-destructive"
+              title="Delete"
             >
               <Trash2 className="h-4 w-4" />
-              <span className="sm:inline">Delete</span>
             </Button>
           </div>
         </div>
