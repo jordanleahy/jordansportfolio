@@ -1543,6 +1543,7 @@ export type Database = {
           key_benefits: string[]
           key_features: string[]
           key_investors: string[]
+          landscape_logo_url: string | null
           linkedin_url: string | null
           notable_customers: string[]
           office_locations: string[] | null
@@ -1557,6 +1558,7 @@ export type Database = {
           sitemap_fetched_at: string | null
           sitemap_tree: Json | null
           slug: string
+          social_logo_url: string | null
           source_url: string | null
           specialties: string[]
           status: string | null
@@ -1593,6 +1595,7 @@ export type Database = {
           key_benefits?: string[]
           key_features?: string[]
           key_investors?: string[]
+          landscape_logo_url?: string | null
           linkedin_url?: string | null
           notable_customers?: string[]
           office_locations?: string[] | null
@@ -1607,6 +1610,7 @@ export type Database = {
           sitemap_fetched_at?: string | null
           sitemap_tree?: Json | null
           slug: string
+          social_logo_url?: string | null
           source_url?: string | null
           specialties?: string[]
           status?: string | null
@@ -1643,6 +1647,7 @@ export type Database = {
           key_benefits?: string[]
           key_features?: string[]
           key_investors?: string[]
+          landscape_logo_url?: string | null
           linkedin_url?: string | null
           notable_customers?: string[]
           office_locations?: string[] | null
@@ -1657,6 +1662,7 @@ export type Database = {
           sitemap_fetched_at?: string | null
           sitemap_tree?: Json | null
           slug?: string
+          social_logo_url?: string | null
           source_url?: string | null
           specialties?: string[]
           status?: string | null

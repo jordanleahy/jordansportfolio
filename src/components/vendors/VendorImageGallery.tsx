@@ -30,6 +30,8 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
   const [images, setImages] = useState<VendorImage[]>(
     Array.isArray(vendor.vendor_images) ? vendor.vendor_images : []
   );
+  const [socialLogoUrl, setSocialLogoUrl] = useState((vendor as any).social_logo_url || '');
+  const [landscapeLogoUrl, setLandscapeLogoUrl] = useState((vendor as any).landscape_logo_url || '');
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [viewImage, setViewImage] = useState<VendorImage | null>(null);
@@ -42,6 +44,46 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
     setIsEditing(false);
     // Reset images to original state
     setImages(Array.isArray(vendor.vendor_images) ? vendor.vendor_images : []);
+    setSocialLogoUrl((vendor as any).social_logo_url || '');
+    setLandscapeLogoUrl((vendor as any).landscape_logo_url || '');
+  };
+
+  const updateImageField = (field: string, value: string) => {
+    if (field === 'social_logo_url') {
+      setSocialLogoUrl(value);
+    } else if (field === 'landscape_logo_url') {
+      setLandscapeLogoUrl(value);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImage(file, {
+        folder: `vendor-logos/${vendor.slug}`,
+        fileName: `${field}-${Date.now()}-${file.name}`
+      });
+
+      if (url) {
+        updateImageField(field, url);
+        toast({
+          title: "Logo uploaded",
+          description: "Logo has been uploaded successfully.",
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -49,7 +91,11 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ vendor_images: images as any })
+        .update({ 
+          vendor_images: images as any,
+          social_logo_url: socialLogoUrl || null,
+          landscape_logo_url: landscapeLogoUrl || null
+        })
         .eq('id', vendor.id);
 
       if (error) throw error;
@@ -275,10 +321,10 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                 <Badge variant="outline" className="text-xs">1:1</Badge>
               </div>
               <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
-                {vendor.social_logo_url ? (
+                {socialLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
-                      src={vendor.social_logo_url}
+                      src={socialLogoUrl}
                       alt="Social Logo"
                       className="w-full h-full object-cover"
                     />
@@ -323,10 +369,10 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
                 <Badge variant="outline" className="text-xs">300×75</Badge>
               </div>
               <div className="relative w-full h-20 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25">
-                {vendor.landscape_logo_url ? (
+                {landscapeLogoUrl ? (
                   <div className="relative w-full h-full group">
                     <img
-                      src={vendor.landscape_logo_url}
+                      src={landscapeLogoUrl}
                       alt="Landscape Logo"
                       className="w-full h-full object-cover"
                     />
