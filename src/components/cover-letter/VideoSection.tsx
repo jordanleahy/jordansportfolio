@@ -114,7 +114,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             {videoSrc ? (
               <video 
                 className="w-full h-full object-cover rounded-lg"
-                poster={posterSrc}
                 controls
                 preload="metadata"
               >
