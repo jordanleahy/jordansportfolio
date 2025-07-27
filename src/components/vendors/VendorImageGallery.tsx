@@ -313,7 +313,7 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
         
         <CardContent>
           {/* Logo Upload Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="flex flex-col md:flex-row items-start gap-10 mb-8">
             {/* Social Logo (1:1) */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
