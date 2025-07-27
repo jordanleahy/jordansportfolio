@@ -27,23 +27,6 @@ export const useCompanyPortfolio = (companySlug: string) => {
     queryFn: async () => {
       console.log('🔍 DEBUG: Starting portfolio fetch for slug:', companySlug);
       
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('🔍 DEBUG: Auth error:', authError);
-        throw authError;
-      }
-      
-      console.log('🔍 DEBUG: Current user:', user?.id);
-      
-      // First, let's see all portfolios for this user
-      const { data: allPortfolios, error: allError } = await supabase
-        .from("company_portfolios")
-        .select("id, company_slug, company_name, user_id")
-        .order("created_at", { ascending: false });
-      
-      console.log('🔍 DEBUG: All portfolios:', allPortfolios);
-      console.log('🔍 DEBUG: Looking for slug:', companySlug);
-      
       const { data, error } = await supabase
         .from("company_portfolios")
         .select("*, job_applications(*)")
@@ -60,9 +43,7 @@ export const useCompanyPortfolio = (companySlug: string) => {
         id: data?.id,
         company_name: data?.company_name,
         user_id: data?.user_id,
-        slug: data?.company_slug,
-        auth_user_id: user?.id,
-        matches_auth: data?.user_id === user?.id
+        slug: data?.company_slug
       });
       
       if (!data) return null;
