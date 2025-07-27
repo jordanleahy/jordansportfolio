@@ -34,17 +34,31 @@ serve(async (req) => {
     // Analyze the content to understand context
     const contentAnalysis = await analyzeThemeContent(themeData);
     
-    // Generate context-aware system prompt
-    const systemPrompt = generateContextualSystemPrompt(contentAnalysis);
+    console.log('Content analysis completed:', {
+      industryContext: contentAnalysis.industryContext,
+      visualTheme: contentAnalysis.visualTheme
+    });
+
+    // Generate context-aware system prompt using the Context Aware agent
+    const generatedSystemPrompt = await generateSystemPromptUsingAgent(userId, contentAnalysis);
     
-    // Create or update the agent
-    const agentResult = await createContextualVisualAgent(userId, contentAnalysis, systemPrompt);
+    console.log('Generated system prompt for category:', contentAnalysis.industryContext);
+
+    // Update the Blog Visual Prompt Generator with the new system prompt
+    const updateResult = await updateBlogVisualAgent(userId, contentAnalysis, generatedSystemPrompt);
+
+    console.log('Blog Visual Prompt Generator updated:', {
+      newCategory: updateResult.newCategory,
+      addedNewCategory: updateResult.addedNewCategory
+    });
 
     return new Response(JSON.stringify({
       success: true,
-      agent: agentResult,
       analysis: contentAnalysis,
-      systemPrompt
+      generatedSystemPrompt,
+      updatedAgent: updateResult.updatedAgent,
+      newCategory: updateResult.newCategory,
+      addedNewCategory: updateResult.addedNewCategory
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -129,87 +143,127 @@ Please analyze and return a JSON object with:
   }
 }
 
-function generateContextualSystemPrompt(analysis: any): string {
-  return `You are an expert at creating detailed, professional image generation prompts for ${analysis.industryContext}-themed AI image generators.
+async function generateSystemPromptUsingAgent(userId: string, analysis: any) {
+  // Get the Context Aware Visual Prompt Generator agent
+  const { data: contextAgent, error: agentError } = await supabase
+    .from('openai_agents')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('name', 'Context Aware Visual Prompt Generator')
+    .single();
 
-Based on the content analysis:
+  if (agentError || !contextAgent) {
+    throw new Error('Context Aware Visual Prompt Generator agent not found');
+  }
+
+  // Use the agent's system prompt to generate a new system prompt
+  const systemPrompt = contextAgent.system_prompts?.[0]?.prompt || '';
+  
+  const userPrompt = `Based on this content analysis, generate a specialized system prompt for the Blog Visual Prompt Generator agent:
+
+Analysis:
 - Visual Theme: ${analysis.visualTheme}
 - Industry Context: ${analysis.industryContext}
 - Target Audience: ${analysis.targetAudience}
 - Content Tone: ${analysis.contentTone}
+- Color Palette: ${analysis.colorPalette}
+- Image Style: ${analysis.imageStyle}
+- Key Elements: ${analysis.keyElements.join(', ')}
 
-Focus on creating clear, specific prompts that will generate high-quality, professional visuals that are:
-- ${analysis.imageStyle} style
-- ${analysis.colorPalette} color palette
-- Suitable for ${analysis.targetAudience}
-- Professional and trustworthy
-- Clean, modern design
-- Include relevant elements: ${analysis.keyElements.join(', ')}
-- Consistent with ${analysis.contentTone} tone
-- Appropriate for ${analysis.industryContext} industry
+Please generate a complete system prompt that follows the template structure shown in your system prompt. The new prompt should be specifically tailored for "${analysis.industryContext}" content.`;
 
-Visual Style Guidelines:
-- Use ${analysis.imageStyle} as the primary style
-- Maintain ${analysis.colorPalette} color scheme
-- Focus on ${analysis.visualTheme}
-- Ensure professional, clean imagery suitable for business use
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: contextAgent.model_version,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.2
+    }),
+  });
 
-Always specify the aspect ratio in your prompt and ensure the generated prompt will create appropriate, professional visuals that match the content theme and industry context.`;
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content) {
+    throw new Error('Failed to generate system prompt');
+  }
+
+  return data.choices[0].message.content.trim();
 }
 
-async function createContextualVisualAgent(userId: string, analysis: any, systemPrompt: string) {
-  const agentName = `${analysis.industryContext} Visual Context Agent`;
-  
-  // Check if agent already exists
-  const { data: existingAgent } = await supabase
+async function updateBlogVisualAgent(userId: string, analysis: any, generatedSystemPrompt: string) {
+  // Get the Blog Visual Prompt Generator agent
+  const { data: blogAgent, error: agentError } = await supabase
     .from('openai_agents')
-    .select('id')
+    .select('*')
     .eq('user_id', userId)
-    .eq('name', agentName)
+    .eq('name', 'Blog Visual Prompt Generator')
     .single();
 
-  const agentData = {
-    user_id: userId,
-    name: agentName,
-    purpose: `Context-aware visual prompt generator for ${analysis.industryContext} content. Analyzes imported theme data and generates specialized visual prompts that match the content context and industry requirements.`,
-    model_version: 'gpt-4o-mini',
-    trigger: 'api_call',
-    input_source: 'Theme content and context analysis (JSON)',
-    output_target: 'Contextual image prompts (JSON)',
-    schedule: 'on-demand',
-    owner: 'Content Marketing Team',
-    status: 'active',
-    tags: ['visual-content', 'context-aware', 'theme-analysis', analysis.industryContext.toLowerCase(), 'ai-prompts'],
-    notes: `Generated from theme analysis. Visual theme: ${analysis.visualTheme}. Target audience: ${analysis.targetAudience}. Content tone: ${analysis.contentTone}.`,
-    system_prompts: [
-      {
-        category: analysis.industryContext.toLowerCase(),
-        prompt: systemPrompt
-      }
-    ],
-    supported_categories: [analysis.industryContext.toLowerCase()]
-  };
-
-  if (existingAgent) {
-    // Update existing agent
-    const { data, error } = await supabase
-      .from('openai_agents')
-      .update(agentData)
-      .eq('id', existingAgent.id)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    return data;
-  } else {
-    // Create new agent
-    const { data, error } = await supabase
-      .from('openai_agents')
-      .insert(agentData)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    return data;
+  if (agentError || !blogAgent) {
+    throw new Error('Blog Visual Prompt Generator agent not found');
   }
+
+  // Create the new category key from the industry context
+  const newCategory = analysis.industryContext.toLowerCase().replace(/\s+/g, '_');
+  
+  // Get existing system prompts and supported categories
+  const existingSystemPrompts = blogAgent.system_prompts || [];
+  const existingSupportedCategories = blogAgent.supported_categories || [];
+
+  // Check if this category already exists
+  const existingPromptIndex = existingSystemPrompts.findIndex(
+    (prompt: any) => prompt.category === newCategory
+  );
+
+  let updatedSystemPrompts;
+  if (existingPromptIndex >= 0) {
+    // Update existing prompt
+    updatedSystemPrompts = [...existingSystemPrompts];
+    updatedSystemPrompts[existingPromptIndex] = {
+      category: newCategory,
+      prompt: generatedSystemPrompt
+    };
+  } else {
+    // Add new prompt
+    updatedSystemPrompts = [
+      ...existingSystemPrompts,
+      {
+        category: newCategory,
+        prompt: generatedSystemPrompt
+      }
+    ];
+  }
+
+  // Update supported categories if not already included
+  const updatedSupportedCategories = existingSupportedCategories.includes(newCategory)
+    ? existingSupportedCategories
+    : [...existingSupportedCategories, newCategory];
+
+  // Update the Blog Visual Prompt Generator agent
+  const { data: updatedAgent, error: updateError } = await supabase
+    .from('openai_agents')
+    .update({
+      system_prompts: updatedSystemPrompts,
+      supported_categories: updatedSupportedCategories,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', blogAgent.id)
+    .select()
+    .single();
+
+  if (updateError) {
+    throw new Error(`Failed to update Blog Visual Prompt Generator: ${updateError.message}`);
+  }
+
+  return {
+    updatedAgent,
+    newCategory,
+    addedNewCategory: !existingSupportedCategories.includes(newCategory)
+  };
 }
