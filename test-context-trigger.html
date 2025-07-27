@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trigger Context Update</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Triggering Context Update for Product Design</h1>
+    <div id="output"></div>
+    
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://wgwmzfbnkovumqcvsxgd.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnd216ZmJua292dW1xY3ZzeGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwODg1MjcsImV4cCI6MjA2MTY2NDUyN30.HVv6TGHC5jDiEWChIyo_jp60Ef7Vtwc0x3zPKyDt4bE'
+        );
+
+        async function triggerUpdate() {
+            const output = document.getElementById('output');
+            output.innerHTML = 'Starting update...';
+
+            const themeData = {
+                category: 'product-design',
+                theme: 'Product Design Communication Skills',
+                description: 'Essential communication and collaboration skills for product designers working in cross-functional teams',
+                posts: [
+                    {
+                        day: 1,
+                        title: 'Speak Their Language',
+                        description: 'Communication is more than talking—it\'s about clarity across functions. Designers must adapt their language for PMs, engineers, and marketers.'
+                    },
+                    {
+                        day: 2,
+                        title: 'Active Listening Wins Trust',
+                        description: 'Listening with intent—not just to respond—helps designers truly understand stakeholder goals. Mirror language, ask clarifying questions, and summarize back.'
+                    },
+                    {
+                        day: 3,
+                        title: 'Empathy for Non-Designers',
+                        description: 'Empathy isn\'t just for users—it\'s for teammates. Understand engineering constraints or PM pressure points to drive alignment.'
+                    },
+                    {
+                        day: 4,
+                        title: 'Navigate Ambiguity',
+                        description: 'In early product discovery or shifting roadmaps, ambiguity is the norm. Show comfort with "gray zones" and drive decisions with partial data.'
+                    },
+                    {
+                        day: 5,
+                        title: 'Influence Without Authority',
+                        description: 'You don\'t need a title to lead. Persuasion based on insight, timing, and trust is a designer\'s secret weapon.'
+                    }
+                ]
+            };
+
+            try {
+                output.innerHTML += '<br>Calling generate-context-visual-prompts...';
+                
+                const { data, error } = await supabase.functions.invoke('generate-context-visual-prompts', {
+                    body: {
+                        themeData: themeData,
+                        userId: '3e7858df-9613-4285-98d2-ffb818c26f6d'
+                    }
+                });
+
+                if (error) {
+                    output.innerHTML += '<br>Error: ' + JSON.stringify(error);
+                    return;
+                }
+
+                output.innerHTML += '<br>Function response: ' + JSON.stringify(data, null, 2);
+                
+                // Check if the agent was updated
+                output.innerHTML += '<br>Checking agent update...';
+                
+                const { data: agent, error: agentError } = await supabase
+                    .from('openai_agents')
+                    .select('supported_categories, system_prompts')
+                    .eq('name', 'Blog Visual Prompt Generator')
+                    .eq('user_id', '3e7858df-9613-4285-98d2-ffb818c26f6d')
+                    .single();
+
+                if (agentError) {
+                    output.innerHTML += '<br>Agent fetch error: ' + JSON.stringify(agentError);
+                    return;
+                }
+
+                output.innerHTML += '<br>Agent supported categories: ' + JSON.stringify(agent.supported_categories);
+                
+                const hasProductDesign = agent.supported_categories?.includes('product-design');
+                output.innerHTML += '<br>Product Design category added: ' + hasProductDesign;
+                
+                if (hasProductDesign) {
+                    const productDesignPrompt = agent.system_prompts?.find(p => p.category === 'product-design');
+                    output.innerHTML += '<br>Product Design prompt exists: ' + !!productDesignPrompt;
+                    if (productDesignPrompt) {
+                        output.innerHTML += '<br>Prompt preview: ' + productDesignPrompt.prompt.substring(0, 200) + '...';
+                    }
+                }
+                
+            } catch (err) {
+                output.innerHTML += '<br>Script error: ' + err.message;
+            }
+        }
+
+        // Trigger immediately
+        triggerUpdate();
+    </script>
+</body>
+</html>
