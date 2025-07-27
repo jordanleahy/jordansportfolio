@@ -180,7 +180,6 @@ export const PostsTableView = memo(({
                 <Button
                   variant="ghost"
                   size="sm"
-                  disabled={!post.image_16_9_url || !post.image_9_16_url || !post.image_3_4_url || !post.image_4_3_url}
                   onClick={() => onGenerateImagePrompt(post)}
                   title="Generate image prompt"
                 >
