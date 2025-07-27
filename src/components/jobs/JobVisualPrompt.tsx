@@ -9,15 +9,16 @@ interface JobVisualPromptProps {
   jobTitle: string;
   jobDescription: string;
   companyName: string;
+  vendorId?: string;
 }
 
-export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, companyName }: JobVisualPromptProps) => {
+export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, companyName, vendorId }: JobVisualPromptProps) => {
   const config: ImagePromptConfig = {
-    title: "Generate Job Visual Prompt (9:16)",
-    systemPrompt: '', // Handled by edge function
-    edgeFunction: 'generate-hero-job-visual',
+    title: `Generate ${companyName} Job Visual Prompt (9:16)`,
+    systemPrompt: '', // Handled by context-aware edge function
+    edgeFunction: 'generate-job-context-visual',
     enableCaching: true,
-    cacheKeyPrefix: 'job_visual',
+    cacheKeyPrefix: `job_visual_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
     fixedAspectRatio: "9:16"
   };
 

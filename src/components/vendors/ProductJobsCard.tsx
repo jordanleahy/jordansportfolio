@@ -504,9 +504,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         <JobVisualPrompt
           isOpen={!!visualPromptJob}
           onClose={() => setVisualPromptJob(null)}
-          jobTitle={`Job Position at ${vendor.company_name}`}
+          jobTitle={visualPromptJob.job_title}
           jobDescription={visualPromptJob.job_description}
           companyName={vendor.company_name}
+          vendorId={vendorId}
         />
       )}
 
