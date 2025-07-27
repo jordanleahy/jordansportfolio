@@ -405,7 +405,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         size="sm"
                         variant="outline"
                         onClick={() => handleCreateCoverLetter(job)}
-                        className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
+                        className="md:px-3 px-2"
                       >
                         <Plus className="h-4 w-4" />
                         <span className="hidden md:inline ml-2">Create Cover Page</span>
@@ -415,7 +415,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         size="sm"
                         variant="outline"
                         onClick={() => handleOpenResumeModal(job)}
-                        className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
+                        className="md:px-3 px-2"
                       >
                         <FileText className="h-4 w-4" />
                         <span className="hidden md:inline ml-2">Add Resume</span>
