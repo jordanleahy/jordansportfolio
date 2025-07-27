@@ -403,8 +403,9 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                     <div className="flex items-center justify-start gap-1 md:gap-2">
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={() => handleCreateCoverLetter(job)}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 md:px-3 px-2"
+                        className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
                       >
                         <Plus className="h-4 w-4" />
                         <span className="hidden md:inline ml-2">Create Cover Page</span>
