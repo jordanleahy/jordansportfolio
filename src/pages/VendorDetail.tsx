@@ -20,6 +20,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useVendorPublish } from '@/hooks/useVendorPublish';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
+import { VendorNameOrLogo } from '@/components/vendors/VendorNameOrLogo';
 import { ProductJobsCard } from '@/components/vendors/ProductJobsCard';
 import { OGMetadataCard } from '@/components/vendors/OGMetadataCard';
 import { useVendorEdit } from '@/hooks/useVendorEdit';
@@ -894,11 +895,11 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                       rel="noopener noreferrer"
                       className="hover:text-primary transition-colors cursor-pointer hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4"
                     >
-                      {vendor.company_name}
+                      <VendorNameOrLogo vendor={vendor} size="lg" />
                     </a>
                   ) : (
                     <span className="hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4 transition-all duration-200 cursor-default">
-                      {vendor.company_name}
+                      <VendorNameOrLogo vendor={vendor} size="lg" />
                     </span>
                   )}
                 </h1>
