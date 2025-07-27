@@ -111,9 +111,21 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
           >
-            <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-              <Image className="w-16 h-16 text-muted-foreground" />
-            </div>
+            {videoSrc ? (
+              <video 
+                className="w-full h-full object-cover rounded-lg"
+                poster={posterSrc}
+                controls
+                preload="metadata"
+              >
+                <source src={videoSrc} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+                <Image className="w-16 h-16 text-muted-foreground" />
+              </div>
+            )}
             
             {user && portfolio && (
               <div className={`absolute top-2 right-2 transition-opacity duration-200 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
