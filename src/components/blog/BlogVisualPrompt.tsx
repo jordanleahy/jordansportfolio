@@ -20,10 +20,9 @@ const aspectRatioOptions: AspectRatioOption[] = [
 
 export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare' }: BlogVisualPromptProps) => {
   const config: ImagePromptConfig = {
-    title: `${getCategoryLabel(category)} Blog Visual Prompt Generator`,
+    title: 'Universal Blog Visual Prompt Generator',
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'generate-image-prompt-dynamic',
-    category: category,
+    edgeFunction: 'generate-image-prompt-simplified',
     enableCaching: true,
     aspectRatioOptions,
     cacheKeyPrefix: 'blog_visual'

@@ -22,10 +22,9 @@ const aspectRatioOptions: AspectRatioOption[] = [
 
 export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
   const config: ImagePromptConfig = {
-    title: `${getCategoryLabel(category)} Image Prompt Generator`,
+    title: 'Universal Image Prompt Generator',
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'generate-image-prompt-dynamic',
-    category: category,
+    edgeFunction: 'generate-image-prompt-simplified',
     enableCaching: true,
     aspectRatioOptions,
     cacheKeyPrefix: 'calendar_image'

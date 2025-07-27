@@ -62,7 +62,18 @@ export const ImagePromptGeneratorModal = ({
             body: {
               title: content.primary,
               description: content.secondary,
-              category: config.category || 'healthcare'
+              category: config.category || 'healthcare',
+              aspectRatio: selectedAspectRatio
+            }
+          });
+          break;
+          
+        case 'generate-image-prompt-simplified':
+          response = await supabase.functions.invoke('generate-image-prompt-simplified', {
+            body: {
+              title: content.primary,
+              description: content.secondary,
+              aspectRatio: selectedAspectRatio
             }
           });
           break;
