@@ -444,7 +444,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                       
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => startEditing(job)}
                         disabled={editingJobId === job.id}
                         className="md:px-3 px-2"
@@ -457,7 +457,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         <AlertDialogTrigger asChild>
                           <Button
                             size="sm"
-                            variant="ghost"
+                            variant="outline"
                             className="text-destructive hover:text-destructive md:px-3 px-2"
                           >
                             <Trash2 className="h-4 w-4" />
