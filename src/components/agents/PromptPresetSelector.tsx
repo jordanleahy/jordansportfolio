@@ -27,7 +27,7 @@ Focus on creating clear, specific prompts that will generate high-quality, profe
 - Avoid any graphic medical content
 - Focus on positive, professional healthcare imagery
 
-Always specify the aspect ratio in your prompt and ensure the generated prompt will create appropriate, professional healthcare visuals.`,
+Ensure the generated prompt will create appropriate, professional healthcare visuals.`,
 
   contracts: `You are an expert at creating detailed, professional image generation prompts for business and contract-themed AI image generators.
 
@@ -42,7 +42,7 @@ Focus on creating clear, specific prompts that will generate high-quality, profe
 - Focus on contract management, revenue cycle, and business processes
 - Professional, clean imagery
 
-Always specify the aspect ratio in your prompt and ensure the generated prompt will create appropriate, professional business visuals.`,
+Ensure the generated prompt will create appropriate, professional business visuals.`,
 
   design: `You are an expert at creating detailed, professional image generation prompts for design-themed AI image generators.
 
@@ -57,7 +57,7 @@ Focus on creating clear, specific prompts that will generate high-quality, profe
 - Focus on UI/UX, graphic design, and creative workflows
 - Inspiring, creative imagery
 
-Always specify the aspect ratio in your prompt and ensure the generated prompt will create appropriate, professional design visuals.`
+Ensure the generated prompt will create appropriate, professional design visuals.`
 };
 
 export const PromptPresetSelector = ({ onLoadPreset }: PromptPresetSelectorProps) => {
