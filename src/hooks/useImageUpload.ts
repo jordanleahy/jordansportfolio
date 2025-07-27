@@ -94,15 +94,15 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
       });
 
       toast({
-        title: "Video uploaded",
-        description: "9:16 video has been successfully uploaded."
+        title: "Image uploaded",
+        description: "9:16 image has been successfully uploaded."
       });
       onPostsChange();
     } catch (error) {
       console.error('Error uploading 9:16 image:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload 9:16 video. Please try again.",
+        description: "Failed to upload 9:16 image. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -158,15 +158,15 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
       });
 
       toast({
-        title: "Video uploaded",
-        description: "4:3 video has been successfully uploaded."
+        title: "Image uploaded",
+        description: "4:3 image has been successfully uploaded."
       });
       onPostsChange();
     } catch (error) {
       console.error('Error uploading 4:3 image:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload 4:3 video. Please try again.",
+        description: "Failed to upload 4:3 image. Please try again.",
         variant: "destructive"
       });
     } finally {
