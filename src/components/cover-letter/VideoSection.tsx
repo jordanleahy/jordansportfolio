@@ -122,9 +122,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                 Your browser does not support the video tag.
               </video>
             ) : (
-              <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-                <Image className="w-16 h-16 text-muted-foreground" />
-              </div>
+              <div className="w-full h-full bg-muted rounded-lg" />
             )}
             
             {user && portfolio && (
