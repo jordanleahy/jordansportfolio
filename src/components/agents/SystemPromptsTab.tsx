@@ -38,26 +38,10 @@ export const SystemPromptsTab = ({
     onChange(newPrompts, supportedCategories);
   };
 
-  const updatePromptCategory = (index: number, category: string) => {
-    const newPrompts = [...systemPrompts];
-    const oldCategory = newPrompts[index].category;
-    newPrompts[index] = { ...newPrompts[index], category };
-    
-    // Update supported categories
-    let newCategories = [...supportedCategories];
-    
-    // Add new category if not present
-    if (!newCategories.includes(category)) {
-      newCategories.push(category);
-    }
-    
-    // Remove old category if no other prompts use it
-    const oldCategoryStillUsed = newPrompts.some(p => p.category === oldCategory);
-    if (!oldCategoryStillUsed) {
-      newCategories = newCategories.filter(c => c !== oldCategory);
-    }
-    
-    onChange(newPrompts, newCategories);
+  // Get available categories that don't already have prompts
+  const getAvailableCategories = () => {
+    const usedCategories = systemPrompts.map(p => p.category);
+    return DEFAULT_CATEGORIES.filter(cat => !usedCategories.includes(cat));
   };
 
   const removePrompt = (index: number) => {
@@ -114,25 +98,13 @@ export const SystemPromptsTab = ({
           <h4 className="text-sm font-medium">Category-Specific Prompts</h4>
           {systemPrompts.length > 0 ? (
             systemPrompts.map((prompt, index) => (
-              <div key={index} className="border rounded-lg p-4">
+              <div key={`${prompt.category}-${index}`} className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">Category:</span>
-                    <Select 
-                      value={prompt.category} 
-                      onValueChange={(value) => updatePromptCategory(index, value)}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEFAULT_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {getCategoryLabel(category)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant="secondary" className="text-sm">
+                      {getCategoryLabel(prompt.category)}
+                    </Badge>
                   </div>
                   <Button
                     variant="ghost"
@@ -144,7 +116,9 @@ export const SystemPromptsTab = ({
                   </Button>
                 </div>
                 <CategoryPromptEditor
+                  category={prompt.category}
                   prompt={prompt.prompt}
+                  isNew={false}
                   onChange={(newPrompt) => updatePrompt(index, newPrompt)}
                 />
               </div>
@@ -158,11 +132,12 @@ export const SystemPromptsTab = ({
 
         {/* Add New Prompt */}
         <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-2">Add Custom Prompt</h4>
+          <h4 className="text-sm font-medium mb-2">Add New Category Prompt</h4>
           <CategoryPromptEditor
             category={selectedCategory}
             prompt=""
             isNew={true}
+            availableCategories={getAvailableCategories()}
             onCategoryChange={setSelectedCategory}
             onSave={(category, prompt) => addNewPrompt(category, prompt)}
           />

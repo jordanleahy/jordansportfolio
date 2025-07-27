@@ -10,6 +10,7 @@ interface CategoryPromptEditorProps {
   category?: string;
   prompt: string;
   isNew?: boolean;
+  availableCategories?: string[];
   onCategoryChange?: (category: string) => void;
   onChange?: (prompt: string) => void;
   onSave?: (category: string, prompt: string) => void;
@@ -19,6 +20,7 @@ export const CategoryPromptEditor = ({
   category = '',
   prompt,
   isNew = false,
+  availableCategories = [...DEFAULT_CATEGORIES],
   onCategoryChange,
   onChange,
   onSave
@@ -54,7 +56,7 @@ export const CategoryPromptEditor = ({
               <SelectValue placeholder="Select a category type" />
             </SelectTrigger>
             <SelectContent>
-              {DEFAULT_CATEGORIES.map((category) => (
+              {availableCategories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {getCategoryLabel(category)}
                 </SelectItem>
