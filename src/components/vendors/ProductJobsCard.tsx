@@ -294,9 +294,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                 onClick={() => setIsAddingJob(true)}
                 size="sm"
                 variant="outline"
+                className="md:px-3 px-2"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Job
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline ml-2">Add Job</span>
               </Button>
             )}
           </div>
@@ -353,17 +354,19 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                   onClick={handleSubmit}
                   size="sm"
                   disabled={createJobMutation.isPending || updateJobMutation.isPending}
+                  className="md:px-3 px-2"
                 >
-                  <Save className="h-4 w-4 mr-2" />
-                  {editingJobId ? 'Update' : 'Save'}
+                  <Save className="h-4 w-4" />
+                  <span className="hidden md:inline ml-2">{editingJobId ? 'Update' : 'Save'}</span>
                 </Button>
                 <Button
                   onClick={handleCancel}
                   size="sm"
                   variant="outline"
+                  className="md:px-3 px-2"
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
+                  <X className="h-4 w-4" />
+                  <span className="hidden md:inline ml-2">Cancel</span>
                 </Button>
               </div>
             </div>
@@ -398,23 +401,24 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         </a>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 md:gap-2">
                         <Button
                           size="sm"
                           onClick={() => handleCreateCoverLetter(job)}
-                          className="bg-primary text-primary-foreground hover:bg-primary/90"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 md:px-3 px-2"
                         >
-                          Create Cover Page
+                          <FileText className="h-4 w-4" />
+                          <span className="hidden md:inline ml-2">Create Cover Page</span>
                         </Button>
                         
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleOpenResumeModal(job)}
-                          className="text-primary border-primary hover:bg-primary/10"
+                          className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
                         >
-                          <FileText className="h-4 w-4 mr-2" />
-                          Add Resume
+                          <FileText className="h-4 w-4" />
+                          <span className="hidden md:inline ml-2">Add Resume</span>
                         </Button>
                         
                         {existingPortfolio && (
@@ -422,9 +426,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                             size="sm"
                             variant="outline"
                             onClick={handleViewCoverPage}
-                            className="text-primary border-primary hover:bg-primary/10"
+                            className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
                           >
                             <Eye className="h-4 w-4" />
+                            <span className="hidden md:inline ml-2">View</span>
                           </Button>
                         )}
                         
@@ -432,9 +437,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                           size="sm"
                           variant="outline"
                           onClick={() => handleOpenVisualPrompt(job)}
-                          className="text-primary border-primary hover:bg-primary/10"
+                          className="text-primary border-primary hover:bg-primary/10 md:px-3 px-2"
                         >
                           <Image className="h-4 w-4" />
+                          <span className="hidden md:inline ml-2">Visual</span>
                         </Button>
                         
                         <Button
@@ -442,8 +448,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                           variant="ghost"
                           onClick={() => startEditing(job)}
                           disabled={editingJobId === job.id}
+                          className="md:px-3 px-2"
                         >
                           <Edit3 className="h-4 w-4" />
+                          <span className="hidden md:inline ml-2">Edit</span>
                         </Button>
                         
                         <AlertDialog>
@@ -451,9 +459,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-destructive hover:text-destructive"
+                              className="text-destructive hover:text-destructive md:px-3 px-2"
                             >
                               <Trash2 className="h-4 w-4" />
+                              <span className="hidden md:inline ml-2">Delete</span>
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
