@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, NotebookPen, Mic } from 'lucide-react';
+import { UploadDropdown } from './UploadDropdown';
+import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -213,85 +214,20 @@ export const PostsTableView = memo(({
                     <NotebookPen className="h-4 w-4" />
                   )}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingPostId === post.id}
-                  title="Upload 16:9 image"
-                >
-                  {uploadingPostId === post.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ImageIcon className="h-4 w-4" />
-                  )}
-                </Button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => onImageUpload(post.id, e)}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => file916InputRef.current?.click()}
-                  disabled={uploading916PostId === post.id}
-                  title="Upload 9:16 video"
-                >
-                  {uploading916PostId === post.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                </Button>
-                <input
-                  type="file"
-                  ref={file916InputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => onImage916Upload(post.id, e)}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => file34InputRef.current?.click()}
-                  disabled={uploading34PostId === post.id}
-                  title="Upload 3:4 image"
-                >
-                  {uploading34PostId === post.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                </Button>
-                <input
-                  type="file"
-                  ref={file34InputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => onImage34Upload(post.id, e)}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => file43InputRef.current?.click()}
-                  disabled={uploading43PostId === post.id}
-                  title="Upload 4:3 video"
-                >
-                  {uploading43PostId === post.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                </Button>
-                <input
-                  type="file"
-                  ref={file43InputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => onImage43Upload(post.id, e)}
+                <UploadDropdown
+                  postId={post.id}
+                  uploadingPostId={uploadingPostId}
+                  uploading916PostId={uploading916PostId}
+                  uploading34PostId={uploading34PostId}
+                  uploading43PostId={uploading43PostId}
+                  fileInputRef={fileInputRef}
+                  file916InputRef={file916InputRef}
+                  file34InputRef={file34InputRef}
+                  file43InputRef={file43InputRef}
+                  onImageUpload={onImageUpload}
+                  onImage916Upload={onImage916Upload}
+                  onImage34Upload={onImage34Upload}
+                  onImage43Upload={onImage43Upload}
                 />
               </div>
             </TableCell>
