@@ -254,7 +254,7 @@ const Blog = () => {
                   to={`/blog/${post.slug}`} 
                   onMouseEnter={() => handleMouseEnter(post.slug)}
                 >
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 group">
+                  <Card className="flex flex-col hover:shadow-lg transition-all duration-300 group">
                     <div className="blog-image-container">
                       {post.hero_image_url ? (
                         <img 
