@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Save, X, Sparkles } from "lucide-react";
+import { Edit, Save, X, Sparkles, Video } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { UploadTopVideoButton } from "./UploadTopVideoButton";
 
 interface CoverLetterEditorProps {
   portfolio: CompanyPortfolio & {
@@ -147,6 +148,10 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         <div className="flex items-center justify-between">
           <CardTitle>Admin: Cover Letter Editor</CardTitle>
           <div className="flex gap-2">
+            <UploadTopVideoButton 
+              portfolio={portfolio} 
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            />
             {!isEditing ? (
               <>
                 <div className="flex items-center gap-2">

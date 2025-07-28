@@ -8,7 +8,7 @@ import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
 import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
 import { CoverLetterEditor } from "./CoverLetterEditor";
 import { PortfolioActions } from "./PortfolioActions";
-import { UploadTopVideoButton } from "./UploadTopVideoButton";
+
 import { useCoverLetterData } from "@/hooks/useCoverLetterData";
 import { useCoverLetterSEO } from "@/hooks/useCoverLetterSEO";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -78,14 +78,6 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         </div>
       )}
 
-      {user && !topVideoSrc && (
-        <div className="mb-6 flex justify-center">
-          <UploadTopVideoButton 
-            portfolio={portfolio} 
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          />
-        </div>
-      )}
 
       <VideoWithCoverLetterLayout
         videoSrc={videoSrc}

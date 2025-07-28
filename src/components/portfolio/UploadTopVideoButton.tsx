@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { CompanyPortfolio } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from '@/hooks/useCompanyPortfolios';
 import { uploadVideoToStorage, isVideoFile } from '@/utils/videoUpload';
@@ -79,9 +79,9 @@ export const UploadTopVideoButton: React.FC<UploadTopVideoButtonProps> = ({
         onClick={() => document.getElementById('top-video-upload-button')?.click()}
         disabled={isUploading}
         className={className}
+        size="sm"
       >
-        <Upload className="h-4 w-4 mr-2" />
-        {isUploading ? 'Uploading...' : 'Upload Video'}
+        <Video className="h-4 w-4" />
       </Button>
       
       <input
