@@ -11,6 +11,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostsTableViewProps {
   posts: SocialMediaPost[];
+  activeTab: 'draft' | 'published';
   creatingBlogIds: Set<string>;
   uploadingPostId: string | null;
   uploading916PostId: string | null;
@@ -50,6 +51,7 @@ type SortDirection = 'asc' | 'desc';
 
 export const PostsTableView = memo(({
   posts,
+  activeTab,
   creatingBlogIds,
   uploadingPostId,
   uploading916PostId,
@@ -151,7 +153,7 @@ export const PostsTableView = memo(({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedPosts.map((post) => (
+        {sortedPosts.map((post, index) => (
           <TableRow key={post.id}>
             <TableCell className="font-medium">
               {post.day || '-'}
@@ -166,16 +168,23 @@ export const PostsTableView = memo(({
             </TableCell>
             <TableCell>{new Date(post.created_at).toLocaleDateString()}</TableCell>
             <TableCell>
-              <Badge 
-                className={getStatusColor(post.status)}
-                onClick={() => {
-                  const nextStatus = post.status === 'draft' ? 'published' : 'draft';
-                  onStatusChange(post.id, nextStatus);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                {post.status}
-              </Badge>
+              <div className="flex gap-2 items-center">
+                <Badge 
+                  className={getStatusColor(post.status)}
+                  onClick={() => {
+                    const nextStatus = post.status === 'draft' ? 'published' : 'draft';
+                    onStatusChange(post.id, nextStatus);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {post.status}
+                </Badge>
+                {post.status === 'draft' && activeTab === 'draft' && (
+                  <Badge variant="outline" className="text-xs">
+                    {index + 1}
+                  </Badge>
+                )}
+              </div>
             </TableCell>
             <TableCell>
               <div className="flex gap-2 flex-wrap">

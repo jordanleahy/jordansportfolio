@@ -86,13 +86,14 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="draft">
+           <TabsContent value="draft">
             {isMobile ? (
               <div className="space-y-4">
-                {filteredPosts.map((post) => (
+                {filteredPosts.map((post, index) => (
                   <PostCard
                     key={post.id}
                     post={post}
+                    draftIndex={post.status === 'draft' ? index + 1 : undefined}
                     onCopy={postActions.handleCopyContent}
                     onDelete={postActions.handleDeletePost}
                     onGeneratePrompt={modalManager.openImagePromptModal}
@@ -109,6 +110,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
             ) : (
               <PostsTableView
                 posts={filteredPosts}
+                activeTab={activeTab}
                 creatingBlogIds={postActions.creatingBlogIds}
                 uploadingPostId={imageUpload.uploadingPostId}
                 uploading916PostId={imageUpload.uploading916PostId}
@@ -157,6 +159,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
             ) : (
               <PostsTableView
                 posts={filteredPosts}
+                activeTab={activeTab}
                 creatingBlogIds={postActions.creatingBlogIds}
                 uploadingPostId={imageUpload.uploadingPostId}
                 uploading916PostId={imageUpload.uploading916PostId}
