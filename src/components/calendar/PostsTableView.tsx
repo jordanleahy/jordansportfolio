@@ -1,11 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { UploadDropdown } from './UploadDropdown';
-import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic } from 'lucide-react';
+import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -45,6 +45,9 @@ const getStatusColor = (status: string) => {
   }
 };
 
+type SortField = 'day' | 'title' | 'created_at' | 'status';
+type SortDirection = 'asc' | 'desc';
+
 export const PostsTableView = memo(({
   posts,
   creatingBlogIds,
@@ -70,6 +73,65 @@ export const PostsTableView = memo(({
   file43InputRef
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
+  const [sortField, setSortField] = useState<SortField>('day');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedPosts = [...posts].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortField) {
+      case 'day':
+        aValue = a.day || 0;
+        bValue = b.day || 0;
+        break;
+      case 'title':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      case 'created_at':
+        aValue = new Date(a.created_at).getTime();
+        bValue = new Date(b.created_at).getTime();
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      default:
+        return 0;
+    }
+
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+    } else {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+    }
+  });
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <TableHead 
+      className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-2">
+        {children}
+        {sortField === field && (
+          sortDirection === 'asc' ? 
+            <ChevronUp className="h-4 w-4" /> : 
+            <ChevronDown className="h-4 w-4" />
+        )}
+      </div>
+    </TableHead>
+  );
 
   if (isMobile) {
     return null; // Mobile view handled elsewhere
@@ -79,17 +141,21 @@ export const PostsTableView = memo(({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Title</TableHead>
+          <SortableHeader field="day">Day</SortableHeader>
+          <SortableHeader field="title">Title</SortableHeader>
           <TableHead>Description</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Status</TableHead>
+          <SortableHeader field="created_at">Date</SortableHeader>
+          <SortableHeader field="status">Status</SortableHeader>
           <TableHead>Images</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {posts.map((post) => (
+        {sortedPosts.map((post) => (
           <TableRow key={post.id}>
+            <TableCell className="font-medium">
+              {post.day || '-'}
+            </TableCell>
             <TableCell className="font-medium max-w-[200px] truncate">
               {post.title}
             </TableCell>
