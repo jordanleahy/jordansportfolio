@@ -31,7 +31,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get the Blog Visual Prompt Generator agent
+    // Get agent and find category prompt
     const { data: agentData, error: agentError } = await supabase
       .from('openai_agents')
       .select('system_prompts, supported_categories')
@@ -39,26 +39,19 @@ serve(async (req) => {
       .single();
 
     if (agentError) {
-      throw new Error(`Failed to fetch agent configuration: ${agentError.message}`);
+      throw new Error(`Agent not found: ${agentError.message}`);
     }
 
-    // Find the system prompt for the specific category
-    const systemPrompts = agentData.system_prompts || [];
-    const categoryPrompt = systemPrompts.find((prompt: any) => prompt.category === category);
+    const categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === category);
     
     if (!categoryPrompt) {
-      const supportedCategories = agentData.supported_categories || [];
-      throw new Error(`Category '${category}' not supported. Available categories: ${supportedCategories.join(', ')}`);
+      throw new Error(`Category '${category}' not supported. Available: ${agentData.supported_categories?.join(', ')}`);
     }
 
-    // Create the user message with the specific category context
-    const userMessage = `Generate a detailed image prompt based on this content:
-
+    const userMessage = `Generate an image prompt for:
 Title: ${title}
 Description: ${description}
-Category: ${category}
-
-Please create a professional, engaging image prompt that captures the essence of this content and follows the specific style guidelines for ${category} visuals.`;
+Category: ${category}`;
 
     // Call OpenAI directly with the agent's system prompt
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -92,8 +85,7 @@ Please create a professional, engaging image prompt that captures the essence of
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
       category,
-      agent: 'Blog Visual Prompt Generator',
-      systemPromptUsed: categoryPrompt.category
+      agent: 'Blog Visual Prompt Generator'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
