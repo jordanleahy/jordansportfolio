@@ -15,7 +15,7 @@ interface CategoryPromptEditorProps {
 }
 
 export const CategoryPromptEditor = ({
-  category = 'chart-type',
+  category = 'cdi',
   prompt,
   isNew = false,
   onChange,
