@@ -64,17 +64,15 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
       return;
     }
 
-    // Validate aspect ratio based on upload type
-    if (uploadType === 'top') {
-      const hasValidRatio = await validateVideoAspectRatio(file, '9:16');
-      if (!hasValidRatio) {
-        toast({
-          title: "Invalid Aspect Ratio",
-          description: "Please upload a video with 9:16 aspect ratio (portrait orientation)",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Validate aspect ratio - both videos should be 9:16 now
+    const hasValidRatio = await validateVideoAspectRatio(file, '9:16');
+    if (!hasValidRatio) {
+      toast({
+        title: "Invalid Aspect Ratio",
+        description: "Please upload a video with 9:16 aspect ratio (portrait orientation)",
+        variant: "destructive",
+      });
+      return;
     }
 
     setIsUploading(true);
@@ -137,7 +135,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     }
   };
 
-  const ratio = aspectRatio === 'landscape' ? 16/9 : 9/16;
+  const ratio = 9/16; // Both videos are now 9:16 aspect ratio
   const hasVideo = videoSrc && videoSrc.trim() !== '';
   const hasCustomVideo = uploadType === 'top' ? portfolio?.custom_top_video_url : portfolio?.custom_video_url;
 
@@ -156,7 +154,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                 controls
                 loop
                 preload="metadata"
-                poster={posterSrc}
               >
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -165,8 +162,8 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Upload {uploadType === 'top' ? 'portrait' : 'landscape'} video</p>
-                  <p className="text-xs">{uploadType === 'top' ? '9:16 aspect ratio' : '16:9 aspect ratio'}</p>
+                  <p className="text-sm">Upload portrait video</p>
+                  <p className="text-xs">9:16 aspect ratio</p>
                 </div>
               </div>
             ) : (

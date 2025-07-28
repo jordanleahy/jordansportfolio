@@ -59,7 +59,7 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
             posterSrc={posterSrc}
             showTimer={showTimer}
             portfolio={portfolio}
-            aspectRatio="landscape"
+            aspectRatio="portrait"
             uploadType="main"
           />
         </div>
