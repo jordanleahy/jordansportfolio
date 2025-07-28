@@ -40,28 +40,24 @@ Category: ${category}
 
 Please create a professional, engaging image prompt that captures the essence of this content and follows the style guidelines for ${category} visuals.`;
 
-    // Call the Blog Visual Prompt Generator agent through our agent system
-    const { data: agentResponse, error: agentError } = await supabase.functions.invoke('generate-content', {
+    // Call the generate-content function with the correct parameters
+    const { data: response, error: contentError } = await supabase.functions.invoke('generate-content', {
       body: {
-        agentName: 'Blog Visual Prompt Generator',
-        userMessage: userMessage,
-        category: category,
-        model: 'gpt-4o-mini',
-        temperature: 0.7,
-        max_tokens: 500
+        prompt: userMessage,
+        type: 'image_prompt'
       }
     });
 
-    if (agentError) {
-      throw new Error(`Agent invocation error: ${agentError.message}`);
+    if (contentError) {
+      throw new Error(`Content generation error: ${contentError.message}`);
     }
 
-    if (!agentResponse?.generatedText) {
-      throw new Error('No generated text received from agent');
+    if (!response?.generatedText) {
+      throw new Error('No generated text received from content function');
     }
 
     return new Response(JSON.stringify({ 
-      generatedPrompt: agentResponse.generatedText,
+      generatedPrompt: response.generatedText,
       category,
       agent: 'Blog Visual Prompt Generator'
     }), {
