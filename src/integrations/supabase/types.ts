@@ -279,6 +279,8 @@ export type Database = {
           created_at: string
           custom_cover_image_url: string | null
           custom_image_url: string | null
+          custom_poster_url: string | null
+          custom_top_poster_url: string | null
           custom_top_video_url: string | null
           custom_video_url: string | null
           generated_content: Json | null
@@ -295,6 +297,8 @@ export type Database = {
           created_at?: string
           custom_cover_image_url?: string | null
           custom_image_url?: string | null
+          custom_poster_url?: string | null
+          custom_top_poster_url?: string | null
           custom_top_video_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
@@ -311,6 +315,8 @@ export type Database = {
           created_at?: string
           custom_cover_image_url?: string | null
           custom_image_url?: string | null
+          custom_poster_url?: string | null
+          custom_top_poster_url?: string | null
           custom_top_video_url?: string | null
           custom_video_url?: string | null
           generated_content?: Json | null
