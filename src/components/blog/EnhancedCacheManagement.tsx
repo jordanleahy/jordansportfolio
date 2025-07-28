@@ -68,7 +68,7 @@ export const EnhancedCacheManagement = ({ isOpen, onClose }: EnhancedCacheManage
   const [activeTab, setActiveTab] = useState("prompts");
 
   const { data: allPrompts = [], isLoading } = useCachedPrompts();
-  const { data: stats = {} } = useCachedPromptsStats();
+  const { data: stats } = useCachedPromptsStats();
   const deletePrompt = useDeleteCachedPrompt();
   const bulkDeletePrompts = useBulkDeleteCachedPrompts();
   const clearAllPrompts = useClearAllCachedPrompts(selectedCategory || undefined);
@@ -297,7 +297,7 @@ export const EnhancedCacheManagement = ({ isOpen, onClose }: EnhancedCacheManage
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.total || 0}</div>
+                    <div className="text-2xl font-bold">{stats?.total_prompts || 0}</div>
                   </CardContent>
                 </Card>
 
@@ -313,37 +313,33 @@ export const EnhancedCacheManagement = ({ isOpen, onClose }: EnhancedCacheManage
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Most Used</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Hits</CardTitle>
                     <Zap className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm font-medium">
-                      {Object.entries(stats)
-                        .filter(([key]) => key !== 'total')
-                        .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'None'}
-                    </div>
+                    <div className="text-2xl font-bold">{stats?.total_hits || 0}</div>
                   </CardContent>
                 </Card>
               </div>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Category Breakdown</CardTitle>
+                  <CardTitle>Additional Statistics</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Object.entries(stats)
-                      .filter(([key]) => key !== 'total')
-                      .map(([category, count]) => (
-                        <div key={category} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge className={categoryColors[category as keyof typeof categoryColors] || categoryColors.default}>
-                              {categoryLabels[category as keyof typeof categoryLabels] || category}
-                            </Badge>
-                          </div>
-                          <span className="text-sm font-medium">{count as number}</span>
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Categories Count</span>
+                      <span className="text-sm font-medium">{stats?.categories_count || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Expired Prompts</span>
+                      <span className="text-sm font-medium">{stats?.expired_prompts || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Average Hit Count</span>
+                      <span className="text-sm font-medium">{stats?.avg_hit_count?.toFixed(1) || '0.0'}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

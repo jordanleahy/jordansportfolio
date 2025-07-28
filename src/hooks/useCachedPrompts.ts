@@ -11,6 +11,19 @@ interface CachedPrompt {
   metadata: any;
   created_at: string;
   updated_at: string;
+  expires_at?: string;
+  version: number;
+  hit_count: number;
+  last_accessed_at: string;
+  user_id: string;
+}
+
+interface CacheStats {
+  total_prompts: number;
+  expired_prompts: number;
+  total_hits: number;
+  categories_count: number;
+  avg_hit_count: number;
 }
 
 export const useCachedPrompts = (category?: string) => {
@@ -39,21 +52,51 @@ export const useCachedPromptsStats = () => {
     queryKey: ['cached-prompts-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('cached_prompts')
-        .select('category')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+        .rpc('get_cache_stats');
 
       if (error) throw error;
-      
-      const stats = data.reduce((acc: Record<string, number>, item) => {
-        acc[item.category] = (acc[item.category] || 0) + 1;
-        acc.total = (acc.total || 0) + 1;
-        return acc;
-      }, {});
-      
-      return stats;
+      return data[0] as CacheStats;
     },
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useCleanupExpiredCache = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc('cleanup_expired_cache');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (deletedCount) => {
+      queryClient.invalidateQueries({ queryKey: ['cached-prompts'] });
+      queryClient.invalidateQueries({ queryKey: ['cached-prompts-stats'] });
+      toast({
+        title: "Cache Cleanup Complete",
+        description: `${deletedCount} expired prompts removed`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to cleanup expired cache",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useUpdateCacheHit = () => {
+  return useMutation({
+    mutationFn: async (cacheKey: string) => {
+      const { error } = await supabase.rpc('update_cache_hit', {
+        cache_key_param: cacheKey
+      });
+      if (error) throw error;
+    },
   });
 };
 

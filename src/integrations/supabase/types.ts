@@ -127,31 +127,43 @@ export type Database = {
           cache_key: string
           category: string
           created_at: string
+          expires_at: string | null
+          hit_count: number | null
           id: string
+          last_accessed_at: string | null
           metadata: Json | null
           prompt_text: string
           updated_at: string
           user_id: string | null
+          version: number | null
         }
         Insert: {
           cache_key: string
           category: string
           created_at?: string
+          expires_at?: string | null
+          hit_count?: number | null
           id?: string
+          last_accessed_at?: string | null
           metadata?: Json | null
           prompt_text: string
           updated_at?: string
           user_id?: string | null
+          version?: number | null
         }
         Update: {
           cache_key?: string
           category?: string
           created_at?: string
+          expires_at?: string | null
+          hit_count?: number | null
           id?: string
+          last_accessed_at?: string | null
           metadata?: Json | null
           prompt_text?: string
           updated_at?: string
           user_id?: string | null
+          version?: number | null
         }
         Relationships: []
       }
@@ -1817,12 +1829,26 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       fuzzy_search_offerings: {
         Args: { search_term: string; similarity_threshold?: number }
         Returns: {
           accessionnumber: string
           company_name: string
           similarity_score: number
+        }[]
+      }
+      get_cache_stats: {
+        Args: { user_id_param?: string }
+        Returns: {
+          total_prompts: number
+          expired_prompts: number
+          total_hits: number
+          categories_count: number
+          avg_hit_count: number
         }[]
       }
       has_role: {
@@ -1870,6 +1896,10 @@ export type Database = {
       }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_cache_hit: {
+        Args: { cache_key_param: string }
         Returns: undefined
       }
       validate_tldr_bullets: {
