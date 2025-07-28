@@ -1902,6 +1902,10 @@ export type Database = {
         Args: { cache_key_param: string }
         Returns: undefined
       }
+      upgrade_generic_system_prompts: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       validate_tldr_bullets: {
         Args: { bullets: Json }
         Returns: boolean
