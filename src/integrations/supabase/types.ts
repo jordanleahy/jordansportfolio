@@ -1833,6 +1833,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      fix_hardcoded_aspect_ratio_in_prompts: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       fuzzy_search_offerings: {
         Args: { search_term: string; similarity_threshold?: number }
         Returns: {
