@@ -26,12 +26,12 @@ export const useBlogStatus = (postTitle: string) => {
       try {
         setBlogStatus(prev => ({ ...prev, isLoading: true, error: undefined }));
         
-        // Search for blog posts with similar title (first 20 chars)
-        const titlePrefix = postTitle.substring(0, 20);
+        // Search for blog posts with similar title using more flexible matching
+        const titlePrefix = postTitle.substring(0, 15).trim();
         const { data, error } = await supabase
           .from('blog_posts')
           .select('id, slug, status, hero_headline')
-          .ilike('hero_headline', `%${titlePrefix}%`)
+          .or(`hero_headline.ilike.%${titlePrefix}%`)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
