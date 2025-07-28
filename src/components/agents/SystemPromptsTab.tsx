@@ -153,26 +153,6 @@ export const SystemPromptsTab = ({
             onSave={(category, prompt) => addNewPrompt(category, prompt)}
           />
         </div>
-
-        {/* Quick Action: Update All Prompts */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-2">Quick Actions</h4>
-          <Button
-            variant="outline"
-            onClick={() => {
-              const updatedPrompts = systemPrompts.map(prompt => ({
-                ...prompt,
-                prompt: prompt.prompt.includes('Do not include any title, heading, or descriptive text') 
-                  ? prompt.prompt 
-                  : prompt.prompt + '\n\n**CRITICAL: Do not include any title, heading, or descriptive text within the image. Focus entirely on visual elements only.**'
-              }));
-              onChange(updatedPrompts, supportedCategories);
-            }}
-            className="w-full"
-          >
-            Add "No Text in Image" Rule to All Prompts
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
