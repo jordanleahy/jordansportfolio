@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { VendorRichData } from '@/components/vendors/VendorRichData';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAuth } from '@/contexts/AuthContext';
 import { useVendorPublish } from '@/hooks/useVendorPublish';
 import { EditableSection } from '@/components/vendors/EditableSection';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
@@ -219,6 +220,7 @@ export default function VendorDetail() {
   
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const queryClient = useQueryClient();
   

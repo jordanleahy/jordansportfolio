@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useVendorJobs, useCreateVendorJob, useUpdateVendorJob, useDeleteVendorJob, type VendorJob } from "@/hooks/useVendorJobs";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -59,7 +60,8 @@ const isValidUrl = (url: string): boolean => {
 };
 
 export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vendor }) => {
-  const { isAdmin } = useUserRole();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: jobs = [], isLoading } = useVendorJobs(vendorId);
@@ -88,9 +90,57 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   const [visualPromptJob, setVisualPromptJob] = useState<VendorJob | null>(null);
   const [resumeModalJob, setResumeModalJob] = useState<VendorJob | null>(null);
 
-  // Only show to admins
+  // Enhanced authentication and authorization checks
+  if (authLoading || roleLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" />
+            <CardTitle>Product Jobs</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" />
+            <CardTitle>Product Jobs</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            Please <Button variant="link" className="p-0 h-auto" onClick={() => window.location.href = '/auth'}>sign in</Button> to manage job postings.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!isAdmin) {
-    return null;
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" />
+            <CardTitle>Product Jobs</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            Admin access required to manage job postings.
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const validateForm = (): boolean => {
@@ -169,6 +219,16 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   };
 
   const handleCreateCoverLetter = async (job: VendorJob) => {
+    // Enhanced security checks
+    if (!user || !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Admin authentication required to generate cover letters",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!vendor) {
       toast({
         title: "Error",
@@ -183,16 +243,6 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         title: "Generating Cover Letter",
         description: "Creating personalized cover letter...",
       });
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to generate cover letters",
-          variant: "destructive"
-        });
-        return;
-      }
 
       // Create job application
       const { data: jobApp, error: jobError } = await supabase

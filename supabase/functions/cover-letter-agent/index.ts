@@ -34,6 +34,23 @@ serve(async (req) => {
 
     console.log('Generating cover letter for:', { companyName, roleType, userId });
 
+    // Enhanced security: Verify user is authenticated and has admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user || user.id !== userId) {
+      throw new Error('Authentication failed or user mismatch');
+    }
+
+    // Check if user has admin role
+    const { data: userRole, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (roleError || userRole?.role !== 'admin') {
+      throw new Error('Admin privileges required for cover letter generation');
+    }
+
     // Get user's resume text and case studies
     const [resumeResult, caseStudiesResult, agentResult] = await Promise.all([
       // Get latest resume text
