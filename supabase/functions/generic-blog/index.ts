@@ -291,6 +291,7 @@ Requirements:
       .from('blog_posts')
       .insert({
         user_id: user.id,
+        social_media_post_id: socialMediaPost.id,
         hero_headline: blogPostInput.hero_headline,
         hero_subhead: blogPostInput.hero_subhead,
         hero_image_url: blogPostInput.hero_image_url,

@@ -4,12 +4,12 @@ import { FileText, Loader2 } from 'lucide-react';
 import { useBlogStatus } from '@/hooks/useBlogStatus';
 
 interface BlogStatusBadgeProps {
-  postTitle: string;
+  postId: string;
   className?: string;
 }
 
-export const BlogStatusBadge = ({ postTitle, className }: BlogStatusBadgeProps) => {
-  const blogStatus = useBlogStatus(postTitle);
+export const BlogStatusBadge = ({ postId, className }: BlogStatusBadgeProps) => {
+  const blogStatus = useBlogStatus(postId);
 
   if (blogStatus.isLoading) {
     return (

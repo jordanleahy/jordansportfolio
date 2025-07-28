@@ -41,6 +41,7 @@ export type Database = {
           read_time: number | null
           share_enabled: boolean
           slug: string
+          social_media_post_id: string | null
           status: string
           tags: string[] | null
           tldr_bullets: Json
@@ -76,6 +77,7 @@ export type Database = {
           read_time?: number | null
           share_enabled?: boolean
           slug: string
+          social_media_post_id?: string | null
           status?: string
           tags?: string[] | null
           tldr_bullets: Json
@@ -111,6 +113,7 @@ export type Database = {
           read_time?: number | null
           share_enabled?: boolean
           slug?: string
+          social_media_post_id?: string | null
           status?: string
           tags?: string[] | null
           tldr_bullets?: Json
@@ -120,7 +123,15 @@ export type Database = {
           visual_sections?: Json
           word_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_social_media_post_id_fkey"
+            columns: ["social_media_post_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cached_prompts: {
         Row: {

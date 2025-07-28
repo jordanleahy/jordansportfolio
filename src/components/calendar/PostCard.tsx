@@ -140,7 +140,7 @@ export const PostCard = ({
                   {draftIndex}
                 </Badge>
               )}
-              <BlogStatusBadge postTitle={post.title} />
+              <BlogStatusBadge postId={post.id} />
             </div>
           </div>
           <div className="flex gap-1">

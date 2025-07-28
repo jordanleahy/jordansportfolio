@@ -10,7 +10,7 @@ interface BlogStatus {
   error?: string;
 }
 
-export const useBlogStatus = (postTitle: string) => {
+export const useBlogStatus = (postId: string) => {
   const [blogStatus, setBlogStatus] = useState<BlogStatus>({
     exists: false,
     isLoading: true,
@@ -18,7 +18,7 @@ export const useBlogStatus = (postTitle: string) => {
 
   useEffect(() => {
     const checkBlogStatus = async () => {
-      if (!postTitle) {
+      if (!postId) {
         setBlogStatus({ exists: false, isLoading: false });
         return;
       }
@@ -26,12 +26,11 @@ export const useBlogStatus = (postTitle: string) => {
       try {
         setBlogStatus(prev => ({ ...prev, isLoading: true, error: undefined }));
         
-        // Search for blog posts with similar title using more flexible matching
-        const titlePrefix = postTitle.substring(0, 15).trim();
+        // Query for blog posts by social media post ID
         const { data, error } = await supabase
           .from('blog_posts')
           .select('id, slug, status, hero_headline')
-          .ilike('hero_headline', `%${titlePrefix}%`)
+          .eq('social_media_post_id', postId)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -69,7 +68,7 @@ export const useBlogStatus = (postTitle: string) => {
     };
 
     checkBlogStatus();
-  }, [postTitle]);
+  }, [postId]);
 
   return blogStatus;
 };

@@ -185,7 +185,7 @@ export const PostsTableView = memo(({
                     {index + 1}
                   </Badge>
                 )}
-                <BlogStatusBadge postTitle={post.title} />
+                <BlogStatusBadge postId={post.id} />
               </div>
             </TableCell>
             <TableCell>
