@@ -100,9 +100,19 @@
 
 @layer components {
   .blog-index-image {
+    aspect-ratio: 4 / 3 !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+  
+  /* Blog image container to ensure proper aspect ratio */
+  .blog-image-container {
     aspect-ratio: 4 / 3;
     width: 100%;
-    object-fit: cover;
+    position: relative;
+    overflow: hidden;
   }
 }
 

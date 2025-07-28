@@ -168,15 +168,17 @@ const Blog = () => {
                 <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                   <div className="md:flex">
                     <div className="md:w-1/2">
-                      {featuredPost.hero_image_url ? (
-                        <img 
-                          src={featuredPost.hero_image_url} 
-                          alt={featuredPost.hero_headline} 
-                          className="blog-index-image" 
-                        />
-                      ) : (
-                        <div className="blog-index-image bg-muted"></div>
-                      )}
+                      <div className="blog-image-container">
+                        {featuredPost.hero_image_url ? (
+                          <img 
+                            src={featuredPost.hero_image_url} 
+                            alt={featuredPost.hero_headline} 
+                            className="blog-index-image" 
+                          />
+                        ) : (
+                          <div className="blog-index-image bg-muted"></div>
+                        )}
+                      </div>
                     </div>
                     <div className="md:w-1/2 p-8">
                       <div className="flex items-start justify-between mb-4">
@@ -253,15 +255,17 @@ const Blog = () => {
                   onMouseEnter={() => handleMouseEnter(post.slug)}
                 >
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group">
-                    {post.hero_image_url ? (
-                      <img 
-                        src={post.hero_image_url} 
-                        alt={post.hero_headline} 
-                        className="blog-index-image" 
-                      />
-                    ) : (
-                      <div className="blog-index-image bg-muted"></div>
-                    )}
+                    <div className="blog-image-container">
+                      {post.hero_image_url ? (
+                        <img 
+                          src={post.hero_image_url} 
+                          alt={post.hero_headline} 
+                          className="blog-index-image" 
+                        />
+                      ) : (
+                        <div className="blog-index-image bg-muted"></div>
+                      )}
+                    </div>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <Badge variant="secondary">{post.category}</Badge>
