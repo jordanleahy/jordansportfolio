@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { SystemPrompt } from '@/types/openaiAgent';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 
@@ -20,8 +19,6 @@ export const SystemPromptsTab = ({
   supportedCategories, 
   onChange 
 }: SystemPromptsTabProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-
   const addNewPrompt = (category: string, prompt: string) => {
     const newPrompts = [...systemPrompts, { category, prompt }];
     const newCategories = supportedCategories.includes(category) 
@@ -29,7 +26,6 @@ export const SystemPromptsTab = ({
       : [...supportedCategories, category];
     
     onChange(newPrompts, newCategories);
-    setSelectedCategory('');
   };
 
   const updatePrompt = (index: number, prompt: string) => {
@@ -38,27 +34,6 @@ export const SystemPromptsTab = ({
     onChange(newPrompts, supportedCategories);
   };
 
-  const updatePromptCategory = (index: number, category: string) => {
-    const newPrompts = [...systemPrompts];
-    const oldCategory = newPrompts[index].category;
-    newPrompts[index] = { ...newPrompts[index], category };
-    
-    // Update supported categories
-    let newCategories = [...supportedCategories];
-    
-    // Add new category if not present
-    if (!newCategories.includes(category)) {
-      newCategories.push(category);
-    }
-    
-    // Remove old category if no other prompts use it
-    const oldCategoryStillUsed = newPrompts.some(p => p.category === oldCategory);
-    if (!oldCategoryStillUsed) {
-      newCategories = newCategories.filter(c => c !== oldCategory);
-    }
-    
-    onChange(newPrompts, newCategories);
-  };
 
   const removePrompt = (index: number) => {
     const newPrompts = systemPrompts.filter((_, i) => i !== index);
@@ -104,21 +79,9 @@ export const SystemPromptsTab = ({
                 <div className="flex items-start justify-between mb-2">
                   <div className="space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">Category:</span>
-                    <Select 
-                      value={prompt.category} 
-                      onValueChange={(value) => updatePromptCategory(index, value)}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEFAULT_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {getCategoryLabel(category)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant="secondary">
+                      {getCategoryLabel(prompt.category)}
+                    </Badge>
                   </div>
                   <Button
                     variant="ghost"
@@ -146,10 +109,9 @@ export const SystemPromptsTab = ({
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium mb-2">Add Custom Prompt</h4>
           <CategoryPromptEditor
-            category={selectedCategory}
+            category="chart-type"
             prompt=""
             isNew={true}
-            onCategoryChange={setSelectedCategory}
             onSave={(category, prompt) => addNewPrompt(category, prompt)}
           />
         </div>

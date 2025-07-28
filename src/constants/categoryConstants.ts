@@ -1,5 +1,6 @@
 // Known default categories - can be extended dynamically
 export const DEFAULT_CATEGORIES = [
+  'chart-type',
   'cdi',
   'contracts', 
   'coding ai',
@@ -13,6 +14,7 @@ export type CategoryType = string;
 
 // Default labels for known categories
 export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
+  'chart-type': 'Chart Type',
   'cdi': 'CDI',
   'contracts': 'Contracts',
   'coding ai': 'Coding AI',
