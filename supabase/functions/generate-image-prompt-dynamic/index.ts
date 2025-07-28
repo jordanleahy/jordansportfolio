@@ -25,37 +25,13 @@ serve(async (req) => {
       throw new Error('Missing required fields: title, description, and category are required');
     }
 
-    // Fetch the Blog Visual Prompt Generator agent
+    // Initialize Supabase client
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { data: agent, error: agentError } = await supabase
-      .from('openai_agents')
-      .select('system_prompts, supported_categories')
-      .eq('name', 'Blog Visual Prompt Generator')
-      .eq('status', 'active')
-      .single();
-
-    if (agentError || !agent) {
-      throw new Error('Blog Visual Prompt Generator agent not found or inactive');
-    }
-
-    // Find the appropriate system prompt for the category
-    const systemPrompts = agent.system_prompts as any[];
-    let categoryPrompt = systemPrompts?.find((prompt: any) => prompt.category === category);
-    
-    // If no specific category prompt found, use the default one
-    if (!categoryPrompt) {
-      categoryPrompt = systemPrompts?.find((prompt: any) => prompt.category === 'default');
-    }
-
-    if (!categoryPrompt) {
-      throw new Error(`No system prompt found for category: ${category}. Agent has prompts for: ${systemPrompts?.map((p: any) => p.category).join(', ')}`);
-    }
-
-    // Create the user message
+    // Create the user message for the agent
     const userMessage = `Generate a detailed image prompt based on this content:
 
 Title: ${title}
@@ -64,41 +40,30 @@ Category: ${category}
 
 Please create a professional, engaging image prompt that captures the essence of this content and follows the style guidelines for ${category} visuals.`;
 
-    // Call OpenAI API with the dynamic system prompt
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Call the Blog Visual Prompt Generator agent through our agent system
+    const { data: agentResponse, error: agentError } = await supabase.functions.invoke('generate-content', {
+      body: {
+        agentName: 'Blog Visual Prompt Generator',
+        userMessage: userMessage,
+        category: category,
         model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: categoryPrompt.prompt },
-          { role: 'user', content: userMessage }
-        ],
         temperature: 0.7,
-        max_tokens: 500,
-      }),
+        max_tokens: 500
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    if (agentError) {
+      throw new Error(`Agent invocation error: ${agentError.message}`);
     }
 
-    const data = await response.json();
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response from OpenAI API');
+    if (!agentResponse?.generatedText) {
+      throw new Error('No generated text received from agent');
     }
-
-    const generatedPrompt = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ 
-      generatedPrompt,
+      generatedPrompt: agentResponse.generatedText,
       category,
-      agent: 'Blog Visual Prompt Generator',
-      systemPrompt: categoryPrompt.prompt
+      agent: 'Blog Visual Prompt Generator'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
