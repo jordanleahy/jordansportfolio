@@ -57,6 +57,10 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
     return portfolio.custom_video_url || defaultVideoContent.videoUrl;
   }, [portfolio.custom_video_url]);
 
+  const topVideoSrc = useMemo(() => {
+    return portfolio.custom_top_video_url;
+  }, [portfolio.custom_top_video_url]);
+
   const calendarUrl = useMemo(() => {
     return defaultCalendarUrl;
   }, []);
@@ -64,6 +68,7 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
   return {
     coverLetterContent,
     videoSrc,
+    topVideoSrc,
     posterSrc: defaultVideoContent.posterUrl,
     calendarUrl,
     personalInfo,

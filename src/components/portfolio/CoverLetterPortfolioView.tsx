@@ -7,8 +7,10 @@ import { SchedulingSection } from "@/components/cover-letter/SchedulingSection";
 import { HealthcareProjectsSection } from "@/components/cover-letter/HealthcareProjectsSection";
 import { CoverLetterEditor } from "./CoverLetterEditor";
 import { PortfolioActions } from "./PortfolioActions";
+import { UploadTopVideoButton } from "./UploadTopVideoButton";
 import { useCoverLetterData } from "@/hooks/useCoverLetterData";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CoverLetterPortfolioViewProps {
   portfolio: CompanyPortfolio & {
@@ -24,9 +26,11 @@ interface CoverLetterPortfolioViewProps {
 
 const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) => {
   const { isAdmin } = useUserRole();
+  const { user } = useAuth();
   const { 
     coverLetterContent, 
     videoSrc, 
+    topVideoSrc,
     posterSrc, 
     calendarUrl, 
     companyName,
@@ -41,8 +45,18 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         </div>
       )}
 
+      {user && !topVideoSrc && (
+        <div className="mb-6 flex justify-center">
+          <UploadTopVideoButton 
+            portfolio={portfolio} 
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          />
+        </div>
+      )}
+
       <VideoWithCoverLetterLayout
         videoSrc={videoSrc}
+        topVideoSrc={topVideoSrc}
         posterSrc={posterSrc}
         coverLetterContent={coverLetterContent}
         portfolio={portfolio}
