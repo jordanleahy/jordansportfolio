@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
+import { BlogStatusBadge } from './BlogStatusBadge';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -119,7 +120,7 @@ export const PostCard = ({
         <div className="flex justify-between items-start gap-3">
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-2 flex-wrap">
               <Badge 
                 className={`${getStatusColor(post.status)} text-xs cursor-pointer hover:opacity-80 transition-opacity`}
                 onClick={() => {
@@ -139,6 +140,7 @@ export const PostCard = ({
                   {draftIndex}
                 </Badge>
               )}
+              <BlogStatusBadge postTitle={post.title} />
             </div>
           </div>
           <div className="flex gap-1">

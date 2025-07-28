@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { UploadDropdown } from './UploadDropdown';
+import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -168,7 +169,7 @@ export const PostsTableView = memo(({
             </TableCell>
             <TableCell>{new Date(post.created_at).toLocaleDateString()}</TableCell>
             <TableCell>
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center flex-wrap">
                 <Badge 
                   className={getStatusColor(post.status)}
                   onClick={() => {
@@ -184,6 +185,7 @@ export const PostsTableView = memo(({
                     {index + 1}
                   </Badge>
                 )}
+                <BlogStatusBadge postTitle={post.title} />
               </div>
             </TableCell>
             <TableCell>
