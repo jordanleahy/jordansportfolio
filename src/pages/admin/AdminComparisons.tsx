@@ -152,18 +152,16 @@ export const AdminComparisons: React.FC = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {comparisons?.map((comparison) => (
               <Card key={comparison.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg leading-tight">{comparison.title}</CardTitle>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-semibold leading-tight">{comparison.title}</h3>
                     <Badge variant={comparison.status === 'published' ? 'default' : 'secondary'}>
                       {comparison.status}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-4">
                     {comparison.meta_description.substring(0, 100)}...
                   </p>
-                </CardHeader>
-                <CardContent className="pt-0">
                   <div className="text-xs text-muted-foreground mb-4">
                     Updated {formatDistanceToNow(new Date(comparison.updated_at))} ago
                   </div>
