@@ -31,7 +31,7 @@ export const useBlogStatus = (postTitle: string) => {
         const { data, error } = await supabase
           .from('blog_posts')
           .select('id, slug, status, hero_headline')
-          .or(`hero_headline.ilike.%${titlePrefix}%`)
+          .ilike('hero_headline', `%${titlePrefix}%`)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
