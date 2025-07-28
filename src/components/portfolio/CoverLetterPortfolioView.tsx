@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { CoverLetterPageLayout } from "@/components/cover-letter/CoverLetterPageLayout";
 import { VideoWithCoverLetterLayout } from "@/components/cover-letter/VideoWithCoverLetterLayout";
@@ -9,6 +10,7 @@ import { CoverLetterEditor } from "./CoverLetterEditor";
 import { PortfolioActions } from "./PortfolioActions";
 import { UploadTopVideoButton } from "./UploadTopVideoButton";
 import { useCoverLetterData } from "@/hooks/useCoverLetterData";
+import { useCoverLetterSEO } from "@/hooks/useCoverLetterSEO";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -37,8 +39,39 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
     jobApplication 
   } = useCoverLetterData({ portfolio });
 
+  // Generate SEO metadata for this specific cover letter
+  const seoData = useCoverLetterSEO(portfolio);
+
   return (
-    <CoverLetterPageLayout>
+    <>
+      <Helmet>
+        <title>{seoData.title}</title>
+        <meta name="description" content={seoData.description} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content={seoData.type} />
+        <meta property="og:url" content={seoData.url} />
+        <meta property="og:title" content={seoData.ogTitle} />
+        <meta property="og:description" content={seoData.ogDescription} />
+        <meta property="og:image" content={seoData.image} />
+        <meta property="og:site_name" content={seoData.siteName} />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={seoData.url} />
+        <meta name="twitter:title" content={seoData.ogTitle} />
+        <meta name="twitter:description" content={seoData.ogDescription} />
+        <meta name="twitter:image" content={seoData.image} />
+        
+        {/* LinkedIn optimization */}
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={seoData.url} />
+      </Helmet>
+      
+      <CoverLetterPageLayout>
       {isAdmin && (
         <div className="mb-8">
           <CoverLetterEditor portfolio={portfolio} />
@@ -71,6 +104,7 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
 
       <PortfolioActions jobApplication={jobApplication} />
     </CoverLetterPageLayout>
+    </>
   );
 };
 
