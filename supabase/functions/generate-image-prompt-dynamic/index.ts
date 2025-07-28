@@ -42,10 +42,16 @@ serve(async (req) => {
       throw new Error(`Agent not found: ${agentError.message}`);
     }
 
-    const categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === category);
+    // Find category prompt, fallback to healthcare for unsupported categories
+    let categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === category);
     
     if (!categoryPrompt) {
-      throw new Error(`Category '${category}' not supported. Available: ${agentData.supported_categories?.join(', ')}`);
+      // Fallback to healthcare prompt for unsupported categories like "appeals"
+      categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === 'healthcare');
+      
+      if (!categoryPrompt) {
+        throw new Error(`Category '${category}' not supported and no healthcare fallback found. Available: ${agentData.supported_categories?.join(', ')}`);
+      }
     }
 
     const userMessage = `Generate an image prompt for:
