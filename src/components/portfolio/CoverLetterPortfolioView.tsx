@@ -48,12 +48,12 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         portfolio={portfolio}
       />
 
+      <HealthcareProjectsSection />
+
       <SchedulingSection
         calendarSrc={calendarUrl}
         companyName={companyName}
       />
-
-      <HealthcareProjectsSection />
 
       <PortfolioActions jobApplication={jobApplication} />
     </CoverLetterPageLayout>

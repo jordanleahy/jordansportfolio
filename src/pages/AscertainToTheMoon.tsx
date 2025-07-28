@@ -46,12 +46,12 @@ const AscertainToTheMoon = () => {
             coverLetterContent={ascertainCoverLetterContent}
           />
 
+          <HealthcareProjectsSection />
+
           <SchedulingSection
             calendarSrc="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0HtVBzITEmJVDw6wxuGBdLLnH99oOFJpzPZysiE0Tr70J6k5kzzrqp6WLR8SVCmH72f8EyuUBE?gv=true"
             companyName="Ascertain"
           />
-
-          <HealthcareProjectsSection />
         </CoverLetterPageLayout>
       </PageLayout>
     </>
