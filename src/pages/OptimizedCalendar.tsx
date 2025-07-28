@@ -25,6 +25,7 @@ import {
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Lazy load components
+const PostForm = React.lazy(() => import('@/components/calendar/PostForm').then(module => ({ default: module.PostForm })));
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
 const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
@@ -238,8 +239,12 @@ export default function OptimizedCalendar() {
           </div>
 
           {availableCategories.map((category) => (
-            <TabsContent key={category} value={category} className="mt-6">
+            <TabsContent key={category} value={category} className="space-y-8">
               <Suspense fallback={<CalendarSkeletonLoader />}>
+                <PostForm 
+                  onPostCreated={() => loadCategoryPosts(category)} 
+                  category={category as any} 
+                />
                 <PostsTable 
                   posts={postsByCategory[category] || []} 
                   onPostsChange={() => loadCategoryPosts(category)} 

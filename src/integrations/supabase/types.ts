@@ -1833,10 +1833,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
-      fix_hardcoded_aspect_ratio_in_prompts: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       fuzzy_search_offerings: {
         Args: { search_term: string; similarity_threshold?: number }
         Returns: {
@@ -1905,10 +1901,6 @@ export type Database = {
       update_cache_hit: {
         Args: { cache_key_param: string }
         Returns: undefined
-      }
-      upgrade_generic_system_prompts: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       validate_tldr_bullets: {
         Args: { bullets: Json }
