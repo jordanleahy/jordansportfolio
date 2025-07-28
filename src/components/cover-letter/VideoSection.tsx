@@ -4,11 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
 import { Button } from "@/components/ui/button";
-import { Upload, Trash2, Settings, Image } from "lucide-react";
+import { Upload, Trash2, Settings, Image, ImageIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyPortfolio } from "@/types/companyPortfolio";
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { uploadVideoToStorage, isVideoFile } from "@/utils/videoUpload";
+import { uploadFileToStorage } from "@/utils/fileUpload";
 import { useToast } from "@/hooks/use-toast";
 
 interface VideoSectionProps {
@@ -111,6 +112,56 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !portfolio) return;
+
+    // Basic image validation
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an image file (PNG, JPG, GIF, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const result = await uploadFileToStorage(file, 'images', 'portfolio-covers');
+      
+      if (result.success && result.url) {
+        const updateData = uploadType === 'top' 
+          ? { id: portfolio.id, custom_top_poster_url: result.url }
+          : { id: portfolio.id, custom_poster_url: result.url };
+          
+        await updatePortfolio.mutateAsync(updateData);
+        
+        toast({
+          title: "Cover Image Updated",
+          description: `Your ${uploadType === 'top' ? 'top video' : 'main video'} cover image has been updated successfully.`,
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: result.error || "Failed to upload cover image.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload Error",
+        description: "An error occurred while uploading the cover image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
+    }
+  };
+
   const handleVideoRemove = async () => {
     if (!portfolio) return;
     
@@ -135,9 +186,34 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     }
   };
 
+  const handleCoverRemove = async () => {
+    if (!portfolio) return;
+    
+    try {
+      const updateData = uploadType === 'top' 
+        ? { id: portfolio.id, custom_top_poster_url: null }
+        : { id: portfolio.id, custom_poster_url: null };
+        
+      await updatePortfolio.mutateAsync(updateData);
+      
+      toast({
+        title: "Cover Image Removed",
+        description: `${uploadType === 'top' ? 'Top video' : 'Main video'} cover image removed successfully.`,
+      });
+    } catch (error) {
+      console.error('Cover removal error:', error);
+      toast({
+        title: "Removal Error",
+        description: "Failed to remove cover image.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const ratio = 9/16; // Both videos are now 9:16 aspect ratio
   const hasVideo = videoSrc && videoSrc.trim() !== '';
   const hasCustomVideo = uploadType === 'top' ? portfolio?.custom_top_video_url : portfolio?.custom_video_url;
+  const hasCustomCover = uploadType === 'top' ? portfolio?.custom_top_poster_url : portfolio?.custom_poster_url;
 
   return (
     <Card className="bg-transparent border-none shadow-none">
@@ -173,6 +249,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             {user && portfolio && (
               <div className={`absolute top-2 right-2 transition-opacity duration-200 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="flex gap-1">
+                  {/* Video Upload */}
                   <input
                     type="file"
                     accept="video/*,.mp4,.webm,.mov,.avi,.ogg,.mkv"
@@ -192,7 +269,29 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                       <Upload className="w-4 h-4 text-white" />
                     </label>
                   </Button>
+
+                  {/* Image/Cover Upload */}
+                  <input
+                    type="file"
+                    accept="image/*,.png,.jpg,.jpeg,.gif,.webp"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                    className="hidden"
+                    id={`image-upload-${uploadType}`}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={isUploading}
+                    asChild
+                    className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
+                  >
+                    <label htmlFor={`image-upload-${uploadType}`} className="cursor-pointer">
+                      <ImageIcon className="w-4 h-4 text-white" />
+                    </label>
+                  </Button>
                   
+                  {/* Video Remove Button */}
                   {hasCustomVideo && (
                     <Button
                       variant="secondary"
@@ -202,6 +301,19 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                       className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
                     >
                       <Trash2 className="w-4 h-4 text-white" />
+                    </Button>
+                  )}
+
+                  {/* Cover Remove Button */}
+                  {hasCustomCover && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleCoverRemove}
+                      disabled={updatePortfolio.isPending}
+                      className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
                     </Button>
                   )}
                 </div>
