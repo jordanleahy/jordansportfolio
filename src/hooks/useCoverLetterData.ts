@@ -69,7 +69,7 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
     coverLetterContent,
     videoSrc,
     topVideoSrc,
-    posterSrc: defaultVideoContent.posterUrl,
+    posterSrc: "",
     calendarUrl,
     personalInfo,
     companyName: portfolio.company_name,
