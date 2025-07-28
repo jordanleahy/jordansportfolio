@@ -148,6 +148,10 @@ export class ThemeImportService {
         validation.cleanedData.posts
       );
       
+      // Auto-create system prompt for new category
+      console.log('🤖 Creating system prompt for new category...');
+      await this.createSystemPromptForCategory(validation.cleanedData.category);
+      
       console.log('🎉 Import completed successfully, inserted:', insertedCount);
       
       return {
@@ -279,6 +283,83 @@ export class ThemeImportService {
         stack: error.stack
       });
       throw new Error(`Failed to insert posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Creates a system prompt for a new category using CDI template
+   */
+  private async createSystemPromptForCategory(category: string): Promise<void> {
+    try {
+      console.log('🔍 Fetching CDI template system prompt...');
+      
+      // Get the CDI system prompt to use as template
+      const { data: cdiAgent, error: fetchError } = await supabase
+        .from('openai_agents')
+        .select('system_prompts')
+        .eq('id', '159f87b8-a4bb-461f-86c4-a344c42c06a2')
+        .single();
+
+      if (fetchError || !cdiAgent?.system_prompts) {
+        console.warn('⚠️ Could not fetch CDI template, skipping system prompt creation');
+        return;
+      }
+
+      const cdiPrompts = cdiAgent.system_prompts as any[];
+      const cdiTemplate = cdiPrompts.find(p => p.category === 'cdi')?.prompt;
+
+      if (!cdiTemplate) {
+        console.warn('⚠️ CDI template prompt not found, skipping system prompt creation');
+        return;
+      }
+
+      console.log('📝 Creating system prompt for category:', category);
+      
+      // Replace 'cdi' with the new category in the template
+      const categoryPrompt = cdiTemplate.replace(/cdi/gi, category.toLowerCase());
+
+      // Find agents that already support this category
+      const { data: existingAgents, error: searchError } = await supabase
+        .from('openai_agents')
+        .select('id, system_prompts, supported_categories')
+        .contains('supported_categories', [category]);
+
+      if (searchError) {
+        console.error('❌ Error searching for existing agents:', searchError);
+        return;
+      }
+
+      // If no agents support this category, update the CDI agent to include it
+      if (!existingAgents || existingAgents.length === 0) {
+        console.log('🤖 Adding new category to CDI agent...');
+        
+        const newSystemPrompts = [
+          ...cdiPrompts,
+          { category: category.toLowerCase(), prompt: categoryPrompt }
+        ];
+        
+        const newSupportedCategories = ['cdi', category.toLowerCase()];
+
+        const { error: updateError } = await supabase
+          .from('openai_agents')
+          .update({
+            system_prompts: newSystemPrompts,
+            supported_categories: newSupportedCategories
+          })
+          .eq('id', '159f87b8-a4bb-461f-86c4-a344c42c06a2');
+
+        if (updateError) {
+          console.error('❌ Failed to update agent with new category:', updateError);
+        } else {
+          console.log('✅ Successfully added category to CDI agent');
+        }
+      } else {
+        console.log('ℹ️ Category already supported by existing agents');
+      }
+
+    } catch (error) {
+      console.error('💥 Failed to create system prompt for category:', error);
+      // Don't throw - this is a non-critical enhancement
     }
   }
 
