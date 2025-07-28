@@ -104,21 +104,9 @@ export const SystemPromptsTab = ({
                 <div className="flex items-start justify-between mb-2">
                   <div className="space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">Category:</span>
-                    <Select 
-                      value={prompt.category} 
-                      onValueChange={(value) => updatePromptCategory(index, value)}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEFAULT_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {getCategoryLabel(category)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant="outline" className="w-48 justify-start">
+                      {getCategoryLabel(prompt.category)}
+                    </Badge>
                   </div>
                   <Button
                     variant="ghost"
