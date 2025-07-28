@@ -16,19 +16,39 @@ interface VideoSectionProps {
   posterSrc: string;
   showTimer?: boolean;
   portfolio?: CompanyPortfolio;
+  aspectRatio?: 'portrait' | 'landscape';
+  uploadType?: 'main' | 'top';
+  showUploadPrompt?: boolean;
 }
 
 export const VideoSection: React.FC<VideoSectionProps> = ({ 
   videoSrc, 
   posterSrc, 
   showTimer = true,
-  portfolio 
+  portfolio,
+  aspectRatio = 'portrait',
+  uploadType = 'main',
+  showUploadPrompt = false
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const updatePortfolio = useUpdateCompanyPortfolio();
   const [isUploading, setIsUploading] = useState(false);
   const [showControls, setShowControls] = useState(false);
+
+  const validateVideoAspectRatio = (file: File, expectedRatio: '9:16' | '16:9'): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.onloadedmetadata = () => {
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        const isValidRatio = expectedRatio === '9:16' 
+          ? aspectRatio < 1 // Portrait (9:16 is approximately 0.5625)
+          : aspectRatio > 1; // Landscape (16:9 is approximately 1.777)
+        resolve(isValidRatio);
+      };
+      video.src = URL.createObjectURL(file);
+    });
+  };
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,20 +64,34 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
       return;
     }
 
+    // Validate aspect ratio based on upload type
+    if (uploadType === 'top') {
+      const hasValidRatio = await validateVideoAspectRatio(file, '9:16');
+      if (!hasValidRatio) {
+        toast({
+          title: "Invalid Aspect Ratio",
+          description: "Please upload a video with 9:16 aspect ratio (portrait orientation)",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setIsUploading(true);
 
     try {
       const result = await uploadVideoToStorage(file, 'general', 'portfolio-videos');
       
       if (result.success && result.url) {
-        await updatePortfolio.mutateAsync({
-          id: portfolio.id,
-          custom_video_url: result.url
-        });
+        const updateData = uploadType === 'top' 
+          ? { id: portfolio.id, custom_top_video_url: result.url }
+          : { id: portfolio.id, custom_video_url: result.url };
+          
+        await updatePortfolio.mutateAsync(updateData);
         
         toast({
           title: "Video Updated",
-          description: "Your portfolio video has been updated successfully.",
+          description: `Your ${uploadType === 'top' ? 'top' : 'main'} video has been updated successfully.`,
         });
       } else {
         toast({
@@ -83,44 +117,58 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     if (!portfolio) return;
     
     try {
-      await updatePortfolio.mutateAsync({
-        id: portfolio.id,
-        custom_video_url: null
-      });
+      const updateData = uploadType === 'top' 
+        ? { id: portfolio.id, custom_top_video_url: null }
+        : { id: portfolio.id, custom_video_url: null };
+        
+      await updatePortfolio.mutateAsync(updateData);
       
       toast({
         title: "Video Removed",
-        description: "Custom video removed. Default video will be used.",
+        description: `${uploadType === 'top' ? 'Top video' : 'Custom video'} removed successfully.`,
       });
     } catch (error) {
       console.error('Video removal error:', error);
       toast({
         title: "Removal Error",
-        description: "Failed to remove custom video.",
+        description: "Failed to remove video.",
         variant: "destructive",
       });
     }
   };
 
+  const ratio = aspectRatio === 'landscape' ? 16/9 : 9/16;
+  const hasVideo = videoSrc && videoSrc.trim() !== '';
+  const hasCustomVideo = uploadType === 'top' ? portfolio?.custom_top_video_url : portfolio?.custom_video_url;
+
   return (
     <Card className="bg-transparent border-none shadow-none">
       <CardContent className="p-0 space-y-4">
-        <AspectRatio ratio={9/16}>
+        <AspectRatio ratio={ratio}>
           <div 
             className="relative w-full h-full group"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
           >
-            {videoSrc ? (
+            {hasVideo ? (
               <video 
                 className="w-full h-full object-cover rounded-lg"
                 controls
                 loop
                 preload="metadata"
+                poster={posterSrc}
               >
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+            ) : showUploadPrompt ? (
+              <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <Upload className="w-8 h-8 mx-auto mb-2" />
+                  <p className="text-sm">Upload {uploadType === 'top' ? 'portrait' : 'landscape'} video</p>
+                  <p className="text-xs">{uploadType === 'top' ? '9:16 aspect ratio' : '16:9 aspect ratio'}</p>
+                </div>
+              </div>
             ) : (
               <div className="w-full h-full bg-muted rounded-lg" />
             )}
@@ -134,7 +182,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     onChange={handleVideoUpload}
                     disabled={isUploading}
                     className="hidden"
-                    id="video-upload"
+                    id={`video-upload-${uploadType}`}
                   />
                   <Button
                     variant="secondary"
@@ -143,12 +191,12 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     asChild
                     className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70 border-0"
                   >
-                    <label htmlFor="video-upload" className="cursor-pointer">
+                    <label htmlFor={`video-upload-${uploadType}`} className="cursor-pointer">
                       <Upload className="w-4 h-4 text-white" />
                     </label>
                   </Button>
                   
-                  {portfolio.custom_video_url && (
+                  {hasCustomVideo && (
                     <Button
                       variant="secondary"
                       size="sm"

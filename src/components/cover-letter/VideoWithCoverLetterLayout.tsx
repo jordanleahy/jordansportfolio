@@ -31,33 +31,38 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
 }) => {
   const { user } = useAuth();
   const hasTopVideo = portfolio?.custom_top_video_url;
-  const shouldUseDualVideo = useDualVideo || hasTopVideo;
+  
+  // Show dual video layout only when there's actually a top video
+  // OR when user is authenticated and can upload (to show upload interface)
+  const shouldShowDualLayout = hasTopVideo || (user && portfolio);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
-      {shouldUseDualVideo ? (
-        <>
-          {/* Show upload interface for authenticated users with portfolio */}
-          {user && portfolio ? (
-            <DualVideoUploadSection
-              topVideoSrc={topVideoSrc}
-              bottomVideoSrc={videoSrc}
-              posterSrc={posterSrc}
-              showTimer={showTimer}
+      {shouldShowDualLayout ? (
+        <div className="space-y-4">
+          {/* Only show top video section if there's a video or user can upload */}
+          {(hasTopVideo || (user && portfolio)) && (
+            <VideoSection 
+              videoSrc={topVideoSrc || ''}
+              posterSrc=""
+              showTimer={false}
               portfolio={portfolio}
-              showControls={true}
-            />
-          ) : (
-            <DualVideoSection 
-              topVideoSrc={topVideoSrc || ''}
-              topPosterSrc={topPosterSrc || posterSrc}
-              bottomVideoSrc={videoSrc}
-              bottomPosterSrc={posterSrc}
-              showTimer={showTimer}
-              portfolio={portfolio}
+              aspectRatio="portrait"
+              uploadType="top"
+              showUploadPrompt={!hasTopVideo && !!(user && portfolio)}
             />
           )}
-        </>
+          
+          {/* Always show the main video */}
+          <VideoSection 
+            videoSrc={videoSrc}
+            posterSrc={posterSrc}
+            showTimer={showTimer}
+            portfolio={portfolio}
+            aspectRatio="landscape"
+            uploadType="main"
+          />
+        </div>
       ) : (
         <VideoSection 
           videoSrc={videoSrc}
