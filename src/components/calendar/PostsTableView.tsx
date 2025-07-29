@@ -182,11 +182,6 @@ export const PostsTableView = memo(({
                 >
                   {post.status}
                 </Badge>
-                {post.status === 'draft' && activeTab === 'draft' && post.day && (
-                  <Badge variant="outline" className="text-xs">
-                    {post.day}
-                  </Badge>
-                )}
                 <BlogStatusBadge postId={post.id} />
               </div>
             </TableCell>
