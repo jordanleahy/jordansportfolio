@@ -292,9 +292,8 @@ const AdminBlog = () => {
                 <div className="flex justify-end gap-2 pt-2 border-t border-border">
                   {post.status === 'published' && (
                     <Link to={`/blog/${post.slug}`}>
-                      <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
-                        View
                       </Button>
                     </Link>
                   )}
@@ -302,25 +301,21 @@ const AdminBlog = () => {
                     variant="outline" 
                     size="sm"
                     onClick={() => handleVoiceoverClick(post)}
-                    className="flex items-center gap-2"
                   >
                     <Mic className="h-4 w-4" />
-                    Voice
                   </Button>
                   <Link to={`/blog-editor/${post.slug}`}>
-                    <Button variant="default" size="sm" className="flex items-center gap-2">
+                    <Button variant="default" size="sm">
                       <Edit className="h-4 w-4" />
-                      Edit
                     </Button>
                   </Link>
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => handleDeleteClick(post)}
-                    className="flex items-center gap-2 text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Delete
                   </Button>
                 </div>
               </div>
