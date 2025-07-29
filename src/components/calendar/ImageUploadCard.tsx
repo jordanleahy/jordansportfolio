@@ -67,13 +67,18 @@ export const ImageUploadCard = ({
       <CardContent className="space-y-3">
         {imageUrl ? (
           <div className="relative">
-            <OptimizedImage
-              src={imageUrl}
-              alt={title}
-              size="preview"
-              aspectRatio={aspectRatio}
-              className="w-full rounded-md border"
-            />
+            <div 
+              className="w-full rounded-md border overflow-hidden bg-muted/10" 
+              style={{ aspectRatio: displayAspectRatio }}
+            >
+              <OptimizedImage
+                src={imageUrl}
+                alt={title}
+                size="preview"
+                aspectRatio={aspectRatio}
+                className="w-full h-full object-cover"
+              />
+            </div>
             <Button
               size="sm"
               variant="destructive"
