@@ -8,12 +8,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
+import { useNavigationPreloading } from "@/hooks/useRoutePreloading";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
+  const { handleMouseEnter, handleFocus } = useNavigationPreloading();
 
   // Simplified active state logic
   const isActive = (path: string) => {
@@ -143,6 +145,8 @@ const Navigation = () => {
                         <Link
                           to="/calendar"
                           className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
+                          onMouseEnter={() => handleMouseEnter('/calendar')}
+                          onFocus={() => handleFocus('/calendar')}
                         >
                           <Calendar className="mr-2 h-4 w-4" />
                           Calendar

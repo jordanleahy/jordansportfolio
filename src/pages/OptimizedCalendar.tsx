@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
 import { Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -22,7 +22,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Lazy load components
 const PostForm = React.lazy(() => import('@/components/calendar/PostForm').then(module => ({ default: module.PostForm })));
@@ -34,49 +33,24 @@ type CategoryType = string;
 export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<CategoryType>('');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const { toast } = useToast();
 
-  // Use optimized queries with caching
-  const { data: availableCategories = ['cdi', 'contracts'] } = useQuery({
-    queryKey: ['available-categories'],
-    queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    select: (data) => {
-      // Ensure known categories appear first, followed by any dynamic categories
-      const knownCategories = ['cdi', 'contracts', 'coding ai', 'ai agents'];
-      const dynamicCategories = data.filter(c => !knownCategories.includes(c));
-      return [...knownCategories.filter(c => data.includes(c)), ...dynamicCategories] as CategoryType[];
-    },
-    enabled: !!user,
-  });
+  // Use the optimized calendar hook for performance
+  const {
+    activeTab,
+    availableCategories,
+    activeCategoryPosts,
+    isLoading,
+    categoriesLoading,
+    handleTabChange,
+    invalidateCategoryCache,
+    getCategoryPosts,
+  } = useOptimizedCalendar(user);
 
-  // Set the default tab to the first available category once data loads
-  React.useEffect(() => {
-    if (availableCategories.length > 0 && !activeTab) {
-      setActiveTab(availableCategories[0]);
-    }
-  }, [availableCategories, activeTab]);
-
-  const { data: postsByCategory = {} } = useQuery({
-    queryKey: ['posts-by-category', availableCategories],
-    queryFn: async () => {
-      const postsData: Record<string, SocialMediaPost[]> = {};
-      for (const category of availableCategories) {
-        const posts = await optimizedSocialMediaService.getAllPosts(category as any);
-        postsData[category] = posts;
-      }
-      return postsData;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!user && availableCategories.length > 0,
-  });
-
-  const loadCategoryPosts = async (category: CategoryType) => {
-    // Invalidate and refetch the posts for this category
-    await queryClient.invalidateQueries({ queryKey: ['posts-by-category'] });
+  const loadCategoryPosts = async (category: string) => {
+    // Use optimistic cache invalidation for the specific category only
+    invalidateCategoryCache(category);
   };
 
   const handleImportComplete = async () => {
@@ -99,7 +73,7 @@ export default function OptimizedCalendar() {
       if (activeTab === category && availableCategories.length > 1) {
         const remainingCategories = availableCategories.filter(c => c !== category);
         if (remainingCategories.length > 0) {
-          setActiveTab(remainingCategories[0]);
+          handleTabChange(remainingCategories[0]);
         }
       }
       
@@ -115,7 +89,7 @@ export default function OptimizedCalendar() {
     }
   };
 
-  if (loading) {
+  if (loading || (!isLoading && !activeTab)) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -150,7 +124,9 @@ export default function OptimizedCalendar() {
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-6 mt-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{Object.values(postsByCategory).flat().length}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {availableCategories.reduce((total, cat) => total + getCategoryPosts(cat).length, 0)}
+                    </div>
                     <div className="text-sm text-muted-foreground">Total Posts</div>
                   </div>
                   <div className="text-center">
@@ -158,7 +134,7 @@ export default function OptimizedCalendar() {
                     <div className="text-sm text-muted-foreground">Active Themes</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{postsByCategory[activeTab]?.length || 0}</div>
+                    <div className="text-2xl font-bold text-primary">{activeCategoryPosts.length}</div>
                     <div className="text-sm text-muted-foreground">Current Theme</div>
                   </div>
                 </div>
@@ -179,7 +155,7 @@ export default function OptimizedCalendar() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Theme</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
+                            Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {activeCategoryPosts.length} posts in this theme. This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -200,7 +176,7 @@ export default function OptimizedCalendar() {
                     </div>
                     <div>
                       <div className="font-medium capitalize">{activeTab}</div>
-                      <div className="text-xs text-muted-foreground">{postsByCategory[activeTab]?.length || 0} posts</div>
+                      <div className="text-xs text-muted-foreground">{activeCategoryPosts.length} posts</div>
                     </div>
                   </div>
                 </div>
@@ -226,7 +202,7 @@ export default function OptimizedCalendar() {
 
         <Tabs 
           value={activeTab} 
-          onValueChange={(value) => setActiveTab(value as CategoryType)} 
+          onValueChange={handleTabChange} 
           className="space-y-8"
         >
           <div className="overflow-x-auto">
@@ -251,7 +227,7 @@ export default function OptimizedCalendar() {
                   category={category as any} 
                 />
                 <PostsTable 
-                  posts={postsByCategory[category] || []} 
+                  posts={category === activeTab ? activeCategoryPosts : getCategoryPosts(category)} 
                   onPostsChange={() => loadCategoryPosts(category)}
                   isAdmin={isAdmin}
                 />

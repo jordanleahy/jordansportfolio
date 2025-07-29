@@ -3,7 +3,25 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useJobApplications } from '@/hooks/useJobApplications';
+
+// Get user preferences from localStorage
+const getUserPreferences = () => {
+  try {
+    const prefs = localStorage.getItem('user-preferences');
+    return prefs ? JSON.parse(prefs) : { defaultCategory: 'cdi', recentCategories: ['cdi', 'contracts'] };
+  } catch {
+    return { defaultCategory: 'cdi', recentCategories: ['cdi', 'contracts'] };
+  }
+};
+
+// Save user preferences to localStorage
+const saveUserPreferences = (prefs: { defaultCategory: string; recentCategories: string[] }) => {
+  try {
+    localStorage.setItem('user-preferences', JSON.stringify(prefs));
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+};
 
 export const useRoutePreloading = () => {
   const queryClient = useQueryClient();
@@ -12,60 +30,78 @@ export const useRoutePreloading = () => {
   const prefetchRoute = async (route: string) => {
     if (!user) return;
 
+    const userPrefs = getUserPreferences();
+
     switch (route) {
       case '/calendar':
-        // Prefetch calendar data - get available categories first, then prefetch popular ones
+        console.log('[Prefetch] Starting calendar data prefetch');
+        
+        // 1. Prefetch available categories first (highest priority)
         await queryClient.prefetchQuery({
           queryKey: ['available-categories'],
           queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
           staleTime: 10 * 60 * 1000,
         });
-        
-        // Prefetch popular categories
-        await queryClient.prefetchQuery({
-          queryKey: ['social-media-posts', 'cdi'],
-          queryFn: () => optimizedSocialMediaService.getAllPosts('cdi'),
-          staleTime: 5 * 60 * 1000, // 5 minutes
-        });
-        
-        await queryClient.prefetchQuery({
-          queryKey: ['social-media-posts', 'contracts'],
-          queryFn: () => optimizedSocialMediaService.getAllPosts('contracts'),
+
+        // 2. Prefetch user's default category immediately
+        queryClient.prefetchQuery({
+          queryKey: ['category-posts', userPrefs.defaultCategory],
+          queryFn: () => optimizedSocialMediaService.getAllPosts(userPrefs.defaultCategory as any),
           staleTime: 5 * 60 * 1000,
         });
-        break;
 
-      case '/jobs':
-        // Prefetch job applications
-        await queryClient.prefetchQuery({
-          queryKey: ['job-applications'],
-          queryFn: async () => {
-            const { useJobApplications } = await import('@/hooks/useJobApplications');
-            // This would normally be handled by the hook, but we can prefetch the data
-            return [];
-          },
-          staleTime: 2 * 60 * 1000, // 2 minutes
-        });
+        // 3. Background prefetch of recent categories
+        setTimeout(() => {
+          userPrefs.recentCategories.forEach((category) => {
+            if (category !== userPrefs.defaultCategory) {
+              queryClient.prefetchQuery({
+                queryKey: ['category-posts', category],
+                queryFn: () => optimizedSocialMediaService.getAllPosts(category as any),
+                staleTime: 5 * 60 * 1000,
+              });
+            }
+          });
+        }, 500);
+
+        console.log('[Prefetch] Calendar prefetch completed');
         break;
 
       case '/vendors':
-        // Prefetch vendors data
+        console.log('[Prefetch] Starting vendors data prefetch');
+        const { useVendors } = await import('@/hooks/useVendors');
         await queryClient.prefetchQuery({
           queryKey: ['vendors'],
           queryFn: async () => {
-            const { useVendors } = await import('@/hooks/useVendors');
-            return [];
+            const { supabase } = await import('@/integrations/supabase/client');
+            const { data, error } = await supabase.from('vendors').select('*').order('company_name');
+            if (error) throw error;
+            return data || [];
           },
           staleTime: 10 * 60 * 1000,
         });
         break;
 
+      case '/jobs':
+        console.log('[Prefetch] Starting jobs data prefetch');
+        await queryClient.prefetchQuery({
+          queryKey: ['job-applications'],
+          queryFn: async () => {
+            const { supabase } = await import('@/integrations/supabase/client');
+            const { data } = await supabase.from('job_applications').select('*').order('created_at', { ascending: false });
+            return data || [];
+          },
+          staleTime: 2 * 60 * 1000,
+        });
+        break;
+
       case '/agents':
-        // Prefetch agents data
+        console.log('[Prefetch] Starting agents data prefetch');
         await queryClient.prefetchQuery({
           queryKey: ['openai-agents'],
           queryFn: async () => {
-            return [];
+            const { supabase } = await import('@/integrations/supabase/client');
+            const { data } = await supabase.from('openai_agents').select('*').order('created_at', { ascending: false });
+            return data || [];
           },
           staleTime: 5 * 60 * 1000,
         });
@@ -73,7 +109,7 @@ export const useRoutePreloading = () => {
     }
   };
 
-  return { prefetchRoute };
+  return { prefetchRoute, getUserPreferences, saveUserPreferences };
 };
 
 export const useNavigationPreloading = () => {
