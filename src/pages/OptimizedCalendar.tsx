@@ -164,7 +164,17 @@ export default function OptimizedCalendar() {
                 </div>
               </div>
               
-              {/* Theme Management Panel */}
+              {/* Theme Import Button for all users */}
+              <div className="lg:w-80">
+                <Button 
+                  onClick={() => setImportModalOpen(true)}
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  Import Theme Data
+                </Button>
+              </div>
+              
+              {/* Admin-only Theme Management Panel */}
               {isAdmin && (
                 <div className="lg:w-80 space-y-4">
                   <div className="bg-card/50 backdrop-blur-sm border rounded-xl p-4">
@@ -205,13 +215,6 @@ export default function OptimizedCalendar() {
                       </div>
                     </div>
                   </div>
-                  
-                  <Button 
-                    onClick={() => setImportModalOpen(true)}
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  >
-                    Import Theme Data
-                  </Button>
                 </div>
               )}
             </div>
