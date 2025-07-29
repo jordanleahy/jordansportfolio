@@ -4,36 +4,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { UploadDropdown } from './UploadDropdown';
+import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
+type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
+
 interface PostsTableViewProps {
   posts: SocialMediaPost[];
   activeTab: 'draft' | 'published';
   creatingBlogIds: Set<string>;
-  uploadingPostId: string | null;
-  uploading916PostId: string | null;
-  uploading34PostId: string | null;
-  uploading43PostId: string | null;
-  uploadingGeneralVideoPostId: string | null;
+  isUploading: (postId: string, aspectRatio?: AspectRatio) => boolean;
+  getUploadType: (postId: string) => AspectRatio | null;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   onCopyContent: (post: SocialMediaPost) => void;
   onDeletePost: (postId: string) => void;
   onCreateBlogPost: (post: SocialMediaPost) => void;
   onGenerateVoiceoverScript: (post: SocialMediaPost) => void;
   onGenerateImagePrompt: (post: SocialMediaPost) => void;
-  onImageUpload: (postId: string, event: React.ChangeEvent<HTMLInputElement>) => void;
-  onImage916Upload: (postId: string, event: React.ChangeEvent<HTMLInputElement>) => void;
-  onImage34Upload: (postId: string, event: React.ChangeEvent<HTMLInputElement>) => void;
-  onImage43Upload: (postId: string, event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileSelect: (postId: string, aspectRatio: AspectRatio, post: SocialMediaPost) => void;
   onPreviewImage: (url: string, alt: string) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-  file916InputRef: React.RefObject<HTMLInputElement>;
-  file34InputRef: React.RefObject<HTMLInputElement>;
-  file43InputRef: React.RefObject<HTMLInputElement>;
   isAdmin?: boolean;
 }
 
@@ -55,26 +47,16 @@ export const PostsTableView = memo(({
   posts,
   activeTab,
   creatingBlogIds,
-  uploadingPostId,
-  uploading916PostId,
-  uploading34PostId,
-  uploading43PostId,
-  uploadingGeneralVideoPostId,
+  isUploading,
+  getUploadType,
   onStatusChange,
   onCopyContent,
   onDeletePost,
   onCreateBlogPost,
   onGenerateVoiceoverScript,
   onGenerateImagePrompt,
-  onImageUpload,
-  onImage916Upload,
-  onImage34Upload,
-  onImage43Upload,
+  onFileSelect,
   onPreviewImage,
-  fileInputRef,
-  file916InputRef,
-  file34InputRef,
-  file43InputRef,
   isAdmin = false
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
@@ -286,20 +268,11 @@ export const PostsTableView = memo(({
                     )}
                   </Button>
                 )}
-                <UploadDropdown
-                  postId={post.id}
-                  uploadingPostId={uploadingPostId}
-                  uploading916PostId={uploading916PostId}
-                  uploading34PostId={uploading34PostId}
-                  uploading43PostId={uploading43PostId}
-                  fileInputRef={fileInputRef}
-                  file916InputRef={file916InputRef}
-                  file34InputRef={file34InputRef}
-                  file43InputRef={file43InputRef}
-                  onImageUpload={onImageUpload}
-                  onImage916Upload={onImage916Upload}
-                  onImage34Upload={onImage34Upload}
-                  onImage43Upload={onImage43Upload}
+                <SimplifiedUploadDropdown
+                  post={post}
+                  isUploading={isUploading}
+                  getUploadType={getUploadType}
+                  onFileSelect={onFileSelect}
                 />
                 <Button
                   variant="ghost"

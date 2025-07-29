@@ -21,68 +21,39 @@ interface PostsTableOptimizedProps {
 
 export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<'draft' | 'published'>('draft');
-  const [localPosts, setLocalPosts] = useState<SocialMediaPost[]>(posts);
   const isMobile = useIsMobile();
-  
-  // Update local posts when props change
-  React.useEffect(() => {
-    setLocalPosts(posts);
-  }, [posts]);
   
   // Custom hooks for better separation of concerns
   const modalManager = useModalManager();
   const postActions = usePostActions(onPostsChange);
-  const imageUpload = useImageUpload(posts, onPostsChange, setLocalPosts);
+  const imageUpload = useImageUpload(onPostsChange);
 
-  // Memoized filtered posts for performance
+  // Memoized filtered posts for performance - use posts prop directly
   const { draftPosts, publishedPosts, filteredPosts } = useMemo(() => {
-    const draftPosts = localPosts.filter(post => post.status === 'draft');
-    const publishedPosts = localPosts.filter(post => post.status === 'published');
+    const draftPosts = posts.filter(post => post.status === 'draft');
+    const publishedPosts = posts.filter(post => post.status === 'published');
     const filteredPosts = activeTab === 'draft' ? draftPosts : publishedPosts;
     return { draftPosts, publishedPosts, filteredPosts };
-  }, [localPosts, activeTab]);
+  }, [posts, activeTab]);
 
   // Handle watermark upload completion
   const handleWatermarkedUpload = async (watermarkedFile: File) => {
-    if (!imageUpload.selectedPost) {
-      console.error('No selected post for upload!'); // Debug log
+    if (!imageUpload.selectedPostId) {
       return;
     }
 
-    console.log('Uploading watermarked file for post:', imageUpload.selectedPost.title, 'ID:', imageUpload.selectedPost.id); // Debug log
-
-    const uploadFunctions = {
-      '16_9': imageUpload.handleImageUpload,
-      '9_16': imageUpload.handleImage916Upload,
-      '3_4': imageUpload.handleImage34Upload,
-      '4_3': imageUpload.handleImage43Upload
-    };
-
-    const uploadFunction = uploadFunctions[imageUpload.uploadType];
-    if (uploadFunction) {
-      await uploadFunction(imageUpload.selectedPost.id, watermarkedFile);
-    }
-
+    const post = posts.find(p => p.id === imageUpload.selectedPostId);
+    await imageUpload.handleUpload(imageUpload.selectedPostId, watermarkedFile, imageUpload.uploadType, post);
     modalManager.closeWatermarkModal();
   };
 
   // Handle file selection with watermark modal
-  const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
-    console.log('File selected for post ID:', postId); // Debug log
-    const file = event.target.files?.[0];
-    if (file) {
-      // Use posts prop instead of localPosts to avoid stale state
-      const post = posts.find(p => p.id === postId);
-      console.log('Found post:', post?.title, 'ID:', post?.id); // Debug log
-      imageUpload.setSelectedPost(post || null);
-      imageUpload.setSelectedFile(file);
-      imageUpload.setUploadType(type);
-      modalManager.openWatermarkModal();
-    }
-    
-    if (event.target) {
-      event.target.value = '';
-    }
+  const handleFileSelect = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', file: File) => {
+    const post = posts.find(p => p.id === postId);
+    imageUpload.setSelectedPostId(postId);
+    imageUpload.setSelectedFile(file);
+    imageUpload.setUploadType(aspectRatio);
+    modalManager.openWatermarkModal();
   };
 
   return (
@@ -113,7 +84,10 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onDelete={postActions.handleDeletePost}
                     onGeneratePrompt={modalManager.openImagePromptModal}
                     onGenerateVoiceover={modalManager.openVoiceoverModal}
-                    onFileSelect={handleFileSelect}
+                    onFileSelect={(postId, event, type) => {
+                      const file = event.target.files?.[0];
+                      if (file) handleFileSelect(postId, type, file);
+                    }}
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
@@ -128,26 +102,16 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 posts={filteredPosts}
                 activeTab={activeTab}
                 creatingBlogIds={postActions.creatingBlogIds}
-                uploadingPostId={imageUpload.uploadingPostId}
-                uploading916PostId={imageUpload.uploading916PostId}
-                uploading34PostId={imageUpload.uploading34PostId}
-                uploading43PostId={imageUpload.uploading43PostId}
-                uploadingGeneralVideoPostId={imageUpload.uploadingGeneralVideoPostId}
+                isUploading={imageUpload.isUploading}
+                getUploadType={imageUpload.getUploadType}
                 onStatusChange={postActions.handleStatusChange}
                 onCopyContent={postActions.handleCopyContent}
                 onDeletePost={postActions.handleDeletePost}
                 onCreateBlogPost={postActions.handleCreateBlogPost}
                 onGenerateVoiceoverScript={modalManager.openVoiceoverModal}
                 onGenerateImagePrompt={modalManager.openImagePromptModal}
-                onImageUpload={(postId, event) => handleFileSelect(postId, event, '16_9')}
-                onImage916Upload={(postId, event) => handleFileSelect(postId, event, '9_16')}
-                onImage34Upload={(postId, event) => handleFileSelect(postId, event, '3_4')}
-                onImage43Upload={(postId, event) => handleFileSelect(postId, event, '4_3')}
+                onFileSelect={imageUpload.handleFileSelect}
                 onPreviewImage={modalManager.openPreviewImage}
-                fileInputRef={imageUpload.fileInputRef}
-                file916InputRef={imageUpload.file916InputRef}
-                file34InputRef={imageUpload.file34InputRef}
-                file43InputRef={imageUpload.file43InputRef}
                 isAdmin={isAdmin}
               />
             )}
@@ -164,7 +128,10 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                   onDelete={postActions.handleDeletePost}
                   onGeneratePrompt={modalManager.openImagePromptModal}
                   onGenerateVoiceover={modalManager.openVoiceoverModal}
-                  onFileSelect={handleFileSelect}
+                  onFileSelect={(postId, event, type) => {
+                    const file = event.target.files?.[0];
+                    if (file) handleFileSelect(postId, type, file);
+                  }}
                   onVideoUpload={() => {}}
                   onVideoRemove={() => {}}
                   onImageDelete={() => {}}
@@ -179,26 +146,16 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 posts={filteredPosts}
                 activeTab={activeTab}
                 creatingBlogIds={postActions.creatingBlogIds}
-                uploadingPostId={imageUpload.uploadingPostId}
-                uploading916PostId={imageUpload.uploading916PostId}
-                uploading34PostId={imageUpload.uploading34PostId}
-                uploading43PostId={imageUpload.uploading43PostId}
-                uploadingGeneralVideoPostId={imageUpload.uploadingGeneralVideoPostId}
+                isUploading={imageUpload.isUploading}
+                getUploadType={imageUpload.getUploadType}
                 onStatusChange={postActions.handleStatusChange}
                 onCopyContent={postActions.handleCopyContent}
                 onDeletePost={postActions.handleDeletePost}
                 onCreateBlogPost={postActions.handleCreateBlogPost}
                 onGenerateVoiceoverScript={modalManager.openVoiceoverModal}
                 onGenerateImagePrompt={modalManager.openImagePromptModal}
-                onImageUpload={(postId, event) => handleFileSelect(postId, event, '16_9')}
-                onImage916Upload={(postId, event) => handleFileSelect(postId, event, '9_16')}
-                onImage34Upload={(postId, event) => handleFileSelect(postId, event, '3_4')}
-                onImage43Upload={(postId, event) => handleFileSelect(postId, event, '4_3')}
+                onFileSelect={imageUpload.handleFileSelect}
                 onPreviewImage={modalManager.openPreviewImage}
-                fileInputRef={imageUpload.fileInputRef}
-                file916InputRef={imageUpload.file916InputRef}
-                file34InputRef={imageUpload.file34InputRef}
-                file43InputRef={imageUpload.file43InputRef}
                 isAdmin={isAdmin}
               />
             )}
@@ -221,7 +178,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
           onClose={() => {
             modalManager.closeWatermarkModal();
             // Clear selected state to prevent stale references
-            imageUpload.setSelectedPost(null);
+            imageUpload.setSelectedPostId(null);
             imageUpload.setSelectedFile(null);
           }}
           file={imageUpload.selectedFile}

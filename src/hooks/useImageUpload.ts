@@ -5,25 +5,22 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 import { useDebouncedCallback } from 'use-debounce';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => void, setPosts?: (posts: SocialMediaPost[]) => void) => {
+type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
+
+export const useImageUpload = (onPostsChange: () => void) => {
   const { toast } = useToast();
+  
+  // Simplified state management
+  const [uploadingPosts, setUploadingPosts] = useState<Record<string, AspectRatio | null>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState<AspectRatio>('16_9');
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+
+  // Single file input ref for all uploads
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const file916InputRef = useRef<HTMLInputElement>(null);
-  const file34InputRef = useRef<HTMLInputElement>(null);
-  const file43InputRef = useRef<HTMLInputElement>(null);
-  
-  const [uploadingPostId, setUploadingPostId] = useState<string | null>(null);
-  const [uploading916PostId, setUploading916PostId] = useState<string | null>(null);
-  const [uploading34PostId, setUploading34PostId] = useState<string | null>(null);
-  const [uploading43PostId, setUploading43PostId] = useState<string | null>(null);
-  const [uploadingGeneralVideoPostId, setUploadingGeneralVideoPostId] = useState<string | null>(null);
-  
-  const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<'16_9' | '9_16' | '3_4' | '4_3'>('16_9');
 
   const sanitizeTitle = useCallback((title: string) => {
     return title.toLowerCase()
@@ -50,60 +47,45 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
     return publicUrl;
   }, []);
 
-  const handleImageUpload = useCallback(async (postId: string, file: File) => {
-    setUploadingPostId(postId);
-    
-    // Create temporary URL for optimistic update
-    const tempUrl = URL.createObjectURL(file);
-    
-    // Optimistic update: immediately update local state
-    if (setPosts) {
-      setPosts(posts.map(p => 
-        p.id === postId ? { ...p, image_16_9_url: tempUrl } : p
-      ));
-    }
+  // Unified upload handler for all aspect ratios
+  const handleUpload = useCallback(async (postId: string, file: File, aspectRatio: AspectRatio, post?: SocialMediaPost) => {
+    setUploadingPosts(prev => ({ ...prev, [postId]: aspectRatio }));
     
     try {
-      const post = posts.find(p => p.id === postId);
       const fileExt = file.name.split('.').pop();
       const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
       const baseName = sanitizedTitle || postId;
-      const fileName = `${baseName}_16_9_${Date.now()}.${fileExt}`;
+      const fileName = `${baseName}_${aspectRatio}_${Date.now()}.${fileExt}`;
 
       const publicUrl = await uploadToStorage(file, fileName);
 
+      // Map aspect ratio to database field
+      const fieldMap = {
+        '16_9': 'image_16_9_url',
+        '9_16': 'image_9_16_url',
+        '3_4': 'image_3_4_url',
+        '4_3': 'image_4_3_url'
+      };
+
       await optimizedSocialMediaService.updatePost(postId, {
-        image_16_9_url: publicUrl
+        [fieldMap[aspectRatio]]: publicUrl
       });
 
-      // Update with real URL
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_16_9_url: publicUrl } : p
-        ));
-      }
+      const aspectRatioLabels = {
+        '16_9': '16:9',
+        '9_16': '9:16',
+        '3_4': '3:4',
+        '4_3': '4:3'
+      };
 
       toast({
         title: "Image uploaded",
-        description: "16:9 image has been successfully uploaded."
+        description: `${aspectRatioLabels[aspectRatio]} image has been successfully uploaded.`
       });
       
-      // Clean up temp URL
-      URL.revokeObjectURL(tempUrl);
-      
-      // Use debounced refetch to prevent rapid calls
       debouncedOnPostsChange();
     } catch (error) {
       console.error('Error uploading image:', error);
-      
-      // Revert optimistic update on error
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_16_9_url: undefined } : p
-        ));
-      }
-      
-      URL.revokeObjectURL(tempUrl);
       
       toast({
         title: "Upload failed",
@@ -111,183 +93,9 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
         variant: "destructive"
       });
     } finally {
-      setUploadingPostId(null);
+      setUploadingPosts(prev => ({ ...prev, [postId]: null }));
     }
-  }, [posts, setPosts, sanitizeTitle, uploadToStorage, debouncedOnPostsChange, toast]);
-
-  const handleImage916Upload = useCallback(async (postId: string, file: File) => {
-    setUploading916PostId(postId);
-    
-    const tempUrl = URL.createObjectURL(file);
-    
-    if (setPosts) {
-      setPosts(posts.map(p => 
-        p.id === postId ? { ...p, image_9_16_url: tempUrl } : p
-      ));
-    }
-    
-    try {
-      const post = posts.find(p => p.id === postId);
-      const fileExt = file.name.split('.').pop();
-      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
-      const baseName = sanitizedTitle || postId;
-      const fileName = `${baseName}_9_16_${Date.now()}.${fileExt}`;
-
-      const publicUrl = await uploadToStorage(file, fileName);
-
-      await optimizedSocialMediaService.updatePost(postId, {
-        image_9_16_url: publicUrl
-      });
-
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_9_16_url: publicUrl } : p
-        ));
-      }
-
-      toast({
-        title: "Image uploaded",
-        description: "9:16 image has been successfully uploaded."
-      });
-      
-      URL.revokeObjectURL(tempUrl);
-      debouncedOnPostsChange();
-    } catch (error) {
-      console.error('Error uploading 9:16 image:', error);
-      
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_9_16_url: undefined } : p
-        ));
-      }
-      
-      URL.revokeObjectURL(tempUrl);
-      
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload 9:16 image. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setUploading916PostId(null);
-    }
-  }, [posts, setPosts, sanitizeTitle, uploadToStorage, debouncedOnPostsChange, toast]);
-
-  const handleImage34Upload = useCallback(async (postId: string, file: File) => {
-    setUploading34PostId(postId);
-    
-    const tempUrl = URL.createObjectURL(file);
-    
-    if (setPosts) {
-      setPosts(posts.map(p => 
-        p.id === postId ? { ...p, image_3_4_url: tempUrl } : p
-      ));
-    }
-    
-    try {
-      const post = posts.find(p => p.id === postId);
-      const fileExt = file.name.split('.').pop();
-      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
-      const baseName = sanitizedTitle || postId;
-      const fileName = `${baseName}_3_4_${Date.now()}.${fileExt}`;
-
-      const publicUrl = await uploadToStorage(file, fileName);
-
-      await optimizedSocialMediaService.updatePost(postId, {
-        image_3_4_url: publicUrl
-      });
-
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_3_4_url: publicUrl } : p
-        ));
-      }
-
-      toast({
-        title: "Image uploaded",
-        description: "3:4 image has been successfully uploaded."
-      });
-      
-      URL.revokeObjectURL(tempUrl);
-      debouncedOnPostsChange();
-    } catch (error) {
-      console.error('Error uploading 3:4 image:', error);
-      
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_3_4_url: undefined } : p
-        ));
-      }
-      
-      URL.revokeObjectURL(tempUrl);
-      
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload 3:4 image. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setUploading34PostId(null);
-    }
-  }, [posts, setPosts, sanitizeTitle, uploadToStorage, debouncedOnPostsChange, toast]);
-
-  const handleImage43Upload = useCallback(async (postId: string, file: File) => {
-    setUploading43PostId(postId);
-    
-    const tempUrl = URL.createObjectURL(file);
-    
-    if (setPosts) {
-      setPosts(posts.map(p => 
-        p.id === postId ? { ...p, image_4_3_url: tempUrl } : p
-      ));
-    }
-    
-    try {
-      const post = posts.find(p => p.id === postId);
-      const fileExt = file.name.split('.').pop();
-      const sanitizedTitle = post ? sanitizeTitle(post.title) : '';
-      const baseName = sanitizedTitle || postId;
-      const fileName = `${baseName}_4_3_${Date.now()}.${fileExt}`;
-
-      const publicUrl = await uploadToStorage(file, fileName);
-
-      await optimizedSocialMediaService.updatePost(postId, {
-        image_4_3_url: publicUrl
-      });
-
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_4_3_url: publicUrl } : p
-        ));
-      }
-
-      toast({
-        title: "Image uploaded",
-        description: "4:3 image has been successfully uploaded."
-      });
-      
-      URL.revokeObjectURL(tempUrl);
-      debouncedOnPostsChange();
-    } catch (error) {
-      console.error('Error uploading 4:3 image:', error);
-      
-      if (setPosts) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, image_4_3_url: undefined } : p
-        ));
-      }
-      
-      URL.revokeObjectURL(tempUrl);
-      
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload 4:3 image. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setUploading43PostId(null);
-    }
-  }, [posts, setPosts, sanitizeTitle, uploadToStorage, debouncedOnPostsChange, toast]);
+  }, [sanitizeTitle, uploadToStorage, debouncedOnPostsChange, toast]);
 
   const validateFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -311,48 +119,59 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
     return true;
   }, [toast]);
 
-  const handleFileSelect = useCallback((postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
-    const file = event.target.files?.[0];
-    if (file && validateFile(file)) {
-      const post = posts.find(p => p.id === postId);
-      console.log('useImageUpload: Setting selected post:', post?.title, 'ID:', post?.id); // Debug log
-      setSelectedPost(post || null);
-      setSelectedFile(file);
-      setUploadType(type);
-    }
+  // Simplified file selection handler
+  const handleFileSelect = useCallback((postId: string, aspectRatio: AspectRatio, post?: SocialMediaPost) => {
+    setSelectedPostId(postId);
+    setUploadType(aspectRatio);
     
-    if (event.target) {
-      event.target.value = '';
+    // Create and trigger file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file && validateFile(file)) {
+        setSelectedFile(file);
+        // For now, skip watermark and upload directly
+        // Later we can add watermark modal trigger here
+        handleUpload(postId, file, aspectRatio, post);
+      }
+    };
+    input.click();
+  }, [validateFile, handleUpload]);
+
+  // Helper to check if a specific post is uploading
+  const isUploading = useCallback((postId: string, aspectRatio?: AspectRatio) => {
+    if (aspectRatio) {
+      return uploadingPosts[postId] === aspectRatio;
     }
-  }, [posts, validateFile]);
+    return uploadingPosts[postId] !== null && uploadingPosts[postId] !== undefined;
+  }, [uploadingPosts]);
+
+  // Get upload type for a specific post
+  const getUploadType = useCallback((postId: string) => {
+    return uploadingPosts[postId];
+  }, [uploadingPosts]);
 
   return {
-    // Refs
+    // Single file input ref
     fileInputRef,
-    file916InputRef,
-    file34InputRef,
-    file43InputRef,
     
-    // States
-    uploadingPostId,
-    uploading916PostId,
-    uploading34PostId,
-    uploading43PostId,
-    uploadingGeneralVideoPostId,
-    selectedPost,
+    // Simplified state
+    uploadingPosts,
     selectedFile,
     uploadType,
+    selectedPostId,
     
     // Actions
-    handleImageUpload,
-    handleImage916Upload,
-    handleImage34Upload,
-    handleImage43Upload,
+    handleUpload,
     handleFileSelect,
+    isUploading,
+    getUploadType,
     
     // Setters for modal management
-    setSelectedPost,
     setSelectedFile,
-    setUploadType
+    setUploadType,
+    setSelectedPostId
   };
 };
