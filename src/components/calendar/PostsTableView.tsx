@@ -1,3 +1,4 @@
+// PostsTableView - Updated to use standard img tags instead of OptimizedImage
 import React, { memo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
