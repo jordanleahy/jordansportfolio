@@ -258,6 +258,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
             <ImageUploadCard
               title="Landscape (16:9)"
               aspectRatio="16/9"
+              displayAspectRatio="16/9"
               imageUrl={formData.image_16_9_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_16_9_url: undefined }))}
@@ -265,6 +266,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
             <ImageUploadCard
               title="Portrait (9:16)"
               aspectRatio="9/16"
+              displayAspectRatio="16/9"
               imageUrl={formData.image_9_16_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_9_16_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_9_16_url: undefined }))}
@@ -272,6 +274,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
             <ImageUploadCard
               title="Social (3:4)"
               aspectRatio="3/4"
+              displayAspectRatio="16/9"
               imageUrl={formData.image_3_4_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_3_4_url: undefined }))}
@@ -279,6 +282,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
             <ImageUploadCard
               title="Standard (4:3)"
               aspectRatio="4/3"
+              displayAspectRatio="16/9"
               imageUrl={formData.image_4_3_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_4_3_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_4_3_url: undefined }))}

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ImageUploadCardProps {
   title: string;
   aspectRatio: string;
+  displayAspectRatio?: string;
   imageUrl?: string;
   onImageUpload: (url: string) => void;
   onImageRemove: () => void;
@@ -18,6 +19,7 @@ interface ImageUploadCardProps {
 export const ImageUploadCard = ({ 
   title, 
   aspectRatio, 
+  displayAspectRatio = "16/9",
   imageUrl, 
   onImageUpload, 
   onImageRemove 
@@ -82,7 +84,7 @@ export const ImageUploadCard = ({
             </Button>
           </div>
         ) : (
-          <div className={`border-2 border-dashed border-muted-foreground/25 rounded-md p-8 text-center`} style={{ aspectRatio }}>
+          <div className={`border-2 border-dashed border-muted-foreground/25 rounded-md p-8 text-center`} style={{ aspectRatio: displayAspectRatio }}>
             <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
             <p className="text-sm text-muted-foreground mb-2">Upload {title}</p>
             <Input
