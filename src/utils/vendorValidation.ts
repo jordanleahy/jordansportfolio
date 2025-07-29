@@ -73,6 +73,7 @@ export const validateVendorData = (rawData: any): ValidationResult => {
       });
     } else {
       cleanedData[field as keyof VendorSchema] = rawData[field].trim();
+      console.log(`✅ [VendorValidation] ${field} validated successfully`);
     }
   }
 
@@ -97,9 +98,14 @@ export const validateVendorData = (rawData: any): ValidationResult => {
     'certifications', 'awards_recognition', 'office_locations', 'partnerships', 'tech_stack'
   ];
   
+  console.log("🔍 [VendorValidation] Processing array fields:", arrayFields);
+  
   for (const field of arrayFields) {
     if (rawData[field] !== undefined) {
+      console.log(`📋 [VendorValidation] Processing ${field}:`, rawData[field]);
+      
       if (!Array.isArray(rawData[field])) {
+        console.warn(`⚠️ [VendorValidation] ${field} is not an array, type:`, typeof rawData[field]);
         errors.push({
           field,
           message: `${field} must be an array`,
@@ -111,8 +117,10 @@ export const validateVendorData = (rawData: any): ValidationResult => {
         ).map((item: string) => item.trim());
         
         cleanedData[field as keyof VendorSchema] = cleanArray;
+        console.log(`✅ [VendorValidation] ${field} cleaned: ${cleanArray.length} items`);
         
         if (cleanArray.length === 0 && rawData[field].length > 0) {
+          console.warn(`⚠️ [VendorValidation] ${field} had invalid items removed`);
           warnings.push({
             field,
             message: `${field} had invalid items that were removed`,
@@ -122,6 +130,7 @@ export const validateVendorData = (rawData: any): ValidationResult => {
       }
     } else {
       cleanedData[field as keyof VendorSchema] = [];
+      console.log(`📋 [VendorValidation] ${field} not provided, setting to empty array`);
     }
   }
 
@@ -196,8 +205,21 @@ export const validateVendorData = (rawData: any): ValidationResult => {
     }
   }
 
+  const isValid = errors.length === 0;
+  console.log(`🎯 [VendorValidation] Validation complete - Valid: ${isValid}`);
+  console.log(`📊 [VendorValidation] Summary - Errors: ${errors.length}, Warnings: ${warnings.length}`);
+  console.log(`📋 [VendorValidation] Cleaned data fields: ${Object.keys(cleanedData).length}`);
+  
+  if (cleanedData.key_benefits || cleanedData.competitive_advantages || cleanedData.key_features) {
+    console.log("🎯 [VendorValidation] Key arrays processed:", {
+      key_benefits: cleanedData.key_benefits?.length || 0,
+      competitive_advantages: cleanedData.competitive_advantages?.length || 0,
+      key_features: cleanedData.key_features?.length || 0
+    });
+  }
+
   return {
-    isValid: errors.length === 0,
+    isValid,
     errors,
     warnings,
     cleanedData

@@ -357,27 +357,43 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   };
 
   const validateVendorData = (data: any): boolean => {
-    // Check for required fields that should be present in ChatGPT response
-    const requiredStringFields = ['company_name', 'description', 'headquarters'];
-    const requiredArrayFields = ['core_services', 'specialties', 'customers'];
+    console.log("🔍 [VendorDetail] Validating vendor data...");
+    console.log("📊 [VendorDetail] Data keys:", Object.keys(data || {}));
     
-    for (const field of requiredStringFields) {
-      if (!data[field] || typeof data[field] !== 'string') {
-        return false;
-      }
+    // More lenient validation - only require company_name
+    if (!data?.company_name || typeof data.company_name !== 'string') {
+      console.warn("❌ [VendorDetail] Missing or invalid company_name");
+      return false;
     }
     
-    for (const field of requiredArrayFields) {
-      if (!data[field] || !Array.isArray(data[field])) {
-        return false;
+    // Check for at least one meaningful field beyond company_name
+    const meaningfulFields = [
+      'description', 'headquarters', 'core_services', 'specialties', 
+      'customers', 'key_features', 'key_benefits', 'competitive_advantages'
+    ];
+    
+    const hasValidFields = meaningfulFields.some(field => {
+      const value = data[field];
+      if (Array.isArray(value)) {
+        return value.length > 0;
       }
+      return value && typeof value === 'string' && value.trim().length > 0;
+    });
+    
+    if (!hasValidFields) {
+      console.warn("❌ [VendorDetail] No meaningful data fields found");
+      return false;
     }
     
+    console.log("✅ [VendorDetail] Validation passed");
     return true;
   };
 
   const processJsonData = async () => {
+    console.log("🚀 [VendorDetail] Starting JSON processing...");
+    
     if (!pasteContent.trim()) {
+      console.warn("❌ [VendorDetail] No paste content provided");
       toast({
         title: "No Data",
         description: "Please paste JSON data first.",
@@ -386,16 +402,34 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       return;
     }
 
+    console.log("📊 [VendorDetail] Paste content length:", pasteContent.length);
+    console.log("📋 [VendorDetail] Paste content preview:", pasteContent.substring(0, 200) + "...");
+
     setIsProcessing(true);
     try {
+      console.log("🔄 [VendorDetail] Invoking process-funding-json edge function...");
+      
       const { data, error } = await supabase.functions.invoke('process-funding-json', {
         body: { rawJson: pasteContent }
       });
 
-      if (error) throw error;
+      console.log("📨 [VendorDetail] Edge function response:", { data, error });
+
+      if (error) {
+        console.error("❌ [VendorDetail] Edge function error:", error);
+        throw error;
+      }
 
       setProcessingResult(data);
       if (data.success) {
+        console.log("✅ [VendorDetail] JSON processed successfully");
+        console.log("📄 [VendorDetail] Cleaned data keys:", Object.keys(data.cleanedData || {}));
+        console.log("🔍 [VendorDetail] Key fields in cleaned data:", {
+          key_benefits: data.cleanedData?.key_benefits?.length || 0,
+          competitive_advantages: data.cleanedData?.competitive_advantages?.length || 0,
+          key_features: data.cleanedData?.key_features?.length || 0
+        });
+        
         setProcessedData(data.cleanedData);
         const fixCount = data.fixes?.length || 0;
         const warningCount = data.warnings?.length || 0;
@@ -403,20 +437,21 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         
         toast({
           title: `JSON Processed Successfully${aiUsed}`,
-          description: `${fixCount} issues fixed, ${warningCount} warnings`,
+          description: `${fixCount} issues fixed, ${warningCount} warnings. Ready to submit!`,
         });
       } else {
+        console.error("❌ [VendorDetail] Processing failed:", data);
         toast({
           title: "Processing Failed",
-          description: `${data.errors?.length || 0} errors found`,
+          description: `${data.errors?.length || 0} errors found. Check console for details.`,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error processing JSON:', error);
+      console.error('❌ [VendorDetail] Error processing JSON:', error);
       toast({
         title: "Processing Error",
-        description: "Failed to process JSON data",
+        description: "Failed to process JSON data. Check console for details.",
         variant: "destructive",
       });
     } finally {
@@ -425,16 +460,22 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   };
 
   const submitPastedData = async () => {
+    console.log("🚀 [VendorDetail] Starting data submission...");
+    
     const dataToSubmit = processedData || pasteContent;
+    console.log("📊 [VendorDetail] Data source:", processedData ? "processed" : "raw");
     
     try {
       let jsonData;
       if (processedData) {
+        console.log("✅ [VendorDetail] Using processed data");
         jsonData = processedData;
       } else {
+        console.log("🔄 [VendorDetail] Parsing raw JSON...");
         jsonData = JSON.parse(dataToSubmit);
         
         if (!validateVendorData(jsonData)) {
+          console.warn("❌ [VendorDetail] Validation failed for raw JSON");
           toast({
             title: "Invalid Data Structure",
             description: "The JSON doesn't contain required vendor fields. Try processing it first.",
@@ -443,6 +484,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           return;
         }
       }
+
+      console.log("📋 [VendorDetail] JSON data keys:", Object.keys(jsonData));
+      console.log("🔍 [VendorDetail] Key field values:", {
+        key_benefits_count: Array.isArray(jsonData.key_benefits) ? jsonData.key_benefits.length : 'not array',
+        competitive_advantages_count: Array.isArray(jsonData.competitive_advantages) ? jsonData.competitive_advantages.length : 'not array',
+        key_features_count: Array.isArray(jsonData.key_features) ? jsonData.key_features.length : 'not array'
+      });
 
       // Map ChatGPT response to vendor fields with improved data handling
       const vendorUpdate: Partial<Vendor> = {
@@ -453,7 +501,7 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         founding_year: jsonData.founding_year || vendor?.founding_year,
         company_type: jsonData.company_type || vendor?.company_type,
         
-        // Services and capabilities
+        // Services and capabilities - with explicit logging
         core_services: jsonData.core_services || vendor?.core_services || [],
         specialties: jsonData.specialties || vendor?.specialties || [],
         customers: jsonData.customers || vendor?.customers || [],
@@ -520,15 +568,27 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         }
       };
 
+      console.log("📤 [VendorDetail] Vendor update object keys:", Object.keys(vendorUpdate));
+      console.log("🎯 [VendorDetail] Fields being updated:", {
+        key_benefits: vendorUpdate.key_benefits?.length || 0,
+        competitive_advantages: vendorUpdate.competitive_advantages?.length || 0,
+        key_features: vendorUpdate.key_features?.length || 0
+      });
+
       // Update vendor in database
-      const { error } = await supabase
+      console.log("💾 [VendorDetail] Updating database...");
+      const { data: updateResult, error } = await supabase
         .from('vendors')
         .update(vendorUpdate)
-        .eq('id', vendor?.id);
+        .eq('id', vendor?.id)
+        .select();
 
       if (error) {
+        console.error("❌ [VendorDetail] Database update error:", error);
         throw error;
       }
+      
+      console.log("✅ [VendorDetail] Database update successful:", updateResult);
       
       // Show success message
       toast({
@@ -539,12 +599,15 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       // Close modal and clear content
       setIsPasteOpen(false);
       setPasteContent("");
+      setProcessedData(null);
+      setProcessingResult(null);
       
       // Refresh the page to show updated data
+      console.log("🔄 [VendorDetail] Refreshing page to show updates...");
       window.location.reload();
       
     } catch (error) {
-      console.error('Error processing JSON:', error);
+      console.error('❌ [VendorDetail] Error processing JSON:', error);
       toast({
         title: "Processing Error",
         description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
@@ -712,6 +775,11 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">
               Paste the JSON response from ChatGPT here. Use "Process JSON" to automatically fix common formatting issues using AI-powered cleaning.
+              {pasteContent.trim() && !processedData && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+                  💡 <strong>Tip:</strong> Click "Process JSON" to validate and clean your data before submission for better results.
+                </div>
+              )}
             </div>
             
             <Textarea
@@ -783,11 +851,50 @@ Research all ${investors.length} firms listed above and return comprehensive dat
             )}
 
             {processedData && (
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Processed Data Preview:</h4>
-                <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
-                  {JSON.stringify(processedData, null, 2)}
-                </pre>
+              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                <h4 className="font-medium">✅ Data Ready for Submission</h4>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+                  {processedData.key_benefits && Array.isArray(processedData.key_benefits) && processedData.key_benefits.length > 0 && (
+                    <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
+                      🎯 Key Benefits: {processedData.key_benefits.length} items
+                    </div>
+                  )}
+                  {processedData.competitive_advantages && Array.isArray(processedData.competitive_advantages) && processedData.competitive_advantages.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                      🏆 Competitive Advantages: {processedData.competitive_advantages.length} items
+                    </div>
+                  )}
+                  {processedData.key_features && Array.isArray(processedData.key_features) && processedData.key_features.length > 0 && (
+                    <div className="bg-purple-50 border border-purple-200 rounded px-2 py-1">
+                      ⚡ Key Features: {processedData.key_features.length} items
+                    </div>
+                  )}
+                  {processedData.core_services && Array.isArray(processedData.core_services) && processedData.core_services.length > 0 && (
+                    <div className="bg-orange-50 border border-orange-200 rounded px-2 py-1">
+                      🔧 Core Services: {processedData.core_services.length} items
+                    </div>
+                  )}
+                  {processedData.specialties && Array.isArray(processedData.specialties) && processedData.specialties.length > 0 && (
+                    <div className="bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
+                      🎯 Specialties: {processedData.specialties.length} items
+                    </div>
+                  )}
+                  {processedData.customers && Array.isArray(processedData.customers) && processedData.customers.length > 0 && (
+                    <div className="bg-cyan-50 border border-cyan-200 rounded px-2 py-1">
+                      👥 Customers: {processedData.customers.length} items
+                    </div>
+                  )}
+                </div>
+                
+                <details className="mt-3">
+                  <summary className="text-sm font-medium cursor-pointer hover:text-primary">
+                    📋 View Full Processed Data
+                  </summary>
+                  <pre className="text-xs overflow-x-auto whitespace-pre-wrap mt-2 bg-background border rounded p-2">
+                    {JSON.stringify(processedData, null, 2)}
+                  </pre>
+                </details>
               </div>
             )}
             
