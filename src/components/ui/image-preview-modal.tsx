@@ -1,6 +1,5 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -17,11 +16,11 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt }: ImagePrevi
           <DialogTitle>{alt}</DialogTitle>
         </DialogHeader>
         <div className="flex justify-center">
-          <OptimizedImage
+          <img
             src={imageUrl}
             alt={alt}
-            size="full"
             className="max-w-full max-h-[70vh] object-contain"
+            loading="lazy"
           />
         </div>
       </DialogContent>

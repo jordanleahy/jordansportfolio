@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface CaseStudyHeroProps {
   title: string;
@@ -44,12 +43,11 @@ export const CaseStudyHero = ({
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative mb-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
             >
-              <OptimizedImage 
+              <img 
                 src={heroImage}
                 alt={heroImageAlt}
-                priority={true}
-                aspectRatio="16/9"
                 className="w-full h-auto"
+                loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
             </motion.div>

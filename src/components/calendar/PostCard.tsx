@@ -2,7 +2,6 @@ import React, { useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic } from 'lucide-react';
@@ -104,11 +103,11 @@ const PostCardComponent = ({
         </div>
         {imageUrl && (
           <div className="relative">
-            <OptimizedImage
+            <img
               src={imageUrl}
               alt={`${label} for ${post.title}`}
-              size="preview"
               className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+              loading="lazy"
               onClick={() => setPreviewImage({ url: imageUrl, alt: `${label} for ${post.title}` })}
             />
           </div>
@@ -326,11 +325,11 @@ const PostCardComponent = ({
                 showUpload={false}
                 className="flex-shrink-0"
               >
-                <OptimizedImage
+                <img
                   src={post.image_16_9_url}
                   alt="16:9 image"
-                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
                 />
               </ImageHoverOverlay>
             )}
@@ -342,11 +341,11 @@ const PostCardComponent = ({
                 showUpload={false}
                 className="flex-shrink-0"
               >
-                <OptimizedImage
+                <img
                   src={post.image_9_16_url}
                   alt="9:16 image"
-                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
                 />
               </ImageHoverOverlay>
             )}
@@ -358,11 +357,11 @@ const PostCardComponent = ({
                 showUpload={false}
                 className="flex-shrink-0"
               >
-                <OptimizedImage
+                <img
                   src={post.image_3_4_url}
                   alt="3:4 image"
-                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
                 />
               </ImageHoverOverlay>
             )}
@@ -374,11 +373,11 @@ const PostCardComponent = ({
                 showUpload={false}
                 className="flex-shrink-0"
               >
-                <OptimizedImage
+                <img
                   src={post.image_4_3_url}
                   alt="4:3 image"
-                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
                 />
               </ImageHoverOverlay>
             )}

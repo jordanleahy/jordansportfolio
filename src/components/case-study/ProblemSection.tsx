@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Challenge } from "@/types/caseStudy";
-import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface ProblemSectionProps {
   title: string;

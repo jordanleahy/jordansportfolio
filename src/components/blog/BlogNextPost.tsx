@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BlogPost } from "@/types/blog";
-import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface BlogNextPostProps {
   nextPost: BlogPost | null;
@@ -50,7 +49,7 @@ export const BlogNextPost = ({ nextPost, className = "" }: BlogNextPostProps) =>
               {/* Image */}
               {nextPost.hero_image_url && (
                 <div className="md:w-1/3 overflow-hidden">
-                  <OptimizedImage
+                  <img
                     src={nextPost.hero_image_url}
                     alt={nextPost.hero_headline}
                     className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"

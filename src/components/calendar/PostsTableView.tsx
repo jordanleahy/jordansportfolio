@@ -2,7 +2,6 @@ import React, { memo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { UploadDropdown } from './UploadDropdown';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -193,11 +192,12 @@ export const PostsTableView = memo(({
             <TableCell>
               <div className="flex gap-2 flex-wrap">
                 {post.image_16_9_url && (
-                  <div className="relative group">
-                    <OptimizedImage
+                  <div className="w-16 h-9 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
                       src={post.image_16_9_url}
                       alt="16:9 aspect ratio"
-                      className="w-16 h-9 object-cover rounded cursor-pointer"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
                       onClick={() => onPreviewImage(post.image_16_9_url!, `${post.title} - 16:9 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">
@@ -206,11 +206,12 @@ export const PostsTableView = memo(({
                   </div>
                 )}
                 {post.image_9_16_url && (
-                  <div className="relative group">
-                    <OptimizedImage
+                  <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
                       src={post.image_9_16_url}
                       alt="9:16 aspect ratio"
-                      className="w-9 h-16 object-cover rounded cursor-pointer"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
                       onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">
@@ -219,11 +220,12 @@ export const PostsTableView = memo(({
                   </div>
                 )}
                 {post.image_3_4_url && (
-                  <div className="relative group">
-                    <OptimizedImage
+                  <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
                       src={post.image_3_4_url}
                       alt="3:4 aspect ratio"
-                      className="w-12 h-16 object-cover rounded cursor-pointer"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
                       onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">
@@ -232,11 +234,12 @@ export const PostsTableView = memo(({
                   </div>
                 )}
                 {post.image_4_3_url && (
-                  <div className="relative group">
-                    <OptimizedImage
+                  <div className="w-16 h-12 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
                       src={post.image_4_3_url}
                       alt="4:3 aspect ratio"
-                      className="w-16 h-12 object-cover rounded cursor-pointer"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
                       onClick={() => onPreviewImage(post.image_4_3_url!, `${post.title} - 4:3 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">

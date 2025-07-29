@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, X } from 'lucide-react';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useToast } from '@/hooks/use-toast';
 
@@ -71,12 +70,11 @@ export const ImageUploadCard = ({
               className="w-full rounded-md border overflow-hidden bg-muted/10" 
               style={{ aspectRatio: displayAspectRatio }}
             >
-              <OptimizedImage
+              <img
                 src={imageUrl}
                 alt={title}
-                size="preview"
-                aspectRatio={aspectRatio}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <Button

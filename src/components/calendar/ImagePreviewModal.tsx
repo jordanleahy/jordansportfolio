@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -36,10 +35,11 @@ export const ImagePreviewModal = ({
 
           {/* Image */}
           <div className="flex items-center justify-center p-4 w-full h-full">
-            <OptimizedImage
+            <img
               src={imageUrl}
               alt={imageAlt}
               className="max-w-full max-h-full object-contain rounded"
+              loading="lazy"
             />
           </div>
         </div>
