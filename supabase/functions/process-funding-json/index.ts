@@ -38,6 +38,20 @@ serve(async (req) => {
   try {
     const { rawJson } = await req.json();
     console.log('Processing funding JSON with specialized AI agent...');
+    
+    // Log the incoming raw data to inspect key_features and key_benefits
+    console.log('Raw JSON input (first 1000 chars):', typeof rawJson === 'string' ? rawJson.substring(0, 1000) : JSON.stringify(rawJson).substring(0, 1000));
+    
+    // Try to parse and check if key_features/key_benefits exist in input
+    try {
+      const inputData = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+      console.log('🔍 Checking input for key fields:');
+      console.log('- key_features exists:', inputData.key_features !== undefined, 'length:', Array.isArray(inputData.key_features) ? inputData.key_features.length : 'not array');
+      console.log('- key_benefits exists:', inputData.key_benefits !== undefined, 'length:', Array.isArray(inputData.key_benefits) ? inputData.key_benefits.length : 'not array');
+      console.log('- competitive_advantages exists:', inputData.competitive_advantages !== undefined, 'length:', Array.isArray(inputData.competitive_advantages) ? inputData.competitive_advantages.length : 'not array');
+    } catch (parseError) {
+      console.log('Could not parse input JSON for pre-analysis:', parseError.message);
+    }
 
     const result = await processFundingJsonWithAI(rawJson, startTime);
     success = result.success;
@@ -216,10 +230,23 @@ CRITICAL FUNDING DATA PROCESSING RULES:
 4. EXTRACT key_investors as clean company/person names (no titles or descriptions)
 5. NORMALIZE founding_year to integer year only
 6. CATEGORIZE employee_count_range to: 1-10, 11-50, 51-200, 201-500, 501-1000, 1000+, Unknown
-7. Use null for missing string/number fields, empty arrays [] for missing array fields
+7. Use null for missing string/number fields, empty arrays [] ONLY for truly missing array fields
 8. Generate a slug from company_name (lowercase, hyphens, no special chars)
 9. Choose company_type from: Private, Public, Non-profit, Government
 10. Return ONLY valid JSON with no additional text
+
+🚨 CRITICAL ARRAY PRESERVATION RULES:
+- If key_features exists in input data, PRESERVE ALL entries in the output array
+- If key_benefits exists in input data, PRESERVE ALL entries in the output array  
+- If competitive_advantages exists in input data, PRESERVE ALL entries in the output array
+- Do NOT set these arrays to empty [] unless they are completely missing from input
+- Look for variations like "features", "benefits", "advantages" and map them correctly
+
+ARRAY FIELD MAPPING EXAMPLES:
+- "key_features" OR "features" → key_features array
+- "key_benefits" OR "benefits" → key_benefits array
+- "competitive_advantages" OR "advantages" → competitive_advantages array
+- "core_services" OR "services" → core_services array
 
 FUNDING STAGE CONVERSION EXAMPLES:
 - "Pre-seed" → "Pre-Seed"
@@ -246,6 +273,7 @@ REMEMBER:
 - Focus on accurate funding data extraction and normalization
 - Map similar fields intelligently (e.g., "firm_name" → "company_name", "services" → "core_services")
 - Be precise with funding stages and amounts
+- NEVER ignore existing array data - always preserve it!
 
 RAW FUNDING DATA TO PROCESS:
 ${rawJson}`;
@@ -288,6 +316,12 @@ ${rawJson}`;
     // Validate the returned JSON
     const parsedData = JSON.parse(processedJson);
     console.log('AI processed data:', JSON.stringify(parsedData, null, 2));
+    
+    // Critical data preservation check
+    console.log('🚨 AI OUTPUT CHECK:');
+    console.log('- key_features in AI output:', parsedData.key_features !== undefined, 'length:', Array.isArray(parsedData.key_features) ? parsedData.key_features.length : 'not array');
+    console.log('- key_benefits in AI output:', parsedData.key_benefits !== undefined, 'length:', Array.isArray(parsedData.key_benefits) ? parsedData.key_benefits.length : 'not array');
+    console.log('- competitive_advantages in AI output:', parsedData.competitive_advantages !== undefined, 'length:', Array.isArray(parsedData.competitive_advantages) ? parsedData.competitive_advantages.length : 'not array');
     
     // Add slug generation
     if (parsedData.company_name) {
