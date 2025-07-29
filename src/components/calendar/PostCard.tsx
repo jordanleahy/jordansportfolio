@@ -135,9 +135,9 @@ export const PostCard = ({
               >
                 {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
               </Badge>
-              {post.status === 'draft' && draftIndex && (
+              {post.status === 'draft' && post.day && (
                 <Badge variant="outline" className="text-xs">
-                  {draftIndex}
+                  {post.day}
                 </Badge>
               )}
               <BlogStatusBadge postId={post.id} />
