@@ -231,16 +231,14 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     size="sm"
                     onClick={() => onEdit(application)}
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
+                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleViewPortfolio(application)}
                   >
-                    <Building2 className="h-4 w-4 mr-1" />
-                    Portfolio
+                    <Building2 className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -248,8 +246,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     onClick={() => handleCreatePortfolio(application)}
                     disabled={creatingPortfolio === application.id}
                   >
-                    <FileText className="h-4 w-4 mr-1" />
-                    {creatingPortfolio === application.id ? 'Creating...' : 'Create'}
+                    <FileText className="h-4 w-4" />
                   </Button>
                 </div>
                 <AlertDialog>
