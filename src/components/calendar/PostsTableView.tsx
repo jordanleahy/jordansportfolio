@@ -127,32 +127,54 @@ export const PostsTableView = memo(({
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <SortableHeader field="day">Day</SortableHeader>
-          <SortableHeader field="title">Title</SortableHeader>
-          <TableHead>Description</TableHead>
-          <SortableHeader field="created_at">Date</SortableHeader>
-          <SortableHeader field="status">Status</SortableHeader>
-          <TableHead>Images</TableHead>
-          <TableHead>Actions</TableHead>
+        <TableRow className="h-12">
+          <SortableHeader field="day">
+            <div className="w-16">Day</div>
+          </SortableHeader>
+          <SortableHeader field="title">
+            <div className="w-48">Title</div>
+          </SortableHeader>
+          <TableHead>
+            <div className="w-64">Description</div>
+          </TableHead>
+          <SortableHeader field="created_at">
+            <div className="w-24">Date</div>
+          </SortableHeader>
+          <SortableHeader field="status">
+            <div className="w-32">Status</div>
+          </SortableHeader>
+          <TableHead>
+            <div className="w-40">Images</div>
+          </TableHead>
+          <TableHead>
+            <div className="w-48">Actions</div>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {sortedPosts.map((post, index) => (
-          <TableRow key={post.id}>
-            <TableCell className="font-medium">
-              {post.day || '-'}
+          <TableRow key={post.id} className="h-20">
+            <TableCell className="font-medium w-16">
+              <div className="truncate">
+                {post.day || '-'}
+              </div>
             </TableCell>
-            <TableCell className="font-medium max-w-[200px] truncate">
-              {post.title}
+            <TableCell className="font-medium w-48">
+              <div className="truncate" title={post.title}>
+                {post.title}
+              </div>
             </TableCell>
-            <TableCell className="max-w-[300px]">
-              <div className="text-sm text-muted-foreground line-clamp-3">
+            <TableCell className="w-64">
+              <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
                 {post.description}
               </div>
             </TableCell>
-            <TableCell>{new Date(post.created_at).toLocaleDateString()}</TableCell>
-            <TableCell>
+            <TableCell className="w-24">
+              <div className="truncate">
+                {new Date(post.created_at).toLocaleDateString()}
+              </div>
+            </TableCell>
+            <TableCell className="w-32">
               <div className="flex gap-2 items-center flex-wrap">
                 <Badge 
                   className={getStatusColor(post.status)}
@@ -167,7 +189,7 @@ export const PostsTableView = memo(({
                 <BlogStatusBadge postId={post.id} />
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="w-40">
               <div className="flex gap-2 flex-wrap">
                 {post.image_16_9_url && (
                   <div className="w-16 h-9 relative group overflow-hidden rounded border flex-shrink-0">
@@ -227,7 +249,7 @@ export const PostsTableView = memo(({
                 )}
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="w-48">
               <div className="flex gap-1 flex-wrap">
                 <Button
                   variant="ghost"
