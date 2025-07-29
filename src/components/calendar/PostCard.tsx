@@ -30,6 +30,7 @@ interface PostCardProps {
   uploadingStates: {
     [key: string]: boolean;
   };
+  isAdmin?: boolean;
 }
 
 const PostCardComponent = ({ 
@@ -44,7 +45,8 @@ const PostCardComponent = ({
   onVideoRemove,
   onImageDelete,
   onStatusChange,
-  uploadingStates
+  uploadingStates,
+  isAdmin = false
 }: PostCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -189,8 +191,8 @@ const PostCardComponent = ({
 
         {/* Action Buttons */}
         <div className="space-y-2">
-          <div className="grid grid-cols-3 gap-2">
-            <BlogPostButton post={post} />
+          <div className={`grid gap-2 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            {isAdmin && <BlogPostButton post={post} />}
             <Button
               variant="outline"
               size="sm"

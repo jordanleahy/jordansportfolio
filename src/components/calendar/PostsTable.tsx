@@ -16,9 +16,10 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
   onPostsChange: () => void;
+  isAdmin?: boolean;
 }
 
-export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) => {
+export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<'draft' | 'published'>('draft');
   const [localPosts, setLocalPosts] = useState<SocialMediaPost[]>(posts);
   const isMobile = useIsMobile();
@@ -110,6 +111,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
                     onImageDelete={() => {}}
                     onStatusChange={postActions.handleStatusChange}
                     uploadingStates={{}}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
@@ -138,6 +140,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
                 file916InputRef={imageUpload.file916InputRef}
                 file34InputRef={imageUpload.file34InputRef}
                 file43InputRef={imageUpload.file43InputRef}
+                isAdmin={isAdmin}
               />
             )}
           </TabsContent>
@@ -146,20 +149,21 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
             {isMobile ? (
               <div className="space-y-4">
                 {filteredPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onCopy={postActions.handleCopyContent}
-                    onDelete={postActions.handleDeletePost}
-                    onGeneratePrompt={modalManager.openImagePromptModal}
-                    onGenerateVoiceover={modalManager.openVoiceoverModal}
-                    onFileSelect={handleFileSelect}
-                    onVideoUpload={() => {}}
-                    onVideoRemove={() => {}}
-                    onImageDelete={() => {}}
-                    onStatusChange={postActions.handleStatusChange}
-                    uploadingStates={{}}
-                  />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onCopy={postActions.handleCopyContent}
+                  onDelete={postActions.handleDeletePost}
+                  onGeneratePrompt={modalManager.openImagePromptModal}
+                  onGenerateVoiceover={modalManager.openVoiceoverModal}
+                  onFileSelect={handleFileSelect}
+                  onVideoUpload={() => {}}
+                  onVideoRemove={() => {}}
+                  onImageDelete={() => {}}
+                  onStatusChange={postActions.handleStatusChange}
+                  uploadingStates={{}}
+                  isAdmin={isAdmin}
+                />
                 ))}
               </div>
             ) : (
@@ -187,6 +191,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
                 file916InputRef={imageUpload.file916InputRef}
                 file34InputRef={imageUpload.file34InputRef}
                 file43InputRef={imageUpload.file43InputRef}
+                isAdmin={isAdmin}
               />
             )}
           </TabsContent>

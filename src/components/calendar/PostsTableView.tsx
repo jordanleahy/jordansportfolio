@@ -34,6 +34,7 @@ interface PostsTableViewProps {
   file916InputRef: React.RefObject<HTMLInputElement>;
   file34InputRef: React.RefObject<HTMLInputElement>;
   file43InputRef: React.RefObject<HTMLInputElement>;
+  isAdmin?: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -73,7 +74,8 @@ export const PostsTableView = memo(({
   fileInputRef,
   file916InputRef,
   file34InputRef,
-  file43InputRef
+  file43InputRef,
+  isAdmin = false
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
@@ -270,19 +272,21 @@ export const PostsTableView = memo(({
                 >
                   <Mic className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onCreateBlogPost(post)}
-                  disabled={creatingBlogIds.has(post.id) || !post.image_16_9_url || !post.image_9_16_url || !post.image_3_4_url || !post.image_4_3_url}
-                  title="Create blog post"
-                >
-                  {creatingBlogIds.has(post.id) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <NotebookPen className="h-4 w-4" />
-                  )}
-                </Button>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onCreateBlogPost(post)}
+                    disabled={creatingBlogIds.has(post.id) || !post.image_16_9_url || !post.image_9_16_url || !post.image_3_4_url || !post.image_4_3_url}
+                    title="Create blog post"
+                  >
+                    {creatingBlogIds.has(post.id) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <NotebookPen className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
                 <UploadDropdown
                   postId={post.id}
                   uploadingPostId={uploadingPostId}

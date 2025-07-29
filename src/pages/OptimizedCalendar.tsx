@@ -247,7 +247,8 @@ export default function OptimizedCalendar() {
                 />
                 <PostsTable 
                   posts={postsByCategory[category] || []} 
-                  onPostsChange={() => loadCategoryPosts(category)} 
+                  onPostsChange={() => loadCategoryPosts(category)}
+                  isAdmin={isAdmin}
                 />
               </Suspense>
             </TabsContent>
