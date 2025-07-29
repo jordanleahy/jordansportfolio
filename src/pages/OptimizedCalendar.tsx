@@ -164,8 +164,47 @@ export default function OptimizedCalendar() {
                 </div>
               </div>
               
-              {/* Theme Import Button for all users */}
-              <div className="lg:w-80">
+              {/* Theme Management Panel - Available to all users */}
+              <div className="lg:w-80 space-y-4">
+                <div className="bg-card/50 backdrop-blur-sm border rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm">Current Theme</h3>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Theme</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteTheme(activeTab)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete Theme
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium capitalize">{activeTab}</div>
+                      <div className="text-xs text-muted-foreground">{postsByCategory[activeTab]?.length || 0} posts</div>
+                    </div>
+                  </div>
+                </div>
+                
                 <Button 
                   onClick={() => setImportModalOpen(true)}
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
@@ -173,50 +212,6 @@ export default function OptimizedCalendar() {
                   Import Theme Data
                 </Button>
               </div>
-              
-              {/* Admin-only Theme Management Panel */}
-              {isAdmin && (
-                <div className="lg:w-80 space-y-4">
-                  <div className="bg-card/50 backdrop-blur-sm border rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-sm">Current Theme</h3>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Theme</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {postsByCategory[activeTab]?.length || 0} posts in this theme. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteTheme(activeTab)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete Theme
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <div className="w-3 h-3 rounded-full bg-primary" />
-                      </div>
-                      <div>
-                        <div className="font-medium capitalize">{activeTab}</div>
-                        <div className="text-xs text-muted-foreground">{postsByCategory[activeTab]?.length || 0} posts</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
