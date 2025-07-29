@@ -16,7 +16,7 @@ interface SimplifiedUploadDropdownProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatio) => boolean;
   getUploadType: (postId: string) => AspectRatio | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatio, post: SocialMediaPost) => void;
+  onFileSelect: (postId: string, aspectRatio: AspectRatio) => void;
 }
 
 export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> = ({
@@ -51,7 +51,14 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
             key={option.value}
-            onClick={() => onFileSelect(post.id, option.value, post)}
+            onClick={() => {
+              console.log('🖼️ IMAGE_UPLOAD: Dropdown option clicked', { 
+                postId: post.id, 
+                aspectRatio: option.value, 
+                postTitle: post.title 
+              });
+              onFileSelect(post.id, option.value);
+            }}
             disabled={uploadType === option.value}
             className="cursor-pointer"
           >

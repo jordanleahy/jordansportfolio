@@ -21,7 +21,7 @@ interface PostCardProps {
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
   onGenerateVoiceover?: (post: SocialMediaPost) => void;
-  onFileSelect: (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
@@ -87,11 +87,12 @@ const PostCardComponent = ({
             className="h-8"
             disabled={isUploading}
             onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'image/*';
-              input.onchange = (e) => onFileSelect(post.id, e as any, type);
-              input.click();
+              console.log('🖼️ IMAGE_UPLOAD: Mobile upload button clicked', { 
+                postId: post.id, 
+                aspectRatio: type, 
+                postTitle: post.title 
+              });
+              onFileSelect(post.id, type, post);
             }}
           >
             {isUploading ? (

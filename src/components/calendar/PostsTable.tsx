@@ -38,22 +38,63 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
 
   // Handle watermark upload completion
   const handleWatermarkedUpload = async (watermarkedFile: File) => {
-    if (!imageUpload.selectedPostId) {
+    console.log('🖼️ IMAGE_UPLOAD: Watermarked upload triggered in PostsTable', { 
+      selectedPostId: imageUpload.selectedPostId, 
+      uploadType: imageUpload.uploadType, 
+      fileName: watermarkedFile.name 
+    });
+    
+    if (!imageUpload.selectedPostId || !imageUpload.uploadType) {
+      console.error('🖼️ IMAGE_UPLOAD: Missing upload context in PostsTable', { 
+        selectedPostId: imageUpload.selectedPostId, 
+        uploadType: imageUpload.uploadType 
+      });
       return;
     }
 
     const post = posts.find(p => p.id === imageUpload.selectedPostId);
-    await imageUpload.handleUpload(imageUpload.selectedPostId, watermarkedFile, imageUpload.uploadType, post);
+    console.log('🖼️ IMAGE_UPLOAD: Found post for upload in PostsTable', { 
+      postId: imageUpload.selectedPostId, 
+      postTitle: post?.title 
+    });
+    
+    await imageUpload.handleWatermarkedUpload(imageUpload.selectedPostId, watermarkedFile, imageUpload.uploadType, post);
     modalManager.closeWatermarkModal();
+    
+    // Clear state
+    imageUpload.setSelectedPostId(null);
+    imageUpload.setSelectedFile(null);
+    imageUpload.setUploadType(null);
   };
 
-  // Handle file selection with watermark modal
-  const handleFileSelect = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', file: File) => {
-    const post = posts.find(p => p.id === postId);
-    imageUpload.setSelectedPostId(postId);
-    imageUpload.setSelectedFile(file);
-    imageUpload.setUploadType(aspectRatio);
-    modalManager.openWatermarkModal();
+  // Unified file selection handler for mobile
+  const handleMobileFileSelect = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => {
+    console.log('🖼️ IMAGE_UPLOAD: Mobile file selection initiated in PostsTable', { 
+      postId, 
+      aspectRatio, 
+      postTitle: post.title 
+    });
+    
+    // Create file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        console.log('🖼️ IMAGE_UPLOAD: File selected in mobile, opening watermark modal', { 
+          fileName: file.name, 
+          postId, 
+          aspectRatio 
+        });
+        
+        imageUpload.setSelectedPostId(postId);
+        imageUpload.setSelectedFile(file);
+        imageUpload.setUploadType(aspectRatio);
+        modalManager.openWatermarkModal();
+      }
+    };
+    input.click();
   };
 
   return (
@@ -84,10 +125,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onDelete={postActions.handleDeletePost}
                     onGeneratePrompt={modalManager.openImagePromptModal}
                     onGenerateVoiceover={modalManager.openVoiceoverModal}
-                    onFileSelect={(postId, event, type) => {
-                      const file = event.target.files?.[0];
-                      if (file) handleFileSelect(postId, type, file);
-                    }}
+                    onFileSelect={handleMobileFileSelect}
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
@@ -110,7 +148,18 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onCreateBlogPost={postActions.handleCreateBlogPost}
                 onGenerateVoiceoverScript={modalManager.openVoiceoverModal}
                 onGenerateImagePrompt={modalManager.openImagePromptModal}
-                onFileSelect={imageUpload.handleFileSelect}
+                onFileSelect={(postId, aspectRatio, post) => {
+                  console.log('🖼️ IMAGE_UPLOAD: Desktop file selection in PostsTable', { postId, aspectRatio, postTitle: post.title });
+                  imageUpload.handleFileSelect(postId, aspectRatio, post);
+                  
+                  // Listen for when file is selected to open watermark modal
+                  setTimeout(() => {
+                    if (imageUpload.selectedFile) {
+                      console.log('🖼️ IMAGE_UPLOAD: Opening watermark modal for desktop');
+                      modalManager.openWatermarkModal();
+                    }
+                  }, 100);
+                }}
                 onPreviewImage={modalManager.openPreviewImage}
                 isAdmin={isAdmin}
               />
@@ -128,10 +177,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                   onDelete={postActions.handleDeletePost}
                   onGeneratePrompt={modalManager.openImagePromptModal}
                   onGenerateVoiceover={modalManager.openVoiceoverModal}
-                  onFileSelect={(postId, event, type) => {
-                    const file = event.target.files?.[0];
-                    if (file) handleFileSelect(postId, type, file);
-                  }}
+                  onFileSelect={handleMobileFileSelect}
                   onVideoUpload={() => {}}
                   onVideoRemove={() => {}}
                   onImageDelete={() => {}}
@@ -154,7 +200,18 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onCreateBlogPost={postActions.handleCreateBlogPost}
                 onGenerateVoiceoverScript={modalManager.openVoiceoverModal}
                 onGenerateImagePrompt={modalManager.openImagePromptModal}
-                onFileSelect={imageUpload.handleFileSelect}
+                onFileSelect={(postId, aspectRatio, post) => {
+                  console.log('🖼️ IMAGE_UPLOAD: Desktop file selection in PostsTable', { postId, aspectRatio, postTitle: post.title });
+                  imageUpload.handleFileSelect(postId, aspectRatio, post);
+                  
+                  // Listen for when file is selected to open watermark modal
+                  setTimeout(() => {
+                    if (imageUpload.selectedFile) {
+                      console.log('🖼️ IMAGE_UPLOAD: Opening watermark modal for desktop');
+                      modalManager.openWatermarkModal();
+                    }
+                  }, 100);
+                }}
                 onPreviewImage={modalManager.openPreviewImage}
                 isAdmin={isAdmin}
               />
@@ -176,10 +233,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
         <ImageWatermarkModal
           isOpen={modalManager.showWatermarkModal}
           onClose={() => {
+            console.log('🖼️ IMAGE_UPLOAD: Watermark modal closed');
             modalManager.closeWatermarkModal();
             // Clear selected state to prevent stale references
             imageUpload.setSelectedPostId(null);
             imageUpload.setSelectedFile(null);
+            imageUpload.setUploadType(null);
           }}
           file={imageUpload.selectedFile}
           onConfirm={handleWatermarkedUpload}

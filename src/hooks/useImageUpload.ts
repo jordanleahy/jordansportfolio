@@ -47,8 +47,9 @@ export const useImageUpload = (onPostsChange: () => void) => {
     return publicUrl;
   }, []);
 
-  // Unified upload handler for all aspect ratios
-  const handleUpload = useCallback(async (postId: string, file: File, aspectRatio: AspectRatio, post?: SocialMediaPost) => {
+  // Upload handler for watermarked files
+  const handleWatermarkedUpload = useCallback(async (postId: string, file: File, aspectRatio: AspectRatio, post?: SocialMediaPost) => {
+    console.log('🖼️ IMAGE_UPLOAD: Starting watermarked upload', { postId, aspectRatio, fileName: file.name, postTitle: post?.title });
     setUploadingPosts(prev => ({ ...prev, [postId]: aspectRatio }));
     
     try {
@@ -57,6 +58,7 @@ export const useImageUpload = (onPostsChange: () => void) => {
       const baseName = sanitizedTitle || postId;
       const fileName = `${baseName}_${aspectRatio}_${Date.now()}.${fileExt}`;
 
+      console.log('🖼️ IMAGE_UPLOAD: Uploading to storage', { fileName, bucket: 'images' });
       const publicUrl = await uploadToStorage(file, fileName);
 
       // Map aspect ratio to database field
@@ -67,6 +69,7 @@ export const useImageUpload = (onPostsChange: () => void) => {
         '4_3': 'image_4_3_url'
       };
 
+      console.log('🖼️ IMAGE_UPLOAD: Updating database', { postId, field: fieldMap[aspectRatio], url: publicUrl });
       await optimizedSocialMediaService.updatePost(postId, {
         [fieldMap[aspectRatio]]: publicUrl
       });
@@ -78,6 +81,7 @@ export const useImageUpload = (onPostsChange: () => void) => {
         '4_3': '4:3'
       };
 
+      console.log('🖼️ IMAGE_UPLOAD: Upload successful', { postId, aspectRatio });
       toast({
         title: "Image uploaded",
         description: `${aspectRatioLabels[aspectRatio]} image has been successfully uploaded.`
@@ -85,7 +89,7 @@ export const useImageUpload = (onPostsChange: () => void) => {
       
       debouncedOnPostsChange();
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('🖼️ IMAGE_UPLOAD: Upload failed', { error, postId, aspectRatio });
       
       toast({
         title: "Upload failed",
@@ -119,8 +123,10 @@ export const useImageUpload = (onPostsChange: () => void) => {
     return true;
   }, [toast]);
 
-  // Simplified file selection handler
+  // Unified file selection handler - triggers watermark modal
   const handleFileSelect = useCallback((postId: string, aspectRatio: AspectRatio, post?: SocialMediaPost) => {
+    console.log('🖼️ IMAGE_UPLOAD: File selection started', { postId, aspectRatio, postTitle: post?.title });
+    
     setSelectedPostId(postId);
     setUploadType(aspectRatio);
     
@@ -130,15 +136,17 @@ export const useImageUpload = (onPostsChange: () => void) => {
     input.accept = 'image/*';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
+      console.log('🖼️ IMAGE_UPLOAD: File selected', { file: file?.name, size: file?.size, type: file?.type });
+      
       if (file && validateFile(file)) {
         setSelectedFile(file);
-        // For now, skip watermark and upload directly
-        // Later we can add watermark modal trigger here
-        handleUpload(postId, file, aspectRatio, post);
+        console.log('🖼️ IMAGE_UPLOAD: File validated, ready for watermark modal', { postId, aspectRatio });
+        // File is now ready for watermark modal - don't upload directly
+        // The watermark modal will handle the actual upload via handleWatermarkedUpload
       }
     };
     input.click();
-  }, [validateFile, handleUpload]);
+  }, [validateFile]);
 
   // Helper to check if a specific post is uploading
   const isUploading = useCallback((postId: string, aspectRatio?: AspectRatio) => {
@@ -164,7 +172,7 @@ export const useImageUpload = (onPostsChange: () => void) => {
     selectedPostId,
     
     // Actions
-    handleUpload,
+    handleWatermarkedUpload,
     handleFileSelect,
     isUploading,
     getUploadType,

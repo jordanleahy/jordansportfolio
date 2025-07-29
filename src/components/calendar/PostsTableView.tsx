@@ -268,12 +268,15 @@ export const PostsTableView = memo(({
                     )}
                   </Button>
                 )}
-                <SimplifiedUploadDropdown
-                  post={post}
-                  isUploading={isUploading}
-                  getUploadType={getUploadType}
-                  onFileSelect={onFileSelect}
-                />
+              <SimplifiedUploadDropdown
+                post={post}
+                isUploading={isUploading}
+                getUploadType={getUploadType}
+                onFileSelect={(postId, aspectRatio) => {
+                  console.log('🖼️ IMAGE_UPLOAD: Desktop upload triggered', { postId, aspectRatio, postTitle: post.title });
+                  onFileSelect(postId, aspectRatio, post);
+                }}
+              />
                 <Button
                   variant="ghost"
                   size="sm"

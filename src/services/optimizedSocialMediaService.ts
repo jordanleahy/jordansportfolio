@@ -77,6 +77,8 @@ export class OptimizedSocialMediaService {
   }
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
+    console.log('🖼️ IMAGE_UPLOAD: Database update started', { postId: id, updates });
+    
     const { data, error } = await supabase
       .from('social_media_posts')
       .update(updates)
@@ -84,8 +86,16 @@ export class OptimizedSocialMediaService {
       .select()
       .maybeSingle();
 
-    if (error) throw error;
-    if (!data) throw new Error(`Post with id ${id} not found`);
+    if (error) {
+      console.error('🖼️ IMAGE_UPLOAD: Database update failed', { error, postId: id, updates });
+      throw error;
+    }
+    if (!data) {
+      console.error('🖼️ IMAGE_UPLOAD: No data returned from update', { postId: id, updates });
+      throw new Error(`Post with id ${id} not found`);
+    }
+    
+    console.log('🖼️ IMAGE_UPLOAD: Database update successful', { postId: id, updatedPost: data });
     
     // Invalidate relevant caches
     this.invalidateCache(updates.category);
