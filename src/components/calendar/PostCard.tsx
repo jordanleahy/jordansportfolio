@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,19 +32,19 @@ interface PostCardProps {
   };
 }
 
-export const PostCard = ({ 
+const PostCardComponent = ({ 
   post, 
-  draftIndex,
+  draftIndex, 
   onCopy, 
-  onDelete, 
-  onGeneratePrompt, 
+  onDelete,
+  onGeneratePrompt,
   onGenerateVoiceover,
-  onFileSelect, 
+  onFileSelect,
   onVideoUpload,
   onVideoRemove,
   onImageDelete,
   onStatusChange,
-  uploadingStates 
+  uploadingStates
 }: PostCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -418,3 +418,21 @@ export const PostCard = ({
     </Card>
   );
 };
+
+// Memoized component to prevent unnecessary re-renders
+export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
+  // Custom comparison function for better performance
+  return (
+    prevProps.post.id === nextProps.post.id &&
+    prevProps.post.title === nextProps.post.title &&
+    prevProps.post.description === nextProps.post.description &&
+    prevProps.post.status === nextProps.post.status &&
+    prevProps.post.image_16_9_url === nextProps.post.image_16_9_url &&
+    prevProps.post.image_9_16_url === nextProps.post.image_9_16_url &&
+    prevProps.post.image_3_4_url === nextProps.post.image_3_4_url &&
+    prevProps.post.image_4_3_url === nextProps.post.image_4_3_url &&
+    prevProps.post.day === nextProps.post.day &&
+    prevProps.draftIndex === nextProps.draftIndex &&
+    JSON.stringify(prevProps.uploadingStates) === JSON.stringify(nextProps.uploadingStates)
+  );
+});

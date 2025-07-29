@@ -36,7 +36,10 @@ export class OptimizedSocialMediaService {
     let query = supabase
       .from('social_media_posts')
       .select('*')
-      .order('created_at', { ascending: false });
+      // Stable ordering: first by day (if exists), then by created_at, finally by id as tiebreaker
+      .order('day', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true });
 
     if (category) {
       query = query.eq('category', category);

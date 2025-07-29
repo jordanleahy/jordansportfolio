@@ -20,20 +20,26 @@ interface PostsTableOptimizedProps {
 
 export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<'draft' | 'published'>('draft');
+  const [localPosts, setLocalPosts] = useState<SocialMediaPost[]>(posts);
   const isMobile = useIsMobile();
+  
+  // Update local posts when props change
+  React.useEffect(() => {
+    setLocalPosts(posts);
+  }, [posts]);
   
   // Custom hooks for better separation of concerns
   const modalManager = useModalManager();
   const postActions = usePostActions(onPostsChange);
-  const imageUpload = useImageUpload(posts, onPostsChange);
+  const imageUpload = useImageUpload(localPosts, onPostsChange, setLocalPosts);
 
   // Memoized filtered posts for performance
   const { draftPosts, publishedPosts, filteredPosts } = useMemo(() => {
-    const draftPosts = posts.filter(post => post.status === 'draft');
-    const publishedPosts = posts.filter(post => post.status === 'published');
+    const draftPosts = localPosts.filter(post => post.status === 'draft');
+    const publishedPosts = localPosts.filter(post => post.status === 'published');
     const filteredPosts = activeTab === 'draft' ? draftPosts : publishedPosts;
     return { draftPosts, publishedPosts, filteredPosts };
-  }, [posts, activeTab]);
+  }, [localPosts, activeTab]);
 
   // Handle watermark upload completion
   const handleWatermarkedUpload = async (watermarkedFile: File) => {
@@ -58,7 +64,7 @@ export const PostsTable = ({ posts, onPostsChange }: PostsTableOptimizedProps) =
   const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
     const file = event.target.files?.[0];
     if (file) {
-      const post = posts.find(p => p.id === postId);
+      const post = localPosts.find(p => p.id === postId);
       imageUpload.setSelectedPost(post || null);
       imageUpload.setSelectedFile(file);
       imageUpload.setUploadType(type);
