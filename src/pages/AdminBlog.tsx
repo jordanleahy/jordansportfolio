@@ -204,7 +204,7 @@ const AdminBlog = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">LLM Models Globally</Badge>
+                    <Badge variant="outline">{post.category}</Badge>
                   </TableCell>
                   <TableCell>{formatDate(post.updated_at)}</TableCell>
                   <TableCell>
@@ -275,7 +275,7 @@ const AdminBlog = () => {
                   }>
                     {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                   </Badge>
-                  <Badge variant="outline">LLM Models Globally</Badge>
+                  <Badge variant="outline">{post.category}</Badge>
                 </div>
 
                 {/* Dates */}
