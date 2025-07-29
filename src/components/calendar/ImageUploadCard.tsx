@@ -75,7 +75,6 @@ export const ImageUploadCard = ({
                 src={imageUrl}
                 alt={title}
                 size="preview"
-                aspectRatio={aspectRatio}
                 className="w-full h-full object-cover"
               />
             </div>
