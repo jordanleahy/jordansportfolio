@@ -315,6 +315,7 @@ export const useImageUpload = (posts: SocialMediaPost[], onPostsChange: () => vo
     const file = event.target.files?.[0];
     if (file && validateFile(file)) {
       const post = posts.find(p => p.id === postId);
+      console.log('useImageUpload: Setting selected post:', post?.title, 'ID:', post?.id); // Debug log
       setSelectedPost(post || null);
       setSelectedFile(file);
       setUploadType(type);

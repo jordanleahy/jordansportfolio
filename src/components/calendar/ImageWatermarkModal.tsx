@@ -37,6 +37,7 @@ export const ImageWatermarkModal: React.FC<ImageWatermarkModalProps> = ({
 
   const handleConfirm = () => {
     if (watermarkedFile) {
+      console.log('ImageWatermarkModal: Confirming upload with watermarked file'); // Debug log
       onConfirm(watermarkedFile);
       handleClose();
     }

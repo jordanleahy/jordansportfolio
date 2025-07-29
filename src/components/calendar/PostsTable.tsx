@@ -32,7 +32,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
   // Custom hooks for better separation of concerns
   const modalManager = useModalManager();
   const postActions = usePostActions(onPostsChange);
-  const imageUpload = useImageUpload(localPosts, onPostsChange, setLocalPosts);
+  const imageUpload = useImageUpload(posts, onPostsChange, setLocalPosts);
 
   // Memoized filtered posts for performance
   const { draftPosts, publishedPosts, filteredPosts } = useMemo(() => {
@@ -44,7 +44,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
 
   // Handle watermark upload completion
   const handleWatermarkedUpload = async (watermarkedFile: File) => {
-    if (!imageUpload.selectedPost) return;
+    if (!imageUpload.selectedPost) {
+      console.error('No selected post for upload!'); // Debug log
+      return;
+    }
+
+    console.log('Uploading watermarked file for post:', imageUpload.selectedPost.title, 'ID:', imageUpload.selectedPost.id); // Debug log
 
     const uploadFunctions = {
       '16_9': imageUpload.handleImageUpload,
@@ -63,9 +68,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
 
   // Handle file selection with watermark modal
   const handleFileSelect = (postId: string, event: React.ChangeEvent<HTMLInputElement>, type: '16_9' | '9_16' | '3_4' | '4_3') => {
+    console.log('File selected for post ID:', postId); // Debug log
     const file = event.target.files?.[0];
     if (file) {
-      const post = localPosts.find(p => p.id === postId);
+      // Use posts prop instead of localPosts to avoid stale state
+      const post = posts.find(p => p.id === postId);
+      console.log('Found post:', post?.title, 'ID:', post?.id); // Debug log
       imageUpload.setSelectedPost(post || null);
       imageUpload.setSelectedFile(file);
       imageUpload.setUploadType(type);
@@ -210,7 +218,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
 
         <ImageWatermarkModal
           isOpen={modalManager.showWatermarkModal}
-          onClose={modalManager.closeWatermarkModal}
+          onClose={() => {
+            modalManager.closeWatermarkModal();
+            // Clear selected state to prevent stale references
+            imageUpload.setSelectedPost(null);
+            imageUpload.setSelectedFile(null);
+          }}
           file={imageUpload.selectedFile}
           onConfirm={handleWatermarkedUpload}
         />
