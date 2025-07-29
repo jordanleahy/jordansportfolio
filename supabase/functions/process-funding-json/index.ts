@@ -379,16 +379,27 @@ function validateFundingFields(data: any, warnings: string[], errors: string[]):
     }
   }
   
-  // Ensure array fields are arrays (no warnings for funding data)
+  // Ensure array fields are arrays (preserve existing valid arrays)
   const arrayFields = [
     'core_services', 'specialties', 'customers', 'competitors', 'key_features', 
     'key_benefits', 'competitive_advantages', 'key_investors', 'notable_customers'
   ];
   
   for (const field of arrayFields) {
-    if (!validated[field] || !Array.isArray(validated[field])) {
+    console.log(`Validating array field: ${field}, current value:`, validated[field]);
+    
+    if (validated[field] === undefined || validated[field] === null) {
+      // Field is missing, set to empty array
       validated[field] = [];
-      // No warning for funding data as these fields are often missing
+      console.log(`Set missing field ${field} to empty array`);
+    } else if (!Array.isArray(validated[field])) {
+      // Field exists but is not an array, reset to empty array
+      console.log(`WARNING: Field ${field} is not an array, resetting. Value was:`, validated[field]);
+      validated[field] = [];
+      warnings.push(`Reset invalid ${field} (was not an array) to empty array`);
+    } else if (validated[field].length > 0) {
+      // Field exists and is a valid array with content, preserve it
+      console.log(`Preserving existing ${field} array with ${validated[field].length} items`);
     }
   }
   
