@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Eye, Plus, Trash2, Mic } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAdminAllBlogPosts, useAdminDraftBlogPosts, useDeleteBlogPost } from "@/hooks/useAdminBlogQueries";
@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 
 const AdminBlog = () => {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ const AdminBlog = () => {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<any>(null);
+  const [voiceoverModalOpen, setVoiceoverModalOpen] = useState(false);
+  const [selectedPostForVoiceover, setSelectedPostForVoiceover] = useState<any>(null);
   
   console.log('AdminBlog component state:', {
     user: user?.id,
@@ -66,6 +69,26 @@ const AdminBlog = () => {
       setDeleteDialogOpen(false);
       setPostToDelete(null);
     }
+  };
+
+  const handleVoiceoverClick = (post: any) => {
+    setSelectedPostForVoiceover(post);
+    setVoiceoverModalOpen(true);
+  };
+
+  const createContentForVoiceover = (post: any) => {
+    // Combine blog content for voiceover script generation
+    const sections = [
+      post.hero_headline,
+      post.hero_subhead,
+      post.intro_content,
+      ...(post.visual_sections || []).map((section: any) => `${section.headline} ${section.content}`),
+      post.tldr_title,
+      ...(post.tldr_bullets || []),
+      post.deep_dive_content
+    ].filter(Boolean);
+    
+    return sections.join(' ');
   };
 
   // Redirect if not admin
@@ -196,6 +219,14 @@ const AdminBlog = () => {
                           </Button>
                         </Link>
                       )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleVoiceoverClick(post)}
+                        title="Generate Voiceover Script"
+                      >
+                        <Mic className="h-4 w-4" />
+                      </Button>
                       <Link to={`/blog-editor/${post.slug}`}>
                         <Button variant="ghost" size="sm">
                           <Edit className="h-4 w-4" />
@@ -267,6 +298,15 @@ const AdminBlog = () => {
                       </Button>
                     </Link>
                   )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleVoiceoverClick(post)}
+                    className="flex items-center gap-2"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Voice
+                  </Button>
                   <Link to={`/blog-editor/${post.slug}`}>
                     <Button variant="default" size="sm" className="flex items-center gap-2">
                       <Edit className="h-4 w-4" />
@@ -357,6 +397,21 @@ const AdminBlog = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Voiceover Script Modal */}
+        {selectedPostForVoiceover && (
+          <VoiceoverScriptModal
+            isOpen={voiceoverModalOpen}
+            onClose={() => {
+              setVoiceoverModalOpen(false);
+              setSelectedPostForVoiceover(null);
+            }}
+            sourceId={selectedPostForVoiceover.id}
+            sourceType="blog_post"
+            originalContent={createContentForVoiceover(selectedPostForVoiceover)}
+            contentType="blog_post"
+          />
+        )}
     </PageLayout>
   );
 };
