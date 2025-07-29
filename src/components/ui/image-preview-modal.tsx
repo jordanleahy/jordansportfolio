@@ -20,6 +20,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt }: ImagePrevi
           <OptimizedImage
             src={imageUrl}
             alt={alt}
+            size="full"
             className="max-w-full max-h-[70vh] object-contain"
           />
         </div>

@@ -68,6 +68,7 @@ export const ImageUploadCard = ({
             <OptimizedImage
               src={imageUrl}
               alt={title}
+              size="preview"
               aspectRatio={aspectRatio}
               className="w-full rounded-md border"
             />

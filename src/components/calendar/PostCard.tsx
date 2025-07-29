@@ -105,6 +105,7 @@ const PostCardComponent = ({
             <OptimizedImage
               src={imageUrl}
               alt={`${label} for ${post.title}`}
+              size="preview"
               className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setPreviewImage({ url: imageUrl, alt: `${label} for ${post.title}` })}
             />
@@ -326,6 +327,7 @@ const PostCardComponent = ({
                 <OptimizedImage
                   src={post.image_16_9_url}
                   alt="16:9 image"
+                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>
@@ -340,7 +342,8 @@ const PostCardComponent = ({
               >
                 <OptimizedImage
                   src={post.image_9_16_url}
-                  alt="16:9 video"
+                  alt="9:16 image"
+                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>
@@ -356,6 +359,7 @@ const PostCardComponent = ({
                 <OptimizedImage
                   src={post.image_3_4_url}
                   alt="3:4 image"
+                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>
@@ -370,7 +374,8 @@ const PostCardComponent = ({
               >
                 <OptimizedImage
                   src={post.image_4_3_url}
-                  alt="3:4 video"
+                  alt="4:3 image"
+                  size="thumbnail"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                 />
               </ImageHoverOverlay>

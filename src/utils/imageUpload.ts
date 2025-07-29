@@ -63,10 +63,42 @@ export const deleteImage = async (filePath: string): Promise<boolean> => {
   }
 };
 
-export const getImageUrl = (filePath: string): string => {
+export type ImageSize = 'thumbnail' | 'preview' | 'full';
+
+export const getImageUrl = (filePath: string, size: ImageSize = 'full', quality?: number): string => {
   const { data } = supabase.storage
     .from('images')
     .getPublicUrl(filePath);
   
-  return data.publicUrl;
+  if (size === 'full' && !quality) {
+    return data.publicUrl;
+  }
+  
+  // Add transformation parameters for optimized loading
+  const params = new URLSearchParams();
+  
+  switch (size) {
+    case 'thumbnail':
+      params.set('width', '100');
+      params.set('height', '100');
+      params.set('quality', String(quality || 60));
+      break;
+    case 'preview':
+      params.set('width', '400');
+      params.set('height', '400');
+      params.set('quality', String(quality || 75));
+      break;
+    case 'full':
+      if (quality && quality < 90) {
+        params.set('quality', String(quality));
+      }
+      break;
+  }
+  
+  if (size !== 'full' || quality) {
+    params.set('format', 'webp');
+  }
+  
+  const transformParams = params.toString();
+  return transformParams ? `${data.publicUrl}?${transformParams}` : data.publicUrl;
 };
