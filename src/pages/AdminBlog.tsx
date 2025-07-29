@@ -211,27 +211,29 @@ const AdminBlog = () => {
                     {post.published_at ? formatDate(post.published_at) : '-'}
                   </TableCell>
                    <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {post.status === 'published' && (
-                        <Link to={`/blog/${post.slug}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {post.status === 'published' && (
+                          <Link to={`/blog/${post.slug}`}>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleVoiceoverClick(post)}
+                          title="Generate Voiceover Script"
+                        >
+                          <Mic className="h-4 w-4" />
+                        </Button>
+                        <Link to={`/blog-editor/${post.slug}`}>
                           <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
-                      )}
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleVoiceoverClick(post)}
-                        title="Generate Voiceover Script"
-                      >
-                        <Mic className="h-4 w-4" />
-                      </Button>
-                      <Link to={`/blog-editor/${post.slug}`}>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                      </div>
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -241,7 +243,7 @@ const AdminBlog = () => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TableCell>
+                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -289,26 +291,28 @@ const AdminBlog = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                  {post.status === 'published' && (
-                    <Link to={`/blog/${post.slug}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4" />
+                <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <div className="flex gap-2">
+                    {post.status === 'published' && (
+                      <Link to={`/blog/${post.slug}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleVoiceoverClick(post)}
+                    >
+                      <Mic className="h-4 w-4" />
+                    </Button>
+                    <Link to={`/blog-editor/${post.slug}`}>
+                      <Button variant="default" size="sm">
+                        <Edit className="h-4 w-4" />
                       </Button>
                     </Link>
-                  )}
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleVoiceoverClick(post)}
-                  >
-                    <Mic className="h-4 w-4" />
-                  </Button>
-                  <Link to={`/blog-editor/${post.slug}`}>
-                    <Button variant="default" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  </div>
                   <Button 
                     variant="outline" 
                     size="sm"
