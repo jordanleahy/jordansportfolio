@@ -94,11 +94,11 @@ function App() {
                 <Route 
                   path="/calendar" 
                   element={
-                    <AdminRoute>
+                    <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
                         <OptimizedCalendar />
                       </Suspense>
-                    </AdminRoute>
+                    </ProtectedRoute>
                   } 
                 />
                 <Route 

@@ -36,10 +36,10 @@ const Navigation = () => {
     { href: "/vendors", label: "Vendors", icon: Building2 },
     { href: "/investors", label: "Investors", icon: TrendingUp },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
-      { href: "/calendar", label: "Calendar", icon: Calendar },
       { href: "/jobs", label: "Jobs", icon: FileText },
       { href: "/agents", label: "AI Agents", icon: Settings },
       { href: "/admin-blog", label: "Blog Admin", icon: BookOpen }
@@ -138,6 +138,18 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/calendar"
+                          className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Calendar
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
                      {/* Admin-only navigation items */}
                     {isAdmin && (
                       <>
@@ -153,17 +165,6 @@ const Navigation = () => {
                           </NavigationMenuLink>
                         </NavigationMenuItem>
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/calendar"
-                              className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
-                            >
-                              <Calendar className="mr-2 h-4 w-4" />
-                              Calendar
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
 
                         <NavigationMenuItem>
                           <NavigationMenuLink asChild>
@@ -345,6 +346,15 @@ const Navigation = () => {
                     >
                       <Building2 className="h-4 w-4" />
                     </Link>
+                    <Link
+                      to="/calendar"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/calendar") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <Calendar className="h-4 w-4" />
+                    </Link>
                     {/* Admin-only quick access icons */}
                     {isAdmin && (
                       <>
@@ -356,15 +366,6 @@ const Navigation = () => {
                           )}
                         >
                           <BarChart3 className="h-4 w-4" />
-                        </Link>
-                        <Link
-                          to="/calendar"
-                          className={cn(
-                            "p-2 rounded-lg transition-colors hover:bg-accent",
-                            isActive("/calendar") && "bg-accent text-accent-foreground"
-                          )}
-                        >
-                          <Calendar className="h-4 w-4" />
                         </Link>
                         <Link
                           to="/jobs"
