@@ -14,6 +14,12 @@ export interface SocialMediaPost {
   image_3_4_video_url?: string | null;
   general_video_url?: string | null;
   
+  // Image processing status fields
+  image_16_9_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
+  image_9_16_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
+  image_3_4_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
+  image_4_3_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
+  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;

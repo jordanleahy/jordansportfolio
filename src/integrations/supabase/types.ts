@@ -1420,12 +1420,16 @@ export type Database = {
           generated_image_prompt: string | null
           id: string
           image_16_9_gif_url: string | null
+          image_16_9_status: string | null
           image_16_9_url: string | null
           image_16_9_video_url: string | null
           image_3_4_gif_url: string | null
+          image_3_4_status: string | null
           image_3_4_url: string | null
           image_3_4_video_url: string | null
+          image_4_3_status: string | null
           image_4_3_url: string | null
+          image_9_16_status: string | null
           image_9_16_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
@@ -1445,12 +1449,16 @@ export type Database = {
           generated_image_prompt?: string | null
           id?: string
           image_16_9_gif_url?: string | null
+          image_16_9_status?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
           image_3_4_gif_url?: string | null
+          image_3_4_status?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
+          image_4_3_status?: string | null
           image_4_3_url?: string | null
+          image_9_16_status?: string | null
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
@@ -1470,12 +1478,16 @@ export type Database = {
           generated_image_prompt?: string | null
           id?: string
           image_16_9_gif_url?: string | null
+          image_16_9_status?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
           image_3_4_gif_url?: string | null
+          image_3_4_status?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
+          image_4_3_status?: string | null
           image_4_3_url?: string | null
+          image_9_16_status?: string | null
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
