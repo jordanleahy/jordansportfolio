@@ -40,77 +40,11 @@ serve(async (req) => {
     const imageBlob = await imageResponse.blob();
     const imageArrayBuffer = await imageBlob.arrayBuffer();
     
-    // Create a canvas for image processing
-    const canvas = new OffscreenCanvas(1920, 1080); // Default size, will be adjusted
-    const ctx = canvas.getContext('2d');
+    // For now, we'll just upload the original image as "processed"
+    // TODO: Implement server-side image processing when canvas support is available
+    console.log('Processing image by renaming and re-uploading...');
     
-    if (!ctx) {
-      throw new Error('Failed to get canvas context');
-    }
-
-    // Create image from blob
-    const img = new Image();
-    const imageDataUrl = `data:${imageBlob.type};base64,${btoa(String.fromCharCode(...new Uint8Array(imageArrayBuffer)))}`;
-    
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
-      img.src = imageDataUrl;
-    });
-
-    // Calculate optimal dimensions (max 1920px on either side)
-    let { width, height } = img;
-    const maxDimension = 1920;
-    
-    if (width > maxDimension || height > maxDimension) {
-      const scaleFactor = Math.min(maxDimension / width, maxDimension / height);
-      width = Math.floor(width * scaleFactor);
-      height = Math.floor(height * scaleFactor);
-    }
-
-    // Resize canvas to optimal dimensions
-    canvas.width = width;
-    canvas.height = height;
-
-    // Draw the resized image
-    ctx.drawImage(img, 0, 0, width, height);
-
-    // Add watermark
-    const fontSize = Math.max(14, Math.min(width * 0.025, 28));
-    ctx.font = `${fontSize}px Arial`;
-    
-    // Measure text to center it
-    const textMetrics = ctx.measureText(watermarkText);
-    const textWidth = textMetrics.width;
-    
-    // Position at center
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Save context for rotation
-    ctx.save();
-    
-    // Rotate 15 degrees for diagonal effect
-    ctx.translate(centerX, centerY);
-    ctx.rotate(-15 * Math.PI / 180);
-    
-    // Set subtle styling
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
-    ctx.lineWidth = 0.5;
-    
-    // Draw watermark text at origin (now rotated center)
-    ctx.fillText(watermarkText, -textWidth / 2, fontSize / 3);
-    ctx.strokeText(watermarkText, -textWidth / 2, fontSize / 3);
-    
-    // Restore context
-    ctx.restore();
-
-    // Convert canvas to blob
-    const processedBlob = await canvas.convertToBlob({
-      type: 'image/jpeg',
-      quality: 0.9
-    });
+    const processedBlob = imageBlob;
 
     // Generate unique filename for processed image
     const timestamp = Date.now();
