@@ -230,7 +230,7 @@ export default function OptimizedCalendar() {
           className="space-y-8"
         >
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+            <TabsList className="inline-flex w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
               {availableCategories.map((category) => (
                 <TabsTrigger 
                   key={category} 
