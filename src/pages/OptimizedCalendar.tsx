@@ -35,7 +35,7 @@ export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<CategoryType>('cdi');
+  const [activeTab, setActiveTab] = useState<CategoryType>('');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -52,6 +52,13 @@ export default function OptimizedCalendar() {
     },
     enabled: !!user,
   });
+
+  // Set the default tab to the first available category once data loads
+  React.useEffect(() => {
+    if (availableCategories.length > 0 && !activeTab) {
+      setActiveTab(availableCategories[0]);
+    }
+  }, [availableCategories, activeTab]);
 
   const { data: postsByCategory = {} } = useQuery({
     queryKey: ['posts-by-category', availableCategories],
