@@ -169,7 +169,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         <div className="flex flex-col gap-4">
           {!isEditing ? (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-center">
+              <div className="flex justify-center gap-2">
                 <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
                   <SelectTrigger className="w-12 h-12 p-3">
                     <User className="w-5 h-5" />
@@ -179,9 +179,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
                     <SelectItem value="product_designer">Product Designer</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              
-              <div className="flex justify-center gap-2">
+
                 <UploadTopVideoButton 
                   portfolio={portfolio} 
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80 p-3"
