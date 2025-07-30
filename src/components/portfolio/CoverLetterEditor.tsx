@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Save, X, Sparkles, Video, ExternalLink, User, Settings } from "lucide-react";
+import { Edit, Save, X, Sparkles, Video, ExternalLink, Settings } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +27,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
   const updatePortfolio = useUpdateCompanyPortfolio();
   const [isEditing, setIsEditing] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [selectedRoleType, setSelectedRoleType] = useState<'product_manager' | 'product_designer'>('product_manager');
+  
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isOGModalOpen, setIsOGModalOpen] = useState(false);
   const [editData, setEditData] = useState<StructuredCoverLetter>({
@@ -170,17 +169,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 bg-transparent p-2 rounded-full z-50">
           {!isEditing ? (
             <>
-              <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
-                <SelectTrigger className="w-12 h-12 p-3">
-                  <User className="w-5 h-5" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="product_manager">Product Manager</SelectItem>
-                  <SelectItem value="product_designer">Product Designer</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <UploadTopVideoButton 
+              <UploadTopVideoButton
                 portfolio={portfolio} 
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80 w-12 h-12 p-3"
               />
