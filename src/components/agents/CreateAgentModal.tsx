@@ -139,9 +139,12 @@ export const CreateAgentModal = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4o-mini">gpt-4o-mini</SelectItem>
-                  <SelectItem value="gpt-4o">gpt-4o</SelectItem>
-                  <SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
+                  <SelectItem value="gpt-4.1-2025-04-14">gpt-4.1-2025-04-14 (Flagship)</SelectItem>
+                  <SelectItem value="o3-2025-04-16">o3-2025-04-16 (Reasoning)</SelectItem>
+                  <SelectItem value="o4-mini-2025-04-16">o4-mini-2025-04-16 (Fast Reasoning)</SelectItem>
+                  <SelectItem value="gpt-4.1-mini-2025-04-14">gpt-4.1-mini-2025-04-14 (Vision)</SelectItem>
+                  <SelectItem value="gpt-4o">gpt-4o (Legacy)</SelectItem>
+                  <SelectItem value="gpt-4o-mini">gpt-4o-mini (Legacy)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
