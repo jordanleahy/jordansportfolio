@@ -141,6 +141,11 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
     }
   };
 
+  const hasExistingPortfolio = (application: JobApplication) => {
+    const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+    return portfolios?.some(p => p.company_slug === companySlug) || false;
+  };
+
   if (applications.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -244,7 +249,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCreatePortfolio(application)}
-                    disabled={creatingPortfolio === application.id}
+                    disabled={creatingPortfolio === application.id || hasExistingPortfolio(application)}
                   >
                     <FileText className="h-4 w-4" />
                   </Button>
@@ -429,7 +434,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCreatePortfolio(application)}
-                      disabled={creatingPortfolio === application.id}
+                      disabled={creatingPortfolio === application.id || hasExistingPortfolio(application)}
                       className="p-1 h-auto"
                     >
                       <FileText className="h-3 w-3" />
