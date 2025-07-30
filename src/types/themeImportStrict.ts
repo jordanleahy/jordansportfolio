@@ -12,7 +12,7 @@ export const ThemeImportDataSchema = z.object({
   category: z.string().min(1).max(100),
   theme: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
-  posts: z.array(ThemePostSchema).min(1).max(100),
+  posts: z.array(ThemePostSchema).min(1).max(200),
 });
 
 // TypeScript types derived from schemas
