@@ -307,7 +307,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                   {application.company_name}
                 </TableCell>
                 <TableCell className="w-48">
-                  <div className="break-words leading-tight">
+                  <div className="break-words leading-tight line-clamp-4">
                     {application.job_description}
                   </div>
                 </TableCell>

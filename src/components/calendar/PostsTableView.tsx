@@ -160,7 +160,7 @@ export const PostsTableView = memo(({
               </div>
             </TableCell>
             <TableCell className="font-medium w-48">
-              <div className="break-words leading-tight">
+              <div className="break-words leading-tight line-clamp-4">
                 {post.title}
               </div>
             </TableCell>
