@@ -31,10 +31,12 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
 }) => {
   const { user } = useAuth();
   const hasTopVideo = portfolio?.custom_top_video_url;
+  const hasMainVideo = videoSrc && videoSrc.trim() !== '';
+  const hasMainCover = posterSrc && posterSrc.trim() !== '';
   
-  // Show dual video layout only when there's actually a top video
-  // OR when user is authenticated and can upload (to show upload interface)
-  const shouldShowDualLayout = hasTopVideo || (user && portfolio);
+  // Only show dual layout when there's actual top video content
+  // This prevents showing empty containers when only cover images exist
+  const shouldShowDualLayout = !!hasTopVideo;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[35%_1fr] gap-8 mb-12">
