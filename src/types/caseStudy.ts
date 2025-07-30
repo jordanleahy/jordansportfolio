@@ -40,6 +40,14 @@ export interface VisualsArtifacts {
   processDocumentation: string[];
 }
 
+export interface FigmaPresentation {
+  enabled: boolean;
+  password: string;
+  presentationUrl: string;
+  title: string;
+  description?: string;
+}
+
 export interface CaseStudyData {
   // Hero Section
   title: string;
@@ -51,6 +59,9 @@ export interface CaseStudyData {
   timeline: string;
   timelineDetails?: string;
   tags: string[];
+  
+  // Figma Presentation (optional)
+  figmaPresentation?: FigmaPresentation;
   
   // Problem Section
   problemTitle: string;

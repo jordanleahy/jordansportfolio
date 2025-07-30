@@ -1,5 +1,6 @@
 import { CaseStudyData } from "@/types/caseStudy";
 import { heroData } from "./heroData";
+import { figmaData } from "./figmaData";
 import { problemData } from "./problemData";
 import { teamData } from "./teamData";
 import { processData } from "./processData";
@@ -11,6 +12,9 @@ import { visualsData } from "./visualsData";
 export const case1Data: CaseStudyData = {
   // Hero Section
   ...heroData,
+  
+  // Figma Presentation
+  ...figmaData,
   
   // Problem Section
   ...problemData,
