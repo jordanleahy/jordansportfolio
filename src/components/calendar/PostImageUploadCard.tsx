@@ -153,13 +153,13 @@ export const PostImageUploadCard = ({
 
   const getLoadingText = () => {
     if (isGenerating) {
-      if (generationStep === 'prompt') return 'Creating prompt...';
-      if (generationStep === 'image') return 'Generating image...';
+      if (generationStep === 'prompt') return 'Creating...';
+      if (generationStep === 'image') return 'Generating...';
       if (generationStep === 'upload') return 'Uploading...';
-      return 'Generating...';
+      return 'Processing...';
     }
     if (isUploading) return 'Uploading...';
-    return 'Upload or Generate';
+    return '';
   };
 
   const handleDeleteImage = () => {
@@ -177,16 +177,14 @@ export const PostImageUploadCard = ({
             <Button
               variant="outline"
               size="sm"
-              className="h-8 gap-1"
+              className="h-8 w-8 p-0"
               disabled={isUploading || isGenerating}
             >
               {(isUploading || isGenerating) ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Upload className="h-3 w-3" />
+                <ChevronDown className="h-4 w-4" />
               )}
-              <span className="text-xs">{getLoadingText()}</span>
-              <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
