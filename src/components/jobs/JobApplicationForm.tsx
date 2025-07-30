@@ -29,8 +29,10 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedResume, setSelectedResume] = useState<File | null>(null);
+  const [selectedCoverLetter, setSelectedCoverLetter] = useState<File | null>(null);
   const { uploadFile, uploading } = useFileUpload({ 
-    bucket: 'general', 
+    bucket: 'job-applications', 
     folder: 'job-applications' 
   });
 
@@ -39,22 +41,38 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
     
     let finalFormData = { ...formData };
 
-    // Upload file if one is selected
-    if (selectedFile) {
-      try {
-        const uploadedUrl = await uploadFile(selectedFile);
-        if (uploadedUrl) {
+    try {
+      // Upload resume PDF if selected
+      if (selectedResume) {
+        const resumeUrl = await uploadFile(selectedResume);
+        if (resumeUrl) {
+          finalFormData.resume_link = resumeUrl;
+        }
+      }
+
+      // Upload cover letter PDF if selected
+      if (selectedCoverLetter) {
+        const coverLetterUrl = await uploadFile(selectedCoverLetter);
+        if (coverLetterUrl) {
+          finalFormData.cover_letter_link = coverLetterUrl;
+        }
+      }
+
+      // Upload general attachment if selected
+      if (selectedFile) {
+        const attachmentUrl = await uploadFile(selectedFile);
+        if (attachmentUrl) {
           finalFormData = {
             ...finalFormData,
-            attachment_url: uploadedUrl,
+            attachment_url: attachmentUrl,
             attachment_filename: selectedFile.name,
             attachment_type: selectedFile.type,
           };
         }
-      } catch (error) {
-        toast.error("Failed to upload file. Please try again.");
-        return;
       }
+    } catch (error) {
+      toast.error("Failed to upload files. Please try again.");
+      return;
     }
 
     onSubmit(finalFormData);
@@ -120,6 +138,15 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
             />
           </div>
 
+          <FileUpload
+            onFileSelect={setSelectedResume}
+            accept="application/pdf"
+            maxSize={10}
+            label="Upload Resume PDF"
+            description="Upload your resume as a PDF file"
+            preview={false}
+          />
+
           <div className="space-y-2">
             <Label htmlFor="cover_letter_link">Cover Letter Link</Label>
             <Input
@@ -130,6 +157,15 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
               placeholder="https://example.com/your-cover-letter.pdf"
             />
           </div>
+
+          <FileUpload
+            onFileSelect={setSelectedCoverLetter}
+            accept="application/pdf"
+            maxSize={10}
+            label="Upload Cover Letter PDF"
+            description="Upload your cover letter as a PDF file"
+            preview={false}
+          />
 
           <FileUpload
             onFileSelect={handleFileSelect}
