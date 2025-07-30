@@ -180,6 +180,14 @@ export const ImageUploadCard = ({
     return 'Upload or Generate';
   };
 
+  // Debug logging
+  console.log('🐛 ImageUploadCard Debug:', { 
+    title, 
+    postData, 
+    hasPostData: !!postData,
+    postDataKeys: postData ? Object.keys(postData) : 'no postData'
+  });
+
   return (
     <Card className="w-full">
       <CardHeader>
