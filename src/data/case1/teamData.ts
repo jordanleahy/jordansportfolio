@@ -19,10 +19,10 @@ export const teamData = {
       description: "",
       items: [
         "2 CDI Specialist",
-        "2 Data Scientists",
+        "1 Data Scientists",
         "4 Engineers", 
-        "Director of Product",
-        "MD Cofounder Head of Product"
+        "1 Clinical Informaticist",
+        "MD Cofounder"
       ]
     },
     {
