@@ -9,6 +9,7 @@ import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UploadTopVideoButton } from "./UploadTopVideoButton";
+import { CoverLetterPromptModal } from "./CoverLetterPromptModal";
 
 interface CoverLetterEditorProps {
   portfolio: CompanyPortfolio & {
@@ -27,6 +28,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
   const [isEditing, setIsEditing] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [selectedRoleType, setSelectedRoleType] = useState<'product_manager' | 'product_designer'>('product_manager');
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [editData, setEditData] = useState<StructuredCoverLetter>({
     opening_hook: '',
     key_achievements: [''],
@@ -95,13 +97,15 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
     }
   };
 
-  const handleRegenerateWithAgent = async () => {
+  const handleRegenerateWithAgent = async (customPrompt: string, roleType: 'product_manager' | 'product_designer') => {
     if (!portfolio.job_applications) {
       toast.error("Job application data not found");
       return;
     }
 
     setIsRegenerating(true);
+    setIsPromptModalOpen(false);
+    
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
@@ -113,8 +117,9 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         body: { 
           jobDescription: portfolio.job_applications.job_description,
           companyName: portfolio.company_name,
-          roleType: selectedRoleType,
-          userId: user.id
+          roleType: roleType,
+          userId: user.id,
+          additionalContext: customPrompt
         },
       });
 
@@ -132,7 +137,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         generated_content: updatedContent
       });
 
-      toast.success(`Cover letter regenerated for ${selectedRoleType.replace('_', ' ')} role!`);
+      toast.success(`Cover letter regenerated with custom instructions!`);
       
     } catch (error: any) {
       console.error('Error regenerating cover letter:', error);
@@ -165,7 +170,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
                     </SelectContent>
                   </Select>
                   <Button 
-                    onClick={handleRegenerateWithAgent} 
+                    onClick={() => setIsPromptModalOpen(true)} 
                     size="sm" 
                     disabled={isRegenerating}
                     className="bg-gradient-to-r from-primary to-primary-glow"
@@ -270,6 +275,13 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
           </div>
         </CardContent>
       )}
+      
+      <CoverLetterPromptModal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        onSubmit={handleRegenerateWithAgent}
+        isLoading={isRegenerating}
+      />
     </Card>
   );
 };
