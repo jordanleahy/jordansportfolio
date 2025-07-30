@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface CoverLetterPromptModalProps {
   isOpen: boolean;
@@ -21,16 +22,35 @@ export const CoverLetterPromptModal: React.FC<CoverLetterPromptModalProps> = ({
 }) => {
   const [customPrompt, setCustomPrompt] = useState('');
   const [roleType, setRoleType] = useState<'product_manager' | 'product_designer'>('product_manager');
+  
+  const debouncedPrompt = useDebounce(customPrompt, 500);
+
+  // Load cached prompt on mount
+  useEffect(() => {
+    const cachedPrompt = localStorage.getItem('coverLetterCustomPrompt');
+    if (cachedPrompt) {
+      setCustomPrompt(cachedPrompt);
+    }
+  }, []);
+
+  // Save to localStorage when prompt changes (debounced)
+  useEffect(() => {
+    if (debouncedPrompt) {
+      localStorage.setItem('coverLetterCustomPrompt', debouncedPrompt);
+    }
+  }, [debouncedPrompt]);
 
   const handleSubmit = () => {
     if (customPrompt.trim()) {
       onSubmit(customPrompt.trim(), roleType);
       setCustomPrompt('');
+      localStorage.removeItem('coverLetterCustomPrompt');
     }
   };
 
   const handleClose = () => {
     setCustomPrompt('');
+    localStorage.removeItem('coverLetterCustomPrompt');
     onClose();
   };
 
