@@ -164,9 +164,6 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-center">Admin: Cover Letter Editor</CardTitle>
-      </CardHeader>
       
       <CardContent>
         <div className="flex flex-col gap-4">
