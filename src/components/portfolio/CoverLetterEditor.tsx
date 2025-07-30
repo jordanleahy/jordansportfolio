@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Save, X, Sparkles, Video, ExternalLink } from "lucide-react";
+import { Edit, Save, X, Sparkles, Video, ExternalLink, User } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
@@ -171,8 +171,8 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-center">
                 <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
+                  <SelectTrigger className="w-12 h-12 p-3">
+                    <User className="w-5 h-5" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="product_manager">Product Manager</SelectItem>
