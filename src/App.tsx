@@ -8,7 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SEC from "./pages/SEC";
@@ -48,30 +48,29 @@ const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const OptimizedCalendar = lazy(() => import("./pages/OptimizedCalendar"));
 
 
-// Optimized QueryClient configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      retry: (failureCount, error) => {
-        // Don't retry on 4xx errors
-        if (error && typeof error === 'object' && 'status' in error) {
-          const status = error.status as number;
-          if (status >= 400 && status < 500) return false;
-        }
-        return failureCount < 2;
+function App() {
+  // Initialize QueryClient inside component to avoid React reconciliation issues
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        retry: (failureCount, error) => {
+          // Don't retry on 4xx errors
+          if (error && typeof error === 'object' && 'status' in error) {
+            const status = error.status as number;
+            if (status >= 400 && status < 500) return false;
+          }
+          return failureCount < 2;
+        },
+      },
+      mutations: {
+        retry: 1,
       },
     },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
-
-function App() {
+  }));
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
