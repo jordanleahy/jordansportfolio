@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Save, X, Sparkles, Video } from "lucide-react";
+import { Edit, Save, X, Sparkles, Video, ExternalLink } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +97,21 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
     }
   };
 
+  const handleOpenIncognito = () => {
+    const publicUrl = `/portfolio/${portfolio.company_slug}`;
+    const fullUrl = `${window.location.origin}${publicUrl}`;
+    
+    // Try to open in incognito/private mode
+    // Chrome uses different parameters than other browsers
+    const newWindow = window.open(fullUrl, '_blank', 'noreferrer,noopener');
+    
+    if (!newWindow) {
+      toast.error("Please allow popups and try again");
+    } else {
+      toast.success("Opened in new tab - use browser's incognito mode for private viewing");
+    }
+  };
+
   const handleRegenerateWithAgent = async (customPrompt: string, roleType: 'product_manager' | 'product_designer') => {
     if (!portfolio.job_applications) {
       toast.error("Job application data not found");
@@ -186,6 +201,10 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
                 
                 <Button onClick={handleStartEdit} size="default" variant="outline" className="p-3">
                   <Edit className="w-5 h-5" />
+                </Button>
+                
+                <Button onClick={handleOpenIncognito} size="default" variant="outline" className="p-3">
+                  <ExternalLink className="w-5 h-5" />
                 </Button>
               </div>
             </div>
