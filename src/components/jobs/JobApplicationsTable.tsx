@@ -152,11 +152,9 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   };
 
   const handleSubmittedDateChange = (applicationId: string, date: Date | undefined) => {
-    if (!date) return;
-    
     updateJobApplication.mutate({
       id: applicationId,
-      submitted: date.toISOString(),
+      submitted: date ? date.toISOString() : null,
     });
   };
 
@@ -244,22 +242,22 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
               
               {/* Submitted Date */}
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Submitted:</span>
+                <span className="text-sm font-medium text-foreground">Submitted:</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-[140px] justify-start text-left font-normal",
-                        !application.submitted && "text-muted-foreground"
+                        "w-[160px] justify-start text-left font-normal h-9",
+                        !application.submitted && "text-muted-foreground hover:text-foreground"
                       )}
                       size="sm"
                     >
-                      <CalendarIcon className="mr-2 h-3 w-3" />
-                      {application.submitted ? format(new Date(application.submitted), "PPP") : "Pick a date"}
+                      <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                      {application.submitted ? format(new Date(application.submitted), "MMM d, yyyy") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 bg-card" align="start">
                     <Calendar
                       mode="single"
                       selected={application.submitted ? new Date(application.submitted) : undefined}
@@ -267,6 +265,18 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       initialFocus
                       className="pointer-events-auto"
                     />
+                    {application.submitted && (
+                      <div className="flex justify-center border-t p-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSubmittedDateChange(application.id, undefined)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          Clear date
+                        </Button>
+                      </div>
+                    )}
                   </PopoverContent>
                 </Popover>
               </div>
@@ -460,16 +470,16 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-[140px] justify-start text-left font-normal",
-                          !application.submitted && "text-muted-foreground"
+                          "w-[160px] justify-start text-left font-normal h-9",
+                          !application.submitted && "text-muted-foreground hover:text-foreground"
                         )}
                         size="sm"
                       >
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {application.submitted ? format(new Date(application.submitted), "PPP") : "Pick a date"}
+                        <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                        {application.submitted ? format(new Date(application.submitted), "MMM d, yyyy") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-card" align="start">
                       <Calendar
                         mode="single"
                         selected={application.submitted ? new Date(application.submitted) : undefined}
@@ -477,6 +487,18 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                         initialFocus
                         className="pointer-events-auto"
                       />
+                      {application.submitted && (
+                        <div className="flex justify-center border-t p-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSubmittedDateChange(application.id, undefined)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            Clear date
+                          </Button>
+                        </div>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </TableCell>
