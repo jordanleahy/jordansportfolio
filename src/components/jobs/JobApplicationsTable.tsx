@@ -306,8 +306,8 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                 <TableCell className="font-medium">
                   {application.company_name}
                 </TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="truncate" title={application.job_description}>
+                <TableCell className="w-48">
+                  <div className="break-words leading-tight">
                     {application.job_description}
                   </div>
                 </TableCell>
