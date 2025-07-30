@@ -166,54 +166,50 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
     <Card>
       
       <CardContent>
-        <div className="flex flex-col gap-4">
-          {!isEditing ? (
-            <div className="flex flex-col gap-4">
-              <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 bg-transparent p-2 rounded-full z-50">
-                <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
-                  <SelectTrigger className="w-12 h-12 p-3">
-                    <User className="w-5 h-5" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="product_manager">Product Manager</SelectItem>
-                    <SelectItem value="product_designer">Product Designer</SelectItem>
-                  </SelectContent>
-                </Select>
+        {!isEditing ? (
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 bg-transparent p-2 rounded-full z-50">
+            <Select value={selectedRoleType} onValueChange={(value: 'product_manager' | 'product_designer') => setSelectedRoleType(value)}>
+              <SelectTrigger className="w-12 h-12 p-3">
+                <User className="w-5 h-5" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="product_manager">Product Manager</SelectItem>
+                <SelectItem value="product_designer">Product Designer</SelectItem>
+              </SelectContent>
+            </Select>
 
-                <UploadTopVideoButton 
-                  portfolio={portfolio} 
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80 p-3"
-                />
-                
-                <Button 
-                  onClick={() => setIsPromptModalOpen(true)} 
-                  size="default" 
-                  disabled={isRegenerating}
-                  className="bg-gradient-to-r from-primary to-primary-glow p-3"
-                >
-                  <Sparkles className="w-5 h-5" />
-                </Button>
-                
-                <Button onClick={handleStartEdit} size="default" variant="outline" className="p-3">
-                  <Edit className="w-5 h-5" />
-                </Button>
-                
-                <Button onClick={handleOpenIncognito} size="default" variant="outline" className="p-3">
-                  <ExternalLink className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center gap-2">
-              <Button onClick={handleSaveEdit} size="default" disabled={updatePortfolio.isPending} className="p-3">
-                <Save className="w-5 h-5" />
-              </Button>
-              <Button onClick={handleCancelEdit} variant="outline" size="default" className="p-3">
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          )}
-        </div>
+            <UploadTopVideoButton 
+              portfolio={portfolio} 
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 p-3"
+            />
+            
+            <Button 
+              onClick={() => setIsPromptModalOpen(true)} 
+              size="default" 
+              disabled={isRegenerating}
+              className="bg-gradient-to-r from-primary to-primary-glow p-3"
+            >
+              <Sparkles className="w-5 h-5" />
+            </Button>
+            
+            <Button onClick={handleStartEdit} size="default" variant="outline" className="p-3">
+              <Edit className="w-5 h-5" />
+            </Button>
+            
+            <Button onClick={handleOpenIncognito} size="default" variant="outline" className="p-3">
+              <ExternalLink className="w-5 h-5" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-center gap-2">
+            <Button onClick={handleSaveEdit} size="default" disabled={updatePortfolio.isPending} className="p-3">
+              <Save className="w-5 h-5" />
+            </Button>
+            <Button onClick={handleCancelEdit} variant="outline" size="default" className="p-3">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
       </CardContent>
       
       {isEditing && (
