@@ -297,6 +297,9 @@ export type Database = {
           generated_content: Json | null
           id: string
           job_application_id: string
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
           status: string
           updated_at: string
           user_id: string
@@ -315,6 +318,9 @@ export type Database = {
           generated_content?: Json | null
           id?: string
           job_application_id: string
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -333,6 +339,9 @@ export type Database = {
           generated_content?: Json | null
           id?: string
           job_application_id?: string
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           status?: string
           updated_at?: string
           user_id?: string
