@@ -27,21 +27,6 @@ export const FigmaPresentationViewer = ({
 
       <Card className="overflow-hidden">
         <div className="relative bg-muted/30 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            </div>
-            <a 
-              href={presentationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Open in Figma <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
           
           <div className="bg-background rounded border aspect-video">
             <iframe
