@@ -218,17 +218,16 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     }
   };
 
-  const isUploadingOrGenerating = isUploading(post.id) || isGenerating || isBatchGenerating;
-
   return (
-    <div className="flex">
+    <div className="inline-flex border border-input rounded-md bg-background hover:bg-accent/50 transition-colors">
       {/* Left Button - Generate All Images */}
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={isUploadingOrGenerating}
-        className="h-8 px-3 rounded-r-none border-r-0"
+      <button
         onClick={handleGenerateAllImages}
+        disabled={isBatchGenerating || isUploading(post.id)}
+        className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium 
+                 hover:bg-accent hover:text-accent-foreground 
+                 disabled:pointer-events-none disabled:opacity-50 
+                 rounded-l-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         title="Generate All Images"
       >
         {isBatchGenerating ? (
@@ -236,19 +235,23 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         ) : (
           <ImageIcon className="h-4 w-4" />
         )}
-      </Button>
+      </button>
+      
+      {/* Divider */}
+      <div className="w-px bg-border" />
       
       {/* Right Button - Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isUploadingOrGenerating}
-            className="h-8 px-2 rounded-l-none border-l border-l-border/50"
+          <button
+            disabled={isUploading(post.id)}
+            className="inline-flex items-center justify-center h-8 px-2 text-sm font-medium 
+                     hover:bg-accent hover:text-accent-foreground 
+                     disabled:pointer-events-none disabled:opacity-50 
+                     rounded-r-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <ChevronDown className="h-3 w-3" />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
