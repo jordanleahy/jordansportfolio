@@ -43,23 +43,13 @@ export const FigmaPresentationViewer = ({
             </a>
           </div>
           
-          <div className="bg-background rounded border aspect-video flex items-center justify-center">
-            <a 
-              href={presentationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex flex-col items-center gap-4 p-8 hover:bg-muted/50 rounded-lg transition-colors group"
-            >
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <ExternalLink className="w-8 h-8 text-primary" />
-              </div>
-              <div className="text-center">
-                <h3 className="font-semibold text-lg mb-2">View Interactive Presentation</h3>
-                <p className="text-muted-foreground text-sm">
-                  Click to open the full interactive Figma presentation
-                </p>
-              </div>
-            </a>
+          <div className="bg-background rounded border aspect-video">
+            <iframe
+              src={presentationUrl}
+              className="w-full h-full rounded"
+              allowFullScreen
+              title="Use Case Presentation"
+            />
           </div>
         </div>
 
