@@ -66,8 +66,9 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
       }
 
-      const generatedPrompt = promptResponse.data?.prompt;
+      const generatedPrompt = promptResponse.data?.generatedPrompt;
       if (!generatedPrompt) {
+        console.error('🎨 IMAGE_GENERATION: No prompt in response:', promptResponse.data);
         throw new Error('No prompt generated');
       }
 
