@@ -54,7 +54,7 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
   }, [portfolio]);
 
   const videoSrc = useMemo(() => {
-    return portfolio.custom_video_url || defaultVideoContent.videoUrl;
+    return portfolio.custom_video_url || "";
   }, [portfolio.custom_video_url]);
 
   const topVideoSrc = useMemo(() => {

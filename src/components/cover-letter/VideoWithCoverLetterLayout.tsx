@@ -61,6 +61,7 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
             portfolio={portfolio}
             aspectRatio="portrait"
             uploadType="main"
+            showUploadPrompt={!videoSrc && !!(user && portfolio)}
           />
         </div>
       ) : (
@@ -69,6 +70,7 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
           posterSrc={posterSrc}
           showTimer={showTimer}
           portfolio={portfolio}
+          showUploadPrompt={!videoSrc && !!(user && portfolio)}
         />
       )}
       <CoverLetterSection content={coverLetterContent} />
