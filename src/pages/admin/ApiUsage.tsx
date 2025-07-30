@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 import { UsageSummaryCards } from "@/components/admin/UsageSummaryCards";
 import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
@@ -85,7 +87,13 @@ export default function ApiUsage() {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <PageLayout>
+      <Helmet>
+        <title>API Usage Tracking - Admin</title>
+        <meta name="description" content="Monitor and analyze AI API usage across your application" />
+      </Helmet>
+      
+      <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
@@ -280,6 +288,7 @@ export default function ApiUsage() {
         open={!!selectedRecord}
         onOpenChange={(open) => !open && setSelectedRecord(null)}
       />
-    </div>
+      </div>
+    </PageLayout>
   );
 }
