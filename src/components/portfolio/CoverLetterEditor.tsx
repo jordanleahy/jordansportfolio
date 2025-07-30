@@ -180,23 +180,23 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
 
             <UploadTopVideoButton 
               portfolio={portfolio} 
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 p-3"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 w-12 h-12 p-3"
             />
             
             <Button 
               onClick={() => setIsPromptModalOpen(true)} 
               size="default" 
               disabled={isRegenerating}
-              className="bg-gradient-to-r from-primary to-primary-glow p-3"
+              className="bg-gradient-to-r from-primary to-primary-glow w-12 h-12 p-3"
             >
               <Sparkles className="w-5 h-5" />
             </Button>
             
-            <Button onClick={handleStartEdit} size="default" variant="outline" className="p-3">
+            <Button onClick={handleStartEdit} size="default" variant="outline" className="w-12 h-12 p-3">
               <Edit className="w-5 h-5" />
             </Button>
             
-            <Button onClick={handleOpenIncognito} size="default" variant="outline" className="p-3">
+            <Button onClick={handleOpenIncognito} size="default" variant="outline" className="w-12 h-12 p-3">
               <ExternalLink className="w-5 h-5" />
             </Button>
           </div>
