@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
+import { PostImageUploadCard } from './PostImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -25,6 +26,7 @@ interface PostCardProps {
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   uploadingStates: {
     [key: string]: boolean;
@@ -43,6 +45,7 @@ const PostCardComponent = ({
   onVideoUpload,
   onVideoRemove,
   onImageDelete,
+  onImageGenerated,
   onStatusChange,
   uploadingStates,
   isAdmin = false
@@ -67,55 +70,6 @@ const PostCardComponent = ({
   };
 
 
-  const ImageUploadButton = ({ type, label, isUploading }: { 
-    type: '16_9' | '9_16' | '3_4' | '4_3'; 
-    label: string; 
-    isUploading: boolean;
-  }) => {
-    const imageUrl = type === '16_9' ? post.image_16_9_url :
-                    type === '9_16' ? post.image_9_16_url :
-                    type === '3_4' ? post.image_3_4_url :
-                    post.image_4_3_url;
-
-    return (
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium">{label}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8"
-            disabled={isUploading}
-            onClick={() => {
-              console.log('🖼️ IMAGE_UPLOAD: Mobile upload button clicked', { 
-                postId: post.id, 
-                aspectRatio: type, 
-                postTitle: post.title 
-              });
-              onFileSelect(post.id, type, post);
-            }}
-          >
-            {isUploading ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Upload className="h-3 w-3" />
-            )}
-          </Button>
-        </div>
-        {imageUrl && (
-          <div className="relative">
-            <img
-              src={imageUrl}
-              alt={`${label} for ${post.title}`}
-              className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-              loading="lazy"
-              onClick={() => setPreviewImage({ url: imageUrl, alt: `${label} for ${post.title}` })}
-            />
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <Card className="w-full">
@@ -260,25 +214,45 @@ const PostCardComponent = ({
           <div className="border-t pt-4">
             <h4 className="text-sm font-medium mb-3">Photo Uploads</h4>
             <div className="grid grid-cols-2 gap-3">
-              <ImageUploadButton 
-                type="16_9" 
-                label="Landscape (16:9)" 
-                isUploading={uploadingStates[`${post.id}_16_9`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="16_9"
+                label="Landscape (16:9)"
+                imageUrl={post.image_16_9_url || undefined}
+                isUploading={uploadingStates[`${post.id}_16_9`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="9_16" 
-                label="Portrait (9:16)" 
-                isUploading={uploadingStates[`${post.id}_9_16`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="9_16"
+                label="Portrait (9:16)"
+                imageUrl={post.image_9_16_url || undefined}
+                isUploading={uploadingStates[`${post.id}_9_16`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="3_4" 
-                label="Social (3:4)" 
-                isUploading={uploadingStates[`${post.id}_3_4`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="3_4"
+                label="Social (3:4)"
+                imageUrl={post.image_3_4_url || undefined}
+                isUploading={uploadingStates[`${post.id}_3_4`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="4_3" 
-                label="Standard (4:3)" 
-                isUploading={uploadingStates[`${post.id}_4_3`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="4_3"
+                label="Standard (4:3)"
+                imageUrl={post.image_4_3_url || undefined}
+                isUploading={uploadingStates[`${post.id}_4_3`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
             </div>
           </div>

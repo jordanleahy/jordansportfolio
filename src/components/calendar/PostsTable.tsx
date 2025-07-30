@@ -78,6 +78,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
+                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
                     uploadingStates={{}}
                     isAdmin={isAdmin}
@@ -119,6 +120,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
+                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
                     uploadingStates={{}}
                     isAdmin={isAdmin}

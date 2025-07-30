@@ -262,12 +262,6 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               imageUrl={formData.image_16_9_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_16_9_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_16_9_url: undefined }))}
-              postData={{
-                id: 'temp-' + Date.now(),
-                title: formData.title,
-                description: formData.description,
-                category: formData.category || 'cdi'
-              }}
             />
             <ImageUploadCard
               title="Portrait (9:16)"
@@ -276,12 +270,6 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               imageUrl={formData.image_9_16_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_9_16_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_9_16_url: undefined }))}
-              postData={{
-                id: 'temp-' + Date.now(),
-                title: formData.title,
-                description: formData.description,
-                category: formData.category || 'cdi'
-              }}
             />
             <ImageUploadCard
               title="Social (3:4)"
@@ -290,12 +278,6 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               imageUrl={formData.image_3_4_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_3_4_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_3_4_url: undefined }))}
-              postData={{
-                id: 'temp-' + Date.now(),
-                title: formData.title,
-                description: formData.description,
-                category: formData.category || 'cdi'
-              }}
             />
             <ImageUploadCard
               title="Standard (4:3)"
@@ -304,12 +286,6 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               imageUrl={formData.image_4_3_url}
               onImageUpload={(url) => setFormData(prev => ({ ...prev, image_4_3_url: url }))}
               onImageRemove={() => setFormData(prev => ({ ...prev, image_4_3_url: undefined }))}
-              postData={{
-                id: 'temp-' + Date.now(),
-                title: formData.title,
-                description: formData.description,
-                category: formData.category || 'cdi'
-              }}
             />
           </div>
 
