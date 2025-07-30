@@ -93,7 +93,7 @@ export const FigmaPasswordSection = ({
                   )}
 
                   <Button type="submit" className="w-full">
-                    View Figma Presentation
+                    View Case Study
                   </Button>
                 </form>
               </Card>
