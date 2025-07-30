@@ -164,7 +164,6 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
 
   return (
     <Card>
-      
       <CardContent>
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex justify-center gap-2 bg-transparent p-2 rounded-full z-50">
           {!isEditing ? (
