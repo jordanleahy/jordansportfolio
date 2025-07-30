@@ -301,7 +301,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
               <TableHead>Resume</TableHead>
               <TableHead>Cover Letter</TableHead>
               <TableHead>Attachment</TableHead>
-              <TableHead>Applied</TableHead>
+              <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
