@@ -230,10 +230,17 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                 controls
                 loop
                 preload="metadata"
+                poster={posterSrc}
               >
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+            ) : posterSrc ? (
+              <img 
+                src={posterSrc}
+                alt="Cover image"
+                className="w-full h-full object-cover rounded-lg"
+              />
             ) : showUploadPrompt ? (
               <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
                 <div className="text-center text-muted-foreground">

@@ -65,11 +65,20 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
     return defaultCalendarUrl;
   }, []);
 
+  const posterSrc = useMemo(() => {
+    return portfolio.custom_poster_url || "";
+  }, [portfolio.custom_poster_url]);
+
+  const topPosterSrc = useMemo(() => {
+    return portfolio.custom_top_poster_url || "";
+  }, [portfolio.custom_top_poster_url]);
+
   return {
     coverLetterContent,
     videoSrc,
     topVideoSrc,
-    posterSrc: "",
+    posterSrc,
+    topPosterSrc,
     calendarUrl,
     personalInfo,
     companyName: portfolio.company_name,
