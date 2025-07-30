@@ -180,13 +180,6 @@ export const ImageUploadCard = ({
     return 'Upload or Generate';
   };
 
-  // Debug logging
-  console.log('🐛 ImageUploadCard Debug:', { 
-    title, 
-    postData, 
-    hasPostData: !!postData,
-    postDataKeys: postData ? Object.keys(postData) : 'no postData'
-  });
 
   return (
     <Card className="w-full">
@@ -235,18 +228,18 @@ export const ImageUploadCard = ({
                   variant="outline"
                   size="sm"
                   disabled={isUploading || isGenerating}
-                  className="gap-2"
+                  className="gap-2 w-full"
                 >
                   {(isUploading || isGenerating) ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <ImageIcon className="h-4 w-4" />
                   )}
-                  {getLoadingText()}
+                  <span className="flex-1">{getLoadingText()}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56">
+              <DropdownMenuContent align="center" className="w-56 bg-background border shadow-lg z-50">
                 <DropdownMenuLabel>Upload Image</DropdownMenuLabel>
                 <DropdownMenuItem
                   asChild
