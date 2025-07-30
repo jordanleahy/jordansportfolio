@@ -3,103 +3,84 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ApiUsageRecord, UsageSummary, UsageFilters, UsageChartData } from '@/types/apiUsage';
 
-// For now, we'll return mock data since the backend doesn't exist yet
-// This will be replaced with actual Supabase queries later
-
-const generateMockUsageData = (): ApiUsageRecord[] => {
-  const mockData: ApiUsageRecord[] = [];
-  const now = new Date();
-  
-  for (let i = 0; i < 50; i++) {
-    const date = new Date(now.getTime() - i * 3600000); // Go back i hours
-    mockData.push({
-      id: `mock-${i}`,
-      user_id: `user-${Math.floor(Math.random() * 5) + 1}`,
-      user_email: `user${Math.floor(Math.random() * 5) + 1}@example.com`,
-      user_name: `User ${Math.floor(Math.random() * 5) + 1}`,
-      function_name: ['generate-image-prompt-dynamic', 'generate-image-gpt'][Math.floor(Math.random() * 2)],
-      model_used: ['gpt-4o-mini', 'dall-e-3'][Math.floor(Math.random() * 2)],
-      request_type: ['text_generation', 'image_generation'][Math.floor(Math.random() * 2)] as any,
-      tokens_used: Math.floor(Math.random() * 2000) + 100,
-      image_size: '1024x1024',
-      image_quality: ['standard', 'hd'][Math.floor(Math.random() * 2)],
-      estimated_cost: Math.random() * 0.5,
-      success: Math.random() > 0.1, // 90% success rate
-      error_message: Math.random() > 0.1 ? undefined : 'Rate limit exceeded',
-      request_metadata: { post_id: `post-${i}`, category: 'test' },
-      prompt_tokens: Math.floor(Math.random() * 1000) + 50,
-      completion_tokens: Math.floor(Math.random() * 1000) + 50,
-      total_tokens: Math.floor(Math.random() * 2000) + 100,
-      response_time_ms: Math.floor(Math.random() * 5000) + 500,
-      created_at: date.toISOString(),
-    });
-  }
-  
-  return mockData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-};
-
-const generateMockSummary = (): UsageSummary => ({
-  total_cost_today: 12.45,
-  total_cost_week: 89.32,
-  total_cost_month: 342.18,
-  total_requests_today: 156,
-  total_requests_week: 1203,
-  total_requests_month: 4567,
-  total_tokens_today: 89234,
-  total_tokens_week: 567890,
-  total_tokens_month: 2345678,
-  success_rate_today: 0.94,
-  success_rate_week: 0.92,
-  success_rate_month: 0.91,
-  top_users: [
-    { user_id: 'user-1', user_email: 'user1@example.com', user_name: 'User 1', total_cost: 125.32, total_requests: 450 },
-    { user_id: 'user-2', user_email: 'user2@example.com', user_name: 'User 2', total_cost: 89.45, total_requests: 320 },
-    { user_id: 'user-3', user_email: 'user3@example.com', user_name: 'User 3', total_cost: 67.23, total_requests: 280 },
-  ],
-  top_functions: [
-    { function_name: 'generate-image-gpt', total_cost: 198.45, total_requests: 2340 },
-    { function_name: 'generate-image-prompt-dynamic', total_cost: 143.73, total_requests: 2227 },
-  ],
-});
-
-const generateMockChartData = (): UsageChartData => ({
-  daily_costs: Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    text_generation_cost: Math.random() * 10,
-    image_generation_cost: Math.random() * 15,
-    image_prompt_cost: Math.random() * 5,
-    total_cost: Math.random() * 30,
-    total_requests: Math.floor(Math.random() * 200) + 50,
-  })).reverse(),
-  function_distribution: [
-    { function_name: 'generate-image-gpt', cost: 198.45, requests: 2340 },
-    { function_name: 'generate-image-prompt-dynamic', cost: 143.73, requests: 2227 },
-  ],
-  model_usage: [
-    { model: 'gpt-4o-mini', cost: 156.32, requests: 3245 },
-    { model: 'dall-e-3', cost: 185.86, requests: 1322 },
-  ],
-  success_rates: Array.from({ length: 30 }, (_, i) => ({
-    date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    success_rate: 0.85 + Math.random() * 0.15,
-  })).reverse(),
-});
-
 export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize = 50) => {
   return useQuery({
     queryKey: ['api-usage', filters, page, pageSize],
     queryFn: async () => {
-      // Mock implementation - replace with actual Supabase query
-      const allData = generateMockUsageData();
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
+      console.log('Fetching API usage data with filters:', filters);
       
+      let query = supabase
+        .from('api_usage_tracking')
+        .select(`
+          *,
+          user_email:user_id,
+          user_name:user_id
+        `)
+        .order('created_at', { ascending: false });
+
+      // Apply filters
+      if (filters.startDate) {
+        query = query.gte('created_at', filters.startDate);
+      }
+      if (filters.endDate) {
+        query = query.lte('created_at', filters.endDate);
+      }
+      if (filters.userId) {
+        query = query.eq('user_id', filters.userId);
+      }
+      if (filters.functionName) {
+        query = query.eq('function_name', filters.functionName);
+      }
+      if (filters.requestType) {
+        query = query.eq('request_type', filters.requestType);
+      }
+      if (filters.success !== undefined) {
+        query = query.eq('success', filters.success);
+      }
+
+      // Apply pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('Error fetching API usage data:', error);
+        throw error;
+      }
+
+      // Transform data to match our interface
+      const transformedData: ApiUsageRecord[] = (data || []).map(record => ({
+        id: record.id,
+        user_id: record.user_id,
+        function_name: record.function_name,
+        model_used: record.model_used,
+        request_type: record.request_type as 'text_generation' | 'image_generation' | 'image_prompt',
+        tokens_used: record.tokens_used || undefined,
+        image_size: record.image_size || undefined,
+        image_quality: record.image_quality || undefined,
+        estimated_cost: Number(record.estimated_cost),
+        success: record.success,
+        error_message: record.error_message || undefined,
+        request_metadata: (typeof record.request_metadata === 'object' && record.request_metadata !== null) 
+          ? record.request_metadata as Record<string, any> 
+          : {},
+        prompt_tokens: record.prompt_tokens || undefined,
+        completion_tokens: record.completion_tokens || undefined,
+        total_tokens: record.total_tokens || undefined,
+        response_time_ms: record.response_time_ms || undefined,
+        created_at: record.created_at,
+        user_email: `user-${record.user_id?.slice(0, 8)}@example.com`, // Mock for now
+        user_name: `User ${record.user_id?.slice(0, 8)}`, // Mock for now
+      }));
+
       return {
-        data: allData.slice(start, end),
-        total: allData.length,
+        data: transformedData,
+        total: count || 0,
         page,
         pageSize,
-        totalPages: Math.ceil(allData.length / pageSize),
+        totalPages: Math.ceil((count || 0) / pageSize),
       };
     },
   });
@@ -109,8 +90,107 @@ export const useUsageSummary = () => {
   return useQuery({
     queryKey: ['usage-summary'],
     queryFn: async () => {
-      // Mock implementation - replace with actual Supabase query
-      return generateMockSummary();
+      console.log('Fetching usage summary');
+      
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // Get today's stats
+      const { data: todayData, error: todayError } = await supabase
+        .from('api_usage_tracking')
+        .select('estimated_cost, tokens_used, success')
+        .gte('created_at', todayStart.toISOString());
+
+      if (todayError) throw todayError;
+
+      // Get week's stats
+      const { data: weekData, error: weekError } = await supabase
+        .from('api_usage_tracking')
+        .select('estimated_cost, tokens_used, success')
+        .gte('created_at', weekStart.toISOString());
+
+      if (weekError) throw weekError;
+
+      // Get month's stats
+      const { data: monthData, error: monthError } = await supabase
+        .from('api_usage_tracking')
+        .select('estimated_cost, tokens_used, success, user_id, function_name')
+        .gte('created_at', monthStart.toISOString());
+
+      if (monthError) throw monthError;
+
+      // Calculate summaries
+      const calculateStats = (data: any[]) => ({
+        totalCost: data.reduce((sum, record) => sum + Number(record.estimated_cost || 0), 0),
+        totalRequests: data.length,
+        totalTokens: data.reduce((sum, record) => sum + Number(record.tokens_used || 0), 0),
+        successRate: data.length > 0 ? data.filter(r => r.success).length / data.length : 0,
+      });
+
+      const todayStats = calculateStats(todayData || []);
+      const weekStats = calculateStats(weekData || []);
+      const monthStats = calculateStats(monthData || []);
+
+      // Calculate top users and functions from month data
+      const userCosts = (monthData || []).reduce((acc: any, record) => {
+        const userId = record.user_id;
+        if (!acc[userId]) {
+          acc[userId] = { cost: 0, requests: 0 };
+        }
+        acc[userId].cost += Number(record.estimated_cost || 0);
+        acc[userId].requests++;
+        return acc;
+      }, {});
+
+      const functionCosts = (monthData || []).reduce((acc: any, record) => {
+        const funcName = record.function_name;
+        if (!acc[funcName]) {
+          acc[funcName] = { cost: 0, requests: 0 };
+        }
+        acc[funcName].cost += Number(record.estimated_cost || 0);
+        acc[funcName].requests++;
+        return acc;
+      }, {});
+
+      const topUsers = Object.entries(userCosts)
+        .map(([userId, stats]: [string, any]) => ({
+          user_id: userId,
+          user_email: `user-${userId.slice(0, 8)}@example.com`,
+          user_name: `User ${userId.slice(0, 8)}`,
+          total_cost: stats.cost,
+          total_requests: stats.requests,
+        }))
+        .sort((a, b) => b.total_cost - a.total_cost)
+        .slice(0, 3);
+
+      const topFunctions = Object.entries(functionCosts)
+        .map(([functionName, stats]: [string, any]) => ({
+          function_name: functionName,
+          total_cost: stats.cost,
+          total_requests: stats.requests,
+        }))
+        .sort((a, b) => b.total_cost - a.total_cost);
+
+      const summary: UsageSummary = {
+        total_cost_today: todayStats.totalCost,
+        total_cost_week: weekStats.totalCost,
+        total_cost_month: monthStats.totalCost,
+        total_requests_today: todayStats.totalRequests,
+        total_requests_week: weekStats.totalRequests,
+        total_requests_month: monthStats.totalRequests,
+        total_tokens_today: todayStats.totalTokens,
+        total_tokens_week: weekStats.totalTokens,
+        total_tokens_month: monthStats.totalTokens,
+        success_rate_today: todayStats.successRate,
+        success_rate_week: weekStats.successRate,
+        success_rate_month: monthStats.successRate,
+        top_users: topUsers,
+        top_functions: topFunctions,
+      };
+
+      return summary;
     },
   });
 };
@@ -119,8 +199,103 @@ export const useUsageChartData = (filters: UsageFilters = {}) => {
   return useQuery({
     queryKey: ['usage-chart-data', filters],
     queryFn: async () => {
-      // Mock implementation - replace with actual Supabase query
-      return generateMockChartData();
+      console.log('Fetching usage chart data');
+      
+      // Get data for the last 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      
+      const { data, error } = await supabase
+        .from('api_usage_tracking')
+        .select('*')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Group data by date
+      const dailyData = (data || []).reduce((acc: any, record) => {
+        const date = record.created_at.split('T')[0];
+        if (!acc[date]) {
+          acc[date] = {
+            date,
+            text_generation_cost: 0,
+            image_generation_cost: 0,
+            image_prompt_cost: 0,
+            total_cost: 0,
+            total_requests: 0,
+          };
+        }
+        
+        const cost = Number(record.estimated_cost || 0);
+        acc[date].total_cost += cost;
+        acc[date].total_requests++;
+        
+        if (record.request_type === 'text_generation') {
+          acc[date].text_generation_cost += cost;
+        } else if (record.request_type === 'image_generation') {
+          acc[date].image_generation_cost += cost;
+        } else if (record.request_type === 'image_prompt') {
+          acc[date].image_prompt_cost += cost;
+        }
+        
+        return acc;
+      }, {});
+
+      // Convert to array and fill missing dates
+      const dailyCosts = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        dailyCosts.push(dailyData[date] || {
+          date,
+          text_generation_cost: 0,
+          image_generation_cost: 0,
+          image_prompt_cost: 0,
+          total_cost: 0,
+          total_requests: 0,
+        });
+      }
+
+      // Calculate function and model distributions
+      const functionDist = (data || []).reduce((acc: any, record) => {
+        const funcName = record.function_name;
+        if (!acc[funcName]) {
+          acc[funcName] = { function_name: funcName, cost: 0, requests: 0 };
+        }
+        acc[funcName].cost += Number(record.estimated_cost || 0);
+        acc[funcName].requests++;
+        return acc;
+      }, {});
+
+      const modelDist = (data || []).reduce((acc: any, record) => {
+        const model = record.model_used;
+        if (!acc[model]) {
+          acc[model] = { model, cost: 0, requests: 0 };
+        }
+        acc[model].cost += Number(record.estimated_cost || 0);
+        acc[model].requests++;
+        return acc;
+      }, {});
+
+      // Calculate daily success rates
+      const successRates = dailyCosts.map(day => {
+        const dayData = (data || []).filter(record => 
+          record.created_at.split('T')[0] === day.date
+        );
+        return {
+          date: day.date,
+          success_rate: dayData.length > 0 ? 
+            dayData.filter(r => r.success).length / dayData.length : 0,
+        };
+      });
+
+      const chartData: UsageChartData = {
+        daily_costs: dailyCosts,
+        function_distribution: Object.values(functionDist),
+        model_usage: Object.values(modelDist),
+        success_rates: successRates,
+      };
+
+      return chartData;
     },
   });
 };
@@ -131,9 +306,14 @@ export const useUsageByUser = (userId?: string) => {
     queryFn: async () => {
       if (!userId) return null;
       
-      // Mock implementation - replace with actual Supabase query
-      const allData = generateMockUsageData();
-      return allData.filter(record => record.user_id === userId);
+      const { data, error } = await supabase
+        .from('api_usage_tracking')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
     },
     enabled: !!userId,
   });
@@ -145,9 +325,14 @@ export const useUsageByFunction = (functionName?: string) => {
     queryFn: async () => {
       if (!functionName) return null;
       
-      // Mock implementation - replace with actual Supabase query
-      const allData = generateMockUsageData();
-      return allData.filter(record => record.function_name === functionName);
+      const { data, error } = await supabase
+        .from('api_usage_tracking')
+        .select('*')
+        .eq('function_name', functionName)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
     },
     enabled: !!functionName,
   });
