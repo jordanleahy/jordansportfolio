@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Save, X, Sparkles, Video, ExternalLink, User } from "lucide-react";
+import { Edit, Save, X, Sparkles, Video, ExternalLink, User, Settings } from "lucide-react";
 import { CompanyPortfolio, StructuredCoverLetter } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UploadTopVideoButton } from "./UploadTopVideoButton";
 import { CoverLetterPromptModal } from "./CoverLetterPromptModal";
+import { PortfolioOGModal } from "./PortfolioOGModal";
 
 interface CoverLetterEditorProps {
   portfolio: CompanyPortfolio & {
@@ -29,6 +30,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [selectedRoleType, setSelectedRoleType] = useState<'product_manager' | 'product_designer'>('product_manager');
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isOGModalOpen, setIsOGModalOpen] = useState(false);
   const [editData, setEditData] = useState<StructuredCoverLetter>({
     opening_hook: '',
     key_achievements: [''],
@@ -192,6 +194,10 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
                 <Sparkles className="w-5 h-5" />
               </Button>
               
+              <Button onClick={() => setIsOGModalOpen(true)} size="default" variant="outline" className="w-12 h-12 p-3">
+                <Settings className="w-5 h-5" />
+              </Button>
+              
               <Button onClick={handleStartEdit} size="default" variant="outline" className="w-12 h-12 p-3">
                 <Edit className="w-5 h-5" />
               </Button>
@@ -294,6 +300,12 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
         onClose={() => setIsPromptModalOpen(false)}
         onSubmit={handleRegenerateWithAgent}
         isLoading={isRegenerating}
+      />
+      
+      <PortfolioOGModal
+        isOpen={isOGModalOpen}
+        onClose={() => setIsOGModalOpen(false)}
+        portfolio={portfolio}
       />
     </Card>
   );
