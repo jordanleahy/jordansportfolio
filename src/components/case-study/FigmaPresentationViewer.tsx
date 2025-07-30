@@ -48,7 +48,7 @@ export const FigmaPresentationViewer = ({
               src={presentationUrl}
               className="w-full h-full rounded"
               allowFullScreen
-              title="Figma Use Case Presentation"
+              title="Use Case Presentation"
             />
           </div>
         </div>
