@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageIcon, Loader2, Sparkles } from 'lucide-react';
+import { ImageIcon, Loader2, Sparkles, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,7 +20,7 @@ interface SimplifiedUploadDropdownProps {
   isUploading: (postId: string, aspectRatio?: AspectRatio) => boolean;
   getUploadType: (postId: string) => AspectRatio | null;
   onFileSelect: (postId: string, aspectRatio: AspectRatio) => void;
-  onPostsChange?: () => void;
+  onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
 export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> = ({
@@ -31,7 +31,8 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   onPostsChange,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
+  const [generationStep, setGenerationStep] = useState<string>('');
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   
   const postIsUploading = isUploading(post.id);
   const uploadType = getUploadType(post.id);
@@ -43,10 +44,56 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     { value: '4_3' as const, label: '4:3 (Landscape)' },
   ];
 
+  const handleGenerateAllImages = async () => {
+    if (!post) return;
+    
+    setIsBatchGenerating(true);
+    console.log('🚀 Starting batch image generation for post:', post.id);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-all-images', {
+        body: {
+          postId: post.id,
+          title: post.title,
+          description: post.description,
+          category: post.category
+        }
+      });
+
+      if (error) {
+        console.error('❌ Batch generation failed:', error);
+        toast.error('Batch generation failed');
+        return;
+      }
+
+      console.log('✅ Batch generation completed:', data);
+      toast.success(`Generated ${data.imagesGenerated} images successfully!`);
+      
+      // Refresh the post data to show the new images
+      if (onPostsChange) {
+        const { data: refreshedPosts } = await supabase
+          .from('social_media_posts')
+          .select('*')
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+          .order('day', { ascending: true });
+        
+        if (refreshedPosts) {
+          onPostsChange(refreshedPosts as SocialMediaPost[]);
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Batch generation error:', error);
+      toast.error('Batch generation failed');
+    } finally {
+      setIsBatchGenerating(false);
+    }
+  };
+
   const handleGenerateImage = async (aspectRatio: AspectRatio) => {
     try {
       setIsGenerating(true);
-      setGenerationStep('prompt');
+      setGenerationStep('Generating prompt...');
       
       console.log('🎨 IMAGE_GENERATION: Starting generation for post:', post.id, 'aspect:', aspectRatio);
       
@@ -81,7 +128,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         .eq('id', post.id);
 
       // Step 2: Generate image
-      setGenerationStep('image');
+      setGenerationStep('Creating image...');
       toast.info('Generating image with AI...');
 
       const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
@@ -101,7 +148,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       }
 
       // Step 3: Convert to file and upload
-      setGenerationStep('upload');
+      setGenerationStep('Processing...');
       toast.info('Processing and uploading image...');
 
       // Convert base64 to blob
@@ -148,81 +195,106 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       });
 
       toast.success('Image generated and uploaded successfully!');
-      onPostsChange?.();
+      
+      // Refresh the post data
+      if (onPostsChange) {
+        const { data: refreshedPosts } = await supabase
+          .from('social_media_posts')
+          .select('*')
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+          .order('day', { ascending: true });
+        
+        if (refreshedPosts) {
+          onPostsChange(refreshedPosts as SocialMediaPost[]);
+        }
+      }
 
     } catch (error) {
       console.error('🎨 IMAGE_GENERATION: Error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image');
     } finally {
       setIsGenerating(false);
-      setGenerationStep(null);
+      setGenerationStep('');
     }
   };
 
-  const getLoadingText = () => {
-    if (generationStep === 'prompt') return 'Generating prompt...';
-    if (generationStep === 'image') return 'Creating image...';
-    if (generationStep === 'upload') return 'Processing...';
-    return 'Upload or Generate';
-  };
+  const isUploadingOrGenerating = isUploading(post.id) || isGenerating || isBatchGenerating;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" title={getLoadingText()}>
-          {(postIsUploading || isGenerating) ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <ImageIcon className="h-4 w-4" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
-        {aspectRatioOptions.map((option) => (
-          <DropdownMenuItem
-            key={`upload-${option.value}`}
-            onClick={() => {
-              console.log('🖼️ IMAGE_UPLOAD: Dropdown option clicked', { 
-                postId: post.id, 
-                aspectRatio: option.value, 
-                postTitle: post.title 
-              });
-              onFileSelect(post.id, option.value);
-            }}
-            disabled={uploadType === option.value || isGenerating}
-            className="cursor-pointer"
+    <div className="flex">
+      {/* Left Button - Generate All Images */}
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={isUploadingOrGenerating}
+        className="h-8 px-3 rounded-r-none border-r-0"
+        onClick={handleGenerateAllImages}
+        title="Generate All Images"
+      >
+        {isBatchGenerating ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <ImageIcon className="h-4 w-4" />
+        )}
+      </Button>
+      
+      {/* Right Button - Dropdown Menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isUploadingOrGenerating}
+            className="h-8 px-2 rounded-l-none border-l border-l-border/50"
           >
-            <ImageIcon className="mr-2 h-4 w-4" />
-            {option.label}
-            {uploadType === option.value && (
-              <Loader2 className="ml-auto h-4 w-4 animate-spin" />
-            )}
-          </DropdownMenuItem>
-        ))}
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
-        {aspectRatioOptions.map((option) => (
-          <DropdownMenuItem
-            key={`generate-${option.value}`}
-            onClick={() => handleGenerateImage(option.value)}
-            disabled={isGenerating || postIsUploading}
-            className="cursor-pointer"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            {option.label}
-            {isGenerating && (
-              <span className="ml-auto text-xs text-muted-foreground">
-                {generationStep === 'prompt' && 'Prompt...'}
-                {generationStep === 'image' && 'Image...'}
-                {generationStep === 'upload' && 'Upload...'}
-              </span>
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
+          {aspectRatioOptions.map((option) => (
+            <DropdownMenuItem
+              key={`upload-${option.value}`}
+              onClick={() => {
+                console.log('🖼️ IMAGE_UPLOAD: Dropdown option clicked', { 
+                  postId: post.id, 
+                  aspectRatio: option.value, 
+                  postTitle: post.title 
+                });
+                onFileSelect(post.id, option.value);
+              }}
+              disabled={uploadType === option.value || isGenerating}
+              className="cursor-pointer"
+            >
+              <ImageIcon className="mr-2 h-4 w-4" />
+              {option.label}
+              {uploadType === option.value && (
+                <Loader2 className="ml-auto h-4 w-4 animate-spin" />
+              )}
+            </DropdownMenuItem>
+          ))}
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
+          {aspectRatioOptions.map((option) => (
+            <DropdownMenuItem
+              key={`generate-${option.value}`}
+              onClick={() => handleGenerateImage(option.value)}
+              disabled={isGenerating || postIsUploading}
+              className="cursor-pointer"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              {option.label}
+              {isGenerating && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {generationStep}
+                </span>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
