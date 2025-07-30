@@ -41,6 +41,9 @@ import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
 import { AdminComparisons } from "./pages/admin/AdminComparisons";
 import { ComparisonForm } from "./pages/admin/ComparisonForm";
+
+// Lazy load API Usage component
+const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -127,6 +130,16 @@ function App() {
                 <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
                 <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                <Route 
+                  path="/admin/api-usage" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                        <ApiUsage />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
