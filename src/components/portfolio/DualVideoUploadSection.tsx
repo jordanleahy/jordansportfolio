@@ -7,7 +7,7 @@ import { CompanyPortfolio } from '@/types/companyPortfolio';
 import { useUpdateCompanyPortfolio } from '@/hooks/useCompanyPortfolios';
 import { uploadVideoToStorage, isVideoFile } from '@/utils/videoUpload';
 import { toast } from 'sonner';
-import { TimeOnTaskTimer } from '@/components/TimeOnTaskTimer';
+
 
 interface DualVideoUploadSectionProps {
   topVideoSrc?: string;
@@ -243,11 +243,6 @@ export const DualVideoUploadSection: React.FC<DualVideoUploadSectionProps> = ({
           style={{ display: 'none' }}
         />
         
-        {showTimer && (
-          <div className="absolute bottom-4 right-4">
-            <TimeOnTaskTimer />
-          </div>
-        )}
       </Card>
     </div>
   );

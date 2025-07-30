@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { TimeOnTaskTimer } from "@/components/TimeOnTaskTimer";
+
 import { Button } from "@/components/ui/button";
 import { Upload, Trash2, Settings, Image, ImageIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -321,7 +321,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             )}
           </div>
         </AspectRatio>
-        {showTimer && <TimeOnTaskTimer />}
+        
       </CardContent>
     </Card>
   );
