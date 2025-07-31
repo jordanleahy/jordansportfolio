@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +57,7 @@ const PostCardComponent = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -67,6 +69,51 @@ const PostCardComponent = ({
 
   const truncateText = (text: string, limit: number) => {
     return text.length > limit ? text.substring(0, limit) + '...' : text;
+  };
+
+  const handleBatchImageGeneration = async () => {
+    setIsBatchGenerating(true);
+    try {
+      console.log('🎨 Starting batch image generation for post:', post.id);
+      
+      const { data, error } = await supabase.functions.invoke('generate-all-images', {
+        body: { 
+          postId: post.id,
+          aspectRatios: ['16_9', '9_16', '3_4', '4_3']
+        }
+      });
+
+      if (error) {
+        console.error('❌ Batch generation error:', error);
+        toast({
+          title: "Generation Failed",
+          description: "Failed to generate images. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('✅ Batch generation successful:', data);
+      toast({
+        title: "Batch Generation Started",
+        description: "Generating images for all aspect ratios...",
+      });
+
+      // Refresh the post data to show new images
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+
+    } catch (error) {
+      console.error('❌ Batch generation error:', error);
+      toast({
+        title: "Generation Failed", 
+        description: "Failed to generate images. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsBatchGenerating(false);
+    }
   };
 
 
@@ -180,19 +227,36 @@ const PostCardComponent = ({
           </div>
           
           <div className="flex gap-2">
-            <Button
+            <SplitButton
               variant="outline"
               size="sm"
-              onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
-            >
-              <ImageIcon className="h-4 w-4" />
-              {showPhotos ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
-              )}
-            </Button>
+              primaryAction={{
+                onClick: handleBatchImageGeneration,
+                disabled: isBatchGenerating,
+                loading: isBatchGenerating,
+                title: "Generate all images",
+                children: isBatchGenerating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )
+              }}
+              dropdownTrigger={{
+                disabled: isBatchGenerating,
+                title: showPhotos ? "Hide photos" : "Show photos",
+                children: (
+                  <div onClick={() => setShowPhotos(!showPhotos)}>
+                    {showPhotos ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                )
+              }}
+              dropdownContent={null}
+            />
             <Button
               variant="outline"
               size="sm"
