@@ -223,8 +223,8 @@ export const PostsTableView = memo(({
               </div>
             </TableCell>
             <TableCell className="w-40">
-              <div className="flex gap-2 flex-wrap">
-                {/* 16:9 Image */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* Top row: 16:9 and 4:3 */}
                 {isGenerating ? (
                   <div className="w-16 h-9 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
@@ -240,45 +240,8 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
-                ) : null}
+                ) : <div className="w-16 h-9"></div>}
 
-                {/* 9:16 Image */}
-                {isGenerating ? (
-                  <div className="w-9 h-16 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_9_16_url ? (
-                  <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_9_16_url}
-                      alt="9:16 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
-                  </div>
-                ) : null}
-
-                {/* 3:4 Image */}
-                {isGenerating ? (
-                  <div className="w-12 h-16 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_3_4_url ? (
-                  <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_3_4_url}
-                      alt="3:4 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
-                  </div>
-                ) : null}
-
-                {/* 4:3 Image */}
                 {isGenerating ? (
                   <div className="w-16 h-12 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
@@ -294,7 +257,42 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
                   </div>
-                ) : null}
+                ) : <div className="w-16 h-12"></div>}
+
+                {/* Bottom row: 9:16 and 3:4 */}
+                {isGenerating ? (
+                  <div className="w-9 h-16 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_9_16_url ? (
+                  <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
+                      src={post.image_9_16_url}
+                      alt="9:16 aspect ratio"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
+                      onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
+                    />
+                    <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
+                  </div>
+                ) : <div className="w-9 h-16"></div>}
+
+                {isGenerating ? (
+                  <div className="w-12 h-16 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_3_4_url ? (
+                  <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
+                      src={post.image_3_4_url}
+                      alt="3:4 aspect ratio"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
+                      onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
+                    />
+                    <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
+                  </div>
+                ) : <div className="w-12 h-16"></div>}
               </div>
             </TableCell>
             <TableCell className="w-48">
