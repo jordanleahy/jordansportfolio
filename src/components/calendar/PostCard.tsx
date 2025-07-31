@@ -207,31 +207,19 @@ const PostCardComponent = ({
               onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
               onPostsChange={onPostsChange}
             />
-            <SplitButton
+            <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
-              primaryAction={{
-                onClick: () => setShowPhotos(!showPhotos),
-                title: showPhotos ? "Hide photos" : "Show photos",
-                className: "flex-1 min-w-0",
-                children: <ImageIcon className="h-4 w-4" />
-              }}
-              dropdownTrigger={{
-                title: showPhotos ? "Hide photos" : "Show photos",
-                className: "w-9 flex-shrink-0",
-                children: (
-                  <div onClick={() => setShowPhotos(!showPhotos)}>
-                    {showPhotos ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                )
-              }}
-              dropdownContent={null}
-            />
+            >
+              <ImageIcon className="h-4 w-4" />
+              {showPhotos ? (
+                <ChevronUp className="h-4 w-4 ml-1" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-1" />
+              )}
+            </Button>
             <Button
               variant="outline"
               size="sm"
