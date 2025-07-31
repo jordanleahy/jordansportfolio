@@ -213,13 +213,13 @@ export function RealtimeDebugger({ connectionStatus }: RealtimeDebuggerProps) {
                         </div>
                       </div>
                       <div className="font-medium mb-1">{log.message}</div>
-                      {log.data && (
+                      {log.metadata && (
                         <details className="text-muted-foreground">
                           <summary className="cursor-pointer hover:text-foreground">
                             View Data
                           </summary>
                           <pre className="mt-1 text-xs overflow-x-auto bg-background p-2 rounded">
-                            {JSON.stringify(log.data, null, 2)}
+                            {JSON.stringify(log.metadata, null, 2)}
                           </pre>
                         </details>
                       )}
