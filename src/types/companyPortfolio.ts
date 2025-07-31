@@ -11,9 +11,6 @@ export interface CompanyPortfolio {
   custom_top_video_url?: string;
   custom_poster_url?: string;
   custom_top_poster_url?: string;
-  og_title?: string;
-  og_description?: string;
-  og_image_url?: string;
   status: 'draft' | 'completed' | 'published';
   created_at: string;
   updated_at: string;
@@ -29,9 +26,6 @@ export interface CompanyPortfolioInput {
   custom_top_video_url?: string;
   custom_poster_url?: string;
   custom_top_poster_url?: string;
-  og_title?: string;
-  og_description?: string;
-  og_image_url?: string;
   status?: 'draft' | 'completed' | 'published';
 }
 

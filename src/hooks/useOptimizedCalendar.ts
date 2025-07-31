@@ -37,14 +37,8 @@ export const useOptimizedCalendar = (user: any) => {
   const [activeTab, setActiveTab] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Get URL params for tab state (fallback mechanism)
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlTab = urlParams.get('tab');
-
-  // Get user preferences with enhanced debugging
+  // Get user preferences
   const userPrefs = getUserPreferences();
-  console.log('[Calendar] User preferences loaded:', userPrefs);
-  console.log('[Calendar] URL tab parameter:', urlTab);
 
   // Primary query: available categories
   const { 
@@ -52,36 +46,20 @@ export const useOptimizedCalendar = (user: any) => {
     isLoading: categoriesLoading 
   } = useAvailableCategories(!!user);
 
-  // Initialize active tab with enhanced preference handling
+  // Initialize active tab with user preferences
   useEffect(() => {
     if (!isInitialized && availableCategories.length > 0) {
-      console.log('[Calendar] Available categories:', availableCategories);
-      console.log('[Calendar] User preferred category:', userPrefs.defaultCategory);
-      console.log('[Calendar] URL tab parameter:', urlTab);
+      // Set active tab to user's preferred category if available, otherwise first category
+      const defaultTab = availableCategories.includes(userPrefs.defaultCategory) 
+        ? userPrefs.defaultCategory 
+        : availableCategories[0];
       
-      // Priority order: URL tab > User preference > First available category
-      let selectedTab = availableCategories[0]; // Fallback
-      
-      if (urlTab && availableCategories.includes(urlTab)) {
-        selectedTab = urlTab;
-        console.log('[Calendar] Using URL tab:', selectedTab);
-      } else if (userPrefs.defaultCategory && availableCategories.includes(userPrefs.defaultCategory)) {
-        selectedTab = userPrefs.defaultCategory;
-        console.log('[Calendar] Using user preference tab:', selectedTab);
-      } else {
-        console.log('[Calendar] Using fallback tab:', selectedTab);
-        console.log('[Calendar] User preference not found in available categories');
-      }
-      
-      setActiveTab(selectedTab);
+      setActiveTab(defaultTab);
       setIsInitialized(true);
       
-      // Update URL without page reload
-      updateURLTab(selectedTab);
-      
-      console.log('[Calendar] Initialized with tab:', selectedTab);
+      console.log('[Calendar] Initialized with default tab:', defaultTab);
     }
-  }, [availableCategories, userPrefs.defaultCategory, urlTab, isInitialized]);
+  }, [availableCategories, userPrefs.defaultCategory, isInitialized]);
 
   // Primary category posts (loads immediately)
   const { 
@@ -109,28 +87,15 @@ export const useOptimizedCalendar = (user: any) => {
     }
   }, [availableCategories, activeTab, queryClient]);
 
-  // Helper function to update URL without page reload
-  const updateURLTab = (tab: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', tab);
-    window.history.replaceState({}, '', url.toString());
-  };
-
   // Update user preferences when active tab changes
   const handleTabChange = (newTab: string) => {
-    console.log('[Calendar] Changing tab from', activeTab, 'to', newTab);
     setActiveTab(newTab);
-    
-    // Update URL immediately
-    updateURLTab(newTab);
     
     // Update user preferences
     const updatedPrefs = {
       defaultCategory: newTab,
       recentCategories: [newTab, ...userPrefs.recentCategories.filter(c => c !== newTab)].slice(0, 5),
     };
-    
-    console.log('[Calendar] Saving preferences:', updatedPrefs);
     saveUserPreferences(updatedPrefs);
     
     console.log('[Calendar] Tab changed to:', newTab);

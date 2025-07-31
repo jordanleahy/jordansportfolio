@@ -4,18 +4,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ExternalLink, Edit, Trash2, FileText, Building2, Paperclip, Image, Video, CalendarIcon } from "lucide-react";
+import { ExternalLink, Edit, Trash2, FileText, Building2, Paperclip, Image, Video } from "lucide-react";
 import { JobApplication } from "@/types/jobApplication";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useCompanyPortfolios } from "@/hooks/useCompanyPortfolios";
-import { useOptimizedUpdateJobApplication } from "@/hooks/useOptimizedJobApplications";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPersonalizedPortfolio } from "@/services/landingPageService";
-import { cn } from "@/lib/utils";
 
 interface JobApplicationsTableProps {
   applications: JobApplication[];
@@ -29,7 +25,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   const [creatingPortfolio, setCreatingPortfolio] = useState<string | null>(null);
   const navigate = useNavigate();
   const { data: portfolios } = useCompanyPortfolios();
-  const updateJobApplication = useOptimizedUpdateJobApplication();
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -151,13 +146,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
     return portfolios?.some(p => p.company_slug === companySlug) || false;
   };
 
-  const handleSubmittedDateChange = (applicationId: string, date: Date | undefined) => {
-    updateJobApplication.mutate({
-      id: applicationId,
-      submitted: date ? date.toISOString() : null,
-    });
-  };
-
   if (applications.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -240,47 +228,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                 Applied {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
               </div>
               
-              {/* Submitted Date */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">Submitted:</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[160px] justify-start text-left font-normal h-9",
-                        !application.submitted && "text-muted-foreground hover:text-foreground"
-                      )}
-                      size="sm"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
-                      {application.submitted ? format(new Date(application.submitted), "MMM d, yyyy") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-card" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={application.submitted ? new Date(application.submitted) : undefined}
-                      onSelect={(date) => handleSubmittedDateChange(application.id, date)}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                    {application.submitted && (
-                      <div className="flex justify-center border-t p-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSubmittedDateChange(application.id, undefined)}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          Clear date
-                        </Button>
-                      </div>
-                    )}
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
               {/* Actions Row */}
               <div className="flex justify-between items-center pt-2 border-t">
                 <div className="flex gap-2">
@@ -354,8 +301,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
               <TableHead>Resume</TableHead>
               <TableHead>Cover Letter</TableHead>
               <TableHead>Attachment</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Submitted</TableHead>
+              <TableHead>Applied</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -463,44 +409,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                   <span className="text-sm text-muted-foreground">
                     {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
                   </span>
-                </TableCell>
-                <TableCell>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-[160px] justify-start text-left font-normal h-9",
-                          !application.submitted && "text-muted-foreground hover:text-foreground"
-                        )}
-                        size="sm"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
-                        {application.submitted ? format(new Date(application.submitted), "MMM d, yyyy") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-card" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={application.submitted ? new Date(application.submitted) : undefined}
-                        onSelect={(date) => handleSubmittedDateChange(application.id, date)}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                      {application.submitted && (
-                        <div className="flex justify-center border-t p-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSubmittedDateChange(application.id, undefined)}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            Clear date
-                          </Button>
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +42,6 @@ const Navigation = () => {
     // Admin-only items
     ...(isAdmin ? [
       { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
-      { href: "/admin/api-usage", label: "API Usage", icon: Activity },
       { href: "/jobs", label: "Jobs", icon: FileText },
       { href: "/agents", label: "AI Agents", icon: Settings },
       { href: "/admin-blog", label: "Blog Admin", icon: BookOpen }
@@ -171,29 +170,17 @@ const Navigation = () => {
                         </NavigationMenuItem>
 
 
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/admin/api-usage"
-                               className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
-                             >
-                               <Activity className="mr-2 h-4 w-4" />
-                               API Usage
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
-
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/jobs"
-                               className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
-                             >
-                               <FileText className="mr-2 h-4 w-4" />
-                               Jobs
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/jobs"
+                              className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Jobs
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
 
                         <NavigationMenuItem>
                           <NavigationMenuLink asChild>
@@ -384,24 +371,15 @@ const Navigation = () => {
                         >
                           <BarChart3 className="h-4 w-4" />
                         </Link>
-                         <Link
-                           to="/admin/api-usage"
-                           className={cn(
-                             "p-2 rounded-lg transition-colors hover:bg-accent",
-                             isActive("/admin/api-usage") && "bg-accent text-accent-foreground"
-                           )}
-                         >
-                           <Activity className="h-4 w-4" />
-                         </Link>
-                         <Link
-                           to="/jobs"
-                           className={cn(
-                             "p-2 rounded-lg transition-colors hover:bg-accent",
-                             isActive("/jobs") && "bg-accent text-accent-foreground"
-                           )}
-                         >
-                           <FileText className="h-4 w-4" />
-                         </Link>
+                        <Link
+                          to="/jobs"
+                          className={cn(
+                            "p-2 rounded-lg transition-colors hover:bg-accent",
+                            isActive("/jobs") && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Link>
                         <Link
                           to="/agents"
                           className={cn(

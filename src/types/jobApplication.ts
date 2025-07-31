@@ -10,7 +10,6 @@ export interface JobApplication {
   attachment_url?: string;
   attachment_filename?: string;
   attachment_type?: string;
-  submitted?: string;
   created_at: string;
   updated_at: string;
 }
@@ -25,5 +24,4 @@ export interface JobApplicationInput {
   attachment_url?: string;
   attachment_filename?: string;
   attachment_type?: string;
-  submitted?: string;
 }

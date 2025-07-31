@@ -14,69 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      api_usage_tracking: {
-        Row: {
-          completion_tokens: number | null
-          created_at: string
-          error_message: string | null
-          estimated_cost: number
-          function_name: string
-          id: string
-          image_quality: string | null
-          image_size: string | null
-          model_used: string
-          prompt_tokens: number | null
-          request_metadata: Json | null
-          request_type: string
-          response_time_ms: number | null
-          success: boolean
-          tokens_used: number | null
-          total_tokens: number | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completion_tokens?: number | null
-          created_at?: string
-          error_message?: string | null
-          estimated_cost?: number
-          function_name: string
-          id?: string
-          image_quality?: string | null
-          image_size?: string | null
-          model_used: string
-          prompt_tokens?: number | null
-          request_metadata?: Json | null
-          request_type: string
-          response_time_ms?: number | null
-          success?: boolean
-          tokens_used?: number | null
-          total_tokens?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completion_tokens?: number | null
-          created_at?: string
-          error_message?: string | null
-          estimated_cost?: number
-          function_name?: string
-          id?: string
-          image_quality?: string | null
-          image_size?: string | null
-          model_used?: string
-          prompt_tokens?: number | null
-          request_metadata?: Json | null
-          request_type?: string
-          response_time_ms?: number | null
-          success?: boolean
-          tokens_used?: number | null
-          total_tokens?: number | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       blog_posts: {
         Row: {
           category: string
@@ -360,9 +297,6 @@ export type Database = {
           generated_content: Json | null
           id: string
           job_application_id: string
-          og_description: string | null
-          og_image_url: string | null
-          og_title: string | null
           status: string
           updated_at: string
           user_id: string
@@ -381,9 +315,6 @@ export type Database = {
           generated_content?: Json | null
           id?: string
           job_application_id: string
-          og_description?: string | null
-          og_image_url?: string | null
-          og_title?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -402,9 +333,6 @@ export type Database = {
           generated_content?: Json | null
           id?: string
           job_application_id?: string
-          og_description?: string | null
-          og_image_url?: string | null
-          og_title?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -1015,7 +943,6 @@ export type Database = {
           job_description_link: string | null
           resume_link: string | null
           resume_text: string | null
-          submitted: string | null
           updated_at: string
           user_id: string
         }
@@ -1031,7 +958,6 @@ export type Database = {
           job_description_link?: string | null
           resume_link?: string | null
           resume_text?: string | null
-          submitted?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1047,7 +973,6 @@ export type Database = {
           job_description_link?: string | null
           resume_link?: string | null
           resume_text?: string | null
-          submitted?: string | null
           updated_at?: string
           user_id?: string
         }

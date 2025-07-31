@@ -8,7 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SEC from "./pages/SEC";
@@ -41,9 +41,6 @@ import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
 import { AdminComparisons } from "./pages/admin/AdminComparisons";
 import { ComparisonForm } from "./pages/admin/ComparisonForm";
-
-// Lazy load API Usage component
-const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
@@ -51,29 +48,30 @@ const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const OptimizedCalendar = lazy(() => import("./pages/OptimizedCalendar"));
 
 
-function App() {
-  // Initialize QueryClient inside component to avoid React reconciliation issues
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        retry: (failureCount, error) => {
-          // Don't retry on 4xx errors
-          if (error && typeof error === 'object' && 'status' in error) {
-            const status = error.status as number;
-            if (status >= 400 && status < 500) return false;
-          }
-          return failureCount < 2;
-        },
-      },
-      mutations: {
-        retry: 1,
+// Optimized QueryClient configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors
+        if (error && typeof error === 'object' && 'status' in error) {
+          const status = error.status as number;
+          if (status >= 400 && status < 500) return false;
+        }
+        return failureCount < 2;
       },
     },
-  }));
+    mutations: {
+      retry: 1,
+    },
+  },
+});
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
@@ -130,16 +128,6 @@ function App() {
                 <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
                 <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
-                <Route 
-                  path="/admin/api-usage" 
-                  element={
-                    <AdminRoute>
-                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                        <ApiUsage />
-                      </Suspense>
-                    </AdminRoute>
-                  } 
-                />
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />

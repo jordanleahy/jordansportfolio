@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Loader2, Sparkles, ChevronDown, ImageIcon } from 'lucide-react';
+import { ImageIcon, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,16 +13,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-import { ASPECT_RATIO_CONFIGS, convertAspectRatio } from '@/types/batchImageGeneration';
-import type { AspectRatioKey } from '@/types/batchImageGeneration';
+type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
 
 interface SimplifiedUploadDropdownProps {
   post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
-  onPostsChange?: (posts: SocialMediaPost[]) => void;
-  className?: string;
+  isUploading: (postId: string, aspectRatio?: AspectRatio) => boolean;
+  getUploadType: (postId: string) => AspectRatio | null;
+  onFileSelect: (postId: string, aspectRatio: AspectRatio) => void;
+  onPostsChange?: () => void;
 }
 
 export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> = ({
@@ -31,26 +29,24 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   getUploadType,
   onFileSelect,
   onPostsChange,
-  className,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<string>('');
-  
+  const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
   
   const postIsUploading = isUploading(post.id);
   const uploadType = getUploadType(post.id);
 
-  // Use optimized aspect ratio configs
-  const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
-    value: config.key,
-    label: config.label
-  }));
+  const aspectRatioOptions = [
+    { value: '16_9' as const, label: '16:9 (Landscape)' },
+    { value: '9_16' as const, label: '9:16 (Portrait)' },
+    { value: '3_4' as const, label: '3:4 (Portrait)' },
+    { value: '4_3' as const, label: '4:3 (Landscape)' },
+  ];
 
-
-  const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
+  const handleGenerateImage = async (aspectRatio: AspectRatio) => {
     try {
       setIsGenerating(true);
-      setGenerationStep('Generating prompt...');
+      setGenerationStep('prompt');
       
       console.log('🎨 IMAGE_GENERATION: Starting generation for post:', post.id, 'aspect:', aspectRatio);
       
@@ -85,7 +81,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         .eq('id', post.id);
 
       // Step 2: Generate image
-      setGenerationStep('Creating image...');
+      setGenerationStep('image');
       toast.info('Generating image with AI...');
 
       const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
@@ -105,7 +101,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       }
 
       // Step 3: Convert to file and upload
-      setGenerationStep('Processing...');
+      setGenerationStep('upload');
       toast.info('Processing and uploading image...');
 
       // Convert base64 to blob
@@ -152,44 +148,36 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       });
 
       toast.success('Image generated and uploaded successfully!');
-      
-      // Refresh the post data
-      if (onPostsChange) {
-        const { data: refreshedPosts } = await supabase
-          .from('social_media_posts')
-          .select('*')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-          .order('day', { ascending: true });
-        
-        if (refreshedPosts) {
-          onPostsChange(refreshedPosts as SocialMediaPost[]);
-        }
-      }
+      onPostsChange?.();
 
     } catch (error) {
       console.error('🎨 IMAGE_GENERATION: Error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image');
     } finally {
       setIsGenerating(false);
-      setGenerationStep('');
+      setGenerationStep(null);
     }
+  };
+
+  const getLoadingText = () => {
+    if (generationStep === 'prompt') return 'Generating prompt...';
+    if (generationStep === 'image') return 'Creating image...';
+    if (generationStep === 'upload') return 'Processing...';
+    return 'Upload or Generate';
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={isUploading(post.id)}
-          className={`flex-1 focus:outline-none focus:ring-0 focus:border-transparent ${className || ''}`}
-          title="Image generation and upload actions"
-          aria-label="Open image actions menu"
-        >
-          <ChevronDown className="h-4 w-4" />
+        <Button variant="ghost" size="sm" title={getLoadingText()}>
+          {(postIsUploading || isGenerating) ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ImageIcon className="h-4 w-4" />
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-md z-50">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
@@ -203,7 +191,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
               onFileSelect(post.id, option.value);
             }}
             disabled={uploadType === option.value || isGenerating}
-            className="cursor-pointer focus:bg-accent"
+            className="cursor-pointer"
           >
             <ImageIcon className="mr-2 h-4 w-4" />
             {option.label}
@@ -215,19 +203,21 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuLabel>Generate Individual</DropdownMenuLabel>
+        <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
             key={`generate-${option.value}`}
             onClick={() => handleGenerateImage(option.value)}
             disabled={isGenerating || postIsUploading}
-            className="cursor-pointer focus:bg-accent"
+            className="cursor-pointer"
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {option.label}
             {isGenerating && (
               <span className="ml-auto text-xs text-muted-foreground">
-                {generationStep}
+                {generationStep === 'prompt' && 'Prompt...'}
+                {generationStep === 'image' && 'Image...'}
+                {generationStep === 'upload' && 'Upload...'}
               </span>
             )}
           </DropdownMenuItem>

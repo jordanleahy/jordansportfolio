@@ -49,14 +49,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     getUploadType,
   } = useImageUpload({ onPostsChange });
 
-  // Convert nested uploading states to flat format for PostCard
-  const flatUploadingStates = Object.entries(uploadingPosts).reduce((acc, [postId, aspectRatios]) => {
-    Object.entries(aspectRatios).forEach(([aspectRatio, isUploading]) => {
-      acc[`${postId}_${aspectRatio}`] = isUploading;
-    });
-    return acc;
-  }, {} as Record<string, boolean>);
-
   // Filter posts by status
   const filteredPosts = posts.filter((post) => post.status === activeTab);
 
@@ -83,11 +75,11 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onGeneratePrompt={() => openImagePromptModal(post)}
                     onGenerateVoiceover={() => openVoiceoverModal(post)}
                     onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)}
+                    onVideoUpload={() => {}}
+                    onVideoRemove={() => {}}
                     onImageDelete={() => {}}
-                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
-                    onPostsChange={onPostsChange}
-                    uploadingStates={flatUploadingStates}
+                    uploadingStates={{}}
                     isAdmin={isAdmin}
                   />
                 ))}
@@ -124,11 +116,11 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onGeneratePrompt={() => openImagePromptModal(post)}
                     onGenerateVoiceover={() => openVoiceoverModal(post)}
                     onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)}
+                    onVideoUpload={() => {}}
+                    onVideoRemove={() => {}}
                     onImageDelete={() => {}}
-                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
-                    onPostsChange={onPostsChange}
-                    uploadingStates={flatUploadingStates}
+                    uploadingStates={{}}
                     isAdmin={isAdmin}
                   />
                 ))}

@@ -8,66 +8,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to track API usage
-async function trackApiUsage(
-  supabase: any,
-  userId: string,
-  functionName: string,
-  modelUsed: string,
-  requestType: string,
-  success: boolean,
-  estimatedCost: number,
-  tokensUsed?: number,
-  promptTokens?: number,
-  completionTokens?: number,
-  responseTimeMs?: number,
-  errorMessage?: string,
-  metadata?: any
-) {
-  try {
-    await supabase.from('api_usage_tracking').insert({
-      user_id: userId,
-      function_name: functionName,
-      model_used: modelUsed,
-      request_type: requestType,
-      tokens_used: tokensUsed,
-      prompt_tokens: promptTokens,
-      completion_tokens: completionTokens,
-      total_tokens: tokensUsed,
-      estimated_cost: estimatedCost,
-      success,
-      error_message: errorMessage,
-      request_metadata: metadata || {},
-      response_time_ms: responseTimeMs,
-    });
-    console.log('✅ API usage tracked successfully');
-  } catch (error) {
-    console.error('❌ Failed to track API usage:', error);
-  }
-}
-
-// Helper function to calculate cost for text generation
-function calculateTextGenerationCost(promptTokens: number, completionTokens: number): number {
-  const inputCost = promptTokens * (0.000150 / 1000); // $0.000150 per 1K input tokens
-  const outputCost = completionTokens * (0.000600 / 1000); // $0.000600 per 1K output tokens
-  return inputCost + outputCost;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-
-  const startTime = Date.now();
-  let userId: string | null = null;
-  let success = false;
-  let estimatedCost = 0;
-  let tokensUsed = 0;
-  let promptTokens = 0;
-  let completionTokens = 0;
-  let errorMessage: string | undefined;
-  let requestMetadata: any = {};
 
   try {
     if (!openAIApiKey) {
@@ -80,24 +25,11 @@ serve(async (req) => {
       throw new Error('Missing required fields: title, description, and category are required');
     }
 
-    // Store request metadata
-    requestMetadata = { category, title, description };
-
     // Initialize Supabase client
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Get user from auth header
-    const authHeader = req.headers.get('authorization');
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-    }
-
-    console.log('🚀 Generating image prompt for:', { category, title, userId: userId?.slice(0, 8) });
 
     // Get agent and find category prompt
     const { data: agentData, error: agentError } = await supabase
@@ -156,87 +88,18 @@ Category: ${category}`;
       throw new Error('No generated text received from OpenAI');
     }
 
-    // Extract usage data for cost calculation
-    const usage = openAIData.usage;
-    if (usage) {
-      promptTokens = usage.prompt_tokens;
-      completionTokens = usage.completion_tokens;
-      tokensUsed = usage.total_tokens;
-      estimatedCost = calculateTextGenerationCost(promptTokens, completionTokens);
-    }
-
-    success = true;
-    console.log('✅ Prompt generated successfully');
-
-    // Track API usage if we have userId
-    if (userId) {
-      const responseTime = Date.now() - startTime;
-      await trackApiUsage(
-        supabase,
-        userId,
-        'generate-image-prompt-dynamic',
-        'gpt-4o-mini',
-        'text_generation',
-        success,
-        estimatedCost,
-        tokensUsed,
-        promptTokens,
-        completionTokens,
-        responseTime,
-        undefined,
-        requestMetadata
-      );
-    }
-
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
       category,
-      agent: 'Blog Visual Prompt Generator',
-      usage: {
-        prompt_tokens: promptTokens,
-        completion_tokens: completionTokens,
-        total_tokens: tokensUsed,
-        estimated_cost: estimatedCost
-      }
+      agent: 'Blog Visual Prompt Generator'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('❌ Error in generate-image-prompt-dynamic function:', error);
-    errorMessage = error.message || 'An unexpected error occurred';
-    
-    // Track failed API usage if we have userId
-    if (userId) {
-      try {
-        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const responseTime = Date.now() - startTime;
-        await trackApiUsage(
-          supabase,
-          userId,
-          'generate-image-prompt-dynamic',
-          'gpt-4o-mini',
-          'text_generation',
-          false,
-          0,
-          0,
-          0,
-          0,
-          responseTime,
-          errorMessage,
-          requestMetadata
-        );
-      } catch (trackingError) {
-        console.error('Failed to track error usage:', trackingError);
-      }
-    }
-
+    console.error('Error in generate-image-prompt-dynamic function:', error);
     return new Response(JSON.stringify({ 
-      error: errorMessage
+      error: error.message || 'An unexpected error occurred'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
