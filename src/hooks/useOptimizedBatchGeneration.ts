@@ -271,7 +271,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
       }, 1000);
     }
-  }, [getOrGeneratePrompt]);
+  }, [cachedPrompts]);
 
   return {
     generateAllImages,
