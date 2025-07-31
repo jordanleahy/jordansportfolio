@@ -214,11 +214,7 @@ const PostCardComponent = ({
               className="flex-1"
               title={showPhotos ? "Hide photos" : "Show photos"}
             >
-              {showPhotos ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
+              <ImageIcon className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
