@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageIcon, Loader2, Sparkles, ChevronDown } from 'lucide-react';
+import { ImageIcon, Loader2, Star, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -215,7 +215,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       {isBatchGenerating ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        <Sparkles className="h-4 w-4" />
+        <Star className="h-4 w-4" />
       )}
     </Button>
   );
