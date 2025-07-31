@@ -148,6 +148,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onGenerateImagePrompt={openImagePromptModal}
                 onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)}
                 onPreviewImage={openPreviewImage}
+                onPostsChange={onPostsChange}
                 isAdmin={isAdmin}
               />
             )}
@@ -191,6 +192,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onGenerateImagePrompt={openImagePromptModal}
                 onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)}
                 onPreviewImage={openPreviewImage}
+                onPostsChange={onPostsChange}
                 isAdmin={isAdmin}
               />
             )}

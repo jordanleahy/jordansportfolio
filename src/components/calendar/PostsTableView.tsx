@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { ImageActionDropdown } from './ImageActionDropdown';
 import { BlogStatusBadge } from './BlogStatusBadge';
-import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown } from 'lucide-react';
+import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
@@ -26,6 +27,7 @@ interface PostsTableViewProps {
   onGenerateImagePrompt: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, aspectRatio: AspectRatio, post: SocialMediaPost) => void;
   onPreviewImage: (url: string, alt: string) => void;
+  onPostsChange: () => void;
   isAdmin?: boolean;
 }
 
@@ -57,11 +59,28 @@ export const PostsTableView = memo(({
   onGenerateImagePrompt,
   onFileSelect,
   onPreviewImage,
+  onPostsChange,
   isAdmin = false
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const { generateAllImages, isGenerating } = useOptimizedBatchGeneration();
+
+  const handleGenerateAllImages = async (post: SocialMediaPost) => {
+    try {
+      await generateAllImages({
+        postId: post.id,
+        title: post.title,
+        description: post.description,
+        category: post.category
+      });
+      // Refresh the posts to show newly generated images
+      onPostsChange();
+    } catch (error) {
+      console.error('Batch generation failed:', error);
+    }
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -258,6 +277,19 @@ export const PostsTableView = memo(({
                   title="Copy content"
                 >
                   <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleGenerateAllImages(post)}
+                  disabled={isGenerating}
+                  title="Generate all images with AI"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
                 </Button>
                 <Button
                   variant="ghost"
