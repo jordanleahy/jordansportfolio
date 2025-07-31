@@ -125,8 +125,8 @@ serve(async (req) => {
         size: size,
         quality: 'high',
         output_format: 'png',
-        n: 1,
-        ...(finalSeed && { seed: finalSeed })
+        n: 1
+        // Note: gpt-image-1 doesn't support seed parameter
       }),
     });
 
