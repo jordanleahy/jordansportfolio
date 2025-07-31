@@ -62,6 +62,23 @@ export const SeedManagement = () => {
     return Math.floor(Math.random() * 999999999);
   };
 
+  const createDefaultCDISeed = async () => {
+    const defaultSeed = {
+      name: "CDI Professional Healthcare Style",
+      seed_value: 847392651, // Professional healthcare seed value
+      description: "Professional healthcare illustrations with good contrast, teal/blue color palette, clean vector style suitable for CDI content. Produces consistent medical imagery with modern, trustworthy aesthetic.",
+      category: "cdi",
+      is_default: true
+    };
+
+    try {
+      await createSeed(defaultSeed);
+      toast.success('Default CDI seed created successfully!');
+    } catch (error) {
+      console.error('Failed to create default CDI seed:', error);
+    }
+  };
+
   if (loading) {
     return <div>Loading seeds...</div>;
   }
@@ -334,8 +351,28 @@ export const SeedManagement = () => {
       {seeds.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="text-muted-foreground">
-              No seeds found. Create your first seed to get started.
+            <div className="space-y-4">
+              <div className="text-muted-foreground">
+                No seeds found. Create your first seed to get started.
+              </div>
+              <Button onClick={createDefaultCDISeed} variant="outline">
+                Create Default CDI Seed
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {seeds.filter(s => s.category === 'cdi').length === 0 && seeds.length > 0 && (
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <div className="space-y-4">
+              <div className="text-muted-foreground">
+                No CDI seeds found. Create a professional healthcare seed for consistent CDI imagery.
+              </div>
+              <Button onClick={createDefaultCDISeed} variant="outline">
+                Create Default CDI Seed
+              </Button>
             </div>
           </CardContent>
         </Card>
