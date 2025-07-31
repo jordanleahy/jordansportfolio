@@ -12,7 +12,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
+
 import { ASPECT_RATIO_CONFIGS, convertAspectRatio } from '@/types/batchImageGeneration';
 import type { AspectRatioKey } from '@/types/batchImageGeneration';
 
@@ -35,7 +35,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
-  const { generateAllImages, isGenerating: isBatchGenerating, progress } = useOptimizedBatchGeneration();
+  
   
   const postIsUploading = isUploading(post.id);
   const uploadType = getUploadType(post.id);
@@ -46,36 +46,6 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     label: config.label
   }));
 
-  const handleGenerateAllImages = async () => {
-    if (!post) return;
-    
-    console.log('🚀 Starting optimized batch image generation for post:', post.id);
-    
-    try {
-      const response = await generateAllImages({
-        postId: post.id,
-        title: post.title,
-        description: post.description,
-        category: post.category
-      });
-
-      // Refresh the post data to show the new images
-      if (response.success && onPostsChange) {
-        const { data: refreshedPosts } = await supabase
-          .from('social_media_posts')
-          .select('*')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-          .order('day', { ascending: true });
-        
-        if (refreshedPosts) {
-          onPostsChange(refreshedPosts as SocialMediaPost[]);
-        }
-      }
-      
-    } catch (error) {
-      console.error('❌ Optimized batch generation error:', error);
-    }
-  };
 
   const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
     try {
@@ -211,16 +181,12 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         <Button
           variant="ghost"
           size="sm"
-          disabled={isBatchGenerating || isUploading(post.id)}
+          disabled={isUploading(post.id)}
           className={`h-8 focus:outline-none focus:ring-0 focus:border-transparent ${className || ''}`}
           title="Image generation and upload actions"
           aria-label="Open image actions menu"
         >
-          {isBatchGenerating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-md z-50">
