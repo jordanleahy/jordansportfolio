@@ -113,14 +113,17 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
         <DropdownMenuLabel className="text-sm font-medium">
           Generate Images
         </DropdownMenuLabel>
-        <DropdownMenuItem
-          onClick={handleGenerateAllImages}
-          disabled={isBatchGenerating || postIsUploading}
-          className="cursor-pointer text-sm"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Generate All Images
-        </DropdownMenuItem>
+        {aspectRatioOptions.map((option) => (
+          <DropdownMenuItem
+            key={`generate-${option.value}`}
+            onClick={() => {/* TODO: Implement individual generation */}}
+            disabled={isBatchGenerating || postIsUploading}
+            className="cursor-pointer text-sm"
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Generate {option.label}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
