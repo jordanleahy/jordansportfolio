@@ -209,7 +209,10 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     <div className={`inline-flex border border-input rounded-md bg-background transition-colors ${className || ''}`}>
       {/* Left Button - Generate All Images */}
       <button
-        onClick={handleGenerateAllImages}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleGenerateAllImages();
+        }}
         disabled={isBatchGenerating || isUploading(post.id)}
         className="flex-1 inline-flex items-center justify-center h-8 px-3 text-sm font-medium 
                  hover:bg-accent hover:text-accent-foreground 
