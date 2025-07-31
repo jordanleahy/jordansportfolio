@@ -36,7 +36,7 @@ serve(async (req) => {
   let userId: string | null = null;
 
   try {
-    const { prompt, aspectRatio = "1:1" } = await req.json();
+    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -76,8 +76,20 @@ serve(async (req) => {
 
     const size = sizeMap[aspectRatio] || '1024x1024';
     const estimatedCost = 0.040; // GPT-Image-1 standard pricing
+    
+    // Generate deterministic seed if requested, or use provided seed
+    let finalSeed = seed;
+    if (useDeterministicSeed && !seed) {
+      // Create deterministic seed based on prompt + aspect ratio for consistency
+      const encoder = new TextEncoder();
+      const data = encoder.encode(prompt + aspectRatio);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = new Uint8Array(hashBuffer);
+      // Convert first 4 bytes to a positive integer
+      finalSeed = Math.abs(new DataView(hashArray.buffer).getInt32(0, false));
+    }
 
-    console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...');
+    console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '');
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -91,7 +103,8 @@ serve(async (req) => {
         size: size,
         quality: 'high',
         output_format: 'png',
-        n: 1
+        n: 1,
+        ...(finalSeed && { seed: finalSeed })
       }),
     });
 
@@ -134,6 +147,7 @@ serve(async (req) => {
         image: base64Image,
         aspectRatio: aspectRatio,
         size: size,
+        seed: finalSeed,
         usage: { estimated_cost: estimatedCost }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

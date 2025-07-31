@@ -113,9 +113,13 @@ serve(async (req) => {
           throw new Error('No prompt generated');
         }
 
-        // Step 2: Generate image (parallel execution)
+        // Step 2: Generate image with deterministic seed for consistency
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
-          body: { prompt, aspectRatio: ratio }
+          body: { 
+            prompt, 
+            aspectRatio: ratio,
+            useDeterministicSeed: true
+          }
         });
 
         if (imageResponse.error) {
