@@ -225,7 +225,7 @@ export const PostsTableView = memo(({
             <TableCell className="w-40">
               <div className="grid grid-cols-2 gap-2">
                 {/* Top row: 16:9 and 4:3 */}
-                {isGenerating ? (
+                {isUploading(post.id, '16_9') ? (
                   <div className="w-16 h-9 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -242,7 +242,7 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-16 h-9"></div>}
 
-                {isGenerating ? (
+                {isUploading(post.id, '4_3') ? (
                   <div className="w-16 h-12 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -260,7 +260,7 @@ export const PostsTableView = memo(({
                 ) : <div className="w-16 h-12"></div>}
 
                 {/* Bottom row: 9:16 and 3:4 */}
-                {isGenerating ? (
+                {isUploading(post.id, '9_16') ? (
                   <div className="w-9 h-16 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -277,7 +277,7 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-9 h-16"></div>}
 
-                {isGenerating ? (
+                {isUploading(post.id, '3_4') ? (
                   <div className="w-12 h-16 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
