@@ -211,7 +211,7 @@ const PostCardComponent = ({
               variant="outline"
               size="sm"
               onClick={() => setShowPhotos(!showPhotos)}
-              className="flex-1"
+              className="h-8 w-8 p-0"
               title={showPhotos ? "Hide photos" : "Show photos"}
             >
               <ImageIcon className="h-4 w-4" />
@@ -220,7 +220,7 @@ const PostCardComponent = ({
               variant="outline"
               size="sm"
               onClick={() => setShowVideos(!showVideos)}
-              className="flex-1"
+              className="h-8 w-8 p-0"
             >
               <Video className="h-4 w-4" />
             </Button>
