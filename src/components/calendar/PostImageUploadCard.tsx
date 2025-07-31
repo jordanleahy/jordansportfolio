@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
+import { ImageSkeletonLoader } from '@/components/ui/image-skeleton-loader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -220,7 +221,9 @@ export const PostImageUploadCard = ({
         </DropdownMenu>
       </div>
       
-      {imageUrl && (
+      {(isUploading || isGenerating) ? (
+        <ImageSkeletonLoader variant="thumbnail" />
+      ) : imageUrl ? (
         <div className="relative">
           <img
             src={imageUrl}
@@ -239,7 +242,7 @@ export const PostImageUploadCard = ({
             </Button>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

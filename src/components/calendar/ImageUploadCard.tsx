@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, X, ImageIcon, Loader2, Sparkles, ChevronDown } from 'lucide-react';
+import { ImageSkeletonLoader } from '@/components/ui/image-skeleton-loader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -187,7 +188,9 @@ export const ImageUploadCard = ({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {imageUrl ? (
+        {(isUploading || isGenerating) ? (
+          <ImageSkeletonLoader aspectRatio={displayAspectRatio} />
+        ) : imageUrl ? (
           <div className="relative">
             <div 
               className="w-full rounded-md border overflow-hidden bg-muted/10" 
