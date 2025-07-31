@@ -52,12 +52,12 @@ serve(async (req) => {
     const extension = originalFilename.split('.').pop() || 'jpg';
     const baseName = originalFilename.replace(`.${extension}`, '');
     const processedFilename = `${baseName}_watermarked_${aspectRatio}_${timestamp}.${extension}`;
-    const filePath = `general/${processedFilename}`;
+    const filePath = processedFilename;
 
     // Upload processed image to storage
     console.log('Uploading processed image to storage:', filePath);
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('images')
+      .from('social-media-images')
       .upload(filePath, processedBlob, {
         cacheControl: '3600',
         upsert: false
@@ -69,7 +69,7 @@ serve(async (req) => {
 
     // Get public URL for processed image
     const { data: urlData } = supabase.storage
-      .from('images')
+      .from('social-media-images')
       .getPublicUrl(uploadData.path);
 
     const processedImageUrl = urlData.publicUrl;

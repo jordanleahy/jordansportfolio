@@ -8,13 +8,13 @@ interface FileUploadResult {
 
 export const uploadFileToStorage = async (
   file: File,
-  bucket: string = 'images',
-  folder: string = 'social-media'
+  bucket: string = 'social-media-images',
+  folder: string = ''
 ): Promise<FileUploadResult> => {
   try {
     const fileExt = file.name.split('.').pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+    const filePath = folder ? `${folder}/${fileName}` : fileName;
 
     const { data, error } = await supabase.storage
       .from(bucket)

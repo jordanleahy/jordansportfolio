@@ -146,8 +146,8 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('general')
-        .upload(`social-media/${fileName}`, file);
+        .from('social-media-images')
+        .upload(fileName, file);
 
       if (uploadError) {
         throw new Error(`Failed to upload image: ${uploadError.message}`);
@@ -155,7 +155,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('general')
+        .from('social-media-images')
         .getPublicUrl(uploadData.path);
 
       // Update post with image URL
@@ -173,7 +173,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       // Trigger background processing for watermark
       await supabase.functions.invoke('process-uploaded-images', {
         body: {
-          filePath: uploadData.path,
+          imageUrl: urlData.publicUrl,
           postId: post.id,
           aspectRatio: aspectRatio
         }
