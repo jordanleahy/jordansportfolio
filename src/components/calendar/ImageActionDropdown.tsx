@@ -95,7 +95,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
         className="w-48 bg-background border border-border shadow-lg z-50"
       >
         <DropdownMenuLabel className="text-sm font-medium">
-          Upload Images
+          Upload
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
