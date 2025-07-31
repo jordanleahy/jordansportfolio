@@ -113,15 +113,11 @@ serve(async (req) => {
           throw new Error('No prompt generated');
         }
 
-        // Step 2: Generate image with managed seed for consistency (falls back to deterministic)
+        // Step 2: Generate image (without seed parameters for gpt-image-1 compatibility)
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
           body: { 
             prompt, 
-            aspectRatio: ratio,
-            useManagedSeed: true,
-            managedSeedCategory: category,
-            useDeterministicSeed: true,  // Fallback if no managed seed
-            seedContext: `${postId}_${title}_${description.substring(0, 50)}` // Make seeds unique per post
+            aspectRatio: ratio
           }
         });
 
