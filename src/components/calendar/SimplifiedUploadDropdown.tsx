@@ -209,7 +209,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       disabled={isBatchGenerating || isUploading(post.id)}
       variant="outline"
       size="sm"
-      className="h-8 w-8 p-0"
+      className="h-8 flex-1"
       title="Generate All Images with AI"
     >
       {isBatchGenerating ? (
