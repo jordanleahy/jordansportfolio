@@ -100,6 +100,9 @@ const config: Config = {
         "scale-in": {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" }
+        },
+        "shimmer": {
+          "100%": { transform: "translateX(100%)" }
         }
       },
       animation: {
@@ -109,6 +112,7 @@ const config: Config = {
         "slide-out-right": "slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         "fade-in": "fade-in-stagger 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "scale-in": "scale-in 0.2s ease-out",
+        "shimmer": "shimmer 2s infinite",
       },
     },
   },
