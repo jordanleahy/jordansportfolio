@@ -79,7 +79,9 @@ const PostCardComponent = ({
       const { data, error } = await supabase.functions.invoke('generate-all-images', {
         body: { 
           postId: post.id,
-          aspectRatios: ['16_9', '9_16', '3_4', '4_3']
+          title: post.title,
+          description: post.description,
+          category: post.category || 'general'
         }
       });
 
