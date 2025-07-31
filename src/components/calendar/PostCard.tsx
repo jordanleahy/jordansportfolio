@@ -12,6 +12,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
+import { supabase } from '@/integrations/supabase/client';
+import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -55,6 +57,7 @@ const PostCardComponent = ({
   const isMobile = useIsMobile();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
+  const { generateAllImages } = useOptimizedBatchGeneration();
   
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
   const getStatusColor = (status: string) => {
@@ -202,8 +205,28 @@ const PostCardComponent = ({
               variant="outline"
               size="sm"
               className="flex-1"
-              title="AI Wizard"
-              aria-label="AI Wizard"
+              title="Generate All Images"
+              aria-label="Generate All Images"
+              onClick={async () => {
+                await generateAllImages({
+                  postId: post.id,
+                  title: post.title,
+                  description: post.description,
+                  category: post.category
+                });
+                // Refresh posts if callback provided
+                if (onPostsChange) {
+                  const { data: refreshedPosts } = await supabase
+                    .from('social_media_posts')
+                    .select('*')
+                    .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+                    .order('day', { ascending: true });
+                  
+                  if (refreshedPosts) {
+                    onPostsChange();
+                  }
+                }
+              }}
             >
               <Wand2 className="h-4 w-4" />
             </Button>

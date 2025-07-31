@@ -226,23 +226,6 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-md z-50">
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            handleGenerateAllImages();
-          }}
-          disabled={isBatchGenerating || isUploading(post.id)}
-          className="cursor-pointer focus:bg-accent"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Generate All Images
-          {isBatchGenerating && (
-            <Loader2 className="ml-auto h-4 w-4 animate-spin" />
-          )}
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
         <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
