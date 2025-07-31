@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
 import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
+import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -29,6 +29,7 @@ interface PostCardProps {
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
+  onPostsChange?: () => void;
   uploadingStates: {
     [key: string]: boolean;
   };
@@ -48,6 +49,7 @@ const PostCardComponent = ({
   onImageDelete,
   onImageGenerated,
   onStatusChange,
+  onPostsChange,
   uploadingStates,
   isAdmin = false
 }: PostCardProps) => {
@@ -57,8 +59,6 @@ const PostCardComponent = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
-  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -71,51 +71,22 @@ const PostCardComponent = ({
     return text.length > limit ? text.substring(0, limit) + '...' : text;
   };
 
-  const handleBatchImageGeneration = async () => {
-    setIsBatchGenerating(true);
-    try {
-      console.log('🎨 Starting batch image generation for post:', post.id);
-      
-      const { data, error } = await supabase.functions.invoke('generate-all-images', {
-        body: { 
-          postId: post.id,
-          title: post.title,
-          description: post.description,
-          category: post.category || 'general'
-        }
-      });
-
-      if (error) {
-        console.error('❌ Batch generation error:', error);
-        toast({
-          title: "Generation Failed",
-          description: "Failed to generate images. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log('✅ Batch generation successful:', data);
-      toast({
-        title: "Batch Generation Started",
-        description: "Generating images for all aspect ratios...",
-      });
-
-      // Refresh the post data to show new images
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-
-    } catch (error) {
-      console.error('❌ Batch generation error:', error);
-      toast({
-        title: "Generation Failed", 
-        description: "Failed to generate images. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsBatchGenerating(false);
+  const isUploading = (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
+    if (aspectRatio) {
+      return uploadingStates[`${postId}_${aspectRatio}`] || false;
     }
+    return Object.keys(uploadingStates).some(key => key.startsWith(`${postId}_`));
+  };
+
+  const getUploadType = (postId: string): '16_9' | '9_16' | '3_4' | '4_3' | null => {
+    const uploadKey = Object.keys(uploadingStates).find(key => 
+      key.startsWith(`${postId}_`) && uploadingStates[key]
+    );
+    if (uploadKey) {
+      const parts = uploadKey.split('_');
+      return parts.slice(1).join('_') as '16_9' | '9_16' | '3_4' | '4_3';
+    }
+    return null;
   };
 
 
@@ -229,26 +200,26 @@ const PostCardComponent = ({
           </div>
           
           <div className="flex gap-2">
+            <SimplifiedUploadDropdown
+              post={post}
+              isUploading={isUploading}
+              getUploadType={getUploadType}
+              onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+              onPostsChange={onPostsChange}
+            />
             <SplitButton
               variant="outline"
               size="sm"
               className="flex-1"
               primaryAction={{
-                onClick: handleBatchImageGeneration,
-                disabled: isBatchGenerating,
-                loading: isBatchGenerating,
-                title: "Generate all images",
-                className: "flex-1 min-w-0", // Take remaining width
-                children: isBatchGenerating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )
+                onClick: () => setShowPhotos(!showPhotos),
+                title: showPhotos ? "Hide photos" : "Show photos",
+                className: "flex-1 min-w-0",
+                children: <ImageIcon className="h-4 w-4" />
               }}
               dropdownTrigger={{
-                disabled: isBatchGenerating,
                 title: showPhotos ? "Hide photos" : "Show photos",
-                className: "w-9 flex-shrink-0", // Fixed width
+                className: "w-9 flex-shrink-0",
                 children: (
                   <div onClick={() => setShowPhotos(!showPhotos)}>
                     {showPhotos ? (
