@@ -223,11 +223,6 @@ const PostCardComponent = ({
               className="flex-1"
             >
               <Video className="h-4 w-4" />
-              {showVideos ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
-              )}
             </Button>
           </div>
         </div>
