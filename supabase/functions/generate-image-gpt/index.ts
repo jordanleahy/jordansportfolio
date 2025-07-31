@@ -36,10 +36,22 @@ serve(async (req) => {
   let userId: string | null = null;
 
   try {
-    const requestBody = await req.json();
-    console.log('🔍 DEBUG: Request body received:', JSON.stringify(requestBody, null, 2));
+    console.log('🔍 DEBUG: Function started, parsing request body...');
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('🔍 DEBUG: Request body parsed successfully');
+    } catch (parseError) {
+      console.error('❌ DEBUG: JSON parsing failed:', parseError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
     
     const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null } = requestBody;
+
+    console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'seedContext exists:', !!seedContext);
 
     if (!prompt) {
       console.log('❌ DEBUG: No prompt provided');
