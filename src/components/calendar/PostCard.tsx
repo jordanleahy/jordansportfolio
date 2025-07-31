@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, BookOpen, Mic, Sparkles } from 'lucide-react';
 import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
-import VideoUploadCard from './VideoUploadCard';
+
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -25,8 +25,6 @@ interface PostCardProps {
   onGeneratePrompt: (post: SocialMediaPost) => void;
   onGenerateVoiceover?: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
-  onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
-  onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
@@ -45,8 +43,6 @@ const PostCardComponent = ({
   onGeneratePrompt,
   onGenerateVoiceover,
   onFileSelect,
-  onVideoUpload,
-  onVideoRemove,
   onImageDelete,
   onImageGenerated,
   onStatusChange,
@@ -59,7 +55,7 @@ const PostCardComponent = ({
   const isMobile = useIsMobile();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
-  const [showVideos, setShowVideos] = useState(false);
+  
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -225,19 +221,6 @@ const PostCardComponent = ({
                 )}
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowVideos(!showVideos)}
-              className="flex-1"
-            >
-              <Video className="h-4 w-4" />
-              {showVideos ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
-              )}
-            </Button>
           </div>
         </div>
 
@@ -290,39 +273,9 @@ const PostCardComponent = ({
           </div>
         )}
 
-        {/* Videos Section */}
-        {showVideos && (
-          <div className="border-t pt-4">
-            <h4 className="text-sm font-medium mb-3">Video Uploads</h4>
-            <div className="grid grid-cols-1 gap-3">
-              <VideoUploadCard
-                title="16:9 Video (Landscape)"
-                aspectRatio="16/9"
-                videoUrl={post.image_16_9_video_url || undefined}
-                onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
-                onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
-              />
-              <VideoUploadCard
-                title="3:4 Video (Portrait)"
-                aspectRatio="3/4"
-                videoUrl={post.image_3_4_video_url || undefined}
-                onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
-                onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
-              />
-              <VideoUploadCard
-                title="General Video"
-                aspectRatio="16/9"
-                videoUrl={post.general_video_url || undefined}
-                onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
-                onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
-              />
-              
-            </div>
-          </div>
-        )}
 
-        {/* Media Previews - Show any existing images or videos */}
-        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
+        {/* Media Previews - Show any existing images */}
+        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url) && !showPhotos && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
@@ -387,33 +340,6 @@ const PostCardComponent = ({
                   loading="lazy"
                 />
               </ImageHoverOverlay>
-            )}
-            {post.image_16_9_video_url && (
-              <div className="flex-shrink-0">
-                <video
-                  src={post.image_16_9_video_url}
-                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.image_16_9_video_url!, alt: "16:9 video for " + post.title })}
-                />
-              </div>
-            )}
-            {post.image_3_4_video_url && (
-              <div className="flex-shrink-0">
-                <video
-                  src={post.image_3_4_video_url}
-                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.image_3_4_video_url!, alt: "3:4 video for " + post.title })}
-                />
-              </div>
-            )}
-            {post.general_video_url && (
-              <div className="flex-shrink-0">
-                <video
-                  src={post.general_video_url}
-                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
-                />
-              </div>
             )}
           </div>
         )}

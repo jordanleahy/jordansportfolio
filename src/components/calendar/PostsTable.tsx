@@ -83,8 +83,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onGeneratePrompt={() => openImagePromptModal(post)}
                     onGenerateVoiceover={() => openVoiceoverModal(post)}
                     onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)}
-                    onVideoUpload={() => {}}
-                    onVideoRemove={() => {}}
                     onImageDelete={() => {}}
                     onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
@@ -126,8 +124,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onGeneratePrompt={() => openImagePromptModal(post)}
                     onGenerateVoiceover={() => openVoiceoverModal(post)}
                     onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)}
-                    onVideoUpload={() => {}}
-                    onVideoRemove={() => {}}
                     onImageDelete={() => {}}
                     onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
