@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, FileText } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -199,7 +199,8 @@ const PostCardComponent = ({
             )}
           </div>
           
-          <div className="flex gap-2">
+          {/* Mobile: Single row layout */}
+          <div className="flex gap-2 md:hidden">
             <SimplifiedUploadDropdown
               post={post}
               isUploading={isUploading}
@@ -221,6 +222,58 @@ const PostCardComponent = ({
               size="sm"
               onClick={() => setShowVideos(!showVideos)}
               className="h-8 flex-1"
+            >
+              <Video className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Tablet/Desktop: 2x3 grid layout */}
+          <div className="hidden md:grid grid-cols-3 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              title="Content"
+            >
+              <FileText className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              title="Ideas"
+            >
+              <Lightbulb className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              title="Voice"
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+            <SimplifiedUploadDropdown
+              post={post}
+              isUploading={isUploading}
+              getUploadType={getUploadType}
+              onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+              onPostsChange={onPostsChange}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPhotos(!showPhotos)}
+              className="h-8"
+              title={showPhotos ? "Hide photos" : "Show photos"}
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowVideos(!showVideos)}
+              className="h-8"
             >
               <Video className="h-4 w-4" />
             </Button>
