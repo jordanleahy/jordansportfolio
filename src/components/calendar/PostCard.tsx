@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { Copy, Trash2, Eye, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, BookOpen, Mic, Sparkles } from 'lucide-react';
 import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -212,8 +212,11 @@ const PostCardComponent = ({
                 size="sm"
                 onClick={() => setShowPhotos(!showPhotos)}
                 className="flex-1"
+                title="Toggle image gallery view"
+                aria-label="View existing images"
               >
-                <ImageIcon className="h-4 w-4" />
+                <Eye className="h-4 w-4" />
+                View Images
                 {showPhotos ? (
                   <ChevronUp className="h-4 w-4 ml-1" />
                 ) : (

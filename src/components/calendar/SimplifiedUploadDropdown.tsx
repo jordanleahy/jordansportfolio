@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageIcon, Loader2, Sparkles, ChevronDown } from 'lucide-react';
+import { Settings, Loader2, Sparkles, ChevronDown, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -209,17 +209,19 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           disabled={isBatchGenerating || isUploading(post.id)}
           className={`h-8 ${className || ''}`}
+          title="Image generation and upload actions"
+          aria-label="Open image actions menu"
         >
           {isBatchGenerating ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
-            <ImageIcon className="h-4 w-4 mr-2" />
+            <Settings className="h-4 w-4 mr-2" />
           )}
-          Images
+          Image Actions
           <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
