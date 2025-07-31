@@ -19,14 +19,13 @@ export const useCoverLetterSEO = (portfolio: CompanyPortfolio): CoverLetterSEODa
     const companyName = portfolio.company_name;
     const companySlug = portfolio.company_slug;
     
-    // Generate dynamic title and description based on company
-    const title = `Cover Letter for ${companyName} - Jordan Leahy`;
-    const description = `Personalized cover letter and portfolio for ${companyName}. Healthcare technology leadership, product development expertise, and proven track record in digital health solutions.`;
+    // Use custom OG fields if available, otherwise generate dynamic defaults
+    const title = portfolio.og_title || `Cover Letter for ${companyName} - Jordan Leahy`;
+    const description = portfolio.og_description || `Personalized cover letter and portfolio for ${companyName}. Healthcare technology leadership, product development expertise, and proven track record in digital health solutions.`;
     
-    // Use portfolio-specific OG image or fallback to default
-    const ogImage = portfolio.custom_video_url 
-      ? `${SEO_DEFAULTS.siteUrl}/og-portfolio.png` // Use portfolio-specific template
-      : SEO_DEFAULTS.defaultImage;
+    // Priority: custom OG image > portfolio-specific template > default
+    const ogImage = portfolio.og_image_url || 
+      (portfolio.custom_video_url ? `${SEO_DEFAULTS.siteUrl}/og-portfolio.png` : SEO_DEFAULTS.defaultImage);
     
     // Generate the SEO metadata using existing utility
     const seoData = generateSEOMetadata({

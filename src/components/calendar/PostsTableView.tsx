@@ -298,6 +298,10 @@ export const PostsTableView = memo(({
                   console.log('🖼️ IMAGE_UPLOAD: Desktop upload triggered', { postId, aspectRatio, postTitle: post.title });
                   onFileSelect(postId, aspectRatio, post);
                 }}
+                onPostsChange={() => {
+                  // This should trigger cache invalidation at the parent level
+                  console.log('🔄 Desktop batch generation complete, triggering cache refresh');
+                }}
               />
                 <Button
                   variant="ghost"

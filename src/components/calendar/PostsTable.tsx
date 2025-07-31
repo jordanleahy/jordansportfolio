@@ -49,6 +49,14 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     getUploadType,
   } = useImageUpload({ onPostsChange });
 
+  // Convert nested uploading states to flat format for PostCard
+  const flatUploadingStates = Object.entries(uploadingPosts).reduce((acc, [postId, aspectRatios]) => {
+    Object.entries(aspectRatios).forEach(([aspectRatio, isUploading]) => {
+      acc[`${postId}_${aspectRatio}`] = isUploading;
+    });
+    return acc;
+  }, {} as Record<string, boolean>);
+
   // Filter posts by status
   const filteredPosts = posts.filter((post) => post.status === activeTab);
 
@@ -78,8 +86,10 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
+                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
-                    uploadingStates={{}}
+                    onPostsChange={onPostsChange}
+                    uploadingStates={flatUploadingStates}
                     isAdmin={isAdmin}
                   />
                 ))}
@@ -119,8 +129,10 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                     onVideoUpload={() => {}}
                     onVideoRemove={() => {}}
                     onImageDelete={() => {}}
+                    onImageGenerated={() => onPostsChange()}
                     onStatusChange={(postId, status) => handleStatusChange(postId, status)}
-                    uploadingStates={{}}
+                    onPostsChange={onPostsChange}
+                    uploadingStates={flatUploadingStates}
                     isAdmin={isAdmin}
                   />
                 ))}

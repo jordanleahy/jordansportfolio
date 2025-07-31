@@ -4,22 +4,42 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
-// Get user preferences from localStorage
+// Get user preferences from localStorage with enhanced debugging
 const getUserPreferences = () => {
   try {
-    const prefs = localStorage.getItem('user-preferences');
-    return prefs ? JSON.parse(prefs) : { defaultCategory: 'cdi', recentCategories: ['cdi', 'contracts'] };
-  } catch {
+    const prefsString = localStorage.getItem('user-preferences');
+    console.log('[Storage] Raw preferences from localStorage:', prefsString);
+    
+    if (prefsString) {
+      const parsed = JSON.parse(prefsString);
+      console.log('[Storage] Parsed preferences:', parsed);
+      return parsed;
+    } else {
+      console.log('[Storage] No preferences found, using defaults');
+      return { defaultCategory: 'cdi', recentCategories: ['cdi', 'contracts'] };
+    }
+  } catch (error) {
+    console.error('[Storage] Error reading preferences:', error);
     return { defaultCategory: 'cdi', recentCategories: ['cdi', 'contracts'] };
   }
 };
 
-// Save user preferences to localStorage
+// Save user preferences to localStorage with enhanced debugging
 const saveUserPreferences = (prefs: { defaultCategory: string; recentCategories: string[] }) => {
   try {
-    localStorage.setItem('user-preferences', JSON.stringify(prefs));
-  } catch {
-    // Silently fail if localStorage is not available
+    const prefsString = JSON.stringify(prefs);
+    localStorage.setItem('user-preferences', prefsString);
+    console.log('[Storage] Preferences saved successfully:', prefs);
+    
+    // Verify the save worked
+    const verification = localStorage.getItem('user-preferences');
+    if (verification === prefsString) {
+      console.log('[Storage] Save verification: SUCCESS');
+    } else {
+      console.warn('[Storage] Save verification: FAILED');
+    }
+  } catch (error) {
+    console.error('[Storage] Error saving preferences:', error);
   }
 };
 

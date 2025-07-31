@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
+import { PostImageUploadCard } from './PostImageUploadCard';
+import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -25,7 +27,9 @@ interface PostCardProps {
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
+  onPostsChange?: () => void;
   uploadingStates: {
     [key: string]: boolean;
   };
@@ -43,7 +47,9 @@ const PostCardComponent = ({
   onVideoUpload,
   onVideoRemove,
   onImageDelete,
+  onImageGenerated,
   onStatusChange,
+  onPostsChange,
   uploadingStates,
   isAdmin = false
 }: PostCardProps) => {
@@ -53,7 +59,6 @@ const PostCardComponent = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -66,56 +71,25 @@ const PostCardComponent = ({
     return text.length > limit ? text.substring(0, limit) + '...' : text;
   };
 
-
-  const ImageUploadButton = ({ type, label, isUploading }: { 
-    type: '16_9' | '9_16' | '3_4' | '4_3'; 
-    label: string; 
-    isUploading: boolean;
-  }) => {
-    const imageUrl = type === '16_9' ? post.image_16_9_url :
-                    type === '9_16' ? post.image_9_16_url :
-                    type === '3_4' ? post.image_3_4_url :
-                    post.image_4_3_url;
-
-    return (
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium">{label}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8"
-            disabled={isUploading}
-            onClick={() => {
-              console.log('🖼️ IMAGE_UPLOAD: Mobile upload button clicked', { 
-                postId: post.id, 
-                aspectRatio: type, 
-                postTitle: post.title 
-              });
-              onFileSelect(post.id, type, post);
-            }}
-          >
-            {isUploading ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              <Upload className="h-3 w-3" />
-            )}
-          </Button>
-        </div>
-        {imageUrl && (
-          <div className="relative">
-            <img
-              src={imageUrl}
-              alt={`${label} for ${post.title}`}
-              className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-              loading="lazy"
-              onClick={() => setPreviewImage({ url: imageUrl, alt: `${label} for ${post.title}` })}
-            />
-          </div>
-        )}
-      </div>
-    );
+  const isUploading = (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
+    if (aspectRatio) {
+      return uploadingStates[`${postId}_${aspectRatio}`] || false;
+    }
+    return Object.keys(uploadingStates).some(key => key.startsWith(`${postId}_`));
   };
+
+  const getUploadType = (postId: string): '16_9' | '9_16' | '3_4' | '4_3' | null => {
+    const uploadKey = Object.keys(uploadingStates).find(key => 
+      key.startsWith(`${postId}_`) && uploadingStates[key]
+    );
+    if (uploadKey) {
+      const parts = uploadKey.split('_');
+      return parts.slice(1).join('_') as '16_9' | '9_16' | '3_4' | '4_3';
+    }
+    return null;
+  };
+
+
 
   return (
     <Card className="w-full">
@@ -226,19 +200,38 @@ const PostCardComponent = ({
           </div>
           
           <div className="flex gap-2">
-            <Button
+            <SimplifiedUploadDropdown
+              post={post}
+              isUploading={isUploading}
+              getUploadType={getUploadType}
+              onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+              onPostsChange={onPostsChange}
+            />
+            <SplitButton
               variant="outline"
               size="sm"
-              onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
-            >
-              <ImageIcon className="h-4 w-4" />
-              {showPhotos ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
-              )}
-            </Button>
+              primaryAction={{
+                onClick: () => setShowPhotos(!showPhotos),
+                title: showPhotos ? "Hide photos" : "Show photos",
+                className: "flex-1 min-w-0",
+                children: <ImageIcon className="h-4 w-4" />
+              }}
+              dropdownTrigger={{
+                title: showPhotos ? "Hide photos" : "Show photos",
+                className: "w-9 flex-shrink-0",
+                children: (
+                  <div onClick={() => setShowPhotos(!showPhotos)}>
+                    {showPhotos ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                )
+              }}
+              dropdownContent={null}
+            />
             <Button
               variant="outline"
               size="sm"
@@ -260,25 +253,45 @@ const PostCardComponent = ({
           <div className="border-t pt-4">
             <h4 className="text-sm font-medium mb-3">Photo Uploads</h4>
             <div className="grid grid-cols-2 gap-3">
-              <ImageUploadButton 
-                type="16_9" 
-                label="Landscape (16:9)" 
-                isUploading={uploadingStates[`${post.id}_16_9`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="16_9"
+                label="Landscape (16:9)"
+                imageUrl={post.image_16_9_url || undefined}
+                isUploading={uploadingStates[`${post.id}_16_9`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="9_16" 
-                label="Portrait (9:16)" 
-                isUploading={uploadingStates[`${post.id}_9_16`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="9_16"
+                label="Portrait (9:16)"
+                imageUrl={post.image_9_16_url || undefined}
+                isUploading={uploadingStates[`${post.id}_9_16`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="3_4" 
-                label="Social (3:4)" 
-                isUploading={uploadingStates[`${post.id}_3_4`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="3_4"
+                label="Social (3:4)"
+                imageUrl={post.image_3_4_url || undefined}
+                isUploading={uploadingStates[`${post.id}_3_4`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
-              <ImageUploadButton 
-                type="4_3" 
-                label="Standard (4:3)" 
-                isUploading={uploadingStates[`${post.id}_4_3`] || false} 
+              <PostImageUploadCard
+                post={post}
+                type="4_3"
+                label="Standard (4:3)"
+                imageUrl={post.image_4_3_url || undefined}
+                isUploading={uploadingStates[`${post.id}_4_3`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
               />
             </div>
           </div>
