@@ -132,7 +132,16 @@ serve(async (req) => {
         });
 
         if (imageResponse.error) {
-          throw new Error(`Image generation failed: ${imageResponse.error.message || 'Unknown error'}`);
+          // Get the actual error response body
+          let errorDetails = 'Unknown error';
+          try {
+            const errorResponse = await imageResponse.error.context?.text?.();
+            errorDetails = errorResponse || imageResponse.error.message;
+            console.log(`❌ DEBUG: Detailed error for ${ratio}:`, errorDetails);
+          } catch (e) {
+            console.log(`❌ DEBUG: Could not parse error details for ${ratio}:`, imageResponse.error);
+          }
+          throw new Error(`Image generation failed: ${errorDetails}`);
         }
 
         const base64Image = imageResponse.data?.image;
