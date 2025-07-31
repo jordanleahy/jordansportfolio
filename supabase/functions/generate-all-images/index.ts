@@ -185,11 +185,11 @@ serve(async (req) => {
         .insert({
           user_id: user.id,
           function_name: 'generate-all-images',
-          model: 'batch-operation',
+          model_used: 'batch-operation',
           success: true,
-          cost: totalCost,
+          estimated_cost: totalCost,
           tokens_used: totalTokens,
-          metadata: {
+          request_metadata: {
             post_id: postId,
             images_generated: results.length,
             aspect_ratios: aspectRatios,
