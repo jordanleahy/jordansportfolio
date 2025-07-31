@@ -8,6 +8,7 @@ import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, Chevr
 import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
@@ -55,6 +56,7 @@ const PostCardComponent = ({
 }: PostCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -207,19 +209,21 @@ const PostCardComponent = ({
               onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
               onPostsChange={onPostsChange}
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPhotos(!showPhotos)}
-              className="flex-1"
-            >
-              <ImageIcon className="h-4 w-4" />
-              {showPhotos ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
-              )}
-            </Button>
+            {!isMobile && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPhotos(!showPhotos)}
+                className="flex-1"
+              >
+                <ImageIcon className="h-4 w-4" />
+                {showPhotos ? (
+                  <ChevronUp className="h-4 w-4 ml-1" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                )}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
