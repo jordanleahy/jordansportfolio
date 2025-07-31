@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
-import { SplitButton } from '@/components/ui/split-button';
+
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
@@ -207,31 +207,19 @@ const PostCardComponent = ({
               onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
               onPostsChange={onPostsChange}
             />
-            <SplitButton
+            <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
-              primaryAction={{
-                onClick: () => setShowPhotos(!showPhotos),
-                title: showPhotos ? "Hide photos" : "Show photos",
-                className: "flex-1 min-w-0",
-                children: <ImageIcon className="h-4 w-4" />
-              }}
-              dropdownTrigger={{
-                title: showPhotos ? "Hide photos" : "Show photos",
-                className: "w-9 flex-shrink-0",
-                children: (
-                  <div onClick={() => setShowPhotos(!showPhotos)}>
-                    {showPhotos ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                )
-              }}
-              dropdownContent={null}
-            />
+              title={showPhotos ? "Hide photos" : "Show photos"}
+            >
+              {showPhotos ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
             <Button
               variant="outline"
               size="sm"
