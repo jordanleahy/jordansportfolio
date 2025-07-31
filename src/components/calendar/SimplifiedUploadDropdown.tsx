@@ -206,88 +206,84 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   };
 
   return (
-    <div className={`inline-flex border border-input rounded-md bg-background transition-colors ${className || ''}`}>
-      {/* Left Button - Generate All Images */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleGenerateAllImages();
-        }}
-        disabled={isBatchGenerating || isUploading(post.id)}
-        className="flex-1 inline-flex items-center justify-center h-8 px-3 text-sm font-medium 
-                 hover:bg-accent hover:text-accent-foreground 
-                 disabled:pointer-events-none disabled:opacity-50 
-                 rounded-l-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        title="Generate All Images"
-      >
-        {isBatchGenerating ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <ImageIcon className="h-4 w-4" />
-        )}
-      </button>
-      
-      {/* Divider */}
-      <div className="w-px bg-border" />
-      
-      {/* Right Button - Dropdown Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            disabled={isUploading(post.id)}
-            className="inline-flex items-center justify-center h-8 px-2 text-sm font-medium 
-                     hover:bg-accent hover:text-accent-foreground 
-                     disabled:pointer-events-none disabled:opacity-50 
-                     rounded-r-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isBatchGenerating || isUploading(post.id)}
+          className={`h-8 ${className || ''}`}
+        >
+          {isBatchGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <ImageIcon className="h-4 w-4 mr-2" />
+          )}
+          Images
+          <ChevronDown className="h-3 w-3 ml-1" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-md z-50">
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleGenerateAllImages();
+          }}
+          disabled={isBatchGenerating || isUploading(post.id)}
+          className="cursor-pointer focus:bg-accent"
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Generate All Images
+          {isBatchGenerating && (
+            <Loader2 className="ml-auto h-4 w-4 animate-spin" />
+          )}
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
+        {aspectRatioOptions.map((option) => (
+          <DropdownMenuItem
+            key={`upload-${option.value}`}
+            onClick={() => {
+              console.log('🖼️ IMAGE_UPLOAD: Dropdown option clicked', { 
+                postId: post.id, 
+                aspectRatio: option.value, 
+                postTitle: post.title 
+              });
+              onFileSelect(post.id, option.value);
+            }}
+            disabled={uploadType === option.value || isGenerating}
+            className="cursor-pointer focus:bg-accent"
           >
-            <ChevronDown className="h-3 w-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Upload Images</DropdownMenuLabel>
-          {aspectRatioOptions.map((option) => (
-            <DropdownMenuItem
-              key={`upload-${option.value}`}
-              onClick={() => {
-                console.log('🖼️ IMAGE_UPLOAD: Dropdown option clicked', { 
-                  postId: post.id, 
-                  aspectRatio: option.value, 
-                  postTitle: post.title 
-                });
-                onFileSelect(post.id, option.value);
-              }}
-              disabled={uploadType === option.value || isGenerating}
-              className="cursor-pointer"
-            >
-              <ImageIcon className="mr-2 h-4 w-4" />
-              {option.label}
-              {uploadType === option.value && (
-                <Loader2 className="ml-auto h-4 w-4 animate-spin" />
-              )}
-            </DropdownMenuItem>
-          ))}
-          
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
-          {aspectRatioOptions.map((option) => (
-            <DropdownMenuItem
-              key={`generate-${option.value}`}
-              onClick={() => handleGenerateImage(option.value)}
-              disabled={isGenerating || postIsUploading}
-              className="cursor-pointer"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {option.label}
-              {isGenerating && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {generationStep}
-                </span>
-              )}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            <ImageIcon className="mr-2 h-4 w-4" />
+            {option.label}
+            {uploadType === option.value && (
+              <Loader2 className="ml-auto h-4 w-4 animate-spin" />
+            )}
+          </DropdownMenuItem>
+        ))}
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuLabel>Generate Individual</DropdownMenuLabel>
+        {aspectRatioOptions.map((option) => (
+          <DropdownMenuItem
+            key={`generate-${option.value}`}
+            onClick={() => handleGenerateImage(option.value)}
+            disabled={isGenerating || postIsUploading}
+            className="cursor-pointer focus:bg-accent"
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            {option.label}
+            {isGenerating && (
+              <span className="ml-auto text-xs text-muted-foreground">
+                {generationStep}
+              </span>
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
