@@ -212,7 +212,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
           variant="ghost"
           size="sm"
           disabled={isBatchGenerating || isUploading(post.id)}
-          className={`h-8 ${className || ''}`}
+          className={`h-8 focus:outline-none focus:ring-0 focus:border-transparent ${className || ''}`}
           title="Image generation and upload actions"
           aria-label="Open image actions menu"
         >
