@@ -36,7 +36,7 @@ serve(async (req) => {
   let userId: string | null = null;
 
   try {
-    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false } = await req.json();
+    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -77,9 +77,31 @@ serve(async (req) => {
     const size = sizeMap[aspectRatio] || '1024x1024';
     const estimatedCost = 0.040; // GPT-Image-1 standard pricing
     
-    // Generate deterministic seed if requested, or use provided seed
+    // Generate deterministic seed if requested, or use provided seed, or use managed seed
     let finalSeed = seed;
-    if (useDeterministicSeed && !seed) {
+    
+    // Check for managed seed first
+    if (useManagedSeed && managedSeedCategory && userId) {
+      try {
+        const { data: managedSeeds } = await supabase
+          .from('image_seeds')
+          .select('seed_value')
+          .eq('user_id', userId)
+          .eq('category', managedSeedCategory)
+          .eq('is_default', true)
+          .limit(1);
+        
+        if (managedSeeds && managedSeeds.length > 0) {
+          finalSeed = managedSeeds[0].seed_value;
+          console.log('🌱 Using managed seed:', finalSeed, 'for category:', managedSeedCategory);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch managed seed:', error);
+      }
+    }
+    
+    // Fall back to deterministic seed if no seed is set yet
+    if (useDeterministicSeed && !finalSeed) {
       // Create deterministic seed based on prompt + aspect ratio for consistency
       const encoder = new TextEncoder();
       const data = encoder.encode(prompt + aspectRatio);
