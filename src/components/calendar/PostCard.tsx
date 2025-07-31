@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Trash2, Eye, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { Copy, Trash2, Eye, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, BookOpen, Mic, Sparkles, Wand2 } from 'lucide-react';
 import { SplitButton } from '@/components/ui/split-button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -198,6 +198,15 @@ const PostCardComponent = ({
           </div>
           
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              title="AI Wizard"
+              aria-label="AI Wizard"
+            >
+              <Wand2 className="h-4 w-4" />
+            </Button>
             <SimplifiedUploadDropdown
               post={post}
               isUploading={isUploading}
