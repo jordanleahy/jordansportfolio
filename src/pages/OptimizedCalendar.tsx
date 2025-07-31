@@ -10,7 +10,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
-import { RealtimeDebugger } from '@/components/debug/RealtimeDebugger';
+// Removed complex realtime debugging system
 import { Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -46,8 +46,6 @@ export default function OptimizedCalendar() {
     isLoadingActiveTab,
     availableCategories,
     activeTabPosts,
-    connectionStatus,
-    isConnected,
     changeTab,
     invalidateCache,
     getCategoryPosts
@@ -115,8 +113,8 @@ export default function OptimizedCalendar() {
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
               <div className="flex-1">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-primary animate-pulse'}`} />
-                    Content Management {isConnected ? '• Live Updates' : ''}
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    Content Management
                   </div>
                 <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
                   Social Media Calendar
@@ -240,10 +238,7 @@ export default function OptimizedCalendar() {
           ))}
         </Tabs>
         
-        {/* Advanced Realtime Debugger */}
-        <RealtimeDebugger
-          connectionStatus={connectionStatus}
-        />
+        {/* Simplified calendar without complex realtime debugging */}
       </div>
     </PageLayout>
   );
