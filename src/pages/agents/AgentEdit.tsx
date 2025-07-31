@@ -28,7 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy, BarChart3 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useOpenAIAgent, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
 import { AgentStatus, CreateAgentData, SystemPrompt } from '@/types/openaiAgent';
@@ -240,6 +240,14 @@ export const AgentEdit = () => {
               <Button variant="outline" onClick={handleClone} className="gap-2 flex-1 sm:flex-none">
                 <Copy className="h-4 w-4" />
                 <span className="sm:inline">Clone</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/admin/seed-management')}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="sm:inline">Seed Dashboard</span>
               </Button>
               <Button 
                 variant="outline" 
