@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
-import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
@@ -60,8 +59,6 @@ const PostCardComponent = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
-  
-  const { generateAllImages, isGenerating } = useOptimizedBatchGeneration();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -90,24 +87,6 @@ const PostCardComponent = ({
       return parts.slice(1).join('_') as '16_9' | '9_16' | '3_4' | '4_3';
     }
     return null;
-  };
-
-  const handleGenerateAllImages = async () => {
-    try {
-      const result = await generateAllImages({
-        postId: post.id,
-        title: post.title,
-        description: post.description,
-        category: post.category
-      });
-      
-      if (result.success && result.imagesGenerated > 0) {
-        setShowPhotos(true); // Auto-expand photos section to show results
-        onPostsChange?.(); // Refresh the posts to show new images
-      }
-    } catch (error) {
-      console.error('Batch generation failed:', error);
-    }
   };
 
 
@@ -231,15 +210,14 @@ const PostCardComponent = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={handleGenerateAllImages}
-              disabled={isGenerating}
+              onClick={() => setShowPhotos(!showPhotos)}
               className="flex-1"
-              title="Generate all images with AI"
+              title={showPhotos ? "Hide photos" : "Show photos"}
             >
-              {isGenerating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+              {showPhotos ? (
+                <ChevronUp className="h-4 w-4" />
               ) : (
-                <Sparkles className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
               )}
             </Button>
             <Button
