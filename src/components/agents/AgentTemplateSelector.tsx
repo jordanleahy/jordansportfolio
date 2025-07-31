@@ -6,7 +6,7 @@ interface AgentTemplateSelectorProps {
 }
 
 const BLOG_VISUAL_TEMPLATE: CreateAgentData = {
-  name: 'Blog Visual Prompt Generator',
+  name: 'Visual Prompt Generator',
   purpose: 'Generates AI image prompts for blog visuals across different categories (Healthcare, Contracts, Design). Dynamically selects appropriate system prompts based on the category passed in the request.',
   model_version: 'gpt-4o-mini',
   trigger: 'api_call',
@@ -16,7 +16,7 @@ const BLOG_VISUAL_TEMPLATE: CreateAgentData = {
   owner: 'Content Marketing Team',
   status: 'active',
   tags: ['blog', 'content-generation', 'image-prompts', 'ai-writing', 'visual-content'],
-  notes: 'Multi-category blog visual prompt generator with healthcare, contracts, and design system prompts.',
+  notes: 'Multi-category Visual Prompt Generator with healthcare, contracts, and design system prompts.',
   system_prompts: [
     {
       category: 'healthcare',
@@ -146,7 +146,7 @@ export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelecto
         className="w-full justify-start text-left h-auto p-4"
       >
         <div>
-          <div className="font-medium">Blog Visual Prompt Generator</div>
+          <div className="font-medium">Visual Prompt Generator</div>
           <div className="text-sm text-muted-foreground mt-1">
             Multi-category agent for generating AI image prompts for blog visuals
           </div>
