@@ -36,7 +36,7 @@ serve(async (req) => {
   let userId: string | null = null;
 
   try {
-    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null } = await req.json();
+    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -102,9 +102,10 @@ serve(async (req) => {
     
     // Fall back to deterministic seed if no seed is set yet
     if (useDeterministicSeed && !finalSeed) {
-      // Create deterministic seed based on prompt + aspect ratio for consistency
+      // Create deterministic seed based on seedContext + prompt + aspect ratio for uniqueness
       const encoder = new TextEncoder();
-      const data = encoder.encode(prompt + aspectRatio);
+      const seedInput = seedContext ? `${seedContext}_${prompt}_${aspectRatio}` : `${prompt}_${aspectRatio}`;
+      const data = encoder.encode(seedInput);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);
       // Convert first 4 bytes to a positive integer and constrain to valid range (0 to 2^32-1)

@@ -120,7 +120,8 @@ serve(async (req) => {
             aspectRatio: ratio,
             useManagedSeed: true,
             managedSeedCategory: category,
-            useDeterministicSeed: true  // Fallback if no managed seed
+            useDeterministicSeed: true,  // Fallback if no managed seed
+            seedContext: `${postId}_${title}_${description.substring(0, 50)}` // Make seeds unique per post
           }
         });
 
