@@ -9,6 +9,7 @@ import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, Chevr
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
+import { PostMediaGalleryModal } from './PostMediaGalleryModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
 import VideoUploadCard from './VideoUploadCard';
@@ -59,6 +60,7 @@ const PostCardComponent = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
+  const [showGallery, setShowGallery] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -312,7 +314,7 @@ const PostCardComponent = ({
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_16_9_url!, alt: "16:9 image for " + post.title })}
+                onView={() => setShowGallery(true)}
                 onDelete={() => onImageDelete(post.id, '16_9')}
                 imageUrl={post.image_16_9_url}
                 showUpload={false}
@@ -328,7 +330,7 @@ const PostCardComponent = ({
             )}
             {post.image_9_16_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_9_16_url!, alt: "16:9 video for " + post.title })}
+                onView={() => setShowGallery(true)}
                 onDelete={() => onImageDelete(post.id, '9_16')}
                 imageUrl={post.image_9_16_url}
                 showUpload={false}
@@ -344,7 +346,7 @@ const PostCardComponent = ({
             )}
             {post.image_3_4_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_3_4_url!, alt: "3:4 image for " + post.title })}
+                onView={() => setShowGallery(true)}
                 onDelete={() => onImageDelete(post.id, '3_4')}
                 imageUrl={post.image_3_4_url}
                 showUpload={false}
@@ -360,7 +362,7 @@ const PostCardComponent = ({
             )}
             {post.image_4_3_url && (
               <ImageHoverOverlay
-                onView={() => setPreviewImage({ url: post.image_4_3_url!, alt: "3:4 video for " + post.title })}
+                onView={() => setShowGallery(true)}
                 onDelete={() => onImageDelete(post.id, '4_3')}
                 imageUrl={post.image_4_3_url}
                 showUpload={false}
@@ -379,7 +381,7 @@ const PostCardComponent = ({
                 <video
                   src={post.image_16_9_video_url}
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.image_16_9_video_url!, alt: "16:9 video for " + post.title })}
+                  onClick={() => setShowGallery(true)}
                 />
               </div>
             )}
@@ -388,7 +390,7 @@ const PostCardComponent = ({
                 <video
                   src={post.image_3_4_video_url}
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.image_3_4_video_url!, alt: "3:4 video for " + post.title })}
+                  onClick={() => setShowGallery(true)}
                 />
               </div>
             )}
@@ -397,12 +399,19 @@ const PostCardComponent = ({
                 <video
                   src={post.general_video_url}
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setPreviewImage({ url: post.general_video_url!, alt: "General video for " + post.title })}
+                  onClick={() => setShowGallery(true)}
                 />
               </div>
             )}
           </div>
         )}
+
+        {/* Gallery Modal */}
+        <PostMediaGalleryModal
+          isOpen={showGallery}
+          onClose={() => setShowGallery(false)}
+          post={post}
+        />
 
         {/* Image Preview Modal */}
         {previewImage && (
