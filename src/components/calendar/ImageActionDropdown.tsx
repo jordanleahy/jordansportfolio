@@ -111,7 +111,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
         <DropdownMenuSeparator />
         
         <DropdownMenuLabel className="text-sm font-medium">
-          Generate Images
+          Generate
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
