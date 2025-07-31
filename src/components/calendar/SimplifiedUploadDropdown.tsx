@@ -12,14 +12,15 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { SocialMediaPost } from '@/types/socialMedia';
-
-type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
+import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
+import { ASPECT_RATIO_CONFIGS, convertAspectRatio } from '@/types/batchImageGeneration';
+import type { AspectRatioKey } from '@/types/batchImageGeneration';
 
 interface SimplifiedUploadDropdownProps {
   post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatio) => boolean;
-  getUploadType: (postId: string) => AspectRatio | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatio) => void;
+  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
+  getUploadType: (postId: string) => AspectRatioKey | null;
+  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
@@ -32,45 +33,32 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
-  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
+  const { generateAllImages, isGenerating: isBatchGenerating, progress } = useOptimizedBatchGeneration();
   
   const postIsUploading = isUploading(post.id);
   const uploadType = getUploadType(post.id);
 
-  const aspectRatioOptions = [
-    { value: '16_9' as const, label: '16:9 (Landscape)' },
-    { value: '9_16' as const, label: '9:16 (Portrait)' },
-    { value: '3_4' as const, label: '3:4 (Portrait)' },
-    { value: '4_3' as const, label: '4:3 (Landscape)' },
-  ];
+  // Use optimized aspect ratio configs
+  const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
+    value: config.key,
+    label: config.label
+  }));
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
     
-    setIsBatchGenerating(true);
-    console.log('🚀 Starting batch image generation for post:', post.id);
+    console.log('🚀 Starting optimized batch image generation for post:', post.id);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-all-images', {
-        body: {
-          postId: post.id,
-          title: post.title,
-          description: post.description,
-          category: post.category
-        }
+      const response = await generateAllImages({
+        postId: post.id,
+        title: post.title,
+        description: post.description,
+        category: post.category
       });
 
-      if (error) {
-        console.error('❌ Batch generation failed:', error);
-        toast.error('Batch generation failed');
-        return;
-      }
-
-      console.log('✅ Batch generation completed:', data);
-      toast.success(`Generated ${data.imagesGenerated} images successfully!`);
-      
       // Refresh the post data to show the new images
-      if (onPostsChange) {
+      if (response.success && onPostsChange) {
         const { data: refreshedPosts } = await supabase
           .from('social_media_posts')
           .select('*')
@@ -83,14 +71,11 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
       }
       
     } catch (error) {
-      console.error('❌ Batch generation error:', error);
-      toast.error('Batch generation failed');
-    } finally {
-      setIsBatchGenerating(false);
+      console.error('❌ Optimized batch generation error:', error);
     }
   };
 
-  const handleGenerateImage = async (aspectRatio: AspectRatio) => {
+  const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
     try {
       setIsGenerating(true);
       setGenerationStep('Generating prompt...');
