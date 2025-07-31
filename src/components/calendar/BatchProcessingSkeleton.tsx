@@ -93,7 +93,7 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
 
                 {/* Shimmer overlay for current generation */}
                 {isCurrent && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-[shimmer_1.5s_infinite] rounded-md" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer rounded-md" />
                 )}
               </div>
             );
