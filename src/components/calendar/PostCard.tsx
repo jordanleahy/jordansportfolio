@@ -236,6 +236,7 @@ const PostCardComponent = ({
                 disabled: isBatchGenerating,
                 loading: isBatchGenerating,
                 title: "Generate all images",
+                className: "flex-1 min-w-0", // Take remaining width
                 children: isBatchGenerating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -245,6 +246,7 @@ const PostCardComponent = ({
               dropdownTrigger={{
                 disabled: isBatchGenerating,
                 title: showPhotos ? "Hide photos" : "Show photos",
+                className: "w-9 flex-shrink-0", // Fixed width
                 children: (
                   <div onClick={() => setShowPhotos(!showPhotos)}>
                     {showPhotos ? (

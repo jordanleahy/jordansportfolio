@@ -53,11 +53,13 @@ export interface SplitButtonProps extends VariantProps<typeof splitButtonVariant
     loading?: boolean
     children: React.ReactNode
     title?: string
+    className?: string
   }
   dropdownTrigger: {
     disabled?: boolean
     children: React.ReactNode
     title?: string
+    className?: string
   }
   dropdownContent: React.ReactNode
 }
@@ -80,7 +82,8 @@ const SplitButton = React.forwardRef<HTMLDivElement, SplitButtonProps>(
             "px-3 rounded-l-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
             size === "sm" && "h-8",
             size === "default" && "h-9", 
-            size === "lg" && "h-10"
+            size === "lg" && "h-10",
+            primaryAction.className
           )}
         >
           {primaryAction.children}
@@ -99,7 +102,8 @@ const SplitButton = React.forwardRef<HTMLDivElement, SplitButtonProps>(
               "px-2 rounded-r-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               size === "sm" && "h-8",
               size === "default" && "h-9",
-              size === "lg" && "h-10"
+              size === "lg" && "h-10",
+              dropdownTrigger.className
             )}
           >
             {dropdownTrigger.children}
