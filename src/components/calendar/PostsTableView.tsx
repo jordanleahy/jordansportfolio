@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
+import { ImageActionDropdown } from './ImageActionDropdown';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -290,19 +290,19 @@ export const PostsTableView = memo(({
                     )}
                   </Button>
                 )}
-              <SimplifiedUploadDropdown
-                post={post}
-                isUploading={isUploading}
-                getUploadType={getUploadType}
-                onFileSelect={(postId, aspectRatio) => {
-                  console.log('🖼️ IMAGE_UPLOAD: Desktop upload triggered', { postId, aspectRatio, postTitle: post.title });
-                  onFileSelect(postId, aspectRatio, post);
-                }}
-                onPostsChange={() => {
-                  // This should trigger cache invalidation at the parent level
-                  console.log('🔄 Desktop batch generation complete, triggering cache refresh');
-                }}
-              />
+                <ImageActionDropdown
+                  post={post}
+                  isUploading={isUploading}
+                  getUploadType={getUploadType}
+                  onFileSelect={(postId, aspectRatio) => {
+                    console.log('🖼️ IMAGE_UPLOAD: Desktop upload triggered', { postId, aspectRatio, postTitle: post.title });
+                    onFileSelect(postId, aspectRatio, post);
+                  }}
+                  onPostsChange={() => {
+                    // This should trigger cache invalidation at the parent level
+                    console.log('🔄 Desktop batch generation complete, triggering cache refresh');
+                  }}
+                />
                 <Button
                   variant="ghost"
                   size="sm"
