@@ -49,13 +49,16 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     getUploadType,
   } = useImageUpload({ onPostsChange });
 
-  // Handle image deletion
+  // Handle image deletion with optimistic updates
   const handleImageDelete = async (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
     try {
       const updateField = `image_${aspectRatio}_url`;
       
       // Import supabase client
       const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Optimistic update: immediately refresh the UI
+      onPostsChange();
       
       const { error } = await supabase
         .from('social_media_posts')
@@ -66,14 +69,20 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
         throw error;
       }
 
-      // Refresh the posts data
-      onPostsChange();
+      // Force another refresh to ensure consistency
+      setTimeout(() => {
+        onPostsChange();
+      }, 100);
       
       // Show success toast
       const { toast } = await import('sonner');
       toast.success('Image deleted successfully');
     } catch (error) {
       console.error('Error deleting image:', error);
+      
+      // If there was an error, refresh to revert optimistic update
+      onPostsChange();
+      
       const { toast } = await import('sonner');
       toast.error('Failed to delete image');
     }
