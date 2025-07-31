@@ -19,13 +19,19 @@ export const SeedManagementButton: React.FC<SeedManagementButtonProps> = ({
   const [showModal, setShowModal] = useState(false);
   const { getDefaultSeed, getSeedsByCategory } = useImageSeeds();
   
+  // Disable seed functionality for CDI category
+  const isCDI = post.category === 'cdi';
+  
   // Get the currently selected seed or default for the category
   const categorySeeds = getSeedsByCategory(post.category);
   const defaultSeed = getDefaultSeed(post.category);
-  const hasSeeds = categorySeeds.length > 0;
+  const hasSeeds = categorySeeds.length > 0 && !isCDI;
   
   // Determine current seed status
   const getCurrentSeedInfo = () => {
+    if (isCDI) {
+      return 'Seeds disabled for CDI';
+    }
     if (post.selected_seed_id) {
       const selectedSeed = categorySeeds.find(s => s.id === post.selected_seed_id);
       return selectedSeed ? `${selectedSeed.name}` : 'Custom seed';

@@ -113,11 +113,12 @@ serve(async (req) => {
           throw new Error('No prompt generated');
         }
 
-        // Step 2: Generate image (without seed parameters for gpt-image-1 compatibility)
+        // Step 2: Generate image (pass category to disable seeds for CDI)
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
           body: { 
             prompt, 
-            aspectRatio: ratio
+            aspectRatio: ratio,
+            category
           }
         });
 

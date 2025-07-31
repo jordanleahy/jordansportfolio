@@ -49,7 +49,7 @@ serve(async (req) => {
       );
     }
     
-    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null } = requestBody;
+    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = requestBody;
 
     console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'seedContext exists:', !!seedContext);
 
@@ -93,11 +93,14 @@ serve(async (req) => {
     const size = sizeMap[aspectRatio] || '1024x1024';
     const estimatedCost = 0.040; // GPT-Image-1 standard pricing
     
-    // Generate deterministic seed if requested, or use provided seed, or use managed seed
-    let finalSeed = seed;
+    // Disable seeds for CDI category
+    const isCDICategory = category === 'cdi';
     
-    // Check for managed seed first
-    if (useManagedSeed && managedSeedCategory && userId) {
+    // Generate deterministic seed if requested, or use provided seed, or use managed seed
+    let finalSeed = isCDICategory ? null : seed;
+    
+    // Check for managed seed first (skip for CDI)
+    if (useManagedSeed && managedSeedCategory && userId && !isCDICategory) {
       try {
         const { data: managedSeeds } = await supabase
           .from('image_seeds')
@@ -116,8 +119,8 @@ serve(async (req) => {
       }
     }
     
-    // Fall back to deterministic seed if no seed is set yet
-    if (useDeterministicSeed && !finalSeed) {
+    // Fall back to deterministic seed if no seed is set yet (skip for CDI)
+    if (useDeterministicSeed && !finalSeed && !isCDICategory) {
       // Create deterministic seed based on seedContext + prompt + aspect ratio for uniqueness
       const encoder = new TextEncoder();
       const seedInput = seedContext ? `${seedContext}_${prompt}_${aspectRatio}` : `${prompt}_${aspectRatio}`;
