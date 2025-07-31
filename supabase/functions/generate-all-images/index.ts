@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
@@ -191,6 +192,7 @@ serve(async (req) => {
           user_id: user.id,
           function_name: 'generate-all-images',
           model_used: 'batch-operation',
+          request_type: 'image_generation',
           success: true,
           estimated_cost: totalCost,
           tokens_used: totalTokens,
