@@ -1,94 +1,77 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { useRealtimeDebug } from '@/hooks/realtime/useRealtimeDebug';
+import type { ConnectionStatus } from '@/services/interfaces/IRealtimeConnection';
 import { 
   Activity, 
-  Download, 
-  Eye, 
-  EyeOff, 
-  Trash2, 
   Wifi, 
-  WifiOff,
-  Clock,
+  WifiOff, 
+  AlertCircle, 
+  Clock, 
+  Download,
+  Trash2,
+  Eye,
+  EyeOff,
   Database,
   Zap,
-  AlertTriangle,
-  Info,
-  Bug
+  TrendingUp
 } from 'lucide-react';
-import type { RealtimeLogEntry, RealtimeMetrics } from '@/hooks/useRealtimePosts';
 
 interface RealtimeDebuggerProps {
-  isConnected: boolean;
-  logs: RealtimeLogEntry[];
-  metrics: RealtimeMetrics;
-  sessionId: string;
-  onClearLogs: () => void;
-  onExportLogs: () => any;
-  realtimeUpdates: any[];
+  connectionStatus: ConnectionStatus;
 }
 
-export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
-  isConnected,
-  logs,
-  metrics,
-  sessionId,
-  onClearLogs,
-  onExportLogs,
-  realtimeUpdates,
-}) => {
+export function RealtimeDebugger({ connectionStatus }: RealtimeDebuggerProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedLogLevel, setSelectedLogLevel] = useState<string>('ALL');
+  const [selectedLevel, setSelectedLevel] = useState<string>('all');
+  
+  const { 
+    logs, 
+    metrics, 
+    recentUpdates, 
+    clearLogs, 
+    exportLogs, 
+    getFilteredLogs 
+  } = useRealtimeDebug({ enabled: isVisible });
 
   const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit'
-    }) + '.' + String(timestamp % 1000).padStart(3, '0');
+    return new Date(timestamp).toLocaleTimeString();
   };
 
-  const getLevelIcon = (level: RealtimeLogEntry['level']) => {
+  const getLevelIcon = (level: string) => {
     switch (level) {
-      case 'ERROR': return <AlertTriangle className="h-4 w-4 text-destructive" />;
-      case 'WARN': return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case 'DEBUG': return <Bug className="h-4 w-4 text-blue-500" />;
-      default: return <Info className="h-4 w-4 text-muted-foreground" />;
+      case 'error': return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'warn': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      case 'debug': return <Activity className="w-4 h-4 text-blue-500" />;
+      default: return <Activity className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getCategoryIcon = (category: RealtimeLogEntry['category']) => {
+  const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Connection': return <Wifi className="h-4 w-4" />;
-      case 'Update': return <Activity className="h-4 w-4" />;
-      case 'Cache': return <Database className="h-4 w-4" />;
-      case 'Performance': return <Zap className="h-4 w-4" />;
-      case 'Error': return <AlertTriangle className="h-4 w-4" />;
-      default: return <Info className="h-4 w-4" />;
+      case 'connection': return <Wifi className="w-4 h-4" />;
+      case 'update': return <Database className="w-4 h-4" />;
+      case 'cache': return <Database className="w-4 h-4" />;
+      case 'performance': return <Zap className="w-4 h-4" />;
+      default: return <Activity className="w-4 h-4" />;
     }
   };
-
-  const filteredLogs = logs.filter(log => 
-    selectedLogLevel === 'ALL' || log.level === selectedLogLevel
-  );
 
   const handleExportLogs = () => {
-    const exportData = onExportLogs();
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `realtime-logs-${sessionId}-${Date.now()}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    try {
+      exportLogs();
+    } catch (error) {
+      console.error('Failed to export logs:', error);
+    }
   };
+
+  const isConnected = connectionStatus.status === 'connected';
+  const isConnecting = connectionStatus.status === 'connecting';
+  const hasError = connectionStatus.status === 'error';
 
   if (!isVisible) {
     return (
@@ -130,7 +113,7 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
             </Button>
           </div>
           <CardDescription>
-            Session: {sessionId} • {logs.length} logs • {realtimeUpdates.length} updates
+            Status: {connectionStatus.status} • {logs.length} logs • {recentUpdates.length} updates
           </CardDescription>
         </CardHeader>
 
@@ -147,20 +130,20 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
                 <div className="space-y-1">
                   <div className="text-muted-foreground">Connection</div>
                   <div className="font-mono">
-                    {metrics.successfulConnections}/{metrics.connectionAttempts}
+                    {metrics.connectionAttempts}
                   </div>
                 </div>
                 
                 <div className="space-y-1">
                   <div className="text-muted-foreground">Updates</div>
                   <div className="font-mono">
-                    {metrics.totalUpdatesProcessed}/{metrics.totalUpdatesReceived}
+                    {metrics.updatesProcessed}/{metrics.updatesReceived}
                   </div>
                 </div>
                 
                 <div className="space-y-1">
                   <div className="text-muted-foreground">Cache Hits</div>
-                  <div className="font-mono">{metrics.totalCacheInvalidations}</div>
+                  <div className="font-mono">{metrics.cacheInvalidations}</div>
                 </div>
                 
                 <div className="space-y-1">
@@ -174,14 +157,12 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
                 </div>
               </div>
               
-              {metrics.lastUpdateTimestamp && (
-                <div className="pt-2 border-t">
-                  <div className="text-xs text-muted-foreground">Last Update</div>
-                  <div className="text-sm font-mono">
-                    {formatTimestamp(metrics.lastUpdateTimestamp)}
-                  </div>
+              <div className="pt-2 border-t">
+                <div className="text-xs text-muted-foreground">Connection</div>
+                <div className="text-sm font-mono">
+                  {formatTimestamp(connectionStatus.timestamp)}
                 </div>
-              )}
+              </div>
             </TabsContent>
 
             <TabsContent value="logs" className="p-0">
@@ -189,23 +170,23 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <select 
-                      value={selectedLogLevel}
-                      onChange={(e) => setSelectedLogLevel(e.target.value)}
+                      value={selectedLevel}
+                      onChange={(e) => setSelectedLevel(e.target.value)}
                       className="text-xs border rounded px-2 py-1"
                     >
-                      <option value="ALL">All Levels</option>
-                      <option value="ERROR">Errors</option>
-                      <option value="WARN">Warnings</option>
-                      <option value="INFO">Info</option>
-                      <option value="DEBUG">Debug</option>
+                      <option value="all">All Levels</option>
+                      <option value="error">Errors</option>
+                      <option value="warn">Warnings</option>
+                      <option value="info">Info</option>
+                      <option value="debug">Debug</option>
                     </select>
                     <Badge variant="outline" className="text-xs">
-                      {filteredLogs.length}
+                      {getFilteredLogs().length}
                     </Badge>
                   </div>
                   
                   <div className="flex gap-1">
-                    <Button onClick={onClearLogs} variant="ghost" size="sm">
+                    <Button onClick={clearLogs} variant="ghost" size="sm">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                     <Button onClick={handleExportLogs} variant="ghost" size="sm">
@@ -217,7 +198,7 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
               
               <ScrollArea className="h-64">
                 <div className="p-2 space-y-1">
-                  {filteredLogs.slice(-50).reverse().map((log) => (
+                  {getFilteredLogs(selectedLevel === 'all' ? undefined : selectedLevel as any).slice(-50).reverse().map((log) => (
                     <div key={log.id} className="text-xs p-2 rounded border bg-muted/30">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
@@ -245,7 +226,7 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
                     </div>
                   ))}
                   
-                  {filteredLogs.length === 0 && (
+                  {getFilteredLogs().length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No logs found for selected level
                     </div>
@@ -257,7 +238,7 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
             <TabsContent value="updates" className="p-0">
               <ScrollArea className="h-64">
                 <div className="p-2 space-y-2">
-                  {realtimeUpdates.slice(-20).reverse().map((update, index) => (
+                  {recentUpdates.slice(-20).reverse().map((update, index) => (
                     <div key={index} className="text-xs p-2 rounded border bg-muted/30">
                       <div className="flex items-center justify-between mb-1">
                         <Badge variant="default" className="text-xs">
@@ -286,7 +267,7 @@ export const RealtimeDebugger: React.FC<RealtimeDebuggerProps> = ({
                     </div>
                   ))}
                   
-                  {realtimeUpdates.length === 0 && (
+                  {recentUpdates.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No realtime updates yet
                     </div>

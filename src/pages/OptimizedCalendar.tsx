@@ -41,25 +41,20 @@ export default function OptimizedCalendar() {
   // Use the optimized calendar hook for performance
   const {
     activeTab,
+    isInitialized,
+    isLoadingCategories,
+    isLoadingActiveTab,
     availableCategories,
-    activeCategoryPosts,
-    isLoading,
-    categoriesLoading,
-    isRealtimeConnected,
-    realtimeUpdates,
-    realtimeLogs,
-    realtimeMetrics,
-    realtimeSessionId,
-    clearRealtimeLogs,
-    exportRealtimeLogs,
-    handleTabChange,
-    invalidateCategoryCache,
-    getCategoryPosts,
+    activeTabPosts,
+    connectionStatus,
+    isConnected,
+    changeTab,
+    invalidateCache,
+    getCategoryPosts
   } = useOptimizedCalendar(user);
 
   const loadCategoryPosts = async (category: string) => {
-    // Use optimistic cache invalidation for the specific category only
-    invalidateCategoryCache(category);
+    invalidateCache();
   };
 
   const handleImportComplete = async () => {
@@ -79,12 +74,12 @@ export default function OptimizedCalendar() {
       });
       
       // If the deleted category was active, switch to the first available one
-      if (activeTab === category && availableCategories.length > 1) {
-        const remainingCategories = availableCategories.filter(c => c !== category);
-        if (remainingCategories.length > 0) {
-          handleTabChange(remainingCategories[0]);
+        if (activeTab === category && availableCategories.length > 1) {
+          const remainingCategories = availableCategories.filter(c => c !== category);
+          if (remainingCategories.length > 0) {
+            changeTab(remainingCategories[0]);
+          }
         }
-      }
       
       // Force refresh the page to reload data
       window.location.reload();
@@ -98,7 +93,7 @@ export default function OptimizedCalendar() {
     }
   };
 
-  if (loading || (!isLoading && !activeTab)) {
+  if (loading || (!isInitialized)) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -119,10 +114,10 @@ export default function OptimizedCalendar() {
           <div className="relative">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
               <div className="flex-1">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                  <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500' : 'bg-primary animate-pulse'}`} />
-                  Content Management {isRealtimeConnected ? '• Live Updates' : ''}
-                </div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-primary animate-pulse'}`} />
+                    Content Management {isConnected ? '• Live Updates' : ''}
+                  </div>
                 <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
                   Social Media Calendar
                 </h1>
@@ -142,10 +137,10 @@ export default function OptimizedCalendar() {
                     <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
                     <div className="text-sm text-muted-foreground">Active Themes</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{activeCategoryPosts.length}</div>
-                    <div className="text-sm text-muted-foreground">Current Theme</div>
-                  </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">{activeTabPosts.length}</div>
+                      <div className="text-sm text-muted-foreground">Current Theme</div>
+                    </div>
                 </div>
               </div>
               
@@ -164,7 +159,7 @@ export default function OptimizedCalendar() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Theme</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {activeCategoryPosts.length} posts in this theme. This action cannot be undone.
+                            Are you sure you want to delete the "{activeTab}" theme? This will permanently delete all {activeTabPosts.length} posts in this theme. This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -185,7 +180,7 @@ export default function OptimizedCalendar() {
                     </div>
                     <div>
                       <div className="font-medium capitalize">{activeTab}</div>
-                      <div className="text-xs text-muted-foreground">{activeCategoryPosts.length} posts</div>
+                      <div className="text-xs text-muted-foreground">{activeTabPosts.length} posts</div>
                     </div>
                   </div>
                 </div>
@@ -211,7 +206,7 @@ export default function OptimizedCalendar() {
 
         <Tabs 
           value={activeTab} 
-          onValueChange={handleTabChange} 
+          onValueChange={changeTab} 
           className="space-y-8"
         >
           <div className="overflow-x-auto">
@@ -236,7 +231,7 @@ export default function OptimizedCalendar() {
                   category={category as any} 
                 />
                 <PostsTable 
-                  posts={category === activeTab ? activeCategoryPosts : getCategoryPosts(category)} 
+                  posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
                   onPostsChange={() => loadCategoryPosts(category)}
                   isAdmin={isAdmin}
                 />
@@ -247,13 +242,7 @@ export default function OptimizedCalendar() {
         
         {/* Advanced Realtime Debugger */}
         <RealtimeDebugger
-          isConnected={isRealtimeConnected}
-          logs={realtimeLogs || []}
-          metrics={realtimeMetrics || {} as any}
-          sessionId={realtimeSessionId || 'unknown'}
-          onClearLogs={clearRealtimeLogs || (() => {})}
-          onExportLogs={exportRealtimeLogs || (() => ({}))}
-          realtimeUpdates={realtimeUpdates}
+          connectionStatus={connectionStatus}
         />
       </div>
     </PageLayout>
