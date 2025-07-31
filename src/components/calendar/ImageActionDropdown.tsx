@@ -104,7 +104,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
             className="cursor-pointer text-sm"
           >
             <Upload className="mr-2 h-4 w-4" />
-            Upload {option.label}
+            {option.label}
           </DropdownMenuItem>
         ))}
         
