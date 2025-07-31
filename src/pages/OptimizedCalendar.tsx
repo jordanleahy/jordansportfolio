@@ -10,6 +10,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
+import { RealtimeDebugger } from '@/components/debug/RealtimeDebugger';
 import { Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -46,6 +47,11 @@ export default function OptimizedCalendar() {
     categoriesLoading,
     isRealtimeConnected,
     realtimeUpdates,
+    realtimeLogs,
+    realtimeMetrics,
+    realtimeSessionId,
+    clearRealtimeLogs,
+    exportRealtimeLogs,
     handleTabChange,
     invalidateCategoryCache,
     getCategoryPosts,
@@ -238,6 +244,17 @@ export default function OptimizedCalendar() {
             </TabsContent>
           ))}
         </Tabs>
+        
+        {/* Advanced Realtime Debugger */}
+        <RealtimeDebugger
+          isConnected={isRealtimeConnected}
+          logs={realtimeLogs || []}
+          metrics={realtimeMetrics || {} as any}
+          sessionId={realtimeSessionId || 'unknown'}
+          onClearLogs={clearRealtimeLogs || (() => {})}
+          onExportLogs={exportRealtimeLogs || (() => ({}))}
+          realtimeUpdates={realtimeUpdates}
+        />
       </div>
     </PageLayout>
   );

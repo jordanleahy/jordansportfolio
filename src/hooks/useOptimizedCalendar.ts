@@ -110,10 +110,19 @@ export const useOptimizedCalendar = (user: any) => {
     }
   };
 
-  const { isSubscribed = false } = useRealtimePosts({
+  const { 
+    isSubscribed = false, 
+    logs: realtimeLogs, 
+    metrics: realtimeMetrics,
+    sessionId,
+    clearLogs,
+    exportLogs 
+  } = useRealtimePosts({
     enabled: !!user,
     userId: user?.id,
     onUpdate: handleRealtimeUpdate,
+    enableAdvancedLogging: true,
+    verboseLogging: false, // Set to true for verbose debugging
   });
 
   // Primary category posts (loads immediately)
@@ -195,6 +204,13 @@ export const useOptimizedCalendar = (user: any) => {
     // Realtime
     isRealtimeConnected: isSubscribed,
     realtimeUpdates,
+    
+    // Advanced logging & debugging
+    realtimeLogs,
+    realtimeMetrics,
+    realtimeSessionId: sessionId,
+    clearRealtimeLogs: clearLogs,
+    exportRealtimeLogs: exportLogs,
     
     // Actions
     handleTabChange,

@@ -1,8 +1,31 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/realtime-js';
 import type { SocialMediaPost } from '@/types/socialMedia';
+
+// Enhanced logging types for QA testing
+export interface RealtimeLogEntry {
+  id: string;
+  timestamp: number;
+  level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+  category: 'Connection' | 'Update' | 'Cache' | 'Performance' | 'Error';
+  message: string;
+  data?: any;
+  sessionId: string;
+}
+
+export interface RealtimeMetrics {
+  connectionAttempts: number;
+  successfulConnections: number;
+  failedConnections: number;
+  totalUpdatesReceived: number;
+  totalUpdatesProcessed: number;
+  totalCacheInvalidations: number;
+  averageProcessingTime: number;
+  lastUpdateTimestamp?: number;
+  debounceHits: number;
+}
 
 export interface RealtimePostUpdate {
   postId: string;
@@ -25,24 +48,109 @@ interface UseRealtimePostsOptions {
   enabled?: boolean;
   userId?: string;
   onUpdate?: (update: RealtimePostUpdate) => void;
+  enableAdvancedLogging?: boolean;
+  verboseLogging?: boolean;
 }
 
 export const useRealtimePosts = ({ 
   enabled = true, 
   userId,
-  onUpdate 
+  onUpdate,
+  enableAdvancedLogging = true,
+  verboseLogging = false
 }: UseRealtimePostsOptions = {}) => {
   const queryClient = useQueryClient();
   const channelRef = useRef<RealtimeChannel | null>(null);
   const lastUpdateRef = useRef<{ [key: string]: number }>({});
+  
+  // Advanced logging state
+  const [logs, setLogs] = useState<RealtimeLogEntry[]>([]);
+  const [metrics, setMetrics] = useState<RealtimeMetrics>({
+    connectionAttempts: 0,
+    successfulConnections: 0,
+    failedConnections: 0,
+    totalUpdatesReceived: 0,
+    totalUpdatesProcessed: 0,
+    totalCacheInvalidations: 0,
+    averageProcessingTime: 0,
+    debounceHits: 0,
+  });
+  
+  const sessionId = useRef(Math.random().toString(36).substring(7));
+  const processingTimesRef = useRef<number[]>([]);
+
+  // Enhanced logging function
+  const addLog = (level: RealtimeLogEntry['level'], category: RealtimeLogEntry['category'], message: string, data?: any) => {
+    if (!enableAdvancedLogging) return;
+    
+    const logEntry: RealtimeLogEntry = {
+      id: Math.random().toString(36).substring(7),
+      timestamp: Date.now(),
+      level,
+      category,
+      message,
+      data,
+      sessionId: sessionId.current,
+    };
+    
+    setLogs(prev => [...prev.slice(-99), logEntry]); // Keep last 100 logs
+    
+    // Console output with enhanced formatting
+    const prefix = `[Realtime:${category}]`;
+    const timestamp = new Date().toISOString();
+    const logMessage = `${prefix} ${timestamp} ${message}`;
+    
+    switch (level) {
+      case 'ERROR':
+        console.error(logMessage, data);
+        break;
+      case 'WARN':
+        console.warn(logMessage, data);
+        break;
+      case 'DEBUG':
+        if (verboseLogging) console.debug(logMessage, data);
+        break;
+      default:
+        console.log(logMessage, data);
+    }
+  };
+
+  // Performance tracking
+  const trackPerformance = (operation: string, startTime: number) => {
+    const duration = Date.now() - startTime;
+    processingTimesRef.current.push(duration);
+    
+    // Keep only last 50 measurements for rolling average
+    if (processingTimesRef.current.length > 50) {
+      processingTimesRef.current = processingTimesRef.current.slice(-50);
+    }
+    
+    const avgTime = processingTimesRef.current.reduce((a, b) => a + b, 0) / processingTimesRef.current.length;
+    
+    setMetrics(prev => ({
+      ...prev,
+      averageProcessingTime: avgTime,
+    }));
+    
+    addLog('DEBUG', 'Performance', `${operation} completed in ${duration}ms (avg: ${avgTime.toFixed(2)}ms)`, {
+      operation,
+      duration,
+      averageTime: avgTime,
+    });
+  };
 
   useEffect(() => {
     if (!enabled || !userId) {
-      console.log('[Realtime] Disabled or no userId:', { enabled, userId });
+      addLog('INFO', 'Connection', 'Subscription disabled or no userId', { enabled, userId });
       return;
     }
 
-    console.log('[Realtime] Setting up subscription for user:', userId);
+    addLog('INFO', 'Connection', `Setting up subscription for user: ${userId}`, { userId, sessionId: sessionId.current });
+    
+    setMetrics(prev => ({
+      ...prev,
+      connectionAttempts: prev.connectionAttempts + 1,
+    }));
 
     // Create realtime channel
     const channel = supabase
@@ -56,15 +164,44 @@ export const useRealtimePosts = ({
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('[Realtime] Received update payload:', payload);
+          const updateStartTime = Date.now();
+          addLog('INFO', 'Update', 'Received realtime payload', { 
+            payloadType: payload.eventType,
+            table: payload.table,
+            schema: payload.schema,
+          });
+          
+          setMetrics(prev => ({
+            ...prev,
+            totalUpdatesReceived: prev.totalUpdatesReceived + 1,
+          }));
           
           const newRecord = payload.new as SocialMediaPost;
           const oldRecord = payload.old as SocialMediaPost;
           
           if (!newRecord || !oldRecord) {
-            console.log('[Realtime] Missing record data, skipping update');
+            addLog('WARN', 'Update', 'Missing record data in payload', { 
+              hasNew: !!newRecord, 
+              hasOld: !!oldRecord,
+              payload: verboseLogging ? payload : 'Enable verbose logging to see full payload'
+            });
             return;
           }
+
+          // Detailed field-by-field change analysis
+          const statusChanges = {
+            '16_9': { old: oldRecord.image_16_9_status, new: newRecord.image_16_9_status },
+            '9_16': { old: oldRecord.image_9_16_status, new: newRecord.image_9_16_status },
+            '3_4': { old: oldRecord.image_3_4_status, new: newRecord.image_3_4_status },
+            '4_3': { old: oldRecord.image_4_3_status, new: newRecord.image_4_3_status },
+          };
+          
+          const urlChanges = {
+            '16_9': { old: oldRecord.image_16_9_url, new: newRecord.image_16_9_url },
+            '9_16': { old: oldRecord.image_9_16_url, new: newRecord.image_9_16_url },
+            '3_4': { old: oldRecord.image_3_4_url, new: newRecord.image_3_4_url },
+            '4_3': { old: oldRecord.image_4_3_url, new: newRecord.image_4_3_url },
+          };
 
           // Check if this is an image-related update
           const isImageUpdate = (
@@ -79,26 +216,52 @@ export const useRealtimePosts = ({
           );
 
           if (!isImageUpdate) {
-            console.log('[Realtime] Not an image update, skipping');
+            addLog('DEBUG', 'Update', 'Non-image update filtered out', {
+              postId: newRecord.id,
+              category: newRecord.category,
+              statusChanges,
+              urlChanges,
+            });
             return;
           }
+          
+          addLog('INFO', 'Update', 'Image-related update detected', {
+            postId: newRecord.id,
+            category: newRecord.category,
+            statusChanges,
+            urlChanges,
+          });
 
           // Debounce rapid updates (within 1 second)
           const now = Date.now();
           const lastUpdate = lastUpdateRef.current[newRecord.id] || 0;
-          if (now - lastUpdate < 1000) {
-            console.log('[Realtime] Debouncing rapid update');
+          const timeSinceLastUpdate = now - lastUpdate;
+          
+          if (timeSinceLastUpdate < 1000) {
+            setMetrics(prev => ({
+              ...prev,
+              debounceHits: prev.debounceHits + 1,
+            }));
+            
+            addLog('DEBUG', 'Update', `Debouncing rapid update (${timeSinceLastUpdate}ms since last)`, {
+              postId: newRecord.id,
+              timeSinceLastUpdate,
+              debounceThreshold: 1000,
+            });
             return;
           }
           lastUpdateRef.current[newRecord.id] = now;
 
-          console.log('[Realtime] Processing image update for post:', newRecord.id);
-          console.log('[Realtime] Category:', newRecord.category);
-          console.log('[Realtime] Status changes:', {
-            '16_9': `${oldRecord.image_16_9_status} → ${newRecord.image_16_9_status}`,
-            '9_16': `${oldRecord.image_9_16_status} → ${newRecord.image_9_16_status}`,
-            '3_4': `${oldRecord.image_3_4_status} → ${newRecord.image_3_4_status}`,
-            '4_3': `${oldRecord.image_4_3_status} → ${newRecord.image_4_3_status}`,
+          addLog('INFO', 'Update', `Processing image update for post: ${newRecord.id}`, {
+            postId: newRecord.id,
+            category: newRecord.category,
+            statusTransitions: {
+              '16_9': `${oldRecord.image_16_9_status} → ${newRecord.image_16_9_status}`,
+              '9_16': `${oldRecord.image_9_16_status} → ${newRecord.image_9_16_status}`,
+              '3_4': `${oldRecord.image_3_4_status} → ${newRecord.image_3_4_status}`,
+              '4_3': `${oldRecord.image_4_3_status} → ${newRecord.image_4_3_status}`,
+            },
+            updateProcessingTime: Date.now() - updateStartTime,
           });
 
           // Create update object for callback
@@ -121,31 +284,72 @@ export const useRealtimePosts = ({
 
           // Call update callback if provided
           if (onUpdate) {
+            addLog('DEBUG', 'Update', 'Calling update callback', { postId: newRecord.id });
             onUpdate(update);
           }
 
-          // Invalidate relevant queries to trigger UI refresh
-          console.log('[Realtime] Invalidating category cache for:', newRecord.category);
+          // Cache invalidation with detailed tracking
+          const cacheInvalidationStart = Date.now();
+          
+          addLog('INFO', 'Cache', `Starting cache invalidation for category: ${newRecord.category}`, {
+            category: newRecord.category,
+            postId: newRecord.id,
+          });
+          
           queryClient.invalidateQueries({ 
             queryKey: ['category-posts', newRecord.category] 
           });
 
-          // Also invalidate the general available categories query
           queryClient.invalidateQueries({ 
             queryKey: ['available-categories'] 
           });
+          
+          setMetrics(prev => ({
+            ...prev,
+            totalCacheInvalidations: prev.totalCacheInvalidations + 1,
+            totalUpdatesProcessed: prev.totalUpdatesProcessed + 1,
+            lastUpdateTimestamp: Date.now(),
+          }));
 
-          console.log('[Realtime] Cache invalidation completed');
+          trackPerformance('Cache Invalidation', cacheInvalidationStart);
+          trackPerformance('Full Update Processing', updateStartTime);
+          
+          addLog('INFO', 'Cache', 'Cache invalidation completed', {
+            category: newRecord.category,
+            invalidationTime: Date.now() - cacheInvalidationStart,
+          });
         }
       )
       .subscribe((status) => {
-        console.log('[Realtime] Subscription status:', status);
+        addLog('INFO', 'Connection', `Subscription status changed: ${status}`, { 
+          status, 
+          channelName: 'social-media-posts-changes',
+          timestamp: new Date().toISOString(),
+        });
+        
         if (status === 'SUBSCRIBED') {
-          console.log('[Realtime] Successfully subscribed to social_media_posts changes');
+          setMetrics(prev => ({
+            ...prev,
+            successfulConnections: prev.successfulConnections + 1,
+          }));
+          addLog('INFO', 'Connection', 'Successfully subscribed to social_media_posts changes', {
+            sessionId: sessionId.current,
+            userId,
+          });
         } else if (status === 'CHANNEL_ERROR') {
-          console.error('[Realtime] Channel error - retrying subscription');
+          setMetrics(prev => ({
+            ...prev,
+            failedConnections: prev.failedConnections + 1,
+          }));
+          addLog('ERROR', 'Connection', 'Channel error - connection failed', { status });
         } else if (status === 'TIMED_OUT') {
-          console.error('[Realtime] Subscription timed out');
+          setMetrics(prev => ({
+            ...prev,
+            failedConnections: prev.failedConnections + 1,
+          }));
+          addLog('ERROR', 'Connection', 'Subscription timed out', { status });
+        } else if (status === 'CLOSED') {
+          addLog('INFO', 'Connection', 'Channel closed', { status });
         }
       });
 
@@ -153,16 +357,34 @@ export const useRealtimePosts = ({
 
     // Cleanup function
     return () => {
-      console.log('[Realtime] Cleaning up subscription');
+      addLog('INFO', 'Connection', 'Cleaning up subscription', { 
+        sessionId: sessionId.current,
+        channelState: channelRef.current?.state,
+      });
+      
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
-  }, [enabled, userId, queryClient, onUpdate]);
+  }, [enabled, userId, queryClient, onUpdate, enableAdvancedLogging, verboseLogging]);
 
   return {
     isSubscribed: channelRef.current?.state === 'joined',
     channel: channelRef.current,
+    // Advanced logging exports
+    logs: enableAdvancedLogging ? logs : [],
+    metrics: enableAdvancedLogging ? metrics : {} as RealtimeMetrics,
+    sessionId: sessionId.current,
+    clearLogs: () => setLogs([]),
+    exportLogs: () => ({
+      logs,
+      metrics,
+      sessionInfo: {
+        sessionId: sessionId.current,
+        timestamp: new Date().toISOString(),
+        userId,
+      }
+    }),
   };
 };
