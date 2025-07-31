@@ -34,11 +34,11 @@ interface PostsTableViewProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'published':
-      return 'bg-green-500/20 text-green-700 border-green-500/20';
+      return 'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 transition-colors';
     case 'scheduled':
-      return 'bg-blue-500/20 text-blue-700 border-blue-500/20';
+      return 'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20 transition-colors';
     default:
-      return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/20';
+      return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 hover:bg-yellow-500/20 transition-colors';
   }
 };
 
@@ -66,6 +66,19 @@ export const PostsTableView = memo(({
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const { generateAllImages, isGenerating } = useOptimizedBatchGeneration();
+
+  const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
+    switch (currentStatus) {
+      case 'draft':
+        return 'published';
+      case 'scheduled':
+        return 'published';
+      case 'published':
+        return 'draft';
+      default:
+        return 'draft';
+    }
+  };
 
   const handleGenerateAllImages = async (post: SocialMediaPost) => {
     try {
@@ -196,12 +209,12 @@ export const PostsTableView = memo(({
             <TableCell className="w-32">
               <div className="flex gap-2 items-center flex-wrap">
                 <Badge 
-                  className={getStatusColor(post.status)}
+                  className={`${getStatusColor(post.status)} cursor-pointer select-none`}
                   onClick={() => {
-                    const nextStatus = post.status === 'draft' ? 'published' : 'draft';
+                    const nextStatus = getNextStatus(post.status);
                     onStatusChange(post.id, nextStatus);
                   }}
-                  style={{ cursor: 'pointer' }}
+                  title={`Click to ${getNextStatus(post.status) === 'draft' ? 'mark as draft' : 'publish'}`}
                 >
                   {post.status}
                 </Badge>
