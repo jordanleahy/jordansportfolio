@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
+import { SeedManagementButton } from './SeedManagementButton';
+import { useSeedManagement } from '@/hooks/useSeedManagement';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +58,7 @@ const PostCardComponent = ({
 }: PostCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { updatePostSeed } = useSeedManagement();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -89,6 +92,13 @@ const PostCardComponent = ({
       return parts.slice(1).join('_') as '16_9' | '9_16' | '3_4' | '4_3';
     }
     return null;
+  };
+
+  const handleSeedSelect = async (postId: string, seedId: string | null) => {
+    const success = await updatePostSeed(postId, seedId);
+    if (success && onPostsChange) {
+      onPostsChange();
+    }
   };
 
 
@@ -208,6 +218,10 @@ const PostCardComponent = ({
               getUploadType={getUploadType}
               onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
               onPostsChange={onPostsChange}
+            />
+            <SeedManagementButton
+              post={post}
+              onSeedSelect={handleSeedSelect}
             />
             <Button
               variant="outline"
@@ -439,6 +453,7 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
     prevProps.post.image_9_16_url === nextProps.post.image_9_16_url &&
     prevProps.post.image_3_4_url === nextProps.post.image_3_4_url &&
     prevProps.post.image_4_3_url === nextProps.post.image_4_3_url &&
+    prevProps.post.selected_seed_id === nextProps.post.selected_seed_id &&
     prevProps.post.day === nextProps.post.day &&
     prevProps.draftIndex === nextProps.draftIndex &&
     JSON.stringify(prevProps.uploadingStates) === JSON.stringify(nextProps.uploadingStates)

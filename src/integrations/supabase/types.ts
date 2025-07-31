@@ -1544,6 +1544,7 @@ export type Database = {
           image_9_16_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
+          selected_seed_id: string | null
           status: Database["public"]["Enums"]["post_status"]
           theme: string | null
           title: string
@@ -1573,6 +1574,7 @@ export type Database = {
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
+          selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
           title: string
@@ -1602,13 +1604,22 @@ export type Database = {
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
+          selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "social_media_posts_selected_seed_id_fkey"
+            columns: ["selected_seed_id"]
+            isOneToOne: false
+            referencedRelation: "image_seeds"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
