@@ -106,6 +106,9 @@ export function useRealtimeUpdates({
 
         // Handle specific update types
         if (processedUpdate.type === 'image_status_change') {
+          console.log('🎉 Image status changed, invalidating calendar cache');
+          cacheManager.invalidatePattern('posts');
+          
           const { newImageStatus, title, newImageUrl } = processedUpdate.data;
           
           if (newImageStatus === 'completed' && newImageUrl) {

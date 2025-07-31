@@ -222,7 +222,12 @@ export const PostImageUploadCard = ({
       </div>
       
       {(isUploading || isGenerating) ? (
-        <ImageSkeletonLoader variant="thumbnail" />
+        <div className="border-2 border-primary/40 rounded bg-primary/10 p-2">
+          <ImageSkeletonLoader variant="thumbnail" />
+          <div className="text-xs text-center mt-1 text-primary font-medium">
+            {isGenerating ? `Step: ${generationStep || 'starting'}` : 'Uploading...'}
+          </div>
+        </div>
       ) : imageUrl ? (
         <div className="relative">
           <img

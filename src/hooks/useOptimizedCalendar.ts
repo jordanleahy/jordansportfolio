@@ -142,10 +142,11 @@ export function useOptimizedCalendar(user: any) {
   };
 
   const invalidateCache = () => {
-    // Invalidate all post queries
-    availableCategories.forEach(category => {
-      supabase.from('social_media_posts').select('*').eq('category', category);
-    });
+    console.log('🔄 Invalidating calendar cache');
+    // Use the cacheManager from realtime updates if available
+    if (cacheManager) {
+      cacheManager.invalidatePattern('posts');
+    }
   };
 
   const getCategoryPosts = (category: string) => {

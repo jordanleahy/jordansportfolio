@@ -14,9 +14,13 @@ export const ImageSkeletonLoader = ({
   if (variant === 'thumbnail') {
     return (
       <div className={`relative ${className}`}>
-        <Skeleton className="w-full h-16 rounded border" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Skeleton className="h-4 w-4 rounded-full animate-pulse" />
+        <div className="w-full h-16 rounded border-2 border-dashed border-primary/30 bg-primary/5 animate-pulse">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-full bg-primary/20 animate-bounce" />
+          </div>
+        </div>
+        <div className="absolute top-1 left-1 text-xs text-primary/60 font-medium">
+          Generating...
         </div>
       </div>
     );
@@ -24,12 +28,15 @@ export const ImageSkeletonLoader = ({
 
   return (
     <div 
-      className={`relative w-full rounded-md border overflow-hidden bg-muted/10 ${className}`}
+      className={`relative w-full rounded-md border-2 border-dashed border-primary/30 bg-primary/5 animate-pulse ${className}`}
       style={{ aspectRatio }}
     >
-      <Skeleton className="w-full h-full" />
+      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <Skeleton className="h-8 w-8 rounded-full animate-pulse" />
+        <div className="h-12 w-12 rounded-full bg-primary/20 animate-bounce" />
+      </div>
+      <div className="absolute bottom-2 left-2 text-sm text-primary/70 font-medium">
+        Generating Image...
       </div>
     </div>
   );
