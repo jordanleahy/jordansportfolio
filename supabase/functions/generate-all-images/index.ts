@@ -76,16 +76,21 @@ serve(async (req) => {
           continue;
         }
 
-        const { prompt, usage: promptUsage, cost: promptCost } = promptResponse.data || {};
+        // Fix response structure - use correct field names from generate-image-prompt-dynamic
+        const prompt = promptResponse.data?.generatedPrompt;
+        const promptUsage = promptResponse.data?.usage;
+        const promptCost = promptUsage?.estimated_cost || 0;
         
         if (!prompt) {
-          console.error(`❌ No prompt received for ${aspectRatio}`);
+          console.error(`❌ No prompt received for ${aspectRatio}:`, promptResponse.data);
           continue;
         }
         
-        console.log(`✅ Prompt generated for ${aspectRatio}: "${prompt.substring(0, 100)}..."`);
+        // Add null check for substring to prevent errors
+        const promptPreview = prompt ? prompt.substring(0, 100) : 'No prompt';
+        console.log(`✅ Prompt generated for ${aspectRatio}: "${promptPreview}..."`);
         
-        if (promptUsage) totalTokens += promptUsage.total_tokens || 0;
+        if (promptUsage?.total_tokens) totalTokens += promptUsage.total_tokens;
         if (promptCost) totalCost += promptCost;
 
         // Step 2: Generate image
