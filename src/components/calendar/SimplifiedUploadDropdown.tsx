@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
+import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 
 interface SimplifiedUploadDropdownProps {
@@ -23,8 +24,17 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   onPostsChange,
 }) => {
   const { generateAllImages, isGenerating, progress } = useOptimizedBatchGeneration();
+  const [showThumbnails, setShowThumbnails] = useState(false);
 
   const handleGenerateAllImages = async () => {
+    if (!showThumbnails) {
+      // First click: show thumbnails to confirm intent
+      setShowThumbnails(true);
+      return;
+    }
+
+    // Second click: start actual generation
+    setShowThumbnails(false);
     if (!post) return;
     
     console.log('🚀 Starting optimized batch image generation for post:', post.id);
@@ -76,7 +86,13 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
         )}
       </Button>
       
-      {/* Batch Processing Skeleton */}
+      {/* Thumbnail Preview - shown on first click */}
+      <BulkGenerationThumbnails 
+        showThumbnails={showThumbnails && !isGenerating(post.id)}
+        className="mt-4"
+      />
+      
+      {/* Batch Processing Skeleton - shown during generation */}
       <BatchProcessingSkeleton
         isGenerating={isGenerating(post.id)}
         progress={progress}
