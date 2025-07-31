@@ -205,13 +205,39 @@ const PostCardComponent = ({
               variant="outline"
               size="sm"
               className="flex-1"
-              title="Add Photo"
-              aria-label="Add Photo"
+              title="Generate All Images"
+              aria-label="Generate All Images"
+              onClick={async () => {
+                await generateAllImages({
+                  postId: post.id,
+                  title: post.title,
+                  description: post.description,
+                  category: post.category
+                });
+                // Refresh posts if callback provided
+                if (onPostsChange) {
+                  const { data: refreshedPosts } = await supabase
+                    .from('social_media_posts')
+                    .select('*')
+                    .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+                    .order('day', { ascending: true });
+                  
+                  if (refreshedPosts) {
+                    onPostsChange();
+                  }
+                }
+              }}
             >
-              <Upload className="h-4 w-4 mr-2" />
-              Photo
-              <ChevronDown className="h-4 w-4 ml-2" />
+              <Wand2 className="h-4 w-4" />
             </Button>
+            <SimplifiedUploadDropdown
+              post={post}
+              isUploading={isUploading}
+              getUploadType={getUploadType}
+              onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+              onPostsChange={onPostsChange}
+              className="flex-1"
+            />
             {!isMobile && (
               <Button
                 variant="outline"
