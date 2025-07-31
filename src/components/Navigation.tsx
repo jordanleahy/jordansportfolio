@@ -222,8 +222,8 @@ const Navigation = () => {
                          <NavigationMenuItem>
                            <NavigationMenuLink asChild>
                              <Link
-                               to="/admin/seed-management"
-                               className={cn(navLinkStyles, isActive("/admin/seed-management") && "bg-accent text-accent-foreground")}
+                               to="/admin/seeds"
+                               className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
                              >
                                <Settings className="mr-2 h-4 w-4" />
                                Seed Management
