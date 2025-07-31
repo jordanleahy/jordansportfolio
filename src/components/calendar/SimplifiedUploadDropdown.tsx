@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
+import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import type { AspectRatioKey } from '@/types/batchImageGeneration';
 
 interface SimplifiedUploadDropdownProps {
@@ -56,19 +57,28 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
 
 
   return (
-    <Button
-      onClick={handleGenerateAllImages}
-      disabled={isGenerating(post.id) || isUploading(post.id)}
-      variant="outline"
-      size="sm"
-      className="h-8 flex-1"
-      title="Generate All Images with AI"
-    >
-      {isGenerating(post.id) ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Sparkles className="h-4 w-4" />
-      )}
-    </Button>
+    <>
+      <Button
+        onClick={handleGenerateAllImages}
+        disabled={isGenerating(post.id) || isUploading(post.id)}
+        variant="outline"
+        size="sm"
+        className="h-8 flex-1"
+        title="Generate All Images with AI"
+      >
+        {isGenerating(post.id) ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Sparkles className="h-4 w-4" />
+        )}
+      </Button>
+      
+      {/* Batch Processing Skeleton */}
+      <BatchProcessingSkeleton
+        isGenerating={isGenerating(post.id)}
+        progress={progress}
+        className="mt-4"
+      />
+    </>
   );
 };

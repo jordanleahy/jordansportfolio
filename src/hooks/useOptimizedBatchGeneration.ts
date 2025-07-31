@@ -10,7 +10,11 @@ import type {
 
 export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
   const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
-  const [progress, setProgress] = useState({ completed: 0, total: 4 });
+  const [progress, setProgress] = useState({ 
+    completed: 0, 
+    total: 4,
+    currentAspectRatio: undefined as AspectRatio | undefined 
+  });
   const [error, setError] = useState<string | null>(null);
 
   const isGenerating = useCallback((postId: string) => {
@@ -20,7 +24,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
   const generateAllImages = useCallback(async (request: BatchGenerationRequest): Promise<BatchGenerationResponse> => {
     setGeneratingPosts(prev => new Set(prev).add(request.postId));
     setError(null);
-    setProgress({ completed: 0, total: 4 });
+    setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
 
     try {
       console.log('🎨 Starting optimized batch generation for post:', request.postId);
@@ -56,7 +60,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         toast.warning(`Some images failed to generate: ${failedAspectRatios}`);
       }
 
-      setProgress({ completed: response.imagesGenerated, total: response.aspectRatiosProcessed });
+      setProgress({ completed: response.imagesGenerated, total: response.aspectRatiosProcessed, currentAspectRatio: undefined });
       
       return response;
 
