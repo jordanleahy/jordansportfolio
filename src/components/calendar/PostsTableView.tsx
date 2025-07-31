@@ -7,6 +7,7 @@ import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { ImageActionDropdown } from './ImageActionDropdown';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -223,7 +224,12 @@ export const PostsTableView = memo(({
             </TableCell>
             <TableCell className="w-40">
               <div className="flex gap-2 flex-wrap">
-                {post.image_16_9_url && (
+                {/* 16:9 Image */}
+                {isGenerating ? (
+                  <div className="w-16 h-9 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_16_9_url ? (
                   <div className="w-16 h-9 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_16_9_url}
@@ -232,12 +238,16 @@ export const PostsTableView = memo(({
                       loading="lazy"
                       onClick={() => onPreviewImage(post.image_16_9_url!, `${post.title} - 16:9 image`)}
                     />
-                    <ImageHoverOverlay className="text-xs">
-                      16:9
-                    </ImageHoverOverlay>
+                    <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
-                )}
-                {post.image_9_16_url && (
+                ) : null}
+
+                {/* 9:16 Image */}
+                {isGenerating ? (
+                  <div className="w-9 h-16 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_9_16_url ? (
                   <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_9_16_url}
@@ -246,12 +256,16 @@ export const PostsTableView = memo(({
                       loading="lazy"
                       onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
                     />
-                    <ImageHoverOverlay className="text-xs">
-                      9:16
-                    </ImageHoverOverlay>
+                    <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
                   </div>
-                )}
-                {post.image_3_4_url && (
+                ) : null}
+
+                {/* 3:4 Image */}
+                {isGenerating ? (
+                  <div className="w-12 h-16 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_3_4_url ? (
                   <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_3_4_url}
@@ -260,12 +274,16 @@ export const PostsTableView = memo(({
                       loading="lazy"
                       onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
                     />
-                    <ImageHoverOverlay className="text-xs">
-                      3:4
-                    </ImageHoverOverlay>
+                    <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
                   </div>
-                )}
-                {post.image_4_3_url && (
+                ) : null}
+
+                {/* 4:3 Image */}
+                {isGenerating ? (
+                  <div className="w-16 h-12 relative flex-shrink-0">
+                    <Skeleton className="w-full h-full rounded border" />
+                  </div>
+                ) : post.image_4_3_url ? (
                   <div className="w-16 h-12 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_4_3_url}
@@ -274,11 +292,9 @@ export const PostsTableView = memo(({
                       loading="lazy"
                       onClick={() => onPreviewImage(post.image_4_3_url!, `${post.title} - 4:3 image`)}
                     />
-                    <ImageHoverOverlay className="text-xs">
-                      4:3
-                    </ImageHoverOverlay>
+                    <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
                   </div>
-                )}
+                ) : null}
               </div>
             </TableCell>
             <TableCell className="w-48">
