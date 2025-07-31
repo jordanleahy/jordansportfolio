@@ -20,17 +20,6 @@ export const SystemPromptsTab = ({
   supportedCategories, 
   onChange 
 }: SystemPromptsTabProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-
-  const addNewPrompt = (category: string, prompt: string) => {
-    const newPrompts = [...systemPrompts, { category, prompt }];
-    const newCategories = supportedCategories.includes(category) 
-      ? supportedCategories 
-      : [...supportedCategories, category];
-    
-    onChange(newPrompts, newCategories);
-    setSelectedCategory('');
-  };
 
   const updatePrompt = (index: number, prompt: string) => {
     const newPrompts = [...systemPrompts];
@@ -125,21 +114,9 @@ export const SystemPromptsTab = ({
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No system prompts configured. Use the preset selector above to get started.
+              No system prompts configured.
             </p>
           )}
-        </div>
-
-        {/* Add New Prompt */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium mb-2">Add Custom Prompt</h4>
-          <CategoryPromptEditor
-            category={selectedCategory}
-            prompt=""
-            isNew={true}
-            onCategoryChange={setSelectedCategory}
-            onSave={(category, prompt) => addNewPrompt(category, prompt)}
-          />
         </div>
       </CardContent>
     </Card>
