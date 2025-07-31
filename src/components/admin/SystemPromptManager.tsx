@@ -16,7 +16,7 @@ export const SystemPromptManager = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<SystemPrompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
 
-  const blogVisualAgent = agents?.find(agent => agent.name === 'Blog Visual Prompt Generator');
+  const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
 
   const getPromptMetrics = (category: string) => {
     // Mock metrics - in real implementation, this would come from API usage tracking
@@ -161,7 +161,7 @@ export const SystemPromptManager = () => {
       {blogVisualAgent && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Blog Visual Prompt Generator</h3>
+            <h3 className="text-lg font-semibold">Visual Prompt Generator</h3>
             <Badge variant="outline">{blogVisualAgent.status}</Badge>
           </div>
           

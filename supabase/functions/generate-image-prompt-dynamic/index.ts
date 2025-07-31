@@ -103,7 +103,7 @@ serve(async (req) => {
     const { data: agentData, error: agentError } = await supabase
       .from('openai_agents')
       .select('system_prompts, supported_categories')
-      .eq('name', 'Blog Visual Prompt Generator')
+      .eq('name', 'Visual Prompt Generator')
       .single();
 
     if (agentError) {
@@ -180,7 +180,7 @@ Category: ${category}`;
           metadata: {
             title,
             description,
-            agent: 'Blog Visual Prompt Generator',
+            agent: 'Visual Prompt Generator',
             model: 'gpt-4o-mini',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
@@ -222,7 +222,7 @@ Category: ${category}`;
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
       category,
-      agent: 'Blog Visual Prompt Generator',
+      agent: 'Visual Prompt Generator',
       usage: {
         prompt_tokens: promptTokens,
         completion_tokens: completionTokens,

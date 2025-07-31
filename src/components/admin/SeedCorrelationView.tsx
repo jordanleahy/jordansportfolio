@@ -9,7 +9,7 @@ export const SeedCorrelationView = () => {
   const { seeds, loading: seedsLoading } = useImageSeeds();
   const { data: agents, isLoading: agentsLoading } = useOpenAIAgents();
 
-  const blogVisualAgent = agents?.find(agent => agent.name === 'Blog Visual Prompt Generator');
+  const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
 
   const getSeedPromptCorrelation = (seedCategory: string) => {
     const matchingPrompt = blogVisualAgent?.system_prompts?.find(
@@ -99,7 +99,7 @@ export const SeedCorrelationView = () => {
                     <div className="text-sm font-medium mb-1">System Prompt</div>
                     {correlatedPrompt ? (
                       <div className="p-3 bg-muted rounded-lg">
-                        <div className="text-xs text-muted-foreground mb-1">Agent: Blog Visual Prompt Generator</div>
+                        <div className="text-xs text-muted-foreground mb-1">Agent: Visual Prompt Generator</div>
                         <div className="text-sm line-clamp-2">
                           {correlatedPrompt.prompt.substring(0, 100)}...
                         </div>
