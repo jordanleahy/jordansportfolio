@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useRoutePreloading } from '@/hooks/useRoutePreloading';
+import { useRealtimePosts, type RealtimePostUpdate } from '@/hooks/useRealtimePosts';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Individual category query hook for granular caching
@@ -36,6 +37,7 @@ export const useOptimizedCalendar = (user: any) => {
   const { getUserPreferences, saveUserPreferences } = useRoutePreloading();
   const [activeTab, setActiveTab] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimePostUpdate[]>([]);
 
   // Get URL params for tab state (fallback mechanism)
   const urlParams = new URLSearchParams(window.location.search);
@@ -82,6 +84,37 @@ export const useOptimizedCalendar = (user: any) => {
       console.log('[Calendar] Initialized with tab:', selectedTab);
     }
   }, [availableCategories, userPrefs.defaultCategory, urlTab, isInitialized]);
+
+  // Set up realtime subscriptions for automatic updates
+  const handleRealtimeUpdate = (update: RealtimePostUpdate) => {
+    console.log('[Calendar] Received realtime update:', update);
+    setRealtimeUpdates(prev => [...prev.slice(-9), update]); // Keep last 10 updates for debugging
+    
+    // Show user feedback for completed images
+    const completedStatuses = Object.entries(update.imageStatuses).filter(
+      ([_, status]) => status === 'complete'
+    );
+    
+    if (completedStatuses.length > 0) {
+      const aspectRatios = completedStatuses.map(([key, _]) => 
+        key.replace('image_', '').replace('_status', '').replace('_', ':')
+      );
+      
+      // Dynamic import to avoid bundle size issues
+      import('sonner').then(({ toast }) => {
+        toast.success(`Image(s) ready: ${aspectRatios.join(', ')}`, {
+          description: 'Your images have been processed and are now available.',
+          duration: 4000,
+        });
+      });
+    }
+  };
+
+  const { isSubscribed } = useRealtimePosts({
+    enabled: !!user,
+    userId: user?.id,
+    onUpdate: handleRealtimeUpdate,
+  });
 
   // Primary category posts (loads immediately)
   const { 
@@ -158,6 +191,10 @@ export const useOptimizedCalendar = (user: any) => {
     categoriesLoading,
     activePostsLoading,
     isInitialized,
+    
+    // Realtime
+    isRealtimeConnected: isSubscribed,
+    realtimeUpdates,
     
     // Actions
     handleTabChange,

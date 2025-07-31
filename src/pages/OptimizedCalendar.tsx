@@ -44,6 +44,8 @@ export default function OptimizedCalendar() {
     activeCategoryPosts,
     isLoading,
     categoriesLoading,
+    isRealtimeConnected,
+    realtimeUpdates,
     handleTabChange,
     invalidateCategoryCache,
     getCategoryPosts,
@@ -112,8 +114,8 @@ export default function OptimizedCalendar() {
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
               <div className="flex-1">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  Content Management
+                  <div className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-green-500' : 'bg-primary animate-pulse'}`} />
+                  Content Management {isRealtimeConnected ? '• Live Updates' : ''}
                 </div>
                 <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
                   Social Media Calendar
