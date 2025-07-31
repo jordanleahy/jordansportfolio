@@ -25,6 +25,8 @@ interface BatchRequest {
   title: string;
   description: string;
   category?: string;
+  cachedPrompt?: string;
+  useCachedPrompt?: boolean;
 }
 
 const corsHeaders = {
@@ -77,7 +79,7 @@ serve(async (req) => {
     }
 
     const requestBody: BatchRequest = await req.json();
-    const { postId, title, description, category = 'general' } = requestBody;
+    const { postId, title, description, category = 'general', cachedPrompt, useCachedPrompt = false } = requestBody;
 
     if (!postId || !title || !description) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -95,22 +97,29 @@ serve(async (req) => {
       try {
         console.log(`🖼️ Starting ${ratio} generation...`);
 
-        // Step 1: Generate prompt (parallel execution)
-        const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-          body: { title, description, category }
-        });
+        let prompt: string;
+        let promptUsage = { estimated_cost: 0, total_tokens: 0 };
 
-        if (promptResponse.error) {
-          throw new Error(`Prompt generation failed: ${promptResponse.error.message}`);
-        }
+        // Use cached prompt if available, otherwise generate new one
+        if (useCachedPrompt && cachedPrompt) {
+          console.log(`📦 Using cached prompt for ${ratio}`);
+          prompt = cachedPrompt;
+        } else {
+          // Step 1: Generate prompt (parallel execution)
+          const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+            body: { title, description, category }
+          });
 
-        const prompt = promptResponse.data?.generatedPrompt;
-        const promptUsage = promptResponse.data?.usage;
-        const promptCost = promptUsage?.estimated_cost || 0;
-        const promptTokens = promptUsage?.total_tokens || 0;
+          if (promptResponse.error) {
+            throw new Error(`Prompt generation failed: ${promptResponse.error.message}`);
+          }
 
-        if (!prompt) {
-          throw new Error('No prompt generated');
+          prompt = promptResponse.data?.generatedPrompt;
+          promptUsage = promptResponse.data?.usage || { estimated_cost: 0, total_tokens: 0 };
+
+          if (!prompt) {
+            throw new Error('No prompt generated');
+          }
         }
 
         // Step 2: Generate image (pass category to disable seeds for CDI)
@@ -143,6 +152,8 @@ serve(async (req) => {
 
         const base64Image = imageResponse.data?.image;
         const imageCost = imageResponse.data?.cost || 0;
+        const promptCost = promptUsage?.estimated_cost || 0;
+        const promptTokens = promptUsage?.total_tokens || 0;
 
         if (!base64Image) {
           throw new Error('No image generated');

@@ -48,6 +48,8 @@ export interface OptimizedBatchGenerationHook {
     currentAspectRatio?: AspectRatio;
   };
   error: string | null;
+  getOrGeneratePrompt: (request: BatchGenerationRequest) => Promise<string>;
+  clearCache: () => void;
 }
 
 // Utility function to convert between aspect ratio formats

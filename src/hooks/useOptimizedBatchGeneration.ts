@@ -4,22 +4,160 @@ import { toast } from 'sonner';
 import type { 
   BatchGenerationRequest, 
   BatchGenerationResponse, 
-  AspectRatio,
-  OptimizedBatchGenerationHook 
+  OptimizedBatchGenerationHook, 
+  AspectRatio 
 } from '@/types/batchImageGeneration';
+
+// Helper function to create a cache key for prompt caching
+const createPromptCacheKey = (request: BatchGenerationRequest): string => {
+  const { title, description, category = 'general' } = request;
+  // Create a stable hash from the content for consistent caching
+  const content = `${title}|${description}|${category}`.toLowerCase().trim();
+  return `prompt_${category}_${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+};
+
+// Helper function to cache a generated prompt
+const cacheGeneratedPrompt = async (
+  cacheKey: string, 
+  prompt: string, 
+  category: string,
+  metadata: any = {}
+) => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) return;
+
+    // Check if prompt already exists
+    const { data: existing } = await supabase
+      .from('cached_prompts')
+      .select('id')
+      .eq('cache_key', cacheKey)
+      .eq('user_id', user.user.id)
+      .single();
+
+    if (existing) {
+      // Update existing cache entry
+      await supabase
+        .from('cached_prompts')
+        .update({
+          prompt_text: prompt,
+          metadata,
+          updated_at: new Date().toISOString(),
+          version: 1 // Increment version for cache invalidation
+        })
+        .eq('id', existing.id);
+    } else {
+      // Create new cache entry
+      await supabase
+        .from('cached_prompts')
+        .insert({
+          cache_key: cacheKey,
+          prompt_text: prompt,
+          category,
+          metadata,
+          user_id: user.user.id,
+          version: 1,
+          hit_count: 0
+        });
+    }
+    
+    console.log('📦 Cached prompt with key:', cacheKey);
+  } catch (error) {
+    console.warn('⚠️ Failed to cache prompt:', error);
+    // Don't throw - caching failures shouldn't break generation
+  }
+};
+
+// Helper function to retrieve cached prompt
+const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) return null;
+
+    const { data: cached } = await supabase
+      .from('cached_prompts')
+      .select('prompt_text, id')
+      .eq('cache_key', cacheKey)
+      .eq('user_id', user.user.id)
+      .single();
+
+    if (cached) {
+      // Update hit count and access time
+      await supabase.rpc('update_cache_hit', {
+        cache_key_param: cacheKey
+      });
+      
+      console.log('🎯 Using cached prompt for key:', cacheKey);
+      return cached.prompt_text;
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('⚠️ Failed to retrieve cached prompt:', error);
+    return null;
+  }
+};
 
 export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
   const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
-  const [progress, setProgress] = useState({ 
-    completed: 0, 
+  const [progress, setProgress] = useState<{ completed: number; total: number; currentAspectRatio?: AspectRatio }>({
+    completed: 0,
     total: 4,
-    currentAspectRatio: undefined as AspectRatio | undefined 
+    currentAspectRatio: undefined
   });
   const [error, setError] = useState<string | null>(null);
+  const [cachedPrompts, setCachedPrompts] = useState<Map<string, string>>(new Map());
 
   const isGenerating = useCallback((postId: string) => {
     return generatingPosts.has(postId);
   }, [generatingPosts]);
+
+  // Function to get or generate prompt with caching
+  const getOrGeneratePrompt = useCallback(async (request: BatchGenerationRequest): Promise<string> => {
+    const cacheKey = createPromptCacheKey(request);
+    
+    // Check memory cache first
+    if (cachedPrompts.has(cacheKey)) {
+      console.log('💾 Using memory cached prompt for:', cacheKey);
+      return cachedPrompts.get(cacheKey)!;
+    }
+    
+    // Check database cache
+    const cachedPrompt = await getCachedPrompt(cacheKey);
+    if (cachedPrompt) {
+      // Store in memory cache for faster subsequent access
+      setCachedPrompts(prev => new Map(prev).set(cacheKey, cachedPrompt));
+      return cachedPrompt;
+    }
+    
+    // Generate new prompt
+    console.log('🎯 Generating new prompt for:', cacheKey);
+    const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      body: { 
+        title: request.title, 
+        description: request.description, 
+        category: request.category 
+      }
+    });
+
+    if (error || !data?.generatedPrompt) {
+      throw new Error('Failed to generate prompt');
+    }
+
+    const newPrompt = data.generatedPrompt;
+    
+    // Cache the new prompt
+    await cacheGeneratedPrompt(cacheKey, newPrompt, request.category || 'general', {
+      title: request.title,
+      description: request.description,
+      generated_at: new Date().toISOString()
+    });
+    
+    // Store in memory cache
+    setCachedPrompts(prev => new Map(prev).set(cacheKey, newPrompt));
+    
+    return newPrompt;
+  }, [cachedPrompts]);
 
   const generateAllImages = useCallback(async (request: BatchGenerationRequest): Promise<BatchGenerationResponse> => {
     setGeneratingPosts(prev => new Set(prev).add(request.postId));
@@ -50,9 +188,19 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
     try {
       console.log('🎨 Starting optimized batch generation for post:', request.postId);
       
-      // Use optimized edge function
+      // Get or generate cached prompt first
+      const cachedPrompt = await getOrGeneratePrompt(request);
+      console.log('📝 Using prompt for batch generation (cached)');
+      
+      // Use optimized edge function with enhanced request including cached prompt
+      const enhancedRequest = {
+        ...request,
+        cachedPrompt, // Pass the cached prompt to the edge function
+        useCachedPrompt: true
+      };
+      
       const { data, error: functionError } = await supabase.functions.invoke('generate-all-images-optimized', {
-        body: request
+        body: enhancedRequest
       });
 
       clearInterval(progressInterval);
@@ -123,12 +271,14 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
       }, 1000);
     }
-  }, []);
+  }, [getOrGeneratePrompt]);
 
   return {
     generateAllImages,
     isGenerating,
     progress,
-    error
+    error,
+    getOrGeneratePrompt, // Expose this function for single image generation
+    clearCache: () => setCachedPrompts(new Map()) // Function to clear memory cache
   };
 };
