@@ -41,7 +41,7 @@ export interface BatchGenerationResponse {
 
 export interface OptimizedBatchGenerationHook {
   generateAllImages: (request: BatchGenerationRequest) => Promise<BatchGenerationResponse>;
-  isGenerating: boolean;
+  isGenerating: (postId: string) => boolean;
   progress: {
     completed: number;
     total: number;

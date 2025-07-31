@@ -9,12 +9,16 @@ import type {
 } from '@/types/batchImageGeneration';
 
 export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState({ completed: 0, total: 4 });
   const [error, setError] = useState<string | null>(null);
 
+  const isGenerating = useCallback((postId: string) => {
+    return generatingPosts.has(postId);
+  }, [generatingPosts]);
+
   const generateAllImages = useCallback(async (request: BatchGenerationRequest): Promise<BatchGenerationResponse> => {
-    setIsGenerating(true);
+    setGeneratingPosts(prev => new Set(prev).add(request.postId));
     setError(null);
     setProgress({ completed: 0, total: 4 });
 
@@ -76,7 +80,11 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         aspectRatiosProcessed: 4
       };
     } finally {
-      setIsGenerating(false);
+      setGeneratingPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(request.postId);
+        return newSet;
+      });
     }
   }, []);
 

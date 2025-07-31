@@ -311,10 +311,10 @@ export const PostsTableView = memo(({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleGenerateAllImages(post)}
-                  disabled={isGenerating}
+                  disabled={isGenerating(post.id)}
                   title="Generate all images with AI"
                 >
-                  {isGenerating ? (
+                  {isGenerating(post.id) ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Sparkles className="h-4 w-4" />

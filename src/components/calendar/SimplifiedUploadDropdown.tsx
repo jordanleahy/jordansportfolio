@@ -21,7 +21,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   onFileSelect,
   onPostsChange,
 }) => {
-  const { generateAllImages, isGenerating: isBatchGenerating, progress } = useOptimizedBatchGeneration();
+  const { generateAllImages, isGenerating, progress } = useOptimizedBatchGeneration();
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
@@ -58,13 +58,13 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   return (
     <Button
       onClick={handleGenerateAllImages}
-      disabled={isBatchGenerating || isUploading(post.id)}
+      disabled={isGenerating(post.id) || isUploading(post.id)}
       variant="outline"
       size="sm"
       className="h-8 flex-1"
       title="Generate All Images with AI"
     >
-      {isBatchGenerating ? (
+      {isGenerating(post.id) ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <Sparkles className="h-4 w-4" />
