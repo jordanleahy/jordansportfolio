@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useImageSeeds } from '@/hooks/useImageSeeds';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +78,14 @@ export const SeedManagement = () => {
       console.error('Failed to create default CDI seed:', error);
     }
   };
+
+  // Auto-create default CDI seed if none exists
+  useEffect(() => {
+    const cdiSeeds = seeds.filter(s => s.category === 'cdi');
+    if (!loading && seeds.length >= 0 && cdiSeeds.length === 0) {
+      createDefaultCDISeed();
+    }
+  }, [loading, seeds]);
 
   if (loading) {
     return <div>Loading seeds...</div>;
@@ -351,28 +359,8 @@ export const SeedManagement = () => {
       {seeds.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="space-y-4">
-              <div className="text-muted-foreground">
-                No seeds found. Create your first seed to get started.
-              </div>
-              <Button onClick={createDefaultCDISeed} variant="outline">
-                Create Default CDI Seed
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {seeds.filter(s => s.category === 'cdi').length === 0 && seeds.length > 0 && (
-        <Card className="border-dashed">
-          <CardContent className="py-8 text-center">
-            <div className="space-y-4">
-              <div className="text-muted-foreground">
-                No CDI seeds found. Create a professional healthcare seed for consistent CDI imagery.
-              </div>
-              <Button onClick={createDefaultCDISeed} variant="outline">
-                Create Default CDI Seed
-              </Button>
+            <div className="text-muted-foreground">
+              Creating your default CDI seed...
             </div>
           </CardContent>
         </Card>
