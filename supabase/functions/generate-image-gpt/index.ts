@@ -107,8 +107,9 @@ serve(async (req) => {
       const data = encoder.encode(prompt + aspectRatio);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);
-      // Convert first 4 bytes to a positive integer
-      finalSeed = Math.abs(new DataView(hashArray.buffer).getInt32(0, false));
+      // Convert first 4 bytes to a positive integer and constrain to valid range (0 to 2^32-1)
+      const rawSeed = Math.abs(new DataView(hashArray.buffer).getInt32(0, false));
+      finalSeed = rawSeed % 4294967295; // Ensure it's within valid range for OpenAI
     }
 
     console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '');
@@ -125,8 +126,8 @@ serve(async (req) => {
         size: size,
         quality: 'high',
         output_format: 'png',
-        n: 1
-        // Note: gpt-image-1 doesn't support seed parameter
+        n: 1,
+        ...(finalSeed && { seed: finalSeed })
       }),
     });
 
