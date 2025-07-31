@@ -2,14 +2,14 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { 
-  BatchGenerationRequest, 
-  BatchGenerationResponse, 
-  OptimizedBatchGenerationHook, 
+  BulkImageGenerationRequest, 
+  BulkImageGenerationResponse, 
+  OptimizedBulkGenerationHook, 
   AspectRatio 
-} from '@/types/batchImageGeneration';
+} from '@/types/bulkImageGeneration';
 
 // Helper function to create a cache key for prompt caching
-const createPromptCacheKey = (request: BatchGenerationRequest): string => {
+const createPromptCacheKey = (request: BulkImageGenerationRequest): string => {
   const { title, description, category = 'general' } = request;
   // Create a stable hash from the content for consistent caching
   const content = `${title}|${description}|${category}`.toLowerCase().trim();
@@ -98,7 +98,7 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
   }
 };
 
-export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
+export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
   const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState<{ completed: number; total: number; currentAspectRatio?: AspectRatio }>({
     completed: 0,
@@ -113,7 +113,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
   }, [generatingPosts]);
 
   // Function to get or generate prompt with caching
-  const getOrGeneratePrompt = useCallback(async (request: BatchGenerationRequest): Promise<string> => {
+  const getOrGeneratePrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {
     const cacheKey = createPromptCacheKey(request);
     
     // Check memory cache first
@@ -159,7 +159,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
     return newPrompt;
   }, [cachedPrompts]);
 
-  const generateAllImages = useCallback(async (request: BatchGenerationRequest): Promise<BatchGenerationResponse> => {
+  const generateAllImages = useCallback(async (request: BulkImageGenerationRequest): Promise<BulkImageGenerationResponse> => {
     setGeneratingPosts(prev => new Set(prev).add(request.postId));
     setError(null);
     
@@ -213,7 +213,7 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         throw new Error('Batch generation returned failure status');
       }
 
-      const response: BatchGenerationResponse = data;
+      const response: BulkImageGenerationResponse = data;
       
       // Complete the progress
       setProgress({

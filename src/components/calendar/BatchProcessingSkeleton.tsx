@@ -34,7 +34,7 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-primary">
-              Generating All Images...
+              Generating all images...
             </span>
           </div>
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -103,10 +103,10 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
         {/* Status message */}
         <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground">
-            {progress.completed === 0 && 'Starting image generation...'}
+            {progress.completed === 0 && 'Starting bulk image generation...'}
             {progress.completed > 0 && progress.completed < progress.total && 
               `Generated ${progress.completed} of ${progress.total} images`}
-            {progress.completed === progress.total && 'Almost done!'}
+            {progress.completed === progress.total && 'Finalizing all images...'}
           </p>
         </div>
       </CardContent>

@@ -1,6 +1,7 @@
-// Type definitions for batch image generation
+// Type definitions for bulk image generation
 export type AspectRatio = '16:9' | '9:16' | '4:3' | '3:4';
 export type AspectRatioKey = '16_9' | '9_16' | '4_3' | '3_4';
+export type BulkGenerationMode = 'card' | 'table';
 
 export interface AspectRatioConfig {
   ratio: AspectRatio;
@@ -10,7 +11,7 @@ export interface AspectRatioConfig {
   label: string;
 }
 
-export interface GenerationResult {
+export interface BulkImageGenerationResult {
   aspectRatio: AspectRatio;
   url?: string;
   prompt?: string;
@@ -21,26 +22,28 @@ export interface GenerationResult {
   tokens: number;
 }
 
-export interface BatchGenerationRequest {
+export interface BulkImageGenerationRequest {
   postId: string;
   title: string;
   description: string;
   category?: string;
+  context?: BulkGenerationMode;
 }
 
-export interface BatchGenerationResponse {
+export interface BulkImageGenerationResponse {
   success: boolean;
-  results: GenerationResult[];
-  failures: GenerationResult[];
+  results: BulkImageGenerationResult[];
+  failures: BulkImageGenerationResult[];
   totalCost: number;
   totalTokens: number;
   imagesGenerated: number;
   processingTimeMs: number;
   aspectRatiosProcessed: number;
+  context?: BulkGenerationMode;
 }
 
-export interface OptimizedBatchGenerationHook {
-  generateAllImages: (request: BatchGenerationRequest) => Promise<BatchGenerationResponse>;
+export interface OptimizedBulkGenerationHook {
+  generateAllImages: (request: BulkImageGenerationRequest) => Promise<BulkImageGenerationResponse>;
   isGenerating: (postId: string) => boolean;
   progress: {
     completed: number;
@@ -48,7 +51,7 @@ export interface OptimizedBatchGenerationHook {
     currentAspectRatio?: AspectRatio;
   };
   error: string | null;
-  getOrGeneratePrompt: (request: BatchGenerationRequest) => Promise<string>;
+  getOrGeneratePrompt: (request: BulkImageGenerationRequest) => Promise<string>;
   clearCache: () => void;
 }
 

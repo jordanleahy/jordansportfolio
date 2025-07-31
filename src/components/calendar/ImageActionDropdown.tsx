@@ -10,8 +10,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import { ASPECT_RATIO_CONFIGS } from '@/types/batchImageGeneration';
-import type { AspectRatioKey } from '@/types/batchImageGeneration';
+import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
+import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 interface ImageActionDropdownProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;

@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
 import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
-import type { AspectRatioKey } from '@/types/batchImageGeneration';
+import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 
 interface SimplifiedUploadDropdownProps {
   post: SocialMediaPost;
@@ -30,12 +30,15 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     console.log('🚀 Starting optimized batch image generation for post:', post.id);
     
     try {
-      const response = await generateAllImages({
+      const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
         description: post.description,
-        category: post.category
-      });
+        category: post.category,
+        context: 'table'
+      };
+
+      const response = await generateAllImages(request);
 
       // Refresh the post data to show the new images
       if (response.success && onPostsChange) {

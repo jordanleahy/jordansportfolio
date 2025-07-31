@@ -20,13 +20,13 @@ interface GenerationResult {
   tokens: number;
 }
 
-interface BatchRequest {
+interface BulkImageGenerationRequest {
   postId: string;
   title: string;
   description: string;
   category?: string;
-  cachedPrompt?: string;
-  useCachedPrompt?: boolean;
+  context?: 'card' | 'table';
+  prompt?: string;
 }
 
 const corsHeaders = {
@@ -54,7 +54,10 @@ serve(async (req) => {
   const startTime = Date.now();
   
   try {
-    console.log('🚀 Starting optimized batch image generation');
+    const requestBody: BulkImageGenerationRequest = await req.json();
+    const { postId, title, description, category = 'general', context, prompt } = requestBody;
+    
+    console.log(`🚀 Starting bulk image generation (context: ${context || 'unknown'})`);
     
     // Auth validation
     const authHeader = req.headers.get('Authorization');
@@ -78,9 +81,6 @@ serve(async (req) => {
       });
     }
 
-    const requestBody: BatchRequest = await req.json();
-    const { postId, title, description, category = 'general', cachedPrompt, useCachedPrompt = false } = requestBody;
-
     if (!postId || !title || !description) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
@@ -97,13 +97,13 @@ serve(async (req) => {
       try {
         console.log(`🖼️ Starting ${ratio} generation...`);
 
-        let prompt: string;
+        let finalPrompt: string;
         let promptUsage = { estimated_cost: 0, total_tokens: 0 };
 
-        // Use cached prompt if available, otherwise generate new one
-        if (useCachedPrompt && cachedPrompt) {
-          console.log(`📦 Using cached prompt for ${ratio}`);
-          prompt = cachedPrompt;
+        // Use provided prompt if available, otherwise generate new one
+        if (prompt) {
+          console.log(`📦 Using provided prompt for ${ratio} (${context || 'unknown'} context)`);
+          finalPrompt = prompt;
         } else {
           // Step 1: Generate prompt (parallel execution)
           const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
@@ -114,10 +114,10 @@ serve(async (req) => {
             throw new Error(`Prompt generation failed: ${promptResponse.error.message}`);
           }
 
-          prompt = promptResponse.data?.generatedPrompt;
+          finalPrompt = promptResponse.data?.generatedPrompt;
           promptUsage = promptResponse.data?.usage || { estimated_cost: 0, total_tokens: 0 };
 
-          if (!prompt) {
+          if (!finalPrompt) {
             throw new Error('No prompt generated');
           }
         }
@@ -125,7 +125,7 @@ serve(async (req) => {
         // Step 2: Generate image (pass category to disable seeds for CDI)
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
           body: { 
-            prompt, 
+            prompt: finalPrompt, 
             aspectRatio: ratio,
             category
           }
@@ -192,7 +192,7 @@ serve(async (req) => {
         return {
           aspectRatio: ratio,
           url: publicUrl,
-          prompt,
+          prompt: finalPrompt,
           fileName,
           success: true,
           cost: promptCost + imageCost,
@@ -314,7 +314,7 @@ serve(async (req) => {
     }
 
     const processingTime = Date.now() - startTime;
-    console.log(`🎉 Optimized batch generation complete! Generated ${successfulResults.length}/${ASPECT_RATIOS.length} images in ${processingTime}ms`);
+    console.log(`🎉 Bulk image generation complete! Generated ${successfulResults.length}/${ASPECT_RATIOS.length} images in ${processingTime}ms (${context || 'unknown'} context)`);
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -331,7 +331,7 @@ serve(async (req) => {
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    console.error('❌ Optimized batch generation error:', error);
+    console.error('❌ Bulk image generation error:', error);
     return new Response(JSON.stringify({ 
       error: error instanceof Error ? error.message : 'Unknown error',
       processingTimeMs: processingTime
