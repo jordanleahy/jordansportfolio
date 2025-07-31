@@ -24,7 +24,28 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
   const generateAllImages = useCallback(async (request: BatchGenerationRequest): Promise<BatchGenerationResponse> => {
     setGeneratingPosts(prev => new Set(prev).add(request.postId));
     setError(null);
-    setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
+    
+    // Start progress simulation with shimmer effects
+    const aspectRatios: AspectRatio[] = ['16:9', '9:16', '4:3', '3:4'];
+    let currentIndex = 0;
+    
+    setProgress({
+      completed: 0,
+      total: aspectRatios.length,
+      currentAspectRatio: aspectRatios[0]
+    });
+
+    // Simulate progress updates during generation
+    const progressInterval = setInterval(() => {
+      if (currentIndex < aspectRatios.length - 1) {
+        currentIndex++;
+        setProgress({
+          completed: currentIndex,
+          total: aspectRatios.length,
+          currentAspectRatio: aspectRatios[currentIndex]
+        });
+      }
+    }, 2500); // Update every 2.5 seconds to simulate processing
 
     try {
       console.log('🎨 Starting optimized batch generation for post:', request.postId);
@@ -33,6 +54,8 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
       const { data, error: functionError } = await supabase.functions.invoke('generate-all-images-optimized', {
         body: request
       });
+
+      clearInterval(progressInterval);
 
       if (functionError) {
         throw new Error(functionError.message || 'Batch generation failed');
@@ -43,6 +66,13 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
       }
 
       const response: BatchGenerationResponse = data;
+      
+      // Complete the progress
+      setProgress({
+        completed: aspectRatios.length,
+        total: aspectRatios.length,
+        currentAspectRatio: undefined
+      });
       
       // Show success message with details
       if (response.imagesGenerated > 0) {
@@ -59,8 +89,6 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         const failedAspectRatios = response.failures.map(f => f.aspectRatio).join(', ');
         toast.warning(`Some images failed to generate: ${failedAspectRatios}`);
       }
-
-      setProgress({ completed: response.imagesGenerated, total: response.aspectRatiosProcessed, currentAspectRatio: undefined });
       
       return response;
 
@@ -84,11 +112,16 @@ export const useOptimizedBatchGeneration = (): OptimizedBatchGenerationHook => {
         aspectRatiosProcessed: 4
       };
     } finally {
+      clearInterval(progressInterval);
       setGeneratingPosts(prev => {
         const newSet = new Set(prev);
         newSet.delete(request.postId);
         return newSet;
       });
+      // Reset progress after a short delay
+      setTimeout(() => {
+        setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
+      }, 1000);
     }
   }, []);
 
