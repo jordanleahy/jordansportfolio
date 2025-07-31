@@ -96,7 +96,6 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
           const isGeneratingThis = isGeneratingImage(post.id, option.value);
-          const generationStep = getGenerationStep(post.id);
           return (
             <DropdownMenuItem
               key={`generate-${option.value}`}
@@ -110,11 +109,6 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
               {option.label}
-              {isGeneratingThis && generationStep && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {generationStep}
-                </span>
-              )}
             </DropdownMenuItem>
           );
         })}
