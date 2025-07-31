@@ -2,6 +2,7 @@ import { useState, useMemo, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOpenAIAgents, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
 import { useFilteredAndSortedAgents, useAgentPagination, SortField, SortDirection } from '@/hooks/useAgentTableLogic';
+import { useAgentsWithRelationships } from '@/hooks/useAgentRelationships';
 import { AgentStatusBadge } from './AgentStatusBadge';
 import { AgentDeleteModal } from './AgentDeleteModal';
 import { Button } from "@/components/ui/button";
@@ -40,11 +41,17 @@ import {
   ArrowUpDown, 
   ArrowUp, 
   ArrowDown,
-  Plus
+  Plus,
+  GitBranch,
+  Zap,
+  ZapOff,
+  AlertTriangle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AgentStatus, OpenAIAgent, CreateAgentData } from '@/types/openaiAgent';
 import { CreateAgentModal } from './CreateAgentModal';
+import { AgentRelationshipModal } from './AgentRelationshipModal';
+import { AgentDependencyGraph } from './AgentDependencyGraph';
 
 
 
@@ -57,6 +64,7 @@ interface TableState {
   pageSize: number;
   currentPage: number;
   deleteModalAgent: OpenAIAgent | null;
+  showDependencyGraph: boolean;
 }
 
 type TableAction = 
@@ -70,6 +78,7 @@ type TableAction =
   | { type: 'SET_PAGE_SIZE'; payload: number }
   | { type: 'SET_CURRENT_PAGE'; payload: number }
   | { type: 'SET_DELETE_MODAL_AGENT'; payload: OpenAIAgent | null }
+  | { type: 'TOGGLE_DEPENDENCY_GRAPH' }
   | { type: 'RESET_PAGE' };
 
 const initialState: TableState = {
@@ -81,6 +90,7 @@ const initialState: TableState = {
   pageSize: 10,
   currentPage: 1,
   deleteModalAgent: null,
+  showDependencyGraph: false,
 };
 
 function tableReducer(state: TableState, action: TableAction): TableState {
@@ -124,6 +134,8 @@ function tableReducer(state: TableState, action: TableAction): TableState {
       return { ...state, currentPage: action.payload };
     case 'SET_DELETE_MODAL_AGENT':
       return { ...state, deleteModalAgent: action.payload };
+    case 'TOGGLE_DEPENDENCY_GRAPH':
+      return { ...state, showDependencyGraph: !state.showDependencyGraph };
     case 'RESET_PAGE':
       return { ...state, currentPage: 1 };
     default:
@@ -134,11 +146,22 @@ function tableReducer(state: TableState, action: TableAction): TableState {
 export const EnhancedAgentsTable = () => {
   const navigate = useNavigate();
   const { data: agents, isLoading } = useOpenAIAgents();
+  const { data: agentsWithRelationships } = useAgentsWithRelationships();
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
   const createAgent = useCreateAgent();
 
   const [state, dispatch] = useReducer(tableReducer, initialState);
+
+  // Get dependency status summary
+  const dependencySummary = useMemo(() => {
+    if (!agentsWithRelationships) return { ready: 0, blocked: 0, total: 0 };
+    
+    const ready = agentsWithRelationships.filter(a => a.dependency_status === 'ready').length;
+    const blocked = agentsWithRelationships.filter(a => a.dependency_status === 'blocked').length;
+    
+    return { ready, blocked, total: agentsWithRelationships.length };
+  }, [agentsWithRelationships]);
 
   // Use custom hooks for filtering, sorting, and pagination
   const filteredAndSortedAgents = useFilteredAndSortedAgents({
@@ -205,12 +228,76 @@ export const EnhancedAgentsTable = () => {
     createAgent.mutate(cloneData);
   };
 
+  const getDependencyStatusIcon = (agent: OpenAIAgent) => {
+    const agentWithRel = agentsWithRelationships?.find(a => a.id === agent.id);
+    if (!agentWithRel) return null;
+
+    switch (agentWithRel.dependency_status) {
+      case 'ready': return <div title="Ready to execute"><Zap className="w-4 h-4 text-green-600" /></div>;
+      case 'blocked': return <div title="Blocked by dependencies"><ZapOff className="w-4 h-4 text-red-600" /></div>;
+      default: return <div title="Unknown dependency status"><AlertTriangle className="w-4 h-4 text-yellow-600" /></div>;
+    }
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center h-64">Loading agents...</div>;
   }
 
   return (
     <div className="space-y-6">
+      {/* Dependency Summary */}
+      {agentsWithRelationships && agentsWithRelationships.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Ready to Execute</p>
+                  <p className="text-2xl font-bold text-green-600">{dependencySummary.ready}</p>
+                </div>
+                <Zap className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Blocked</p>
+                  <p className="text-2xl font-bold text-red-600">{dependencySummary.blocked}</p>
+                </div>
+                <ZapOff className="h-8 w-8 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Agents</p>
+                  <p className="text-2xl font-bold">{dependencySummary.total}</p>
+                </div>
+                <GitBranch className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <Button 
+                variant="outline" 
+                className="w-full h-full flex flex-col gap-2"
+                onClick={() => dispatch({ type: 'TOGGLE_DEPENDENCY_GRAPH' })}
+              >
+                <GitBranch className="h-6 w-6" />
+                {state.showDependencyGraph ? 'Hide' : 'Show'} Dependency Graph
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Dependency Graph */}
+      {state.showDependencyGraph && <AgentDependencyGraph />}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -333,9 +420,10 @@ export const EnhancedAgentsTable = () => {
                       Last Modified {getSortIcon('updated_at')}
                     </Button>
                   </TableHead>
-                  <TableHead>Performance</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Performance</TableHead>
+                    <TableHead>Dependencies</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -352,7 +440,10 @@ export const EnhancedAgentsTable = () => {
                         className="cursor-pointer hover:text-primary"
                         onClick={() => navigate(`/agents/${agent.id}`)}
                       >
-                        <div className="font-medium">{agent.name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium">{agent.name}</div>
+                          {getDependencyStatusIcon(agent)}
+                        </div>
                         <div className="text-sm text-muted-foreground truncate max-w-[200px]">
                           {agent.purpose}
                         </div>
@@ -388,6 +479,36 @@ export const EnhancedAgentsTable = () => {
                           <div>Error Rate: {(agent.metrics.errorRate * 100).toFixed(1)}%</div>
                         </div>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const agentWithRel = agentsWithRelationships?.find(a => a.id === agent.id);
+                        if (!agentWithRel || (!agentWithRel.dependencies?.length && !agentWithRel.dependents?.length)) {
+                          return <span className="text-xs text-muted-foreground">None</span>;
+                        }
+                        
+                        return (
+                          <div className="text-xs space-y-1">
+                            {agentWithRel.dependencies?.length > 0 && (
+                              <div className="flex items-center gap-1">
+                                <span className="text-red-600">↑{agentWithRel.dependencies.length}</span>
+                                <span className="text-muted-foreground">deps</span>
+                              </div>
+                            )}
+                            {agentWithRel.dependents?.length > 0 && (
+                              <div className="flex items-center gap-1">
+                                <span className="text-blue-600">↓{agentWithRel.dependents.length}</span>
+                                <span className="text-muted-foreground">uses</span>
+                              </div>
+                            )}
+                            {agentWithRel.blocked_by?.length > 0 && (
+                              <Badge variant="destructive" className="text-xs">
+                                Blocked
+                              </Badge>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
@@ -428,6 +549,12 @@ export const EnhancedAgentsTable = () => {
                               <Copy className="h-4 w-4 mr-2" />
                               Clone Agent
                             </DropdownMenuItem>
+                            <AgentRelationshipModal agent={agent}>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <GitBranch className="h-4 w-4 mr-2" />
+                                Manage Dependencies
+                              </DropdownMenuItem>
+                            </AgentRelationshipModal>
                             <DropdownMenuItem 
                               onClick={() => dispatch({ type: 'SET_DELETE_MODAL_AGENT', payload: agent })}
                               className="text-destructive"

@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_relationships: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_required: boolean
+          relationship_type: string
+          source_agent_id: string
+          target_agent_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          relationship_type?: string
+          source_agent_id: string
+          target_agent_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_required?: boolean
+          relationship_type?: string
+          source_agent_id?: string
+          target_agent_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_source_agent"
+            columns: ["source_agent_id"]
+            isOneToOne: false
+            referencedRelation: "openai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_target_agent"
+            columns: ["target_agent_id"]
+            isOneToOne: false
+            referencedRelation: "openai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_usage_tracking: {
         Row: {
           completion_tokens: number | null
@@ -1998,6 +2046,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      detect_dependency_cycle: {
+        Args: { p_source_agent_id: string; p_target_agent_id: string }
+        Returns: boolean
+      }
       fix_hardcoded_aspect_ratio_in_prompts: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2008,6 +2060,16 @@ export type Database = {
           accessionnumber: string
           company_name: string
           similarity_score: number
+        }[]
+      }
+      get_agent_dependencies: {
+        Args: { p_agent_id: string }
+        Returns: {
+          agent_id: string
+          agent_name: string
+          relationship_type: string
+          depth: number
+          is_required: boolean
         }[]
       }
       get_cache_stats: {
