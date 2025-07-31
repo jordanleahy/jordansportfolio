@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { SplitButton } from '@/components/ui/split-button';
 import { Upload, Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
 import {
   DropdownMenu,
@@ -173,59 +172,52 @@ export const PostImageUploadCard = ({
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <span className="text-sm font-medium">{label}</span>
-        <SplitButton
-          variant="outline"
-          size="sm"
-          primaryAction={{
-            onClick: handleGenerateImage,
-            disabled: isUploading || isGenerating,
-            loading: isGenerating,
-            children: isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />,
-            title: `Generate ${aspectRatio} image`
-          }}
-          dropdownTrigger={{
-            disabled: isUploading || isGenerating,
-            children: <ChevronDown className="h-4 w-4" />,
-            title: "More options"
-          }}
-          dropdownContent={
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="absolute inset-0 w-full h-full" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
-                <DropdownMenuLabel>Upload Image</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => onFileSelect(post.id, type, post)}
-                  disabled={isUploading || isGenerating}
-                  className="cursor-pointer"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Choose File
-                  {isUploading && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={handleGenerateImage}
-                  disabled={isGenerating || isUploading}
-                  className="cursor-pointer"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate ({aspectRatio})
-                  {isGenerating && (
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {generationStep === 'prompt' && 'Prompt...'}
-                      {generationStep === 'image' && 'Image...'}
-                      {generationStep === 'upload' && 'Upload...'}
-                    </span>
-                  )}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          }
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              disabled={isUploading || isGenerating}
+            >
+              {(isUploading || isGenerating) ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
+            <DropdownMenuLabel>Upload Image</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => onFileSelect(post.id, type, post)}
+              disabled={isUploading || isGenerating}
+              className="cursor-pointer"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Choose File
+              {isUploading && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={handleGenerateImage}
+              disabled={isGenerating || isUploading}
+              className="cursor-pointer"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Generate ({aspectRatio})
+              {isGenerating && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {generationStep === 'prompt' && 'Prompt...'}
+                  {generationStep === 'image' && 'Image...'}
+                  {generationStep === 'upload' && 'Upload...'}
+                </span>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       {imageUrl && (
