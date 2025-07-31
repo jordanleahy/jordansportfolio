@@ -36,9 +36,13 @@ serve(async (req) => {
   let userId: string | null = null;
 
   try {
-    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null } = await req.json();
+    const requestBody = await req.json();
+    console.log('🔍 DEBUG: Request body received:', JSON.stringify(requestBody, null, 2));
+    
+    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null } = requestBody;
 
     if (!prompt) {
+      console.log('❌ DEBUG: No prompt provided');
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -134,7 +138,21 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('🎨 IMAGE_GENERATION: OpenAI API error:', errorData);
+      console.error('🎨 IMAGE_GENERATION: OpenAI API error:', JSON.stringify(errorData, null, 2));
+      console.error('🎨 IMAGE_GENERATION: Request details:', {
+        url: 'https://api.openai.com/v1/images/generations',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': '[REDACTED]' },
+        body: JSON.stringify({
+          model: 'gpt-image-1',
+          prompt: prompt.substring(0, 100) + '...',
+          size: size,
+          quality: 'high',
+          output_format: 'png',
+          n: 1,
+          seed: finalSeed
+        }, null, 2)
+      });
       
       // Track failed usage
       if (userId) {

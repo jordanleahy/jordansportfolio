@@ -125,8 +125,14 @@ serve(async (req) => {
           }
         });
 
+        console.log(`🔍 DEBUG: Image generation response for ${ratio}:`, {
+          error: imageResponse.error,
+          status: imageResponse.status,
+          data: imageResponse.data ? 'present' : 'missing'
+        });
+
         if (imageResponse.error) {
-          throw new Error(`Image generation failed: ${imageResponse.error.message}`);
+          throw new Error(`Image generation failed: ${imageResponse.error.message || 'Unknown error'}`);
         }
 
         const base64Image = imageResponse.data?.image;
