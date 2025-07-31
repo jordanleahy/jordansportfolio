@@ -243,7 +243,7 @@ export const AgentEdit = () => {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/admin/seed-management')}
+                onClick={() => navigate('/admin/seed-analytics')}
                 className="gap-2 flex-1 sm:flex-none"
               >
                 <BarChart3 className="h-4 w-4" />
