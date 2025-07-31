@@ -76,7 +76,13 @@ serve(async (req) => {
           continue;
         }
 
-        const { prompt, usage: promptUsage, cost: promptCost } = promptResponse.data;
+        const { prompt, usage: promptUsage, cost: promptCost } = promptResponse.data || {};
+        
+        if (!prompt) {
+          console.error(`❌ No prompt received for ${aspectRatio}`);
+          continue;
+        }
+        
         console.log(`✅ Prompt generated for ${aspectRatio}: "${prompt.substring(0, 100)}..."`);
         
         if (promptUsage) totalTokens += promptUsage.total_tokens || 0;
@@ -93,7 +99,13 @@ serve(async (req) => {
           continue;
         }
 
-        const { image: base64Image, cost: imageCost } = imageResponse.data;
+        const { image: base64Image, cost: imageCost } = imageResponse.data || {};
+        
+        if (!base64Image) {
+          console.error(`❌ No image received for ${aspectRatio}`);
+          continue;
+        }
+        
         console.log(`✅ Image generated for ${aspectRatio}`);
         
         if (imageCost) totalCost += imageCost;
