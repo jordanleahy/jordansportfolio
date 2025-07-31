@@ -98,6 +98,21 @@ serve(async (req) => {
       throw new Error('Job title and company name are required');
     }
 
+    // Initialize Supabase client for prompt storage
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from auth header
+    let userId: string | null = null;
+    const authHeader = req.headers.get('authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
     console.log(`Generating hero job visual for: ${companyName} - ${jobTitle}`);
 
     const userContent = `Company Name: ${companyName}
@@ -148,6 +163,37 @@ Focus on making this feel like THE career opportunity of a lifetime, with the co
     }
 
     const generatedPrompt = data.choices[0].message.content;
+
+    // Store the generated prompt in cached_prompts table
+    if (userId) {
+      try {
+        const cacheKey = `hero_job_prompt_${companyName}_${jobTitle}`.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+        
+        await supabase.from('cached_prompts').insert({
+          user_id: userId,
+          cache_key: cacheKey,
+          category: 'hero_job_visual',
+          prompt_text: generatedPrompt,
+          metadata: {
+            companyName,
+            jobTitle,
+            jobDescription: jobDescription || 'Not provided',
+            agent: 'Hero Job Visual Generator',
+            model: 'gpt-4.1-2025-04-14',
+            generated_at: new Date().toISOString(),
+            style: 'hero',
+            aspectRatio: '9:16'
+          },
+          hit_count: 1,
+          version: 1,
+          expires_at: null
+        });
+        console.log('✅ Hero job prompt stored in cache successfully');
+      } catch (cacheError) {
+        console.error('❌ Failed to store hero job prompt in cache:', cacheError);
+        // Don't fail the request if caching fails
+      }
+    }
 
     return new Response(JSON.stringify({ 
       generatedPrompt,

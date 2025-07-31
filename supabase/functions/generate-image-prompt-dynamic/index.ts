@@ -166,6 +166,37 @@ Category: ${category}`;
     }
 
     success = true;
+
+    // Store the generated prompt in cached_prompts table
+    if (userId) {
+      try {
+        const cacheKey = `image_prompt_${category}_${Buffer.from(title + description).toString('base64').slice(0, 20)}`;
+        
+        await supabase.from('cached_prompts').insert({
+          user_id: userId,
+          cache_key: cacheKey,
+          category: category,
+          prompt_text: generatedText,
+          metadata: {
+            title,
+            description,
+            agent: 'Blog Visual Prompt Generator',
+            model: 'gpt-4o-mini',
+            generated_at: new Date().toISOString(),
+            tokens_used: tokensUsed,
+            estimated_cost: estimatedCost
+          },
+          hit_count: 1,
+          version: 1,
+          expires_at: null // No expiration for image prompts
+        });
+        console.log('✅ Prompt stored in cache successfully');
+      } catch (cacheError) {
+        console.error('❌ Failed to store prompt in cache:', cacheError);
+        // Don't fail the request if caching fails
+      }
+    }
+
     console.log('✅ Prompt generated successfully');
 
     // Track API usage if we have userId

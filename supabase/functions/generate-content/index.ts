@@ -25,6 +25,21 @@ serve(async (req) => {
       throw new Error('Prompt is required');
     }
 
+    // Initialize Supabase client for prompt storage
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from auth header
+    let userId: string | null = null;
+    const authHeader = req.headers.get('authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
     console.log(`Generating content for type: ${type}`);
 
     let systemContent;
@@ -66,6 +81,35 @@ serve(async (req) => {
     }
 
     const generatedText = data.choices[0].message.content;
+
+    // Store the generated content in cached_prompts table (for image prompts and important content)
+    if (userId && (type === 'image_prompt' || type === 'important')) {
+      try {
+        const promptHash = Buffer.from(prompt).toString('base64').slice(0, 20);
+        const cacheKey = `content_${type}_${promptHash}`;
+        
+        await supabase.from('cached_prompts').insert({
+          user_id: userId,
+          cache_key: cacheKey,
+          category: type,
+          prompt_text: generatedText,
+          metadata: {
+            original_prompt: prompt,
+            content_type: type,
+            agent: 'General Content Generator',
+            model: 'gpt-4o-mini',
+            generated_at: new Date().toISOString()
+          },
+          hit_count: 1,
+          version: 1,
+          expires_at: null
+        });
+        console.log('✅ Generated content stored in cache successfully');
+      } catch (cacheError) {
+        console.error('❌ Failed to store generated content in cache:', cacheError);
+        // Don't fail the request if caching fails
+      }
+    }
 
     return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
