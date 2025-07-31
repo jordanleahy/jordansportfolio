@@ -110,7 +110,7 @@ export const useOptimizedCalendar = (user: any) => {
     }
   };
 
-  const { isSubscribed } = useRealtimePosts({
+  const { isSubscribed = false } = useRealtimePosts({
     enabled: !!user,
     userId: user?.id,
     onUpdate: handleRealtimeUpdate,
