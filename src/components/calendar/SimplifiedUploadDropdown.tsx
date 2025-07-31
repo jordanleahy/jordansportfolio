@@ -179,10 +179,10 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           disabled={isUploading(post.id)}
-          className={`h-8 focus:outline-none focus:ring-0 focus:border-transparent ${className || ''}`}
+          className={`flex-1 focus:outline-none focus:ring-0 focus:border-transparent ${className || ''}`}
           title="Image generation and upload actions"
           aria-label="Open image actions menu"
         >
