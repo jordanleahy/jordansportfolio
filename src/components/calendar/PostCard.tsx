@@ -208,6 +208,7 @@ const PostCardComponent = ({
               getUploadType={getUploadType}
               onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
               onPostsChange={onPostsChange}
+              className="flex-1"
             />
             {!isMobile && (
               <Button

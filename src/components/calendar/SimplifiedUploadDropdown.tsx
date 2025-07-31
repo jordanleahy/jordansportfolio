@@ -22,6 +22,7 @@ interface SimplifiedUploadDropdownProps {
   getUploadType: (postId: string) => AspectRatioKey | null;
   onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
+  className?: string;
 }
 
 export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> = ({
@@ -30,6 +31,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   getUploadType,
   onFileSelect,
   onPostsChange,
+  className,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
@@ -204,12 +206,12 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   };
 
   return (
-    <div className="inline-flex border border-input rounded-md bg-background hover:bg-accent/50 transition-colors">
+    <div className={`inline-flex border border-input rounded-md bg-background hover:bg-accent/50 transition-colors ${className || ''}`}>
       {/* Left Button - Generate All Images */}
       <button
         onClick={handleGenerateAllImages}
         disabled={isBatchGenerating || isUploading(post.id)}
-        className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium 
+        className="flex-1 inline-flex items-center justify-center h-8 px-3 text-sm font-medium 
                  hover:bg-accent hover:text-accent-foreground 
                  disabled:pointer-events-none disabled:opacity-50 
                  rounded-l-md transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
