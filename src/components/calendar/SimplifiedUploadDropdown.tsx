@@ -217,12 +217,10 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
           aria-label="Open image actions menu"
         >
           {isBatchGenerating ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Settings className="h-4 w-4 mr-2" />
+            <ChevronDown className="h-4 w-4" />
           )}
-          Image Actions
-          <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-md z-50">
