@@ -45,6 +45,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
   const {
     uploadingPosts,
     handleFileSelect,
+    handleGenerateImage,
     isUploading,
     getUploadType,
   } = useImageUpload({ onPostsChange });
@@ -147,6 +148,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onGenerateVoiceoverScript={openVoiceoverModal}
                 onGenerateImagePrompt={openImagePromptModal}
                 onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)}
+                onGenerateImage={handleGenerateImage}
                 onPreviewImage={openPreviewImage}
                 onPostsChange={onPostsChange}
                 isAdmin={isAdmin}
@@ -191,6 +193,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onGenerateVoiceoverScript={openVoiceoverModal}
                 onGenerateImagePrompt={openImagePromptModal}
                 onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)}
+                onGenerateImage={handleGenerateImage}
                 onPreviewImage={openPreviewImage}
                 onPostsChange={onPostsChange}
                 isAdmin={isAdmin}

@@ -12,13 +12,12 @@ import {
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { ASPECT_RATIO_CONFIGS } from '@/types/batchImageGeneration';
 import type { AspectRatioKey } from '@/types/batchImageGeneration';
-import { useSingleImageGeneration } from '@/hooks/useSingleImageGeneration';
-
 interface ImageActionDropdownProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
   getUploadType: (postId: string) => AspectRatioKey | null;
   onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
+  onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
@@ -27,9 +26,9 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
   isUploading,
   getUploadType,
   onFileSelect,
+  onGenerateImage,
   onPostsChange,
 }) => {
-  const { generateSingleImage, isUploading: isGeneratingImage, getGenerationStep } = useSingleImageGeneration();
   
   const postIsUploading = isUploading(post.id);
   const uploadType = getUploadType(post.id);
@@ -40,7 +39,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
   }));
 
   const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
-    await generateSingleImage(
+    const response = await onGenerateImage(
       post.id,
       aspectRatio,
       post.title,
@@ -49,7 +48,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
     );
     
     // Refresh posts data if callback provided
-    if (onPostsChange) {
+    if (response.success && onPostsChange) {
       onPostsChange([]);
     }
   };
@@ -95,7 +94,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
           Generate
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
-          const isGeneratingThis = isGeneratingImage(post.id, option.value);
+          const isGeneratingThis = isUploading(post.id, option.value);
           return (
             <DropdownMenuItem
               key={`generate-${option.value}`}

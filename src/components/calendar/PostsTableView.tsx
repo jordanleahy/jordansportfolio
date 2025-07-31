@@ -27,6 +27,7 @@ interface PostsTableViewProps {
   onGenerateVoiceoverScript: (post: SocialMediaPost) => void;
   onGenerateImagePrompt: (post: SocialMediaPost) => void;
   onFileSelect: (postId: string, aspectRatio: AspectRatio, post: SocialMediaPost) => void;
+  onGenerateImage: (postId: string, aspectRatio: AspectRatio, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPreviewImage: (url: string, alt: string) => void;
   onPostsChange: () => void;
   isAdmin?: boolean;
@@ -59,6 +60,7 @@ export const PostsTableView = memo(({
   onGenerateVoiceoverScript,
   onGenerateImagePrompt,
   onFileSelect,
+  onGenerateImage,
   onPreviewImage,
   onPostsChange,
   isAdmin = false
@@ -357,6 +359,7 @@ export const PostsTableView = memo(({
                     console.log('🖼️ IMAGE_UPLOAD: Desktop upload triggered', { postId, aspectRatio, postTitle: post.title });
                     onFileSelect(postId, aspectRatio, post);
                   }}
+                  onGenerateImage={onGenerateImage}
                   onPostsChange={() => {
                     // This should trigger cache invalidation at the parent level
                     console.log('🔄 Desktop batch generation complete, triggering cache refresh');
