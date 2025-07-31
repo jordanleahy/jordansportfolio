@@ -157,17 +157,6 @@ export const SystemPromptManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            System Prompt Management
-          </CardTitle>
-          <CardDescription>
-            Monitor and optimize your AI system prompts for better performance
-          </CardDescription>
-        </CardHeader>
-      </Card>
 
       {blogVisualAgent && (
         <div className="space-y-4">
