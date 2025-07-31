@@ -121,7 +121,7 @@ export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
             className="cursor-pointer text-sm"
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            Generate {option.label}
+            {option.label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
