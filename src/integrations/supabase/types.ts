@@ -880,42 +880,6 @@ export type Database = {
         }
         Relationships: []
       }
-      image_seeds: {
-        Row: {
-          category: string
-          created_at: string
-          description: string | null
-          id: string
-          is_default: boolean
-          name: string
-          seed_value: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_default?: boolean
-          name: string
-          seed_value: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_default?: boolean
-          name?: string
-          seed_value?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       investors: {
         Row: {
           address: string | null
@@ -1593,7 +1557,6 @@ export type Database = {
           platform_tags: Json | null
           scheduled_date: string | null
           seed_value: number | null
-          selected_seed_id: string | null
           status: Database["public"]["Enums"]["post_status"]
           theme: string | null
           title: string
@@ -1624,7 +1587,6 @@ export type Database = {
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null
-          selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
           title: string
@@ -1655,22 +1617,13 @@ export type Database = {
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null
-          selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "social_media_posts_selected_seed_id_fkey"
-            columns: ["selected_seed_id"]
-            isOneToOne: false
-            referencedRelation: "image_seeds"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
