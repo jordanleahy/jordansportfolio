@@ -70,3 +70,6 @@ export const ASPECT_RATIO_CONFIGS: AspectRatioConfig[] = [
   { ratio: '4:3', key: '4_3', width: 1536, height: 1024, label: 'Standard (4:3)' },
   { ratio: '3:4', key: '3_4', width: 1024, height: 1536, label: 'Social (3:4)' },
 ];
+
+// Re-export from config for backward compatibility
+export { DEFAULT_IMAGE_CONFIG, getImageConfig, calculateImageCost, getAspectRatioSize } from '@/config/imageGenerationConfig';
