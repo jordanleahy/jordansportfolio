@@ -279,8 +279,11 @@ export default function VendorDetail() {
     }
 
     const prompt = generateVendorPrompt(vendor.website_url, vendor);
-    setGeneratedPrompt(prompt);
-    setShowPrompt(true);
+    navigator.clipboard.writeText(prompt);
+    toast({
+      title: "Copied!",
+      description: "Advanced research prompt copied to clipboard.",
+    });
   };
 
   const copyPrompt = () => {
