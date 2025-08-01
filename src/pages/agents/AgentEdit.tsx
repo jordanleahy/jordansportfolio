@@ -573,6 +573,7 @@ export const AgentEdit = () => {
             {/* System Prompts Tab */}
             {activeTab === 'prompts' && (
               <SystemPromptsTab
+                agentId={id}
                 systemPrompts={form.watch('system_prompts') || []}
                 supportedCategories={form.watch('supported_categories') || []}
                 onChange={handleSystemPromptsChange}

@@ -6,16 +6,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2 } from 'lucide-react';
 import { SystemPrompt } from '@/types/openaiAgent';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
+import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
 
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
 interface SystemPromptsTabProps {
+  agentId?: string;
   systemPrompts: SystemPrompt[];
   supportedCategories: string[];
   onChange: (prompts: SystemPrompt[], categories: string[]) => void;
 }
 
 export const SystemPromptsTab = ({ 
+  agentId,
   systemPrompts, 
   supportedCategories, 
   onChange 
@@ -97,14 +100,25 @@ export const SystemPromptsTab = ({
                       {getCategoryLabel(prompt.category)}
                     </Badge>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removePrompt(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {agentId && (
+                      <GenerateSystemPromptButton
+                        agentId={agentId}
+                        category={prompt.category}
+                        onSuccess={() => {
+                          // The component will re-render when the agent data is updated
+                        }}
+                      />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removePrompt(index)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 <CategoryPromptEditor
                   prompt={prompt.prompt}
