@@ -155,8 +155,8 @@ function App() {
                 <Route path="/cases/case1" element={<Case1 />} />
                 <Route path="/cases/case3" element={<Case3 />} />
                 <Route path="/cases/case4" element={<Case4 />} />
-                <Route path="/rcmcompanies" element={<RCMCompanies />} />
-                <Route path="/rcmcompanies/:vendorSlug" element={<PublicVendorView />} />
+                <Route path="/companies" element={<RCMCompanies />} />
+                <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
                 <Route path="*" element={<NotFound />} />

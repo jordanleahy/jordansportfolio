@@ -111,7 +111,7 @@ export default function RCMCompanies() {
   };
 
   const handleVendorClick = (vendor: any) => {
-    navigate(`/rcmcompanies/${vendor.slug}`);
+    navigate(`/companies/${vendor.slug}`);
   };
 
   // Sort companies
