@@ -1592,6 +1592,7 @@ export type Database = {
           image_9_16_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
+          seed_value: number | null
           selected_seed_id: string | null
           status: Database["public"]["Enums"]["post_status"]
           theme: string | null
@@ -1622,6 +1623,7 @@ export type Database = {
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
+          seed_value?: number | null
           selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
@@ -1652,6 +1654,7 @@ export type Database = {
           image_9_16_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
+          seed_value?: number | null
           selected_seed_id?: string | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
