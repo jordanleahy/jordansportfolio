@@ -170,7 +170,11 @@ Category: ${category}`;
     // Store the generated prompt in cached_prompts table
     if (userId) {
       try {
-        const cacheKey = `image_prompt_${category}_${Buffer.from(title + description).toString('base64').slice(0, 20)}`;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(title + description);
+        const hashArray = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const cacheKey = `image_prompt_${category}_${hashHex.slice(0, 20)}`;
         
         await supabase.from('cached_prompts').insert({
           user_id: userId,

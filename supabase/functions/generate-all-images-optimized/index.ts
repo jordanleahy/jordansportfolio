@@ -139,39 +139,51 @@ serve(async (req) => {
       });
     }
 
-    // PERFORMANCE IMPROVEMENT #1: Parallel processing with Promise.allSettled
+    // PERFORMANCE IMPROVEMENT #1: Generate single master prompt first
+    let masterPrompt: string;
+    let promptUsage = { estimated_cost: 0, total_tokens: 0 };
+
+    // Use provided prompt if available, otherwise generate new one
+    if (prompt) {
+      masterPrompt = prompt;
+    } else {
+      // Step 1: Generate master prompt once
+      const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+        body: { title, description, category }
+      });
+
+      if (promptResponse.error) {
+        return new Response(JSON.stringify({ error: `Prompt generation failed: ${promptResponse.error.message}` }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      masterPrompt = promptResponse.data?.generatedPrompt;
+      promptUsage = promptResponse.data?.usage || { estimated_cost: 0, total_tokens: 0 };
+
+      if (!masterPrompt) {
+        return new Response(JSON.stringify({ error: 'No prompt generated' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Step 2: Generate images in parallel using single master prompt with aspect ratio enhancements
     const generationPromises = ASPECT_RATIOS.map(async (aspectConfig): Promise<GenerationResult> => {
       const { ratio } = aspectConfig;
       
       try {
-        let finalPrompt: string;
-        let promptUsage = { estimated_cost: 0, total_tokens: 0 };
+        // Enhance master prompt with aspect ratio context
+        const enhancedPrompt = `${masterPrompt}
 
-        // Use provided prompt if available, otherwise generate new one
-        if (prompt) {
-          finalPrompt = prompt;
-        } else {
-          // Step 1: Generate prompt (parallel execution)
-          const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-            body: { title, description, category }
-          });
+Composition optimized for ${ratio} aspect ratio format.`;
 
-          if (promptResponse.error) {
-            throw new Error(`Prompt generation failed: ${promptResponse.error.message}`);
-          }
-
-          finalPrompt = promptResponse.data?.generatedPrompt;
-          promptUsage = promptResponse.data?.usage || { estimated_cost: 0, total_tokens: 0 };
-
-          if (!finalPrompt) {
-            throw new Error('No prompt generated');
-          }
-        }
-
-        // Step 2: Generate image (pass category to disable seeds for CDI)
+        // Step 2: Generate image using enhanced prompt
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
           body: { 
-            prompt: finalPrompt, 
+            prompt: enhancedPrompt, 
             aspectRatio: ratio,
             category
           }
@@ -183,8 +195,9 @@ serve(async (req) => {
 
         const base64Image = imageResponse.data?.image;
         const imageCost = imageResponse.data?.cost || 0;
-        const promptCost = promptUsage?.estimated_cost || 0;
-        const promptTokens = promptUsage?.total_tokens || 0;
+        // Cost calculation: divide prompt cost among all 4 images for accurate tracking
+        const promptCostPerImage = promptUsage?.estimated_cost / ASPECT_RATIOS.length || 0;
+        const promptTokensPerImage = Math.ceil((promptUsage?.total_tokens || 0) / ASPECT_RATIOS.length);
 
         if (!base64Image) {
           throw new Error('No image generated');
@@ -221,11 +234,11 @@ serve(async (req) => {
         return {
           aspectRatio: ratio,
           url: publicUrl,
-          prompt: finalPrompt,
+          prompt: masterPrompt,
           fileName,
           success: true,
-          cost: promptCost + imageCost,
-          tokens: promptTokens
+          cost: promptCostPerImage + imageCost,
+          tokens: promptTokensPerImage
         };
 
       } catch (error) {
