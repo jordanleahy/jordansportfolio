@@ -4,11 +4,11 @@ import { useDebouncedCallback } from 'use-debounce';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 
-interface UseImageUploadProps {
+interface UseImageManagerProps {
   onPostsChange: () => void;
 }
 
-interface UseImageUploadReturn {
+interface UseImageManagerReturn {
   uploadingPosts: Record<string, Record<string, boolean>>;
   handleFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
   handleGenerateImage: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
@@ -16,7 +16,7 @@ interface UseImageUploadReturn {
   getUploadType: (postId: string) => '16_9' | '9_16' | '3_4' | '4_3' | null;
 }
 
-export const useImageUpload = ({ onPostsChange }: UseImageUploadProps): UseImageUploadReturn => {
+export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
   const [uploadingPosts, setUploadingPosts] = useState<Record<string, Record<string, boolean>>>({});
 
   // Debounced version of onPostsChange to prevent rapid refetches

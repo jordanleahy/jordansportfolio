@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { ImageActionDropdown } from './ImageActionDropdown';
+import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -367,7 +367,7 @@ export const PostsTableView = memo(({
                     )}
                   </Button>
                 )}
-                <ImageActionDropdown
+                <SingleAspectRatioSelector
                   post={post}
                   isUploading={isUploading}
                   getUploadType={getUploadType}

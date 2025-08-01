@@ -7,7 +7,7 @@ import { PostsTableView } from "./PostsTableView";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
-import { useImageUpload } from "@/hooks/useImageUpload";
+import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStates } from "@/hooks/useProcessingStates";
 import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
@@ -49,7 +49,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     handleGenerateImage,
     isUploading: originalIsUploading,
     getUploadType: originalGetUploadType,
-  } = useImageUpload({ onPostsChange });
+  } = useImageManager({ onPostsChange });
 
   // Use unified processing states
   const { isUploading: unifiedIsUploading, getUploadType: unifiedGetUploadType } = useProcessingStates();

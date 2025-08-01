@@ -9,7 +9,7 @@ import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 
-interface SimplifiedUploadDropdownProps {
+interface BulkImageGenerationButtonProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
   getUploadType: (postId: string) => AspectRatioKey | null;
@@ -17,7 +17,7 @@ interface SimplifiedUploadDropdownProps {
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
-export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> = ({
+export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps> = ({
   post,
   isUploading,
   getUploadType,

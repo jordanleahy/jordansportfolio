@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { PostMediaGalleryModal } from './PostMediaGalleryModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
-import { SimplifiedUploadDropdown } from './SimplifiedUploadDropdown';
+import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
@@ -204,7 +204,7 @@ const PostCardComponent = ({
           </div>
           
           <div className="flex gap-2">
-            <SimplifiedUploadDropdown
+            <BulkImageGenerationButton
               post={post}
               isUploading={isUploading}
               getUploadType={getUploadType}

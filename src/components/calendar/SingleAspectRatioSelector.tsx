@@ -12,7 +12,7 @@ import {
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
-interface ImageActionDropdownProps {
+interface SingleAspectRatioSelectorProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
   getUploadType: (postId: string) => AspectRatioKey | null;
@@ -21,7 +21,7 @@ interface ImageActionDropdownProps {
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
-export const ImageActionDropdown: React.FC<ImageActionDropdownProps> = ({
+export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,
   isUploading,
   getUploadType,
