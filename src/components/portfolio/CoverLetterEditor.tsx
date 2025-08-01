@@ -205,6 +205,10 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
             <Button onClick={handleOpenIncognito} size="default" variant="outline" className="w-12 h-12 p-3">
               <ExternalLink className="w-5 h-5" />
             </Button>
+            
+            <Button size="default" variant="outline" className="w-12 h-12 p-3">
+              <FileText className="w-5 h-5" />
+            </Button>
           </>
         ) : (
           <>
