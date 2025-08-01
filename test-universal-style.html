@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Universal Style System</title>
+</head>
+<body>
+    <h1>Testing Universal Visual Style System</h1>
+    <button id="testBtn">Generate System Prompt with Universal Style</button>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4'
+        
+        const supabase = createClient(
+            'https://wgwmzfbnkovumqcvsxgd.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnd216ZmJua292dW1xY3ZzeGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwODg1MjcsImV4cCI6MjA2MTY2NDUyN30.HVv6TGHC5jDiEWChIyo_jp60Ef7Vtwc0x3zPKyDt4bE'
+        )
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            console.log('Testing universal style system...')
+            const result = document.getElementById('result')
+            result.textContent = 'Generating system prompt...'
+
+            try {
+                const { data, error } = await supabase.functions.invoke('generate-system-prompt', {
+                    body: {
+                        category: 'workplace-discrimination',
+                        description: 'Visual content for workplace discrimination topics including retaliation, age discrimination, disability rights, and equal employment opportunity',
+                        sample_posts: [
+                            {title: 'Retaliation', description: 'Adverse actions taken against employees for reporting discrimination'},
+                            {title: 'Age Discrimination', description: 'Treating applicants aged 40+ less favorably in hiring decisions'}
+                        ]
+                    }
+                })
+
+                if (error) {
+                    console.error('Error:', error)
+                    result.textContent = `Error: ${error.message}`
+                } else {
+                    console.log('Success:', data)
+                    result.textContent = JSON.stringify(data, null, 2)
+                    
+                    // Check if it contains universal HSL colors
+                    const prompt = data.system_prompt
+                    const hasUniversalColors = prompt.includes('hsl(220, 70%, 50%)') && prompt.includes('hsl(200, 60%, 45%)')
+                    
+                    if (hasUniversalColors) {
+                        result.textContent += '\n\n✅ SUCCESS: Universal color palette detected!'
+                    } else {
+                        result.textContent += '\n\n❌ ISSUE: Universal colors not found'
+                    }
+                }
+            } catch (err) {
+                console.error('Function call error:', err)
+                result.textContent = `Function call error: ${err.message}`
+            }
+        })
+    </script>
+</body>
+</html>
