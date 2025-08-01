@@ -87,19 +87,19 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         <div className="space-y-6">
           <FileUpload
             onFileSelect={setSelectedResume}
-            accept="application/pdf"
+            accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             maxSize={10}
-            label="Upload Resume PDF"
-            description="Upload your resume as a PDF file"
+            label="Upload Resume"
+            description="Upload your resume as a PDF or Word document"
             preview={false}
           />
 
           <FileUpload
             onFileSelect={setSelectedCoverLetter}
-            accept="application/pdf"
+            accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             maxSize={10}
-            label="Upload Cover Letter PDF"
-            description="Upload your cover letter as a PDF file"
+            label="Upload Cover Letter"
+            description="Upload your cover letter as a PDF or Word document"
             preview={false}
           />
 
