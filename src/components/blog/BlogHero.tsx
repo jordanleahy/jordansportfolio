@@ -84,7 +84,7 @@ export const BlogHero = ({
                 <img
                   src={heroImageUrl}
                   alt={headline}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                   loading="eager"
                 />
               </div>
