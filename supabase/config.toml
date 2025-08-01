@@ -38,3 +38,6 @@ port = 54330
 
 [functions.generate-comparison-pages]
 verify_jwt = false
+
+[functions.invoke-system-prompt-agent]
+verify_jwt = false

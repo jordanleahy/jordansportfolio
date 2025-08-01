@@ -2,10 +2,39 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 
-const corsHeaders = {
+// Constants
+const AGENT_NAMES = {
+  SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
+} as const;
+
+const SYSTEM_PROMPT_CATEGORIES = {
+  SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
+} as const;
+
+const OPENAI_CONFIG = {
+  DEFAULT_TEMPERATURE: 0.1,
+  DEFAULT_MODEL: 'gpt-4o-mini',
+} as const;
+
+const HTTP_STATUS = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+const ERROR_MESSAGES = {
+  OPENAI_API_KEY_MISSING: 'OpenAI API key not configured',
+  AGENT_NOT_FOUND: 'Required agent not found for this user',
+  SYSTEM_PROMPT_NOT_FOUND: 'No system prompt found for specified category',
+  INVALID_REQUEST_BODY: 'Invalid request body',
+  OPENAI_API_ERROR: 'OpenAI API error',
+} as const;
+
+const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+} as const;
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -16,16 +45,34 @@ serve(async (req) => {
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: CORS_HEADERS });
   }
 
   try {
-    const { category, theme, description, sample_posts, user_id } = await req.json();
+    const requestBody = await req.json();
+    const { category, theme, description, sample_posts, user_id } = requestBody;
+    
+    // Input validation
+    if (!category || !user_id) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: ERROR_MESSAGES.INVALID_REQUEST_BODY 
+      }), {
+        status: HTTP_STATUS.BAD_REQUEST,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
     
     console.log('Processing request for category:', category, 'user_id:', user_id);
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: ERROR_MESSAGES.OPENAI_API_KEY_MISSING 
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
     }
 
     // Create Supabase client
@@ -35,23 +82,35 @@ serve(async (req) => {
     const { data: agent, error: agentError } = await supabase
       .from('openai_agents')
       .select('*')
-      .eq('name', 'System Prompt Generator')
+      .eq('name', AGENT_NAMES.SYSTEM_PROMPT_GENERATOR)
       .eq('user_id', user_id)
       .single();
 
     if (agentError || !agent) {
       console.error('System Prompt Generator agent not found:', agentError);
-      throw new Error('System Prompt Generator agent not found for this user');
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: ERROR_MESSAGES.AGENT_NOT_FOUND 
+      }), {
+        status: HTTP_STATUS.NOT_FOUND,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
     }
 
     console.log('Found System Prompt Generator agent:', agent.id);
 
     // Get the system prompt for this agent
     const systemPrompts = agent.system_prompts || [];
-    const systemPromptObj = systemPrompts.find((p: any) => p.category === 'system_prompt_generation');
+    const systemPromptObj = systemPrompts.find((p: any) => p.category === SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION);
     
     if (!systemPromptObj) {
-      throw new Error('No system prompt found for system_prompt_generation category');
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: ERROR_MESSAGES.SYSTEM_PROMPT_NOT_FOUND 
+      }), {
+        status: HTTP_STATUS.NOT_FOUND,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
     }
 
     const systemPrompt = systemPromptObj.prompt;
@@ -77,19 +136,25 @@ Please generate a detailed, professional system prompt following the established
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: agent.model_version || 'gpt-4o-mini',
+        model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.1,
+        temperature: OPENAI_CONFIG.DEFAULT_TEMPERATURE,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
       console.error('OpenAI API error:', response.status, errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: `${ERROR_MESSAGES.OPENAI_API_ERROR}: ${response.status}` 
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
@@ -98,11 +163,12 @@ Please generate a detailed, professional system prompt following the established
     console.log('Generated system prompt length:', generatedPrompt.length);
 
     // Update the agent's last_run timestamp
+    const currentTimestamp = new Date().toISOString();
     const { error: updateError } = await supabase
       .from('openai_agents')
       .update({ 
-        last_run: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        last_run: currentTimestamp,
+        updated_at: currentTimestamp
       })
       .eq('id', agent.id);
 
@@ -115,7 +181,7 @@ Please generate a detailed, professional system prompt following the established
       system_prompt: generatedPrompt,
       agent_id: agent.id
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in invoke-system-prompt-agent function:', error);
@@ -123,8 +189,8 @@ Please generate a detailed, professional system prompt following the established
       success: false, 
       error: error.message 
     }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   }
 });
