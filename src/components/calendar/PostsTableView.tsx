@@ -9,7 +9,7 @@ import { BlogStatusBadge } from './BlogStatusBadge';
 import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useImageBatchGeneration } from '@/hooks/useImageBatchGeneration';
+import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 type AspectRatio = '16_9' | '9_16' | '3_4' | '4_3';
@@ -68,7 +68,7 @@ export const PostsTableView = memo(({
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const { generateAllImages, isGenerating } = useImageBatchGeneration();
+  const { generateAllImages, isGenerating } = useBulkImageGeneration();
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
     switch (currentStatus) {

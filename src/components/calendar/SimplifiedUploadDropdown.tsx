@@ -3,7 +3,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import { useImageBatchGeneration } from '@/hooks/useImageBatchGeneration';
+import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
 import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
@@ -24,7 +24,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   onFileSelect,
   onPostsChange,
 }) => {
-  const { generateAllImages, progress } = useImageBatchGeneration();
+  const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating } = useProcessingStates();
   const [showThumbnails, setShowThumbnails] = useState(false);
 
