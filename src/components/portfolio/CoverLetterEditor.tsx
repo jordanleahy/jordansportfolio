@@ -115,6 +115,16 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
     }
   };
 
+  const handleOpenVendorPage = () => {
+    const companySlug = portfolio.company_name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '')
+      .replace(/^-+|-+$/g, '');
+    
+    const vendorUrl = `https://www.jordanleahy.com/vendors/healthcare/${companySlug}`;
+    window.open(vendorUrl, '_blank', 'noreferrer,noopener');
+  };
+
   const handleRegenerateWithAgent = async (customPrompt: string, roleType: 'product_manager' | 'product_designer') => {
     if (!portfolio.job_applications) {
       toast.error("Job application data not found");
@@ -206,7 +216,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
               <ExternalLink className="w-5 h-5" />
             </Button>
             
-            <Button size="default" variant="outline" className="w-12 h-12 p-3">
+            <Button onClick={handleOpenVendorPage} size="default" variant="outline" className="w-12 h-12 p-3">
               <FileText className="w-5 h-5" />
             </Button>
           </>
