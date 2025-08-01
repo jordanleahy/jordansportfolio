@@ -149,21 +149,48 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
     return acc;
   }, {} as Record<string, boolean>);
 
-  // Handle color theme update for category
+  // Handle color theme update for category with enhanced logging
   const handleThemeUpdate = async (themeId: string) => {
     if (!category) {
       toast.error('Category not available');
       return;
     }
 
+    const timestamp = new Date().toISOString();
+    console.log('🎨 THEME UPDATE INITIATED:', {
+      timestamp,
+      category,
+      themeId,
+      available_themes: themes.length
+    });
+
     setIsUpdatingTheme(true);
     try {
       // Get selected theme data
       const selectedTheme = themes.find(t => t.id === themeId);
       if (!selectedTheme) {
+        console.error('❌ THEME NOT FOUND:', { themeId, available_themes: themes.map(t => ({ id: t.id, name: t.name })) });
         toast.error('Selected theme not found');
         return;
       }
+
+      console.log('✅ THEME SELECTED:', {
+        theme: {
+          id: selectedTheme.id,
+          name: selectedTheme.name,
+          slug: selectedTheme.slug,
+          colors: {
+            primary: selectedTheme.primary_color,
+            secondary: selectedTheme.secondary_color,
+            accent: selectedTheme.accent_color,
+            background: selectedTheme.background_color,
+            text: selectedTheme.text_color,
+            border: selectedTheme.border_color
+          },
+          visual_style: selectedTheme.visual_style,
+          color_instructions: selectedTheme.color_instructions
+        }
+      });
 
       // Import supabase client
       const { supabase } = await import('@/integrations/supabase/client');
@@ -171,48 +198,126 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
+        console.error('❌ USER AUTHENTICATION ERROR:', userError);
         throw new Error('User not authenticated');
       }
 
-      // Call the edge function to regenerate system prompt with color theme
-      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-        body: {
-          category,
-          theme: `${category} with ${selectedTheme.name} color theme`,
-          description: `Generate comprehensive system prompt for ${category} visual content using ${selectedTheme.name} color palette`,
-          user_id: user.id,
-          color_theme: {
-            name: selectedTheme.name,
-            primary_color: selectedTheme.primary_color,
-            secondary_color: selectedTheme.secondary_color,
-            accent_color: selectedTheme.accent_color,
-            background_color: selectedTheme.background_color,
-            text_color: selectedTheme.text_color,
-            border_color: selectedTheme.border_color,
-            color_instructions: selectedTheme.color_instructions,
-            visual_style: selectedTheme.visual_style
-          },
-          sample_posts: [
-            {
-              title: `Sample ${category} content`,
-              description: `Example content for ${category} category with ${selectedTheme.name} theme`
-            }
-          ]
+      console.log('🔐 USER AUTHENTICATED:', { user_id: user.id });
+
+      const requestPayload = {
+        category,
+        user_id: user.id,
+        color_theme: {
+          name: selectedTheme.name,
+          primary_color: selectedTheme.primary_color,
+          secondary_color: selectedTheme.secondary_color,
+          accent_color: selectedTheme.accent_color,
+          background_color: selectedTheme.background_color,
+          text_color: selectedTheme.text_color,
+          border_color: selectedTheme.border_color,
+          color_instructions: selectedTheme.color_instructions,
+          visual_style: selectedTheme.visual_style
         }
+      };
+
+      console.log('🚀 CALLING EDGE FUNCTION: invoke-system-prompt-agent');
+      console.log('📤 REQUEST PAYLOAD:', requestPayload);
+
+      // Call the edge function for variable-based color replacement
+      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+        body: requestPayload
+      });
+
+      console.log('📥 EDGE FUNCTION RESPONSE:', {
+        success: !!data?.success,
+        error: error,
+        data: data,
+        response_timestamp: new Date().toISOString()
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        console.error('❌ EDGE FUNCTION ERROR:', error);
         throw new Error(error.message || 'Failed to update system prompt');
       }
 
-      setIsThemePopoverOpen(false);
-      toast.success(`System prompt updated with ${selectedTheme.name} color theme`);
+      if (data?.success) {
+        console.log('✅ THEME UPDATE SUCCESS:', {
+          message: data.message,
+          agents_updated: data.agents_updated,
+          updated_agents: data.updated_agents,
+          category: data.category,
+          applied_theme: selectedTheme.name
+        });
+
+        // Verify database update by checking agents
+        console.log('🔍 VERIFYING DATABASE UPDATE...');
+        const { data: verifyData, error: verifyError } = await supabase
+          .from('openai_agents')
+          .select('name, system_prompts, updated_at')
+          .eq('user_id', user.id)
+          .not('system_prompts', 'is', null);
+          
+        if (!verifyError && verifyData) {
+          console.log('📊 DATABASE VERIFICATION:', {
+            total_agents: verifyData.length,
+            agents_with_prompts: verifyData.filter(agent => 
+              agent.system_prompts && Array.isArray(agent.system_prompts) && 
+              agent.system_prompts.some((p: any) => p.category === category)
+            ).length,
+            latest_updates: verifyData.map(agent => ({
+              name: agent.name,
+              updated_at: agent.updated_at,
+              has_category_prompt: agent.system_prompts && Array.isArray(agent.system_prompts) && 
+                agent.system_prompts.some((p: any) => p.category === category)
+            }))
+          });
+          
+          // Check if the system prompt actually contains the new colors
+          const updatedAgent = verifyData.find(agent => 
+            agent.system_prompts && Array.isArray(agent.system_prompts) && 
+            agent.system_prompts.some((p: any) => p.category === category)
+          );
+          
+          if (updatedAgent) {
+            const systemPrompts = Array.isArray(updatedAgent.system_prompts) 
+              ? updatedAgent.system_prompts as Array<{category: string, prompt: string}>
+              : [];
+            const categoryPrompt = systemPrompts.find((p: any) => p.category === category);
+            if (categoryPrompt) {
+              const containsNewColors = selectedTheme.primary_color && 
+                categoryPrompt.prompt.includes(selectedTheme.primary_color);
+              const containsThemeName = categoryPrompt.prompt.includes(selectedTheme.name);
+              
+              console.log('🎨 COLOR VERIFICATION:', {
+                agent_name: updatedAgent.name,
+                prompt_length: categoryPrompt.prompt.length,
+                contains_primary_color: containsNewColors,
+                contains_theme_name: containsThemeName,
+                searching_for_color: selectedTheme.primary_color,
+                searching_for_theme: selectedTheme.name,
+                prompt_has_color_table: categoryPrompt.prompt.includes('| Primary') && categoryPrompt.prompt.includes('| Secondary'),
+                prompt_snippet: categoryPrompt.prompt.substring(0, 300) + '...'
+              });
+            }
+          }
+        }
+
+        setIsThemePopoverOpen(false);
+        toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
+      } else {
+        console.log('⚠️  UNEXPECTED RESPONSE:', data);
+        toast.error('Theme update completed but response was unexpected.');
+      }
     } catch (error) {
-      console.error('Error updating theme:', error);
+      console.error('💥 THEME UPDATE EXCEPTION:', error);
       toast.error(`Failed to update color theme: ${error.message}`);
     } finally {
       setIsUpdatingTheme(false);
+      console.log('🏁 THEME UPDATE COMPLETE:', {
+        timestamp: new Date().toISOString(),
+        category,
+        success: true
+      });
     }
   };
 
