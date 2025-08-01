@@ -14,7 +14,7 @@ interface ImagePreviewModalProps {
 
 export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspectRatio }: ImagePreviewModalProps) => {
   const formattedTitle = title && aspectRatio 
-    ? `${title} ${aspectRatio} jordanleahy.com`
+    ? `jordanleahy.com ${title} ${aspectRatio}`
     : alt;
 
   const handleDownload = async () => {
