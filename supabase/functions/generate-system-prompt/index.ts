@@ -21,6 +21,39 @@ interface SystemPromptRequest {
   existing_prompts?: any[];
 }
 
+const UNIVERSAL_STYLE_TEMPLATE = `
+🎨 **UNIVERSAL VISUAL STYLE REQUIREMENTS**
+
+**Color Palette (Use ONLY these HSL values):**
+| Color Type | HSL Value | Usage |
+|------------|-----------|-------|
+| Primary | hsl(220, 70%, 50%) | Main brand elements, key focal points |
+| Secondary | hsl(200, 60%, 45%) | Supporting elements, backgrounds |
+| Accent | hsl(280, 65%, 55%) | Highlights, CTAs, important details |
+| Neutral Dark | hsl(210, 15%, 25%) | Text, borders, shadows |
+| Neutral Light | hsl(210, 20%, 95%) | Backgrounds, cards, subtle elements |
+| Success | hsl(140, 60%, 45%) | Positive indicators, growth |
+| Warning | hsl(45, 90%, 55%) | Attention, alerts |
+
+**Art Style Requirements:**
+- **Style**: Clean, modern flat vector illustration
+- **Composition**: Balanced, professional layouts with clear hierarchy
+- **Typography**: Sans-serif, clean and readable when text appears
+- **Shadows**: Minimal, subtle drop shadows only (hsl(210, 15%, 25%) at 10% opacity)
+- **Gradients**: Subtle linear gradients between palette colors only
+- **Icons**: Simple, consistent line weight (2-3px), rounded corners
+- **Spacing**: Generous white space, clean margins and padding
+
+**Rendering Specifications:**
+- Vector-based illustration style
+- Clean lines with consistent 2-3px stroke weight
+- Rounded corners (8-12px radius) for all rectangular elements
+- No photorealistic textures or complex lighting
+- Consistent perspective and viewing angle within scene type
+- Professional, corporate-friendly aesthetic
+- High contrast for accessibility compliance
+`;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -55,27 +88,33 @@ CONTEXT ANALYSIS:
 - Description: ${contextData.description}
 - Sample Content: ${contextData.sample_content}
 
-REQUIREMENTS:
+CRITICAL REQUIREMENTS:
+1. MUST use the UNIVERSAL VISUAL STYLE provided below - DO NOT create category-specific colors or styling
+2. Focus on category-specific SCENE COMPOSITION and CONTENT CONTEXT only
+3. The visual style, colors, and rendering approach are standardized across ALL categories
+
+${UNIVERSAL_STYLE_TEMPLATE}
+
+SYSTEM PROMPT STRUCTURE REQUIREMENTS:
 1. Create a comprehensive system prompt that follows this exact structure:
    - Title with emoji (# 🎨 [CATEGORY] Visual Content Generator)
    - Content Analysis Framework (📊)
    - Visual Framework with Foreground/Mid-ground/Background (🎯)
-   - Style & Rendering Requirements (🎨)
-   - Color Palette table with HSL values (🌈)
+   - Universal Style & Rendering Requirements (copy the universal style above exactly) (🎨)
    - Visual Metaphors section (🔍)
    - Output Instructions (📋)
 
-2. The color palette MUST:
-   - Use HSL format: hsl(hue, saturation%, lightness%)
-   - Be appropriate for the industry/category
-   - Include Primary, Secondary, Accent, and Neutral colors
-   - Have specific usage guidelines
+2. CRITICAL - Replace any "Color Palette" section with the UNIVERSAL style above:
+   - Use the EXACT HSL values from the universal palette
+   - DO NOT create new colors or modify the palette
+   - Focus on how the universal colors apply to your category's scenes
 
-3. Industry-specific customization:
-   - Analyze the category and sample content to understand the industry
-   - Include relevant terminology and visual elements
-   - Define appropriate professional contexts
-   - Create meaningful visual metaphors
+3. Category-specific customization (SCENE ONLY):
+   - Analyze the category to define appropriate SCENE CONTEXTS
+   - Include relevant visual elements and environments for the category
+   - Define appropriate professional settings and contexts
+   - Create meaningful visual metaphors that fit the category scene
+   - Focus on WHAT is shown, not HOW it's styled
 
 4. Professional output format:
    - Use emojis in section headers
@@ -83,7 +122,7 @@ REQUIREMENTS:
    - End with the critical instruction about aspect ratios
    - Maintain professional, authoritative tone
 
-Generate a complete system prompt that will enable high-quality, contextually-appropriate visual content generation for this specific category.`;
+Generate a complete system prompt that uses the universal style for ALL visual elements while customizing scene composition for the specific category.`;
 
     const userPrompt = `Generate a comprehensive system prompt for visual content generation in the "${request.category}" category. Use the provided context to create industry-specific guidance, appropriate color palettes, and detailed visual frameworks.`;
 
