@@ -78,6 +78,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   };
 
 
+  console.log('BulkImageGenerationButton rendered'); // Force re-compilation
   return (
     <>
       <Button
