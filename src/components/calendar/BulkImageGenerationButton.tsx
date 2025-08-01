@@ -80,18 +80,18 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       {/* Skeleton Grid - shown during generation */}
       {isGenerating(post.id) && (
         <div className="mt-4 animate-fade-in">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="aspect-video">
-              <Skeleton className="w-full h-full rounded border" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-16 w-full">
+              <Skeleton className="w-full h-full object-cover rounded border" />
             </div>
-            <div className="aspect-[9/16]">
-              <Skeleton className="w-full h-full rounded border" />
+            <div className="h-16 w-full">
+              <Skeleton className="w-full h-full object-cover rounded border" />
             </div>
-            <div className="aspect-[4/3]">
-              <Skeleton className="w-full h-full rounded border" />
+            <div className="h-16 w-full">
+              <Skeleton className="w-full h-full object-cover rounded border" />
             </div>
-            <div className="aspect-[3/4]">
-              <Skeleton className="w-full h-full rounded border" />
+            <div className="h-16 w-full">
+              <Skeleton className="w-full h-full object-cover rounded border" />
             </div>
           </div>
         </div>
