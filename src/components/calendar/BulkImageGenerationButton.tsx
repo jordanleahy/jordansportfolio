@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Loader2, Sparkles, X, Check } from 'lucide-react';
+import React from 'react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,17 +25,8 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating } = useProcessingStates();
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleButtonClick = () => {
-    if (!isExpanded && !isGenerating(post.id)) {
-      // First click: expand to show confirmation
-      setIsExpanded(true);
-      console.log(`✨ [BulkGeneration] Expanding confirmation for post: ${post.id}`);
-    }
-  };
-
-  const handleConfirmGeneration = async () => {
+  const handleGenerateAllImages = async () => {
     if (!post) return;
     
     console.log(`🚀 [BulkGeneration] Starting bulk generation for post: ${post.id}`);
@@ -64,25 +55,15 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         }
       }
       
-      // Close expansion after generation
-      setIsExpanded(false);
-      
     } catch (error) {
       console.error('❌ Optimized batch generation error:', error);
     }
   };
 
-  const handleCancel = () => {
-    setIsExpanded(false);
-    console.log(`❌ [BulkGeneration] Cancelled for post: ${post.id}`);
-  };
-
-
-  console.log('BulkImageGenerationButton rendered'); // Force re-compilation
   return (
     <>
       <Button
-        onClick={handleButtonClick}
+        onClick={handleGenerateAllImages}
         disabled={isGenerating(post.id) || isUploading(post.id)}
         variant="outline"
         size="sm"
@@ -96,10 +77,9 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         )}
       </Button>
       
-      {/* Expandable Confirmation Area */}
-      {isExpanded && (
-        <div className="mt-4 space-y-4 animate-fade-in">
-          {/* 4 Skeleton Grid - 2x2 layout */}
+      {/* Skeleton Grid - shown during generation */}
+      {isGenerating(post.id) && (
+        <div className="mt-4 animate-fade-in">
           <div className="grid grid-cols-2 gap-2">
             <div className="aspect-video">
               <Skeleton className="w-full h-full rounded border" />
@@ -113,27 +93,6 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
             <div className="aspect-[3/4]">
               <Skeleton className="w-full h-full rounded border" />
             </div>
-          </div>
-          
-          {/* Confirmation Buttons */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handleConfirmGeneration}
-              disabled={isGenerating(post.id)}
-              size="sm"
-              className="flex-1"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Generate Images
-            </Button>
-            <Button
-              onClick={handleCancel}
-              disabled={isGenerating(post.id)}
-              variant="outline"
-              size="sm"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       )}
