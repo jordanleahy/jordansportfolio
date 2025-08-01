@@ -30,6 +30,9 @@ interface PostsTableViewProps {
   onPreviewImage: (url: string, alt: string) => void;
   onPostsChange: () => void;
   isAdmin?: boolean;
+  animatingRows?: Set<string>;
+  completingRows?: Set<string>;
+  getRowAnimationClass?: (postId: string) => string;
 }
 
 const getStatusColor = (status: string) => {
@@ -62,7 +65,10 @@ export const PostsTableView = memo(({
   onGenerateImage,
   onPreviewImage,
   onPostsChange,
-  isAdmin = false
+  isAdmin = false,
+  animatingRows = new Set(),
+  completingRows = new Set(),
+  getRowAnimationClass = () => ''
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
@@ -187,7 +193,7 @@ export const PostsTableView = memo(({
       </TableHeader>
       <TableBody>
         {sortedPosts.map((post, index) => (
-          <TableRow key={post.id} className="h-20">
+          <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
             <TableCell className="font-medium w-16">
               <div className="truncate">
                 {post.day || '-'}
@@ -211,14 +217,18 @@ export const PostsTableView = memo(({
             <TableCell className="w-32">
               <div className="flex gap-2 items-center flex-wrap">
                 <Badge 
-                  className={`${getStatusColor(post.status)} cursor-pointer select-none`}
+                  className={`${
+                    completingRows?.has(post.id) 
+                      ? 'bg-green-500/30 text-green-800 border-green-500/40 animate-pulse' 
+                      : getStatusColor(post.status)
+                  } cursor-pointer select-none transition-all duration-300`}
                   onClick={() => {
                     const nextStatus = getNextStatus(post.status);
                     onStatusChange(post.id, nextStatus);
                   }}
                   title={`Click to ${getNextStatus(post.status) === 'draft' ? 'mark as draft' : 'publish'}`}
                 >
-                  {post.status}
+                  {completingRows?.has(post.id) ? 'Published ✓' : post.status}
                 </Badge>
                 <BlogStatusBadge postId={post.id} />
               </div>

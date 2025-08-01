@@ -12,6 +12,7 @@ import { useProcessingStates } from "@/hooks/useProcessingStates";
 import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
+import { useRowAnimations } from "@/hooks/useRowAnimations";
 
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
@@ -22,6 +23,14 @@ interface PostsTableOptimizedProps {
 export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const isMobile = useIsMobile();
+  
+  // Animation state management
+  const { 
+    animatingRows, 
+    completingRows, 
+    handleStatusChangeWithAnimation,
+    getRowAnimationClass 
+  } = useRowAnimations();
 
   const {
     voiceoverModal,
@@ -37,11 +46,16 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
 
   const { 
     creatingBlogIds,
-    handleStatusChange,
+    handleStatusChange: originalHandleStatusChange,
     handleCopyContent,
     handleDeletePost,
     handleCreateBlogPost
   } = usePostActions(onPostsChange);
+
+  // Enhanced status change with animation
+  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
+    await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
+  };
 
   const {
     uploadingPosts,
@@ -174,6 +188,9 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onPreviewImage={openPreviewImage}
                 onPostsChange={onPostsChange}
                 isAdmin={isAdmin}
+                animatingRows={animatingRows}
+                completingRows={completingRows}
+                getRowAnimationClass={getRowAnimationClass}
               />
             )}
           </TabsContent>
@@ -219,6 +236,9 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
                 onPreviewImage={openPreviewImage}
                 onPostsChange={onPostsChange}
                 isAdmin={isAdmin}
+                animatingRows={animatingRows}
+                completingRows={completingRows}
+                getRowAnimationClass={getRowAnimationClass}
               />
             )}
           </TabsContent>
