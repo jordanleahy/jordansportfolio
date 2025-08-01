@@ -2,6 +2,54 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 
+// Text sanitization utility to handle Unicode characters safely
+const sanitizeText = (text: string): string => {
+  if (!text) return '';
+  
+  // Map of common accented characters to their ASCII equivalents
+  const accentMap: Record<string, string> = {
+    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
+    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o',
+    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+    'ý': 'y', 'ÿ': 'y', 'ñ': 'n', 'ç': 'c',
+    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE',
+    'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E',
+    'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+    'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O', 'Ø': 'O',
+    'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U',
+    'Ý': 'Y', 'Ÿ': 'Y', 'Ñ': 'N', 'Ç': 'C'
+  };
+  
+  let sanitized = text;
+  
+  // Convert accented characters to ASCII equivalents
+  for (const [accented, ascii] of Object.entries(accentMap)) {
+    sanitized = sanitized.replace(new RegExp(accented, 'g'), ascii);
+  }
+  
+  // Remove emojis and special Unicode characters
+  sanitized = sanitized
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // emoticons
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // symbols & pictographs
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // transport & map symbols
+    .replace(/[\u{1F700}-\u{1F77F}]/gu, '') // alchemical symbols
+    .replace(/[\u{1F780}-\u{1F7FF}]/gu, '') // geometric shapes extended
+    .replace(/[\u{1F800}-\u{1F8FF}]/gu, '') // supplemental arrows C
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // supplemental symbols and pictographs
+    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // chess symbols
+    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // symbols and pictographs extended A
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // miscellaneous symbols
+    .replace(/[\u{2700}-\u{27BF}]/gu, '');  // dingbats
+  
+  // Keep only alphanumeric characters, spaces, and basic punctuation
+  sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_.,!?()]/g, '');
+  
+  // Clean up multiple spaces and trim
+  return sanitized.replace(/\s+/g, ' ').trim();
+};
+
 // Type definitions for better type safety
 interface AspectRatioConfig {
   ratio: string;
@@ -55,7 +103,12 @@ serve(async (req) => {
   
   try {
     const requestBody: BulkImageGenerationRequest = await req.json();
-    const { postId, title, description, category = 'general', context, prompt } = requestBody;
+    let { postId, title, description, category = 'general', context, prompt } = requestBody;
+    
+    // Sanitize text inputs to prevent Unicode encoding issues
+    title = sanitizeText(title || '');
+    description = sanitizeText(description || '');
+    category = sanitizeText(category);
     
     console.log(`🚀 Starting bulk image generation (context: ${context || 'unknown'})`);
     

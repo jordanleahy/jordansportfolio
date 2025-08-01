@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sanitizeText } from '@/utils/textSanitization';
 import type { 
   BulkImageGenerationRequest, 
   BulkImageGenerationResponse, 
@@ -11,9 +12,22 @@ import type {
 // Helper function to create a cache key for prompt caching
 const createPromptCacheKey = (request: BulkImageGenerationRequest): string => {
   const { title, description, category = 'general' } = request;
-  // Create a stable hash from the content for consistent caching
-  const content = `${title}|${description}|${category}`.toLowerCase().trim();
-  return `prompt_${category}_${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+  
+  // Sanitize text inputs to prevent Unicode encoding issues
+  const sanitizedTitle = sanitizeText(title || '');
+  const sanitizedDescription = sanitizeText(description || '');
+  const sanitizedCategory = sanitizeText(category);
+  
+  // Create a stable hash from the sanitized content for consistent caching
+  const content = `${sanitizedTitle}|${sanitizedDescription}|${sanitizedCategory}`.toLowerCase().trim();
+  
+  try {
+    return `prompt_${sanitizedCategory}_${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+  } catch (error) {
+    console.warn('Failed to encode cache key, using fallback:', error);
+    // Fallback: use a simple hash-like string
+    return `prompt_${sanitizedCategory}_${content.replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+  }
 };
 
 // Helper function to cache a generated prompt
