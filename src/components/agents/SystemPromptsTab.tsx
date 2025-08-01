@@ -87,49 +87,63 @@ export const SystemPromptsTab = ({
           </div>
         </div>
 
-        {/* Existing Prompts */}
+        {/* Category System Prompts */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium">Category-Specific Prompts</h4>
-          {systemPrompts.length > 0 ? (
-            systemPrompts.map((prompt, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="space-y-1">
-                    <span className="text-sm font-medium text-muted-foreground">Category:</span>
-                    <Badge variant="outline" className="w-48 justify-start">
-                      {getCategoryLabel(prompt.category)}
-                    </Badge>
+          {supportedCategories.length > 0 ? (
+            supportedCategories.map((category) => {
+              const existingPrompt = systemPrompts.find(p => p.category === category);
+              const promptIndex = systemPrompts.findIndex(p => p.category === category);
+              
+              return (
+                <div key={category} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="space-y-1">
+                      <span className="text-sm font-medium text-muted-foreground">Category:</span>
+                      <Badge variant="outline" className="w-48 justify-start">
+                        {getCategoryLabel(category)}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      {agentId && (
+                        <GenerateSystemPromptButton
+                          agentId={agentId}
+                          category={category}
+                          onSuccess={() => {
+                            // Force a page refresh to show the updated prompt
+                            window.location.reload();
+                          }}
+                        />
+                      )}
+                      {existingPrompt && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removePrompt(promptIndex)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    {agentId && (
-                      <GenerateSystemPromptButton
-                        agentId={agentId}
-                        category={prompt.category}
-                        onSuccess={() => {
-                          // Force a page refresh to show the updated prompt
-                          window.location.reload();
-                        }}
-                      />
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePrompt(index)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  
+                  {existingPrompt ? (
+                    <CategoryPromptEditor
+                      prompt={existingPrompt.prompt}
+                      onChange={(newPrompt) => updatePrompt(promptIndex, newPrompt)}
+                    />
+                  ) : (
+                    <div className="text-sm text-muted-foreground italic p-4 border-2 border-dashed rounded-md">
+                      No system prompt generated yet. Click "Generate Rich Prompt" to create one.
+                    </div>
+                  )}
                 </div>
-                <CategoryPromptEditor
-                  prompt={prompt.prompt}
-                  onChange={(newPrompt) => updatePrompt(index, newPrompt)}
-                />
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-sm text-muted-foreground">
-              No system prompts configured.
+              No categories configured. Add supported categories to create system prompts.
             </p>
           )}
         </div>
