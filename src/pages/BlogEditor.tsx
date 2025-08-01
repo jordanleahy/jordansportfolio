@@ -26,17 +26,11 @@ const BlogEditor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  console.log('BlogEditor - Route param id:', id);
-  
   // TanStack Query hooks - fetch by ID if it exists, and allow unpublished posts
   const { data: existingPost, isLoading: loading, error } = useBlogPost(id, true);
   const createPostMutation = useCreateBlogPost();
   const updatePostMutation = useUpdateBlogPost();
   const deletePostMutation = useDeleteBlogPost();
-
-  console.log('BlogEditor - Existing post data:', existingPost);
-  console.log('BlogEditor - Loading state:', loading);
-  console.log('BlogEditor - Error:', error);
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
@@ -83,8 +77,6 @@ const BlogEditor = () => {
   // Initialize form data when existing post loads
   useEffect(() => {
     if (existingPost) {
-      console.log('BlogEditor - Populating form with existing post:', existingPost);
-      
       const populatedData = {
         hero_headline: existingPost.hero_headline || "",
         hero_subhead: existingPost.hero_subhead || "",
@@ -114,7 +106,6 @@ const BlogEditor = () => {
         status: (existingPost.status as "draft" | "published" | "archived") || "draft"
       };
       
-      console.log('BlogEditor - Setting form data:', populatedData);
       setFormData(populatedData);
       setSlug(existingPost.slug || "");
       
@@ -126,8 +117,6 @@ const BlogEditor = () => {
   // Set up real-time subscription for blog post updates
   useEffect(() => {
     if (!existingPost?.id) return;
-
-    console.log('Setting up realtime subscription for blog post:', existingPost.id);
     
     const channel = supabase
       .channel('blog-post-updates')
@@ -140,7 +129,6 @@ const BlogEditor = () => {
           filter: `id=eq.${existingPost.id}`,
         },
         (payload) => {
-          console.log('Blog post updated via realtime:', payload);
           const newData = payload.new as any;
           
           if (newData.image_generation_status !== imageGenerationStatus) {
@@ -170,7 +158,6 @@ const BlogEditor = () => {
       .subscribe();
 
     return () => {
-      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
   }, [existingPost?.id, imageGenerationStatus, toast]);
