@@ -52,7 +52,7 @@ const Navigation = () => {
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
-    { href: "/companies", label: "RCM Companies", icon: Heart },
+    { href: "/companies", label: "Companies", icon: Heart },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/#about", label: "About", icon: User },
@@ -291,7 +291,7 @@ const Navigation = () => {
                           className={cn(navLinkStyles, isActive("/companies") && "bg-accent text-accent-foreground")}
                         >
                           <Heart className="mr-2 h-4 w-4" />
-                          RCM Companies
+                          Companies
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
