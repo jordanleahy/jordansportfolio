@@ -1,11 +1,11 @@
-import React from 'react';
-import { Loader2, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Loader2, Sparkles, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
-import { MobileBatchSkeleton } from './MobileBatchSkeleton';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 
 interface BulkImageGenerationButtonProps {
@@ -25,11 +25,20 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating } = useProcessingStates();
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleGenerateAllImages = async () => {
+  const handleButtonClick = () => {
+    if (!isExpanded && !isGenerating(post.id)) {
+      // First click: expand to show confirmation
+      setIsExpanded(true);
+      console.log(`✨ [BulkGeneration] Expanding confirmation for post: ${post.id}`);
+    }
+  };
+
+  const handleConfirmGeneration = async () => {
     if (!post) return;
     
-    console.log(`🚀 [SimplifiedDropdown] Starting bulk generation for post: ${post.id}`);
+    console.log(`🚀 [BulkGeneration] Starting bulk generation for post: ${post.id}`);
     
     try {
       const request: BulkImageGenerationRequest = {
@@ -55,21 +64,24 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         }
       }
       
+      // Close expansion after generation
+      setIsExpanded(false);
+      
     } catch (error) {
       console.error('❌ Optimized batch generation error:', error);
     }
+  };
+
+  const handleCancel = () => {
+    setIsExpanded(false);
+    console.log(`❌ [BulkGeneration] Cancelled for post: ${post.id}`);
   };
 
 
   return (
     <>
       <Button
-        onClick={() => {
-          const generating = isGenerating(post.id);
-          const uploading = isUploading(post.id);
-          console.log(`✨ [SimplifiedDropdown] Button clicked for ${post.id} - generating: ${generating}, uploading: ${uploading}`);
-          handleGenerateAllImages();
-        }}
+        onClick={handleButtonClick}
         disabled={isGenerating(post.id) || isUploading(post.id)}
         variant="outline"
         size="sm"
@@ -83,11 +95,47 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         )}
       </Button>
       
-      {/* Mobile Skeleton - shown during generation */}
-      <MobileBatchSkeleton
-        isGenerating={isGenerating(post.id)}
-        className="mt-4"
-      />
+      {/* Expandable Confirmation Area */}
+      {isExpanded && (
+        <div className="mt-4 space-y-4 animate-fade-in">
+          {/* 4 Skeleton Grid - 2x2 layout */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="aspect-video">
+              <Skeleton className="w-full h-full rounded border" />
+            </div>
+            <div className="aspect-[9/16]">
+              <Skeleton className="w-full h-full rounded border" />
+            </div>
+            <div className="aspect-[4/3]">
+              <Skeleton className="w-full h-full rounded border" />
+            </div>
+            <div className="aspect-[3/4]">
+              <Skeleton className="w-full h-full rounded border" />
+            </div>
+          </div>
+          
+          {/* Confirmation Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handleConfirmGeneration}
+              disabled={isGenerating(post.id)}
+              size="sm"
+              className="flex-1"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Generate Images
+            </Button>
+            <Button
+              onClick={handleCancel}
+              disabled={isGenerating(post.id)}
+              variant="outline"
+              size="sm"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
