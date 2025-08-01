@@ -50,7 +50,7 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id } = requestBody;
+    const { category, theme, description, sample_posts, user_id, color_theme } = requestBody;
     
     // Input validation
     if (!category || !user_id) {
@@ -116,15 +116,35 @@ serve(async (req) => {
     const systemPrompt = systemPromptObj.prompt;
 
     // Prepare the user prompt with the category and context
-    const userPrompt = `Create a comprehensive system prompt for the "${category}" category.
+    let userPrompt = `Create a comprehensive system prompt for the "${category}" category.
 
 Theme: ${theme || 'General'}
 Description: ${description || 'No description provided'}
 
 Sample content from this category:
-${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
+${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}`;
 
-Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, color palettes, and content analysis guidelines.`;
+    // Add color theme information if provided
+    if (color_theme) {
+      userPrompt += `
+
+Color Theme Integration:
+- Theme Name: ${color_theme.name}
+- Primary Color: ${color_theme.primary_color}
+- Secondary Color: ${color_theme.secondary_color}
+- Accent Color: ${color_theme.accent_color}
+- Background Color: ${color_theme.background_color}
+- Text Color: ${color_theme.text_color}
+- Border Color: ${color_theme.border_color}
+- Visual Style: ${color_theme.visual_style}
+- Color Instructions: ${color_theme.color_instructions}
+
+IMPORTANT: Integrate this specific color theme throughout the system prompt. Replace the default color palette section with these exact colors and ensure all visual guidance incorporates the ${color_theme.name} theme.`;
+    }
+
+    userPrompt += `
+
+Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, color palettes, and content analysis guidelines.${color_theme ? ` Make sure to incorporate the ${color_theme.name} color theme consistently throughout all sections, especially the color palette and visual style guidelines.` : ''}`;
 
     console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
 

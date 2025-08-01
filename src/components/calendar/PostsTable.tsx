@@ -2,27 +2,43 @@ import { useState } from "react";
 import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Palette } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
+import { ColorThemeSelector } from "./ColorThemeSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
 import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStates } from "@/hooks/useProcessingStates";
+import { useColorThemes } from "@/hooks/useColorThemes";
 import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
 
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
   onPostsChange: () => void;
   isAdmin?: boolean;
+  category?: string;
 }
 
-export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTableOptimizedProps) => {
+export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
+  const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
+  const [isThemePopoverOpen, setIsThemePopoverOpen] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Load color themes
+  const { data: themes = [] } = useColorThemes();
   
   // Animation state management
   const { 
@@ -133,6 +149,73 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     return acc;
   }, {} as Record<string, boolean>);
 
+  // Handle color theme update for category
+  const handleThemeUpdate = async (themeId: string) => {
+    if (!category) {
+      toast.error('Category not available');
+      return;
+    }
+
+    setIsUpdatingTheme(true);
+    try {
+      // Get selected theme data
+      const selectedTheme = themes.find(t => t.id === themeId);
+      if (!selectedTheme) {
+        toast.error('Selected theme not found');
+        return;
+      }
+
+      // Import supabase client
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Call the edge function to regenerate system prompt with color theme
+      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+        body: {
+          category,
+          theme: `${category} with ${selectedTheme.name} color theme`,
+          description: `Generate comprehensive system prompt for ${category} visual content using ${selectedTheme.name} color palette`,
+          user_id: user.id,
+          color_theme: {
+            name: selectedTheme.name,
+            primary_color: selectedTheme.primary_color,
+            secondary_color: selectedTheme.secondary_color,
+            accent_color: selectedTheme.accent_color,
+            background_color: selectedTheme.background_color,
+            text_color: selectedTheme.text_color,
+            border_color: selectedTheme.border_color,
+            color_instructions: selectedTheme.color_instructions,
+            visual_style: selectedTheme.visual_style
+          },
+          sample_posts: [
+            {
+              title: `Sample ${category} content`,
+              description: `Example content for ${category} category with ${selectedTheme.name} theme`
+            }
+          ]
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Failed to update system prompt');
+      }
+
+      setIsThemePopoverOpen(false);
+      toast.success(`System prompt updated with ${selectedTheme.name} color theme`);
+    } catch (error) {
+      console.error('Error updating theme:', error);
+      toast.error(`Failed to update color theme: ${error.message}`);
+    } finally {
+      setIsUpdatingTheme(false);
+    }
+  };
+
   // Filter posts by status
   const filteredPosts = posts.filter((post) => post.status === activeTab);
 
@@ -142,10 +225,43 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
         <h2 className="text-xl font-semibold mb-4">Social Media Posts</h2>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "draft" | "published")}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="draft">Draft</TabsTrigger>
-            <TabsTrigger value="published">Published</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="draft">Draft</TabsTrigger>
+              <TabsTrigger value="published">Published</TabsTrigger>
+            </TabsList>
+            
+            {category && (
+              <Popover open={isThemePopoverOpen} onOpenChange={setIsThemePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    disabled={isUpdatingTheme}
+                  >
+                    <Palette className="h-4 w-4" />
+                    {isUpdatingTheme ? 'Updating...' : 'Color Theme'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="end">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-sm">Update Color Theme</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This will regenerate the system prompt for {category} category with the selected color theme.
+                      </p>
+                    </div>
+                    <ColorThemeSelector
+                      themes={themes}
+                      onThemeChange={handleThemeUpdate}
+                      className="w-full"
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
 
           <TabsContent value="draft">
             {isMobile ? (

@@ -241,6 +241,7 @@ export default function OptimizedCalendar() {
                   posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
                   onPostsChange={() => loadCategoryPosts(category)}
                   isAdmin={isAdmin}
+                  category={category}
                 />
               </Suspense>
             </TabsContent>
