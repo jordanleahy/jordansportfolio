@@ -18,11 +18,25 @@ export function useFileUpload({ bucket = 'general', folder = 'job-applications' 
     setProgress(0);
 
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You must be logged in to upload files');
+        return null;
+      }
+
       // Generate unique filename
       const timestamp = Date.now();
       const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const fileName = `${timestamp}_${cleanFileName}`;
-      const filePath = folder ? `${folder}/${fileName}` : fileName;
+      
+      // For job-applications bucket, use user ID as the folder structure expected by RLS policies
+      let filePath: string;
+      if (bucket === 'job-applications') {
+        filePath = `${user.id}/${fileName}`;
+      } else {
+        filePath = folder ? `${folder}/${fileName}` : fileName;
+      }
 
       // Upload file to Supabase storage
       const { data, error } = await supabase.storage

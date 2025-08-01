@@ -23,7 +23,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   
   const { uploadFile, uploading } = useFileUpload({ 
     bucket: 'job-applications', 
-    folder: 'job-applications' 
+    folder: '' // Let the hook determine the folder structure based on user ID
   });
   
   const updateJobApplication = useUpdateJobApplication();
