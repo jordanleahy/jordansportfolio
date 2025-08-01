@@ -58,10 +58,11 @@ export const GenerateSystemPromptButton = ({
       });
 
       console.log('Edge function response:', { data, error });
+      console.log('Edge function response status:', { data, error });
 
       if (error) {
-        console.error('Edge function error:', error);
-        throw error;
+        console.error('Edge function error details:', JSON.stringify(error, null, 2));
+        throw new Error(`Edge function error: ${error.message || JSON.stringify(error)}`);
       }
 
       if (data?.system_prompt) {
