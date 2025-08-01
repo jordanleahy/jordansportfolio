@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostMediaGalleryModalProps {
@@ -94,6 +94,9 @@ export const PostMediaGalleryModal = ({
   if (mediaItems.length === 0) return null;
 
   const currentMedia = mediaItems[currentIndex];
+  
+  // Format title: [post title] [aspect ratio] jordanleahy.com
+  const formattedTitle = `${post.title} ${currentMedia.aspectRatio} jordanleahy.com`;
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : mediaItems.length - 1));
@@ -103,31 +106,68 @@ export const PostMediaGalleryModal = ({
     setCurrentIndex((prev) => (prev < mediaItems.length - 1 ? prev + 1 : 0));
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(currentMedia.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formattedTitle}.${currentMedia.type === 'image' ? 'png' : 'mp4'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-black/95"
         onPointerDownOutside={onClose}
       >
-        <div className="relative flex flex-col items-center justify-center w-full h-full">
-          {/* Header */}
-          <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
-                {currentMedia.label}
-              </Badge>
-              <Badge variant="outline" className="bg-white/10 text-white border-white/20">
-                {currentIndex + 1} of {mediaItems.length}
-              </Badge>
+        <div className="relative flex flex-col w-full h-full">
+          {/* Header with title and controls */}
+          <div className="flex items-center justify-between p-4 bg-black/70">
+            <div className="flex-1 min-w-0 mr-4">
+              <DialogTitle className="text-white text-lg font-semibold truncate">
+                {formattedTitle}
+              </DialogTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+                  {currentMedia.label}
+                </Badge>
+                <Badge variant="outline" className="bg-white/10 text-white border-white/20">
+                  {currentIndex + 1} of {mediaItems.length}
+                </Badge>
+              </div>
             </div>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Download button */}
+              <Button
+                onClick={handleDownload}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title="Download"
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+              
+              {/* Close button */}
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title="Close"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Navigation buttons */}
