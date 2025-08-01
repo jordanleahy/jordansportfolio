@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useOptimizedBatchGeneration } from '@/hooks/useOptimizedBatchGeneration';
+import { useProcessingStates } from '@/hooks/useProcessingStates';
 import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
@@ -23,13 +24,15 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   onFileSelect,
   onPostsChange,
 }) => {
-  const { generateAllImages, isGenerating, progress } = useOptimizedBatchGeneration();
+  const { generateAllImages, progress } = useOptimizedBatchGeneration();
+  const { isGenerating } = useProcessingStates();
   const [showThumbnails, setShowThumbnails] = useState(false);
 
   const handleGenerateAllImages = async () => {
     if (!showThumbnails) {
       // First click: show thumbnails to confirm intent
       setShowThumbnails(true);
+      console.log(`👆 [SimplifiedDropdown] First click - showing thumbnails for post: ${post.id}`);
       return;
     }
 
@@ -37,7 +40,7 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
     setShowThumbnails(false);
     if (!post) return;
     
-    console.log('🚀 Starting optimized batch image generation for post:', post.id);
+    console.log(`🚀 [SimplifiedDropdown] Second click - starting bulk generation for post: ${post.id}`);
     
     try {
       const request: BulkImageGenerationRequest = {
@@ -72,7 +75,12 @@ export const SimplifiedUploadDropdown: React.FC<SimplifiedUploadDropdownProps> =
   return (
     <>
       <Button
-        onClick={handleGenerateAllImages}
+        onClick={() => {
+          const generating = isGenerating(post.id);
+          const uploading = isUploading(post.id);
+          console.log(`✨ [SimplifiedDropdown] Button clicked for ${post.id} - generating: ${generating}, uploading: ${uploading}`);
+          handleGenerateAllImages();
+        }}
         disabled={isGenerating(post.id) || isUploading(post.id)}
         variant="outline"
         size="sm"

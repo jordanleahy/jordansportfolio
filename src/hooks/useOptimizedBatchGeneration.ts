@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { sanitizeText } from '@/utils/textSanitization';
+import { useProcessingStates } from './useProcessingStates';
 import type { 
   BulkImageGenerationRequest, 
   BulkImageGenerationResponse, 
@@ -108,7 +109,7 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
 };
 
 export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
-  const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
+  const { setBulkProcessing, isGenerating, clearProcessing } = useProcessingStates();
   const [progress, setProgress] = useState<{ 
     completed: number; 
     total: number; 
@@ -124,10 +125,6 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
   });
   const [error, setError] = useState<string | null>(null);
   const [cachedPrompts, setCachedPrompts] = useState<Map<string, string>>(new Map());
-
-  const isGenerating = useCallback((postId: string) => {
-    return generatingPosts.has(postId);
-  }, [generatingPosts]);
 
   // Function to get or generate prompt with caching
   const getOrGeneratePrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {
@@ -175,7 +172,14 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
   }, [cachedPrompts]);
 
   const generateAllImages = useCallback(async (request: BulkImageGenerationRequest): Promise<BulkImageGenerationResponse> => {
-    setGeneratingPosts(prev => new Set(prev).add(request.postId));
+    console.log(`🚀 [BatchGeneration] Starting bulk generation for post: ${request.postId}`);
+    
+    if (isGenerating(request.postId)) {
+      console.log(`⚠️ [BatchGeneration] Generation already in progress for post: ${request.postId}`);
+      throw new Error('Generation already in progress for this post');
+    }
+
+    setBulkProcessing(request.postId, true);
     setError(null);
     
     // Start extended progress simulation with shimmer effects
@@ -289,11 +293,9 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
       };
     } finally {
       clearInterval(progressInterval);
-      setGeneratingPosts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(request.postId);
-        return newSet;
-      });
+      setBulkProcessing(request.postId, false);
+      console.log(`✅ [BatchGeneration] Completed bulk generation for post: ${request.postId}`);
+      
       // Reset progress after a short delay
       setTimeout(() => {
         setProgress({ 

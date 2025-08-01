@@ -227,7 +227,11 @@ export const PostsTableView = memo(({
             <TableCell className="w-40">
               <div className="grid grid-cols-2 gap-2">
                 {/* Top row: 16:9 and 4:3 */}
-                {isUploading(post.id, '16_9') ? (
+                {(() => {
+                  const uploading = isUploading(post.id, '16_9');
+                  console.log(`🖼️ [TableView] Checking 16:9 upload for ${post.id}: ${uploading}`);
+                  return uploading;
+                })() ? (
                   <div className="w-16 h-9 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -244,7 +248,11 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-16 h-9"></div>}
 
-                {isUploading(post.id, '4_3') ? (
+                {(() => {
+                  const uploading = isUploading(post.id, '4_3');
+                  console.log(`🖼️ [TableView] Checking 4:3 upload for ${post.id}: ${uploading}`);
+                  return uploading;
+                })() ? (
                   <div className="w-16 h-12 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -262,7 +270,11 @@ export const PostsTableView = memo(({
                 ) : <div className="w-16 h-12"></div>}
 
                 {/* Bottom row: 9:16 and 3:4 */}
-                {isUploading(post.id, '9_16') ? (
+                {(() => {
+                  const uploading = isUploading(post.id, '9_16');
+                  console.log(`🖼️ [TableView] Checking 9:16 upload for ${post.id}: ${uploading}`);
+                  return uploading;
+                })() ? (
                   <div className="w-9 h-16 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>
@@ -279,7 +291,11 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-9 h-16"></div>}
 
-                {isUploading(post.id, '3_4') ? (
+                {(() => {
+                  const uploading = isUploading(post.id, '3_4');
+                  console.log(`🖼️ [TableView] Checking 3:4 upload for ${post.id}: ${uploading}`);
+                  return uploading;
+                })() ? (
                   <div className="w-12 h-16 relative flex-shrink-0">
                     <Skeleton className="w-full h-full rounded border" />
                   </div>

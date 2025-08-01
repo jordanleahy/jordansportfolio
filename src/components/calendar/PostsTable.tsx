@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useProcessingStates } from "@/hooks/useProcessingStates";
 import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
@@ -46,9 +47,30 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false }: PostsTable
     uploadingPosts,
     handleFileSelect,
     handleGenerateImage,
-    isUploading,
-    getUploadType,
+    isUploading: originalIsUploading,
+    getUploadType: originalGetUploadType,
   } = useImageUpload({ onPostsChange });
+
+  // Use unified processing states
+  const { isUploading: unifiedIsUploading, getUploadType: unifiedGetUploadType } = useProcessingStates();
+
+  // Combine original upload states with unified processing states
+  const isUploading = (postId: string, aspectRatio?: any) => {
+    console.log(`🔍 [PostsTable] Checking upload state for ${postId}${aspectRatio ? ` (${aspectRatio})` : ''}`);
+    const originalState = originalIsUploading(postId, aspectRatio);
+    const unifiedState = unifiedIsUploading(postId, aspectRatio);
+    const result = originalState || unifiedState;
+    console.log(`🔍 [PostsTable] Upload states - original: ${originalState}, unified: ${unifiedState}, final: ${result}`);
+    return result;
+  };
+
+  const getUploadType = (postId: string): any => {
+    const originalType = originalGetUploadType(postId);
+    const unifiedType = unifiedGetUploadType(postId);
+    const result = originalType || unifiedType;
+    console.log(`🔍 [PostsTable] Upload type for ${postId} - original: ${originalType}, unified: ${unifiedType}, final: ${result}`);
+    return result;
+  };
 
   // Handle image deletion with optimistic updates
   const handleImageDelete = async (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
