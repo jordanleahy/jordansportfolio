@@ -1,71 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { NotebookPen, FileText, Loader2 } from 'lucide-react';
+import { NotebookPen, Eye, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useBlogStatus } from '@/hooks/useBlogStatus';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface BlogPostButtonProps {
   post: SocialMediaPost;
 }
 
-interface ExistingBlog {
-  id: string;
-  slug: string;
-  status: string;
-  hero_headline: string;
-}
-
 export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [existingBlog, setExistingBlog] = useState<ExistingBlog | null>(null);
-  const [isCheckingBlog, setIsCheckingBlog] = useState(true);
-
-  // Check for existing blog post on mount
-  useEffect(() => {
-    const checkExistingBlog = async () => {
-      try {
-        // Search for blog posts with similar title (first 20 chars)
-        const titlePrefix = post.title.substring(0, 20);
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select('id, slug, status, hero_headline')
-          .ilike('hero_headline', `%${titlePrefix}%`)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking existing blog:', error);
-        } else if (data) {
-          setExistingBlog(data);
-        }
-      } catch (error) {
-        console.error('Error checking existing blog:', error);
-      } finally {
-        setIsCheckingBlog(false);
-      }
-    };
-
-    checkExistingBlog();
-  }, [post.title]);
+  const blogStatus = useBlogStatus(post.id);
 
   const handleClick = async () => {
     setIsLoading(true);
     
     try {
-      if (existingBlog) {
-        // Navigate to existing blog post
+      if (blogStatus.exists) {
+        // Navigate to view the existing blog
         toast({
           title: "Opening blog post",
-          description: "Redirecting to blog editor...",
+          description: "Redirecting to blog...",
         });
         
         setTimeout(() => {
-          navigate(`/blog-editor/${existingBlog.id}`);
+          navigate(`/blog/${blogStatus.slug}`);
         }, 500);
       } else {
         // Create new blog post
@@ -94,14 +58,6 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
             : "A draft blog post has been created. Redirecting to editor...",
         });
 
-        // Update local state to show as existing blog
-        setExistingBlog({
-          id: blogPost.id,
-          slug: blogPost.slug,
-          status: blogPost.status,
-          hero_headline: blogPost.hero_headline,
-        });
-
         setTimeout(() => {
           if (redirectUrl) {
             navigate(redirectUrl);
@@ -122,8 +78,8 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
     }
   };
 
-  const isDisabled = isCheckingBlog || isLoading;
-  const hasBlog = !!existingBlog;
+  const isDisabled = blogStatus.isLoading || isLoading;
+  const hasBlog = blogStatus.exists;
 
   return (
     <Button
@@ -132,12 +88,12 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
       className="flex-1"
       onClick={handleClick}
       disabled={isDisabled}
-      title={hasBlog ? "Edit blog post" : "Create blog post"}
+      title={hasBlog ? "View Blog" : "Create blog post"}
     >
       {isDisabled ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : hasBlog ? (
-        <FileText className="h-4 w-4" />
+        <Eye className="h-4 w-4" />
       ) : (
         <NotebookPen className="h-4 w-4" />
       )}

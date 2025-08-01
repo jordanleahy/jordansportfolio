@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
-import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles, Eye } from 'lucide-react';
+import { useBlogStatus } from '@/hooks/useBlogStatus';
+import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
@@ -71,6 +73,7 @@ export const PostsTableView = memo(({
   getRowAnimationClass = () => ''
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
@@ -192,7 +195,40 @@ export const PostsTableView = memo(({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedPosts.map((post, index) => (
+        {sortedPosts.map((post, index) => {
+          const BlogPostButtonForRow = () => {
+            const blogStatus = useBlogStatus(post.id);
+            
+            const handleBlogAction = () => {
+              if (blogStatus.exists) {
+                // Navigate to view the existing blog
+                navigate(`/blog/${blogStatus.slug}`);
+              } else {
+                // Create new blog post
+                onCreateBlogPost(post);
+              }
+            };
+
+            return (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBlogAction}
+                disabled={blogStatus.isLoading || creatingBlogIds.has(post.id)}
+                title={blogStatus.exists ? "View Blog" : "Create blog post"}
+              >
+                {blogStatus.isLoading || creatingBlogIds.has(post.id) ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : blogStatus.exists ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <NotebookPen className="h-4 w-4" />
+                )}
+              </Button>
+            );
+          };
+
+          return (
           <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
             <TableCell className="font-medium w-16">
               <div className="truncate">
@@ -361,21 +397,7 @@ export const PostsTableView = memo(({
                 >
                   <Mic className="h-4 w-4" />
                 </Button>
-                {isAdmin && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onCreateBlogPost(post)}
-                    disabled={creatingBlogIds.has(post.id) || !post.image_16_9_url || !post.image_9_16_url || !post.image_3_4_url || !post.image_4_3_url}
-                    title="Create blog post"
-                  >
-                    {creatingBlogIds.has(post.id) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <NotebookPen className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
+                {isAdmin && <BlogPostButtonForRow />}
                 <SingleAspectRatioSelector
                   post={post}
                   isUploading={isUploading}
@@ -401,7 +423,8 @@ export const PostsTableView = memo(({
               </div>
             </TableCell>
           </TableRow>
-        ))}
+          );
+        })}
       </TableBody>
     </Table>
   );
