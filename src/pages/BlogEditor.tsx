@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Eye, Trash2, Send, Plus } from "lucide-react";
+import { Save, Eye, Trash2, Send, Plus, Loader2 } from "lucide-react";
 import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
@@ -611,6 +611,36 @@ const BlogEditor = () => {
                       </div>
                       <div>
                         <Label>Image (optional)</Label>
+                        
+                        {/* Image Preview Section */}
+                        {section.image_url && (
+                          <div className="mb-4 p-4 border rounded-lg bg-muted/50">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-muted-foreground">Generated Image Preview</span>
+                              {imageGenerationStatus === 'generating' && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  Generating...
+                                </div>
+                              )}
+                            </div>
+                            <div className="relative w-full aspect-[4/3] bg-muted rounded-lg overflow-hidden">
+                              <img
+                                src={section.image_url}
+                                alt={section.title || 'Generated image'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              This image was automatically generated. You can replace it using the field below.
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="flex gap-2 items-center">
                           <Input
                             value={section.image_url || ''}
