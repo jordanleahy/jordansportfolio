@@ -24,28 +24,14 @@ export default function RCMCompanies() {
   // Fetch all vendors and filter for RCM companies
   const { data: allVendors = [], isLoading, error } = useVendors();
   
-  // Filter to show only published RCM companies
-  const rcmCompanies = useMemo(() => {
-    return allVendors.filter(vendor => 
-      vendor.status === 'published' && 
-      (vendor.core_services.some(service => 
-        service.toLowerCase().includes('revenue cycle') || 
-        service.toLowerCase().includes('rcm') ||
-        service.toLowerCase().includes('billing') ||
-        service.toLowerCase().includes('coding')
-      ) ||
-      vendor.specialties.some(specialty => 
-        specialty.toLowerCase().includes('revenue cycle') || 
-        specialty.toLowerCase().includes('rcm') ||
-        specialty.toLowerCase().includes('billing') ||
-        specialty.toLowerCase().includes('coding')
-      ))
-    );
+  // Filter to show only published companies
+  const publishedCompanies = useMemo(() => {
+    return allVendors.filter(vendor => vendor.status === 'published');
   }, [allVendors]);
 
   // Apply additional filters
   const filteredCompanies = useMemo(() => {
-    let filtered = rcmCompanies;
+    let filtered = publishedCompanies;
 
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
@@ -113,7 +99,7 @@ export default function RCMCompanies() {
     }
 
     return filtered;
-  }, [rcmCompanies, filters]);
+  }, [publishedCompanies, filters]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -182,10 +168,10 @@ export default function RCMCompanies() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Revenue Cycle Management (RCM) Companies
+              Healthcare Companies
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Showing {sortedCompanies.length} of {rcmCompanies.length} companies
+              Showing {sortedCompanies.length} of {publishedCompanies.length} companies
             </p>
           </div>
 
@@ -196,7 +182,7 @@ export default function RCMCompanies() {
               <VendorFilters 
                 filters={filters} 
                 onFiltersChange={setFilters} 
-                vendors={rcmCompanies} 
+                vendors={publishedCompanies} 
               />
               
               {/* Sort Controls */}
@@ -258,7 +244,7 @@ export default function RCMCompanies() {
                 <div className="col-span-full">
                   <Card>
                     <CardContent className="text-center py-8 text-muted-foreground">
-                      No RCM companies found matching your filters.
+                      No companies found matching your filters.
                     </CardContent>
                   </Card>
                 </div>
