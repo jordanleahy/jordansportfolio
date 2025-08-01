@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUpdateCompanyPortfolio } from '@/hooks/useCompanyPortfolios';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface VisualGenerationRequest {
   jobTitle: string;
@@ -26,6 +27,7 @@ export const useAutomaticVisualGeneration = () => {
   
   const { toast } = useToast();
   const updatePortfolioMutation = useUpdateCompanyPortfolio();
+  const queryClient = useQueryClient();
 
   const generateVisual = useCallback(async (request: VisualGenerationRequest) => {
     console.log('🎨 Starting automated visual generation workflow');
@@ -128,6 +130,10 @@ export const useAutomaticVisualGeneration = () => {
       }
 
       console.log('✅ Portfolio updated successfully');
+      
+      // Invalidate queries to refresh the UI immediately
+      queryClient.invalidateQueries({ queryKey: ["company-portfolio", request.companySlug] });
+      queryClient.invalidateQueries({ queryKey: ["company-portfolios"] });
       
       setState({
         isGenerating: false,
