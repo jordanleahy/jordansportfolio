@@ -33,9 +33,7 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
     coverLetterContent, 
     videoSrc, 
     topVideoSrc,
-    posterSrc,
-    topPosterSrc,
-    coverImageSrc,
+    posterSrc, 
     calendarUrl, 
     companyName,
     jobApplication 
@@ -85,8 +83,6 @@ const CoverLetterPortfolioView = ({ portfolio }: CoverLetterPortfolioViewProps) 
         videoSrc={videoSrc}
         topVideoSrc={topVideoSrc}
         posterSrc={posterSrc}
-        topPosterSrc={topPosterSrc}
-        coverImageSrc={coverImageSrc}
         coverLetterContent={coverLetterContent}
         portfolio={portfolio}
       />

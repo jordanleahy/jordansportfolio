@@ -73,17 +73,12 @@ export const useCoverLetterData = ({ portfolio }: UseCoverLetterDataProps) => {
     return portfolio.custom_top_poster_url || "";
   }, [portfolio.custom_top_poster_url]);
 
-  const coverImageSrc = useMemo(() => {
-    return portfolio.custom_cover_image_url || "";
-  }, [portfolio.custom_cover_image_url]);
-
   return {
     coverLetterContent,
     videoSrc,
     topVideoSrc,
     posterSrc,
     topPosterSrc,
-    coverImageSrc,
     calendarUrl,
     personalInfo,
     companyName: portfolio.company_name,

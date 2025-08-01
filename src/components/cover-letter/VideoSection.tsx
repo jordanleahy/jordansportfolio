@@ -214,9 +214,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   const hasVideo = videoSrc && videoSrc.trim() !== '';
   const hasCustomVideo = uploadType === 'top' ? portfolio?.custom_top_video_url : portfolio?.custom_video_url;
   const hasCustomCover = uploadType === 'top' ? portfolio?.custom_top_poster_url : portfolio?.custom_poster_url;
-  
-  // For main video section, also check for cover image when no video/poster
-  const fallbackImage = uploadType === 'main' && !hasVideo && !posterSrc ? portfolio?.custom_cover_image_url : null;
 
   return (
     <Card className="bg-transparent border-none shadow-none">
@@ -242,12 +239,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               <img 
                 src={posterSrc}
                 alt="Cover image"
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : fallbackImage ? (
-              <img 
-                src={fallbackImage}
-                alt="AI Generated cover image"
                 className="w-full h-full object-cover rounded-lg"
               />
             ) : showUploadPrompt ? (

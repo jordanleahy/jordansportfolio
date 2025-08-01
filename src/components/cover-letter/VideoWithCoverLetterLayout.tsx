@@ -13,7 +13,6 @@ interface VideoWithCoverLetterLayoutProps {
   posterSrc: string;
   topVideoSrc?: string;
   topPosterSrc?: string;
-  coverImageSrc?: string;
   coverLetterContent: CoverLetterContent;
   showTimer?: boolean;
   portfolio?: CompanyPortfolio;
@@ -25,7 +24,6 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
   posterSrc,
   topVideoSrc,
   topPosterSrc,
-  coverImageSrc,
   coverLetterContent,
   showTimer = true,
   portfolio,
@@ -35,7 +33,6 @@ export const VideoWithCoverLetterLayout: React.FC<VideoWithCoverLetterLayoutProp
   const hasTopVideo = portfolio?.custom_top_video_url;
   const hasMainVideo = videoSrc && videoSrc.trim() !== '';
   const hasMainCover = posterSrc && posterSrc.trim() !== '';
-  const hasCoverImage = coverImageSrc && coverImageSrc.trim() !== '';
   
   // Only show dual layout when there's actual top video content
   // This prevents showing empty containers when only cover images exist
