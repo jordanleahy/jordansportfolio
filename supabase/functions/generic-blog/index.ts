@@ -370,7 +370,7 @@ Requirements:
               continue;
             }
 
-            const imagePrompt = `${promptData.generatedPrompt.trim()}, 4:3 aspect ratio`;
+            const imagePrompt = `${promptData.generatedPrompt.trim()}, professional 4:3 aspect ratio composition`;
             generatedPrompts.push(imagePrompt);
             console.log(`✅ Generated prompt for section ${i + 1}:`, imagePrompt.substring(0, 100) + '...');
 

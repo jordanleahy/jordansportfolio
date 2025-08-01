@@ -49,9 +49,10 @@ serve(async (req) => {
       );
     }
     
-    const { prompt, aspectRatio = "1:1", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = requestBody;
+    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = requestBody;
 
     console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'seedContext exists:', !!seedContext);
+    console.log('📐 ASPECT_RATIO: Received aspect ratio:', aspectRatio);
 
     if (!prompt) {
       console.log('❌ DEBUG: No prompt provided');
@@ -90,7 +91,8 @@ serve(async (req) => {
       '1:1': '1024x1024'
     };
 
-    const size = sizeMap[aspectRatio] || '1024x1024';
+    const size = sizeMap[aspectRatio] || '1536x1024';
+    console.log('📐 ASPECT_RATIO: Final size for OpenAI:', size, '(from aspect ratio:', aspectRatio + ')');
     const estimatedCost = 0.040; // GPT-Image-1 standard pricing
     
     // Disable seeds for CDI category
