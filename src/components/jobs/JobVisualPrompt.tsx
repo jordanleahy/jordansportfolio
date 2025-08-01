@@ -15,9 +15,9 @@ interface JobVisualPromptProps {
 export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, companyName, vendorId }: JobVisualPromptProps) => {
   const config: ImagePromptConfig = {
     title: `Generate ${companyName} Job Visual Prompt (9:16)`,
-    systemPrompt: 'You are an expert at creating professional, context-aware visual prompts for job applications. Generate detailed image prompts that match the company industry, role type, and professional aesthetic.',
-    edgeFunction: 'generate-content',
-    category: 'job_visual',
+    systemPrompt: '', // Will be handled by the edge function
+    edgeFunction: 'generate-image-prompt-dynamic',
+    category: 'healthcare',
     enableCaching: true,
     cacheKeyPrefix: `job_visual_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
     fixedAspectRatio: "9:16"
