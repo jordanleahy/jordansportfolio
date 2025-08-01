@@ -203,7 +203,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { FloatingActionButton } from '@/components/ui/floating-action-button';
 
 
 export default function VendorDetail() {
@@ -1296,23 +1295,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           </div>
         </div>
       </div>
-
-      {/* Floating Action Button for Company Portfolio */}
-      {user && (
-        <FloatingActionButton
-          onClick={() => {
-            const companySlug = vendor.company_name
-              .toLowerCase()
-              .replace(/[^a-z0-9\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .replace(/-+/g, '-')
-              .replace(/^-|-$/g, '');
-            navigate(`/portfolio/${companySlug}`);
-          }}
-          icon={<Users className="h-6 w-6" />}
-          tooltip="View Company Portfolio"
-        />
-      )}
     </PageLayout>
   );
 }
