@@ -224,12 +224,7 @@ export const PostImageUploadCard = ({
       </div>
       
       {(isUploading || isGenerating) ? (
-        <div className="border-2 border-primary/40 rounded bg-primary/10 p-2">
-          <SimpleShimmer variant="thumbnail" />
-          <div className="text-xs text-center mt-1 text-primary font-medium">
-            {getLoadingText()}
-          </div>
-        </div>
+        <SimpleShimmer variant="thumbnail" />
       ) : imageUrl ? (
         <div className="relative">
           <img
