@@ -7,7 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
-import { ImagePromptGeneratorModalProps, AspectRatio } from '@/types/imagePromptGenerator';
+import { ImagePromptGeneratorModalProps } from '@/types/imagePromptGenerator';
+import type { AspectRatio } from '@/types/bulkImageGeneration';
 
 export const ImagePromptGeneratorModal = ({
   isOpen,
