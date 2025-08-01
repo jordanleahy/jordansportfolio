@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { SystemPromptManager } from '@/components/admin/SystemPromptManager';
-import { SeedCorrelationView } from '@/components/admin/SeedCorrelationView';
+
 import { PromptPerformanceMetrics } from '@/components/admin/PromptPerformanceMetrics';
 import { FinetuningInsights } from '@/components/admin/FinetuningInsights';
 import { 
@@ -136,7 +136,24 @@ const SeedAnalytics = () => {
           </TabsContent>
 
           <TabsContent value="correlation" className="space-y-4">
-            <SeedCorrelationView />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  Seed Correlation Analysis
+                </CardTitle>
+                <CardDescription>
+                  Seed analysis has been simplified - seeds are now stored directly on posts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Seed system has been simplified</p>
+                  <p className="text-sm">Seeds are now managed directly on individual posts for better control</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="finetuning" className="space-y-4">

@@ -21,7 +21,7 @@ export interface SocialMediaPost {
   image_4_3_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
   
   // Seed management
-  selected_seed_id?: string | null;
+  seed_value?: number | null;
   
   status: PostStatus;
   scheduled_date?: string | null;

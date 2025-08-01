@@ -44,7 +44,7 @@ import { ComparisonForm } from "./pages/admin/ComparisonForm";
 
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
-const SeedManagement = lazy(() => import("./pages/admin/SeedManagement"));
+
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
@@ -138,16 +138,6 @@ function App() {
                     <AdminRoute>
                       <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
                         <ApiUsage />
-                      </Suspense>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/seeds" 
-                  element={
-                    <AdminRoute>
-                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                        <SeedManagement />
                       </Suspense>
                     </AdminRoute>
                   } 
