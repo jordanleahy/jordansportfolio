@@ -29,15 +29,25 @@ export const GenerateSystemPromptButton = ({
     }
 
     setIsGenerating(true);
+    console.log('Starting system prompt generation for category:', category);
     
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('User ID:', user.id);
+      
       // Call the edge function directly
+      console.log('Calling invoke-system-prompt-agent edge function...');
       const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
         body: {
           category,
           theme: `Rich system prompt for ${category}`,
           description: `Generate comprehensive system prompt for ${category} visual content`,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user.id,
           sample_posts: [
             {
               title: `Sample ${category} content`,
@@ -47,12 +57,18 @@ export const GenerateSystemPromptButton = ({
         }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
+        console.error('Edge function error:', error);
         throw error;
       }
 
       if (data?.system_prompt) {
+        console.log('Generated system prompt:', data.system_prompt);
+        
         // Update the agent with the new system prompt
+        console.log('Updating agent with new system prompt...');
         const { error: updateError } = await supabase
           .from('openai_agents')
           .update({
@@ -68,9 +84,11 @@ export const GenerateSystemPromptButton = ({
           .eq('id', agentId);
 
         if (updateError) {
+          console.error('Update error:', updateError);
           throw updateError;
         }
 
+        console.log('Agent updated successfully');
         toast({
           title: "System prompt generated!",
           description: `Rich system prompt for ${category} has been created`,
@@ -78,13 +96,26 @@ export const GenerateSystemPromptButton = ({
 
         onSuccess?.();
       } else {
-        throw new Error('No system prompt returned');
+        console.error('No system prompt in response:', data);
+        throw new Error('No system prompt returned from edge function');
       }
     } catch (error: any) {
       console.error('Error generating system prompt:', error);
+      
+      // More specific error messages
+      let errorMessage = error.message || "Please try again later";
+      
+      if (error.message?.includes('OpenAI API key')) {
+        errorMessage = "OpenAI API key not configured. Please contact your administrator.";
+      } else if (error.message?.includes('not found')) {
+        errorMessage = "System Prompt Generator agent not found. Please create one first.";
+      } else if (error.message?.includes('fetch')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+      
       toast({
         title: "Failed to generate system prompt",
-        description: error.message || "Please try again later",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
