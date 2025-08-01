@@ -7,6 +7,7 @@ import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
 import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
+import { MobileBatchSkeleton } from './MobileBatchSkeleton';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 
 interface BulkImageGenerationButtonProps {
@@ -100,11 +101,17 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         className="mt-4"
       />
       
-      {/* Batch Processing Skeleton - shown during generation */}
+      {/* Mobile Skeleton - shown during generation on mobile */}
+      <MobileBatchSkeleton
+        isGenerating={isGenerating(post.id)}
+        className="mt-4 md:hidden"
+      />
+      
+      {/* Desktop Skeleton - shown during generation on desktop */}
       <BatchProcessingSkeleton
         isGenerating={isGenerating(post.id)}
         progress={progress}
-        className="mt-4"
+        className="mt-4 hidden md:block"
       />
     </>
   );
