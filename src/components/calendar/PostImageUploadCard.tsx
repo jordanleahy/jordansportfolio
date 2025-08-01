@@ -154,16 +154,6 @@ export const PostImageUploadCard = ({
     }
   };
 
-  const getLoadingText = () => {
-    if (isGenerating) {
-      if (generationStep === 'prompt') return 'Creating...';
-      if (generationStep === 'image') return 'Generating...';
-      if (generationStep === 'upload') return 'Uploading...';
-      return 'Processing...';
-    }
-    if (isUploading) return 'Uploading...';
-    return '';
-  };
 
   const handleDeleteImage = () => {
     if (onImageDelete) {
