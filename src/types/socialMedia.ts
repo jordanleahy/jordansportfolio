@@ -23,6 +23,9 @@ export interface SocialMediaPost {
   // Seed management
   seed_value?: number | null;
   
+  // Color theme
+  color_theme_id?: string | null;
+  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;
@@ -43,6 +46,9 @@ export interface CreateSocialMediaPost {
   image_16_9_video_url?: string;
   image_3_4_video_url?: string;
   general_video_url?: string;
+  
+  // Color theme
+  color_theme_id?: string;
   
   status?: PostStatus;
   scheduled_date?: string;

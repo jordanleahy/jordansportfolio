@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryInput } from './CategoryInput';
+import { ColorThemeSelector } from './ColorThemeSelector';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ImageUploadCard } from './ImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
@@ -11,6 +12,7 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useColorThemes, useDefaultColorTheme } from '@/hooks/useColorThemes';
 import { Plus, Sparkles, Loader2 } from 'lucide-react';
 import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 
@@ -20,11 +22,15 @@ interface PostFormProps {
 }
 
 export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => {
+  const { data: colorThemes = [], isLoading: themesLoading } = useColorThemes();
+  const { data: defaultTheme } = useDefaultColorTheme();
+  
   const [formData, setFormData] = useState<CreateSocialMediaPost>({
     title: '',
     description: '',
     status: 'draft',
     category,
+    color_theme_id: defaultTheme?.id,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +38,13 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
   const [generatingField, setGeneratingField] = useState<string>('');
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Update form data when default theme is loaded
+  React.useEffect(() => {
+    if (defaultTheme && !formData.color_theme_id) {
+      setFormData(prev => ({ ...prev, color_theme_id: defaultTheme.id }));
+    }
+  }, [defaultTheme, formData.color_theme_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +69,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
         description: '',
         status: 'draft',
         category,
+        color_theme_id: defaultTheme?.id,
       });
       setIsOpen(false);
       onPostCreated();
@@ -220,6 +234,16 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
               </Select>
             </div>
           </div>
+
+          {/* Color Theme Selection */}
+          <div>
+            <ColorThemeSelector
+              themes={colorThemes}
+              selectedThemeId={formData.color_theme_id}
+              onThemeChange={(themeId) => setFormData(prev => ({ ...prev, color_theme_id: themeId }))}
+            />
+          </div>
+
 
           <div>
             <div className="flex justify-between items-center mb-2">

@@ -58,12 +58,26 @@ export class OptimizedSocialMediaService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // If no color theme is provided, use the default
+    let colorThemeId = post.color_theme_id;
+    if (!colorThemeId) {
+      const { data: defaultTheme } = await supabase
+        .from('color_themes')
+        .select('id')
+        .eq('is_default', true)
+        .eq('is_system', true)
+        .single();
+      
+      colorThemeId = defaultTheme?.id || null;
+    }
+
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert({
         ...post,
         category: post.category || 'cdi',
         user_id: user.id,
+        color_theme_id: colorThemeId,
       })
       .select()
       .single();

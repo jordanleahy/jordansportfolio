@@ -128,6 +128,7 @@ export type Database = {
       blog_posts: {
         Row: {
           category: string
+          color_theme_id: string | null
           created_at: string
           cta_text: string
           cta_url: string | null
@@ -156,6 +157,7 @@ export type Database = {
           social_media_post_id: string | null
           status: string
           tags: string[] | null
+          theme: string | null
           tldr_bullets: Json
           tldr_title: string
           updated_at: string
@@ -166,6 +168,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          color_theme_id?: string | null
           created_at?: string
           cta_text: string
           cta_url?: string | null
@@ -194,6 +197,7 @@ export type Database = {
           social_media_post_id?: string | null
           status?: string
           tags?: string[] | null
+          theme?: string | null
           tldr_bullets: Json
           tldr_title?: string
           updated_at?: string
@@ -204,6 +208,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          color_theme_id?: string | null
           created_at?: string
           cta_text?: string
           cta_url?: string | null
@@ -232,6 +237,7 @@ export type Database = {
           social_media_post_id?: string | null
           status?: string
           tags?: string[] | null
+          theme?: string | null
           tldr_bullets?: Json
           tldr_title?: string
           updated_at?: string
@@ -241,6 +247,13 @@ export type Database = {
           word_count?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "blog_posts_color_theme_id_fkey"
+            columns: ["color_theme_id"]
+            isOneToOne: false
+            referencedRelation: "color_themes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "blog_posts_social_media_post_id_fkey"
             columns: ["social_media_post_id"]
@@ -398,6 +411,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      color_themes: {
+        Row: {
+          accent_color: string
+          background_color: string
+          border_color: string
+          color_instructions: string
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          is_system: boolean
+          name: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          text_color: string
+          updated_at: string
+          user_id: string
+          visual_style: string
+        }
+        Insert: {
+          accent_color?: string
+          background_color?: string
+          border_color?: string
+          color_instructions?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          is_system?: boolean
+          name: string
+          primary_color?: string
+          secondary_color?: string
+          slug: string
+          text_color?: string
+          updated_at?: string
+          user_id: string
+          visual_style?: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          border_color?: string
+          color_instructions?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          is_system?: boolean
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          slug?: string
+          text_color?: string
+          updated_at?: string
+          user_id?: string
+          visual_style?: string
+        }
+        Relationships: []
       }
       company_portfolios: {
         Row: {
@@ -1541,6 +1614,7 @@ export type Database = {
       social_media_posts: {
         Row: {
           category: string
+          color_theme_id: string | null
           created_at: string
           day: number | null
           description: string
@@ -1571,6 +1645,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          color_theme_id?: string | null
           created_at?: string
           day?: number | null
           description: string
@@ -1601,6 +1676,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          color_theme_id?: string | null
           created_at?: string
           day?: number | null
           description?: string
@@ -1629,7 +1705,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "social_media_posts_color_theme_id_fkey"
+            columns: ["color_theme_id"]
+            isOneToOne: false
+            referencedRelation: "color_themes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
