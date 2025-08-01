@@ -108,7 +108,7 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
   }
 };
 
-export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
+export const useImageBatchGeneration = (): OptimizedBulkGenerationHook => {
   const { setBulkProcessing, isGenerating, clearProcessing } = useProcessingStates();
   const [progress, setProgress] = useState<{ 
     completed: number; 
