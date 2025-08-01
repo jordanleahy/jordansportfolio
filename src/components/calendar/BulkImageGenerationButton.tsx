@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
-import { BatchProcessingSkeleton } from './BatchProcessingSkeleton';
 import { BulkGenerationThumbnails } from './BulkGenerationThumbnails';
 import { MobileBatchSkeleton } from './MobileBatchSkeleton';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
@@ -101,17 +100,10 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         className="mt-4"
       />
       
-      {/* Mobile Skeleton - shown during generation on mobile */}
+      {/* Mobile Skeleton - shown during generation */}
       <MobileBatchSkeleton
         isGenerating={isGenerating(post.id)}
-        className="mt-4 md:hidden"
-      />
-      
-      {/* Desktop Skeleton - shown during generation on desktop */}
-      <BatchProcessingSkeleton
-        isGenerating={isGenerating(post.id)}
-        progress={progress}
-        className="mt-4 hidden md:block"
+        className="mt-4"
       />
     </>
   );
