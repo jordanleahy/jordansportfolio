@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
-import { ImageSkeletonLoader } from '@/components/ui/image-skeleton-loader';
+import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -225,7 +225,7 @@ export const PostImageUploadCard = ({
       
       {(isUploading || isGenerating) ? (
         <div className="border-2 border-primary/40 rounded bg-primary/10 p-2">
-          <ImageSkeletonLoader variant="thumbnail" />
+          <SimpleShimmer variant="thumbnail" />
           <div className="text-xs text-center mt-1 text-primary font-medium">
             {getLoadingText()}
           </div>

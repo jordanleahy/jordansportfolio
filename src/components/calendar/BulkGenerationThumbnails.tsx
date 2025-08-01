@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ImageSkeletonLoader } from '@/components/ui/image-skeleton-loader';
+import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 
 interface BulkGenerationThumbnailsProps {
@@ -33,10 +33,9 @@ export const BulkGenerationThumbnails: React.FC<BulkGenerationThumbnailsProps> =
                 </span>
               </div>
               
-              <ImageSkeletonLoader
+              <SimpleShimmer
                 aspectRatio={ratio.replace(':', '/')}
                 variant="thumbnail"
-                className="animate-pulse"
               />
             </div>
           ))}

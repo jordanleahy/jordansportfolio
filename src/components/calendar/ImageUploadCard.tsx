@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, X, ImageIcon, Loader2, Sparkles, ChevronDown } from 'lucide-react';
-import { ImageSkeletonLoader } from '@/components/ui/image-skeleton-loader';
+import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -189,7 +189,7 @@ export const ImageUploadCard = ({
       </CardHeader>
       <CardContent className="space-y-3">
         {(isUploading || isGenerating) ? (
-          <ImageSkeletonLoader aspectRatio={displayAspectRatio} />
+          <SimpleShimmer aspectRatio={displayAspectRatio} />
         ) : imageUrl ? (
           <div className="relative">
             <div 
