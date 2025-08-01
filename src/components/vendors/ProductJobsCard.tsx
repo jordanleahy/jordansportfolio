@@ -60,6 +60,7 @@ const isValidUrl = (url: string): boolean => {
 };
 
 export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vendor }) => {
+  console.log('🔍 ProductJobsCard rendering with vendor:', vendor.company_name);
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
@@ -90,7 +91,9 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
   const [resumeModalJob, setResumeModalJob] = useState<VendorJob | null>(null);
   
   // Visual generation hook
+  console.log('🔍 About to initialize visual generation hook');
   const { generateVisual, isGenerating: isGeneratingVisual } = useAutomaticVisualGeneration();
+  console.log('🔍 Visual generation hook initialized, isGenerating:', isGeneratingVisual);
 
   // Enhanced authentication and authorization checks
   if (authLoading || roleLoading) {
