@@ -35,9 +35,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "@/types/vendor";
-import { JobVisualPrompt } from "@/components/jobs/JobVisualPrompt";
 import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { ResumeModal } from "@/components/jobs/ResumeModal";
+import { useAutomaticVisualGeneration } from "@/hooks/useAutomaticVisualGeneration";
 
 interface ProductJobsCardProps {
   vendorId: string;
@@ -87,8 +87,10 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     job_description: "",
   });
   const [errors, setErrors] = useState<Partial<JobFormData>>({});
-  const [visualPromptJob, setVisualPromptJob] = useState<VendorJob | null>(null);
   const [resumeModalJob, setResumeModalJob] = useState<VendorJob | null>(null);
+  
+  // Visual generation hook
+  const { generateVisual, isGenerating: isGeneratingVisual } = useAutomaticVisualGeneration();
 
   // Enhanced authentication and authorization checks
   if (authLoading || roleLoading) {
@@ -319,8 +321,22 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
     window.open(portfolioUrl, '_blank');
   };
 
-  const handleOpenVisualPrompt = (job: VendorJob) => {
-    setVisualPromptJob(job);
+  const handleOpenVisualPrompt = async (job: VendorJob) => {
+    if (!job.job_title || !job.job_description) {
+      toast({
+        title: "Missing Information",
+        description: "Job title and description are required for visual generation.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await generateVisual({
+      jobTitle: job.job_title,
+      jobDescription: job.job_description,
+      companyName: vendor.company_name,
+      companySlug: companySlug
+    });
   };
 
   const handleOpenResumeModal = (job: VendorJob) => {
@@ -487,10 +503,13 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
                         size="sm"
                         variant="outline"
                         onClick={() => handleOpenVisualPrompt(job)}
-                        className="md:px-3 px-2"
+                        className={`md:px-3 px-2 ${isGeneratingVisual ? 'animate-pulse bg-primary/10' : ''}`}
+                        disabled={isGeneratingVisual}
                       >
-                        <Image className="h-4 w-4" />
-                        <span className="hidden md:inline ml-2">Visual</span>
+                        <Image className={`h-4 w-4 ${isGeneratingVisual ? 'animate-bounce' : ''}`} />
+                        <span className="hidden md:inline ml-2">
+                          {isGeneratingVisual ? 'Generating...' : 'Visual'}
+                        </span>
                       </Button>
                       
                       <Button
@@ -556,18 +575,6 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
           )}
         </CardContent>
       </Card>
-
-      {/* Job Visual Prompt Modal */}
-      {visualPromptJob && (
-        <JobVisualPrompt
-          isOpen={!!visualPromptJob}
-          onClose={() => setVisualPromptJob(null)}
-          jobTitle={visualPromptJob.job_title}
-          jobDescription={visualPromptJob.job_description}
-          companyName={vendor.company_name}
-          vendorId={vendorId}
-        />
-      )}
 
       {/* Resume Modal */}
       {resumeModalJob && (
