@@ -320,12 +320,96 @@ Requirements:
       throw new Error(`Failed to create blog post: ${insertError.message}`);
     }
 
+    // Start background image prompt generation
+    const generateImagePrompts = async () => {
+      try {
+        console.log('🎨 Starting background image prompt generation for blog post:', blogPost.id);
+        
+        const visualSections = blogPostInput.visual_sections;
+        const updatedSections = [...visualSections];
+        let hasUpdates = false;
+        
+        for (let i = 0; i < visualSections.length; i++) {
+          const section = visualSections[i];
+          
+          try {
+            // Generate prompt using the dynamic function
+            const promptResponse = await fetch(`${supabaseUrl}/functions/v1/generate-image-prompt-dynamic`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                title: section.headline,
+                description: section.content,
+                category: socialMediaPost.category
+              })
+            });
+
+            if (promptResponse.ok) {
+              const promptData = await promptResponse.json();
+              if (promptData.generatedPrompt) {
+                // Add aspect ratio specification to the prompt
+                const promptWith43 = `${promptData.generatedPrompt.trim()}, 4:3 aspect ratio`;
+                updatedSections[i] = {
+                  ...section,
+                  image_url: promptWith43
+                };
+                hasUpdates = true;
+                console.log(`✅ Generated prompt for section ${i + 1}:`, promptWith43.substring(0, 100) + '...');
+              }
+            } else {
+              console.warn(`⚠️ Failed to generate prompt for section ${i + 1}:`, await promptResponse.text());
+            }
+          } catch (error) {
+            console.warn(`⚠️ Error generating prompt for section ${i + 1}:`, error.message);
+          }
+          
+          // Add delay between requests to respect rate limits
+          if (i < visualSections.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+
+        // Update the blog post with generated prompts if any were successful
+        if (hasUpdates) {
+          const { error: updateError } = await supabase
+            .from('blog_posts')
+            .update({ 
+              visual_sections: updatedSections,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', blogPost.id);
+
+          if (updateError) {
+            console.error('❌ Failed to update blog post with image prompts:', updateError);
+          } else {
+            console.log('✅ Blog post updated with generated image prompts');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Background image prompt generation failed:', error);
+      }
+    };
+
+    // Use EdgeRuntime.waitUntil for background processing
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(generateImagePrompts());
+    } else {
+      // Fallback for environments without EdgeRuntime
+      generateImagePrompts().catch(error => {
+        console.error('Background task failed:', error);
+      });
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         blogPost: blogPost,
-        message: 'Blog post draft created successfully',
-        redirectUrl: `/blog-editor/${blogPost.id}`
+        message: 'Blog post draft created successfully. Visual prompts are being generated in the background.',
+        redirectUrl: `/blog-editor/${blogPost.id}`,
+        imagePromptGeneration: 'in_progress'
       }),
       { 
         headers: { 

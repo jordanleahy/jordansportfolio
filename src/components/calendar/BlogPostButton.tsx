@@ -85,11 +85,13 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
           throw response.error;
         }
 
-        const { blogPost, redirectUrl } = response.data;
+        const { blogPost, redirectUrl, message, imagePromptGeneration } = response.data;
         
         toast({
           title: "Blog post created",
-          description: "A draft blog post has been created. Redirecting to editor...",
+          description: imagePromptGeneration === 'in_progress' 
+            ? "Draft created! Visual prompts are being generated automatically..."
+            : "A draft blog post has been created. Redirecting to editor...",
         });
 
         // Update local state to show as existing blog
