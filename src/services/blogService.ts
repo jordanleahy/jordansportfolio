@@ -27,7 +27,8 @@ export class BlogService {
       visual_sections: post.visual_sections as unknown as VisualSection[],
       tldr_bullets: post.tldr_bullets as unknown as string[],
       meta_keywords: post.meta_keywords as unknown as string[] | undefined,
-      tags: post.tags as unknown as string[] | undefined
+      tags: post.tags as unknown as string[] | undefined,
+      theme: (post as any).theme || undefined
     })) as unknown as BlogPost[];
   }
 
@@ -52,7 +53,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost : null;
   }
 
@@ -75,7 +77,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost : null;
   }
 
@@ -96,7 +99,8 @@ export class BlogService {
       visual_sections: post.visual_sections as unknown as VisualSection[],
       tldr_bullets: post.tldr_bullets as unknown as string[],
       meta_keywords: post.meta_keywords as unknown as string[] | undefined,
-      tags: post.tags as unknown as string[] | undefined
+      tags: post.tags as unknown as string[] | undefined,
+      theme: (post as any).theme || undefined
     })) as unknown as BlogPost[];
   }
 
@@ -116,7 +120,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost : null;
   }
 
@@ -167,7 +172,8 @@ export class BlogService {
         visual_sections: firstPost.visual_sections as unknown as VisualSection[],
         tldr_bullets: firstPost.tldr_bullets as unknown as string[],
         meta_keywords: firstPost.meta_keywords as unknown as string[] | undefined,
-        tags: firstPost.tags as unknown as string[] | undefined
+        tags: firstPost.tags as unknown as string[] | undefined,
+        theme: (firstPost as any).theme || undefined
       } as unknown as BlogPost;
     }
 
@@ -176,7 +182,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost;
   }
 
@@ -236,7 +243,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost;
   }
 
@@ -296,7 +304,8 @@ export class BlogService {
       visual_sections: data.visual_sections as unknown as VisualSection[],
       tldr_bullets: data.tldr_bullets as unknown as string[],
       meta_keywords: data.meta_keywords as unknown as string[] | undefined,
-      tags: data.tags as unknown as string[] | undefined
+      tags: data.tags as unknown as string[] | undefined,
+      theme: (data as any).theme || undefined
     } as unknown as BlogPost;
   }
 

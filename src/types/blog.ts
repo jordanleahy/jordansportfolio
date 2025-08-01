@@ -47,6 +47,7 @@ export interface BlogPost {
   featured: boolean;
   category: string;
   tags?: Json; // Will be cast to string[]
+  theme?: string;
   
   // Timestamps
   created_at: string;
@@ -108,6 +109,7 @@ export const BlogPostSchema = z.object({
   featured: z.boolean().default(false),
   category: z.string().default("general"),
   tags: z.array(z.string()).optional(),
+  theme: z.string().optional(),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
 });
 
