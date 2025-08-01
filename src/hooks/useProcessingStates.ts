@@ -79,6 +79,14 @@ export const useProcessingStates = () => {
     }
     
     if (operation) {
+      // For bulk_generate, check exact key match
+      if (operation === 'bulk_generate') {
+        const key = createKey(postId, operation);
+        const result = processingStates.get(key)?.isActive || false;
+        console.log(`🔍 [ProcessingStates] Check ${operation} for ${postId}: ${result} (exact match)`);
+        return result;
+      }
+      
       const matches = Array.from(processingStates.entries())
         .filter(([key, state]) => key.startsWith(`${postId}_${operation}`) && state.isActive);
       const result = matches.length > 0;
