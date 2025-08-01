@@ -39,12 +39,22 @@ export function FileUpload({
       return;
     }
 
-    // Check file type
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
+    // Check file type based on accept prop
+    const acceptedTypes = accept.split(',').map(type => type.trim());
+    const isValidType = acceptedTypes.some(acceptType => {
+      if (acceptType.includes('/')) {
+        // Exact MIME type match (e.g., "application/pdf")
+        return file.type === acceptType;
+      } else if (acceptType.endsWith('/*')) {
+        // Wildcard match (e.g., "image/*")
+        const prefix = acceptType.replace('/*', '');
+        return file.type.startsWith(prefix + '/');
+      }
+      return false;
+    });
     
-    if (!isImage && !isVideo) {
-      toast.error('Please select an image or video file');
+    if (!isValidType) {
+      toast.error(`Please select a valid file type. Accepted: ${accept}`);
       return;
     }
 
