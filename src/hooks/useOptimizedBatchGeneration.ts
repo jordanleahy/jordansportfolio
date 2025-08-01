@@ -114,10 +114,18 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
 
 export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
   const [generatingPosts, setGeneratingPosts] = useState<Set<string>>(new Set());
-  const [progress, setProgress] = useState<{ completed: number; total: number; currentAspectRatio?: AspectRatio }>({
+  const [progress, setProgress] = useState<{ 
+    completed: number; 
+    total: number; 
+    currentAspectRatio?: AspectRatio;
+    isProcessing?: boolean;
+    isFinalizing?: boolean;
+  }>({
     completed: 0,
     total: 4,
-    currentAspectRatio: undefined
+    currentAspectRatio: undefined,
+    isProcessing: false,
+    isFinalizing: false
   });
   const [error, setError] = useState<string | null>(null);
   const [cachedPrompts, setCachedPrompts] = useState<Map<string, string>>(new Map());
@@ -177,27 +185,42 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
     setGeneratingPosts(prev => new Set(prev).add(request.postId));
     setError(null);
     
-    // Start progress simulation with shimmer effects
+    // Start extended progress simulation with shimmer effects
     const aspectRatios: AspectRatio[] = ['16:9', '9:16', '4:3', '3:4'];
     let currentIndex = 0;
+    let isInFinalizing = false;
     
     setProgress({
       completed: 0,
       total: aspectRatios.length,
-      currentAspectRatio: aspectRatios[0]
+      currentAspectRatio: aspectRatios[0],
+      isProcessing: true,
+      isFinalizing: false
     });
 
-    // Simulate progress updates during generation
+    // Extended progress simulation - matches actual generation times (60-90s)
     const progressInterval = setInterval(() => {
       if (currentIndex < aspectRatios.length - 1) {
         currentIndex++;
-        setProgress({
+        setProgress(prev => ({
+          ...prev,
           completed: currentIndex,
-          total: aspectRatios.length,
-          currentAspectRatio: aspectRatios[currentIndex]
-        });
+          currentAspectRatio: aspectRatios[currentIndex],
+          isProcessing: true,
+          isFinalizing: false
+        }));
+      } else if (!isInFinalizing) {
+        // After simulation completes, enter finalizing state with continuous shimmer
+        isInFinalizing = true;
+        setProgress(prev => ({
+          ...prev,
+          completed: aspectRatios.length,
+          currentAspectRatio: undefined,
+          isProcessing: false,
+          isFinalizing: true
+        }));
       }
-    }, 2500); // Update every 2.5 seconds to simulate processing
+    }, 15000); // Update every 15 seconds for more realistic timing
 
     try {
       console.log('🎨 Starting optimized batch generation for post:', request.postId);
@@ -233,7 +256,9 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
       setProgress({
         completed: aspectRatios.length,
         total: aspectRatios.length,
-        currentAspectRatio: undefined
+        currentAspectRatio: undefined,
+        isProcessing: false,
+        isFinalizing: false
       });
       
       // Show success message with details
@@ -282,7 +307,13 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
       });
       // Reset progress after a short delay
       setTimeout(() => {
-        setProgress({ completed: 0, total: 4, currentAspectRatio: undefined });
+        setProgress({ 
+          completed: 0, 
+          total: 4, 
+          currentAspectRatio: undefined,
+          isProcessing: false,
+          isFinalizing: false
+        });
       }, 1000);
     }
   }, [cachedPrompts]);

@@ -49,6 +49,8 @@ export interface OptimizedBulkGenerationHook {
     completed: number;
     total: number;
     currentAspectRatio?: AspectRatio;
+    isProcessing?: boolean;
+    isFinalizing?: boolean;
   };
   error: string | null;
   getOrGeneratePrompt: (request: BulkImageGenerationRequest) => Promise<string>;

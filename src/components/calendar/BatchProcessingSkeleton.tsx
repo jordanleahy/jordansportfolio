@@ -9,6 +9,8 @@ interface BatchProcessingSkeletonProps {
     completed: number;
     total: number;
     currentAspectRatio?: string;
+    isProcessing?: boolean;
+    isFinalizing?: boolean;
   };
   className?: string;
 }
@@ -34,7 +36,10 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-primary">
-              Generating all images...
+              {progress.isFinalizing 
+                ? 'Finalizing all images...' 
+                : 'Generating all images...'
+              }
             </span>
           </div>
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -59,14 +64,15 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
         {/* Skeleton placeholders for all aspect ratios */}
         <div className="grid grid-cols-2 gap-3">
           {aspectRatios.map(({ ratio, label, className: aspectClass }, index) => {
-            const isCompleted = index < progress.completed;
+            const isCompleted = index < progress.completed && !progress.isFinalizing;
             const isCurrent = progress.currentAspectRatio === ratio;
+            const showShimmer = isCurrent || progress.isFinalizing;
 
             return (
               <div 
                 key={ratio} 
                 className={`relative transition-all duration-300 ${
-                  isCompleted ? 'opacity-60' : isCurrent ? 'ring-2 ring-primary' : ''
+                  isCompleted ? 'opacity-60' : (isCurrent || progress.isFinalizing) ? 'ring-2 ring-primary' : ''
                 }`}
               >
                 <div className="space-y-2">
@@ -74,25 +80,25 @@ export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = (
                     <span className="text-xs font-medium text-muted-foreground">
                       {label} ({ratio})
                     </span>
-                    {isCompleted && (
+                    {isCompleted && !progress.isFinalizing && (
                       <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                         <div className="w-2 h-2 bg-white rounded-full" />
                       </div>
                     )}
-                    {isCurrent && (
+                    {(isCurrent || progress.isFinalizing) && (
                       <Loader2 className="w-3 h-3 animate-spin text-primary" />
                     )}
                   </div>
                   
                   <Skeleton 
                     className={`w-full ${aspectClass} ${
-                      isCurrent ? 'animate-pulse' : ''
-                    } ${isCompleted ? 'bg-green-100 dark:bg-green-900/20' : ''}`}
+                      showShimmer ? 'animate-pulse' : ''
+                    } ${isCompleted && !progress.isFinalizing ? 'bg-green-100 dark:bg-green-900/20' : ''}`}
                   />
                 </div>
 
-                {/* Shimmer overlay for current generation */}
-                {isCurrent && (
+                {/* Shimmer overlay for current generation or finalizing */}
+                {showShimmer && (
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer rounded-md" />
                 )}
               </div>
