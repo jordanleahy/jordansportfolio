@@ -143,6 +143,7 @@ export type Database = {
           hero_subhead: string
           hero_video_url: string | null
           id: string
+          image_generation_status: string | null
           intro_content: string
           meta_description: string
           meta_keywords: string[] | null
@@ -159,6 +160,7 @@ export type Database = {
           tldr_title: string
           updated_at: string
           user_id: string
+          visual_section_prompts: Json | null
           visual_sections: Json
           word_count: number | null
         }
@@ -179,6 +181,7 @@ export type Database = {
           hero_subhead: string
           hero_video_url?: string | null
           id?: string
+          image_generation_status?: string | null
           intro_content: string
           meta_description: string
           meta_keywords?: string[] | null
@@ -195,6 +198,7 @@ export type Database = {
           tldr_title?: string
           updated_at?: string
           user_id: string
+          visual_section_prompts?: Json | null
           visual_sections: Json
           word_count?: number | null
         }
@@ -215,6 +219,7 @@ export type Database = {
           hero_subhead?: string
           hero_video_url?: string | null
           id?: string
+          image_generation_status?: string | null
           intro_content?: string
           meta_description?: string
           meta_keywords?: string[] | null
@@ -231,6 +236,7 @@ export type Database = {
           tldr_title?: string
           updated_at?: string
           user_id?: string
+          visual_section_prompts?: Json | null
           visual_sections?: Json
           word_count?: number | null
         }

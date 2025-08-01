@@ -22,6 +22,13 @@ export const BlogVisualSection = ({
 }: BlogVisualSectionProps) => {
   const isEven = index % 2 === 0;
 
+  // Check if imageUrl is actually a prompt vs a real image URL
+  const isActualImage = imageUrl && (
+    imageUrl.startsWith('http') || 
+    imageUrl.startsWith('/') || 
+    imageUrl.startsWith('data:image')
+  );
+
   return (
     <div className={`py-12 px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
@@ -30,13 +37,39 @@ export const BlogVisualSection = ({
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">
-              <div className="h-full bg-muted relative overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt={headline}
-                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                  loading="lazy"
-                />
+              <div className="h-full bg-muted relative overflow-hidden min-h-[300px] flex items-center justify-center">
+                {isActualImage ? (
+                  <img
+                    src={imageUrl}
+                    alt={headline}
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    loading="lazy"
+                    onError={(e) => {
+                      // Hide broken images
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
+                    <div className="w-16 h-16 bg-muted-foreground/10 rounded-lg flex items-center justify-center mb-4">
+                      <svg 
+                        className="w-8 h-8" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium">Image generating...</p>
+                    <p className="text-xs">Visual will appear shortly</p>
+                  </div>
+                )}
               </div>
             </div>
 

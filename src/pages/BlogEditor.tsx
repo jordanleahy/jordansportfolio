@@ -17,6 +17,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
+import { ImageGenerationStatus } from "@/components/blog/ImageGenerationStatus";
+import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Mic } from "lucide-react";
 
 const BlogEditor = () => {
@@ -41,6 +43,7 @@ const BlogEditor = () => {
   const [voiceoverModalOpen, setVoiceoverModalOpen] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastSaved, setLastSaved] = useState<Date>();
+  const [imageGenerationStatus, setImageGenerationStatus] = useState<'pending' | 'generating' | 'completed' | 'failed'>('pending');
 
   // Form state - simplified
   const [formData, setFormData] = useState<BlogPostInput>({
@@ -114,8 +117,63 @@ const BlogEditor = () => {
       console.log('BlogEditor - Setting form data:', populatedData);
       setFormData(populatedData);
       setSlug(existingPost.slug || "");
+      
+      // Set initial image generation status
+      setImageGenerationStatus((existingPost as any).image_generation_status || 'pending');
     }
   }, [existingPost]);
+
+  // Set up real-time subscription for blog post updates
+  useEffect(() => {
+    if (!existingPost?.id) return;
+
+    console.log('Setting up realtime subscription for blog post:', existingPost.id);
+    
+    const channel = supabase
+      .channel('blog-post-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'blog_posts',
+          filter: `id=eq.${existingPost.id}`,
+        },
+        (payload) => {
+          console.log('Blog post updated via realtime:', payload);
+          const newData = payload.new as any;
+          
+          if (newData.image_generation_status !== imageGenerationStatus) {
+            setImageGenerationStatus(newData.image_generation_status);
+            
+            // Update visual sections if they were generated
+            if (newData.image_generation_status === 'completed' && newData.visual_sections) {
+              setFormData(prev => ({
+                ...prev,
+                visual_sections: newData.visual_sections
+              }));
+              
+              toast({
+                title: "Images Generated!",
+                description: "Visual section images have been automatically generated and added to your blog post."
+              });
+            } else if (newData.image_generation_status === 'failed') {
+              toast({
+                variant: "destructive",
+                title: "Image Generation Failed",
+                description: "There was an issue generating the visual section images. You can still add images manually."
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [existingPost?.id, imageGenerationStatus, toast]);
 
   // Unified form update function
   const updateFormData = useCallback((updates: Partial<BlogPostInput>) => {
@@ -321,7 +379,14 @@ const BlogEditor = () => {
                   }
                 </Badge>
               </div>
-              {/* AutoSaveStatus temporarily disabled */}
+              
+              {/* Image Generation Status */}
+              {existingPost && (
+                <div className="flex items-center gap-3">
+                  <h2 className="text-sm font-medium text-muted-foreground">Images:</h2>
+                  <ImageGenerationStatus status={imageGenerationStatus} />
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-3 justify-end sm:justify-start">
               <AlertDialog>

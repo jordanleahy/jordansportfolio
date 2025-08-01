@@ -320,20 +320,32 @@ Requirements:
       throw new Error(`Failed to create blog post: ${insertError.message}`);
     }
 
-    // Start background image prompt generation
-    const generateImagePrompts = async () => {
+    // Start background image generation and storage
+    const generateVisualSectionImages = async () => {
       try {
-        console.log('🎨 Starting background image prompt generation for blog post:', blogPost.id);
+        console.log('🎨 Starting background image generation for blog post:', blogPost.id);
+        
+        // Update status to generating
+        await supabase
+          .from('blog_posts')
+          .update({ 
+            image_generation_status: 'generating',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', blogPost.id);
         
         const visualSections = blogPostInput.visual_sections;
         const updatedSections = [...visualSections];
+        const generatedPrompts = [];
         let hasUpdates = false;
         
         for (let i = 0; i < visualSections.length; i++) {
           const section = visualSections[i];
           
           try {
-            // Generate prompt using the dynamic function
+            console.log(`🚀 Processing visual section ${i + 1}: ${section.headline}`);
+            
+            // Step 1: Generate prompt using the dynamic function
             const promptResponse = await fetch(`${supabaseUrl}/functions/v1/generate-image-prompt-dynamic`, {
               method: 'POST',
               headers: {
@@ -347,58 +359,134 @@ Requirements:
               })
             });
 
-            if (promptResponse.ok) {
-              const promptData = await promptResponse.json();
-              if (promptData.generatedPrompt) {
-                // Add aspect ratio specification to the prompt
-                const promptWith43 = `${promptData.generatedPrompt.trim()}, 4:3 aspect ratio`;
-                updatedSections[i] = {
-                  ...section,
-                  image_url: promptWith43
-                };
-                hasUpdates = true;
-                console.log(`✅ Generated prompt for section ${i + 1}:`, promptWith43.substring(0, 100) + '...');
-              }
-            } else {
+            if (!promptResponse.ok) {
               console.warn(`⚠️ Failed to generate prompt for section ${i + 1}:`, await promptResponse.text());
+              continue;
             }
+
+            const promptData = await promptResponse.json();
+            if (!promptData.generatedPrompt) {
+              console.warn(`⚠️ No prompt generated for section ${i + 1}`);
+              continue;
+            }
+
+            const imagePrompt = `${promptData.generatedPrompt.trim()}, 4:3 aspect ratio`;
+            generatedPrompts.push(imagePrompt);
+            console.log(`✅ Generated prompt for section ${i + 1}:`, imagePrompt.substring(0, 100) + '...');
+
+            // Step 2: Generate actual image using the prompt
+            const imageResponse = await fetch(`${supabaseUrl}/functions/v1/generate-image-gpt`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                prompt: imagePrompt,
+                aspectRatio: "4:3"
+              })
+            });
+
+            if (!imageResponse.ok) {
+              console.warn(`⚠️ Failed to generate image for section ${i + 1}:`, await imageResponse.text());
+              continue;
+            }
+
+            const imageData = await imageResponse.json();
+            if (!imageData.image) {
+              console.warn(`⚠️ No image data returned for section ${i + 1}`);
+              continue;
+            }
+
+            console.log(`🎨 Image generated for section ${i + 1}, uploading to storage...`);
+
+            // Step 3: Convert base64 to file and upload to storage
+            const base64Data = imageData.image.replace(/^data:image\/\w+;base64,/, '');
+            const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+            
+            const fileName = `blog_${blogPost.id}_section_${i + 1}_${Date.now()}.png`;
+            const filePath = `visual-sections/${fileName}`;
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('blog-images')
+              .upload(filePath, buffer, {
+                contentType: 'image/png',
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error(`❌ Failed to upload image for section ${i + 1}:`, uploadError);
+              continue;
+            }
+
+            // Step 4: Get public URL and update section
+            const { data: publicUrlData } = supabase.storage
+              .from('blog-images')
+              .getPublicUrl(filePath);
+
+            if (publicUrlData?.publicUrl) {
+              updatedSections[i] = {
+                ...section,
+                image_url: publicUrlData.publicUrl
+              };
+              hasUpdates = true;
+              console.log(`✅ Image uploaded for section ${i + 1}:`, publicUrlData.publicUrl);
+            }
+
           } catch (error) {
-            console.warn(`⚠️ Error generating prompt for section ${i + 1}:`, error.message);
+            console.error(`❌ Error processing section ${i + 1}:`, error.message);
           }
           
           // Add delay between requests to respect rate limits
           if (i < visualSections.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
           }
         }
 
-        // Update the blog post with generated prompts if any were successful
+        // Update the blog post with generated images and prompts
+        const finalStatus = hasUpdates ? 'completed' : 'failed';
+        const updateData: any = {
+          image_generation_status: finalStatus,
+          visual_section_prompts: generatedPrompts,
+          updated_at: new Date().toISOString()
+        };
+
         if (hasUpdates) {
-          const { error: updateError } = await supabase
-            .from('blog_posts')
-            .update({ 
-              visual_sections: updatedSections,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', blogPost.id);
-
-          if (updateError) {
-            console.error('❌ Failed to update blog post with image prompts:', updateError);
-          } else {
-            console.log('✅ Blog post updated with generated image prompts');
-          }
+          updateData.visual_sections = updatedSections;
         }
+
+        const { error: updateError } = await supabase
+          .from('blog_posts')
+          .update(updateData)
+          .eq('id', blogPost.id);
+
+        if (updateError) {
+          console.error('❌ Failed to update blog post with generated content:', updateError);
+        } else {
+          console.log(`✅ Blog post updated with ${hasUpdates ? 'generated images' : 'prompts only'} (status: ${finalStatus})`);
+        }
+
       } catch (error) {
-        console.error('❌ Background image prompt generation failed:', error);
+        console.error('❌ Background image generation failed:', error);
+        
+        // Update status to failed
+        await supabase
+          .from('blog_posts')
+          .update({ 
+            image_generation_status: 'failed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', blogPost.id);
       }
     };
 
     // Use EdgeRuntime.waitUntil for background processing
     if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-      EdgeRuntime.waitUntil(generateImagePrompts());
+      EdgeRuntime.waitUntil(generateVisualSectionImages());
     } else {
       // Fallback for environments without EdgeRuntime
-      generateImagePrompts().catch(error => {
+      generateVisualSectionImages().catch(error => {
         console.error('Background task failed:', error);
       });
     }
@@ -407,9 +495,9 @@ Requirements:
       JSON.stringify({ 
         success: true, 
         blogPost: blogPost,
-        message: 'Blog post draft created successfully. Visual prompts are being generated in the background.',
+        message: 'Blog post draft created successfully. Visual section images are being generated in the background.',
         redirectUrl: `/blog-editor/${blogPost.id}`,
-        imagePromptGeneration: 'in_progress'
+        imageGeneration: 'in_progress'
       }),
       { 
         headers: { 
