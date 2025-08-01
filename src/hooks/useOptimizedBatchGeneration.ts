@@ -74,10 +74,7 @@ const cacheGeneratedPrompt = async (
           hit_count: 0
         });
     }
-    
-    console.log('📦 Cached prompt with key:', cacheKey);
   } catch (error) {
-    console.warn('⚠️ Failed to cache prompt:', error);
     // Don't throw - caching failures shouldn't break generation
   }
 };
@@ -101,13 +98,11 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
         cache_key_param: cacheKey
       });
       
-      console.log('🎯 Using cached prompt for key:', cacheKey);
       return cached.prompt_text;
     }
     
     return null;
   } catch (error) {
-    console.warn('⚠️ Failed to retrieve cached prompt:', error);
     return null;
   }
 };
@@ -140,7 +135,6 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
     
     // Check memory cache first
     if (cachedPrompts.has(cacheKey)) {
-      console.log('💾 Using memory cached prompt for:', cacheKey);
       return cachedPrompts.get(cacheKey)!;
     }
     
@@ -153,7 +147,6 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
     }
     
     // Generate new prompt
-    console.log('🎯 Generating new prompt for:', cacheKey);
     const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: { 
         title: request.title, 
@@ -223,11 +216,8 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
     }, 15000); // Update every 15 seconds for more realistic timing
 
     try {
-      console.log('🎨 Starting optimized batch generation for post:', request.postId);
-      
       // Get or generate cached prompt first
       const cachedPrompt = await getOrGeneratePrompt(request);
-      console.log('📝 Using prompt for batch generation (cached)');
       
       // Use optimized edge function with enhanced request including cached prompt
       const enhancedRequest = {
@@ -281,7 +271,6 @@ export const useOptimizedBatchGeneration = (): OptimizedBulkGenerationHook => {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('❌ Optimized batch generation error:', error);
       setError(errorMessage);
       toast.error('Batch generation failed', {
         description: errorMessage

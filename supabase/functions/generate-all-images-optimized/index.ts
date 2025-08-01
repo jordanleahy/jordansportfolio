@@ -110,8 +110,6 @@ serve(async (req) => {
     description = sanitizeText(description || '');
     category = sanitizeText(category);
     
-    console.log(`🚀 Starting bulk image generation (context: ${context || 'unknown'})`);
-    
     // Auth validation
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -141,21 +139,16 @@ serve(async (req) => {
       });
     }
 
-    console.log(`📝 Processing post: ${postId} - "${title}"`);
-
     // PERFORMANCE IMPROVEMENT #1: Parallel processing with Promise.allSettled
     const generationPromises = ASPECT_RATIOS.map(async (aspectConfig): Promise<GenerationResult> => {
       const { ratio } = aspectConfig;
       
       try {
-        console.log(`🖼️ Starting ${ratio} generation...`);
-
         let finalPrompt: string;
         let promptUsage = { estimated_cost: 0, total_tokens: 0 };
 
         // Use provided prompt if available, otherwise generate new one
         if (prompt) {
-          console.log(`📦 Using provided prompt for ${ratio} (${context || 'unknown'} context)`);
           finalPrompt = prompt;
         } else {
           // Step 1: Generate prompt (parallel execution)
@@ -184,23 +177,8 @@ serve(async (req) => {
           }
         });
 
-        console.log(`🔍 DEBUG: Image generation response for ${ratio}:`, {
-          error: imageResponse.error,
-          status: imageResponse.status,
-          data: imageResponse.data ? 'present' : 'missing'
-        });
-
         if (imageResponse.error) {
-          // Get the actual error response body
-          let errorDetails = 'Unknown error';
-          try {
-            const errorResponse = await imageResponse.error.context?.text?.();
-            errorDetails = errorResponse || imageResponse.error.message;
-            console.log(`❌ DEBUG: Detailed error for ${ratio}:`, errorDetails);
-          } catch (e) {
-            console.log(`❌ DEBUG: Could not parse error details for ${ratio}:`, imageResponse.error);
-          }
-          throw new Error(`Image generation failed: ${errorDetails}`);
+          throw new Error(`Image generation failed: ${imageResponse.error.message}`);
         }
 
         const base64Image = imageResponse.data?.image;
@@ -240,8 +218,6 @@ serve(async (req) => {
           .from('social-media-images')
           .getPublicUrl(fileName);
 
-        console.log(`✅ Successfully generated ${ratio}`);
-
         return {
           aspectRatio: ratio,
           url: publicUrl,
@@ -253,7 +229,6 @@ serve(async (req) => {
         };
 
       } catch (error) {
-        console.error(`❌ Error processing ${ratio}:`, error);
         return {
           aspectRatio: ratio,
           success: false,
@@ -287,8 +262,6 @@ serve(async (req) => {
 
     // PERFORMANCE IMPROVEMENT #4: Batch database updates
     if (successfulResults.length > 0) {
-      console.log(`💾 Batch updating database with ${successfulResults.length} images...`);
-      
       // Build update object for all successful results
       const updateData: Record<string, any> = {
         generated_image_prompt: successfulResults[0]?.prompt || null
@@ -308,10 +281,7 @@ serve(async (req) => {
         .eq('id', postId);
 
       if (updateError) {
-        console.error('❌ Database update failed:', updateError);
         // Don't fail the entire operation for DB update issues
-      } else {
-        console.log('✅ Database updated successfully');
       }
     }
 
@@ -340,7 +310,7 @@ serve(async (req) => {
             }
           });
       } catch (error) {
-        console.error('⚠️ API usage tracking failed:', error);
+        // API usage tracking failed
       }
 
       // Trigger background processing
@@ -354,7 +324,7 @@ serve(async (req) => {
             }
           });
         } catch (error) {
-          console.error('⚠️ Background processing failed:', error);
+          // Background processing failed
         }
       }
     };
@@ -367,9 +337,8 @@ serve(async (req) => {
     }
 
     const processingTime = Date.now() - startTime;
-    console.log(`🎉 Bulk image generation complete! Generated ${successfulResults.length}/${ASPECT_RATIOS.length} images in ${processingTime}ms (${context || 'unknown'} context)`);
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
       results: successfulResults,
       failures: failedResults,
@@ -384,8 +353,7 @@ serve(async (req) => {
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    console.error('❌ Bulk image generation error:', error);
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       error: error instanceof Error ? error.message : 'Unknown error',
       processingTimeMs: processingTime
     }), {
