@@ -83,15 +83,17 @@ export const GenerateSystemPromptButton = ({
           throw fetchError;
         }
 
-        // Update or add the new prompt for this category
+        // Update or add the new prompt for this category while preserving others
         const existingPrompts = Array.isArray(currentAgent.system_prompts) 
           ? currentAgent.system_prompts as any[]
           : [];
-        const updatedPrompts = existingPrompts.filter((p: any) => p.category !== category);
-        updatedPrompts.push({
+        
+        // Remove any existing prompt for this category and add the new one
+        const filteredPrompts = existingPrompts.filter((p: any) => p.category !== category);
+        const updatedPrompts = [...filteredPrompts, {
           category,
           prompt: data.system_prompt
-        });
+        }];
 
         // Update supported categories if needed
         const currentCategories = Array.isArray(currentAgent.supported_categories)
