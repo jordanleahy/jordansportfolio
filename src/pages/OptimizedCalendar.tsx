@@ -11,7 +11,8 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
 // Removed complex realtime debugging system
-import { Trash2 } from 'lucide-react';
+import { Trash2, Palette } from 'lucide-react';
+import { ColorThemeManager } from '@/components/calendar/ColorThemeManager';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,9 +133,17 @@ export default function OptimizedCalendar() {
                     <div className="text-sm text-muted-foreground">Total Posts</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
-                    <div className="text-sm text-muted-foreground">Active Themes</div>
-                  </div>
+                     <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
+                     <div className="text-sm text-muted-foreground">Active Themes</div>
+                   </div>
+                   <div className="text-center">
+                     <ColorThemeManager trigger={
+                       <Button variant="outline" size="sm">
+                         <Palette className="h-4 w-4 mr-2" />
+                         Themes
+                       </Button>
+                     } />
+                   </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">{activeTabPosts.length}</div>
                       <div className="text-sm text-muted-foreground">Current Theme</div>

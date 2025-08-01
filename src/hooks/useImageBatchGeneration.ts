@@ -143,12 +143,24 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
       return cachedPrompt;
     }
     
+    // Get color theme if available from the request
+    let colorTheme = null;
+    if (request.colorThemeId) {
+      const { data: themeData } = await supabase
+        .from('color_themes')
+        .select('*')
+        .eq('id', request.colorThemeId)
+        .single();
+      colorTheme = themeData;
+    }
+
     // Generate new prompt
     const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: { 
         title: request.title, 
         description: request.description, 
-        category: request.category 
+        category: request.category,
+        colorTheme
       }
     });
 

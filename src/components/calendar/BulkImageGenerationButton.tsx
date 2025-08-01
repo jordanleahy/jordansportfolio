@@ -37,7 +37,8 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         title: post.title,
         description: post.description,
         category: post.category,
-        context: 'table'
+        context: 'table',
+        colorThemeId: post.color_theme_id || undefined
       };
 
       const response = await generateAllImages(request);

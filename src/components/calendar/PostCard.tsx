@@ -15,6 +15,7 @@ import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
+import { useColorTheme } from '@/hooks/useColorThemes';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -57,6 +58,7 @@ const PostCardComponent = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  const { data: colorTheme } = useColorTheme(post.color_theme_id || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -122,6 +124,17 @@ const PostCardComponent = ({
                 </Badge>
               )}
               <BlogStatusBadge postId={post.id} />
+              {colorTheme && (
+                <Badge variant="outline" className="text-xs" title={`Theme: ${colorTheme.name}`}>
+                  <div className="flex items-center gap-1">
+                    <div 
+                      className="w-2 h-2 rounded-full border border-border" 
+                      style={{ backgroundColor: colorTheme.primary_color }}
+                    />
+                    {colorTheme.name}
+                  </div>
+                </Badge>
+              )}
             </div>
           </div>
           <div className="flex gap-1">

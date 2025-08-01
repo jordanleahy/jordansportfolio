@@ -28,6 +28,7 @@ export interface BulkImageGenerationRequest {
   description: string;
   category?: string;
   context?: BulkGenerationMode;
+  colorThemeId?: string;
 }
 
 export interface BulkImageGenerationResponse {

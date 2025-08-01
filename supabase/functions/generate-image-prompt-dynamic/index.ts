@@ -74,14 +74,14 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, category } = await req.json();
+    const { title, description, category, colorTheme } = await req.json();
 
     if (!title || !description || !category) {
       throw new Error('Missing required fields: title, description, and category are required');
     }
 
     // Store request metadata
-    requestMetadata = { category, title, description };
+    requestMetadata = { category, title, description, colorTheme };
 
     // Initialize Supabase client
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
@@ -122,10 +122,27 @@ serve(async (req) => {
       }
     }
 
-    const userMessage = `Generate an image prompt for:
+    // Build user message with color theme information
+    let userMessage = `Generate an image prompt for:
 Title: ${title}
 Description: ${description}
 Category: ${category}`;
+
+    // Add color theme instructions if provided
+    if (colorTheme) {
+      userMessage += `
+
+Color Theme Instructions:
+- Primary Color: ${colorTheme.primary_color}
+- Secondary Color: ${colorTheme.secondary_color}
+- Accent Color: ${colorTheme.accent_color}
+- Background Color: ${colorTheme.background_color}
+- Text Color: ${colorTheme.text_color}
+- Visual Style: ${colorTheme.visual_style}
+- Color Instructions: ${colorTheme.color_instructions}
+
+Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
+    }
 
     // Call OpenAI directly with the agent's system prompt
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
