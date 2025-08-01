@@ -109,10 +109,10 @@ export const SystemPromptsTab = ({
                         <GenerateSystemPromptButton
                           agentId={agentId}
                           category={category}
-                          onSuccess={() => {
-                            // Force a page refresh to show the updated prompt
-                            window.location.reload();
-                          }}
+                        onSuccess={() => {
+                          // Realtime subscription will automatically update the UI
+                          console.log('System prompt generated successfully');
+                        }}
                         />
                       )}
                       {existingPrompt && (
