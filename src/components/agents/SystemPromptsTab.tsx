@@ -106,7 +106,8 @@ export const SystemPromptsTab = ({
                         agentId={agentId}
                         category={prompt.category}
                         onSuccess={() => {
-                          // The component will re-render when the agent data is updated
+                          // Force a page refresh to show the updated prompt
+                          window.location.reload();
                         }}
                       />
                     )}

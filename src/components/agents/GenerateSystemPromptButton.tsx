@@ -70,15 +70,42 @@ export const GenerateSystemPromptButton = ({
         
         // Update the agent with the new system prompt
         console.log('Updating agent with new system prompt...');
+        
+        // Get current agent data first to preserve existing prompts for other categories
+        const { data: currentAgent, error: fetchError } = await supabase
+          .from('openai_agents')
+          .select('system_prompts, supported_categories')
+          .eq('id', agentId)
+          .single();
+
+        if (fetchError) {
+          console.error('Error fetching current agent:', fetchError);
+          throw fetchError;
+        }
+
+        // Update or add the new prompt for this category
+        const existingPrompts = Array.isArray(currentAgent.system_prompts) 
+          ? currentAgent.system_prompts as any[]
+          : [];
+        const updatedPrompts = existingPrompts.filter((p: any) => p.category !== category);
+        updatedPrompts.push({
+          category,
+          prompt: data.system_prompt
+        });
+
+        // Update supported categories if needed
+        const currentCategories = Array.isArray(currentAgent.supported_categories)
+          ? currentAgent.supported_categories as string[]
+          : [];
+        const updatedCategories = currentCategories.includes(category) 
+          ? currentCategories 
+          : [...currentCategories, category];
+
         const { error: updateError } = await supabase
           .from('openai_agents')
           .update({
-            system_prompts: [
-              {
-                category,
-                prompt: data.system_prompt
-              }
-            ],
+            system_prompts: updatedPrompts,
+            supported_categories: updatedCategories,
             last_run: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
