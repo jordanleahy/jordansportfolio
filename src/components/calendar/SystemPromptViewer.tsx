@@ -150,28 +150,6 @@ export const SystemPromptViewer = ({
         </div>
       ) : isEditing ? (
         <div className="space-y-4">
-          {/* Toggle buttons for editor vs diff view */}
-          {hasChanges && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant={showDiff ? "outline" : "default"}
-                size="sm"
-                onClick={() => setShowDiff(false)}
-              >
-                <Edit3 className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-              <Button
-                variant={showDiff ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowDiff(true)}
-              >
-                <GitCompare className="h-4 w-4 mr-1" />
-                Preview Changes
-              </Button>
-            </div>
-          )}
-          
           {/* Content based on view mode */}
           {showDiff && hasChanges ? (
             <DiffView />
@@ -225,6 +203,24 @@ export const SystemPromptViewer = ({
               <Button variant="outline" size="sm" onClick={handleCancel}>
                 <X className="h-4 w-4" />
               </Button>
+              {hasChanges && (
+                <>
+                  <Button
+                    variant={!showDiff ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setShowDiff(false)}
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={showDiff ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setShowDiff(true)}
+                  >
+                    <GitCompare className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
               <Button 
                 variant="default" 
                 size="sm" 
