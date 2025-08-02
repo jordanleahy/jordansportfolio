@@ -11,6 +11,7 @@ import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 import { diffLines } from 'diff';
 import { stripMarkdownFormatting } from '@/utils/markdownUtils';
+import { ColorEnhancedText } from '@/components/ui/color-enhanced-text';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -166,8 +167,15 @@ export const SystemPromptViewer = ({
         </div>
       ) : (
         <div className="max-h-[60vh] overflow-auto">
-          <div className="whitespace-pre-wrap text-sm leading-relaxed border rounded-md p-4 bg-muted/30 h-full">
-            {promptData?.prompt ? stripMarkdownFormatting(promptData.prompt) : 'No system prompt found for this category'}
+          <div className="border rounded-md p-4 bg-muted/30 h-full">
+            {promptData?.prompt ? (
+              <ColorEnhancedText 
+                text={stripMarkdownFormatting(promptData.prompt)} 
+                className="text-sm leading-relaxed"
+              />
+            ) : (
+              <div className="text-sm leading-relaxed">No system prompt found for this category</div>
+            )}
           </div>
         </div>
       )}
