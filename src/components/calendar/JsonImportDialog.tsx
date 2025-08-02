@@ -8,6 +8,7 @@ import { Upload, FileText, Eye, Download, Copy } from 'lucide-react';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface JsonImportDialogProps {
   onImportComplete: () => void;
@@ -88,12 +89,57 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     
     setIsLoading(true);
     try {
+      // First, check if this is a new category by looking for existing posts
+      const { data: existingPosts } = await supabase
+        .from('social_media_posts')
+        .select('id')
+        .eq('category', previewData.category)
+        .limit(1);
+      
+      const isNewCategory = !existingPosts || existingPosts.length === 0;
+      
+      // Import the posts
       await optimizedSocialMediaService.bulkImportPosts(previewData.category, previewData.posts);
       
-      toast({
-        title: "Import Successful",
-        description: `Imported ${previewData.posts.length} posts to ${previewData.category} category.`,
-      });
+      // If this is a new category, invoke the system prompt agent
+      if (isNewCategory) {
+        console.log(`New category detected: ${previewData.category}. Invoking system prompt agent...`);
+        
+        try {
+          const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+            body: {
+              category: previewData.category,
+              user_id: (await supabase.auth.getUser()).data.user?.id
+            }
+          });
+          
+          if (invokeError) {
+            console.error('Error invoking system prompt agent:', invokeError);
+            toast({
+              title: "System Prompt Warning",
+              description: `Posts imported successfully, but failed to generate system prompt for category "${previewData.category}".`,
+              variant: "default",
+            });
+          } else {
+            console.log('System prompt agent invoked successfully:', invokeData);
+            toast({
+              title: "Import & Prompt Generation Successful",
+              description: `Imported ${previewData.posts.length} posts and generated system prompt for new category "${previewData.category}".`,
+            });
+          }
+        } catch (promptError) {
+          console.error('System prompt generation error:', promptError);
+          toast({
+            title: "Import Successful",
+            description: `Imported ${previewData.posts.length} posts to ${previewData.category} category. System prompt will be generated separately.`,
+          });
+        }
+      } else {
+        toast({
+          title: "Import Successful",
+          description: `Imported ${previewData.posts.length} posts to existing ${previewData.category} category.`,
+        });
+      }
       
       setOpen(false);
       setJsonInput('');
