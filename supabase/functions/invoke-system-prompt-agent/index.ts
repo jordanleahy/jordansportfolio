@@ -10,19 +10,17 @@ const AGENT_NAMES = {
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
 } as const;
 
-// Target agent mapping for different categories
-const CATEGORY_TO_TARGET_AGENT = {
-  'vibe-coding': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'healthcare': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'contracts': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'design': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'coding ai': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'ai agents': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'product_manager': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'product_designer': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
-  'blog_content': AGENT_NAMES.BLOG_CONTENT_GENERATOR,
-  'cover_letter': AGENT_NAMES.COVER_LETTER_GENERATOR,
-} as const;
+// Dynamic target agent assignment - defaults to Visual Prompt Generator for visual content
+const getTargetAgentName = (category: string): string => {
+  // Specific mappings for special categories
+  const specificMappings: { [key: string]: string } = {
+    'blog_content': AGENT_NAMES.BLOG_CONTENT_GENERATOR,
+    'cover_letter': AGENT_NAMES.COVER_LETTER_GENERATOR,
+  };
+  
+  // Return specific mapping if exists, otherwise default to Visual Prompt Generator
+  return specificMappings[category] || AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
+};
 
 const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
@@ -30,7 +28,7 @@ const SYSTEM_PROMPT_CATEGORIES = {
 
 const OPENAI_CONFIG = {
   DEFAULT_TEMPERATURE: 0.1,
-  DEFAULT_MODEL: 'gpt-4o-mini',
+  DEFAULT_MODEL: 'gpt-4.1-2025-04-14',
 } as const;
 
 const HTTP_STATUS = {
@@ -58,147 +56,34 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-// Color theme replacement function - enhanced to add color info if missing
-function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
-  console.log('🎨 COLOR REPLACEMENT: Starting variable replacement');
-  console.log('🔍 INPUT THEME:', {
-    name: colorTheme.name,
-    primary: colorTheme.primary_color,
-    secondary: colorTheme.secondary_color,
-    accent: colorTheme.accent_color
-  });
-  
-  let updatedPrompt = prompt;
-  let changesMade = false;
-  
-  // Simple bullet-point color palette format
-  const newColorPalette = `## 🌈 Color Palette
-- Primary: ${colorTheme.primary_color}
-- Secondary: ${colorTheme.secondary_color}
-- Accent: ${colorTheme.accent_color}
-- Supporting: ${colorTheme.text_color}
-- Background: ${colorTheme.background_color}
-- Border: ${colorTheme.border_color}
+// Helper function to get default color theme from database
+async function getDefaultColorTheme(supabase: any): Promise<any> {
+  const { data, error } = await supabase
+    .from('color_themes')
+    .select('*')
+    .eq('is_default', true)
+    .eq('is_system', true)
+    .single();
 
-**Theme**: ${colorTheme.name}
+  if (error) {
+    console.log('No default color theme found, using fallback colors');
+    // Return fallback default colors
+    return {
+      name: 'Professional Blue',
+      primary_color: '#2563eb',
+      secondary_color: '#0891b2',
+      accent_color: '#16a34a',
+      text_color: '#64748b',
+      background_color: '#f8fafc',
+      border_color: '#e5e7eb',
+      visual_style: 'Clean, modern professional design',
+      color_instructions: 'Use primary colors for main subjects, secondary for supporting elements, accent for highlights'
+    };
+  }
 
-`;
-
-  // Find and replace existing color palette section (both table and bullet formats)
-  const colorSectionRegex = /## 🌈 Color Palette[\s\S]*?(?=##|$)/;
-  if (colorSectionRegex.test(updatedPrompt)) {
-    updatedPrompt = updatedPrompt.replace(colorSectionRegex, newColorPalette);
-    console.log('✅ COLOR PALETTE: Replaced existing color palette section');
-    changesMade = true;
-  } else {
-    // Add color palette section if none exists - insert after any existing ## section
-    const afterHeaderRegex = /(##[^#].*?\n)/;
-    if (afterHeaderRegex.test(updatedPrompt)) {
-      updatedPrompt = updatedPrompt.replace(afterHeaderRegex, `$1\n${newColorPalette}`);
-      console.log('✅ COLOR PALETTE: Added new color palette section');
-      changesMade = true;
-    } else {
-      // If no headers exist, prepend the color palette
-      updatedPrompt = newColorPalette + updatedPrompt;
-      console.log('✅ COLOR PALETTE: Prepended color palette to prompt');
-      changesMade = true;
-    }
-  }
-  
-  // Replace color instructions references
-  const colorInstructionsRegex = /(Color Instructions|color instructions):\s*[^\n]*/gi;
-  if (colorInstructionsRegex.test(updatedPrompt)) {
-    updatedPrompt = updatedPrompt.replace(colorInstructionsRegex, `Color Instructions: ${colorTheme.color_instructions}`);
-    console.log('✅ COLOR INSTRUCTIONS: Updated color instructions');
-    changesMade = true;
-  }
-  
-  // Replace visual style references
-  const visualStyleRegex = /(Visual Style|visual style):\s*[^\n]*/gi;
-  if (visualStyleRegex.test(updatedPrompt)) {
-    updatedPrompt = updatedPrompt.replace(visualStyleRegex, `Visual Style: ${colorTheme.visual_style}`);
-    console.log('✅ VISUAL STYLE: Updated visual style');
-    changesMade = true;
-  }
-  
-  // Replace theme name references - be more aggressive about theme name updates
-  const themeNamePatterns = [
-    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+theme/gi,
-    /([A-Z][a-z]+(?:\s+&\s+[A-Z][a-z]+)*)\s+color/gi,
-    /(Default|Professional|Standard|Basic)\s+(theme|color)/gi
-  ];
-  
-  themeNamePatterns.forEach(pattern => {
-    if (pattern.test(updatedPrompt)) {
-      updatedPrompt = updatedPrompt.replace(pattern, `${colorTheme.name} theme`);
-      changesMade = true;
-    }
-  });
-  console.log('✅ THEME NAME: Updated theme name references');
-  
-  // Replace hex color codes with new ones - more comprehensive matching
-  const hexPatterns = [
-    { old: /#2563eb/gi, new: colorTheme.primary_color },
-    { old: /#0891b2/gi, new: colorTheme.secondary_color },
-    { old: /#16a34a/gi, new: colorTheme.accent_color },
-    { old: /#64748b/gi, new: colorTheme.text_color },
-    { old: /#f8fafc/gi, new: colorTheme.background_color },
-    { old: /#e5e7eb/gi, new: colorTheme.border_color },
-    { old: /#1e40af/gi, new: colorTheme.primary_color },
-    { old: /#0e7490/gi, new: colorTheme.secondary_color },
-    { old: /#ea580c/gi, new: colorTheme.accent_color }
-  ];
-  
-  hexPatterns.forEach(({ old, new: newColor }) => {
-    if (old.test(updatedPrompt)) {
-      updatedPrompt = updatedPrompt.replace(old, newColor);
-      console.log(`✅ HEX REPLACEMENT: ${old.source} → ${newColor}`);
-      changesMade = true;
-    }
-  });
-  
-  // Force an update by adding theme signature if no other changes made
-  if (!changesMade) {
-    // Add a subtle theme signature to force an update
-    const themeSignature = `\n\n<!-- Theme: ${colorTheme.name} (${new Date().toISOString()}) -->`;
-    updatedPrompt += themeSignature;
-    changesMade = true;
-    console.log('🔄 FORCED UPDATE: Added theme signature to trigger update');
-  }
-  
-  console.log('🎨 COLOR REPLACEMENT COMPLETE:', {
-    original_length: prompt.length,
-    updated_length: updatedPrompt.length,
-    changes_made: changesMade
-  });
-  
-  return updatedPrompt;
+  return data;
 }
 
-// Helper function to get a descriptive name from hex color
-function getColorNameFromHex(hex: string): string {
-  const colorMap: { [key: string]: string } = {
-    '#000000': 'Pure Black',
-    '#ffffff': 'Pure White',
-    '#404040': 'Dark Gray',
-    '#666666': 'Medium Gray',
-    '#808080': 'Gray',
-    '#cccccc': 'Light Gray',
-    '#f0f0f0': 'Off White',
-    '#2563eb': 'Professional Blue',
-    '#0891b2': 'Trustworthy Teal',
-    '#16a34a': 'Success Green',
-    '#64748b': 'Clean Gray',
-    '#f8fafc': 'Soft White',
-    '#e5e7eb': 'Light Gray',
-    '#1f2937': 'Charcoal',
-    '#1e40af': 'Authority Navy',
-    '#0e7490': 'Reliable Cyan',
-    '#ea580c': 'Highlight Orange'
-  };
-  
-  return colorMap[hex.toLowerCase()] || 'Custom Color';
-}
 
 serve(async (req) => {
   console.log('invoke-system-prompt-agent function called');
@@ -210,7 +95,7 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id, color_theme } = requestBody;
+    const { category, theme, description, sample_posts, user_id } = requestBody;
     
     // Input validation
     if (!category || !user_id) {
@@ -235,123 +120,20 @@ serve(async (req) => {
       });
     }
 
-// Create Supabase client
+    // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    console.log('🎨 THEME UPDATE: Starting variable-based color replacement');
-    console.log('📝 INPUT DATA:', {
-      category,
-      user_id,
-      has_color_theme: !!color_theme,
-      theme_name: color_theme?.name,
-      theme_colors: color_theme ? {
-        primary: color_theme.primary_color,
-        secondary: color_theme.secondary_color,
-        accent: color_theme.accent_color
-      } : null
+    // Get default color theme to include in prompt generation
+    console.log('🎨 FETCHING DEFAULT COLOR THEME: For enhanced prompt generation');
+    const defaultColorTheme = await getDefaultColorTheme(supabase);
+    console.log('✅ DEFAULT COLORS LOADED:', {
+      theme_name: defaultColorTheme.name,
+      primary: defaultColorTheme.primary_color,
+      secondary: defaultColorTheme.secondary_color,
+      accent: defaultColorTheme.accent_color
     });
 
-    // If color_theme is provided, do variable-based replacement
-    if (color_theme) {
-      console.log('🔄 REPLACEMENT MODE: Using targeted color replacement instead of full regeneration');
-      
-      // Get all agents with system prompts that might need updating
-      const { data: agents, error: agentsError } = await supabase
-        .from('openai_agents')
-        .select('*')
-        .eq('user_id', user_id)
-        .not('system_prompts', 'is', null);
-
-      if (agentsError) {
-        console.error('❌ ERROR: Failed to fetch agents:', agentsError);
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: 'Failed to fetch agents for color theme update' 
-        }), {
-          status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        });
-      }
-
-      console.log(`🔍 AGENTS FOUND: ${agents?.length || 0} agents with system prompts`);
-
-      // Find agents that have prompts for the specified category
-      const updatedAgents = [];
-      
-      for (const agent of agents || []) {
-        const systemPrompts = agent.system_prompts || [];
-        let hasUpdates = false;
-        
-        const updatedPrompts = systemPrompts.map((promptObj: any) => {
-          if (promptObj.category === category) {
-            console.log(`🎯 UPDATING: Agent "${agent.name}" prompt for category "${category}"`);
-            
-            const originalPrompt = promptObj.prompt;
-            const updatedPrompt = replaceColorThemeVariables(originalPrompt, color_theme);
-            
-            console.log('📊 REPLACEMENT STATS:', {
-              agent_name: agent.name,
-              category: promptObj.category,
-              original_length: originalPrompt.length,
-              updated_length: updatedPrompt.length,
-              has_changes: originalPrompt !== updatedPrompt
-            });
-            
-            if (originalPrompt !== updatedPrompt) {
-              hasUpdates = true;
-              console.log('✅ COLOR REPLACEMENT: Successfully updated colors in system prompt');
-            } else {
-              console.log('⚠️  NO CHANGES: No color palette found to replace in this prompt');
-            }
-            
-            return {
-              ...promptObj,
-              prompt: updatedPrompt
-            };
-          }
-          return promptObj;
-        });
-
-        if (hasUpdates) {
-          // Update the agent with the new system prompts
-          const { error: updateError } = await supabase
-            .from('openai_agents')
-            .update({ 
-              system_prompts: updatedPrompts,
-              last_run: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', agent.id);
-
-          if (updateError) {
-            console.error('❌ DATABASE UPDATE ERROR:', updateError);
-          } else {
-            console.log(`✅ DATABASE UPDATE: Successfully updated agent "${agent.name}"`);
-            updatedAgents.push(agent.name);
-          }
-        }
-      }
-
-      console.log('🎉 THEME UPDATE COMPLETE:', {
-        total_agents_checked: agents?.length || 0,
-        agents_updated: updatedAgents.length,
-        updated_agent_names: updatedAgents,
-        theme_applied: color_theme.name
-      });
-
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: `Color theme "${color_theme.name}" applied successfully`,
-        agents_updated: updatedAgents.length,
-        updated_agents: updatedAgents,
-        category: category
-      }), {
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Original OpenAI generation logic (for non-color-theme updates)
-    console.log('🤖 AI GENERATION MODE: Using OpenAI for full prompt generation');
+    console.log('🤖 AI GENERATION MODE: Using OpenAI with default color theme integration');
     
     // Get the System Prompt Generator agent for this user
     const { data: agent, error: agentError } = await supabase
@@ -390,16 +172,27 @@ serve(async (req) => {
 
     const systemPrompt = systemPromptObj.prompt;
 
-    // Prepare the user prompt with the category and context
+    // Prepare the user prompt with the category, context, and default colors
     let userPrompt = `Create a comprehensive system prompt for the "${category}" category.
 
 Theme: ${theme || 'General'}
 Description: ${description || 'No description provided'}
 
+Default Color Palette to Include:
+- Primary: ${defaultColorTheme.primary_color} (${defaultColorTheme.name} theme)
+- Secondary: ${defaultColorTheme.secondary_color}
+- Accent: ${defaultColorTheme.accent_color}
+- Text: ${defaultColorTheme.text_color}
+- Background: ${defaultColorTheme.background_color}
+- Border: ${defaultColorTheme.border_color}
+
+Visual Style: ${defaultColorTheme.visual_style}
+Color Usage: ${defaultColorTheme.color_instructions}
+
 Sample content from this category:
 ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
 
-Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, color palettes, and content analysis guidelines.`;
+Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, the provided color palette, and content analysis guidelines. Include the color palette in the standard format with the exact hex values provided above.`;
 
     console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
 
@@ -492,7 +285,7 @@ Please generate a detailed, professional system prompt following the established
       });
 
       // 🎯 Step 2: Find the target agent and add prompt to its system_prompts array
-      const targetAgentName = CATEGORY_TO_TARGET_AGENT[category as keyof typeof CATEGORY_TO_TARGET_AGENT];
+      const targetAgentName = getTargetAgentName(category);
       
       if (targetAgentName) {
         console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${category}"`);
@@ -513,7 +306,9 @@ Please generate a detailed, professional system prompt following the established
         } else {
           console.log('✅ TARGET AGENT FOUND:', {
             agent_name: targetAgent.name,
-            agent_id: targetAgent.id
+            agent_id: targetAgent.id,
+            category: category,
+            dynamic_assignment: !(['blog_content', 'cover_letter'].includes(category))
           });
 
           // Add the new prompt to the target agent's system_prompts array
@@ -573,7 +368,7 @@ Please generate a detailed, professional system prompt following the established
           }
         }
       } else {
-        console.log(`⚠️  NO TARGET MAPPING: No target agent defined for category "${category}"`);
+        console.log(`⚠️  NO TARGET AGENT: Failed to get target agent for category "${category}"`);
       }
 
       // 🔄 Step 3: Update the generator agent's last_run timestamp
