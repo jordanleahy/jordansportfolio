@@ -248,9 +248,11 @@ export const SystemPromptViewer = ({
             )}
             
             {/* Desktop actions - always show persistent save button */}
-            <Button variant="outline" size="sm" onClick={handleCancel}>
-              <X className="h-4 w-4" />
-            </Button>
+            {isMobile && (
+              <Button variant="outline" size="sm" onClick={handleCancel}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant={!showDiff ? "default" : "outline"}
               size="icon"
