@@ -389,7 +389,9 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
       <div className={`transition-all duration-300 ${showSystemPrompt ? 'w-2/3' : 'w-full'}`}>
         <Card className="h-full">
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Social Media Posts</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {category ? category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-') : 'Social Media Posts'}
+            </h2>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "draft" | "published")}>
           <div className="flex items-center justify-between mb-4">
