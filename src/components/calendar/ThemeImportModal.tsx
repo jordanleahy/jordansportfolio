@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,8 @@ import { themeImportService } from '@/services/themeImportService';
 import type { ProcessingResult } from '@/types/themeImport';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 interface ThemeImportModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
 
   const processMutation = useMutation({
     mutationFn: async (data: string) => {
@@ -210,14 +212,29 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
         <div className="space-y-4">
           <div>
             <Label htmlFor="json-input">JSON Data</Label>
-            <Textarea
-              id="json-input"
-              placeholder={`Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`}
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              rows={12}
-              className="font-mono text-sm"
-            />
+            <div className="border border-input rounded-md overflow-hidden">
+              <Editor
+                height="300px"
+                defaultLanguage="json"
+                value={jsonInput}
+                onChange={(value) => setJsonInput(value || '')}
+                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: 'on',
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  folding: true,
+                  lineDecorationsWidth: 10,
+                  lineNumbersMinChars: 3,
+                  padding: { top: 12, bottom: 12 },
+                  contextmenu: false,
+                  placeholder: `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex gap-2 flex-wrap">

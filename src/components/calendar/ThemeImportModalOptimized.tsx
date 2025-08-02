@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,8 @@ import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'luci
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 interface ThemeImportModalOptimizedProps {
   open: boolean;
@@ -25,6 +26,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const { toast } = useToast();
+  const { theme } = useTheme();
   
   const {
     state,
@@ -188,15 +190,30 @@ AVOID:
           {/* JSON Input */}
           <div>
             <Label htmlFor="json-input">JSON Data</Label>
-            <Textarea
-              id="json-input"
-              placeholder={placeholderText}
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              rows={12}
-              className="font-mono text-sm"
-              disabled={isProcessing}
-            />
+            <div className="border border-input rounded-md overflow-hidden">
+              <Editor
+                height="300px"
+                defaultLanguage="json"
+                value={jsonInput}
+                onChange={(value) => setJsonInput(value || '')}
+                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: 'on',
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  folding: true,
+                  lineDecorationsWidth: 10,
+                  lineNumbersMinChars: 3,
+                  padding: { top: 12, bottom: 12 },
+                  contextmenu: false,
+                  placeholder: placeholderText,
+                  readOnly: isProcessing
+                }}
+              />
+            </div>
           </div>
 
           {/* Action Buttons */}

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Edit3, Save, X, Eye, Sparkles, Trash2, RefreshCw } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,6 +11,8 @@ import { connectionPoolManager } from '@/services/realtime/RealtimeConnectionPoo
 import { realtimeEventBus } from '@/services/realtime/RealtimeEventBus';
 import { useDebouncedCallback } from 'use-debounce';
 import * as Diff from 'diff';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -34,6 +35,7 @@ export const SystemPromptViewer = ({
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const { theme } = useTheme();
   
   // Refs for cleanup
   const componentId = useRef(`system-prompt-viewer-${Date.now()}`);
@@ -376,12 +378,29 @@ export const SystemPromptViewer = ({
           <div className="text-muted-foreground">Loading system prompt...</div>
         </div>
       ) : isEditing ? (
-        <Textarea 
-          value={editedPrompt} 
-          onChange={(e) => setEditedPrompt(e.target.value)} 
-          className="h-full min-h-96 resize-none font-mono text-sm" 
-          placeholder="Enter system prompt..." 
-        />
+        <div className="border border-input rounded-md overflow-hidden">
+          <Editor
+            height="400px"
+            defaultLanguage="markdown"
+            value={editedPrompt}
+            onChange={(value) => setEditedPrompt(value || '')}
+            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              wordWrap: 'on',
+              automaticLayout: true,
+              scrollBeyondLastLine: false,
+              folding: false,
+              lineDecorationsWidth: 10,
+              lineNumbersMinChars: 3,
+              padding: { top: 12, bottom: 12 },
+              contextmenu: false,
+              placeholder: 'Enter system prompt...'
+            }}
+          />
+        </div>
       ) : (
         <div className="max-h-[60vh] overflow-auto">
           {renderedPrompt}

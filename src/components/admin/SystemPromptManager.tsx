@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { Brain, Edit, Eye, TrendingUp, Clock, Target } from 'lucide-react';
 import type { OpenAIAgent, SystemPrompt } from '@/types/openaiAgent';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 export const SystemPromptManager = () => {
   const { data: agents, isLoading: loading } = useOpenAIAgents();
   const [selectedAgent, setSelectedAgent] = useState<OpenAIAgent | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<SystemPrompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
+  const { theme } = useTheme();
 
   const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
 
@@ -89,11 +91,28 @@ export const SystemPromptManager = () => {
                     
                     <div>
                       <Label className="text-sm font-medium">System Prompt</Label>
-                      <Textarea 
-                        value={prompt.prompt} 
-                        readOnly
-                        className="mt-2 min-h-[200px] font-mono text-sm"
-                      />
+                      <div className="mt-2 border border-input rounded-md overflow-hidden">
+                        <Editor
+                          height="200px"
+                          defaultLanguage="markdown"
+                          value={prompt.prompt}
+                          theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                          options={{
+                            readOnly: true,
+                            minimap: { enabled: false },
+                            fontSize: 14,
+                            lineNumbers: 'on',
+                            wordWrap: 'on',
+                            automaticLayout: true,
+                            scrollBeyondLastLine: false,
+                            folding: false,
+                            lineDecorationsWidth: 10,
+                            lineNumbersMinChars: 3,
+                            padding: { top: 12, bottom: 12 },
+                            contextmenu: false
+                          }}
+                        />
+                      </div>
                     </div>
                     
                     <div className="flex items-center justify-between pt-4 border-t">
