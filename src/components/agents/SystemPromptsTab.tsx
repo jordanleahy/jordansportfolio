@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
+import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
+import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
@@ -23,6 +25,44 @@ export const SystemPromptsTab = ({
   supportedCategories, 
   onChange 
 }: SystemPromptsTabProps) => {
+  const [databasePrompts, setDatabasePrompts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Set up realtime updates for system prompts
+  useRealtimeSystemPrompts({
+    enabled: !!agentId,
+    onPromptUpdated: () => {
+      if (agentId) {
+        fetchDatabasePrompts();
+      }
+    }
+  });
+
+  // Fetch system prompts from database
+  const fetchDatabasePrompts = async () => {
+    if (!agentId) return;
+    
+    setLoading(true);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase
+        .from('system_prompts')
+        .select('*')
+        .eq('agent_id', agentId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setDatabasePrompts(data || []);
+    } catch (error) {
+      console.error('Error fetching system prompts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDatabasePrompts();
+  }, [agentId]);
 
   const updatePrompt = (index: number, prompt: string) => {
     const newPrompts = [...systemPrompts];
@@ -87,66 +127,122 @@ export const SystemPromptsTab = ({
           </div>
         </div>
 
-        {/* Category System Prompts */}
+        {/* Database System Prompts */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium">Category-Specific Prompts</h4>
-          {supportedCategories.length > 0 ? (
-            supportedCategories.map((category) => {
-              const existingPrompt = systemPrompts.find(p => p.category === category);
-              const promptIndex = systemPrompts.findIndex(p => p.category === category);
-              
-              return (
-                <div key={category} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="space-y-1">
-                      <span className="text-sm font-medium text-muted-foreground">Category:</span>
-                      <Badge variant="outline" className="w-48 justify-start">
-                        {getCategoryLabel(category)}
+          <h4 className="text-sm font-medium">Database System Prompts</h4>
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Loading system prompts...</div>
+          ) : databasePrompts.length > 0 ? (
+            databasePrompts.map((dbPrompt) => (
+              <div key={dbPrompt.id} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{dbPrompt.name}</span>
+                      <Badge variant="outline">
+                        {getCategoryLabel(dbPrompt.category)}
                       </Badge>
                     </div>
-                    <div className="flex gap-2">
-                      {agentId && (
-                        <GenerateSystemPromptButton
-                          agentId={agentId}
-                          category={category}
-                        onSuccess={() => {
-                          // Realtime subscription will automatically update the UI
-                          console.log('System prompt generated successfully');
-                        }}
-                        />
-                      )}
-                      {existingPrompt && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removePrompt(promptIndex)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                    <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
                   </div>
-                  
-                  {existingPrompt ? (
-                    <CategoryPromptEditor
-                      prompt={existingPrompt.prompt}
-                      onChange={(newPrompt) => updatePrompt(promptIndex, newPrompt)}
-                    />
-                  ) : (
-                    <div className="text-sm text-muted-foreground italic p-4 border-2 border-dashed rounded-md">
-                      No system prompt generated yet. Click "Generate Rich Prompt" to create one.
-                    </div>
-                  )}
+                  <div className="flex gap-2">
+                    {agentId && (
+                      <GenerateSystemPromptButton
+                        agentId={agentId}
+                        category={dbPrompt.category}
+                        onSuccess={() => {
+                          fetchDatabasePrompts();
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-              );
-            })
+                
+                <CategoryPromptEditor
+                  prompt={dbPrompt.prompt_text || ''}
+                  onChange={(newPrompt) => {
+                    // Update the database prompt directly
+                    const updateDatabasePrompt = async () => {
+                      try {
+                        const { supabase } = await import('@/integrations/supabase/client');
+                        const { error } = await supabase
+                          .from('system_prompts')
+                          .update({ prompt_text: newPrompt })
+                          .eq('id', dbPrompt.id);
+                        
+                        if (error) throw error;
+                        // Update local state
+                        setDatabasePrompts(prev => 
+                          prev.map(p => p.id === dbPrompt.id ? { ...p, prompt_text: newPrompt } : p)
+                        );
+                      } catch (error) {
+                        console.error('Error updating system prompt:', error);
+                      }
+                    };
+                    updateDatabasePrompt();
+                  }}
+                />
+              </div>
+            ))
           ) : (
-            <p className="text-sm text-muted-foreground">
-              No categories configured. Add supported categories to create system prompts.
-            </p>
+            <div className="text-sm text-muted-foreground italic p-4 border-2 border-dashed rounded-md">
+              No system prompts found in database. Use the "Generate Rich Prompt" button to create CDI template prompts.
+            </div>
           )}
         </div>
+
+        {/* Legacy System Prompts from Agent Configuration */}
+        {systemPrompts.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Legacy Agent System Prompts</h4>
+            {supportedCategories.length > 0 ? (
+              supportedCategories.map((category) => {
+                const existingPrompt = systemPrompts.find(p => p.category === category);
+                const promptIndex = systemPrompts.findIndex(p => p.category === category);
+                
+                return (
+                  <div key={category} className="border rounded-lg p-4 bg-muted/50">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="space-y-1">
+                        <span className="text-sm font-medium text-muted-foreground">Legacy Category:</span>
+                        <Badge variant="outline" className="w-48 justify-start">
+                          {getCategoryLabel(category)}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        {existingPrompt && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removePrompt(promptIndex)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {existingPrompt ? (
+                      <CategoryPromptEditor
+                        prompt={existingPrompt.prompt}
+                        onChange={(newPrompt) => updatePrompt(promptIndex, newPrompt)}
+                      />
+                    ) : (
+                      <div className="text-sm text-muted-foreground italic p-4 border-2 border-dashed rounded-md">
+                        No legacy prompt found.
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No legacy categories configured.
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
