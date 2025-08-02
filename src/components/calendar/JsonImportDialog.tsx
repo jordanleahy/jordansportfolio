@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, Eye, Download, Copy } from 'lucide-react';
-// Removed optimizedSocialMediaService import - now using unified edge function
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,66 +87,87 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     
     setIsLoading(true);
     try {
-      console.log(`🚀 UNIFIED IMPORT: Starting import for category "${previewData.category}"`);
+      // Check if posts exist for this category
+      const { data: existingPosts, error: postsQueryError } = await supabase
+        .from('social_media_posts')
+        .select('id')
+        .eq('category', previewData.category)
+        .limit(1);
       
-      // Use the new unified edge function
-      const { data: importResult, error: importError } = await supabase.functions.invoke(
-        'import-category-with-prompts',
-        {
-          body: {
-            data: {
-              category: previewData.category,
-              description: previewData.description,
-              posts: previewData.posts
+      if (postsQueryError) {
+        console.error('❌ POSTS QUERY ERROR:', postsQueryError);
+      }
+      
+      // Check if a system prompt exists for this category
+      const { data: existingSystemPrompts, error: promptsQueryError } = await supabase
+        .from('system_prompts')
+        .select('id')
+        .eq('category', previewData.category)
+        .limit(1);
+      
+      if (promptsQueryError) {
+        console.error('❌ SYSTEM PROMPTS QUERY ERROR:', promptsQueryError);
+      }
+      
+      const hasExistingPosts = existingPosts && existingPosts.length > 0;
+      const hasSystemPrompt = existingSystemPrompts && existingSystemPrompts.length > 0;
+      const needsSystemPrompt = !hasSystemPrompt;
+      
+      // Import the posts
+      await optimizedSocialMediaService.bulkImportPosts(previewData.category, previewData.posts);
+      
+      // Generate system prompt if one doesn't exist for this category
+      if (needsSystemPrompt) {
+        try {
+          const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+            body: {
+              category: 'system_prompt_generation', // Use the accepted category
+              theme: previewData.category, // Pass the actual category as theme
+              description: previewData.description || `Generated content for ${previewData.category} category`,
+              sample_posts: previewData.posts.slice(0, 3), // Send first 3 posts as samples
+              user_id: (await supabase.auth.getUser()).data.user?.id
             }
+          });
+
+          if (invokeError) {
+            console.error('❌ SYSTEM PROMPT GENERATION ERROR:', invokeError);
+            toast({
+              title: "Import Successful, System Prompt Failed",
+              description: `Imported ${previewData.posts.length} posts but failed to generate system prompt: ${invokeError.message}`,
+              variant: "destructive",
+            });
+          } else {
+            const promptMessage = hasExistingPosts
+              ? `Imported ${previewData.posts.length} posts and generated missing system prompt for "${previewData.category}".`
+              : `Imported ${previewData.posts.length} posts and generated system prompt for new category "${previewData.category}".`;
+            
+            toast({
+              title: "Import & Prompt Generation Successful",
+              description: promptMessage,
+            });
           }
+        } catch (promptError) {
+          console.error('💥 SYSTEM PROMPT GENERATION EXCEPTION:', promptError);
+          toast({
+            title: "Import Successful, System Prompt Failed",
+            description: `Imported ${previewData.posts.length} posts but system prompt generation failed: ${promptError.message}`,
+            variant: "destructive",
+          });
         }
-      );
-
-      if (importError) {
-        console.error('❌ UNIFIED IMPORT ERROR:', importError);
-        toast({
-          title: "Import Failed",
-          description: `Failed to import posts: ${importError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Handle the unified response
-      const result = importResult;
-      console.log('✅ UNIFIED IMPORT RESULT:', result);
-
-      // Build success message based on what happened
-      let title = "Import Successful";
-      let description = `Imported ${result.posts_imported} posts`;
-      
-      if (result.system_prompt_generated) {
-        title = "Import & System Prompt Generated";
-        description += ` and generated system prompt for new category "${result.category}".`;
       } else {
-        description += ` to existing category "${result.category}".`;
+        toast({
+          title: "Import Successful",
+          description: `Imported ${previewData.posts.length} posts to existing ${previewData.category} category (system prompt already exists).`,
+        });
       }
-
-      // Add warnings if any
-      if (result.warnings && result.warnings.length > 0) {
-        description += ` Warnings: ${result.warnings.join(', ')}`;
-      }
-
-      toast({
-        title,
-        description,
-        variant: result.warnings && result.warnings.length > 0 ? "destructive" : "default"
-      });
       
       setOpen(false);
       setJsonInput('');
       setPreviewData(null);
       setErrors([]);
       onImportComplete();
-      
     } catch (error) {
-      console.error('💥 UNIFIED IMPORT EXCEPTION:', error);
+      console.error('Import error:', error);
       toast({
         title: "Import Failed",
         description: "Failed to import posts. Please check your data and try again.",
