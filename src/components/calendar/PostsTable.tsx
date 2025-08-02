@@ -7,7 +7,6 @@ import { Palette, Eye, Plus } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
-import { PostForm } from "./PostForm";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
@@ -35,7 +34,6 @@ export const PostsTable = ({
   category
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
   const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -342,16 +340,6 @@ export const PostsTable = ({
                 <TabsTrigger value="draft">Draft</TabsTrigger>
                 <TabsTrigger value="published">Published</TabsTrigger>
               </TabsList>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1 text-xs sm:text-sm"
-                onClick={() => setShowCreateForm(true)}
-              >
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Create New Post</span>
-                <span className="xs:hidden">New</span>
-              </Button>
             </div>
             
             {category && <div className="flex gap-2 flex-wrap">
@@ -472,15 +460,6 @@ export const PostsTable = ({
         />
       )}
 
-      <PostForm 
-        open={showCreateForm}
-        onOpenChange={setShowCreateForm}
-        onPostCreated={() => {
-          onPostsChange();
-          setShowCreateForm(false);
-        }}
-        category={category}
-      />
     </div>
   );
 };
