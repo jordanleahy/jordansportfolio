@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Save, X, Eye, Sparkles, RefreshCw } from 'lucide-react';
+import { Edit3, Save, X, Eye, Sparkles, RefreshCw, GitCompare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
@@ -24,6 +24,7 @@ export const SystemPromptViewer = ({
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
@@ -79,6 +80,13 @@ export const SystemPromptViewer = ({
   const handleCancel = useCallback(() => {
     setEditedPrompt(promptData?.prompt || '');
     setIsEditing(false);
+    setShowDiff(false);
+  }, [promptData?.prompt]);
+
+  const handleStartEditing = useCallback(() => {
+    setPreviousPrompt(promptData?.prompt || '');
+    setIsEditing(true);
+    setShowDiff(false);
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
@@ -94,6 +102,45 @@ export const SystemPromptViewer = ({
     }
   }, [category, promptData?.prompt, regeneratePrompt]);
 
+  // Compute diff when in editing mode
+  const diffResult = useMemo(() => {
+    if (!isEditing || !previousPrompt || !editedPrompt) return null;
+    return diffLines(previousPrompt, editedPrompt);
+  }, [isEditing, previousPrompt, editedPrompt]);
+
+  const hasChanges = useMemo(() => {
+    return editedPrompt !== previousPrompt;
+  }, [editedPrompt, previousPrompt]);
+
+  // Diff component
+  const DiffView = () => (
+    <div className="max-h-[60vh] overflow-auto border rounded-md bg-muted/30">
+      <div className="font-mono text-sm">
+        {diffResult?.map((part, index) => (
+          <div
+            key={index}
+            className={`px-3 py-1 ${
+              part.added
+                ? 'bg-green-500/20 text-green-700 dark:text-green-300'
+                : part.removed
+                ? 'bg-red-500/20 text-red-700 dark:text-red-300'
+                : 'text-foreground'
+            }`}
+          >
+            <span className="text-muted-foreground mr-2 select-none">
+              {part.added ? '+' : part.removed ? '-' : ' '}
+            </span>
+            {part.value.split('\n').map((line, lineIndex) => (
+              lineIndex < part.value.split('\n').length - 1 && (
+                <div key={lineIndex}>{line}</div>
+              )
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   // Shared content component
   const contentComponent = (
     <>
@@ -102,14 +149,43 @@ export const SystemPromptViewer = ({
           <div className="text-muted-foreground">Loading system prompt...</div>
         </div>
       ) : isEditing ? (
-        <OptimizedMonacoEditor
-          value={editedPrompt}
-          onChange={(value) => setEditedPrompt(value || '')}
-          language="markdown"
-          height="400px"
-          placeholder="Enter system prompt..."
-          className="border border-input rounded-md overflow-hidden"
-        />
+        <div className="space-y-4">
+          {/* Toggle buttons for editor vs diff view */}
+          {hasChanges && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showDiff ? "outline" : "default"}
+                size="sm"
+                onClick={() => setShowDiff(false)}
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+              <Button
+                variant={showDiff ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDiff(true)}
+              >
+                <GitCompare className="h-4 w-4 mr-1" />
+                Preview Changes
+              </Button>
+            </div>
+          )}
+          
+          {/* Content based on view mode */}
+          {showDiff && hasChanges ? (
+            <DiffView />
+          ) : (
+            <OptimizedMonacoEditor
+              value={editedPrompt}
+              onChange={(value) => setEditedPrompt(value || '')}
+              language="markdown"
+              height="400px"
+              placeholder="Enter system prompt..."
+              className="border border-input rounded-md overflow-hidden"
+            />
+          )}
+        </div>
       ) : (
         <div className="max-h-[60vh] overflow-auto">
           <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed border rounded-md p-3 bg-muted/30 h-full">
@@ -161,7 +237,7 @@ export const SystemPromptViewer = ({
           ) : (
             <>
               {promptData?.prompt && (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Button variant="outline" size="sm" onClick={handleStartEditing}>
                   <Edit3 className="h-4 w-4" />
                 </Button>
               )}
