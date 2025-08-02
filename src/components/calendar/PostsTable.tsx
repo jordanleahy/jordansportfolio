@@ -7,6 +7,7 @@ import { Palette, Eye, Plus } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
+import { PostForm } from "./PostForm";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
@@ -33,6 +34,7 @@ export const PostsTable = ({
   category
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
   const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -386,7 +388,12 @@ export const PostsTable = ({
                 <TabsTrigger value="draft">Draft</TabsTrigger>
                 <TabsTrigger value="published">Published</TabsTrigger>
               </TabsList>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setShowCreateForm(true)}
+              >
                 <Plus className="h-4 w-4" />
                 Create New Post
               </Button>
@@ -490,5 +497,15 @@ export const PostsTable = ({
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
 
       {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
+
+      <PostForm 
+        open={showCreateForm}
+        onOpenChange={setShowCreateForm}
+        onPostCreated={() => {
+          onPostsChange();
+          setShowCreateForm(false);
+        }}
+        category={category}
+      />
     </div>;
 };

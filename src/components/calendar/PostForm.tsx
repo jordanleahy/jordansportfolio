@@ -19,9 +19,11 @@ import type { CreateSocialMediaPost, PostStatus } from '@/types/socialMedia';
 interface PostFormProps {
   onPostCreated: () => void;
   category?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => {
+export const PostForm = ({ onPostCreated, category = 'cdi', open: controlledOpen, onOpenChange }: PostFormProps) => {
   const { data: colorThemes = [], isLoading: themesLoading } = useColorThemes();
   const { data: defaultTheme } = useDefaultColorTheme();
   
@@ -38,6 +40,16 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
   const [generatingField, setGeneratingField] = useState<string>('');
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Use controlled or internal state for open/close
+  const isModalOpen = controlledOpen !== undefined ? controlledOpen : isOpen;
+  const setModalOpen = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setIsOpen(open);
+    }
+  };
 
   // Update form data when default theme is loaded
   React.useEffect(() => {
@@ -71,7 +83,7 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
         category,
         color_theme_id: defaultTheme?.id,
       });
-      setIsOpen(false);
+      setModalOpen(false);
       onPostCreated();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -149,13 +161,16 @@ export const PostForm = ({ onPostCreated, category = 'cdi' }: PostFormProps) => 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full">
-          <Plus className="mr-2 h-4 w-4" />
-          Create New Post
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
+      {/* Only show trigger if not externally controlled */}
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button className="w-full">
+            <Plus className="mr-2 h-4 w-4" />
+            Create New Post
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className={`${isMobile ? 'max-w-full h-full sm:max-w-4xl sm:h-auto' : 'max-w-4xl'} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>Create New Social Media Post</DialogTitle>
