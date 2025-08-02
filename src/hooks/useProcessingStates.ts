@@ -74,7 +74,6 @@ export const useProcessingStates = () => {
     if (operation && aspectRatio) {
       const key = createKey(postId, operation, aspectRatio);
       const result = processingStates.get(key)?.isActive || false;
-      console.log(`🔍 [ProcessingStates] Check ${operation} for ${postId} (${aspectRatio}): ${result}`);
       return result;
     }
     
@@ -83,14 +82,12 @@ export const useProcessingStates = () => {
       if (operation === 'bulk_generate') {
         const key = createKey(postId, operation);
         const result = processingStates.get(key)?.isActive || false;
-        console.log(`🔍 [ProcessingStates] Check ${operation} for ${postId}: ${result} (exact match)`);
         return result;
       }
       
       const matches = Array.from(processingStates.entries())
         .filter(([key, state]) => key.startsWith(`${postId}_${operation}`) && state.isActive);
       const result = matches.length > 0;
-      console.log(`🔍 [ProcessingStates] Check ${operation} for ${postId}: ${result} (${matches.length} matches)`);
       return result;
     }
     
@@ -98,7 +95,6 @@ export const useProcessingStates = () => {
     const matches = Array.from(processingStates.entries())
       .filter(([key, state]) => key.startsWith(postId) && state.isActive);
     const result = matches.length > 0;
-    console.log(`🔍 [ProcessingStates] Check any processing for ${postId}: ${result} (${matches.length} matches)`);
     return result;
   }, [processingStates, createKey]);
 
