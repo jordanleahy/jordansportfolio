@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Save, X, Eye, Sparkles, RefreshCw, GitCompare } from 'lucide-react';
+import { Edit3, Save, X, Sparkles, GitCompare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
@@ -38,8 +38,7 @@ export const SystemPromptViewer = ({
     isUpdating,
     regeneratePrompt,
     isRegenerating,
-    invalidateCache,
-    prefetchPrompt
+    invalidateCache
   } = useSystemPromptCache(category);
 
   // Use realtime system prompts
