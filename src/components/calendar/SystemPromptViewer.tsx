@@ -331,7 +331,7 @@ export const SystemPromptViewer = ({
       <CardContent className="flex-1">
         {isLoading ? <div className="flex items-center justify-center h-full">
             <div className="text-muted-foreground">Loading system prompt...</div>
-          </div> : isEditing ? <Textarea value={editedPrompt} onChange={e => setEditedPrompt(e.target.value)} className="h-full resize-none font-mono text-sm" placeholder="Enter system prompt..." /> : <div className="max-h-[400px] overflow-auto">
+          </div> : isEditing ? <Textarea value={editedPrompt} onChange={e => setEditedPrompt(e.target.value)} className="h-full resize-none font-mono text-sm" placeholder="Enter system prompt..." /> : <div className="max-h-[60vh] overflow-auto">
             {systemPrompt ? renderPromptWithHighlight(systemPrompt, previousPrompt) : <div className="flex items-center justify-center h-full text-muted-foreground">
                 No system prompt found for this category
               </div>}
