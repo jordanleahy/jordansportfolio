@@ -118,11 +118,8 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
-    const containerRect = e.currentTarget instanceof Element 
-      ? e.currentTarget.getBoundingClientRect() 
-      : document.body.getBoundingClientRect();
-    
-    const newWidth = Math.max(300, Math.min(800, containerRect.right - e.clientX));
+    // Calculate new width based on mouse position from the right edge of the window
+    const newWidth = Math.max(300, Math.min(800, window.innerWidth - e.clientX));
     setPromptPanelWidth(newWidth);
   }, [isResizing]);
 
