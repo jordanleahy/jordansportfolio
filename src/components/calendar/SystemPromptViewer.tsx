@@ -173,7 +173,7 @@ export const SystemPromptViewer = ({
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <h2 className={`font-semibold truncate ${isMobile ? 'text-base' : 'text-lg'}`}>
-            {category} System Prompt
+            {category}
           </h2>
         </div>
         
