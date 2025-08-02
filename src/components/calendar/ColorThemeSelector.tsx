@@ -39,35 +39,33 @@ export function ColorThemeSelector({
   return (
     <div className={className}>
       <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
-        <SelectTrigger className="w-full">
-          <div className="flex items-center gap-2">
-            <SelectValue placeholder="Select color theme">
-              {selectedTheme && (
-                <div className="flex gap-1">
-                  <div 
-                    className="w-4 h-4 rounded-full border border-border" 
-                    style={{ backgroundColor: selectedTheme.primary_color }}
-                  />
-                  <div 
-                    className="w-4 h-4 rounded-full border border-border" 
-                    style={{ backgroundColor: selectedTheme.secondary_color }}
-                  />
-                  <div 
-                    className="w-4 h-4 rounded-full border border-border" 
-                    style={{ backgroundColor: selectedTheme.accent_color }}
-                  />
-                  <div 
-                    className="w-4 h-4 rounded-full border border-border" 
-                    style={{ backgroundColor: selectedTheme.background_color }}
-                  />
-                </div>
-              )}
-            </SelectValue>
-          </div>
+        <SelectTrigger className="w-fit border-none shadow-none p-2 [&>svg]:hidden">
+          <SelectValue placeholder="Select color theme">
+            {selectedTheme && (
+              <div className="flex gap-1">
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: selectedTheme.primary_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: selectedTheme.secondary_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: selectedTheme.accent_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: selectedTheme.background_color }}
+                />
+              </div>
+            )}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {themes.map((theme) => (
-            <SelectItem key={theme.id} value={theme.id}>
+            <SelectItem key={theme.id} value={theme.id} className="pl-2 [&>span:first-child]:hidden">
               <div className="flex gap-1">
                 <div 
                   className="w-4 h-4 rounded-full border border-border" 
