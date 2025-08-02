@@ -374,13 +374,13 @@ export const PostsTable = ({
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
-  return <div className="flex gap-4 h-screen overflow-hidden">
+  return <div className="flex gap-4 h-full">
       {/* Main content - table */}
-      <div className="transition-all duration-300 flex-1 overflow-hidden" style={{
+      <div className="transition-all duration-300 flex-1" style={{
       width: showSystemPrompt ? `calc(100% - ${promptPanelWidth}px - 1rem)` : '100%'
     }}>
-        <Card className="h-full overflow-hidden flex flex-col">
-          <div className="p-6 flex-shrink-0">
+        <Card className="h-full">
+          <div className="p-6">
             
         
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
@@ -469,20 +469,16 @@ export const PostsTable = ({
               </div>}
           </div>
 
-          <TabsContent value="draft" className="flex-1 overflow-hidden">
-            {isMobile ? <div className="space-y-4 h-full overflow-y-auto p-4">
+          <TabsContent value="draft">
+            {isMobile ? <div className="space-y-4">
                 {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openImagePromptModal(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-              </div> : <div className="h-full overflow-hidden">
-                <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openImagePromptModal} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} />
-              </div>}
+              </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openImagePromptModal} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} />}
           </TabsContent>
 
-          <TabsContent value="published" className="flex-1 overflow-hidden">
-            {isMobile ? <div className="space-y-4 h-full overflow-y-auto p-4">
+          <TabsContent value="published">
+            {isMobile ? <div className="space-y-4">
                 {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openImagePromptModal(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-              </div> : <div className="h-full overflow-hidden">
-                <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openImagePromptModal} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} />
-              </div>}
+              </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openImagePromptModal} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} />}
           </TabsContent>
         </Tabs>
           </div>
@@ -490,7 +486,7 @@ export const PostsTable = ({
       </div>
 
       {/* System Prompt Viewer Panel */}
-      {showSystemPrompt && category && <div className="relative transition-all duration-300 h-full" style={{
+      {showSystemPrompt && category && <div className="relative transition-all duration-300" style={{
       width: promptPanelWidth
     }}>
           {/* Resize handle */}
@@ -499,9 +495,7 @@ export const PostsTable = ({
         width: '4px',
         marginLeft: '-2px'
       }} />
-          <div className="h-full">
-            <SystemPromptViewer category={category} isVisible={showSystemPrompt} onClose={() => setShowSystemPrompt(false)} />
-          </div>
+          <SystemPromptViewer category={category} isVisible={showSystemPrompt} onClose={() => setShowSystemPrompt(false)} />
         </div>}
 
       {/* Modals */}

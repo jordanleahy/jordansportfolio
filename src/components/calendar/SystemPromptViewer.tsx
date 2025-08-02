@@ -323,7 +323,7 @@ export const SystemPromptViewer = ({
           </p>}
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto">
+      <CardContent className="flex-1 overflow-hidden">
         {/* Color Theme Fixer for chart-type category */}
         {category === 'chart-type' && !isEditing && (
           <div className="mb-4">
