@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Palette } from "lucide-react";
 import { ColorTheme } from "@/types/colorTheme";
+import { useRealtimeColorThemes } from '@/hooks/useRealtimeColorThemes';
 
 interface ColorThemeSelectorProps {
   themes: ColorTheme[];
@@ -18,6 +19,23 @@ export function ColorThemeSelector({
   className 
 }: ColorThemeSelectorProps) {
   const selectedTheme = themes.find(t => t.id === selectedThemeId);
+
+  // Listen for real-time color theme changes
+  useRealtimeColorThemes({
+    onThemeCreated: () => {
+      console.log('🎨 [ColorThemeSelector] New theme available in selector');
+    },
+    onThemeUpdated: (theme) => {
+      console.log('🎨 [ColorThemeSelector] Theme updated:', theme.name);
+    },
+    onThemeDeleted: (theme) => {
+      console.log('🎨 [ColorThemeSelector] Theme deleted:', theme.name);
+      // If the currently selected theme was deleted, clear selection
+      if (selectedThemeId === theme.id) {
+        onThemeChange('');
+      }
+    }
+  });
 
   return (
     <div className={className}>

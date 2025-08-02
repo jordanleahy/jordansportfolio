@@ -2,6 +2,7 @@ export type RealtimeEvent =
   | { type: 'connection-changed'; payload: { status: string; timestamp: number; error?: string } }
   | { type: 'update-received'; payload: { table: string; eventType: string; data: any; timestamp: number } }
   | { type: 'cache-invalidated'; payload: { keys: string[]; timestamp: number } }
+  | { type: 'color-theme-changed'; payload: { action: 'created' | 'updated' | 'deleted'; theme: any; timestamp: number } }
   | { type: 'error'; payload: { error: string; context: string; timestamp: number } };
 
 type EventListener<T = RealtimeEvent> = (event: T) => void;

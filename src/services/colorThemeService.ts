@@ -163,7 +163,7 @@ export class ColorThemeService {
     return this.createColorTheme(newTheme);
   }
 
-  private invalidateCache() {
+  public invalidateCache() {
     this.cache.clear();
   }
 }
