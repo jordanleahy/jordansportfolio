@@ -31,7 +31,7 @@ import {
 import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy, BarChart3 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useOpenAIAgent, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
-import { AgentStatus, CreateAgentData, SystemPrompt } from '@/types/openaiAgent';
+import { AgentStatus, CreateAgentData } from '@/types/openaiAgent';
 import { AgentDeleteModal } from '@/components/agents/AgentDeleteModal';
 import { SystemPromptsTab } from '@/components/agents/SystemPromptsTab';
 import { toast } from 'sonner';
@@ -48,10 +48,6 @@ const agentSchema = z.object({
   status: z.enum(['active', 'paused', 'deprecated']),
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  system_prompts: z.array(z.object({
-    category: z.string(),
-    prompt: z.string()
-  })).optional(),
   supported_categories: z.array(z.string()).optional(),
   // Advanced settings
   temperature: z.number().min(0).max(2).optional(),
@@ -90,7 +86,7 @@ export const AgentEdit = () => {
       status: 'active',
       tags: [],
       notes: '',
-      system_prompts: [],
+      
       supported_categories: [],
       temperature: 0.7,
       max_tokens: 1000,
@@ -114,7 +110,6 @@ export const AgentEdit = () => {
         status: agent.status,
         tags: agent.tags || [],
         notes: agent.notes || '',
-        system_prompts: agent.system_prompts || [],
         supported_categories: agent.supported_categories || [],
         // Default advanced settings if not present
         temperature: 0.7,
@@ -146,8 +141,7 @@ export const AgentEdit = () => {
     }
   };
 
-  const handleSystemPromptsChange = (prompts: SystemPrompt[], categories: string[]) => {
-    form.setValue('system_prompts', prompts);
+  const handleSystemPromptsChange = (prompts: any[], categories: string[]) => {
     form.setValue('supported_categories', categories);
   };
 
@@ -166,7 +160,7 @@ export const AgentEdit = () => {
       status: 'paused',
       tags: agent.tags || [],
       notes: agent.notes || '',
-      system_prompts: agent.system_prompts || [],
+      
       supported_categories: agent.supported_categories || []
     };
     
@@ -572,12 +566,11 @@ export const AgentEdit = () => {
 
             {/* System Prompts Tab */}
             {activeTab === 'prompts' && (
-              <SystemPromptsTab
-                agentId={id}
-                systemPrompts={form.watch('system_prompts') || []}
-                supportedCategories={form.watch('supported_categories') || []}
-                onChange={handleSystemPromptsChange}
-              />
+              <div className="text-center py-8 text-muted-foreground">
+                <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>System prompts are now managed through the dedicated System Prompt Viewer.</p>
+                <p className="text-sm">Access it from the Calendar page for each category.</p>
+              </div>
             )}
 
             {/* Tools & Permissions Tab */}

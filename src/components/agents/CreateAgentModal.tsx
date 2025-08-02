@@ -38,7 +38,6 @@ export const CreateAgentModal = () => {
     status: 'active' as AgentStatus,
     tags: [],
     notes: '',
-    system_prompts: [],
     supported_categories: []
   });
 
@@ -61,7 +60,6 @@ export const CreateAgentModal = () => {
           status: 'active' as AgentStatus,
           tags: [],
           notes: '',
-          system_prompts: [],
           supported_categories: []
         });
       }

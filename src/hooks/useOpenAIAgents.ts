@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { OpenAIAgent, CreateAgentData, UpdateAgentData, SystemPrompt } from '@/types/openaiAgent';
+import { OpenAIAgent, CreateAgentData, UpdateAgentData } from '@/types/openaiAgent';
 import { useEntityActionsWrapper } from './useEntityActionsWrapper';
 
 // Helper function to transform database agent data to OpenAIAgent type
@@ -9,9 +9,6 @@ const transformAgentData = (agent: any): OpenAIAgent => ({
   ...agent,
   metrics: agent.metrics && typeof agent.metrics === 'object' && !Array.isArray(agent.metrics) 
     ? agent.metrics as { latencyMs: number; errorRate: number; }
-    : undefined,
-  system_prompts: Array.isArray(agent.system_prompts) 
-    ? agent.system_prompts as SystemPrompt[]
     : undefined,
   tags: Array.isArray(agent.tags) 
     ? agent.tags as string[]

@@ -2,10 +2,6 @@ export type AgentStatus = 'active' | 'paused' | 'deprecated';
 
 import { CategoryType } from '@/constants/categoryConstants';
 
-export interface SystemPrompt {
-  category: CategoryType | string; // Allow string for backward compatibility
-  prompt: string;
-}
 
 export interface OpenAIAgent {
   id: string;
@@ -26,7 +22,6 @@ export interface OpenAIAgent {
   };
   tags?: string[];
   notes?: string;
-  system_prompts?: SystemPrompt[];
   supported_categories?: string[];
   created_at: string;
   updated_at: string;
@@ -44,7 +39,6 @@ export interface CreateAgentData {
   status: AgentStatus;
   tags?: string[];
   notes?: string;
-  system_prompts?: SystemPrompt[];
   supported_categories?: string[];
 }
 

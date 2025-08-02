@@ -6,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { Brain, Edit, Eye, TrendingUp, Clock, Target } from 'lucide-react';
-import type { OpenAIAgent, SystemPrompt } from '@/types/openaiAgent';
+import type { OpenAIAgent } from '@/types/openaiAgent';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
 export const SystemPromptManager = () => {
   const { data: agents, isLoading: loading } = useOpenAIAgents();
   const [selectedAgent, setSelectedAgent] = useState<OpenAIAgent | null>(null);
-  const [selectedPrompt, setSelectedPrompt] = useState<SystemPrompt | null>(null);
+  const [selectedPrompt, setSelectedPrompt] = useState<any | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
 
   const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
@@ -28,7 +28,7 @@ export const SystemPromptManager = () => {
     return mockMetrics;
   };
 
-  const PromptCard = ({ prompt, agent }: { prompt: SystemPrompt; agent: OpenAIAgent }) => {
+  const PromptCard = ({ prompt, agent }: { prompt: any; agent: OpenAIAgent }) => {
     const metrics = getPromptMetrics(prompt.category);
     
     return (
@@ -167,10 +167,9 @@ export const SystemPromptManager = () => {
             <Badge variant="outline">{blogVisualAgent.status}</Badge>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {blogVisualAgent.system_prompts?.map((prompt, index) => (
-              <PromptCard key={index} prompt={prompt} agent={blogVisualAgent} />
-            ))}
+          <div className="text-center py-8 text-muted-foreground">
+            <p>System prompts are now managed in the dedicated table.</p>
+            <p className="text-sm">Use the System Prompt Viewer to view and edit prompts.</p>
           </div>
         </div>
       )}

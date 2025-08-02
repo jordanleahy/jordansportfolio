@@ -304,54 +304,9 @@ export const PostsTable = ({
           applied_theme: selectedTheme.name
         });
 
-        // Verify database update by checking agents
-        console.log('🔍 VERIFYING DATABASE UPDATE...');
-        const {
-          data: verifyData,
-          error: verifyError
-        } = await supabase.from('openai_agents').select('name, system_prompts, updated_at').eq('user_id', user.id).not('system_prompts', 'is', null);
-        if (!verifyError && verifyData) {
-          console.log('📊 DATABASE VERIFICATION:', {
-            total_agents: verifyData.length,
-            agents_with_prompts: verifyData.filter(agent => agent.system_prompts && Array.isArray(agent.system_prompts) && agent.system_prompts.some((p: any) => p.category === category)).length,
-            latest_updates: verifyData.map(agent => ({
-              name: agent.name,
-              updated_at: agent.updated_at,
-              has_category_prompt: agent.system_prompts && Array.isArray(agent.system_prompts) && agent.system_prompts.some((p: any) => p.category === category)
-            }))
-          });
-
-          // Check if the system prompt actually contains the new colors
-          const updatedAgent = verifyData.find(agent => agent.system_prompts && Array.isArray(agent.system_prompts) && agent.system_prompts.some((p: any) => p.category === category));
-          if (updatedAgent) {
-            const systemPrompts = Array.isArray(updatedAgent.system_prompts) ? updatedAgent.system_prompts as Array<{
-              category: string;
-              prompt: string;
-            }> : [];
-            const categoryPrompt = systemPrompts.find((p: any) => p.category === category);
-            if (categoryPrompt) {
-              const containsNewColors = selectedTheme.primary_color && categoryPrompt.prompt.includes(selectedTheme.primary_color);
-              const containsThemeName = categoryPrompt.prompt.includes(selectedTheme.name);
-              console.log('🎨 COLOR VERIFICATION:', {
-                agent_name: updatedAgent.name,
-                prompt_length: categoryPrompt.prompt.length,
-                contains_primary_color: containsNewColors,
-                contains_theme_name: containsThemeName,
-                searching_for_color: selectedTheme.primary_color,
-                searching_for_theme: selectedTheme.name,
-                prompt_has_color_table: categoryPrompt.prompt.includes('| Primary') && categoryPrompt.prompt.includes('| Secondary'),
-                prompt_snippet: categoryPrompt.prompt.substring(0, 300) + '...'
-              });
-            }
-          }
-        }
-
-        // Use verification data to show accurate count
-        const actualUpdatedCount = verifyData ? verifyData.filter(agent => agent.system_prompts && Array.isArray(agent.system_prompts) && agent.system_prompts.some((p: any) => p.category === category) && agent.system_prompts.some((p: any) => p.prompt.includes(selectedTheme.primary_color))).length : data.agents_updated;
-
         // Update the current applied theme state
         setCurrentAppliedTheme(selectedTheme);
-        toast.success(`${selectedTheme.name} color theme applied successfully! ${actualUpdatedCount} agent(s) updated.`);
+        toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
       } else {
         console.log('⚠️  UNEXPECTED RESPONSE:', data);
         toast.error('Theme update completed but response was unexpected.');

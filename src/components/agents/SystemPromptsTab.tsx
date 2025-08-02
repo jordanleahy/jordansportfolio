@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
-import { SystemPrompt } from '@/types/openaiAgent';
+
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
 
@@ -12,9 +12,9 @@ import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConsta
 
 interface SystemPromptsTabProps {
   agentId?: string;
-  systemPrompts: SystemPrompt[];
+  systemPrompts: any[];
   supportedCategories: string[];
-  onChange: (prompts: SystemPrompt[], categories: string[]) => void;
+  onChange: (prompts: any[], categories: string[]) => void;
 }
 
 export const SystemPromptsTab = ({ 

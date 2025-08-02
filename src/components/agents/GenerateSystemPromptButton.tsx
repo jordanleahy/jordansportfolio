@@ -68,57 +68,31 @@ export const GenerateSystemPromptButton = ({
       if (data?.system_prompt) {
         console.log('Generated system prompt:', data.system_prompt);
         
-        // Update the agent with the new system prompt
-        console.log('Updating agent with new system prompt...');
+        // Insert into the new system_prompts table
+        console.log('Inserting into system_prompts table...');
         
-        // Get current agent data first to preserve existing prompts for other categories
-        const { data: currentAgent, error: fetchError } = await supabase
-          .from('openai_agents')
-          .select('system_prompts, supported_categories')
-          .eq('id', agentId)
-          .single();
+        const { error: insertError } = await supabase
+          .from('system_prompts')
+          .upsert({
+            category,
+            name: `${category} System Prompt`,
+            prompt_text: data.system_prompt,
+            agent_name: 'System Prompt Generator',
+            agent_purpose: 'Generate system prompts for categories',
+            agent_owner: 'System',
+            description: `System prompt for ${category} category`,
+            version: 1,
+            user_id: user.id
+          }, {
+            onConflict: 'category'
+          });
 
-        if (fetchError) {
-          console.error('Error fetching current agent:', fetchError);
-          throw fetchError;
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
         }
 
-        // Update or add the new prompt for this category while preserving others
-        const existingPrompts = Array.isArray(currentAgent.system_prompts) 
-          ? currentAgent.system_prompts as any[]
-          : [];
-        
-        // Remove any existing prompt for this category and add the new one
-        const filteredPrompts = existingPrompts.filter((p: any) => p.category !== category);
-        const updatedPrompts = [...filteredPrompts, {
-          category,
-          prompt: data.system_prompt
-        }];
-
-        // Update supported categories if needed
-        const currentCategories = Array.isArray(currentAgent.supported_categories)
-          ? currentAgent.supported_categories as string[]
-          : [];
-        const updatedCategories = currentCategories.includes(category) 
-          ? currentCategories 
-          : [...currentCategories, category];
-
-        const { error: updateError } = await supabase
-          .from('openai_agents')
-          .update({
-            system_prompts: updatedPrompts,
-            supported_categories: updatedCategories,
-            last_run: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', agentId);
-
-        if (updateError) {
-          console.error('Update error:', updateError);
-          throw updateError;
-        }
-
-        console.log('Agent updated successfully');
+        console.log('System prompt saved successfully');
         toast({
           title: "System prompt generated!",
           description: `Rich system prompt for ${category} has been created`,
