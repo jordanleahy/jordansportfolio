@@ -10,9 +10,7 @@ import { themeImportService } from '@/services/themeImportService';
 import type { ProcessingResult } from '@/types/themeImport';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Editor from '@monaco-editor/react';
-import { useTheme } from 'next-themes';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
 interface ThemeImportModalProps {
   open: boolean;
@@ -32,8 +30,6 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { theme } = useTheme();
-  const isMobile = useIsMobile();
 
   const processMutation = useMutation({
     mutationFn: async (data: string) => {
@@ -215,27 +211,12 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
           <div>
             <Label htmlFor="json-input">JSON Data</Label>
             <div className="border border-input rounded-md overflow-hidden">
-              <Editor
+              <OptimizedMonacoEditor
                 height="300px"
-                defaultLanguage="json"
+                language="json"
                 value={jsonInput}
                 onChange={(value) => setJsonInput(value || '')}
-                theme={theme === 'dark' ? 'vs-dark' : 'light'}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  lineNumbers: 'on',
-                  wordWrap: 'on',
-                  automaticLayout: true,
-                  scrollBeyondLastLine: false,
-                  folding: true,
-                  lineDecorationsWidth: 10,
-                  lineNumbersMinChars: 3,
-                  padding: { top: 12, bottom: 12 },
-                  contextmenu: !isMobile,
-                  commandPalette: !isMobile,
-                  placeholder: `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`
-                }}
+                placeholder={`Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`}
               />
             </div>
           </div>

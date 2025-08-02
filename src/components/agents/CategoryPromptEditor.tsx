@@ -4,9 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
-import Editor from '@monaco-editor/react';
-import { useTheme } from 'next-themes';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
 interface CategoryPromptEditorProps {
   category?: string;
@@ -27,8 +25,6 @@ export const CategoryPromptEditor = ({
 }: CategoryPromptEditorProps) => {
   const [localCategory, setLocalCategory] = useState(category);
   const [localPrompt, setLocalPrompt] = useState(prompt);
-  const { theme } = useTheme();
-  const isMobile = useIsMobile();
 
   const handleCategoryChange = (value: string) => {
     setLocalCategory(value);
@@ -71,27 +67,12 @@ export const CategoryPromptEditor = ({
       <div>
         <Label htmlFor="prompt">System Prompt</Label>
         <div className="border border-input rounded-md overflow-hidden">
-          <Editor
+          <OptimizedMonacoEditor
             height="200px"
-            defaultLanguage="markdown"
+            language="markdown"
             value={localPrompt}
             onChange={(value) => handlePromptChange(value || '')}
-            theme={theme === 'dark' ? 'vs-dark' : 'light'}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 14,
-              lineNumbers: 'on',
-              wordWrap: 'on',
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              folding: false,
-              lineDecorationsWidth: 10,
-              lineNumbersMinChars: 3,
-              padding: { top: 12, bottom: 12 },
-              contextmenu: !isMobile,
-              commandPalette: !isMobile,
-              placeholder: 'Enter the system prompt for this category...'
-            }}
+            placeholder="Enter the system prompt for this category..."
           />
         </div>
       </div>

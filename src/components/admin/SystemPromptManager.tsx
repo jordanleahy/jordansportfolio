@@ -8,17 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { Brain, Edit, Eye, TrendingUp, Clock, Target } from 'lucide-react';
 import type { OpenAIAgent, SystemPrompt } from '@/types/openaiAgent';
-import Editor from '@monaco-editor/react';
-import { useTheme } from 'next-themes';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
 export const SystemPromptManager = () => {
   const { data: agents, isLoading: loading } = useOpenAIAgents();
   const [selectedAgent, setSelectedAgent] = useState<OpenAIAgent | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<SystemPrompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
-  const { theme } = useTheme();
-  const isMobile = useIsMobile();
 
   const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
 
@@ -94,26 +90,11 @@ export const SystemPromptManager = () => {
                     <div>
                       <Label className="text-sm font-medium">System Prompt</Label>
                       <div className="mt-2 border border-input rounded-md overflow-hidden">
-                        <Editor
+                        <OptimizedMonacoEditor
                           height="200px"
-                          defaultLanguage="markdown"
+                          language="markdown"
                           value={prompt.prompt}
-                          theme={theme === 'dark' ? 'vs-dark' : 'light'}
-                          options={{
-                            readOnly: true,
-                            minimap: { enabled: false },
-                            fontSize: 14,
-                            lineNumbers: 'on',
-                            wordWrap: 'on',
-                            automaticLayout: true,
-                            scrollBeyondLastLine: false,
-                            folding: false,
-                            lineDecorationsWidth: 10,
-                            lineNumbersMinChars: 3,
-                            padding: { top: 12, bottom: 12 },
-                            contextmenu: !isMobile,
-                            commandPalette: !isMobile
-                          }}
+                          readOnly={true}
                         />
                       </div>
                     </div>

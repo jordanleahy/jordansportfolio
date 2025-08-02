@@ -10,9 +10,7 @@ import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'luci
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
-import Editor from '@monaco-editor/react';
-import { useTheme } from 'next-themes';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
 interface ThemeImportModalOptimizedProps {
   open: boolean;
@@ -27,8 +25,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const { toast } = useToast();
-  const { theme } = useTheme();
-  const isMobile = useIsMobile();
   
   const {
     state,
@@ -193,28 +189,13 @@ AVOID:
           <div>
             <Label htmlFor="json-input">JSON Data</Label>
             <div className="border border-input rounded-md overflow-hidden">
-              <Editor
+              <OptimizedMonacoEditor
                 height="300px"
-                defaultLanguage="json"
+                language="json"
                 value={jsonInput}
                 onChange={(value) => setJsonInput(value || '')}
-                theme={theme === 'dark' ? 'vs-dark' : 'light'}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  lineNumbers: 'on',
-                  wordWrap: 'on',
-                  automaticLayout: true,
-                  scrollBeyondLastLine: false,
-                  folding: true,
-                  lineDecorationsWidth: 10,
-                  lineNumbersMinChars: 3,
-                  padding: { top: 12, bottom: 12 },
-                  contextmenu: !isMobile,
-                  commandPalette: !isMobile,
-                  placeholder: placeholderText,
-                  readOnly: isProcessing
-                }}
+                placeholder={placeholderText}
+                readOnly={isProcessing}
               />
             </div>
           </div>
