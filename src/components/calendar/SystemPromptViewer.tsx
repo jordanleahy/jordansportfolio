@@ -11,18 +11,21 @@ import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 import { diffLines } from 'diff';
 import { stripMarkdownFormatting } from '@/utils/markdownUtils';
-import { ColorEnhancedText } from '@/components/ui/color-enhanced-text';
+import { ThemeAwareColorText } from '@/components/ui/theme-aware-color-text';
+import { useCurrentColorTheme } from '@/hooks/useCurrentColorTheme';
 
 interface SystemPromptViewerProps {
   category: string;
   isVisible: boolean;
   onClose: () => void;
+  selectedThemeId?: string;
 }
 
 export const SystemPromptViewer = ({
   category,
   isVisible,
-  onClose
+  onClose,
+  selectedThemeId
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
@@ -30,6 +33,8 @@ export const SystemPromptViewer = ({
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
+  
+  const { currentTheme } = useCurrentColorTheme({ selectedThemeId });
   
   // Use the optimized cache hook
   const {
@@ -171,8 +176,9 @@ export const SystemPromptViewer = ({
         <div className={`${isMobile ? 'max-h-[50vh]' : 'max-h-[60vh]'} overflow-auto`}>
           <div className="border rounded-md p-4 bg-muted/30 h-full">
             {promptData?.prompt ? (
-              <ColorEnhancedText 
+              <ThemeAwareColorText 
                 text={stripMarkdownFormatting(promptData.prompt)} 
+                currentTheme={currentTheme || undefined}
                 className={`${isMobile ? 'text-xs' : 'text-sm'} leading-relaxed`}
               />
             ) : (
