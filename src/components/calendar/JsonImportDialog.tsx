@@ -16,6 +16,8 @@ interface JsonImportDialogProps {
 
 interface ImportData {
   category: string;
+  theme?: string;
+  description?: string;
   posts: Array<{
     day: number;
     title: string;
@@ -89,26 +91,48 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     
     setIsLoading(true);
     try {
+      console.log('🔍 IMPORT DEBUG: Starting import process for category:', previewData.category);
+      
       // Check if posts exist for this category
-      const { data: existingPosts } = await supabase
+      console.log('📊 CHECKING: Existing posts for category:', previewData.category);
+      const { data: existingPosts, error: postsQueryError } = await supabase
         .from('social_media_posts')
         .select('id')
         .eq('category', previewData.category)
         .limit(1);
       
+      if (postsQueryError) {
+        console.error('❌ POSTS QUERY ERROR:', postsQueryError);
+      }
+      
       // Check if a system prompt exists for this category
-      const { data: existingSystemPrompts } = await supabase
+      console.log('🤖 CHECKING: Existing system prompts for category:', previewData.category);
+      const { data: existingSystemPrompts, error: promptsQueryError } = await supabase
         .from('system_prompts')
         .select('id')
         .eq('category', previewData.category)
         .limit(1);
       
+      if (promptsQueryError) {
+        console.error('❌ SYSTEM PROMPTS QUERY ERROR:', promptsQueryError);
+      }
+      
       const hasExistingPosts = existingPosts && existingPosts.length > 0;
       const hasSystemPrompt = existingSystemPrompts && existingSystemPrompts.length > 0;
       const needsSystemPrompt = !hasSystemPrompt;
       
+      console.log('🎯 IMPORT DECISION MATRIX:', {
+        category: previewData.category,
+        hasExistingPosts,
+        hasSystemPrompt,
+        needsSystemPrompt,
+        postsToImport: previewData.posts.length
+      });
+      
       // Import the posts
+      console.log('📥 IMPORTING: Posts for category:', previewData.category);
       await optimizedSocialMediaService.bulkImportPosts(previewData.category, previewData.posts);
+      console.log('✅ POSTS IMPORTED: Successfully imported', previewData.posts.length, 'posts');
       
       // Generate system prompt if one doesn't exist for this category
       if (needsSystemPrompt) {
@@ -116,25 +140,31 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
           ? `Category "${previewData.category}" has posts but no system prompt. Generating...`
           : `New category "${previewData.category}" detected. Generating system prompt...`;
         
-        console.log(statusMessage);
+        console.log('🤖 SYSTEM PROMPT GENERATION:', statusMessage);
         
         try {
+          console.log('🚀 CALLING: invoke-system-prompt-agent edge function');
           const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
             body: {
               category: previewData.category,
+              theme: previewData.theme || previewData.category,
+              description: previewData.description || `Generated content for ${previewData.category} category`,
+              sample_posts: previewData.posts.slice(0, 3), // Send first 3 posts as samples
               user_id: (await supabase.auth.getUser()).data.user?.id
             }
           });
-          
+
+          console.log('📡 EDGE FUNCTION RESPONSE:', { invokeData, invokeError });
+
           if (invokeError) {
-            console.error('Error invoking system prompt agent:', invokeError);
+            console.error('❌ SYSTEM PROMPT GENERATION ERROR:', invokeError);
             toast({
-              title: "System Prompt Warning",
-              description: `Posts imported successfully, but failed to generate system prompt for category "${previewData.category}".`,
-              variant: "default",
+              title: "Import Successful, System Prompt Failed",
+              description: `Imported ${previewData.posts.length} posts but failed to generate system prompt: ${invokeError.message}`,
+              variant: "destructive",
             });
           } else {
-            console.log('System prompt agent invoked successfully:', invokeData);
+            console.log('✅ SYSTEM PROMPT GENERATED:', invokeData);
             const promptMessage = hasExistingPosts
               ? `Imported ${previewData.posts.length} posts and generated missing system prompt for "${previewData.category}".`
               : `Imported ${previewData.posts.length} posts and generated system prompt for new category "${previewData.category}".`;
@@ -145,13 +175,15 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
             });
           }
         } catch (promptError) {
-          console.error('System prompt generation error:', promptError);
+          console.error('💥 SYSTEM PROMPT GENERATION EXCEPTION:', promptError);
           toast({
-            title: "Import Successful",
-            description: `Imported ${previewData.posts.length} posts to ${previewData.category} category. System prompt will be generated separately.`,
+            title: "Import Successful, System Prompt Failed",
+            description: `Imported ${previewData.posts.length} posts but system prompt generation failed: ${promptError.message}`,
+            variant: "destructive",
           });
         }
       } else {
+        console.log('ℹ️  SYSTEM PROMPT EXISTS: Skipping generation for category:', previewData.category);
         toast({
           title: "Import Successful",
           description: `Imported ${previewData.posts.length} posts to existing ${previewData.category} category (system prompt already exists).`,
