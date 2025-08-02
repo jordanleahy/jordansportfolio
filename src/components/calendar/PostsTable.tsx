@@ -7,6 +7,7 @@ import { Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
+import { useColorThemes } from "@/hooks/useColorThemes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
@@ -25,19 +26,24 @@ interface PostsTableOptimizedProps {
   isAdmin?: boolean;
   category?: string;
   selectedThemeId?: string;
+  onThemeChange?: (themeId: string) => void;
 }
 export const PostsTable = ({
   posts,
   onPostsChange,
   isAdmin = false,
   category,
-  selectedThemeId
+  selectedThemeId,
+  onThemeChange,
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Color themes
+  const { data: colorThemes = [] } = useColorThemes();
 
 
   // Animation state management
@@ -208,11 +214,19 @@ export const PostsTable = ({
             </div>
             
             {category && (
-              <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
-                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
-                <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <ColorThemeSelector
+                  themes={colorThemes}
+                  selectedThemeId={selectedThemeId}
+                  onThemeChange={onThemeChange}
+                  className="w-48"
+                />
+                <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
+                  <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
+                </Button>
+              </div>
             )}
           </div>
 

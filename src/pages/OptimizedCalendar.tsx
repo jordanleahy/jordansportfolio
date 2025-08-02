@@ -272,6 +272,7 @@ export default function OptimizedCalendar() {
                   isAdmin={isAdmin}
                   category={category}
                   selectedThemeId={selectedThemeId}
+                  onThemeChange={setSelectedThemeId}
                 />
               </Suspense>
             </TabsContent>
