@@ -39,8 +39,8 @@ export function ColorThemeSelector({
   return (
     <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
         <SelectTrigger className="h-8 w-fit border border-input bg-background px-2 py-1 text-xs sm:text-sm [&>svg]:hidden">
-          <SelectValue placeholder="Select color theme">
-            {selectedTheme && (
+          <SelectValue>
+            {selectedTheme ? (
               <div className="flex gap-1">
                 <div 
                   className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
@@ -58,6 +58,13 @@ export function ColorThemeSelector({
                   className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: selectedTheme.background_color }}
                 />
+              </div>
+            ) : (
+              <div className="flex gap-1">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-400" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-500" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-600" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-700" />
               </div>
             )}
           </SelectValue>
