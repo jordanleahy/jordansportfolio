@@ -566,11 +566,15 @@ export const AgentEdit = () => {
 
             {/* System Prompts Tab */}
             {activeTab === 'prompts' && (
-              <div className="text-center py-8 text-muted-foreground">
-                <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>System prompts are now managed through the dedicated System Prompt Viewer.</p>
-                <p className="text-sm">Access it from the Calendar page for each category.</p>
-              </div>
+              <SystemPromptsTab
+                agentId={agent?.id}
+                systemPrompts={[]}
+                supportedCategories={agent?.supported_categories || []}
+                onChange={(prompts, categories) => {
+                  // Update only the supported categories in the form
+                  form.setValue('supported_categories', categories);
+                }}
+              />
             )}
 
             {/* Tools & Permissions Tab */}
