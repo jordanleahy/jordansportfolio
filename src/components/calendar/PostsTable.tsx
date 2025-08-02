@@ -305,7 +305,14 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
           }
         }
 
-        toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
+        // Use verification data to show accurate count
+        const actualUpdatedCount = verifyData ? verifyData.filter(agent => 
+          agent.system_prompts && Array.isArray(agent.system_prompts) && 
+          agent.system_prompts.some((p: any) => p.category === category) &&
+          agent.system_prompts.some((p: any) => p.prompt.includes(selectedTheme.primary_color))
+        ).length : data.agents_updated;
+        
+        toast.success(`${selectedTheme.name} color theme applied successfully! ${actualUpdatedCount} agent(s) updated.`);
       } else {
         console.log('⚠️  UNEXPECTED RESPONSE:', data);
         toast.error('Theme update completed but response was unexpected.');
