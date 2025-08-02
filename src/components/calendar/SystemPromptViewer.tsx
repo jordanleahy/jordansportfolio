@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Save, X, Sparkles, GitCompare } from 'lucide-react';
+import { Edit3, Save, X, Sparkles, GitCompare, Palette } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
@@ -12,6 +12,11 @@ import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemProm
 import { diffLines } from 'diff';
 import { stripMarkdownFormatting } from '@/utils/markdownUtils';
 import { ColorEnhancedText } from '@/components/ui/color-enhanced-text';
+import { ColorThemeSelector } from '@/components/calendar/ColorThemeSelector';
+import { ColorPickerRealtime } from '@/components/ui/color-picker-realtime';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useColorThemes } from '@/hooks/useColorThemes';
+import { Separator } from '@/components/ui/separator';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -30,6 +35,8 @@ export const SystemPromptViewer = ({
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
+  const [showColorEditor, setShowColorEditor] = useState(false);
   
   // Use the optimized cache hook
   const {
@@ -53,6 +60,9 @@ export const SystemPromptViewer = ({
       }
     }
   });
+
+  // Use color themes
+  const { data: colorThemes = [], isLoading: isLoadingThemes } = useColorThemes();
 
   // Update local state when data changes
   useEffect(() => {
@@ -103,6 +113,23 @@ export const SystemPromptViewer = ({
     }
   }, [category, promptData?.prompt, regeneratePrompt]);
 
+  const handleThemeChange = useCallback((themeId: string) => {
+    setSelectedThemeId(themeId);
+    const selectedTheme = colorThemes.find(t => t.id === themeId);
+    if (selectedTheme) {
+      // Apply theme colors to CSS variables
+      const root = document.documentElement;
+      root.style.setProperty('--primary', selectedTheme.primary_color);
+      root.style.setProperty('--secondary', selectedTheme.secondary_color);
+      root.style.setProperty('--accent', selectedTheme.accent_color);
+      root.style.setProperty('--background', selectedTheme.background_color);
+      root.style.setProperty('--foreground', selectedTheme.text_color);
+      root.style.setProperty('--border', selectedTheme.border_color);
+      
+      toast.success(`Applied ${selectedTheme.name} theme`);
+    }
+  }, [colorThemes]);
+
   // Compute diff when in editing mode
   const diffResult = useMemo(() => {
     if (!isEditing || !previousPrompt || !editedPrompt) return null;
@@ -151,6 +178,36 @@ export const SystemPromptViewer = ({
         </div>
       ) : isEditing ? (
         <div className="space-y-4">
+          {/* Color Theme Selector */}
+          {!isLoadingThemes && colorThemes.length > 0 && (
+            <div className="border-b pb-4">
+              <ColorThemeSelector
+                themes={colorThemes}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={handleThemeChange}
+                className="mb-3"
+              />
+              
+              <Dialog open={showColorEditor} onOpenChange={setShowColorEditor}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Palette className="h-4 w-4 mr-2" />
+                    Edit Colors
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Real-time Color Editor</DialogTitle>
+                  </DialogHeader>
+                  <ColorPickerRealtime 
+                    allowCollaboration={true}
+                    showAdvanced={true}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+          
           {/* Content based on view mode */}
           {showDiff && hasChanges ? (
             <DiffView />
@@ -167,6 +224,36 @@ export const SystemPromptViewer = ({
         </div>
       ) : (
         <div className="max-h-[60vh] overflow-auto">
+          {/* Color Theme Selector */}
+          {!isLoadingThemes && colorThemes.length > 0 && (
+            <div className="mb-4 p-4 border rounded-md bg-background/50">
+              <ColorThemeSelector
+                themes={colorThemes}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={handleThemeChange}
+                className="mb-3"
+              />
+              
+              <Dialog open={showColorEditor} onOpenChange={setShowColorEditor}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Palette className="h-4 w-4 mr-2" />
+                    Edit Colors
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Real-time Color Editor</DialogTitle>
+                  </DialogHeader>
+                  <ColorPickerRealtime 
+                    allowCollaboration={true}
+                    showAdvanced={true}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+          
           <div className="border rounded-md p-4 bg-muted/30 h-full">
             {promptData?.prompt ? (
               <ColorEnhancedText 
