@@ -217,8 +217,8 @@ export const PostsTable = ({
               <div className="flex items-center gap-1">
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                   <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
-                  <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
+                  <span className="hidden sm:inline">Category Prompt</span>
+                  <span className="sm:hidden">Category Prompt</span>
                 </Button>
               </div>
             )}
