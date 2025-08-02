@@ -26,16 +26,22 @@ export const SystemPromptViewer = ({
   onClose
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
-  const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [agentName, setAgentName] = useState<string>('');
-  const [lastUpdated, setLastUpdated] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
-  const [isRegenerating, setIsRegenerating] = useState(false);
   const { theme } = useTheme();
+  
+  // Use the optimized cache hook
+  const {
+    data: promptData,
+    isLoading,
+    updatePrompt,
+    isUpdating,
+    regeneratePrompt,
+    isRegenerating,
+    invalidateCache,
+    prefetchPrompt
+  } = useSystemPromptCache(category);
   
   // Refs for cleanup
   const componentId = useRef(`system-prompt-viewer-${Date.now()}`);
