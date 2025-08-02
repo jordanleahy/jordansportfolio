@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Edit3, Save, X, Eye, Sparkles, Trash2, RefreshCw } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { connectionPoolManager } from '@/services/realtime/RealtimeConnectionPoolManager';
@@ -22,6 +24,7 @@ export const SystemPromptViewer = ({
   isVisible,
   onClose
 }: SystemPromptViewerProps) => {
+  const isMobile = useIsMobile();
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
@@ -365,84 +368,117 @@ export const SystemPromptViewer = ({
     );
   }, [systemPrompt, previousPrompt]);
 
+  // Shared content component for both mobile and desktop
+  const contentComponent = (
+    <>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-full min-h-32">
+          <div className="text-muted-foreground">Loading system prompt...</div>
+        </div>
+      ) : isEditing ? (
+        <Textarea 
+          value={editedPrompt} 
+          onChange={(e) => setEditedPrompt(e.target.value)} 
+          className="h-full min-h-96 resize-none font-mono text-sm" 
+          placeholder="Enter system prompt..." 
+        />
+      ) : (
+        <div className="max-h-[60vh] overflow-auto">
+          {renderedPrompt}
+        </div>
+      )}
+    </>
+  );
+
+  // Shared header component for both mobile and desktop
+  const headerComponent = (
+    <>
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-semibold truncate">{category} System Prompt</h2>
+          {agentName && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Agent: {agentName}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+          {isEditing ? (
+            <>
+              <Button variant="outline" size="sm" onClick={handleCancel}>
+                <X className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => handleSave()} 
+                disabled={isSaving || editedPrompt === systemPrompt}
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              {systemPrompt && (
+                <>
+                  <Button variant="outline" size="sm" onClick={handleManualRefresh}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRegeneratePrompt} 
+                disabled={isRegenerating}
+              >
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+      
+      {lastUpdated && (
+        <p className="text-xs text-muted-foreground mt-2">
+          Last updated: {lastUpdated}
+        </p>
+      )}
+    </>
+  );
+
   if (!isVisible) return null;
 
+  // Mobile: Use Sheet for full-screen experience
+  if (isMobile) {
+    return (
+      <Sheet open={isVisible} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent side="right" className="w-full p-0 flex flex-col">
+          <SheetHeader className="p-6 pb-3 border-b">
+            {headerComponent}
+          </SheetHeader>
+          <div className="flex-1 p-6 pt-3">
+            {contentComponent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Use Card with close button
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex-shrink-0 pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>{category} System Prompt</CardTitle>
-            {agentName && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Agent: {agentName}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {isEditing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={handleCancel}>
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={() => handleSave()} 
-                  disabled={isSaving || editedPrompt === systemPrompt}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                {systemPrompt && (
-                  <>
-                    <Button variant="outline" size="sm" onClick={handleManualRefresh}>
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRegeneratePrompt} 
-                  disabled={isRegenerating}
-                >
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-        
-        {lastUpdated && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Last updated: {lastUpdated}
-          </p>
-        )}
+        {headerComponent}
       </CardHeader>
-
       <CardContent className="flex-1">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-muted-foreground">Loading system prompt...</div>
-          </div>
-        ) : isEditing ? (
-          <Textarea 
-            value={editedPrompt} 
-            onChange={(e) => setEditedPrompt(e.target.value)} 
-            className="h-full resize-none font-mono text-sm" 
-            placeholder="Enter system prompt..." 
-          />
-        ) : (
-          <div className="max-h-[60vh] overflow-auto">
-            {renderedPrompt}
-          </div>
-        )}
+        {contentComponent}
       </CardContent>
     </Card>
   );
