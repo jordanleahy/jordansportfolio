@@ -417,7 +417,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-sm">{theme.name}</span>
-                          <span className="text-xs bg-muted px-2 py-0.5 rounded">System</span>
                         </div>
                       </div>
                     </DropdownMenuItem>
