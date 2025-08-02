@@ -21,6 +21,7 @@ import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { ColorThemeManager } from "./ColorThemeManager";
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
   onPostsChange: () => void;
@@ -40,6 +41,7 @@ export const PostsTable = ({
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
+  const [isThemeManagerOpen, setIsThemeManagerOpen] = useState(false);
   const isMobile = useIsMobile();
 
   // Load color themes
@@ -437,7 +439,7 @@ export const PostsTable = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64 bg-background border border-border shadow-lg z-50">
-                  <DropdownMenuLabel className="text-sm font-medium">Add Theme</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-sm font-medium">Color Themes</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {themes.map(theme => <DropdownMenuItem key={theme.id} onClick={() => handleThemeUpdate(theme.id)} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
                       <div className="flex gap-1">
@@ -457,6 +459,13 @@ export const PostsTable = ({
                         </div>
                       </div>
                     </DropdownMenuItem>)}
+                  <DropdownMenuSeparator />
+                    <ColorThemeManager trigger={
+                      <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
+                        <Plus className="w-4 h-4" />
+                        <span className="font-medium text-sm">Add Theme</span>
+                      </DropdownMenuItem>
+                    } />
                 </DropdownMenuContent>
               </DropdownMenu>
               </div>}
@@ -497,6 +506,8 @@ export const PostsTable = ({
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
 
       {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
+
+      <ColorThemeManager />
 
       <PostForm 
         open={showCreateForm}
