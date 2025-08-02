@@ -177,7 +177,7 @@ export const SystemPromptViewer = ({
           </h2>
           {promptData?.agentName && (
             <p className="text-sm text-muted-foreground mt-1 truncate">
-              Agent: {promptData.agentName}
+              {promptData.agentName}
             </p>
           )}
         </div>
