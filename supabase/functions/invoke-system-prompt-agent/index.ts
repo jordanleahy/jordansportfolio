@@ -85,7 +85,10 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id } = requestBody;
+    const { category, theme, description, sample_posts, user_id, post_data } = requestBody;
+    
+    // Use post_data if provided (from unified import), otherwise use sample_posts
+    const contextPosts = post_data || sample_posts;
     
     // Input validation
     if (!category || !user_id) {
@@ -101,7 +104,7 @@ serve(async (req) => {
     // Allow any category for system prompt generation
     // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
     
-    console.log('Processing request for category:', category, 'user_id:', user_id);
+    console.log('Processing request for category:', theme || category, 'user_id:', user_id);
 
     if (!openAIApiKey) {
       return new Response(JSON.stringify({ 
@@ -184,7 +187,7 @@ Visual Style: ${defaultColorTheme.visual_style}
 Color Usage: ${defaultColorTheme.color_instructions}
 
 Sample content from this category:
-${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
+${contextPosts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
 
 Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, the provided color palette, and content analysis guidelines. Include the color palette in the standard format with the exact hex values provided above.`;
 
