@@ -96,11 +96,13 @@ export const SystemPromptViewer = ({
       if (event.payload.data?.system_prompts) {
         const hasCategory = event.payload.data.system_prompts.some((prompt: any) => prompt.category === category);
         if (hasCategory) {
+          // Store current prompt as previous before loading new one
+          setPreviousPrompt(systemPrompt);
           loadSystemPrompt();
         }
       }
     }
-  }, [category, loadSystemPrompt]);
+  }, [category, loadSystemPrompt, systemPrompt]);
 
   // Enhanced real-time connection with connection pooling
   useEffect(() => {
