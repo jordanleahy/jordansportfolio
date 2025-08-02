@@ -53,13 +53,13 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   
   let updatedPrompt = prompt;
   
-  // Find and replace the color palette table with complete color names and hex codes
+  // Find and replace the color palette table with hex codes only
   const colorTableRegex = /\|[^|]*Primary[^|]*\|[^|]*Secondary[^|]*\|[^|]*Accent[^|]*\|[^|]*(?:Neutral|Supporting)[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|/g;
   
   const newColorTable = `| Primary | Secondary | Accent | Supporting |
 |---------|-----------|---------|----------|
-| ${getColorNameFromHex(colorTheme.primary_color)} (${colorTheme.primary_color}) | ${getColorNameFromHex(colorTheme.secondary_color)} (${colorTheme.secondary_color}) | ${getColorNameFromHex(colorTheme.accent_color)} (${colorTheme.accent_color}) | ${getColorNameFromHex(colorTheme.text_color)} (${colorTheme.text_color}) |
-| ${getColorNameFromHex(colorTheme.background_color)} (${colorTheme.background_color}) | ${getColorNameFromHex(colorTheme.border_color)} (${colorTheme.border_color}) | ${colorTheme.name} Theme | Clean Layout |`;
+| ${colorTheme.primary_color} | ${colorTheme.secondary_color} | ${colorTheme.accent_color} | ${colorTheme.text_color} |
+| ${colorTheme.background_color} | ${colorTheme.border_color} | ${colorTheme.name} Theme | Clean Layout |`;
   
   if (colorTableRegex.test(updatedPrompt)) {
     updatedPrompt = updatedPrompt.replace(colorTableRegex, newColorTable);
@@ -67,28 +67,6 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   } else {
     console.log('⚠️  COLOR TABLE: No color table found to replace');
   }
-  
-  // Replace specific color name patterns in the usage guidelines and descriptions
-  const colorMappings = [
-    // Replace old color names with new ones
-    { old: /Deep Professional Blue/gi, new: getColorNameFromHex(colorTheme.primary_color) },
-    { old: /Professional Blue/gi, new: getColorNameFromHex(colorTheme.primary_color) },
-    { old: /Trustworthy Teal/gi, new: getColorNameFromHex(colorTheme.secondary_color) },
-    { old: /Medical Blue/gi, new: getColorNameFromHex(colorTheme.secondary_color) },
-    { old: /Success Green/gi, new: getColorNameFromHex(colorTheme.accent_color) },
-    { old: /Highlight Orange/gi, new: getColorNameFromHex(colorTheme.accent_color) },
-    { old: /Clean Gray/gi, new: getColorNameFromHex(colorTheme.text_color) },
-    { old: /Soft White/gi, new: getColorNameFromHex(colorTheme.background_color) },
-    { old: /Authority Navy/gi, new: getColorNameFromHex(colorTheme.primary_color) },
-    { old: /Reliable Cyan/gi, new: getColorNameFromHex(colorTheme.secondary_color) }
-  ];
-  
-  colorMappings.forEach(({ old, new: newName }) => {
-    if (old.test(updatedPrompt)) {
-      updatedPrompt = updatedPrompt.replace(old, newName);
-      console.log(`✅ COLOR NAME: ${old.source} → ${newName}`);
-    }
-  });
   
   // Replace color instructions references
   const colorInstructionsRegex = /(Color Instructions|color instructions):\s*[^\n]*/gi;
