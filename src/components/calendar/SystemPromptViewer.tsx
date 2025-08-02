@@ -117,8 +117,8 @@ export const SystemPromptViewer = ({
 
   // Diff component
   const DiffView = () => (
-    <div className="max-h-[60vh] overflow-auto border rounded-md bg-muted/30">
-      <div className="font-mono text-sm">
+    <div className={`${isMobile ? 'max-h-[40vh]' : 'max-h-[60vh]'} overflow-auto border rounded-md bg-muted/30`}>
+      <div className={`font-mono ${isMobile ? 'text-xs' : 'text-sm'}`}>
         {diffResult?.map((part, index) => (
           <div
             key={index}
@@ -161,22 +161,24 @@ export const SystemPromptViewer = ({
               value={editedPrompt}
               onChange={(value) => setEditedPrompt(value || '')}
               language="markdown"
-              height="400px"
+              height={isMobile ? "250px" : "400px"}
               placeholder="Enter system prompt..."
               className="border border-input rounded-md overflow-hidden"
             />
           )}
         </div>
       ) : (
-        <div className="max-h-[60vh] overflow-auto">
+        <div className={`${isMobile ? 'max-h-[50vh]' : 'max-h-[60vh]'} overflow-auto`}>
           <div className="border rounded-md p-4 bg-muted/30 h-full">
             {promptData?.prompt ? (
               <ColorEnhancedText 
                 text={stripMarkdownFormatting(promptData.prompt)} 
-                className="text-sm leading-relaxed"
+                className={`${isMobile ? 'text-xs' : 'text-sm'} leading-relaxed`}
               />
             ) : (
-              <div className="text-sm leading-relaxed">No system prompt found for this category</div>
+              <div className={`${isMobile ? 'text-xs' : 'text-sm'} leading-relaxed`}>
+                No system prompt found for this category
+              </div>
             )}
           </div>
         </div>
@@ -189,76 +191,120 @@ export const SystemPromptViewer = ({
     <>
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold truncate">{category} System Prompt</h2>
+          <h2 className={`font-semibold truncate ${isMobile ? 'text-base' : 'text-lg'}`}>
+            {category} System Prompt
+          </h2>
           {promptData?.agentName && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1 truncate">
               Agent: {promptData.agentName}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-          {realtimeUpdateReceived && (
-            <Badge variant="secondary" className="animate-pulse">
-              Updated
-            </Badge>
-          )}
-          {/* Close button - only show when not editing */}
-          {(!isMobile || !isEditing) && !isEditing && (
-            <Button variant="outline" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          {isEditing ? (
-            <>
+        
+        {/* Mobile: Stack action buttons or use dropdown when editing */}
+        {isMobile && isEditing ? (
+          <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
+            <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={handleCancel}>
-                <X className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={!showDiff ? "default" : "outline"}
-                size="icon"
-                onClick={() => setShowDiff(false)}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={showDiff ? "default" : "outline"}
-                size="icon"
-                onClick={() => setShowDiff(true)}
-              >
-                <GitCompare className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
               <Button 
                 variant="default" 
                 size="sm" 
                 onClick={handleSave} 
                 disabled={isUpdating || editedPrompt === promptData?.prompt}
+                className="min-w-[60px]"
               >
-                <Save className="h-4 w-4" />
+                <Save className="h-3 w-3" />
               </Button>
-            </>
-          ) : (
-            <>
-              {promptData?.prompt && (
-                <Button variant="outline" size="sm" onClick={handleStartEditing}>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant={!showDiff ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDiff(false)}
+                className="flex-1"
+              >
+                <Edit3 className="h-3 w-3" />
+              </Button>
+              <Button
+                variant={showDiff ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDiff(true)}
+                className="flex-1"
+              >
+                <GitCompare className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+            {realtimeUpdateReceived && (
+              <Badge variant="secondary" className="animate-pulse">
+                Updated
+              </Badge>
+            )}
+            
+            {/* Desktop actions or mobile non-editing actions */}
+            {isEditing && !isMobile ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancel}>
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={!showDiff ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setShowDiff(false)}
+                >
                   <Edit3 className="h-4 w-4" />
                 </Button>
-              )}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRegeneratePrompt} 
-                disabled={isRegenerating}
-              >
-                <Sparkles className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
+                <Button
+                  variant={showDiff ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setShowDiff(true)}
+                >
+                  <GitCompare className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={handleSave} 
+                  disabled={isUpdating || editedPrompt === promptData?.prompt}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                {promptData?.prompt && (
+                  <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRegeneratePrompt} 
+                  disabled={isRegenerating}
+                >
+                  <Sparkles className="h-4 w-4" />
+                </Button>
+                {/* Close button - only show when not editing */}
+                {!isEditing && (
+                  <Button variant="outline" size="sm" onClick={onClose}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
       
-      <div className="flex items-center justify-between mt-2">
+      {/* Status row - stack on mobile when editing */}
+      <div className={`flex items-center justify-between mt-2 ${isMobile && isEditing ? 'flex-col items-start gap-1' : ''}`}>
         {promptData?.lastUpdated && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground truncate">
             Last updated: {new Date(promptData.lastUpdated).toLocaleString()}
           </p>
         )}
@@ -278,11 +324,15 @@ export const SystemPromptViewer = ({
   if (isMobile) {
     return (
       <Sheet open={isVisible} onOpenChange={(open) => !open && onClose()}>
-        <SheetContent side="right" className="w-full p-0 flex flex-col">
-          <SheetHeader className="p-6 pb-3 border-b">
+        <SheetContent 
+          side="right" 
+          className="w-full p-0 flex flex-col max-h-[100dvh]"
+          hideClose={true}
+        >
+          <SheetHeader className="p-4 pb-3 border-b flex-shrink-0">
             {headerComponent}
           </SheetHeader>
-          <div className="flex-1 p-6 pt-3">
+          <div className="flex-1 p-4 pt-3 overflow-auto">
             {contentComponent}
           </div>
         </SheetContent>
