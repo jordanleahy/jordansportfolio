@@ -28,7 +28,6 @@ export const SystemPromptViewer = ({
   selectedThemeId
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
-  const [isEditing, setIsEditing] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
@@ -76,7 +75,6 @@ export const SystemPromptViewer = ({
     try {
       setPreviousPrompt(promptData?.prompt || '');
       await updatePrompt({ newPrompt: editedPrompt });
-      setIsEditing(false);
       toast.success('System prompt updated successfully');
     } catch (error) {
       console.error('Error saving system prompt:', error);
@@ -86,13 +84,6 @@ export const SystemPromptViewer = ({
 
   const handleCancel = useCallback(() => {
     setEditedPrompt(promptData?.prompt || '');
-    setIsEditing(false);
-    setShowDiff(false);
-  }, [promptData?.prompt]);
-
-  const handleStartEditing = useCallback(() => {
-    setPreviousPrompt(promptData?.prompt || '');
-    setIsEditing(true);
     setShowDiff(false);
   }, [promptData?.prompt]);
 
@@ -110,11 +101,11 @@ export const SystemPromptViewer = ({
   }, [category, promptData?.prompt, regeneratePrompt]);
 
 
-  // Compute diff when in editing mode
+  // Compute diff when in diff view mode
   const diffResult = useMemo(() => {
-    if (!isEditing || !previousPrompt || !editedPrompt) return null;
+    if (!showDiff || !previousPrompt || !editedPrompt) return null;
     return diffLines(previousPrompt, editedPrompt);
-  }, [isEditing, previousPrompt, editedPrompt]);
+  }, [showDiff, previousPrompt, editedPrompt]);
 
   const hasChanges = useMemo(() => {
     return editedPrompt !== promptData?.prompt;
@@ -149,14 +140,14 @@ export const SystemPromptViewer = ({
     </div>
   );
 
-  // Shared content component
+  // Shared content component - always show editor
   const contentComponent = (
     <>
       {isLoading ? (
         <div className="flex items-center justify-center h-full min-h-32">
           <div className="text-muted-foreground">Loading system prompt...</div>
         </div>
-      ) : isEditing ? (
+      ) : (
         <div className="space-y-4">
           {/* Content based on view mode */}
           {showDiff && hasChanges ? (
@@ -172,27 +163,11 @@ export const SystemPromptViewer = ({
             />
           )}
         </div>
-      ) : (
-        <div className={`${isMobile ? 'max-h-[50vh]' : 'max-h-[60vh]'} overflow-auto`}>
-          <div className="border rounded-md p-4 bg-muted/30 h-full">
-            {promptData?.prompt ? (
-              <ThemeAwareColorText 
-                text={stripMarkdownFormatting(promptData.prompt)} 
-                currentTheme={currentTheme || undefined}
-                className={`${isMobile ? 'text-xs' : 'text-sm'} leading-relaxed`}
-              />
-            ) : (
-              <div className={`${isMobile ? 'text-xs' : 'text-sm'} leading-relaxed`}>
-                No system prompt found for this category
-              </div>
-            )}
-          </div>
-        </div>
       )}
     </>
   );
 
-  // Shared header component
+  // Shared header component - always show editor with persistent save button
   const headerComponent = (
     <>
       <div className="flex items-center justify-between">
@@ -207,18 +182,18 @@ export const SystemPromptViewer = ({
           )}
         </div>
         
-        {/* Mobile: Stack action buttons or use dropdown when editing */}
-        {isMobile && isEditing ? (
+        {/* Mobile: Stack action buttons */}
+        {isMobile ? (
           <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={handleCancel}>
                 <X className="h-3 w-3" />
               </Button>
               <Button 
-                variant="default" 
+                variant={hasChanges ? "default" : "outline"} 
                 size="sm" 
                 onClick={handleSave} 
-                disabled={isUpdating || editedPrompt === promptData?.prompt}
+                disabled={isUpdating || !hasChanges}
                 className="min-w-[60px]"
               >
                 <Save className="h-3 w-3" />
@@ -251,69 +226,46 @@ export const SystemPromptViewer = ({
               </Badge>
             )}
             
-            {/* Desktop actions or mobile non-editing actions */}
-            {isEditing && !isMobile ? (
-              <>
-                <Button variant="outline" size="sm" onClick={handleCancel}>
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={!showDiff ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setShowDiff(false)}
-                >
-                  <Edit3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={showDiff ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setShowDiff(true)}
-                >
-                  <GitCompare className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={handleSave} 
-                  disabled={isUpdating || editedPrompt === promptData?.prompt}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                {promptData?.prompt && (
-                  <Button variant="outline" size="sm" onClick={handleStartEditing}>
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRegeneratePrompt} 
-                  disabled={isRegenerating}
-                >
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-                {/* Save button - always show save icon, disabled when no changes */}
-                {!isEditing && (
-                  <Button 
-                    variant={hasChanges ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={handleSave}
-                    disabled={isUpdating || !hasChanges}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                )}
-              </>
-            )}
+            {/* Desktop actions - always show persistent save button */}
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={!showDiff ? "default" : "outline"}
+              size="icon"
+              onClick={() => setShowDiff(false)}
+            >
+              <Edit3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={showDiff ? "default" : "outline"}
+              size="icon"
+              onClick={() => setShowDiff(true)}
+            >
+              <GitCompare className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRegeneratePrompt} 
+              disabled={isRegenerating}
+            >
+              <Sparkles className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={hasChanges ? "default" : "outline"} 
+              size="sm" 
+              onClick={handleSave}
+              disabled={isUpdating || !hasChanges}
+            >
+              <Save className="h-4 w-4" />
+            </Button>
           </div>
         )}
       </div>
       
-      {/* Status row - stack on mobile when editing */}
-      <div className={`flex items-center justify-between mt-2 ${isMobile && isEditing ? 'flex-col items-start gap-1' : ''}`}>
+      {/* Status row */}
+      <div className="flex items-center justify-between mt-2">
         {promptData?.lastUpdated && (
           <p className="text-xs text-muted-foreground truncate">
             Last updated: {new Date(promptData.lastUpdated).toLocaleString()}
