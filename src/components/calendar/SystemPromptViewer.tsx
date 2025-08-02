@@ -149,6 +149,21 @@ export const SystemPromptViewer = ({
     };
   }, [isVisible, category, handleRealtimeUpdate]);
 
+  // Listen for theme change success and manually refresh
+  useEffect(() => {
+    if (!isVisible || !category) return;
+    
+    const timer = setTimeout(() => {
+      // Check if theme update happened by looking for 🏁 THEME UPDATE COMPLETE log
+      if (systemPrompt) {
+        setPreviousPrompt(systemPrompt);
+        loadSystemPrompt();
+      }
+    }, 3000); // Wait 3 seconds after component becomes visible
+
+    return () => clearTimeout(timer);
+  }, [isVisible, category, systemPrompt, loadSystemPrompt]);
+
   // Auto-save when editing
   useEffect(() => {
     if (isEditing && editedPrompt !== systemPrompt) {
