@@ -104,6 +104,23 @@ export const SystemPromptsTab = ({
     onChange(newPrompts, newCategories);
   };
 
+  const deleteSystemPrompt = async (promptId: string) => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase
+        .from('system_prompts')
+        .delete()
+        .eq('id', promptId);
+      
+      if (error) throw error;
+      
+      // Remove from local state
+      setDatabasePrompts(prev => prev.filter(p => p.id !== promptId));
+    } catch (error) {
+      console.error('Error deleting system prompt:', error);
+    }
+  };
+
 
   return (
     <Card>
@@ -165,6 +182,14 @@ export const SystemPromptsTab = ({
                         }}
                       />
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteSystemPrompt(dbPrompt.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
                 
