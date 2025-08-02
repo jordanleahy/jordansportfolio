@@ -346,7 +346,25 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                     disabled={isUpdatingTheme}
                   >
                     <Palette className="h-4 w-4" />
-                    {isUpdatingTheme ? 'Updating...' : 'Color Theme'}
+                    {isUpdatingTheme ? (
+                      'Updating...'
+                    ) : (
+                      <div className="flex gap-1">
+                        {themes.slice(0, 4).map((theme, index) => (
+                          <div
+                            key={theme.id}
+                            className="w-3 h-3 rounded-full border border-border"
+                            style={{ backgroundColor: theme.primary_color }}
+                            title={theme.name}
+                          />
+                        ))}
+                        {themes.length > 4 && (
+                          <div className="w-3 h-3 rounded-full border border-border bg-muted flex items-center justify-center">
+                            <span className="text-[8px] text-muted-foreground">+</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80" align="end">
