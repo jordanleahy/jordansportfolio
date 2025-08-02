@@ -233,10 +233,6 @@ export default function OptimizedCalendar() {
           {availableCategories.map((category) => (
             <TabsContent key={category} value={category} className="space-y-8">
               <Suspense fallback={<CalendarSkeletonLoader />}>
-                <PostForm 
-                  onPostCreated={() => loadCategoryPosts(category)} 
-                  category={category as any} 
-                />
                 <PostsTable 
                   posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
                   onPostsChange={() => loadCategoryPosts(category)}

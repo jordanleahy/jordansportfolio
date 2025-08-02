@@ -3,7 +3,7 @@ import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Palette, Eye } from "lucide-react";
+import { Palette, Eye, Plus } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -381,10 +381,16 @@ export const PostsTable = ({
         
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
           <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="draft">Draft</TabsTrigger>
-              <TabsTrigger value="published">Published</TabsTrigger>
-            </TabsList>
+            <div className="flex items-center gap-4">
+              <TabsList>
+                <TabsTrigger value="draft">Draft</TabsTrigger>
+                <TabsTrigger value="published">Published</TabsTrigger>
+              </TabsList>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create New Post
+              </Button>
+            </div>
             
             {category && <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-2">
