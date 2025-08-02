@@ -165,6 +165,8 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
     });
 
     setIsUpdatingTheme(true);
+    setIsThemePopoverOpen(false); // Close modal immediately when update starts
+    
     try {
       // Get selected theme data
       const selectedTheme = themes.find(t => t.id === themeId);
@@ -302,7 +304,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
           }
         }
 
-        setIsThemePopoverOpen(false);
         toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
       } else {
         console.log('⚠️  UNEXPECTED RESPONSE:', data);
