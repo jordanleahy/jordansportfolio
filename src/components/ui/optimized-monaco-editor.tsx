@@ -50,6 +50,8 @@ const OptimizedMonacoEditor = memo<OptimizedMonacoEditorProps>(({
     contextmenu: !isMobile,
     commandPalette: !isMobile,
     placeholder,
+    // Color decorators for hex codes
+    colorDecorators: true,
     // Performance optimizations
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,
