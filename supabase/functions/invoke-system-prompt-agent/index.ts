@@ -436,7 +436,7 @@ Please generate a detailed, professional system prompt following the established
       console.log('💾 STEP 1: Attempting to insert into system_prompts table');
       const { data: insertedPrompt, error: insertError } = await supabase
         .from('system_prompts')
-        .upsert({
+        .insert({
           user_id,
           agent_id: agent.id,
           agent_name: agent.name,
@@ -446,8 +446,6 @@ Please generate a detailed, professional system prompt following the established
           category,
           prompt_text: generatedPrompt,
           description: `Generated system prompt for ${category} category`
-        }, {
-          onConflict: 'user_id,agent_id,category'
         })
         .select();
 
