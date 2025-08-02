@@ -224,27 +224,23 @@ export const SystemPromptViewer = ({
           </div>
           <div className="flex items-center gap-2">
             {!isEditing && systemPrompt && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit3 className="h-4 w-4" />
-                Edit
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={handleRegeneratePrompt} disabled={isRegenerating} className="gap-2">
+            <Button variant="outline" size="sm" onClick={handleRegeneratePrompt} disabled={isRegenerating}>
               <Sparkles className="h-4 w-4" />
-              {isRegenerating ? 'Generating...' : 'Generate Rich Prompt'}
             </Button>
           </div>
         </div>
         
         
         {isEditing && <div className="flex gap-2 mt-3">
-            <Button variant="outline" size="sm" onClick={handleCancel} className="gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
               <X className="h-4 w-4" />
-              Cancel
             </Button>
-            <Button variant="default" size="sm" onClick={handleSave} disabled={isSaving || editedPrompt === systemPrompt} className="gap-2">
+            <Button variant="default" size="sm" onClick={handleSave} disabled={isSaving || editedPrompt === systemPrompt}>
               <Save className="h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save'}
             </Button>
           </div>}
         {lastUpdated && <p className="text-xs text-muted-foreground mt-2">
