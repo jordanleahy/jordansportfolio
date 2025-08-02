@@ -5,6 +5,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 // Constants
 const AGENT_NAMES = {
   SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
+  VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator',
+  BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
+  COVER_LETTER_GENERATOR: 'Cover Letter Generator',
+} as const;
+
+// Target agent mapping for different categories
+const CATEGORY_TO_TARGET_AGENT = {
+  'vibe-coding': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'healthcare': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'contracts': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'design': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'coding ai': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'ai agents': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'product_manager': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'product_designer': AGENT_NAMES.VISUAL_PROMPT_GENERATOR,
+  'blog_content': AGENT_NAMES.BLOG_CONTENT_GENERATOR,
+  'cover_letter': AGENT_NAMES.COVER_LETTER_GENERATOR,
 } as const;
 
 const SYSTEM_PROMPT_CATEGORIES = {
@@ -474,8 +491,93 @@ Please generate a detailed, professional system prompt following the established
         category: insertedPrompt?.[0]?.category
       });
 
-      // 🔄 Step 2: Update the agent's last_run timestamp
-      console.log('⏰ STEP 2: Updating agent last_run timestamp');
+      // 🎯 Step 2: Find the target agent and add prompt to its system_prompts array
+      const targetAgentName = CATEGORY_TO_TARGET_AGENT[category as keyof typeof CATEGORY_TO_TARGET_AGENT];
+      
+      if (targetAgentName) {
+        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${category}"`);
+        
+        const { data: targetAgent, error: targetAgentError } = await supabase
+          .from('openai_agents')
+          .select('*')
+          .eq('name', targetAgentName)
+          .eq('user_id', user_id)
+          .single();
+
+        if (targetAgentError || !targetAgent) {
+          console.error('❌ TARGET AGENT NOT FOUND:', {
+            target_agent_name: targetAgentName,
+            category,
+            error: targetAgentError
+          });
+        } else {
+          console.log('✅ TARGET AGENT FOUND:', {
+            agent_name: targetAgent.name,
+            agent_id: targetAgent.id
+          });
+
+          // Add the new prompt to the target agent's system_prompts array
+          const existingPrompts = targetAgent.system_prompts || [];
+          const newPromptObj = {
+            category,
+            prompt: generatedPrompt
+          };
+
+          // Check if a prompt for this category already exists
+          const existingIndex = existingPrompts.findIndex((p: any) => p.category === category);
+          let updatedPrompts;
+          
+          if (existingIndex >= 0) {
+            // Replace existing prompt
+            updatedPrompts = [...existingPrompts];
+            updatedPrompts[existingIndex] = newPromptObj;
+            console.log(`🔄 REPLACING: Existing prompt for category "${category}"`);
+          } else {
+            // Add new prompt
+            updatedPrompts = [...existingPrompts, newPromptObj];
+            console.log(`➕ ADDING: New prompt for category "${category}"`);
+          }
+
+          // Update the target agent with the new prompt
+          const currentTimestamp = new Date().toISOString();
+          const { error: targetUpdateError } = await supabase
+            .from('openai_agents')
+            .update({ 
+              system_prompts: updatedPrompts,
+              last_run: currentTimestamp,
+              updated_at: currentTimestamp
+            })
+            .eq('id', targetAgent.id);
+
+          if (targetUpdateError) {
+            console.error('❌ TARGET AGENT UPDATE ERROR:', targetUpdateError);
+          } else {
+            console.log('✅ TARGET AGENT UPDATED: Successfully added prompt to target agent');
+          }
+
+          // Also update the system_prompts table record to reflect the correct target agent
+          const { error: promptUpdateError } = await supabase
+            .from('system_prompts')
+            .update({
+              agent_id: targetAgent.id,
+              agent_name: targetAgent.name,
+              agent_purpose: targetAgent.purpose,
+              agent_owner: targetAgent.owner
+            })
+            .eq('id', insertedPrompt[0].id);
+
+          if (promptUpdateError) {
+            console.error('❌ PROMPT RECORD UPDATE ERROR:', promptUpdateError);
+          } else {
+            console.log('✅ PROMPT RECORD UPDATED: System prompt attribution updated');
+          }
+        }
+      } else {
+        console.log(`⚠️  NO TARGET MAPPING: No target agent defined for category "${category}"`);
+      }
+
+      // 🔄 Step 3: Update the generator agent's last_run timestamp
+      console.log('⏰ STEP 3: Updating generator agent last_run timestamp');
       const currentTimestamp = new Date().toISOString();
       const { error: updateError } = await supabase
         .from('openai_agents')
