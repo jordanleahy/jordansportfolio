@@ -10,17 +10,7 @@ const AGENT_NAMES = {
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
 } as const;
 
-// Dynamic target agent assignment - defaults to Visual Prompt Generator for visual content
-const getTargetAgentName = (category: string): string => {
-  // Specific mappings for special categories
-  const specificMappings: { [key: string]: string } = {
-    'blog_content': AGENT_NAMES.BLOG_CONTENT_GENERATOR,
-    'cover_letter': AGENT_NAMES.COVER_LETTER_GENERATOR,
-  };
-  
-  // Return specific mapping if exists, otherwise default to Visual Prompt Generator
-  return specificMappings[category] || AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
-};
+// This function has been removed - only System Prompt Generator is allowed
 
 const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
@@ -105,6 +95,20 @@ serve(async (req) => {
       }), {
         status: HTTP_STATUS.BAD_REQUEST,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only allow system_prompt_generation category
+    if (category !== SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: `Only '${SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION}' category is allowed for this function.`
+      }), {
+        status: HTTP_STATUS.BAD_REQUEST,
+        headers: {
+          ...CORS_HEADERS,
+          'Content-Type': 'application/json'
+        }
       });
     }
     
@@ -284,8 +288,8 @@ Please generate a detailed, professional system prompt following the established
         category: insertedPrompt?.[0]?.category
       });
 
-      // 🎯 Step 2: Find the target agent and add prompt to its system_prompts array
-      const targetAgentName = getTargetAgentName(category);
+      // 🎯 Step 2: Only target the System Prompt Generator agent (itself)
+      const targetAgentName = AGENT_NAMES.SYSTEM_PROMPT_GENERATOR;
       
       if (targetAgentName) {
         console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${category}"`);
