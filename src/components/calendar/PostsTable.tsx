@@ -326,18 +326,18 @@ export const PostsTable = ({
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
-  return <div className="flex gap-4 h-full">
+  
+  return (
+    <div className="flex gap-4 h-full">
       {/* Main content - table */}
       <div className="transition-all duration-300 flex-1" style={{
-      width: showSystemPrompt ? `calc(100% - ${promptPanelWidth}px - 1rem)` : '100%'
-    }}>
+        width: showSystemPrompt ? `calc(100% - ${promptPanelWidth}px - 1rem)` : '100%'
+      }}>
         <Card className="h-full">
           <div className="p-6">
-            
-        
-        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-          <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
+            <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
+              <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
               <TabsList>
                 <TabsTrigger value="draft">Draft</TabsTrigger>
                 <TabsTrigger value="published">Published</TabsTrigger>
@@ -481,5 +481,6 @@ export const PostsTable = ({
         }}
         category={category}
       />
-    </div>;
+    </div>
+  );
 };
