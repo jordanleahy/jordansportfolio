@@ -29,46 +29,84 @@ export const SystemPromptViewer = ({
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  // Real-time subscription to openai_agents table
+  // Enhanced real-time subscription to openai_agents table
   useEffect(() => {
     let subscription: any;
-    if (isVisible && category) {
+    
+    const setupSubscription = async () => {
+      if (!isVisible || !category) return;
+      
       // Initial load
-      loadSystemPrompt();
+      await loadSystemPrompt();
 
-      // Set up real-time subscription
-      subscription = supabase.channel(`system_prompt_${category}`).on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'openai_agents'
-      }, payload => {
-        console.log('🔄 Real-time update detected:', payload);
+      // Get current user for filtering
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
 
-        // Check if this update affects our category
-        if (payload.new && 'system_prompts' in payload.new && payload.new.system_prompts) {
-          const prompts = Array.isArray(payload.new.system_prompts) ? payload.new.system_prompts as Array<{
-            category: string;
-            prompt: string;
-          }> : [];
-          const relevantPrompt = prompts.find(p => p.category === category);
-          if (relevantPrompt && relevantPrompt.prompt !== systemPrompt) {
-            console.log('📝 System prompt updated for category:', category);
-            setPreviousPrompt(systemPrompt); // Store previous for diff
-            setSystemPrompt(relevantPrompt.prompt);
-            setLastUpdated(new Date().toLocaleString());
+      console.log(`🔗 Setting up real-time subscription for user ${user.id}, category: ${category}`);
 
-            // Show visual notification
-            toast.success(`System prompt updated for ${category}`);
+      // Set up real-time subscription with user filtering
+      subscription = supabase
+        .channel(`system_prompt_${category}_${user.id}`)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'openai_agents',
+          filter: `user_id=eq.${user.id}`
+        }, (payload) => {
+          console.log('🔄 Real-time update detected:', payload);
+          console.log('📊 Payload details:', {
+            eventType: payload.eventType,
+            userId: payload.new?.user_id,
+            agentName: payload.new?.name,
+            hasSystemPrompts: !!payload.new?.system_prompts
+          });
+
+          // Check if this update affects our category
+          if (payload.new && 'system_prompts' in payload.new && payload.new.system_prompts) {
+            const prompts = Array.isArray(payload.new.system_prompts) ? 
+              payload.new.system_prompts as Array<{ category: string; prompt: string; }> : [];
+            
+            const relevantPrompt = prompts.find(p => p.category === category);
+            
+            if (relevantPrompt) {
+              console.log(`✅ Found updated prompt for category ${category}`);
+              console.log('🔍 Prompt comparison:', {
+                currentLength: systemPrompt.length,
+                newLength: relevantPrompt.prompt.length,
+                isDifferent: relevantPrompt.prompt !== systemPrompt
+              });
+
+              if (relevantPrompt.prompt !== systemPrompt) {
+                console.log('📝 Storing previous prompt for diff display');
+                setPreviousPrompt(systemPrompt); // Store current as previous
+                
+                // Update with new prompt
+                setSystemPrompt(relevantPrompt.prompt);
+                setLastUpdated(new Date().toLocaleString());
+
+                // Show visual notification
+                toast.success(`System prompt updated for ${category}`);
+              }
+            } else {
+              console.log(`ℹ️ No prompt found for category ${category} in update`);
+            }
           }
-        }
-      }).subscribe();
-    }
+        })
+        .subscribe((status) => {
+          console.log(`📡 Subscription status for ${category}:`, status);
+        });
+    };
+
+    setupSubscription();
+
     return () => {
       if (subscription) {
+        console.log(`🔌 Removing subscription for ${category}`);
         supabase.removeChannel(subscription);
       }
     };
-  }, [isVisible, category, systemPrompt]);
+  }, [isVisible, category]);
   const loadSystemPrompt = async () => {
     if (!category) return;
     setIsLoading(true);
