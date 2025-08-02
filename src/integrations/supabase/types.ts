@@ -1715,6 +1715,77 @@ export type Database = {
           },
         ]
       }
+      system_prompts: {
+        Row: {
+          agent_id: string | null
+          agent_name: string | null
+          agent_owner: string | null
+          agent_purpose: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_template: boolean
+          last_used_at: string | null
+          name: string
+          prompt_text: string
+          tags: string[] | null
+          updated_at: string
+          usage_count: number
+          user_id: string
+          version: number
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_name?: string | null
+          agent_owner?: string | null
+          agent_purpose?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          last_used_at?: string | null
+          name: string
+          prompt_text: string
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number
+          user_id: string
+          version?: number
+        }
+        Update: {
+          agent_id?: string | null
+          agent_name?: string | null
+          agent_owner?: string | null
+          agent_purpose?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_template?: boolean
+          last_used_at?: string | null
+          name?: string
+          prompt_text?: string
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_prompts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "openai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2096,6 +2167,17 @@ export type Database = {
         Args: { p_source_agent_id: string; p_target_agent_id: string }
         Returns: boolean
       }
+      find_prompts_by_category: {
+        Args: { p_category: string; p_user_id?: string; p_agent_id?: string }
+        Returns: {
+          id: string
+          name: string
+          prompt_text: string
+          agent_name: string
+          usage_count: number
+          last_used_at: string
+        }[]
+      }
       fix_hardcoded_aspect_ratio_in_prompts: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2126,6 +2208,17 @@ export type Database = {
           total_hits: number
           categories_count: number
           avg_hit_count: number
+        }[]
+      }
+      get_prompt_stats: {
+        Args: { p_user_id?: string }
+        Returns: {
+          total_prompts: number
+          active_prompts: number
+          template_prompts: number
+          categories_count: number
+          total_usage: number
+          avg_usage: number
         }[]
       }
       has_role: {
@@ -2171,12 +2264,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      migrate_agent_system_prompts: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
       update_cache_hit: {
         Args: { cache_key_param: string }
+        Returns: undefined
+      }
+      update_prompt_usage: {
+        Args: { p_prompt_id: string }
         Returns: undefined
       }
       upgrade_generic_system_prompts: {
