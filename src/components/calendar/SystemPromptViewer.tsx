@@ -403,9 +403,12 @@ export const SystemPromptViewer = ({
           )}
         </div>
         <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+          {/* Only show close button on desktop, or on mobile when not editing */}
+          {(!isMobile || !isEditing) && (
+            <Button variant="outline" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          )}
           {isEditing ? (
             <>
               <Button variant="outline" size="sm" onClick={handleCancel}>
