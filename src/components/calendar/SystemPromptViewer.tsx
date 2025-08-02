@@ -10,6 +10,7 @@ import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 import { diffLines } from 'diff';
+import { stripMarkdownFormatting } from '@/utils/markdownUtils';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -166,8 +167,8 @@ export const SystemPromptViewer = ({
         </div>
       ) : (
         <div className="max-h-[60vh] overflow-auto">
-          <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed border rounded-md p-3 bg-muted/30 h-full">
-            {promptData?.prompt || 'No system prompt found for this category'}
+          <div className="whitespace-pre-wrap text-sm leading-relaxed border rounded-md p-4 bg-muted/30 h-full">
+            {promptData?.prompt ? stripMarkdownFormatting(promptData.prompt) : 'No system prompt found for this category'}
           </div>
         </div>
       )}
