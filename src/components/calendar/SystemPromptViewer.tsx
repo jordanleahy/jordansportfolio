@@ -18,14 +18,12 @@ interface SystemPromptViewerProps {
   category: string;
   isVisible: boolean;
   onClose: () => void;
-  selectedThemeId?: string;
 }
 
 export const SystemPromptViewer = ({
   category,
   isVisible,
-  onClose,
-  selectedThemeId
+  onClose
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
@@ -34,7 +32,7 @@ export const SystemPromptViewer = ({
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
   
-  const { currentTheme } = useCurrentColorTheme({ selectedThemeId });
+  const { currentTheme } = useCurrentColorTheme();
   
   // Use the optimized cache hook
   const {
