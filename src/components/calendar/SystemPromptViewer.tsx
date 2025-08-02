@@ -220,7 +220,7 @@ export const SystemPromptViewer = ({
         <div className="flex items-center justify-between">
           <div>
             
-            <CardTitle className="text-lg">System Prompt</CardTitle>
+            
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleRegeneratePrompt} disabled={isRegenerating} className="gap-2">
