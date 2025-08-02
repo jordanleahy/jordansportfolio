@@ -138,7 +138,8 @@ export const SystemPromptViewer = ({
               Updated
             </Badge>
           )}
-          {(!isMobile || !isEditing) && (
+          {/* Close button - only show when not editing */}
+          {(!isMobile || !isEditing) && !isEditing && (
             <Button variant="outline" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
