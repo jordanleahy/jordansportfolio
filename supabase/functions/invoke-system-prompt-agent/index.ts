@@ -54,37 +54,37 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   let updatedPrompt = prompt;
   let changesMade = false;
   
-  // Find and replace the color palette table with hex codes only
-  const colorTableRegex = /\|[^|]*Primary[^|]*\|[^|]*Secondary[^|]*\|[^|]*Accent[^|]*\|[^|]*(?:Neutral|Supporting)[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|/g;
-  
-  const newColorTable = `| Primary | Secondary | Accent | Supporting |
-|---------|-----------|---------|----------|
-| ${colorTheme.primary_color} | ${colorTheme.secondary_color} | ${colorTheme.accent_color} | ${colorTheme.text_color} |
-| ${colorTheme.background_color} | ${colorTheme.border_color} | ${colorTheme.name} Theme | Clean Layout |`;
-  
-  if (colorTableRegex.test(updatedPrompt)) {
-    updatedPrompt = updatedPrompt.replace(colorTableRegex, newColorTable);
-    console.log('✅ COLOR TABLE: Replaced existing color palette table');
+  // Simple bullet-point color palette format
+  const newColorPalette = `## 🌈 Color Palette
+- Primary: ${colorTheme.primary_color}
+- Secondary: ${colorTheme.secondary_color}
+- Accent: ${colorTheme.accent_color}
+- Supporting: ${colorTheme.text_color}
+- Background: ${colorTheme.background_color}
+- Border: ${colorTheme.border_color}
+
+**Theme**: ${colorTheme.name}
+
+`;
+
+  // Find and replace existing color palette section (both table and bullet formats)
+  const colorSectionRegex = /## 🌈 Color Palette[\s\S]*?(?=##|$)/;
+  if (colorSectionRegex.test(updatedPrompt)) {
+    updatedPrompt = updatedPrompt.replace(colorSectionRegex, newColorPalette);
+    console.log('✅ COLOR PALETTE: Replaced existing color palette section');
     changesMade = true;
   } else {
-    // Add color table if none exists - insert after "## 🌈 Color Palette" section
-    const colorSectionRegex = /## 🌈 Color Palette[\s\S]*?(?=##|$)/;
-    if (colorSectionRegex.test(updatedPrompt)) {
-      updatedPrompt = updatedPrompt.replace(colorSectionRegex, `## 🌈 Color Palette
-
-${newColorTable}
-
-**Usage Guidelines:**
-- Primary colors for main subjects and key elements
-- Secondary colors for supporting elements and backgrounds  
-- Accent colors for highlights, call-to-actions, and important details
-- Supporting colors for text, borders, and subtle elements
-
-`);
-      console.log('✅ COLOR TABLE: Added new color palette table to existing section');
+    // Add color palette section if none exists - insert after any existing ## section
+    const afterHeaderRegex = /(##[^#].*?\n)/;
+    if (afterHeaderRegex.test(updatedPrompt)) {
+      updatedPrompt = updatedPrompt.replace(afterHeaderRegex, `$1\n${newColorPalette}`);
+      console.log('✅ COLOR PALETTE: Added new color palette section');
       changesMade = true;
     } else {
-      console.log('⚠️  COLOR TABLE: No color palette section found to update');
+      // If no headers exist, prepend the color palette
+      updatedPrompt = newColorPalette + updatedPrompt;
+      console.log('✅ COLOR PALETTE: Prepended color palette to prompt');
+      changesMade = true;
     }
   }
   
