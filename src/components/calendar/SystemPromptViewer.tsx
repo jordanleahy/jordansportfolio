@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Save, X, Eye, Sparkles, Trash2 } from 'lucide-react';
+import { Edit3, Save, X, Eye, Sparkles, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { connectionPoolManager } from '@/services/realtime/RealtimeConnectionPoolManager';
@@ -230,6 +230,15 @@ export const SystemPromptViewer = ({
     setIsEditing(false);
   }, [systemPrompt]);
 
+  const handleManualRefresh = useCallback(async () => {
+    if (!category || !systemPrompt) return;
+    
+    console.log('🔄 [SystemPromptViewer] Manual refresh triggered');
+    setPreviousPrompt(systemPrompt);
+    await loadSystemPrompt();
+    toast.success('System prompt refreshed');
+  }, [category, systemPrompt, loadSystemPrompt]);
+
   const handleRegeneratePrompt = useCallback(async () => {
     if (!category) return;
     setIsRegenerating(true);
@@ -388,9 +397,14 @@ export const SystemPromptViewer = ({
             ) : (
               <>
                 {systemPrompt && (
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
+                  <>
+                    <Button variant="outline" size="sm" onClick={handleManualRefresh}>
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
                 <Button 
                   variant="outline" 
