@@ -37,6 +37,7 @@ interface PostsTableOptimizedProps {
 export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
+  const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
   const isMobile = useIsMobile();
   
   // Load color themes
@@ -312,6 +313,9 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
           agent.system_prompts.some((p: any) => p.prompt.includes(selectedTheme.primary_color))
         ).length : data.agents_updated;
         
+        // Update the current applied theme state
+        setCurrentAppliedTheme(selectedTheme);
+        
         toast.success(`${selectedTheme.name} color theme applied successfully! ${actualUpdatedCount} agent(s) updated.`);
       } else {
         console.log('⚠️  UNEXPECTED RESPONSE:', data);
@@ -360,14 +364,8 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                     ) : (
                       <div className="flex gap-1">
                         {(() => {
-                          // Find the currently applied theme by checking verification data
-                          // For now, we'll default to the first theme or try to detect from logs
-                          const getCurrentTheme = () => {
-                            // Try to find the Black & White theme that was just applied, or default to first theme
-                            return themes.find(t => t.name === 'Black & White') || themes[0];
-                          };
-                          
-                          const currentTheme = getCurrentTheme();
+                          // Use the current applied theme state, fallback to first theme
+                          const currentTheme = currentAppliedTheme || themes[0];
                           if (!currentTheme) return null;
                           
                           // Show the 4 main colors from the currently applied theme
