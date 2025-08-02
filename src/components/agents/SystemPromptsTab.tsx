@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,6 +66,21 @@ export const SystemPromptsTab = ({
   useEffect(() => {
     fetchDatabasePrompts();
   }, [agentId]);
+
+  // Calculate active categories dynamically based on existing prompts
+  const activeCategories = useMemo(() => {
+    const dbCategories = databasePrompts.map(p => p.category);
+    const legacyCategories = systemPrompts.map(p => p.category);
+    const allCategories = [...new Set([...dbCategories, ...legacyCategories])];
+    return allCategories.filter(Boolean); // Remove any undefined/null categories
+  }, [databasePrompts, systemPrompts]);
+
+  // Update agent's supported categories when active categories change
+  useEffect(() => {
+    if (JSON.stringify(activeCategories.sort()) !== JSON.stringify(supportedCategories.sort())) {
+      onChange(systemPrompts, activeCategories);
+    }
+  }, [activeCategories, supportedCategories, systemPrompts, onChange]);
 
   const updatePrompt = (index: number, prompt: string) => {
     const newPrompts = [...systemPrompts];
@@ -141,18 +156,18 @@ export const SystemPromptsTab = ({
         <CardTitle>System Prompts Configuration</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Supported Categories Display */}
+        {/* Active Categories Display */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Supported Categories</h4>
+          <h4 className="text-sm font-medium mb-2">Active Categories</h4>
           <div className="flex flex-wrap gap-2">
-            {supportedCategories.length > 0 ? (
-              supportedCategories.map((category) => (
+            {activeCategories.length > 0 ? (
+              activeCategories.map((category) => (
                 <Badge key={category} variant="secondary">
                   {getCategoryLabel(category)}
                 </Badge>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No categories configured</p>
+              <p className="text-sm text-muted-foreground">No categories with prompts found</p>
             )}
           </div>
         </div>
@@ -263,8 +278,8 @@ export const SystemPromptsTab = ({
         {systemPrompts.length > 0 && (
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Legacy Agent System Prompts</h4>
-            {supportedCategories.length > 0 ? (
-              supportedCategories.map((category) => {
+            {activeCategories.filter(category => systemPrompts.some(p => p.category === category)).length > 0 ? (
+              activeCategories.filter(category => systemPrompts.some(p => p.category === category)).map((category) => {
                 const existingPrompt = systemPrompts.find(p => p.category === category);
                 const promptIndex = systemPrompts.findIndex(p => p.category === category);
                 
