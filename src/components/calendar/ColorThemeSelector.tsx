@@ -37,8 +37,7 @@ export function ColorThemeSelector({
   });
 
   return (
-    <div className={className}>
-      <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
+    <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
         <SelectTrigger className="h-8 w-fit border border-input bg-background px-2 py-1 text-xs sm:text-sm [&>svg]:hidden">
           <SelectValue placeholder="Select color theme">
             {selectedTheme && (
@@ -88,6 +87,5 @@ export function ColorThemeSelector({
           ))}
         </SelectContent>
       </Select>
-    </div>
   );
 }

@@ -219,7 +219,6 @@ export const PostsTable = ({
                   themes={colorThemes}
                   selectedThemeId={selectedThemeId}
                   onThemeChange={onThemeChange}
-                  className="w-48"
                 />
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                   <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
