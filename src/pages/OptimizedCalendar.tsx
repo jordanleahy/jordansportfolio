@@ -191,14 +191,7 @@ export default function OptimizedCalendar() {
                   </div>
                 </div>
                 
-                <ColorThemeSelector
-                  themes={colorThemes}
-                  selectedThemeId={selectedThemeId}
-                  onThemeChange={setSelectedThemeId}
-                  className="mb-4"
-                />
-                
-                <Button 
+                <Button
                   onClick={() => setImportModalOpen(true)}
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                 >
