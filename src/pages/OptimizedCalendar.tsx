@@ -188,6 +188,29 @@ export default function OptimizedCalendar() {
                 >
                   Import Theme Data
                 </Button>
+                
+                <Button
+                  onClick={async () => {
+                    const { triggerSystemPromptGeneration } = await import('@/utils/systemPromptTrigger');
+                    const result = await triggerSystemPromptGeneration(activeTab);
+                    if (result.success) {
+                      toast({
+                        title: "System Prompt Generated",
+                        description: `Successfully generated system prompt for "${activeTab}" category.`,
+                      });
+                    } else {
+                      toast({
+                        title: "Generation Failed",
+                        description: result.error,
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Generate Missing System Prompt
+                </Button>
               </div>
             </div>
           </div>
