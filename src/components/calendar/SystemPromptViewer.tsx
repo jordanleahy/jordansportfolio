@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Save, X, Eye } from 'lucide-react';
+import { Edit3, Save, X, Eye, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,6 +22,7 @@ export const SystemPromptViewer = ({ category, isVisible, onClose }: SystemPromp
   const [agentName, setAgentName] = useState<string>('');
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Real-time subscription to openai_agents table
   useEffect(() => {
@@ -174,6 +175,45 @@ export const SystemPromptViewer = ({ category, isVisible, onClose }: SystemPromp
     setIsEditing(false);
   };
 
+  const handleRegeneratePrompt = async () => {
+    if (!category) return;
+    
+    setIsRegenerating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Call the invoke-system-prompt-agent edge function to regenerate the prompt
+      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+        body: {
+          category: category.replace('-', '_'), // Convert chart-type to chart_type
+          user_id: user.id,
+          theme: `${category} content generation`,
+          description: `Professional system prompt for generating ${category} themed visual content`,
+          sample_posts: []
+        }
+      });
+
+      if (error) throw error;
+
+      if (data && data.generatedPrompt) {
+        // Store previous prompt for diff
+        setPreviousPrompt(systemPrompt);
+        
+        // The edge function will automatically update the database
+        // Real-time subscription will pick up the change
+        toast.success('System prompt regenerated successfully');
+      } else {
+        throw new Error('No generated prompt received');
+      }
+    } catch (error) {
+      console.error('Error regenerating system prompt:', error);
+      toast.error('Failed to regenerate system prompt');
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   // Simple diff highlighting - highlight changed lines
   const renderPromptWithHighlight = (text: string, previousText: string) => {
     if (!previousText || text === previousText) {
@@ -205,54 +245,66 @@ export const SystemPromptViewer = ({ category, isVisible, onClose }: SystemPromp
       <CardHeader className="flex-shrink-0 pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              System Prompt
-            </CardTitle>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm text-muted-foreground">Category:</span>
               <Badge variant="secondary">{category}</Badge>
-              {agentName && <Badge variant="outline">{agentName}</Badge>}
             </div>
+            <CardTitle className="text-lg">System Prompt</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            {!isEditing ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="gap-2"
-              >
-                <Edit3 className="h-4 w-4" />
-                Edit
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  className="gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={isSaving || editedPrompt === systemPrompt}
-                  className="gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-              </div>
-            )}
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRegeneratePrompt}
+              disabled={isRegenerating}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              {isRegenerating ? 'Generating...' : 'Generate Rich Prompt'}
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
+        
+        {!isEditing && systemPrompt && (
+          <div className="flex items-center gap-2 mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className="gap-2"
+            >
+              <Edit3 className="h-4 w-4" />
+              Edit
+            </Button>
+          </div>
+        )}
+        
+        {isEditing && (
+          <div className="flex gap-2 mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSave}
+              disabled={isSaving || editedPrompt === systemPrompt}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        )}
         {lastUpdated && (
           <p className="text-xs text-muted-foreground mt-2">
             Last updated: {lastUpdated}
