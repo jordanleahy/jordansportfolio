@@ -23,13 +23,15 @@ import {
 import { Plus } from 'lucide-react';
 import { CreateAgentData, AgentStatus } from '@/types/openaiAgent';
 import { AgentTemplateSelector } from './AgentTemplateSelector';
+import { MODEL_OPTIONS, DEFAULT_MODELS } from '@/constants/agentConstants';
+import { Badge } from '@/components/ui/badge';
 
 export const CreateAgentModal = () => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<CreateAgentData>({
     name: '',
     purpose: '',
-    model_version: 'gpt-4o-mini',
+    model_version: DEFAULT_MODELS.FAST,
     trigger: '',
     input_source: '',
     output_target: '',
@@ -51,7 +53,7 @@ export const CreateAgentModal = () => {
         setFormData({
           name: '',
           purpose: '',
-          model_version: 'gpt-4o-mini',
+          model_version: DEFAULT_MODELS.FAST,
           trigger: '',
           input_source: '',
           output_target: '',
@@ -137,12 +139,16 @@ export const CreateAgentModal = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4.1-2025-04-14">gpt-4.1-2025-04-14 (Flagship)</SelectItem>
-                  <SelectItem value="o3-2025-04-16">o3-2025-04-16 (Reasoning)</SelectItem>
-                  <SelectItem value="o4-mini-2025-04-16">o4-mini-2025-04-16 (Fast Reasoning)</SelectItem>
-                  <SelectItem value="gpt-4.1-mini-2025-04-14">gpt-4.1-mini-2025-04-14 (Vision)</SelectItem>
-                  <SelectItem value="gpt-4o">gpt-4o (Legacy)</SelectItem>
-                  <SelectItem value="gpt-4o-mini">gpt-4o-mini (Legacy)</SelectItem>
+                  {MODEL_OPTIONS.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <div className="flex items-center gap-2">
+                        <span>{model.label}</span>
+                        {model.recommended && (
+                          <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

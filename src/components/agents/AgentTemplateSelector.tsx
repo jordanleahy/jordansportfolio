@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { CreateAgentData } from '@/types/openaiAgent';
+import { DEFAULT_MODELS } from '@/constants/agentConstants';
 
 interface AgentTemplateSelectorProps {
   onSelectTemplate: (template: CreateAgentData) => void;
@@ -8,7 +9,7 @@ interface AgentTemplateSelectorProps {
 const VISUAL_PROMPT_TEMPLATE: CreateAgentData = {
   name: 'Visual Prompt Generator',
   purpose: 'Single source of truth for all visual prompt generation. Stores and uses system prompts for different categories to generate AI image prompts. Categories are managed by the System Prompt Generator.',
-  model_version: 'gpt-4o-mini',
+  model_version: DEFAULT_MODELS.FAST,
   trigger: 'api_call',
   input_source: 'Category and content (JSON)',
   output_target: 'Generated image prompt (JSON)',
@@ -23,7 +24,7 @@ const VISUAL_PROMPT_TEMPLATE: CreateAgentData = {
 const COVER_LETTER_TEMPLATE: CreateAgentData = {
   name: 'Cover Letter Generator',
   purpose: 'Generates personalized cover letters for Product Manager and Product Designer roles by analyzing job descriptions and incorporating user\'s resume and case studies',
-  model_version: 'gpt-4o-mini',
+  model_version: DEFAULT_MODELS.FAST,
   trigger: 'api_call',
   input_source: 'Job description, company info, user resume, case studies (JSON)',
   output_target: 'Structured cover letter (JSON)',

@@ -10,7 +10,7 @@ export const EDGE_FUNCTION_NAMES = {
 export const OPENAI_CONFIG = {
   MAX_TOKENS: 4000,
   DEFAULT_TEMPERATURE: 0.1,
-  DEFAULT_MODEL: 'gpt-4o-mini',
+  DEFAULT_MODEL: 'o4-mini-2025-04-16', // Updated to latest fast reasoning model
   TIMEOUT_MS: 30000,
 } as const;
 

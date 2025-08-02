@@ -17,11 +17,55 @@ export const SYSTEM_PROMPT_CATEGORIES = {
   PRODUCT_DESIGNER: 'product_designer',
 } as const;
 
-// Default Model Versions
-export const DEFAULT_MODELS = {
-  FAST: 'gpt-4o-mini',
-  POWERFUL: 'gpt-4o',
+// OpenAI Model Versions (Latest)
+export const OPENAI_MODELS = {
+  // Latest flagship model
+  FLAGSHIP: 'gpt-4.1-2025-04-14',
+  // Reasoning models
+  REASONING: 'o3-2025-04-16', 
+  REASONING_FAST: 'o4-mini-2025-04-16',
+  // Vision model
+  VISION: 'gpt-4.1-mini-2025-04-14',
+  // Legacy models (deprecated)
+  LEGACY_GPT4O: 'gpt-4o',
+  LEGACY_GPT4O_MINI: 'gpt-4o-mini',
 } as const;
+
+// Default Model Versions (Updated to latest)
+export const DEFAULT_MODELS = {
+  FAST: OPENAI_MODELS.REASONING_FAST,
+  POWERFUL: OPENAI_MODELS.FLAGSHIP,
+  REASONING: OPENAI_MODELS.REASONING,
+  VISION: OPENAI_MODELS.VISION,
+} as const;
+
+// Model Options with Descriptions
+export const MODEL_OPTIONS = [
+  {
+    value: OPENAI_MODELS.FLAGSHIP,
+    label: 'gpt-4.1-2025-04-14 (Flagship)',
+    description: 'Most capable flagship model',
+    recommended: true
+  },
+  {
+    value: OPENAI_MODELS.REASONING,
+    label: 'o3-2025-04-16 (Reasoning)',
+    description: 'Powerful reasoning model for complex problems',
+    recommended: false
+  },
+  {
+    value: OPENAI_MODELS.REASONING_FAST,
+    label: 'o4-mini-2025-04-16 (Fast Reasoning)',
+    description: 'Fast reasoning optimized for coding and visual tasks',
+    recommended: false
+  },
+  {
+    value: OPENAI_MODELS.VISION,
+    label: 'gpt-4.1-mini-2025-04-14 (Vision)',
+    description: 'Model with vision capabilities',
+    recommended: false
+  }
+] as const;
 
 // Agent Status Values
 export const AGENT_STATUS = {
