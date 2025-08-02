@@ -218,15 +218,6 @@ export default function OptimizedCalendar() {
                   </Button>
                 )}
                 
-                {/* Show status when system prompt exists */}
-                {!isCheckingPrompt && hasSystemPrompt === true && (
-                  <div className="w-full p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium">System prompt ready</span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
