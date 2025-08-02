@@ -41,7 +41,7 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-// Color theme replacement function
+// Color theme replacement function - enhanced to add color info if missing
 function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   console.log('🎨 COLOR REPLACEMENT: Starting variable replacement');
   console.log('🔍 INPUT THEME:', {
@@ -52,6 +52,7 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   });
   
   let updatedPrompt = prompt;
+  let changesMade = false;
   
   // Find and replace the color palette table with hex codes only
   const colorTableRegex = /\|[^|]*Primary[^|]*\|[^|]*Secondary[^|]*\|[^|]*Accent[^|]*\|[^|]*(?:Neutral|Supporting)[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|/g;
@@ -63,9 +64,28 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   
   if (colorTableRegex.test(updatedPrompt)) {
     updatedPrompt = updatedPrompt.replace(colorTableRegex, newColorTable);
-    console.log('✅ COLOR TABLE: Replaced color palette table');
+    console.log('✅ COLOR TABLE: Replaced existing color palette table');
+    changesMade = true;
   } else {
-    console.log('⚠️  COLOR TABLE: No color table found to replace');
+    // Add color table if none exists - insert after "## 🌈 Color Palette" section
+    const colorSectionRegex = /## 🌈 Color Palette[\s\S]*?(?=##|$)/;
+    if (colorSectionRegex.test(updatedPrompt)) {
+      updatedPrompt = updatedPrompt.replace(colorSectionRegex, `## 🌈 Color Palette
+
+${newColorTable}
+
+**Usage Guidelines:**
+- Primary colors for main subjects and key elements
+- Secondary colors for supporting elements and backgrounds  
+- Accent colors for highlights, call-to-actions, and important details
+- Supporting colors for text, borders, and subtle elements
+
+`);
+      console.log('✅ COLOR TABLE: Added new color palette table to existing section');
+      changesMade = true;
+    } else {
+      console.log('⚠️  COLOR TABLE: No color palette section found to update');
+    }
   }
   
   // Replace color instructions references
@@ -73,6 +93,7 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   if (colorInstructionsRegex.test(updatedPrompt)) {
     updatedPrompt = updatedPrompt.replace(colorInstructionsRegex, `Color Instructions: ${colorTheme.color_instructions}`);
     console.log('✅ COLOR INSTRUCTIONS: Updated color instructions');
+    changesMade = true;
   }
   
   // Replace visual style references
@@ -80,14 +101,25 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   if (visualStyleRegex.test(updatedPrompt)) {
     updatedPrompt = updatedPrompt.replace(visualStyleRegex, `Visual Style: ${colorTheme.visual_style}`);
     console.log('✅ VISUAL STYLE: Updated visual style');
+    changesMade = true;
   }
   
-  // Replace theme name references
-  const themeNameRegex = /([A-Z][a-z]+\s+[A-Z][a-z]+\s+[A-Z][a-z]+|[A-Z][a-z]+\s+[A-Z][a-z]+)\s+theme/gi;
-  updatedPrompt = updatedPrompt.replace(themeNameRegex, `${colorTheme.name} theme`);
+  // Replace theme name references - be more aggressive about theme name updates
+  const themeNamePatterns = [
+    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+theme/gi,
+    /([A-Z][a-z]+(?:\s+&\s+[A-Z][a-z]+)*)\s+color/gi,
+    /(Default|Professional|Standard|Basic)\s+(theme|color)/gi
+  ];
+  
+  themeNamePatterns.forEach(pattern => {
+    if (pattern.test(updatedPrompt)) {
+      updatedPrompt = updatedPrompt.replace(pattern, `${colorTheme.name} theme`);
+      changesMade = true;
+    }
+  });
   console.log('✅ THEME NAME: Updated theme name references');
   
-  // Replace hex color codes with new ones
+  // Replace hex color codes with new ones - more comprehensive matching
   const hexPatterns = [
     { old: /#2563eb/gi, new: colorTheme.primary_color },
     { old: /#0891b2/gi, new: colorTheme.secondary_color },
@@ -104,13 +136,23 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
     if (old.test(updatedPrompt)) {
       updatedPrompt = updatedPrompt.replace(old, newColor);
       console.log(`✅ HEX REPLACEMENT: ${old.source} → ${newColor}`);
+      changesMade = true;
     }
   });
+  
+  // Force an update by adding theme signature if no other changes made
+  if (!changesMade) {
+    // Add a subtle theme signature to force an update
+    const themeSignature = `\n\n<!-- Theme: ${colorTheme.name} (${new Date().toISOString()}) -->`;
+    updatedPrompt += themeSignature;
+    changesMade = true;
+    console.log('🔄 FORCED UPDATE: Added theme signature to trigger update');
+  }
   
   console.log('🎨 COLOR REPLACEMENT COMPLETE:', {
     original_length: prompt.length,
     updated_length: updatedPrompt.length,
-    changes_made: prompt !== updatedPrompt
+    changes_made: changesMade
   });
   
   return updatedPrompt;
