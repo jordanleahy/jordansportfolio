@@ -15,6 +15,7 @@ import { ThemeAwareColorText } from '@/components/ui/theme-aware-color-text';
 import { useCurrentColorTheme } from '@/hooks/useCurrentColorTheme';
 import { ColorThemeSelector } from './ColorThemeSelector';
 import { ColorTheme } from '@/types/colorTheme';
+import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -38,6 +39,7 @@ export const SystemPromptViewer = ({
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
+  const [previousTheme, setPreviousTheme] = useState<ColorTheme | null>(null);
   
   const { currentTheme } = useCurrentColorTheme({ selectedThemeId });
   
@@ -74,6 +76,19 @@ export const SystemPromptViewer = ({
       }
     }
   }, [promptData, previousPrompt]);
+
+  // Handle theme changes and update hex codes in editor content
+  useEffect(() => {
+    if (currentTheme && previousTheme && currentTheme.id !== previousTheme.id && editedPrompt) {
+      const updatedText = updateTextWithNewTheme(editedPrompt, previousTheme, currentTheme);
+      if (updatedText !== editedPrompt) {
+        setEditedPrompt(updatedText);
+      }
+    }
+    if (currentTheme) {
+      setPreviousTheme(currentTheme);
+    }
+  }, [currentTheme, previousTheme, editedPrompt]);
 
   const handleSave = useCallback(async () => {
     if (!editedPrompt || editedPrompt === promptData?.prompt) return;
