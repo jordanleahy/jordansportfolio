@@ -238,9 +238,6 @@ export default function VendorDetail() {
     onSave: () => queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] }) 
   });
 
-  console.log('VendorDetail params:', { category, vendorSlug });
-  console.log('Available categories:', Object.keys(VENDOR_CATEGORIES));
-  console.log('Category exists:', category && VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES]);
 
   if (!category || !vendorSlug) {
     console.log('Missing required params, redirecting to 404');
@@ -360,8 +357,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   };
 
   const validateVendorData = (data: any): boolean => {
-    console.log("🔍 [VendorDetail] Validating vendor data...");
-    console.log("📊 [VendorDetail] Data keys:", Object.keys(data || {}));
     
     // More lenient validation - only require company_name
     if (!data?.company_name || typeof data.company_name !== 'string') {
@@ -387,13 +382,10 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       console.warn("❌ [VendorDetail] No meaningful data fields found");
       return false;
     }
-    
-    console.log("✅ [VendorDetail] Validation passed");
     return true;
   };
 
   const processJsonData = async () => {
-    console.log("🚀 [VendorDetail] Starting JSON processing...");
     
     if (!pasteContent.trim()) {
       console.warn("❌ [VendorDetail] No paste content provided");
@@ -405,18 +397,15 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       return;
     }
 
-    console.log("📊 [VendorDetail] Paste content length:", pasteContent.length);
-    console.log("📋 [VendorDetail] Paste content preview:", pasteContent.substring(0, 200) + "...");
 
     setIsProcessing(true);
     try {
-      console.log("🔄 [VendorDetail] Invoking process-funding-json edge function...");
       
       const { data, error } = await supabase.functions.invoke('process-funding-json', {
         body: { rawJson: pasteContent }
       });
 
-      console.log("📨 [VendorDetail] Edge function response:", { data, error });
+      
 
       if (error) {
         console.error("❌ [VendorDetail] Edge function error:", error);
@@ -425,14 +414,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
 
       setProcessingResult(data);
       if (data.success) {
-        console.log("✅ [VendorDetail] JSON processed successfully");
-        console.log("📄 [VendorDetail] Cleaned data keys:", Object.keys(data.cleanedData || {}));
-        console.log("🔍 [VendorDetail] Key fields in cleaned data:", {
-          key_benefits: data.cleanedData?.key_benefits?.length || 0,
-          competitive_advantages: data.cleanedData?.competitive_advantages?.length || 0,
-          key_features: data.cleanedData?.key_features?.length || 0
-        });
-        
         setProcessedData(data.cleanedData);
         const fixCount = data.fixes?.length || 0;
         const warningCount = data.warnings?.length || 0;
@@ -463,18 +444,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   };
 
   const submitPastedData = async () => {
-    console.log("🚀 [VendorDetail] Starting data submission...");
-    
     const dataToSubmit = processedData || pasteContent;
-    console.log("📊 [VendorDetail] Data source:", processedData ? "processed" : "raw");
     
     try {
       let jsonData;
       if (processedData) {
-        console.log("✅ [VendorDetail] Using processed data");
         jsonData = processedData;
       } else {
-        console.log("🔄 [VendorDetail] Parsing raw JSON...");
         jsonData = JSON.parse(dataToSubmit);
         
         if (!validateVendorData(jsonData)) {
@@ -487,13 +463,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           return;
         }
       }
-
-      console.log("📋 [VendorDetail] JSON data keys:", Object.keys(jsonData));
-      console.log("🔍 [VendorDetail] Key field values:", {
-        key_benefits_count: Array.isArray(jsonData.key_benefits) ? jsonData.key_benefits.length : 'not array',
-        competitive_advantages_count: Array.isArray(jsonData.competitive_advantages) ? jsonData.competitive_advantages.length : 'not array',
-        key_features_count: Array.isArray(jsonData.key_features) ? jsonData.key_features.length : 'not array'
-      });
 
       // Map ChatGPT response to vendor fields with improved data handling
       const vendorUpdate: Partial<Vendor> = {
@@ -571,15 +540,7 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         }
       };
 
-      console.log("📤 [VendorDetail] Vendor update object keys:", Object.keys(vendorUpdate));
-      console.log("🎯 [VendorDetail] Fields being updated:", {
-        key_benefits: vendorUpdate.key_benefits?.length || 0,
-        competitive_advantages: vendorUpdate.competitive_advantages?.length || 0,
-        key_features: vendorUpdate.key_features?.length || 0
-      });
-
       // Update vendor in database
-      console.log("💾 [VendorDetail] Updating database...");
       const { data: updateResult, error } = await supabase
         .from('vendors')
         .update(vendorUpdate)
@@ -590,8 +551,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         console.error("❌ [VendorDetail] Database update error:", error);
         throw error;
       }
-      
-      console.log("✅ [VendorDetail] Database update successful:", updateResult);
       
       // Show success message
       toast({
@@ -606,7 +565,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       setProcessingResult(null);
       
       // Refresh the page to show updated data
-      console.log("🔄 [VendorDetail] Refreshing page to show updates...");
       window.location.reload();
       
     } catch (error) {

@@ -28,9 +28,6 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
-    
-    console.log(`🚀 [BulkGeneration] Starting bulk generation for post: ${post.id}`);
-    
     try {
       const request: BulkImageGenerationRequest = {
         postId: post.id,

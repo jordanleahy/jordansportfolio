@@ -79,7 +79,6 @@ export default function VendorsIndex() {
   const handleVendorClick = (vendor: any) => {
     const category = getVendorCategory(vendor);
     const vendorDetailUrl = `/vendors/${category}/${vendor.slug}`;
-    console.log('Navigating to vendor detail:', vendorDetailUrl);
     navigate(vendorDetailUrl);
   };
 

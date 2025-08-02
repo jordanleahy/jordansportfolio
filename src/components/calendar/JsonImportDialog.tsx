@@ -72,16 +72,12 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
   };
 
   const handlePreview = () => {
-    console.log('handlePreview called with jsonInput:', jsonInput);
     const validation = validateJson(jsonInput);
-    console.log('validation result:', validation);
     setErrors(validation.errors);
     
     if (validation.isValid && validation.data) {
-      console.log('Setting preview data:', validation.data);
       setPreviewData(validation.data);
     } else {
-      console.log('Validation failed or no data');
       setPreviewData(null);
     }
   };
@@ -91,10 +87,7 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
     
     setIsLoading(true);
     try {
-      console.log('🔍 IMPORT DEBUG: Starting import process for category:', previewData.category);
-      
       // Check if posts exist for this category
-      console.log('📊 CHECKING: Existing posts for category:', previewData.category);
       const { data: existingPosts, error: postsQueryError } = await supabase
         .from('social_media_posts')
         .select('id')
@@ -106,7 +99,6 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
       }
       
       // Check if a system prompt exists for this category
-      console.log('🤖 CHECKING: Existing system prompts for category:', previewData.category);
       const { data: existingSystemPrompts, error: promptsQueryError } = await supabase
         .from('system_prompts')
         .select('id')
@@ -121,29 +113,12 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
       const hasSystemPrompt = existingSystemPrompts && existingSystemPrompts.length > 0;
       const needsSystemPrompt = !hasSystemPrompt;
       
-      console.log('🎯 IMPORT DECISION MATRIX:', {
-        category: previewData.category,
-        hasExistingPosts,
-        hasSystemPrompt,
-        needsSystemPrompt,
-        postsToImport: previewData.posts.length
-      });
-      
       // Import the posts
-      console.log('📥 IMPORTING: Posts for category:', previewData.category);
       await optimizedSocialMediaService.bulkImportPosts(previewData.category, previewData.posts);
-      console.log('✅ POSTS IMPORTED: Successfully imported', previewData.posts.length, 'posts');
       
       // Generate system prompt if one doesn't exist for this category
       if (needsSystemPrompt) {
-        const statusMessage = hasExistingPosts 
-          ? `Category "${previewData.category}" has posts but no system prompt. Generating...`
-          : `New category "${previewData.category}" detected. Generating system prompt...`;
-        
-        console.log('🤖 SYSTEM PROMPT GENERATION:', statusMessage);
-        
         try {
-          console.log('🚀 CALLING: invoke-system-prompt-agent edge function');
           const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
             body: {
               category: previewData.category,
@@ -154,8 +129,6 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
             }
           });
 
-          console.log('📡 EDGE FUNCTION RESPONSE:', { invokeData, invokeError });
-
           if (invokeError) {
             console.error('❌ SYSTEM PROMPT GENERATION ERROR:', invokeError);
             toast({
@@ -164,7 +137,6 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
               variant: "destructive",
             });
           } else {
-            console.log('✅ SYSTEM PROMPT GENERATED:', invokeData);
             const promptMessage = hasExistingPosts
               ? `Imported ${previewData.posts.length} posts and generated missing system prompt for "${previewData.category}".`
               : `Imported ${previewData.posts.length} posts and generated system prompt for new category "${previewData.category}".`;
@@ -183,7 +155,6 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
           });
         }
       } else {
-        console.log('ℹ️  SYSTEM PROMPT EXISTS: Skipping generation for category:', previewData.category);
         toast({
           title: "Import Successful",
           description: `Imported ${previewData.posts.length} posts to existing ${previewData.category} category (system prompt already exists).`,

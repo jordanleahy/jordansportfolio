@@ -38,13 +38,13 @@ export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger, i
   // Listen for real-time color theme changes
   useRealtimeColorThemes({
     onThemeCreated: (theme) => {
-      console.log('🎨 [ColorThemeManager] New theme created in real-time:', theme.name);
+      // Theme created in real-time
     },
     onThemeUpdated: (theme) => {
-      console.log('🎨 [ColorThemeManager] Theme updated in real-time:', theme.name);
+      // Theme updated in real-time
     },
     onThemeDeleted: (theme) => {
-      console.log('🎨 [ColorThemeManager] Theme deleted in real-time:', theme.name);
+      // Theme deleted in real-time
     }
   });
 

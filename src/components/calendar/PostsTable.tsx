@@ -199,45 +199,14 @@ export const PostsTable = ({
       toast.error('Category not available');
       return;
     }
-    const timestamp = new Date().toISOString();
-    console.log('🎨 THEME UPDATE INITIATED:', {
-      timestamp,
-      category,
-      themeId,
-      available_themes: themes.length
-    });
     setIsUpdatingTheme(true);
     try {
       // Get selected theme data
       const selectedTheme = themes.find(t => t.id === themeId);
       if (!selectedTheme) {
-        console.error('❌ THEME NOT FOUND:', {
-          themeId,
-          available_themes: themes.map(t => ({
-            id: t.id,
-            name: t.name
-          }))
-        });
         toast.error('Selected theme not found');
         return;
       }
-      console.log('✅ THEME SELECTED:', {
-        theme: {
-          id: selectedTheme.id,
-          name: selectedTheme.name,
-          slug: selectedTheme.slug,
-          colors: {
-            primary: selectedTheme.primary_color,
-            secondary: selectedTheme.secondary_color,
-            accent: selectedTheme.accent_color,
-            background: selectedTheme.background_color,
-            text: selectedTheme.text_color,
-            border: selectedTheme.border_color
-          },
-          visual_style: selectedTheme.visual_style,
-          color_instructions: selectedTheme.color_instructions
-        }
-      });
 
       // Import supabase client
       const {
@@ -255,9 +224,6 @@ export const PostsTable = ({
         console.error('❌ USER AUTHENTICATION ERROR:', userError);
         throw new Error('User not authenticated');
       }
-      console.log('🔐 USER AUTHENTICATED:', {
-        user_id: user.id
-      });
       const requestPayload = {
         category,
         user_id: user.id,
@@ -273,9 +239,6 @@ export const PostsTable = ({
           visual_style: selectedTheme.visual_style
         }
       };
-      console.log('🚀 CALLING EDGE FUNCTION: invoke-system-prompt-agent');
-      console.log('📤 REQUEST PAYLOAD:', requestPayload);
-
       // Call the edge function for variable-based color replacement
       const {
         data,
@@ -283,30 +246,15 @@ export const PostsTable = ({
       } = await supabase.functions.invoke('invoke-system-prompt-agent', {
         body: requestPayload
       });
-      console.log('📥 EDGE FUNCTION RESPONSE:', {
-        success: !!data?.success,
-        error: error,
-        data: data,
-        response_timestamp: new Date().toISOString()
-      });
       if (error) {
         console.error('❌ EDGE FUNCTION ERROR:', error);
         throw new Error(error.message || 'Failed to update system prompt');
       }
       if (data?.success) {
-        console.log('✅ THEME UPDATE SUCCESS:', {
-          message: data.message,
-          agents_updated: data.agents_updated,
-          updated_agents: data.updated_agents,
-          category: data.category,
-          applied_theme: selectedTheme.name
-        });
-
         // Update the current applied theme state
         setCurrentAppliedTheme(selectedTheme);
         toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
       } else {
-        console.log('⚠️  UNEXPECTED RESPONSE:', data);
         toast.error('Theme update completed but response was unexpected.');
       }
     } catch (error) {
@@ -314,11 +262,6 @@ export const PostsTable = ({
       toast.error(`Failed to update color theme: ${error.message}`);
     } finally {
       setIsUpdatingTheme(false);
-      console.log('🏁 THEME UPDATE COMPLETE:', {
-        timestamp: new Date().toISOString(),
-        category,
-        success: true
-      });
     }
   };
 

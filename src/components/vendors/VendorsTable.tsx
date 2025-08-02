@@ -46,7 +46,6 @@ export function VendorsTable({ vendors, onVendorClick, onAddClick, onDeleteClick
     if (slugname) {
       console.log('Navigating to vendor:', vendor.company_name, 'with slug:', vendor.slug, 'category:', slugname);
       const vendorDetailUrl = `/vendors/${slugname}/${vendor.slug}`;
-      console.log('Generated URL:', vendorDetailUrl);
       navigate(vendorDetailUrl);
     } else if (onVendorClick) {
       onVendorClick(vendor);

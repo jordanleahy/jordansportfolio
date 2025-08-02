@@ -28,8 +28,6 @@ export const useProcessingStates = () => {
     isActive: boolean,
     aspectRatio?: AspectRatio
   ) => {
-    console.log(`🔄 [ProcessingStates] Setting ${operation} for post ${postId}${aspectRatio ? ` (${aspectRatio})` : ''}: ${isActive}`);
-    
     setProcessingStates(prev => {
       const newMap = new Map(prev);
       const key = createKey(postId, operation, aspectRatio);
@@ -40,12 +38,6 @@ export const useProcessingStates = () => {
         newMap.delete(key);
       }
       
-      console.log(`🔄 [ProcessingStates] Current states for post ${postId}:`, 
-        Array.from(newMap.entries())
-          .filter(([k]) => k.startsWith(postId))
-          .map(([k, v]) => ({ key: k, ...v }))
-      );
-      
       return newMap;
     });
   }, [createKey]);
@@ -55,8 +47,6 @@ export const useProcessingStates = () => {
     isActive: boolean,
     aspectRatios: AspectRatio[] = ['16:9', '4:3', '9:16', '3:4']
   ) => {
-    console.log(`🔄 [ProcessingStates] Setting bulk processing for post ${postId}: ${isActive}`);
-    
     // Set individual aspect ratio states for shimmer effects
     aspectRatios.forEach(aspectRatio => {
       setProcessing(postId, 'upload', isActive, aspectRatio);
@@ -119,14 +109,10 @@ export const useProcessingStates = () => {
         key.startsWith(`${postId}_upload_`) && state.isActive && state.aspectRatio
       );
     
-    const result = uploadStates[0]?.[1]?.aspectRatio || null;
-    console.log(`🔍 [ProcessingStates] Get upload type for ${postId}: ${result}`);
-    return result;
+    return uploadStates[0]?.[1]?.aspectRatio || null;
   }, [processingStates]);
 
   const clearProcessing = useCallback((postId: string) => {
-    console.log(`🧹 [ProcessingStates] Clearing all processing states for post ${postId}`);
-    
     setProcessingStates(prev => {
       const newMap = new Map(prev);
       const keysToDelete = Array.from(newMap.keys()).filter(key => key.startsWith(postId));

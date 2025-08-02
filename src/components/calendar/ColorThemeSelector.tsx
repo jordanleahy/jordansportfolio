@@ -23,13 +23,12 @@ export function ColorThemeSelector({
   // Listen for real-time color theme changes
   useRealtimeColorThemes({
     onThemeCreated: () => {
-      console.log('🎨 [ColorThemeSelector] New theme available in selector');
+      // New theme available in selector
     },
     onThemeUpdated: (theme) => {
-      console.log('🎨 [ColorThemeSelector] Theme updated:', theme.name);
+      // Theme updated
     },
     onThemeDeleted: (theme) => {
-      console.log('🎨 [ColorThemeSelector] Theme deleted:', theme.name);
       // If the currently selected theme was deleted, clear selection
       if (selectedThemeId === theme.id) {
         onThemeChange('');

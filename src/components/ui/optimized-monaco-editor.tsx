@@ -97,7 +97,7 @@ const OptimizedMonacoEditor = memo<OptimizedMonacoEditorProps>(({
         options={editorOptions}
         loading={<Skeleton className="w-full h-full" />}
         onMount={() => {
-          console.log('✅ [OptimizedMonacoEditor] Editor mounted successfully');
+          // Editor mounted successfully
         }}
       />
     </div>

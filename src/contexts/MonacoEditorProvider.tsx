@@ -25,7 +25,6 @@ export const MonacoEditorProvider: React.FC<MonacoEditorProviderProps> = ({ chil
 
     preloadPromise.current = (async () => {
       try {
-        console.log('🚀 [Monaco] Pre-loading editor...');
         const monaco = await loader.init();
         
         // Configure Monaco with performance optimizations
@@ -57,7 +56,6 @@ export const MonacoEditorProvider: React.FC<MonacoEditorProviderProps> = ({ chil
 
         setMonacoInstance(monaco);
         setIsLoaded(true);
-        console.log('✅ [Monaco] Editor pre-loaded successfully');
       } catch (error) {
         console.error('❌ [Monaco] Failed to pre-load editor:', error);
       }

@@ -69,9 +69,6 @@ export class SystemPromptCache {
       }
     }
 
-    if (cleanedCount > 0) {
-      console.log(`🧹 [SystemPromptCache] Cleaned ${cleanedCount} expired entries`);
-    }
   }
 
   private async loadFromStorage(): Promise<void> {
@@ -109,9 +106,6 @@ export class SystemPromptCache {
         }
       }
 
-      if (loadedCount > 0) {
-        console.log(`📥 [SystemPromptCache] Loaded ${loadedCount} entries from storage`);
-      }
     } catch (error) {
       console.warn('Failed to load cache from storage:', error);
     }
@@ -164,7 +158,6 @@ export class SystemPromptCache {
     if (memoryEntry) {
       if (now - memoryEntry.timestamp < this.MEMORY_TTL && 
           (!memoryEntry.data.expiresAt || now < memoryEntry.data.expiresAt)) {
-        console.log(`⚡ [SystemPromptCache] Memory hit for ${category}`);
         return memoryEntry.data;
       } else {
         this.memoryCache.delete(cacheKey);
@@ -192,8 +185,6 @@ export class SystemPromptCache {
 
     this.memoryCache.set(cacheKey, entry);
     this.saveToStorage(cacheKey, entry);
-    
-    console.log(`💾 [SystemPromptCache] Cached prompt for ${category}`);
   }
 
   async invalidate(category: string, userId: string): Promise<void> {
@@ -202,8 +193,6 @@ export class SystemPromptCache {
     
     const storageKey = `system_prompt_cache_${cacheKey}`;
     localStorage.removeItem(storageKey);
-    
-    console.log(`🗑️ [SystemPromptCache] Invalidated cache for ${category}`);
   }
 
   async clear(): Promise<void> {
@@ -221,8 +210,6 @@ export class SystemPromptCache {
     for (const key of keys) {
       localStorage.removeItem(key);
     }
-    
-    console.log('🗑️ [SystemPromptCache] Cleared all cache');
   }
 
   getStats(): { memoryEntries: number; memorySize: number } {
