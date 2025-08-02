@@ -38,36 +38,28 @@ export function ColorThemeSelector({
 
   return (
     <div className={className}>
-      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-        Color Theme
-      </label>
       <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
         <SelectTrigger className="w-full">
           <div className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
             <SelectValue placeholder="Select color theme">
               {selectedTheme && (
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div 
-                      className="w-3 h-3 rounded-full border border-border" 
-                      style={{ backgroundColor: selectedTheme.primary_color }}
-                    />
-                    <div 
-                      className="w-3 h-3 rounded-full border border-border" 
-                      style={{ backgroundColor: selectedTheme.secondary_color }}
-                    />
-                    <div 
-                      className="w-3 h-3 rounded-full border border-border" 
-                      style={{ backgroundColor: selectedTheme.accent_color }}
-                    />
-                  </div>
-                  <span>{selectedTheme.name}</span>
-                  {selectedTheme.is_system && (
-                    <Badge variant="secondary" className="text-xs">
-                      System
-                    </Badge>
-                  )}
+                <div className="flex gap-1">
+                  <div 
+                    className="w-4 h-4 rounded-full border border-border" 
+                    style={{ backgroundColor: selectedTheme.primary_color }}
+                  />
+                  <div 
+                    className="w-4 h-4 rounded-full border border-border" 
+                    style={{ backgroundColor: selectedTheme.secondary_color }}
+                  />
+                  <div 
+                    className="w-4 h-4 rounded-full border border-border" 
+                    style={{ backgroundColor: selectedTheme.accent_color }}
+                  />
+                  <div 
+                    className="w-4 h-4 rounded-full border border-border" 
+                    style={{ backgroundColor: selectedTheme.background_color }}
+                  />
                 </div>
               )}
             </SelectValue>
@@ -76,41 +68,23 @@ export function ColorThemeSelector({
         <SelectContent>
           {themes.map((theme) => (
             <SelectItem key={theme.id} value={theme.id}>
-              <div className="flex items-center gap-3 w-full">
-                <div className="flex gap-1">
-                  <div 
-                    className="w-3 h-3 rounded-full border border-border" 
-                    style={{ backgroundColor: theme.primary_color }}
-                  />
-                  <div 
-                    className="w-3 h-3 rounded-full border border-border" 
-                    style={{ backgroundColor: theme.secondary_color }}
-                  />
-                  <div 
-                    className="w-3 h-3 rounded-full border border-border" 
-                    style={{ backgroundColor: theme.accent_color }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{theme.name}</span>
-                    {theme.is_system && (
-                      <Badge variant="secondary" className="text-xs">
-                        System
-                      </Badge>
-                    )}
-                    {theme.is_default && (
-                      <Badge variant="outline" className="text-xs">
-                        Default
-                      </Badge>
-                    )}
-                  </div>
-                  {theme.description && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {theme.description}
-                    </div>
-                  )}
-                </div>
+              <div className="flex gap-1">
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: theme.primary_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: theme.secondary_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: theme.accent_color }}
+                />
+                <div 
+                  className="w-4 h-4 rounded-full border border-border" 
+                  style={{ backgroundColor: theme.background_color }}
+                />
               </div>
             </SelectItem>
           ))}
