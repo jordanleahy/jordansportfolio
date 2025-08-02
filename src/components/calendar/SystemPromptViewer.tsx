@@ -295,19 +295,15 @@ export const SystemPromptViewer = ({
                 >
                   <Sparkles className="h-4 w-4" />
                 </Button>
-                {/* Save button - show when there are changes, Close button when no changes */}
-                {!isEditing && hasChanges ? (
+                {/* Save button - always show when not editing */}
+                {!isEditing && (
                   <Button 
-                    variant="default" 
+                    variant={hasChanges ? "default" : "outline"} 
                     size="sm" 
-                    onClick={handleSave}
-                    disabled={isUpdating}
+                    onClick={hasChanges ? handleSave : onClose}
+                    disabled={isUpdating || (!hasChanges && !promptData?.prompt)}
                   >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                ) : !isEditing && (
-                  <Button variant="outline" size="sm" onClick={onClose}>
-                    <X className="h-4 w-4" />
+                    {hasChanges ? <Save className="h-4 w-4" /> : <X className="h-4 w-4" />}
                   </Button>
                 )}
               </>
