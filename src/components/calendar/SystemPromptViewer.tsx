@@ -8,6 +8,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
+import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 import { diffLines } from 'diff';
 
 interface SystemPromptViewerProps {
@@ -25,6 +26,7 @@ export const SystemPromptViewer = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
+  const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
   
   // Use the optimized cache hook
   const {
@@ -37,6 +39,18 @@ export const SystemPromptViewer = ({
     invalidateCache,
     prefetchPrompt
   } = useSystemPromptCache(category);
+
+  // Use realtime system prompts
+  const { isConnected } = useRealtimeSystemPrompts({
+    enabled: isVisible,
+    onPromptUpdated: (data) => {
+      if (data.category === category) {
+        setRealtimeUpdateReceived(true);
+        // Show update indicator briefly
+        setTimeout(() => setRealtimeUpdateReceived(false), 3000);
+      }
+    }
+  });
 
   // Update local state when data changes
   useEffect(() => {
@@ -119,6 +133,11 @@ export const SystemPromptViewer = ({
           )}
         </div>
         <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+          {realtimeUpdateReceived && (
+            <Badge variant="secondary" className="animate-pulse">
+              Updated
+            </Badge>
+          )}
           {(!isMobile || !isEditing) && (
             <Button variant="outline" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -158,11 +177,19 @@ export const SystemPromptViewer = ({
         </div>
       </div>
       
-      {promptData?.lastUpdated && (
-        <p className="text-xs text-muted-foreground mt-2">
-          Last updated: {new Date(promptData.lastUpdated).toLocaleString()}
-        </p>
-      )}
+      <div className="flex items-center justify-between mt-2">
+        {promptData?.lastUpdated && (
+          <p className="text-xs text-muted-foreground">
+            Last updated: {new Date(promptData.lastUpdated).toLocaleString()}
+          </p>
+        )}
+        {isConnected && (
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs text-muted-foreground">Live</span>
+          </div>
+        )}
+      </div>
     </>
   );
 

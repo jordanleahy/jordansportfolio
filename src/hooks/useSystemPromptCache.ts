@@ -78,48 +78,30 @@ export const useSystemPromptCache = (category: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-        // Optimistic update
-        const currentData = query.data;
-        if (currentData) {
-          const optimisticData: SystemPromptData = {
-            prompt: newPrompt,
-            agentName: currentData.agentName,
-            lastUpdated: new Date().toISOString(),
-            version: currentData.version + 1
-          };
-          
-          queryClient.setQueryData(['system-prompt-cached', category], optimisticData);
-          await systemPromptCache.set(category, user.id, optimisticData);
-        }
+      // Optimistic update
+      const currentData = query.data;
+      if (currentData) {
+        const optimisticData: SystemPromptData = {
+          prompt: newPrompt,
+          agentName: currentData.agentName,
+          lastUpdated: new Date().toISOString(),
+          version: currentData.version + 1
+        };
+        
+        queryClient.setQueryData(['system-prompt-cached', category], optimisticData);
+        await systemPromptCache.set(category, user.id, optimisticData);
+      }
 
-      // Update in database
-      const { data: agents, error: fetchError } = await supabase
-        .from('openai_agents')
-        .select('id, system_prompts')
-        .eq('user_id', user.id)
-        .not('system_prompts', 'is', null);
-
-      if (fetchError) throw fetchError;
-
-      const agent = agents?.find(agent => 
-        agent.system_prompts && 
-        agent.system_prompts[category]
-      );
-
-      if (!agent) throw new Error('Agent not found');
-
-      const updatedPrompts = agent.system_prompts ? {
-        ...(agent.system_prompts as Record<string, any>),
-        [category]: newPrompt
-      } : { [category]: newPrompt };
-
+      // Update in new system_prompts table
       const { error: updateError } = await supabase
-        .from('openai_agents')
+        .from('system_prompts')
         .update({ 
-          system_prompts: updatedPrompts,
-          updated_at: new Date().toISOString()
+          prompt_text: newPrompt,
+          updated_at: new Date().toISOString(),
+          version: (currentData?.version || 0) + 1
         })
-        .eq('id', agent.id);
+        .eq('user_id', user.id)
+        .eq('category', category);
 
       if (updateError) throw updateError;
 
@@ -212,27 +194,29 @@ export const useSystemPromptCache = (category: string) => {
   };
 };
 
-// Helper function to fetch fresh prompt data
+// Helper function to fetch fresh prompt data from new system_prompts table
 async function fetchFreshPrompt(category: string, userId: string): Promise<SystemPromptData | null> {
   const { data, error } = await supabase
-    .from('openai_agents')
-    .select('name, system_prompts, updated_at')
+    .from('system_prompts')
+    .select('prompt_text, agent_name, updated_at, version')
     .eq('user_id', userId)
-    .not('system_prompts', 'is', null);
+    .eq('category', category)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .single();
 
-  if (error) throw error;
-
-  const agent = data?.find(agent => 
-    agent.system_prompts && 
-    agent.system_prompts[category]
-  );
-
-  if (!agent) return null;
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No data found, return null
+      return null;
+    }
+    throw error;
+  }
 
   return {
-    prompt: agent.system_prompts[category],
-    agentName: agent.name,
-    lastUpdated: agent.updated_at,
-    version: Date.now() // Simple versioning based on timestamp
+    prompt: data.prompt_text,
+    agentName: data.agent_name,
+    lastUpdated: data.updated_at,
+    version: data.version
   };
 }
