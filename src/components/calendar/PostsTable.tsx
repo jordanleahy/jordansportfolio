@@ -3,7 +3,7 @@ import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Palette, Eye, Plus } from "lucide-react";
+import { Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -12,15 +12,13 @@ import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
 import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStates } from "@/hooks/useProcessingStates";
-import { useColorThemes } from "@/hooks/useColorThemes";
+
 import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { ColorThemeManager } from "./ColorThemeManager";
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
   onPostsChange: () => void;
@@ -36,18 +34,11 @@ export const PostsTable = ({
   selectedThemeId
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
-  const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
-  const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
-  const [isThemeManagerOpen, setIsThemeManagerOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  // Load color themes
-  const {
-    data: themes = []
-  } = useColorThemes();
 
   // Animation state management
   const {
@@ -195,77 +186,6 @@ export const PostsTable = ({
     return acc;
   }, {} as Record<string, boolean>);
 
-  // Handle color theme update for category with enhanced logging
-  const handleThemeUpdate = async (themeId: string) => {
-    if (!category) {
-      toast.error('Category not available');
-      return;
-    }
-    setIsUpdatingTheme(true);
-    try {
-      // Get selected theme data
-      const selectedTheme = themes.find(t => t.id === themeId);
-      if (!selectedTheme) {
-        toast.error('Selected theme not found');
-        return;
-      }
-
-      // Import supabase client
-      const {
-        supabase
-      } = await import('@/integrations/supabase/client');
-
-      // Get current user
-      const {
-        data: {
-          user
-        },
-        error: userError
-      } = await supabase.auth.getUser();
-      if (userError || !user) {
-        console.error('❌ USER AUTHENTICATION ERROR:', userError);
-        throw new Error('User not authenticated');
-      }
-      const requestPayload = {
-        category,
-        user_id: user.id,
-        color_theme: {
-          name: selectedTheme.name,
-          primary_color: selectedTheme.primary_color,
-          secondary_color: selectedTheme.secondary_color,
-          accent_color: selectedTheme.accent_color,
-          background_color: selectedTheme.background_color,
-          text_color: selectedTheme.text_color,
-          border_color: selectedTheme.border_color,
-          color_instructions: selectedTheme.color_instructions,
-          visual_style: selectedTheme.visual_style
-        }
-      };
-      // Call the edge function for variable-based color replacement
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-        body: requestPayload
-      });
-      if (error) {
-        console.error('❌ EDGE FUNCTION ERROR:', error);
-        throw new Error(error.message || 'Failed to update system prompt');
-      }
-      if (data?.success) {
-        // Update the current applied theme state
-        setCurrentAppliedTheme(selectedTheme);
-        toast.success(`${selectedTheme.name} color theme applied successfully! ${data.agents_updated} agent(s) updated.`);
-      } else {
-        toast.error('Theme update completed but response was unexpected.');
-      }
-    } catch (error) {
-      console.error('💥 THEME UPDATE EXCEPTION:', error);
-      toast.error(`Failed to update color theme: ${error.message}`);
-    } finally {
-      setIsUpdatingTheme(false);
-    }
-  };
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
@@ -287,78 +207,13 @@ export const PostsTable = ({
               </TabsList>
             </div>
             
-            {category && <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
-                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
-                  <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
-                </Button>
-                
-                <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" disabled={isUpdatingTheme}>
-                    <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
-                    {isUpdatingTheme ? (
-                      <>
-                        <span className="hidden sm:inline">Updating...</span>
-                        <span className="sm:hidden">...</span>
-                      </>
-                    ) : <div className="flex gap-1">
-                        {(() => {
-                          // Use the current applied theme state, fallback to first theme
-                          const currentTheme = currentAppliedTheme || themes[0];
-                          if (!currentTheme) return null;
-
-                          // Show the 4 main colors from the currently applied theme
-                          const currentColors = [{
-                            color: currentTheme.primary_color,
-                            name: 'Primary'
-                          }, {
-                            color: currentTheme.secondary_color,
-                            name: 'Secondary'
-                          }, {
-                            color: currentTheme.accent_color,
-                            name: 'Accent'
-                          }, {
-                            color: currentTheme.text_color,
-                            name: 'Text'
-                          }];
-                          return currentColors.map((colorInfo, index) => <div key={index} className="w-3 h-3 rounded-full border border-border" style={{
-                            backgroundColor: colorInfo.color
-                          }} title={`${currentTheme.name} - ${colorInfo.name}: ${colorInfo.color}`} />);
-                        })()}
-                      </div>}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 bg-background border border-border shadow-lg z-50">
-                  <DropdownMenuLabel className="text-sm font-medium">Color Themes</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {themes.map(theme => <DropdownMenuItem key={theme.id} onClick={() => handleThemeUpdate(theme.id)} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
-                      <div className="flex gap-1">
-                        <div className="w-3 h-3 rounded-full border border-border" style={{
-                          backgroundColor: theme.primary_color
-                        }} />
-                        <div className="w-3 h-3 rounded-full border border-border" style={{
-                          backgroundColor: theme.secondary_color
-                        }} />
-                        <div className="w-3 h-3 rounded-full border border-border" style={{
-                          backgroundColor: theme.accent_color
-                        }} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{theme.name}</span>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>)}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsThemeManagerOpen(true)} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
-                    <Plus className="w-4 h-4" />
-                    <span className="font-medium text-sm">Add Theme</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              </div>}
+            {category && (
+              <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
+                <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
+              </Button>
+            )}
           </div>
 
           <TabsContent value="draft">
@@ -396,14 +251,6 @@ export const PostsTable = ({
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
 
       {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
-
-      {isThemeManagerOpen && (
-        <ColorThemeManager 
-          trigger={null}
-          isOpen={isThemeManagerOpen}
-          onClose={() => setIsThemeManagerOpen(false)}
-        />
-      )}
 
     </div>
   );
