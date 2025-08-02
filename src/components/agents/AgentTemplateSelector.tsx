@@ -5,19 +5,19 @@ interface AgentTemplateSelectorProps {
   onSelectTemplate: (template: CreateAgentData) => void;
 }
 
-const BLOG_VISUAL_TEMPLATE: CreateAgentData = {
+const VISUAL_PROMPT_TEMPLATE: CreateAgentData = {
   name: 'Visual Prompt Generator',
-  purpose: 'Generates AI image prompts for blog visuals across different categories (Healthcare, Contracts, Design). Dynamically selects appropriate system prompts based on the category passed in the request.',
+  purpose: 'Single source of truth for all visual prompt generation. Stores and uses system prompts for different categories to generate AI image prompts. Categories are managed by the System Prompt Generator.',
   model_version: 'gpt-4o-mini',
   trigger: 'api_call',
-  input_source: 'Category and blog content (JSON)',
+  input_source: 'Category and content (JSON)',
   output_target: 'Generated image prompt (JSON)',
   schedule: 'on-demand',
   owner: 'Content Marketing Team',
   status: 'active',
-  tags: ['blog', 'content-generation', 'image-prompts', 'ai-writing', 'visual-content'],
-  notes: 'Multi-category Visual Prompt Generator with healthcare, contracts, and design system prompts.',
-  supported_categories: ['healthcare', 'contracts', 'design']
+  tags: ['visual-prompts', 'image-generation', 'multi-category', 'ai-prompts'],
+  notes: 'Centralized visual prompt generator. System prompts are managed by System Prompt Generator and stored here for actual image prompt generation.',
+  supported_categories: ['healthcare', 'contracts', 'design', 'coding_ai', 'cdi']
 };
 
 const COVER_LETTER_TEMPLATE: CreateAgentData = {
@@ -43,16 +43,16 @@ export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelecto
       </div>
       <Button 
         variant="outline" 
-        onClick={() => onSelectTemplate(BLOG_VISUAL_TEMPLATE)}
+        onClick={() => onSelectTemplate(VISUAL_PROMPT_TEMPLATE)}
         className="w-full justify-start text-left h-auto p-4"
       >
         <div>
           <div className="font-medium">Visual Prompt Generator</div>
           <div className="text-sm text-muted-foreground mt-1">
-            Multi-category agent for generating AI image prompts for blog visuals
+            Single source of truth for all visual prompt generation across categories
           </div>
           <div className="text-xs text-muted-foreground mt-2">
-            Includes: Healthcare, Contracts, and Design system prompts
+            Categories managed by System Prompt Generator. Stores and uses visual prompts.
           </div>
         </div>
       </Button>

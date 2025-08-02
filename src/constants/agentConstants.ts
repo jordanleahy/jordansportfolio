@@ -1,7 +1,7 @@
 // Agent Names - centralized for consistency
 export const AGENT_NAMES = {
   SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
-  VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator',
+  VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator', 
   BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',

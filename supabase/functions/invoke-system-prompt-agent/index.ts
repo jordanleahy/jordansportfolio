@@ -8,6 +8,7 @@ const AGENT_NAMES = {
   VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator',
   BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
+  CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
 } as const;
 
 // This function has been removed - only System Prompt Generator is allowed
@@ -278,8 +279,30 @@ Please generate a detailed, professional system prompt following the established
         category: insertedPrompt?.[0]?.category
       });
 
-      // 🎯 Step 2: Only target the System Prompt Generator agent (itself)
-      const targetAgentName = AGENT_NAMES.SYSTEM_PROMPT_GENERATOR;
+    // 🎯 Step 2: Determine target agent based on prompt type
+      let targetAgentName = null;
+      
+      // Route to Visual Prompt Generator for visual content categories
+      if (['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(actualCategory) || 
+          description?.toLowerCase().includes('visual') || 
+          description?.toLowerCase().includes('image') ||
+          theme?.toLowerCase().includes('visual')) {
+        targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
+      }
+      // Route to other agents based on category patterns
+      else if (actualCategory.includes('blog') || actualCategory.includes('content')) {
+        targetAgentName = AGENT_NAMES.BLOG_CONTENT_GENERATOR;
+      }
+      else if (actualCategory.includes('cover_letter')) {
+        targetAgentName = AGENT_NAMES.COVER_LETTER_GENERATOR;
+      }
+      else if (actualCategory.includes('calendar') || actualCategory.includes('theme') || actualCategory.includes('json')) {
+        targetAgentName = AGENT_NAMES.CALENDAR_THEME_JSON_PROCESSOR;
+      }
+      else {
+        // Default to Visual Prompt Generator for unknown categories
+        targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
+      }
       
       if (targetAgentName) {
         console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${actualCategory}"`);
@@ -302,7 +325,7 @@ Please generate a detailed, professional system prompt following the established
             agent_name: targetAgent.name,
             agent_id: targetAgent.id,
             category: actualCategory,
-            dynamic_assignment: !(['blog_content', 'cover_letter'].includes(actualCategory))
+            routing_logic: targetAgentName === AGENT_NAMES.VISUAL_PROMPT_GENERATOR ? 'visual_content' : 'other_agent'
           });
 
           // Add the new prompt to the target agent's system_prompts array
@@ -320,12 +343,18 @@ Please generate a detailed, professional system prompt following the established
             // Replace existing prompt
             updatedPrompts = [...existingPrompts];
             updatedPrompts[existingIndex] = newPromptObj;
-            console.log(`🔄 REPLACING: Existing prompt for category "${actualCategory}"`);
+            console.log(`🔄 REPLACING: Existing prompt for category "${actualCategory}" in ${targetAgent.name}`);
           } else {
             // Add new prompt
             updatedPrompts = [...existingPrompts, newPromptObj];
-            console.log(`➕ ADDING: New prompt for category "${actualCategory}"`);
+            console.log(`➕ ADDING: New prompt for category "${actualCategory}" to ${targetAgent.name}`);
           }
+
+          // Update target agent's supported categories
+          const existingCategories = targetAgent.supported_categories || [];
+          const updatedCategories = existingCategories.includes(actualCategory) 
+            ? existingCategories 
+            : [...existingCategories, actualCategory];
 
           // Update the target agent with the new prompt
           const currentTimestamp = new Date().toISOString();
@@ -333,6 +362,7 @@ Please generate a detailed, professional system prompt following the established
             .from('openai_agents')
             .update({ 
               system_prompts: updatedPrompts,
+              supported_categories: updatedCategories,
               last_run: currentTimestamp,
               updated_at: currentTimestamp
             })
@@ -362,7 +392,7 @@ Please generate a detailed, professional system prompt following the established
           }
         }
       } else {
-        console.log(`⚠️  NO TARGET AGENT: Failed to get target agent for category "${actualCategory}"`);
+        console.log(`⚠️  NO TARGET AGENT: Failed to determine target agent for category "${actualCategory}"`);
       }
 
       // 🔄 Step 3: Update the generator agent's last_run timestamp
