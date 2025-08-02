@@ -175,11 +175,6 @@ export const SystemPromptViewer = ({
           <h2 className={`font-semibold truncate ${isMobile ? 'text-base' : 'text-lg'}`}>
             {category} System Prompt
           </h2>
-          {promptData?.agentName && (
-            <p className="text-sm text-muted-foreground mt-1 truncate">
-              {promptData.agentName}
-            </p>
-          )}
         </div>
         
         {/* Mobile: Stack action buttons */}
