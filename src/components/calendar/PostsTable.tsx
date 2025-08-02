@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,6 +40,8 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
   const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
+  const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
+  const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
   
   // Load color themes
@@ -106,6 +108,48 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
     console.log(`🔍 [PostsTable] Upload type for ${postId} - original: ${originalType}, unified: ${unifiedType}, final: ${result}`);
     return result;
   };
+
+  // Resize functionality
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const containerRect = e.currentTarget instanceof Element 
+      ? e.currentTarget.getBoundingClientRect() 
+      : document.body.getBoundingClientRect();
+    
+    const newWidth = Math.max(300, Math.min(800, containerRect.right - e.clientX));
+    setPromptPanelWidth(newWidth);
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // Handle image deletion with optimistic updates
   const handleImageDelete = async (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
@@ -543,7 +587,20 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
 
       {/* System Prompt Viewer Panel */}
       {showSystemPrompt && category && (
-        <div className="w-1/3 transition-all duration-300">
+        <div 
+          className="relative transition-all duration-300"
+          style={{ width: promptPanelWidth }}
+        >
+          {/* Resize handle */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1 bg-border hover:bg-accent cursor-col-resize z-10"
+            onMouseDown={handleMouseDown}
+            style={{ 
+              background: isResizing ? 'hsl(var(--accent))' : 'hsl(var(--border))',
+              width: '4px',
+              marginLeft: '-2px'
+            }}
+          />
           <SystemPromptViewer
             category={category}
             isVisible={showSystemPrompt}
