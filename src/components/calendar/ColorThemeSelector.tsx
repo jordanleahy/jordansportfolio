@@ -58,7 +58,7 @@ export function ColorThemeSelector({
             />
           </div>
         </SelectTrigger>
-        <SelectContent className="w-[var(--radix-select-trigger-width)]">
+        <SelectContent className="w-[120px]">
           {themes.map((theme) => (
             <SelectItem key={theme.id} value={theme.id} className="pl-2 [&>span:first-child]:hidden">
               <div className="flex gap-1">
