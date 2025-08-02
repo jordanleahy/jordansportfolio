@@ -383,7 +383,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
   return (
     <div className="flex gap-4 h-full">
       {/* Main content - table */}
-      <div className={`transition-all duration-300 ${showSystemPrompt ? 'w-2/3' : 'w-full'}`}>
+      <div 
+        className="transition-all duration-300 flex-1"
+        style={{ 
+          width: showSystemPrompt ? `calc(100% - ${promptPanelWidth}px - 1rem)` : '100%'
+        }}
+      >
         <Card className="h-full">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">
