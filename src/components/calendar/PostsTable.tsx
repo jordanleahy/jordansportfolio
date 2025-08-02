@@ -18,10 +18,13 @@ import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 interface PostsTableOptimizedProps {
@@ -34,7 +37,6 @@ interface PostsTableOptimizedProps {
 export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
-  const [isThemePopoverOpen, setIsThemePopoverOpen] = useState(false);
   const isMobile = useIsMobile();
   
   // Load color themes
@@ -165,7 +167,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
     });
 
     setIsUpdatingTheme(true);
-    setIsThemePopoverOpen(false); // Close modal immediately when update starts
     
     try {
       // Get selected theme data
@@ -338,8 +339,8 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
             </TabsList>
             
             {category && (
-              <Popover open={isThemePopoverOpen} onOpenChange={setIsThemePopoverOpen}>
-                <PopoverTrigger asChild>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -386,23 +387,43 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                       </div>
                     )}
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80" align="end">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-medium text-sm">Update Color Theme</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        This will regenerate the system prompt for {category} category with the selected color theme.
-                      </p>
-                    </div>
-                    <ColorThemeSelector
-                      themes={themes}
-                      onThemeChange={handleThemeUpdate}
-                      className="w-full"
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 bg-background border border-border shadow-lg z-50">
+                  <DropdownMenuLabel className="text-sm font-medium">Color Themes</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {themes.map((theme) => (
+                    <DropdownMenuItem
+                      key={theme.id}
+                      onClick={() => handleThemeUpdate(theme.id)}
+                      className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent"
+                    >
+                      <div className="flex gap-1">
+                        <div
+                          className="w-3 h-3 rounded-full border border-border"
+                          style={{ backgroundColor: theme.primary_color }}
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-border"
+                          style={{ backgroundColor: theme.secondary_color }}
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-border"
+                          style={{ backgroundColor: theme.accent_color }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{theme.name}</span>
+                          <span className="text-xs bg-muted px-2 py-0.5 rounded">System</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {theme.color_instructions || theme.visual_style || 'Custom color scheme'}
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
