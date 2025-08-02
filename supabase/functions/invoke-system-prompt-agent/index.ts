@@ -52,7 +52,7 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
   
   let updatedPrompt = prompt;
   
-  // Find and replace the color palette table
+  // Find and replace the color palette table with complete color names and hex codes
   const colorTableRegex = /\|[^|]*Primary[^|]*\|[^|]*Secondary[^|]*\|[^|]*Accent[^|]*\|[^|]*(?:Neutral|Supporting)[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\n\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|/g;
   
   const newColorTable = `| Primary | Secondary | Accent | Supporting |
@@ -67,8 +67,30 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
     console.log('⚠️  COLOR TABLE: No color table found to replace');
   }
   
+  // Replace specific color name patterns in the usage guidelines and descriptions
+  const colorMappings = [
+    // Replace old color names with new ones
+    { old: /Deep Professional Blue/gi, new: getColorNameFromHex(colorTheme.primary_color) },
+    { old: /Professional Blue/gi, new: getColorNameFromHex(colorTheme.primary_color) },
+    { old: /Trustworthy Teal/gi, new: getColorNameFromHex(colorTheme.secondary_color) },
+    { old: /Medical Blue/gi, new: getColorNameFromHex(colorTheme.secondary_color) },
+    { old: /Success Green/gi, new: getColorNameFromHex(colorTheme.accent_color) },
+    { old: /Highlight Orange/gi, new: getColorNameFromHex(colorTheme.accent_color) },
+    { old: /Clean Gray/gi, new: getColorNameFromHex(colorTheme.text_color) },
+    { old: /Soft White/gi, new: getColorNameFromHex(colorTheme.background_color) },
+    { old: /Authority Navy/gi, new: getColorNameFromHex(colorTheme.primary_color) },
+    { old: /Reliable Cyan/gi, new: getColorNameFromHex(colorTheme.secondary_color) }
+  ];
+  
+  colorMappings.forEach(({ old, new: newName }) => {
+    if (old.test(updatedPrompt)) {
+      updatedPrompt = updatedPrompt.replace(old, newName);
+      console.log(`✅ COLOR NAME: ${old.source} → ${newName}`);
+    }
+  });
+  
   // Replace color instructions references
-  const colorInstructionsRegex = /(Color Instructions|color instructions|Visual Style):\s*[^\n]*/gi;
+  const colorInstructionsRegex = /(Color Instructions|color instructions):\s*[^\n]*/gi;
   if (colorInstructionsRegex.test(updatedPrompt)) {
     updatedPrompt = updatedPrompt.replace(colorInstructionsRegex, `Color Instructions: ${colorTheme.color_instructions}`);
     console.log('✅ COLOR INSTRUCTIONS: Updated color instructions');
@@ -93,7 +115,10 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
     { old: /#16a34a/gi, new: colorTheme.accent_color },
     { old: /#64748b/gi, new: colorTheme.text_color },
     { old: /#f8fafc/gi, new: colorTheme.background_color },
-    { old: /#e5e7eb/gi, new: colorTheme.border_color }
+    { old: /#e5e7eb/gi, new: colorTheme.border_color },
+    { old: /#1e40af/gi, new: colorTheme.primary_color },
+    { old: /#0e7490/gi, new: colorTheme.secondary_color },
+    { old: /#ea580c/gi, new: colorTheme.accent_color }
   ];
   
   hexPatterns.forEach(({ old, new: newColor }) => {
@@ -115,15 +140,23 @@ function replaceColorThemeVariables(prompt: string, colorTheme: any): string {
 // Helper function to get a descriptive name from hex color
 function getColorNameFromHex(hex: string): string {
   const colorMap: { [key: string]: string } = {
-    '#000000': 'Black',
-    '#ffffff': 'White',
+    '#000000': 'Pure Black',
+    '#ffffff': 'Pure White',
+    '#404040': 'Dark Gray',
+    '#666666': 'Medium Gray',
+    '#808080': 'Gray',
+    '#cccccc': 'Light Gray',
+    '#f0f0f0': 'Off White',
     '#2563eb': 'Professional Blue',
     '#0891b2': 'Trustworthy Teal',
     '#16a34a': 'Success Green',
     '#64748b': 'Clean Gray',
     '#f8fafc': 'Soft White',
     '#e5e7eb': 'Light Gray',
-    '#1f2937': 'Dark Gray'
+    '#1f2937': 'Charcoal',
+    '#1e40af': 'Authority Navy',
+    '#0e7490': 'Reliable Cyan',
+    '#ea580c': 'Highlight Orange'
   };
   
   return colorMap[hex.toLowerCase()] || 'Custom Color';
