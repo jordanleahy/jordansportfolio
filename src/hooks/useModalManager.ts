@@ -6,13 +6,9 @@ interface VoiceoverModalState {
   post: SocialMediaPost | null;
 }
 
-interface ImagePromptModalState {
+interface IndividualPromptPanelState {
   isOpen: boolean;
-  postId: string;
-  title: string;
-  description: string;
-  cachedPrompt?: string | null;
-  category?: string;
+  post: SocialMediaPost | null;
 }
 
 interface PreviewImageState {
@@ -26,13 +22,9 @@ export const useModalManager = () => {
     post: null
   });
 
-  const [imagePromptModal, setImagePromptModal] = useState<ImagePromptModalState>({
+  const [individualPromptPanel, setIndividualPromptPanel] = useState<IndividualPromptPanelState>({
     isOpen: false,
-    postId: '',
-    title: '',
-    description: '',
-    cachedPrompt: null,
-    category: 'cdi'
+    post: null
   });
 
   const [previewImage, setPreviewImage] = useState<PreviewImageState | null>(null);
@@ -52,25 +44,17 @@ export const useModalManager = () => {
     });
   }, []);
 
-  const openImagePromptModal = useCallback((post: SocialMediaPost) => {
-    setImagePromptModal({
+  const openIndividualPromptPanel = useCallback((post: SocialMediaPost) => {
+    setIndividualPromptPanel({
       isOpen: true,
-      postId: post.id,
-      title: post.title,
-      description: post.description,
-      cachedPrompt: post.generated_image_prompt,
-      category: post.category
+      post
     });
   }, []);
 
-  const closeImagePromptModal = useCallback(() => {
-    setImagePromptModal({
+  const closeIndividualPromptPanel = useCallback(() => {
+    setIndividualPromptPanel({
       isOpen: false,
-      postId: '',
-      title: '',
-      description: '',
-      cachedPrompt: null,
-      category: 'cdi'
+      post: null
     });
   }, []);
 
@@ -93,15 +77,15 @@ export const useModalManager = () => {
   return {
     // States
     voiceoverModal,
-    imagePromptModal,
+    individualPromptPanel,
     previewImage,
     showWatermarkModal,
     
     // Actions
     openVoiceoverModal,
     closeVoiceoverModal,
-    openImagePromptModal,
-    closeImagePromptModal,
+    openIndividualPromptPanel,
+    closeIndividualPromptPanel,
     openPreviewImage,
     closePreviewImage,
     openWatermarkModal,
