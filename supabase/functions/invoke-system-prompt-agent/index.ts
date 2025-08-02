@@ -420,27 +420,130 @@ Please generate a detailed, professional system prompt following the established
 
     console.log('Generated system prompt length:', generatedPrompt.length);
 
-    // Update the agent's last_run timestamp
-    const currentTimestamp = new Date().toISOString();
-    const { error: updateError } = await supabase
-      .from('openai_agents')
-      .update({ 
-        last_run: currentTimestamp,
-        updated_at: currentTimestamp
-      })
-      .eq('id', agent.id);
-
-    if (updateError) {
-      console.error('Error updating agent last_run:', updateError);
-    }
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      system_prompt: generatedPrompt,
-      agent_id: agent.id
-    }), {
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    // 🔍 ENHANCED LOGGING: Starting database operations
+    console.log('📊 DATABASE OPERATIONS: Starting system prompt storage');
+    console.log('🎯 TARGET DATA:', {
+      user_id,
+      agent_id: agent.id,
+      agent_name: agent.name,
+      category,
+      prompt_length: generatedPrompt.length,
+      timestamp: new Date().toISOString()
     });
+
+    try {
+      // 📝 Step 1: Save the generated prompt to system_prompts table
+      console.log('💾 STEP 1: Attempting to insert into system_prompts table');
+      const { data: insertedPrompt, error: insertError } = await supabase
+        .from('system_prompts')
+        .upsert({
+          user_id,
+          agent_id: agent.id,
+          agent_name: agent.name,
+          agent_purpose: agent.purpose,
+          agent_owner: agent.owner,
+          name: `${category} System Prompt`,
+          category,
+          prompt_text: generatedPrompt,
+          description: `Generated system prompt for ${category} category`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,agent_id,category'
+        })
+        .select();
+
+      if (insertError) {
+        console.error('❌ SYSTEM_PROMPTS INSERT ERROR:', {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint
+        });
+        
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: `Failed to save system prompt to database: ${insertError.message}`,
+          details: insertError
+        }), {
+          status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log('✅ SYSTEM_PROMPTS INSERT SUCCESS:', {
+        inserted_records: insertedPrompt?.length || 0,
+        first_record_id: insertedPrompt?.[0]?.id,
+        category: insertedPrompt?.[0]?.category
+      });
+
+      // 🔄 Step 2: Update the agent's last_run timestamp
+      console.log('⏰ STEP 2: Updating agent last_run timestamp');
+      const currentTimestamp = new Date().toISOString();
+      const { error: updateError } = await supabase
+        .from('openai_agents')
+        .update({ 
+          last_run: currentTimestamp,
+          updated_at: currentTimestamp
+        })
+        .eq('id', agent.id);
+
+      if (updateError) {
+        console.error('⚠️  AGENT UPDATE WARNING:', {
+          error: updateError,
+          message: updateError.message,
+          agent_id: agent.id
+        });
+        // Non-critical error, continue
+      } else {
+        console.log('✅ AGENT UPDATE SUCCESS: Updated last_run timestamp');
+      }
+
+      // 🎉 Final success response
+      console.log('🎉 OPERATION COMPLETE: System prompt generated and stored successfully');
+      console.log('📈 FINAL STATS:', {
+        operation: 'system_prompt_generation',
+        user_id,
+        category,
+        agent_id: agent.id,
+        prompt_length: generatedPrompt.length,
+        database_records_created: insertedPrompt?.length || 0,
+        success: true,
+        timestamp: currentTimestamp
+      });
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        system_prompt: generatedPrompt,
+        agent_id: agent.id,
+        category,
+        database_record_id: insertedPrompt?.[0]?.id,
+        message: `System prompt for "${category}" generated and saved successfully`
+      }), {
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+
+    } catch (dbError) {
+      console.error('💥 DATABASE OPERATION FAILED:', {
+        error: dbError,
+        message: dbError.message,
+        stack: dbError.stack,
+        user_id,
+        category,
+        agent_id: agent.id
+      });
+
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: `Database operation failed: ${dbError.message}`,
+        category,
+        agent_id: agent.id
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
     console.error('Error in invoke-system-prompt-agent function:', error);
     return new Response(JSON.stringify({ 
