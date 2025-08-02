@@ -7,12 +7,13 @@ import { Edit3, Save, X, Eye, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import * as Diff from 'diff';
-import { ColorThemeFixer } from './ColorThemeFixer';
+
 interface SystemPromptViewerProps {
   category: string;
   isVisible: boolean;
   onClose: () => void;
 }
+
 export const SystemPromptViewer = ({
   category,
   isVisible,
@@ -324,13 +325,6 @@ export const SystemPromptViewer = ({
       </CardHeader>
 
       <CardContent className="flex-1 overflow-hidden">
-        {/* Color Theme Fixer for chart-type category */}
-        {category === 'chart-type' && !isEditing && (
-          <div className="mb-4">
-            <ColorThemeFixer />
-          </div>
-        )}
-        
         {isLoading ? <div className="flex items-center justify-center h-full">
             <div className="text-muted-foreground">Loading system prompt...</div>
           </div> : isEditing ? <Textarea value={editedPrompt} onChange={e => setEditedPrompt(e.target.value)} className="h-full resize-none font-mono text-sm" placeholder="Enter system prompt..." /> : <div className="h-full overflow-auto">
