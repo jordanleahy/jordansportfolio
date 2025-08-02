@@ -437,7 +437,7 @@ export const PostsTable = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64 bg-background border border-border shadow-lg z-50">
-                  <DropdownMenuLabel className="text-sm font-medium">Color Themes</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-sm font-medium">Add Theme</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {themes.map(theme => <DropdownMenuItem key={theme.id} onClick={() => handleThemeUpdate(theme.id)} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
                       <div className="flex gap-1">
