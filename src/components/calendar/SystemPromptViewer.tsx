@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit3, Save, X, Eye, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import * as Diff from 'diff';
 interface SystemPromptViewerProps {
   category: string;
   isVisible: boolean;
@@ -197,22 +198,90 @@ export const SystemPromptViewer = ({
     }
   };
 
-  // Simple diff highlighting - highlight changed lines
+  // Enhanced unified diff view with proper git-style highlighting
   const renderPromptWithHighlight = (text: string, previousText: string) => {
     if (!previousText || text === previousText) {
-      return <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">{text}</div>;
+      return <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed border rounded-md p-3 bg-muted/30">{text}</div>;
     }
-    const currentLines = text.split('\n');
-    const previousLines = previousText.split('\n');
-    return <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
-        {currentLines.map((line, index) => {
-        const wasChanged = !previousLines[index] || previousLines[index] !== line;
-        return <div key={index} className={wasChanged ? 'bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded' : ''}>
-              {line}
-              {index < currentLines.length - 1 && '\n'}
-            </div>;
-      })}
-      </div>;
+
+    // Generate unified diff
+    const diff = Diff.diffLines(previousText, text);
+    let addedLines = 0;
+    let removedLines = 0;
+    
+    // Count changes for header
+    diff.forEach(part => {
+      if (part.added) addedLines += part.count || 0;
+      if (part.removed) removedLines += part.count || 0;
+    });
+
+    return (
+      <div className="border rounded-md overflow-hidden">
+        {/* Diff header with statistics */}
+        <div className="bg-muted px-3 py-2 border-b text-sm font-medium flex items-center justify-between">
+          <span>System Prompt Changes</span>
+          <div className="flex items-center gap-4 text-xs">
+            {addedLines > 0 && (
+              <span className="text-green-600 dark:text-green-400">
+                +{addedLines} lines
+              </span>
+            )}
+            {removedLines > 0 && (
+              <span className="text-red-600 dark:text-red-400">
+                -{removedLines} lines
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {/* Diff content */}
+        <div className="font-mono text-sm max-h-96 overflow-auto">
+          {diff.map((part, index) => {
+            if (part.added) {
+              return part.value.split('\n').map((line, lineIndex) => {
+                if (lineIndex === part.value.split('\n').length - 1 && line === '') return null;
+                return (
+                  <div 
+                    key={`${index}-${lineIndex}`}
+                    className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 px-3 py-1 flex"
+                  >
+                    <span className="text-green-600 dark:text-green-400 w-8 select-none">+</span>
+                    <span className="flex-1">{line}</span>
+                  </div>
+                );
+              });
+            } else if (part.removed) {
+              return part.value.split('\n').map((line, lineIndex) => {
+                if (lineIndex === part.value.split('\n').length - 1 && line === '') return null;
+                return (
+                  <div 
+                    key={`${index}-${lineIndex}`}
+                    className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 px-3 py-1 flex"
+                  >
+                    <span className="text-red-600 dark:text-red-400 w-8 select-none">-</span>
+                    <span className="flex-1">{line}</span>
+                  </div>
+                );
+              });
+            } else {
+              // Context lines (unchanged)
+              return part.value.split('\n').map((line, lineIndex) => {
+                if (lineIndex === part.value.split('\n').length - 1 && line === '') return null;
+                return (
+                  <div 
+                    key={`${index}-${lineIndex}`}
+                    className="px-3 py-1 flex border-l-4 border-transparent"
+                  >
+                    <span className="text-muted-foreground w-8 select-none"> </span>
+                    <span className="flex-1">{line}</span>
+                  </div>
+                );
+              });
+            }
+          }).flat().filter(Boolean)}
+        </div>
+      </div>
+    );
   };
   if (!isVisible) return null;
   return <Card className="h-full flex flex-col">
