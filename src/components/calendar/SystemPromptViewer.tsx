@@ -203,7 +203,7 @@ export const SystemPromptViewer = ({
   // Enhanced unified diff view with proper git-style highlighting
   const renderPromptWithHighlight = (text: string, previousText: string) => {
     if (!previousText || text === previousText) {
-      return <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed border rounded-md p-3 bg-muted/30">{text}</div>;
+      return <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed border rounded-md p-3 bg-muted/30 h-full">{text}</div>;
     }
 
     // Generate unified diff
