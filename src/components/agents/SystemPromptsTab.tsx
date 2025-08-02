@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ExternalLink } from 'lucide-react';
 
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
@@ -146,6 +146,16 @@ export const SystemPromptsTab = ({
                     <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        window.open(`/calendar?category=${dbPrompt.category}`, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
                     {agentId && (
                       <GenerateSystemPromptButton
                         agentId={agentId}
