@@ -215,11 +215,6 @@ export const PostsTable = ({
             
             {category && (
               <div className="flex items-center gap-1">
-                <ColorThemeSelector
-                  themes={colorThemes}
-                  selectedThemeId={selectedThemeId}
-                  onThemeChange={onThemeChange}
-                />
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                   <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
@@ -255,7 +250,14 @@ export const PostsTable = ({
         width: '4px',
         marginLeft: '-2px'
       }} />
-          <SystemPromptViewer category={category} isVisible={showSystemPrompt} onClose={() => setShowSystemPrompt(false)} selectedThemeId={selectedThemeId} />
+          <SystemPromptViewer 
+            category={category} 
+            isVisible={showSystemPrompt} 
+            onClose={() => setShowSystemPrompt(false)} 
+            selectedThemeId={selectedThemeId}
+            themes={colorThemes}
+            onThemeChange={onThemeChange}
+          />
         </div>}
 
       {/* Modals */}

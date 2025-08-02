@@ -13,19 +13,25 @@ import { diffLines } from 'diff';
 import { stripMarkdownFormatting } from '@/utils/markdownUtils';
 import { ThemeAwareColorText } from '@/components/ui/theme-aware-color-text';
 import { useCurrentColorTheme } from '@/hooks/useCurrentColorTheme';
+import { ColorThemeSelector } from './ColorThemeSelector';
+import { ColorTheme } from '@/types/colorTheme';
 
 interface SystemPromptViewerProps {
   category: string;
   isVisible: boolean;
   onClose: () => void;
   selectedThemeId?: string;
+  themes?: ColorTheme[];
+  onThemeChange?: (themeId: string) => void;
 }
 
 export const SystemPromptViewer = ({
   category,
   isVisible,
   onClose,
-  selectedThemeId
+  selectedThemeId,
+  themes = [],
+  onThemeChange
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
   const [showDiff, setShowDiff] = useState(false);
@@ -172,6 +178,14 @@ export const SystemPromptViewer = ({
     <>
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
+          {themes.length > 0 && onThemeChange && (
+            <ColorThemeSelector
+              themes={themes}
+              selectedThemeId={selectedThemeId}
+              onThemeChange={onThemeChange}
+              className="mb-2"
+            />
+          )}
         </div>
         
         {/* Mobile: Stack action buttons */}
