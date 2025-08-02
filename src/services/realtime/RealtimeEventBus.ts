@@ -38,7 +38,6 @@ export class RealtimeEventBus {
     const lastEventTime = this.recentEvents.get(eventKey);
     
     if (lastEventTime && (now - lastEventTime) < this.DEDUP_WINDOW) {
-      console.log(`🔄 [EventBus] Deduplicated event: ${event.type}`);
       return;
     }
     
@@ -80,7 +79,7 @@ export class RealtimeEventBus {
       this.batchTimer = null;
     }
     
-    console.log(`📦 [EventBus] Processing batch of ${batch.length} events`);
+    
     
     // Group events by type for efficient processing
     const eventsByType = new Map<string, BatchedEvent[]>();
@@ -120,7 +119,7 @@ export class RealtimeEventBus {
       }
     }
     
-    console.log(`🧹 [EventBus] Cleaned up recent events, ${this.recentEvents.size} remaining`);
+    
   }
 
   on<T extends RealtimeEvent>(

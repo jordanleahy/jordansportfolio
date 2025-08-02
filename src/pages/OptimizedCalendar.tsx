@@ -31,7 +31,6 @@ const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImp
 type CategoryType = string;
 
 export default function OptimizedCalendar() {
-  console.log('[Calendar] Component loaded at:', new Date().toISOString());
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [importModalOpen, setImportModalOpen] = useState(false);
