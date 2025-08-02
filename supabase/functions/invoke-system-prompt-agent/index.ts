@@ -445,9 +445,7 @@ Please generate a detailed, professional system prompt following the established
           name: `${category} System Prompt`,
           category,
           prompt_text: generatedPrompt,
-          description: `Generated system prompt for ${category} category`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          description: `Generated system prompt for ${category} category`
         }, {
           onConflict: 'user_id,agent_id,category'
         })
