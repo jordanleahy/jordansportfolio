@@ -97,18 +97,15 @@ export const PostsTable = ({
 
   // Combine original upload states with unified processing states
   const isUploading = (postId: string, aspectRatio?: any) => {
-    console.log(`🔍 [PostsTable] Checking upload state for ${postId}${aspectRatio ? ` (${aspectRatio})` : ''}`);
     const originalState = originalIsUploading(postId, aspectRatio);
     const unifiedState = unifiedIsUploading(postId, aspectRatio);
     const result = originalState || unifiedState;
-    console.log(`🔍 [PostsTable] Upload states - original: ${originalState}, unified: ${unifiedState}, final: ${result}`);
     return result;
   };
   const getUploadType = (postId: string): any => {
     const originalType = originalGetUploadType(postId);
     const unifiedType = unifiedGetUploadType(postId);
     const result = originalType || unifiedType;
-    console.log(`🔍 [PostsTable] Upload type for ${postId} - original: ${originalType}, unified: ${unifiedType}, final: ${result}`);
     return result;
   };
 
