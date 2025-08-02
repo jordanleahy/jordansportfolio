@@ -19,6 +19,8 @@ export function ColorThemeSelector({
   className 
 }: ColorThemeSelectorProps) {
   const selectedTheme = themes.find(t => t.id === selectedThemeId);
+  const defaultTheme = themes.find(t => t.is_default);
+  const displayTheme = selectedTheme || defaultTheme;
 
   // Listen for real-time color theme changes
   useRealtimeColorThemes({
@@ -42,19 +44,19 @@ export function ColorThemeSelector({
           <div className="flex gap-1">
             <div 
               className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-              style={{ backgroundColor: selectedTheme?.primary_color || '#3b82f6' }}
+              style={{ backgroundColor: displayTheme?.primary_color }}
             />
             <div 
               className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-              style={{ backgroundColor: selectedTheme?.secondary_color || '#10b981' }}
+              style={{ backgroundColor: displayTheme?.secondary_color }}
             />
             <div 
               className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-              style={{ backgroundColor: selectedTheme?.accent_color || '#8b5cf6' }}
+              style={{ backgroundColor: displayTheme?.accent_color }}
             />
             <div 
               className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-              style={{ backgroundColor: selectedTheme?.background_color || '#f97316' }}
+              style={{ backgroundColor: displayTheme?.background_color }}
             />
           </div>
         </SelectTrigger>
