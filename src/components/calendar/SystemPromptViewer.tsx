@@ -10,7 +10,6 @@ import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 import { diffLines } from 'diff';
-import { useDebounce } from 'use-debounce';
 
 interface SystemPromptViewerProps {
   category: string;
@@ -25,12 +24,10 @@ export const SystemPromptViewer = ({
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
-  
-  // Debounce the edited prompt for diff computation
-  const [debouncedEditedPrompt] = useDebounce(editedPrompt, 300);
   
   // Use the optimized cache hook
   const {
@@ -83,11 +80,13 @@ export const SystemPromptViewer = ({
   const handleCancel = useCallback(() => {
     setEditedPrompt(promptData?.prompt || '');
     setIsEditing(false);
+    setShowDiff(false);
   }, [promptData?.prompt]);
 
   const handleStartEditing = useCallback(() => {
     setPreviousPrompt(promptData?.prompt || '');
     setIsEditing(true);
+    setShowDiff(false);
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
@@ -103,15 +102,15 @@ export const SystemPromptViewer = ({
     }
   }, [category, promptData?.prompt, regeneratePrompt]);
 
-  // Compute diff in real-time using debounced edited prompt
+  // Compute diff when in editing mode
   const diffResult = useMemo(() => {
-    if (!isEditing || !previousPrompt || !debouncedEditedPrompt) return null;
-    return diffLines(previousPrompt, debouncedEditedPrompt);
-  }, [isEditing, previousPrompt, debouncedEditedPrompt]);
+    if (!isEditing || !previousPrompt || !editedPrompt) return null;
+    return diffLines(previousPrompt, editedPrompt);
+  }, [isEditing, previousPrompt, editedPrompt]);
 
   const hasChanges = useMemo(() => {
-    return debouncedEditedPrompt !== previousPrompt;
-  }, [debouncedEditedPrompt, previousPrompt]);
+    return editedPrompt !== previousPrompt;
+  }, [editedPrompt, previousPrompt]);
 
   // Diff component
   const DiffView = () => (
@@ -151,42 +150,40 @@ export const SystemPromptViewer = ({
         </div>
       ) : isEditing ? (
         <div className="space-y-4">
-          {/* Split view: Editor on top, live diff on bottom */}
-          <div className="space-y-3">
+          {/* Toggle buttons for editor vs diff view */}
+          {hasChanges && (
             <div className="flex items-center gap-2">
-              <Edit3 className="h-4 w-4" />
-              <span className="text-sm font-medium">Editor</span>
+              <Button
+                variant={showDiff ? "outline" : "default"}
+                size="sm"
+                onClick={() => setShowDiff(false)}
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+              <Button
+                variant={showDiff ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDiff(true)}
+              >
+                <GitCompare className="h-4 w-4 mr-1" />
+                Preview Changes
+              </Button>
             </div>
+          )}
+          
+          {/* Content based on view mode */}
+          {showDiff && hasChanges ? (
+            <DiffView />
+          ) : (
             <OptimizedMonacoEditor
               value={editedPrompt}
               onChange={(value) => setEditedPrompt(value || '')}
               language="markdown"
-              height="300px"
+              height="400px"
               placeholder="Enter system prompt..."
               className="border border-input rounded-md overflow-hidden"
             />
-          </div>
-          
-          {/* Live diff view */}
-          {hasChanges && diffResult && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <GitCompare className="h-4 w-4" />
-                <span className="text-sm font-medium">Live Changes</span>
-                <Badge variant="secondary" className="text-xs">
-                  {diffResult.filter(part => part.added || part.removed).length} changes
-                </Badge>
-              </div>
-              <DiffView />
-            </div>
-          )}
-          
-          {/* No changes indicator */}
-          {!hasChanges && (
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <GitCompare className="h-4 w-4" />
-              <span>No changes yet</span>
-            </div>
           )}
         </div>
       ) : (
