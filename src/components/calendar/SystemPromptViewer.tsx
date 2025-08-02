@@ -203,24 +203,20 @@ export const SystemPromptViewer = ({
               <Button variant="outline" size="sm" onClick={handleCancel}>
                 <X className="h-4 w-4" />
               </Button>
-              {hasChanges && (
-                <>
-                  <Button
-                    variant={!showDiff ? "default" : "outline"}
-                    size="icon"
-                    onClick={() => setShowDiff(false)}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={showDiff ? "default" : "outline"}
-                    size="icon"
-                    onClick={() => setShowDiff(true)}
-                  >
-                    <GitCompare className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
+              <Button
+                variant={!showDiff ? "default" : "outline"}
+                size="icon"
+                onClick={() => setShowDiff(false)}
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={showDiff ? "default" : "outline"}
+                size="icon"
+                onClick={() => setShowDiff(true)}
+              >
+                <GitCompare className="h-4 w-4" />
+              </Button>
               <Button 
                 variant="default" 
                 size="sm" 
