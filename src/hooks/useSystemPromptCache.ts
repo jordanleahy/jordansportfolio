@@ -105,13 +105,33 @@ export const useSystemPromptCache = (category: string) => {
 
       if (updateError) throw updateError;
 
-      return newPrompt;
+      return { newPrompt, userId: user.id };
     },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "System prompt updated successfully",
-      });
+    onSuccess: async ({ newPrompt, userId }) => {
+      // Clear cached prompts for this category when system prompt is updated
+      try {
+        await supabase
+          .from('cached_prompts')
+          .delete()
+          .eq('category', category)
+          .eq('user_id', userId);
+        
+        // Invalidate cached prompts queries
+        queryClient.invalidateQueries({ queryKey: ['cached-prompts', category] });
+        queryClient.invalidateQueries({ queryKey: ['cached-prompts-stats'] });
+        
+        toast({
+          title: "Success",
+          description: "System prompt updated and cache cleared successfully",
+        });
+      } catch (error) {
+        console.error('Failed to clear cache:', error);
+        toast({
+          title: "Warning",
+          description: "System prompt updated but cache clearing failed",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error) => {
       // Revert optimistic update
