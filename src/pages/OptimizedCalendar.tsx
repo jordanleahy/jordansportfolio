@@ -10,6 +10,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
+import { useSystemPromptExists } from '@/hooks/useSystemPromptExists';
 // Removed complex realtime debugging system
 import { Trash2 } from 'lucide-react';
 import {
@@ -48,6 +49,9 @@ export default function OptimizedCalendar() {
     invalidateCache,
     getCategoryPosts
   } = useOptimizedCalendar(user);
+
+  // Check if system prompt exists for active tab
+  const { data: hasSystemPrompt, isLoading: isCheckingPrompt } = useSystemPromptExists(activeTab);
 
   const loadCategoryPosts = async (category: string) => {
     invalidateCache();
@@ -188,28 +192,41 @@ export default function OptimizedCalendar() {
                   Import Theme Data
                 </Button>
                 
-                <Button
-                  onClick={async () => {
-                    const { triggerSystemPromptGeneration } = await import('@/utils/systemPromptTrigger');
-                    const result = await triggerSystemPromptGeneration(activeTab);
-                    if (result.success) {
-                      toast({
-                        title: "System Prompt Generated",
-                        description: `Successfully generated system prompt for "${activeTab}" category.`,
-                      });
-                    } else {
-                      toast({
-                        title: "Generation Failed",
-                        description: result.error,
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  variant="outline" 
-                  className="w-full"
-                >
-                  Generate Missing System Prompt
-                </Button>
+                {/* Show manual system prompt button only if no system prompt exists */}
+                {!isCheckingPrompt && hasSystemPrompt === false && (
+                  <Button
+                    onClick={async () => {
+                      const { triggerSystemPromptGeneration } = await import('@/utils/systemPromptTrigger');
+                      const result = await triggerSystemPromptGeneration(activeTab);
+                      if (result.success) {
+                        toast({
+                          title: "System Prompt Generated",
+                          description: `Successfully generated system prompt for "${activeTab}" category.`,
+                        });
+                      } else {
+                        toast({
+                          title: "Generation Failed",
+                          description: result.error,
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    Generate Missing System Prompt
+                  </Button>
+                )}
+                
+                {/* Show status when system prompt exists */}
+                {!isCheckingPrompt && hasSystemPrompt === true && (
+                  <div className="w-full p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="text-sm font-medium">System prompt ready</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

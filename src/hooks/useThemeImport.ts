@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeValidationService } from '@/services/themeValidationService';
 import { supabase } from '@/integrations/supabase/client';
+import { triggerSystemPromptGeneration } from '@/utils/systemPromptTrigger';
 import type { ProcessingState, ProcessingResult, ThemeImportData, ImportProgress } from '@/types/themeImportStrict';
 
 interface UseThemeImportOptions {
@@ -136,16 +137,58 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
     onMutate: () => {
       updateState({ type: 'processing', step: 'import' });
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       updateState({ type: 'idle' });
       
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['social-media-posts'] });
       queryClient.invalidateQueries({ queryKey: ['available-categories'] });
       
+      let systemPromptStatus = '';
+      
+      // Automatically trigger system prompt generation for the new category
+      if (result.data?.category) {
+        try {
+          console.log('🚀 AUTO-TRIGGER: Starting system prompt generation for:', result.data.category);
+          
+          // Use background processing - don't await to avoid blocking UI
+          triggerSystemPromptGeneration(result.data.category).then((promptResult) => {
+            if (promptResult.success) {
+              console.log('✅ AUTO-GENERATED system prompt for:', result.data.category);
+              
+              // Show success notification
+              toast({
+                title: "System prompt generated",
+                description: `Automatically created system prompt for ${result.data.category}`,
+              });
+              
+              // Invalidate system prompts query to refresh UI
+              queryClient.invalidateQueries({ queryKey: ['system-prompts'] });
+            } else {
+              console.log('⚠️ AUTO-GENERATION failed for:', result.data.category, promptResult.error);
+              
+              // Only show error if it's not "already exists"
+              if (!promptResult.error?.includes('already exists')) {
+                toast({
+                  title: "System prompt generation failed",
+                  description: `Could not auto-generate system prompt for ${result.data.category}. You can try manually later.`,
+                  variant: "destructive"
+                });
+              }
+            }
+          }).catch((error) => {
+            console.error('💥 AUTO-GENERATION error:', error);
+          });
+          
+          systemPromptStatus = ' (generating system prompt...)';
+        } catch (error) {
+          console.error('💥 Error starting auto system prompt generation:', error);
+        }
+      }
+      
       toast({
         title: "Import successful",
-        description: `Imported ${result.insertedCount} posts successfully`,
+        description: `Imported ${result.insertedCount} posts successfully${systemPromptStatus}`,
       });
       
       options.onImportComplete?.();
