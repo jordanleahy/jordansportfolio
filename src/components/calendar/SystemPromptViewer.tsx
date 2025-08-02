@@ -117,8 +117,8 @@ export const SystemPromptViewer = ({
   }, [isEditing, previousPrompt, editedPrompt]);
 
   const hasChanges = useMemo(() => {
-    return editedPrompt !== previousPrompt;
-  }, [editedPrompt, previousPrompt]);
+    return editedPrompt !== promptData?.prompt;
+  }, [editedPrompt, promptData?.prompt]);
 
   // Diff component
   const DiffView = () => (
@@ -295,8 +295,17 @@ export const SystemPromptViewer = ({
                 >
                   <Sparkles className="h-4 w-4" />
                 </Button>
-                {/* Close button - only show when not editing */}
-                {!isEditing && (
+                {/* Save button - show when there are changes, Close button when no changes */}
+                {!isEditing && hasChanges ? (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={handleSave}
+                    disabled={isUpdating}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                ) : !isEditing && (
                   <Button variant="outline" size="sm" onClick={onClose}>
                     <X className="h-4 w-4" />
                   </Button>
