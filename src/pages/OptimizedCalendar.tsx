@@ -12,6 +12,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
 import { useSystemPromptExists } from '@/hooks/useSystemPromptExists';
 import { useColorThemes } from '@/hooks/useColorThemes';
+import { ColorThemeSelector } from '@/components/calendar/ColorThemeSelector';
 // Removed complex realtime debugging system
 import { Trash2 } from 'lucide-react';
 import {
@@ -36,6 +37,7 @@ export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
 
   // Use the optimized calendar hook for performance
@@ -53,6 +55,9 @@ export default function OptimizedCalendar() {
 
   // Check if system prompt exists for active tab
   const { data: hasSystemPrompt, isLoading: isCheckingPrompt } = useSystemPromptExists(activeTab);
+  
+  // Color themes
+  const { data: colorThemes = [] } = useColorThemes();
 
   const loadCategoryPosts = async (category: string) => {
     invalidateCache();
@@ -186,7 +191,14 @@ export default function OptimizedCalendar() {
                   </div>
                 </div>
                 
-                <Button
+                <ColorThemeSelector
+                  themes={colorThemes}
+                  selectedThemeId={selectedThemeId}
+                  onThemeChange={setSelectedThemeId}
+                  className="mb-4"
+                />
+                
+                <Button 
                   onClick={() => setImportModalOpen(true)}
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                 >
@@ -259,6 +271,7 @@ export default function OptimizedCalendar() {
                   onPostsChange={() => loadCategoryPosts(category)}
                   isAdmin={isAdmin}
                   category={category}
+                  selectedThemeId={selectedThemeId}
                 />
               </Suspense>
             </TabsContent>

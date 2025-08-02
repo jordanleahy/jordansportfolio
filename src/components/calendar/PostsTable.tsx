@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Palette, Eye, Plus } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
+import { ColorThemeSelector } from "./ColorThemeSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
@@ -25,12 +26,14 @@ interface PostsTableOptimizedProps {
   onPostsChange: () => void;
   isAdmin?: boolean;
   category?: string;
+  selectedThemeId?: string;
 }
 export const PostsTable = ({
   posts,
   onPostsChange,
   isAdmin = false,
-  category
+  category,
+  selectedThemeId
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
@@ -384,7 +387,7 @@ export const PostsTable = ({
         width: '4px',
         marginLeft: '-2px'
       }} />
-          <SystemPromptViewer category={category} isVisible={showSystemPrompt} onClose={() => setShowSystemPrompt(false)} />
+          <SystemPromptViewer category={category} isVisible={showSystemPrompt} onClose={() => setShowSystemPrompt(false)} selectedThemeId={selectedThemeId} />
         </div>}
 
       {/* Modals */}
