@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Trash2, ExternalLink } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
@@ -27,6 +29,7 @@ export const SystemPromptsTab = ({
 }: SystemPromptsTabProps) => {
   const [databasePrompts, setDatabasePrompts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   // Set up realtime updates for system prompts
   useRealtimeSystemPrompts({
@@ -116,8 +119,18 @@ export const SystemPromptsTab = ({
       
       // Remove from local state
       setDatabasePrompts(prev => prev.filter(p => p.id !== promptId));
+      
+      toast({
+        title: "System prompt deleted",
+        description: "The system prompt has been successfully deleted.",
+      });
     } catch (error) {
       console.error('Error deleting system prompt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete system prompt. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -182,14 +195,34 @@ export const SystemPromptsTab = ({
                         }}
                       />
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteSystemPrompt(dbPrompt.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete System Prompt</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete the "{dbPrompt.name}" system prompt? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => deleteSystemPrompt(dbPrompt.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                 
