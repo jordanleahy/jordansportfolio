@@ -381,8 +381,8 @@ export const PostsTable = ({
             
         
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <TabsList>
                 <TabsTrigger value="draft">Draft</TabsTrigger>
                 <TabsTrigger value="published">Published</TabsTrigger>
@@ -390,25 +390,32 @@ export const PostsTable = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="gap-2"
+                className="gap-1 text-xs sm:text-sm"
                 onClick={() => setShowCreateForm(true)}
               >
-                <Plus className="h-4 w-4" />
-                Create New Post
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Create New Post</span>
+                <span className="xs:hidden">New</span>
               </Button>
             </div>
             
-            {category && <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-2">
-                  <Eye className="h-4 w-4" />
-                  {showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}
+            {category && <div className="flex gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
+                  <span className="sm:hidden">{showSystemPrompt ? 'Hide' : 'View'}</span>
                 </Button>
                 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2" disabled={isUpdatingTheme}>
-                    <Palette className="h-4 w-4" />
-                    {isUpdatingTheme ? 'Updating...' : <div className="flex gap-1">
+                  <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" disabled={isUpdatingTheme}>
+                    <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
+                    {isUpdatingTheme ? (
+                      <>
+                        <span className="hidden sm:inline">Updating...</span>
+                        <span className="sm:hidden">...</span>
+                      </>
+                    ) : <div className="flex gap-1">
                         {(() => {
                           // Use the current applied theme state, fallback to first theme
                           const currentTheme = currentAppliedTheme || themes[0];
