@@ -15,10 +15,16 @@ import { colorThemeService } from '@/services/colorThemeService';
 
 interface ColorThemeManagerProps {
   trigger?: React.ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger }) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger, isOpen: externalIsOpen, onClose: externalOnClose }) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnClose ? (open: boolean) => {
+    if (!open) externalOnClose();
+  } : setInternalIsOpen;
   const [editingTheme, setEditingTheme] = useState<ColorTheme | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   

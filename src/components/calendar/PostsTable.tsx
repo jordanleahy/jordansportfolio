@@ -460,12 +460,10 @@ export const PostsTable = ({
                       </div>
                     </DropdownMenuItem>)}
                   <DropdownMenuSeparator />
-                    <ColorThemeManager trigger={
-                      <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
-                        <Plus className="w-4 h-4" />
-                        <span className="font-medium text-sm">Add Theme</span>
-                      </DropdownMenuItem>
-                    } />
+                  <DropdownMenuItem onClick={() => setIsThemeManagerOpen(true)} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent">
+                    <Plus className="w-4 h-4" />
+                    <span className="font-medium text-sm">Add Theme</span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               </div>}
@@ -507,7 +505,13 @@ export const PostsTable = ({
 
       {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
 
-      <ColorThemeManager />
+      {isThemeManagerOpen && (
+        <ColorThemeManager 
+          trigger={null}
+          isOpen={isThemeManagerOpen}
+          onClose={() => setIsThemeManagerOpen(false)}
+        />
+      )}
 
       <PostForm 
         open={showCreateForm}
