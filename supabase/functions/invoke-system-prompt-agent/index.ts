@@ -98,19 +98,8 @@ serve(async (req) => {
       });
     }
 
-    // Only allow system_prompt_generation category
-    if (category !== SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: `Only '${SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION}' category is allowed for this function.`
-      }), {
-        status: HTTP_STATUS.BAD_REQUEST,
-        headers: {
-          ...CORS_HEADERS,
-          'Content-Type': 'application/json'
-        }
-      });
-    }
+    // Allow any category for system prompt generation
+    // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
     
     console.log('Processing request for category:', category, 'user_id:', user_id);
 
@@ -176,10 +165,11 @@ serve(async (req) => {
 
     const systemPrompt = systemPromptObj.prompt;
 
-    // Prepare the user prompt with the category, context, and default colors
-    let userPrompt = `Create a comprehensive system prompt for the "${category}" category.
+    // Use the actual theme as the category for system prompt generation
+    const actualCategory = theme || category;
+    let userPrompt = `Create a comprehensive system prompt for the "${actualCategory}" category.
 
-Theme: ${theme || 'General'}
+Theme: ${actualCategory}
 Description: ${description || 'No description provided'}
 
 Default Color Palette to Include:
@@ -240,7 +230,7 @@ Please generate a detailed, professional system prompt following the established
       user_id,
       agent_id: agent.id,
       agent_name: agent.name,
-      category,
+      category: actualCategory,
       prompt_length: generatedPrompt.length,
       timestamp: new Date().toISOString()
     });
@@ -256,10 +246,10 @@ Please generate a detailed, professional system prompt following the established
           agent_name: agent.name,
           agent_purpose: agent.purpose,
           agent_owner: agent.owner,
-          name: `${category} System Prompt`,
-          category,
+          name: `${actualCategory} System Prompt`,
+          category: actualCategory,
           prompt_text: generatedPrompt,
-          description: `Generated system prompt for ${category} category`
+          description: `Generated system prompt for ${actualCategory} category`
         })
         .select();
 
@@ -292,7 +282,7 @@ Please generate a detailed, professional system prompt following the established
       const targetAgentName = AGENT_NAMES.SYSTEM_PROMPT_GENERATOR;
       
       if (targetAgentName) {
-        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${category}"`);
+        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${actualCategory}"`);
         
         const { data: targetAgent, error: targetAgentError } = await supabase
           .from('openai_agents')
@@ -304,37 +294,37 @@ Please generate a detailed, professional system prompt following the established
         if (targetAgentError || !targetAgent) {
           console.error('❌ TARGET AGENT NOT FOUND:', {
             target_agent_name: targetAgentName,
-            category,
+            category: actualCategory,
             error: targetAgentError
           });
         } else {
           console.log('✅ TARGET AGENT FOUND:', {
             agent_name: targetAgent.name,
             agent_id: targetAgent.id,
-            category: category,
-            dynamic_assignment: !(['blog_content', 'cover_letter'].includes(category))
+            category: actualCategory,
+            dynamic_assignment: !(['blog_content', 'cover_letter'].includes(actualCategory))
           });
 
           // Add the new prompt to the target agent's system_prompts array
           const existingPrompts = targetAgent.system_prompts || [];
           const newPromptObj = {
-            category,
+            category: actualCategory,
             prompt: generatedPrompt
           };
 
           // Check if a prompt for this category already exists
-          const existingIndex = existingPrompts.findIndex((p: any) => p.category === category);
+          const existingIndex = existingPrompts.findIndex((p: any) => p.category === actualCategory);
           let updatedPrompts;
           
           if (existingIndex >= 0) {
             // Replace existing prompt
             updatedPrompts = [...existingPrompts];
             updatedPrompts[existingIndex] = newPromptObj;
-            console.log(`🔄 REPLACING: Existing prompt for category "${category}"`);
+            console.log(`🔄 REPLACING: Existing prompt for category "${actualCategory}"`);
           } else {
             // Add new prompt
             updatedPrompts = [...existingPrompts, newPromptObj];
-            console.log(`➕ ADDING: New prompt for category "${category}"`);
+            console.log(`➕ ADDING: New prompt for category "${actualCategory}"`);
           }
 
           // Update the target agent with the new prompt
@@ -372,7 +362,7 @@ Please generate a detailed, professional system prompt following the established
           }
         }
       } else {
-        console.log(`⚠️  NO TARGET AGENT: Failed to get target agent for category "${category}"`);
+        console.log(`⚠️  NO TARGET AGENT: Failed to get target agent for category "${actualCategory}"`);
       }
 
       // 🔄 Step 3: Update the generator agent's last_run timestamp
@@ -402,7 +392,7 @@ Please generate a detailed, professional system prompt following the established
       console.log('📈 FINAL STATS:', {
         operation: 'system_prompt_generation',
         user_id,
-        category,
+        category: actualCategory,
         agent_id: agent.id,
         prompt_length: generatedPrompt.length,
         database_records_created: insertedPrompt?.length || 0,
@@ -414,9 +404,9 @@ Please generate a detailed, professional system prompt following the established
         success: true, 
         system_prompt: generatedPrompt,
         agent_id: agent.id,
-        category,
+        category: actualCategory,
         database_record_id: insertedPrompt?.[0]?.id,
-        message: `System prompt for "${category}" generated and saved successfully`
+        message: `System prompt for "${actualCategory}" generated and saved successfully`
       }), {
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
@@ -427,14 +417,14 @@ Please generate a detailed, professional system prompt following the established
         message: dbError.message,
         stack: dbError.stack,
         user_id,
-        category,
+        category: actualCategory,
         agent_id: agent.id
       });
 
       return new Response(JSON.stringify({ 
         success: false, 
         error: `Database operation failed: ${dbError.message}`,
-        category,
+        category: actualCategory,
         agent_id: agent.id
       }), {
         status: HTTP_STATUS.INTERNAL_SERVER_ERROR,

@@ -121,8 +121,8 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
         try {
           const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
             body: {
-              category: previewData.category,
-              theme: previewData.theme || previewData.category,
+              category: 'system_prompt_generation', // Use the accepted category
+              theme: previewData.category, // Pass the actual category as theme
               description: previewData.description || `Generated content for ${previewData.category} category`,
               sample_posts: previewData.posts.slice(0, 3), // Send first 3 posts as samples
               user_id: (await supabase.auth.getUser()).data.user?.id
