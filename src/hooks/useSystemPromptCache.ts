@@ -146,8 +146,11 @@ export const useSystemPromptCache = (category: string) => {
 
   const regenerateMutation = useMutation({
     mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-        body: { category }
+        body: { category, user_id: user.id }
       });
 
       if (error) throw error;
