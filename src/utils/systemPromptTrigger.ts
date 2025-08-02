@@ -52,7 +52,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
     console.log('🤖 CALLING: invoke-system-prompt-agent edge function');
     const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: {
-        category,
+        category: 'system_prompt_generation',
         theme: category,
         description: `Generated content for ${category} category`,
         sample_posts: existingPosts.slice(0, 3),
