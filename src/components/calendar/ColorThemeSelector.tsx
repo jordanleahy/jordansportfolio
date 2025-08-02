@@ -39,35 +39,24 @@ export function ColorThemeSelector({
   return (
     <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
         <SelectTrigger className="h-8 w-fit border border-input bg-background px-2 py-1 text-xs sm:text-sm [&>svg]:hidden">
-          <SelectValue>
-            {selectedTheme ? (
-              <div className="flex gap-1">
-                <div 
-                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-                  style={{ backgroundColor: selectedTheme.primary_color }}
-                />
-                <div 
-                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-                  style={{ backgroundColor: selectedTheme.secondary_color }}
-                />
-                <div 
-                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-                  style={{ backgroundColor: selectedTheme.accent_color }}
-                />
-                <div 
-                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
-                  style={{ backgroundColor: selectedTheme.background_color }}
-                />
-              </div>
-            ) : (
-              <div className="flex gap-1">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-blue-500" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-green-500" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-purple-500" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-orange-500" />
-              </div>
-            )}
-          </SelectValue>
+          <div className="flex gap-1">
+            <div 
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
+              style={{ backgroundColor: selectedTheme?.primary_color || '#3b82f6' }}
+            />
+            <div 
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
+              style={{ backgroundColor: selectedTheme?.secondary_color || '#10b981' }}
+            />
+            <div 
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
+              style={{ backgroundColor: selectedTheme?.accent_color || '#8b5cf6' }}
+            />
+            <div 
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
+              style={{ backgroundColor: selectedTheme?.background_color || '#f97316' }}
+            />
+          </div>
         </SelectTrigger>
         <SelectContent>
           {themes.map((theme) => (
