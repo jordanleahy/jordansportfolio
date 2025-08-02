@@ -104,6 +104,30 @@ export class RealtimeConnectionPoolManager {
             }
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'openai_agents',
+            filter: `user_id=eq.${userId}`
+          },
+          (payload) => {
+            this.updateActivity(connectionKey);
+            // Only emit if system_prompts changed
+            if (JSON.stringify(payload.new?.system_prompts) !== JSON.stringify(payload.old?.system_prompts)) {
+              realtimeEventBus.emit({
+                type: 'update-received',
+                payload: {
+                  table: 'openai_agents',
+                  eventType: 'UPDATE',
+                  data: payload.new,
+                  timestamp: Date.now()
+                }
+              });
+            }
+          }
+        )
         .subscribe((status) => {
           realtimeEventBus.emit({
             type: 'connection-changed',

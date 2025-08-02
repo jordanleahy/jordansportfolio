@@ -36,6 +36,47 @@ export const SystemPromptViewer = ({
   const componentId = useRef(`system-prompt-viewer-${Date.now()}`);
   const eventUnsubscribeRef = useRef<(() => void) | null>(null);
 
+  const loadSystemPrompt = useCallback(async () => {
+    if (!category) return;
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('openai_agents')
+        .select('name, system_prompts, updated_at')
+        .eq('user_id', user.id)
+        .not('system_prompts', 'is', null);
+
+      if (error) throw error;
+
+      const agent = data?.find(agent => 
+        agent.system_prompts && 
+        Array.isArray(agent.system_prompts) && 
+        agent.system_prompts.some((p: any) => p.category === category)
+      );
+
+      if (agent) {
+        const prompts = Array.isArray(agent.system_prompts) ? agent.system_prompts : [];
+        const categoryPrompt = prompts.find((p: any) => p.category === category);
+        
+        if (categoryPrompt) {
+          const prompt = (categoryPrompt as { category: string; prompt: string }).prompt;
+          setSystemPrompt(prompt);
+          setEditedPrompt(prompt);
+          setAgentName(agent.name);
+          setLastUpdated(new Date(agent.updated_at).toLocaleString());
+        }
+      }
+    } catch (error) {
+      console.error('Error loading system prompt:', error);
+      toast.error('Failed to load system prompt');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [category]);
+
   // Debounced auto-save for better UX
   const debouncedSave = useDebouncedCallback(
     useCallback(async (promptToSave: string) => {
@@ -49,17 +90,17 @@ export const SystemPromptViewer = ({
 
   // Optimized event handler with useCallback
   const handleRealtimeUpdate = useCallback((event: any) => {
-    if (event.type === 'update-received' && event.payload.table === 'system_prompts') {
-      const { data } = event.payload;
-      if (data?.category === category && data?.prompt !== systemPrompt) {
-        console.log(`✅ [SystemPromptViewer] Real-time update for category: ${category}`);
-        setPreviousPrompt(systemPrompt);
-        setSystemPrompt(data.prompt);
-        setLastUpdated(new Date().toLocaleString());
-        toast.success(`System prompt updated for ${category}`);
+    if (event.type === 'update-received' && event.payload.table === 'openai_agents') {
+      console.log('🔔 SystemPromptViewer: Received agent update', event.payload);
+      // Check if system_prompts changed and contains our category
+      if (event.payload.data?.system_prompts) {
+        const hasCategory = event.payload.data.system_prompts.some((prompt: any) => prompt.category === category);
+        if (hasCategory) {
+          loadSystemPrompt();
+        }
       }
     }
-  }, [category, systemPrompt]);
+  }, [category, loadSystemPrompt]);
 
   // Enhanced real-time connection with connection pooling
   useEffect(() => {
@@ -113,46 +154,6 @@ export const SystemPromptViewer = ({
     }
   }, [editedPrompt, isEditing, debouncedSave, systemPrompt]);
 
-  const loadSystemPrompt = useCallback(async () => {
-    if (!category) return;
-    setIsLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { data, error } = await supabase
-        .from('openai_agents')
-        .select('name, system_prompts, updated_at')
-        .eq('user_id', user.id)
-        .not('system_prompts', 'is', null);
-
-      if (error) throw error;
-
-      const agent = data?.find(agent => 
-        agent.system_prompts && 
-        Array.isArray(agent.system_prompts) && 
-        agent.system_prompts.some((p: any) => p.category === category)
-      );
-
-      if (agent) {
-        const prompts = Array.isArray(agent.system_prompts) ? agent.system_prompts : [];
-        const categoryPrompt = prompts.find((p: any) => p.category === category);
-        
-        if (categoryPrompt) {
-          const prompt = (categoryPrompt as { category: string; prompt: string }).prompt;
-          setSystemPrompt(prompt);
-          setEditedPrompt(prompt);
-          setAgentName(agent.name);
-          setLastUpdated(new Date(agent.updated_at).toLocaleString());
-        }
-      }
-    } catch (error) {
-      console.error('Error loading system prompt:', error);
-      toast.error('Failed to load system prompt');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [category]);
 
   const handleSave = useCallback(async (promptToSave?: string) => {
     const finalPrompt = promptToSave || editedPrompt;
