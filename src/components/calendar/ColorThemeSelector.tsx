@@ -61,10 +61,10 @@ export function ColorThemeSelector({
               </div>
             ) : (
               <div className="flex gap-1">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-400" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-500" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-600" />
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-slate-700" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-blue-500" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-green-500" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-purple-500" />
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border bg-orange-500" />
               </div>
             )}
           </SelectValue>
