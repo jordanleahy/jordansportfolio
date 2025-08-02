@@ -39,24 +39,24 @@ export function ColorThemeSelector({
   return (
     <div className={className}>
       <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
-        <SelectTrigger className="w-fit border-none shadow-none p-2 [&>svg]:hidden">
+        <SelectTrigger className="h-8 w-fit border border-input bg-background px-2 py-1 text-xs sm:text-sm [&>svg]:hidden">
           <SelectValue placeholder="Select color theme">
             {selectedTheme && (
               <div className="flex gap-1">
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: selectedTheme.primary_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: selectedTheme.secondary_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: selectedTheme.accent_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: selectedTheme.background_color }}
                 />
               </div>
@@ -68,19 +68,19 @@ export function ColorThemeSelector({
             <SelectItem key={theme.id} value={theme.id} className="pl-2 [&>span:first-child]:hidden">
               <div className="flex gap-1">
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: theme.primary_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: theme.secondary_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: theme.accent_color }}
                 />
                 <div 
-                  className="w-4 h-4 rounded-full border border-border" 
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border" 
                   style={{ backgroundColor: theme.background_color }}
                 />
               </div>

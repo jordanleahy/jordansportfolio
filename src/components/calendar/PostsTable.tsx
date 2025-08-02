@@ -214,7 +214,7 @@ export const PostsTable = ({
             </div>
             
             {category && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <ColorThemeSelector
                   themes={colorThemes}
                   selectedThemeId={selectedThemeId}
