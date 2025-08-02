@@ -290,10 +290,7 @@ export const SystemPromptViewer = ({
       <CardHeader className="flex-shrink-0 pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              System Prompt Viewer
-            </CardTitle>
+            <CardTitle></CardTitle>
             {agentName && (
               <p className="text-sm text-muted-foreground mt-1">
                 Agent: {agentName}
