@@ -10,6 +10,7 @@ import { Brain, Edit, Eye, TrendingUp, Clock, Target } from 'lucide-react';
 import type { OpenAIAgent, SystemPrompt } from '@/types/openaiAgent';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const SystemPromptManager = () => {
   const { data: agents, isLoading: loading } = useOpenAIAgents();
@@ -17,6 +18,7 @@ export const SystemPromptManager = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<SystemPrompt | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
 
@@ -109,7 +111,8 @@ export const SystemPromptManager = () => {
                             lineDecorationsWidth: 10,
                             lineNumbersMinChars: 3,
                             padding: { top: 12, bottom: 12 },
-                            contextmenu: false
+                            contextmenu: !isMobile,
+                            commandPalette: !isMobile
                           }}
                         />
                       </div>

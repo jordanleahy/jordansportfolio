@@ -6,6 +6,7 @@ import { Save } from 'lucide-react';
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CategoryPromptEditorProps {
   category?: string;
@@ -27,6 +28,7 @@ export const CategoryPromptEditor = ({
   const [localCategory, setLocalCategory] = useState(category);
   const [localPrompt, setLocalPrompt] = useState(prompt);
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const handleCategoryChange = (value: string) => {
     setLocalCategory(value);
@@ -86,7 +88,8 @@ export const CategoryPromptEditor = ({
               lineDecorationsWidth: 10,
               lineNumbersMinChars: 3,
               padding: { top: 12, bottom: 12 },
-              contextmenu: false,
+              contextmenu: !isMobile,
+              commandPalette: !isMobile,
               placeholder: 'Enter the system prompt for this category...'
             }}
           />

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ThemeImportModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const processMutation = useMutation({
     mutationFn: async (data: string) => {
@@ -230,7 +232,8 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
                   lineDecorationsWidth: 10,
                   lineNumbersMinChars: 3,
                   padding: { top: 12, bottom: 12 },
-                  contextmenu: false,
+                  contextmenu: !isMobile,
+                  commandPalette: !isMobile,
                   placeholder: `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`
                 }}
               />

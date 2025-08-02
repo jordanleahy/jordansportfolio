@@ -396,7 +396,8 @@ export const SystemPromptViewer = ({
               lineDecorationsWidth: 10,
               lineNumbersMinChars: 3,
               padding: { top: 12, bottom: 12 },
-              contextmenu: false,
+              contextmenu: !isMobile,
+              commandPalette: !isMobile,
               placeholder: 'Enter system prompt...'
             }}
           />

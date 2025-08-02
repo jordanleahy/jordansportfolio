@@ -12,6 +12,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import Editor from '@monaco-editor/react';
 import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ThemeImportModalOptimizedProps {
   open: boolean;
@@ -27,6 +28,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   const [jsonInput, setJsonInput] = useState('');
   const { toast } = useToast();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   
   const {
     state,
@@ -208,7 +210,8 @@ AVOID:
                   lineDecorationsWidth: 10,
                   lineNumbersMinChars: 3,
                   padding: { top: 12, bottom: 12 },
-                  contextmenu: false,
+                  contextmenu: !isMobile,
+                  commandPalette: !isMobile,
                   placeholder: placeholderText,
                   readOnly: isProcessing
                 }}
