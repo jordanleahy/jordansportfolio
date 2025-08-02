@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Save } from 'lucide-react';
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
+import Editor from '@monaco-editor/react';
+import { useTheme } from 'next-themes';
 
 interface CategoryPromptEditorProps {
   category?: string;
@@ -25,6 +26,7 @@ export const CategoryPromptEditor = ({
 }: CategoryPromptEditorProps) => {
   const [localCategory, setLocalCategory] = useState(category);
   const [localPrompt, setLocalPrompt] = useState(prompt);
+  const { theme } = useTheme();
 
   const handleCategoryChange = (value: string) => {
     setLocalCategory(value);
@@ -66,14 +68,29 @@ export const CategoryPromptEditor = ({
       
       <div>
         <Label htmlFor="prompt">System Prompt</Label>
-        <Textarea
-          id="prompt"
-          value={localPrompt}
-          onChange={(e) => handlePromptChange(e.target.value)}
-          placeholder="Enter the system prompt for this category..."
-          rows={8}
-          className="font-mono text-sm"
-        />
+        <div className="border border-input rounded-md overflow-hidden">
+          <Editor
+            height="200px"
+            defaultLanguage="markdown"
+            value={localPrompt}
+            onChange={(value) => handlePromptChange(value || '')}
+            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              wordWrap: 'on',
+              automaticLayout: true,
+              scrollBeyondLastLine: false,
+              folding: false,
+              lineDecorationsWidth: 10,
+              lineNumbersMinChars: 3,
+              padding: { top: 12, bottom: 12 },
+              contextmenu: false,
+              placeholder: 'Enter the system prompt for this category...'
+            }}
+          />
+        </div>
       </div>
       
       {isNew && (
