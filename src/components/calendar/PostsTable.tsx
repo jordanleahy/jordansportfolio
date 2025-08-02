@@ -351,14 +351,33 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                       'Updating...'
                     ) : (
                       <div className="flex gap-1">
-                        {themes.slice(0, 4).map((theme, index) => (
-                          <div
-                            key={theme.id}
-                            className="w-3 h-3 rounded-full border border-border"
-                            style={{ backgroundColor: theme.primary_color }}
-                            title={theme.name}
-                          />
-                        ))}
+                        {themes.slice(0, 4).map((theme, index) => {
+                          // Get the actual system colors for this category from the currently applied theme
+                          const getSystemColor = (theme: any, colorType: 'primary' | 'secondary' | 'accent' | 'text') => {
+                            // Map the theme colors to system colors based on category
+                            const systemColorMap = {
+                              primary: theme.primary_color,
+                              secondary: theme.secondary_color, 
+                              accent: theme.accent_color,
+                              text: theme.text_color
+                            };
+                            return systemColorMap[colorType];
+                          };
+
+                          return (
+                            <div
+                              key={theme.id}
+                              className="w-3 h-3 rounded-full border border-border"
+                              style={{ 
+                                backgroundColor: index === 0 ? getSystemColor(theme, 'primary') :
+                                                index === 1 ? getSystemColor(theme, 'secondary') :
+                                                index === 2 ? getSystemColor(theme, 'accent') :
+                                                getSystemColor(theme, 'text')
+                              }}
+                              title={`${theme.name} - ${index === 0 ? 'Primary' : index === 1 ? 'Secondary' : index === 2 ? 'Accent' : 'Text'}`}
+                            />
+                          );
+                        })}
                         {themes.length > 4 && (
                           <div className="w-3 h-3 rounded-full border border-border bg-muted flex items-center justify-center">
                             <span className="text-[8px] text-muted-foreground">+</span>
