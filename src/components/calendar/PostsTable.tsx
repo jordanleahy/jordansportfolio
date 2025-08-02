@@ -3,7 +3,7 @@ import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Palette } from "lucide-react";
+import { Palette, Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -17,6 +17,7 @@ import { ImagePromptModal } from "./ImagePromptModal";
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
+import { SystemPromptViewer } from "./SystemPromptViewer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [isUpdatingTheme, setIsUpdatingTheme] = useState(false);
   const [currentAppliedTheme, setCurrentAppliedTheme] = useState<any>(null);
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const isMobile = useIsMobile();
   
   // Load color themes
@@ -338,9 +340,12 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
   const filteredPosts = posts.filter((post) => post.status === activeTab);
 
   return (
-    <Card>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Social Media Posts</h2>
+    <div className="flex gap-4 h-full">
+      {/* Main content - table */}
+      <div className={`transition-all duration-300 ${showSystemPrompt ? 'w-2/3' : 'w-full'}`}>
+        <Card className="h-full">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Social Media Posts</h2>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "draft" | "published")}>
           <div className="flex items-center justify-between mb-4">
@@ -350,7 +355,18 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
             </TabsList>
             
             {category && (
-              <DropdownMenu>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+                  className="gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  {showSystemPrompt ? 'Hide Prompt' : 'View Prompt'}
+                </Button>
+                
+                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="outline" 
@@ -421,6 +437,7 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+              </div>
             )}
           </div>
 
@@ -520,7 +537,20 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
             )}
           </TabsContent>
         </Tabs>
+          </div>
+        </Card>
       </div>
+
+      {/* System Prompt Viewer Panel */}
+      {showSystemPrompt && category && (
+        <div className="w-1/3 transition-all duration-300">
+          <SystemPromptViewer
+            category={category}
+            isVisible={showSystemPrompt}
+            onClose={() => setShowSystemPrompt(false)}
+          />
+        </div>
+      )}
 
       {/* Modals */}
       <ImagePromptModal
@@ -551,6 +581,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
           originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`}
         />
       )}
-    </Card>
+    </div>
   );
 };
