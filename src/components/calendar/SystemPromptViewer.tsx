@@ -293,7 +293,6 @@ export const SystemPromptViewer = ({
             <CardTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5" />
               System Prompt Viewer
-              <Badge variant="secondary">{category}</Badge>
             </CardTitle>
             {agentName && (
               <p className="text-sm text-muted-foreground mt-1">
