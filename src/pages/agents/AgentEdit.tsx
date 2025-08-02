@@ -112,28 +112,48 @@ export const AgentEdit = () => {
         tags: agent.tags || [],
         notes: agent.notes || '',
         supported_categories: agent.supported_categories || [],
-        // Default advanced settings if not present
-        temperature: 0.7,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
+        // Load advanced settings from agent or use defaults
+        temperature: agent.temperature || 0.7,
+        max_tokens: agent.max_tokens || 1000,
+        top_p: agent.top_p || 1,
+        frequency_penalty: agent.frequency_penalty || 0,
+        presence_penalty: agent.presence_penalty || 0,
       });
     }
   }, [agent, form, isNew]);
 
   const onSubmit = (data: AgentFormData) => {
-    const { temperature, max_tokens, top_p, frequency_penalty, presence_penalty, ...basicData } = data;
+    // Include ALL form data including advanced parameters
+    const agentData = {
+      name: data.name,
+      purpose: data.purpose,
+      model_version: data.model_version,
+      trigger: data.trigger,
+      input_source: data.input_source,
+      output_target: data.output_target,
+      schedule: data.schedule,
+      owner: data.owner,
+      status: data.status,
+      tags: data.tags,
+      notes: data.notes,
+      supported_categories: data.supported_categories,
+      // Include advanced model parameters
+      temperature: data.temperature,
+      max_tokens: data.max_tokens,
+      top_p: data.top_p,
+      frequency_penalty: data.frequency_penalty,
+      presence_penalty: data.presence_penalty,
+    };
     
     if (isNew) {
-      createAgent.mutate(basicData as CreateAgentData, {
+      createAgent.mutate(agentData as CreateAgentData, {
         onSuccess: (newAgent) => {
           toast.success('Agent created successfully');
           navigate(`/agents/${newAgent.id}`);
         }
       });
     } else {
-      updateAgent.mutate({ id: id!, ...basicData }, {
+      updateAgent.mutate({ id: id!, ...agentData }, {
         onSuccess: () => {
           toast.success('Agent updated successfully');
           navigate(`/agents/${id}`);
@@ -161,8 +181,13 @@ export const AgentEdit = () => {
       status: 'paused',
       tags: agent.tags || [],
       notes: agent.notes || '',
-      
-      supported_categories: agent.supported_categories || []
+      supported_categories: agent.supported_categories || [],
+      // Include advanced parameters in clone
+      temperature: agent.temperature || 0.7,
+      max_tokens: agent.max_tokens || 1000,
+      top_p: agent.top_p || 1,
+      frequency_penalty: agent.frequency_penalty || 0,
+      presence_penalty: agent.presence_penalty || 0,
     };
     
     createAgent.mutate(cloneData, {
@@ -559,6 +584,32 @@ export const AgentEdit = () => {
                           </FormControl>
                           <FormDescription>
                             Penalizes repeated tokens.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="presence_penalty"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Presence Penalty (-2 to 2)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.1" 
+                              min="-2" 
+                              max="2" 
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Penalizes presence of tokens.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

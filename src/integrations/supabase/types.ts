@@ -1329,63 +1329,78 @@ export type Database = {
       openai_agents: {
         Row: {
           created_at: string
+          frequency_penalty: number | null
           id: string
           input_source: string
           last_run: string | null
+          max_tokens: number | null
           metrics: Json | null
           model_version: string
           name: string
           notes: string | null
           output_target: string
           owner: string
+          presence_penalty: number | null
           purpose: string
           schedule: string
           status: Database["public"]["Enums"]["agent_status"]
           supported_categories: string[] | null
           system_prompts: Json | null
           tags: string[] | null
+          temperature: number | null
+          top_p: number | null
           trigger: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          frequency_penalty?: number | null
           id?: string
           input_source: string
           last_run?: string | null
+          max_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name: string
           notes?: string | null
           output_target: string
           owner: string
+          presence_penalty?: number | null
           purpose: string
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
           system_prompts?: Json | null
           tags?: string[] | null
+          temperature?: number | null
+          top_p?: number | null
           trigger: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          frequency_penalty?: number | null
           id?: string
           input_source?: string
           last_run?: string | null
+          max_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name?: string
           notes?: string | null
           output_target?: string
           owner?: string
+          presence_penalty?: number | null
           purpose?: string
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
           system_prompts?: Json | null
           tags?: string[] | null
+          temperature?: number | null
+          top_p?: number | null
           trigger?: string
           updated_at?: string
           user_id?: string

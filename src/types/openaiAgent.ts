@@ -23,6 +23,12 @@ export interface OpenAIAgent {
   tags?: string[];
   notes?: string;
   supported_categories?: string[];
+  // Advanced model parameters
+  temperature?: number;
+  max_tokens?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +46,12 @@ export interface CreateAgentData {
   tags?: string[];
   notes?: string;
   supported_categories?: string[];
+  // Advanced model parameters
+  temperature?: number;
+  max_tokens?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
 }
 
 export interface UpdateAgentData extends Partial<CreateAgentData> {
