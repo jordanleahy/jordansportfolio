@@ -416,9 +416,6 @@ export const PostsTable = ({ posts, onPostsChange, isAdmin = false, category }: 
                           <span className="font-medium text-sm">{theme.name}</span>
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">System</span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {theme.color_instructions || theme.visual_style || 'Custom color scheme'}
-                        </p>
                       </div>
                     </DropdownMenuItem>
                   ))}
