@@ -177,18 +177,16 @@ export default function CalendarDashboard() {
               <div className="flex-1">
               </div>
               
-              {/* Theme Management Panel */}
-              <div className="lg:w-80 space-y-4">
-                <div className="space-y-3">
-                  <Textarea
-                    id="theme-description"
-                    placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                    value={customThemeDescription}
-                    onChange={(e) => setCustomThemeDescription(e.target.value)}
-                    className="min-h-[80px] resize-none"
-                    disabled={isGeneratingTheme || isProcessing}
-                  />
-                </div>
+              {/* Theme Management Panel - Full Width */}
+              <div className="flex-1">
+                <Textarea
+                  id="theme-description"
+                  placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                  value={customThemeDescription}
+                  onChange={(e) => setCustomThemeDescription(e.target.value)}
+                  className="w-full h-full min-h-[120px] resize-none"
+                  disabled={isGeneratingTheme || isProcessing}
+                />
               </div>
             </div>
           </div>
