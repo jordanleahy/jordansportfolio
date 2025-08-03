@@ -1,14 +1,13 @@
 // PostsTableView - Updated to use standard img tags instead of OptimizedImage
 import React, { memo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
-import { Copy, Trash2, Loader2, Lightbulb, NotebookPen, Mic, ChevronUp, ChevronDown, Sparkles, Eye } from 'lucide-react';
-import { useBlogStatus } from '@/hooks/useBlogStatus';
-import { useNavigate } from 'react-router-dom';
+import { BlogPostButtonForRow } from './BlogPostButtonForRow';
+import { ActionButton } from '@/components/ui/action-button';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
@@ -73,7 +72,6 @@ export const PostsTableView = memo(({
   getRowAnimationClass = () => ''
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
@@ -196,36 +194,42 @@ export const PostsTableView = memo(({
       </TableHeader>
       <TableBody>
         {sortedPosts.map((post, index) => {
-          const BlogPostButtonForRow = () => {
-            const blogStatus = useBlogStatus(post.id);
-            
-            const handleBlogAction = () => {
-              if (blogStatus.exists) {
-                // Navigate to view the existing blog
-                navigate(`/blog/${blogStatus.slug}`);
-              } else {
-                // Create new blog post
-                onCreateBlogPost(post);
-              }
-            };
+          const createPostActions = () => [
+            {
+              icon: <Copy className="h-4 w-4" />,
+              onClick: () => onCopyContent(post),
+              title: "Copy content"
+            },
+            {
+              icon: <Sparkles className="h-4 w-4" />,
+              onClick: () => handleGenerateAllImages(post),
+              loading: isGenerating(post.id),
+              title: "Generate all images with AI"
+            },
+            {
+              icon: <Lightbulb className="h-4 w-4" />,
+              onClick: () => onGenerateImagePrompt(post),
+              title: "Generate image prompt"
+            },
+            {
+              icon: <Mic className="h-4 w-4" />,
+              onClick: () => onGenerateVoiceoverScript(post),
+              title: "Generate voiceover script"
+            },
+            {
+              icon: <Trash2 className="h-4 w-4" />,
+              onClick: () => onDeletePost(post.id),
+              title: "Delete post"
+            }
+          ];
 
-            return (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBlogAction}
-                disabled={blogStatus.isLoading || creatingBlogIds.has(post.id)}
-                title={blogStatus.exists ? "View Blog" : "Create blog post"}
-              >
-                {blogStatus.isLoading || creatingBlogIds.has(post.id) ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : blogStatus.exists ? (
-                  <Eye className="h-4 w-4" />
-                ) : (
-                  <NotebookPen className="h-4 w-4" />
-                )}
-              </Button>
-            );
+          const selectorProps = {
+            post,
+            isUploading,
+            getUploadType,
+            onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => onFileSelect(postId, aspectRatio, post),
+            onGenerateImage,
+            onPostsChange
           };
 
           return (
@@ -344,60 +348,23 @@ export const PostsTableView = memo(({
             </TableCell>
             <TableCell className="w-48">
               <div className="flex gap-1 flex-wrap">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onCopyContent(post)}
-                  title="Copy content"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleGenerateAllImages(post)}
-                  disabled={isGenerating(post.id)}
-                  title="Generate all images with AI"
-                >
-                  {isGenerating(post.id) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onGenerateImagePrompt(post)}
-                  title="Generate image prompt"
-                >
-                  <Lightbulb className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onGenerateVoiceoverScript(post)}
-                  title="Generate voiceover script"
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
-                {isAdmin && <BlogPostButtonForRow />}
-                <SingleAspectRatioSelector
-                  post={post}
-                  isUploading={isUploading}
-                  getUploadType={getUploadType}
-                  onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
-                  onGenerateImage={onGenerateImage}
-                  onPostsChange={onPostsChange}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDeletePost(post.id)}
-                  title="Delete post"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {createPostActions().map((action, actionIndex) => (
+                  <ActionButton
+                    key={actionIndex}
+                    icon={action.icon}
+                    onClick={action.onClick}
+                    loading={action.loading}
+                    title={action.title}
+                  />
+                ))}
+                {isAdmin && (
+                  <BlogPostButtonForRow
+                    post={post}
+                    creatingBlogIds={creatingBlogIds}
+                    onCreateBlogPost={onCreateBlogPost}
+                  />
+                )}
+                <SingleAspectRatioSelector {...selectorProps} />
               </div>
             </TableCell>
           </TableRow>
