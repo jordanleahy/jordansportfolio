@@ -270,6 +270,7 @@ export default function OptimizedCalendar() {
                   category={category}
                   selectedThemeId={selectedThemeId}
                   onThemeChange={setSelectedThemeId}
+                  onImportClick={() => setImportModalOpen(true)}
                 />
               </Suspense>
             </TabsContent>
