@@ -56,7 +56,7 @@ export const products = [
   {
     title: "Clinical Decision Support",
     link: "/cases/case1",
-    thumbnail: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/hero-parallax/16%20What%20Is%20Clinical%20Documentation%20Integrity%20%20169.png",
+    thumbnail: "/lovable-uploads/ecd4b7f3-47a9-4714-aa6f-9151d493a164.png",
   },
   {
     title: "Revenue Cycle Management",
