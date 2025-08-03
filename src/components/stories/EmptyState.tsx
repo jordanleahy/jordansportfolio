@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Plus, Upload } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EmptyStateProps {
   category?: string;
@@ -8,6 +9,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({ category, onImportClick }: EmptyStateProps) => {
+  const { isAdmin } = useAuth();
   return (
     <Card className="p-12">
       <div className="text-center space-y-6">
@@ -26,7 +28,7 @@ export const EmptyState = ({ category, onImportClick }: EmptyStateProps) => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          {onImportClick && (
+          {onImportClick && isAdmin && (
             <Button onClick={onImportClick} className="gap-2">
               <Upload className="h-4 w-4" />
               Import Theme Data
