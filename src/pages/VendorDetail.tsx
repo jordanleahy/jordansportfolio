@@ -687,7 +687,8 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   const ogImage = vendor.og_image_url || '/og-default.png';
   const pageTitle = ogTitle;
   const pageDescription = ogDescription;
-  return <PageLayout>
+  return (
+    <PageLayout>
       <Helmet>
         <title>{pageTitle} | Competitive Intelligence</title>
         <meta name="description" content={pageDescription} />
