@@ -46,7 +46,7 @@ export const products = [
   {
     title: "Prior Authorization Workflow",
     link: "/cases/case4",
-    thumbnail: getStorageImageUrl("9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png"),
+    thumbnail: "/lovable-uploads/bb27767c-ec9f-4522-8154-3fad47dd1c1d.png",
   },
   {
     title: "Healthcare Data Visualization",
