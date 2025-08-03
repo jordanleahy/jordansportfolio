@@ -167,7 +167,12 @@ serve(async (req) => {
     const systemPrompt = systemPromptObj.prompt;
 
     // Use the actual theme as the category for system prompt generation
-    const actualCategory = theme || category;
+    // Default to "healthcare" theme for visual content when no specific theme provided
+    const isVisualContent = ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(category) || 
+                           description?.toLowerCase().includes('visual') || 
+                           description?.toLowerCase().includes('image');
+    
+    const actualCategory = theme || (isVisualContent ? 'healthcare' : category);
     let userPrompt = `Create a comprehensive system prompt for the "${actualCategory}" category.
 
 Theme: ${actualCategory}
