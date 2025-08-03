@@ -179,7 +179,7 @@ export const SystemPromptsTab = ({
             <div className="text-sm text-muted-foreground">Loading system prompts...</div>
           ) : databasePrompts.length > 0 ? (
             databasePrompts.map((dbPrompt) => (
-              <div key={dbPrompt.id} className="border rounded-lg p-4 min-h-96 flex flex-col">
+              <div key={dbPrompt.id} className="border rounded-lg p-4 h-screen flex flex-col">
                 <div className="flex items-start justify-between mb-2">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
