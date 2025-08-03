@@ -34,12 +34,11 @@ const Navigation = () => {
   // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
-    
-    { href: "/investors", label: "Investors", icon: TrendingUp },
-    { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/stories", label: "Stories", icon: BookOpen },
     // Admin-only items
     ...(isAdmin ? [
+      { href: "/investors", label: "Investors", icon: TrendingUp },
+      { href: "/comparisons", label: "Battlecards", icon: GitCompare },
       { href: "/vendors", label: "Vendors", icon: Building2 },
       { href: "/sec", label: "Funded Startups", icon: Database },
       { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
@@ -136,17 +135,35 @@ const Navigation = () => {
                       </NavigationMenuItem>
                     )}
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/comparisons"
-                          className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
-                        >
-                          <GitCompare className="mr-2 h-4 w-4" />
-                          Battlecards
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                    {/* Investors - Admin Only */}
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/investors"
+                            className={cn(navLinkStyles, isActive("/investors") && "bg-accent text-accent-foreground")}
+                          >
+                            <TrendingUp className="mr-2 h-4 w-4" />
+                            Investors
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+
+                    {/* Battlecards - Admin Only */}
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/comparisons"
+                            className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
+                          >
+                            <GitCompare className="mr-2 h-4 w-4" />
+                            Battlecards
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -375,6 +392,29 @@ const Navigation = () => {
                         )}
                       >
                         <Building2 className="h-4 w-4" />
+                      </Link>
+                    )}
+                    {/* Admin Quick Access Icons */}
+                    {isAdmin && (
+                      <Link
+                        to="/investors"
+                        className={cn(
+                          "p-2 rounded-lg transition-colors hover:bg-accent",
+                          isActive("/investors") && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <TrendingUp className="h-4 w-4" />
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link
+                        to="/comparisons"
+                        className={cn(
+                          "p-2 rounded-lg transition-colors hover:bg-accent",
+                          isActive("/comparisons") && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <GitCompare className="h-4 w-4" />
                       </Link>
                     )}
                     <Link
