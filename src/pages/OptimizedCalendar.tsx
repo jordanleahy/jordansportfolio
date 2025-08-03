@@ -1,4 +1,5 @@
 
+// Cache-busting comment for fresh build
 import React, { useState, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +10,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useOptimizedCalendar, useCategoryPosts } from '@/hooks/useOptimizedCalendar';
+import { useOptimizedCalendar } from '@/hooks/useOptimizedCalendar';
 import { useSystemPromptExists } from '@/hooks/useSystemPromptExists';
 import { useColorThemes } from '@/hooks/useColorThemes';
 import { ColorThemeSelector } from '@/components/calendar/ColorThemeSelector';
