@@ -188,38 +188,39 @@ export default function CalendarDashboard() {
                     className="min-h-[80px] resize-none"
                     disabled={isGeneratingTheme || isProcessing}
                   />
-                  
-                  {/* Submit button for custom theme */}
-                  <Button
-                    onClick={handleGenerateCustomTheme}
-                    disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  >
-                    {isGeneratingTheme || isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {isGeneratingTheme ? 'Generating...' : 'Importing...'}
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Submit
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Import Themes Button - Standalone below hero section */}
-        {isAdmin && (
-          <div className="container mx-auto px-4 mb-8">
-            {roleLoading ? (
-              <Skeleton className="w-48 h-10 mx-auto" />
-            ) : (
-              <div className="flex justify-center">
+        {/* Action Buttons Section - Submit and Import Themes */}
+        <div className="container mx-auto px-4 mb-8">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            {/* Submit Button - Always visible */}
+            <Button
+              onClick={handleGenerateCustomTheme}
+              disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 px-8"
+            >
+              {isGeneratingTheme || isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isGeneratingTheme ? 'Generating...' : 'Importing...'}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Submit
+                </>
+              )}
+            </Button>
+
+            {/* Import Themes Button - Admin only */}
+            {isAdmin && (
+              roleLoading ? (
+                <Skeleton className="w-48 h-10" />
+              ) : (
                 <Button
                   onClick={() => setImportModalOpen(true)}
                   variant="outline"
@@ -227,10 +228,10 @@ export default function CalendarDashboard() {
                 >
                   Import Themes
                 </Button>
-              </div>
+              )
             )}
           </div>
-        )}
+        </div>
 
         {isAdmin && (
           <Suspense fallback={<div>Loading...</div>}>
