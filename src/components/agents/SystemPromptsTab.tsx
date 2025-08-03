@@ -12,7 +12,7 @@ import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
 
-import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
+import { DEFAULT_CATEGORIES, VISUAL_PROMPT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
 interface SystemPromptsTabProps {
   agentId?: string;
@@ -73,6 +73,44 @@ export const SystemPromptsTab = ({
     const legacyCategories = systemPrompts.map(p => p.category);
     const allCategories = [...new Set([...dbCategories, ...legacyCategories])];
     return allCategories.filter(Boolean); // Remove any undefined/null categories
+  }, [databasePrompts, systemPrompts]);
+
+  // Group Visual Prompt Generator categories by domain
+  const groupedCategories = useMemo(() => {
+    const hasPrompt = (category: string) => 
+      databasePrompts.some(p => p.category === category) || 
+      systemPrompts.some(p => p.category === category);
+
+    return {
+      'Healthcare & Medical': [
+        'cdi', 'contracts', 'healthcare-coding', 'medical-devices', 
+        'pharmaceuticals', 'telemedicine', 'hospital-operations', 'patient-care'
+      ],
+      'Technology & AI': [
+        'coding ai', 'ai agents', 'cybersecurity', 'cloud-computing', 
+        'data-analytics', 'machine-learning', 'blockchain', 'iot'
+      ],
+      'Product & Design': [
+        'product_manager', 'product_designer', 'ux-research', 'design-systems',
+        'user-interface', 'prototyping', 'user-testing'
+      ],
+      'Business & Finance': [
+        'business-strategy', 'financial-planning', 'market-research', 'sales-enablement',
+        'customer-success', 'marketing-automation', 'brand-management', 'competitive-analysis'
+      ],
+      'Operations & Management': [
+        'project-management', 'process-optimization', 'quality-assurance', 'supply-chain',
+        'human-resources', 'training-development', 'change-management'
+      ],
+      'Legal & Compliance': [
+        'legal-tech', 'regulatory-compliance', 'data-privacy', 'risk-management',
+        'contract-management', 'intellectual-property'
+      ],
+      'Education & Learning': [
+        'educational-technology', 'e-learning', 'corporate-training', 
+        'skill-development', 'knowledge-management'
+      ]
+    };
   }, [databasePrompts, systemPrompts]);
 
   // Update agent's supported categories when active categories change
@@ -192,7 +230,7 @@ export const SystemPromptsTab = ({
       <CardContent className="space-y-6 h-full min-h-screen flex flex-col">
         {/* Active Categories Display */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Active Categories</h4>
+          <h4 className="text-sm font-medium mb-2">Active Categories ({activeCategories.length})</h4>
           <div className="flex flex-wrap gap-2">
             {activeCategories.length > 0 ? (
               activeCategories.map((category) => (
@@ -204,6 +242,67 @@ export const SystemPromptsTab = ({
               <p className="text-sm text-muted-foreground">No categories with prompts found</p>
             )}
           </div>
+        </div>
+
+        {/* Visual Prompt Generator Categories - Comprehensive View */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Visual Prompt Generator Categories</h4>
+            <p className="text-xs text-muted-foreground">
+              {Object.values(groupedCategories).flat().length} total categories available
+            </p>
+          </div>
+          
+          {Object.entries(groupedCategories).map(([domain, categories]) => (
+            <div key={domain} className="space-y-2">
+              <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {domain}
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {categories.map((category) => {
+                  const hasPrompt = databasePrompts.some(p => p.category === category) || 
+                                   systemPrompts.some(p => p.category === category);
+                  
+                  return (
+                    <div
+                      key={category}
+                      className={`flex items-center justify-between p-3 rounded-lg border ${
+                        hasPrompt 
+                          ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                          : 'bg-muted/30 border-dashed'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={hasPrompt ? "default" : "outline"}
+                          className="text-xs"
+                        >
+                          {getCategoryLabel(category)}
+                        </Badge>
+                        {hasPrompt && (
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        )}
+                      </div>
+                      
+                      {!hasPrompt && agentId && (
+                        <GenerateSystemPromptButton
+                          agentId={agentId}
+                          category={category}
+                          onSuccess={() => {
+                            fetchDatabasePrompts();
+                            // Update supported categories to include the new category
+                            if (!supportedCategories.includes(category)) {
+                              onChange(systemPrompts, [...supportedCategories, category]);
+                            }
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Database System Prompts */}

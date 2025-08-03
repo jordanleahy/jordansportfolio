@@ -8,6 +8,72 @@ export const DEFAULT_CATEGORIES = [
   'product_designer'
 ] as const;
 
+// Comprehensive Visual Prompt Generator categories
+export const VISUAL_PROMPT_CATEGORIES = [
+  // Healthcare & Medical
+  'cdi',
+  'contracts',
+  'healthcare-coding',
+  'medical-devices',
+  'pharmaceuticals',
+  'telemedicine',
+  'hospital-operations',
+  'patient-care',
+  
+  // Technology & AI
+  'coding ai',
+  'ai agents',
+  'cybersecurity',
+  'cloud-computing',
+  'data-analytics',
+  'machine-learning',
+  'blockchain',
+  'iot',
+  
+  // Product & Design
+  'product_manager',
+  'product_designer',
+  'ux-research',
+  'design-systems',
+  'user-interface',
+  'prototyping',
+  'user-testing',
+  
+  // Business & Finance
+  'business-strategy',
+  'financial-planning',
+  'market-research',
+  'sales-enablement',
+  'customer-success',
+  'marketing-automation',
+  'brand-management',
+  'competitive-analysis',
+  
+  // Operations & Management
+  'project-management',
+  'process-optimization',
+  'quality-assurance',
+  'supply-chain',
+  'human-resources',
+  'training-development',
+  'change-management',
+  
+  // Legal & Compliance
+  'legal-tech',
+  'regulatory-compliance',
+  'data-privacy',
+  'risk-management',
+  'contract-management',
+  'intellectual-property',
+  
+  // Education & Learning
+  'educational-technology',
+  'e-learning',
+  'corporate-training',
+  'skill-development',
+  'knowledge-management'
+] as const;
+
 // Category type is now flexible string instead of enum
 export type CategoryType = string;
 
