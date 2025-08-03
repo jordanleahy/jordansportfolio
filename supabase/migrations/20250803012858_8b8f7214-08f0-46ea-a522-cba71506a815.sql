@@ -1,0 +1,6 @@
+UPDATE openai_agents 
+SET 
+  input_source = 'Theme context data (JSON): Accepts structured category information (healthcare/contracts/design/ai-tools/product-management/etc.), theme preferences, descriptive content, and sample posts/content examples. The system analyzes industry-specific terminology, professional requirements, content patterns, and visual design needs to determine the most appropriate system prompt framework. Also incorporates default color theme data and user preferences for comprehensive prompt generation.',
+  output_target = 'Comprehensive, category-specific system prompt with industry analysis and visual frameworks: Generates detailed, structured prompts tailored for target AI agents (Visual Prompt Generator, Blog Content Generator, etc.). Includes industry-specific terminology, professional context, visual style guidelines, color palette recommendations, content analysis frameworks, and actionable instructions. The output is automatically stored in the system_prompts table and distributed to appropriate target agents with proper categorization and version control.',
+  updated_at = now()
+WHERE id = '18939217-944d-4497-905a-81f5332ee08b'
