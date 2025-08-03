@@ -1,129 +1,251 @@
 
-import React, { Suspense, lazy } from "react";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import type { User, Session } from "@supabase/supabase-js";
-import AppLayout from "@/components/layout/AppLayout";
-import CompaniesSection from "@/components/CompaniesSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import ProjectCardsSection from "@/components/ProjectCardsSection";
-import BlogTeaser from "@/components/BlogTeaser";
-import ContactSection from "@/components/ContactSection";
-import { generateSEOMetadata } from "@/utils/seoHelpers";
+import React, { useState, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Loader2, Sparkles } from 'lucide-react';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
+import { useOptimizedStories } from '@/hooks/useOptimizedStories';
+import { useThemeImport } from '@/hooks/useThemeImport';
+import { supabase } from '@/integrations/supabase/client';
+import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
+// Lazy load components
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
-// Lazy load heavy HeroParallax component
-const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
-
-const Index = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+export default function Index() {
+  const { user, loading, isAdmin, roleLoading } = useAuth();
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [customThemeDescription, setCustomThemeDescription] = useState('');
+  const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const { toast } = useToast();
 
-  // Generate SEO metadata for homepage
-  const homeSEO = generateSEOMetadata({
-    title: "Jordan Leahy - Healthcare Technology & Product Development",
-    description: "Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.",
-    image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
-    url: "/",
-    type: "website"
+  // Use the optimized stories hook for performance
+  const {
+    isInitialized,
+    isLoadingCategories,
+    availableCategories,
+    hasCategories,
+    isEmpty,
+    invalidateCache
+  } = useOptimizedStories(user);
+
+  // Hook for theme import functionality
+  const {
+    validateInput,
+    importData,
+    isProcessing,
+    validationResult,
+    canImport,
+    hasErrors
+  } = useThemeImport({
+    onImportComplete: () => {
+      toast({
+        title: "Success!",
+        description: "Custom theme imported successfully",
+      });
+      setImportModalOpen(false);
+      handleImportComplete();
+    }
   });
 
-  // Auth state management
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+  // State for post counts and category images
+  const [postCounts, setPostCounts] = useState<Record<string, number>>({});
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  // Fetch post counts and representative images for each category
+  React.useEffect(() => {
+    const fetchCategoryData = async () => {
+      if (!availableCategories.length || !user) return;
+      
+      try {
+        const counts: Record<string, number> = {};
+        const images: Record<string, string> = {};
         
+        for (const category of availableCategories) {
+          const posts = await optimizedSocialMediaService.getAllPosts(category);
+          counts[category] = posts.length;
+          
+          // Find the first post with an image
+          const postWithImage = posts.find(post => 
+            post.image_16_9_url || 
+            post.image_9_16_url || 
+            post.image_3_4_url || 
+            post.image_4_3_url
+          );
+          
+          if (postWithImage) {
+            images[category] = postWithImage.image_16_9_url || 
+                             postWithImage.image_9_16_url || 
+                             postWithImage.image_3_4_url || 
+                             postWithImage.image_4_3_url || '';
+          }
+        }
+        
+        setPostCounts(counts);
+        setCategoryImages(images);
+      } catch (error) {
+        console.error('Failed to fetch category data:', error);
       }
-    );
+    };
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      
-    });
+    fetchCategoryData();
+  }, [availableCategories, user]);
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
+  const handleImportComplete = async () => {
+    console.log('Import completed, refreshing data...');
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred during sign out",
-        variant: "destructive",
-      });
+      // Invalidate cache to refresh data
+      invalidateCache();
+      // Re-fetch category data
+      const freshCategories = await optimizedSocialMediaService.getAvailableCategories();
+      // The categories will be updated through the hook's reactivity
+    } catch (error) {
+      console.error('Failed to refresh data after import:', error);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+  const handleGenerateCustomTheme = async () => {
+    if (!customThemeDescription.trim()) {
+      toast({
+        title: "Description Required",
+        description: "Please enter a description for your custom theme.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingTheme(true);
+    
+    try {
+      // Call the edge function to generate a custom theme
+      const { data, error } = await supabase.functions.invoke('generate-custom-theme', {
+        body: { description: customThemeDescription.trim() }
+      });
+
+      if (error) throw error;
+
+      if (data?.theme) {
+        // Validate and import the generated theme
+        const validationResult = validateInput(JSON.stringify(data.theme));
+        
+        if (validationResult.success && validationResult.data) {
+          await importData();
+          setCustomThemeDescription('');
+          toast({
+            title: "Custom Theme Generated!",
+            description: "Your custom theme has been generated and imported successfully.",
+          });
+        } else {
+          throw new Error(validationResult.errors?.[0] || 'Generated theme is invalid');
+        }
+      } else {
+        throw new Error('No theme data received from generation service');
+      }
+    } catch (error: any) {
+      console.error('Custom theme generation failed:', error);
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate custom theme. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingTheme(false);
+    }
+  };
+
+  // Loading state while checking auth
+  if (loading || roleLoading || !isInitialized) {
+    return <CalendarSkeletonLoader />;
+  }
+
+  // Redirect to auth if not authenticated
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
   return (
-    <>
-      <Helmet>
-        <title>{homeSEO.title}</title>
-        <meta name="description" content={homeSEO.description} />
-        <meta property="og:title" content={homeSEO.ogTitle} />
-        <meta property="og:description" content={homeSEO.ogDescription} />
-        <meta property="og:image" content={homeSEO.image} />
-        <meta property="og:url" content={homeSEO.url} />
-        <meta property="og:type" content={homeSEO.type} />
-        <meta property="og:site_name" content={homeSEO.siteName} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={homeSEO.ogTitle} />
-        <meta name="twitter:description" content={homeSEO.ogDescription} />
-        <meta name="twitter:image" content={homeSEO.image} />
-      </Helmet>
-      <AppLayout>
-      {/* Hero Parallax Section */}
-      <Suspense fallback={
-        <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading hero section...</p>
+    <PageLayout>
+      {/* Hero section with custom theme generation */}
+      <div className="space-y-8 mb-8">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Content Stories Dashboard
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Generate custom themes, import existing ones, or browse your content categories
+          </p>
+          
+          {/* Quick Stats */}
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <span>{availableCategories.length} themes</span>
+            <span>•</span>
+            <span>{Object.values(postCounts).reduce((a, b) => a + b, 0)} total posts</span>
           </div>
         </div>
-      }>
-        <HeroParallaxDemo />
-      </Suspense>
-      
-      {/* Portfolio Content */}
-      <CompaniesSection />
-      <TestimonialsSection />
-      <ProjectCardsSection />
-      <BlogTeaser />
-      <ContactSection />
-    </AppLayout>
-    </>
-  );
-};
 
-export default Index;
+        {/* Custom Theme Generation */}
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="theme-description">Create Custom Theme</Label>
+            <Textarea
+              id="theme-description"
+              placeholder="Describe your custom theme (e.g., 'AI-powered healthcare solutions for hospitals and clinics')"
+              value={customThemeDescription}
+              onChange={(e) => setCustomThemeDescription(e.target.value)}
+              className="min-h-[100px] resize-none"
+            />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={handleGenerateCustomTheme}
+              disabled={isGeneratingTheme || !customThemeDescription.trim()}
+              className="gap-2"
+            >
+              {isGeneratingTheme ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {isGeneratingTheme ? 'Generating...' : 'Generate Custom Theme'}
+            </Button>
+            
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => setImportModalOpen(true)}
+              >
+                Import Theme Data
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Import Modal (Admin Only) */}
+      {isAdmin && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThemeImportModal
+            open={importModalOpen}
+            onOpenChange={setImportModalOpen}
+            onImportComplete={handleImportComplete}
+          />
+        </Suspense>
+      )}
+
+      {/* Categories Grid */}
+      <CategoriesGrid 
+        categories={availableCategories}
+        postCounts={postCounts}
+        categoryImages={categoryImages}
+      />
+    </PageLayout>
+  );
+}

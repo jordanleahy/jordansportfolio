@@ -18,7 +18,7 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick }: Categor
     if (onClick) {
       onClick();
     } else {
-      navigate(`/stories/category/${encodeURIComponent(category)}`);
+      navigate(`/category/${encodeURIComponent(category)}`);
     }
   };
 

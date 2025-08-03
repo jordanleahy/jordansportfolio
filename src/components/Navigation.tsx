@@ -34,7 +34,7 @@ const Navigation = () => {
   // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
-    { href: "/stories", label: "Stories", icon: BookOpen },
+    { href: "/", label: "Stories", icon: BookOpen },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/investors", label: "Investors", icon: TrendingUp },
@@ -168,10 +168,10 @@ const Navigation = () => {
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
-                          to="/stories"
-                          className={cn(navLinkStyles, isActive("/stories") && "bg-accent text-accent-foreground")}
-                          onMouseEnter={() => handleMouseEnter('/stories')}
-                          onFocus={() => handleFocus('/stories')}
+                          to="/"
+                          className={cn(navLinkStyles, isActive("/") && "bg-accent text-accent-foreground")}
+                          onMouseEnter={() => handleMouseEnter('/')}
+                          onFocus={() => handleFocus('/')}
                         >
                           <BookOpen className="mr-2 h-4 w-4" />
                           Stories
@@ -418,10 +418,10 @@ const Navigation = () => {
                       </Link>
                     )}
                     <Link
-                      to="/stories"
+                      to="/"
                       className={cn(
                         "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/stories") && "bg-accent text-accent-foreground"
+                        isActive("/") && "bg-accent text-accent-foreground"
                       )}
                     >
                       <BookOpen className="h-4 w-4" />

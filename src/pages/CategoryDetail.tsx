@@ -54,7 +54,7 @@ export default function CategoryDetail() {
       });
       
       // Navigate back to dashboard after deletion
-      navigate('/stories');
+      navigate('/');
     } catch (error) {
       console.error('Error deleting theme:', error);
       toast({
@@ -82,7 +82,7 @@ export default function CategoryDetail() {
   }
 
   if (!category || !decodedCategory) {
-    return <Navigate to="/stories" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (
@@ -94,7 +94,7 @@ export default function CategoryDetail() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/stories')}
+              onClick={() => navigate('/')}
               className="gap-2 flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -157,7 +157,7 @@ export default function CategoryDetail() {
               category={decodedCategory}
               selectedThemeId={selectedThemeId}
               onThemeChange={setSelectedThemeId}
-              onImportClick={() => navigate('/stories')} // Navigate back to main dashboard for import
+              onImportClick={() => navigate('/')} // Navigate back to main dashboard for import
             />
           </Suspense>
         </div>

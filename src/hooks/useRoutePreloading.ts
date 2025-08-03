@@ -53,7 +53,7 @@ export const useRoutePreloading = () => {
     const userPrefs = getUserPreferences();
 
     switch (route) {
-      case '/stories':
+      case '/':
         console.log('[Prefetch] Starting stories data prefetch');
         
         // 1. Prefetch available categories first (highest priority)
