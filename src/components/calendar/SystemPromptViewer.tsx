@@ -14,6 +14,7 @@ import { stripMarkdownFormatting } from '@/utils/markdownUtils';
 import { ThemeAwareColorText } from '@/components/ui/theme-aware-color-text';
 import { useCurrentColorTheme } from '@/hooks/useCurrentColorTheme';
 import { ColorThemeSelector } from './ColorThemeSelector';
+import { ColorThemeManager } from './ColorThemeManager';
 import { ColorTheme } from '@/types/colorTheme';
 import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
 
@@ -40,6 +41,7 @@ export const SystemPromptViewer = ({
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
   const [realtimeUpdateReceived, setRealtimeUpdateReceived] = useState(false);
   const [previousTheme, setPreviousTheme] = useState<ColorTheme | null>(null);
+  const [showColorThemeManager, setShowColorThemeManager] = useState(false);
   
   const { currentTheme } = useCurrentColorTheme({ selectedThemeId });
   
@@ -198,6 +200,8 @@ export const SystemPromptViewer = ({
               themes={themes}
               selectedThemeId={selectedThemeId}
               onThemeChange={onThemeChange}
+              showAddOption={true}
+              onAddTheme={() => setShowColorThemeManager(true)}
               className="mb-2"
             />
           )}
@@ -328,13 +332,20 @@ export const SystemPromptViewer = ({
 
   // Desktop: Use Card
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0 pb-3">
-        {headerComponent}
-      </CardHeader>
-      <CardContent className="flex-1">
-        {contentComponent}
-      </CardContent>
-    </Card>
+    <>
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0 pb-3">
+          {headerComponent}
+        </CardHeader>
+        <CardContent className="flex-1">
+          {contentComponent}
+        </CardContent>
+      </Card>
+      
+      <ColorThemeManager 
+        isOpen={showColorThemeManager}
+        onClose={() => setShowColorThemeManager(false)}
+      />
+    </>
   );
 };

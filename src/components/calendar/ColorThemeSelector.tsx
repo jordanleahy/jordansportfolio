@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Palette } from "lucide-react";
+import { Palette, Plus } from "lucide-react";
 import { ColorTheme } from "@/types/colorTheme";
 import { useRealtimeColorThemes } from '@/hooks/useRealtimeColorThemes';
 
@@ -9,13 +9,17 @@ interface ColorThemeSelectorProps {
   themes: ColorTheme[];
   selectedThemeId?: string;
   onThemeChange: (themeId: string) => void;
+  showAddOption?: boolean;
+  onAddTheme?: () => void;
   className?: string;
 }
 
 export function ColorThemeSelector({ 
   themes, 
   selectedThemeId, 
-  onThemeChange, 
+  onThemeChange,
+  showAddOption = false,
+  onAddTheme,
   className 
 }: ColorThemeSelectorProps) {
   const selectedTheme = themes.find(t => t.id === selectedThemeId);
@@ -38,8 +42,16 @@ export function ColorThemeSelector({
     }
   });
 
+  const handleValueChange = (value: string) => {
+    if (value === "__add_new__") {
+      onAddTheme?.();
+    } else {
+      onThemeChange(value);
+    }
+  };
+
   return (
-    <Select value={selectedThemeId || ""} onValueChange={onThemeChange}>
+    <Select value={selectedThemeId || ""} onValueChange={handleValueChange}>
         <SelectTrigger className="h-8 w-fit border border-input bg-background px-2 py-1 text-xs sm:text-sm [&>svg]:hidden">
           <div className="flex gap-1">
             <div 
@@ -60,7 +72,7 @@ export function ColorThemeSelector({
             />
           </div>
         </SelectTrigger>
-        <SelectContent className="w-[120px]">
+        <SelectContent className="w-[120px] bg-background border z-50">
           {themes.map((theme) => (
             <SelectItem key={theme.id} value={theme.id} className="pl-2 [&>span:first-child]:hidden">
               <div className="flex gap-1">
@@ -83,6 +95,19 @@ export function ColorThemeSelector({
               </div>
             </SelectItem>
           ))}
+          {showAddOption && (
+            <>
+              <div className="px-2 my-1">
+                <div className="h-px bg-border" />
+              </div>
+              <SelectItem value="__add_new__" className="pl-2 [&>span:first-child]:hidden">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">Add</span>
+                </div>
+              </SelectItem>
+            </>
+          )}
         </SelectContent>
       </Select>
   );
