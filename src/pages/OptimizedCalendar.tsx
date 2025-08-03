@@ -204,11 +204,11 @@ export default function OptimizedCalendar() {
                 </Button>
                 
                 <Button
-                  onClick={() => {/* TODO: Open Custom Theme modal */}}
+                  onClick={() => setImportModalOpen(true)}
                   variant="outline"
                   className="w-full"
                 >
-                  Custom Theme
+                  Import Themes
                 </Button>
                 
               </div>
