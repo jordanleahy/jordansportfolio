@@ -59,6 +59,30 @@ export class OptimizedSocialMediaService {
     return this.getAllPosts(category);
   }
 
+  // Add method for getting a single post by ID
+  async getPostById(id: string): Promise<SocialMediaPost | null> {
+    const cacheKey = `post:${id}`;
+    
+    // Return cached data if valid
+    if (this.isValidCache(cacheKey)) {
+      return this.getFromCache(cacheKey);
+    }
+
+    const { data, error } = await supabase
+      .from('social_media_posts')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    
+    const post = data as SocialMediaPost | null;
+    if (post) {
+      this.setCache(cacheKey, post);
+    }
+    return post;
+  }
+
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');

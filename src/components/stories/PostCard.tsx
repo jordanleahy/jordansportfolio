@@ -329,7 +329,7 @@ const PostCardComponent = ({
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
-                onView={() => setShowGallery(true)}
+                onView={() => navigate(`/stories/post/${post.id}`)}
                 onDelete={() => onImageDelete(post.id, '16_9')}
                 imageUrl={post.image_16_9_url}
                 showUpload={false}
@@ -340,12 +340,13 @@ const PostCardComponent = ({
                   alt="16:9 image"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
                 />
               </ImageHoverOverlay>
             )}
             {post.image_9_16_url && (
               <ImageHoverOverlay
-                onView={() => setShowGallery(true)}
+                onView={() => navigate(`/stories/post/${post.id}`)}
                 onDelete={() => onImageDelete(post.id, '9_16')}
                 imageUrl={post.image_9_16_url}
                 showUpload={false}
@@ -356,12 +357,13 @@ const PostCardComponent = ({
                   alt="9:16 image"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
                 />
               </ImageHoverOverlay>
             )}
             {post.image_3_4_url && (
               <ImageHoverOverlay
-                onView={() => setShowGallery(true)}
+                onView={() => navigate(`/stories/post/${post.id}`)}
                 onDelete={() => onImageDelete(post.id, '3_4')}
                 imageUrl={post.image_3_4_url}
                 showUpload={false}
@@ -372,12 +374,13 @@ const PostCardComponent = ({
                   alt="3:4 image"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
                 />
               </ImageHoverOverlay>
             )}
             {post.image_4_3_url && (
               <ImageHoverOverlay
-                onView={() => setShowGallery(true)}
+                onView={() => navigate(`/stories/post/${post.id}`)}
                 onDelete={() => onImageDelete(post.id, '4_3')}
                 imageUrl={post.image_4_3_url}
                 showUpload={false}
@@ -388,6 +391,7 @@ const PostCardComponent = ({
                   alt="4:3 image"
                   className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
                   loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
                 />
               </ImageHoverOverlay>
             )}
