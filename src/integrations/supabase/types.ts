@@ -2245,6 +2245,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      is_bootstrap_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
