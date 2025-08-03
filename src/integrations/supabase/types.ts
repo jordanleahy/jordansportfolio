@@ -1733,10 +1733,15 @@ export type Database = {
       system_prompts: {
         Row: {
           agent_id: string
+          agent_name: string | null
+          agent_owner: string | null
+          agent_purpose: string | null
           category: string
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
+          name: string | null
           prompt_text: string
           updated_at: string
           user_id: string
@@ -1744,10 +1749,15 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          agent_name?: string | null
+          agent_owner?: string | null
+          agent_purpose?: string | null
           category: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          name?: string | null
           prompt_text: string
           updated_at?: string
           user_id: string
@@ -1755,10 +1765,15 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          agent_name?: string | null
+          agent_owner?: string | null
+          agent_purpose?: string | null
           category?: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          name?: string | null
           prompt_text?: string
           updated_at?: string
           user_id?: string
