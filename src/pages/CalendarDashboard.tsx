@@ -170,26 +170,16 @@ export default function CalendarDashboard() {
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         {/* Hero Header Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8 h-64">
           <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
-          <div className="relative p-8">
-            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-stretch gap-6 h-full">
-              <div className="flex-1">
-              </div>
-              
-              {/* Theme Management Panel - No Padding */}
-              <div className="flex-1 -m-8 ml-0">
-                <Textarea
-                  id="theme-description"
-                  placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                  value={customThemeDescription}
-                  onChange={(e) => setCustomThemeDescription(e.target.value)}
-                  className="w-full h-full min-h-[200px] resize-none border-0 rounded-none bg-transparent p-8 focus-visible:ring-0"
-                  disabled={isGeneratingTheme || isProcessing}
-                />
-              </div>
-            </div>
-          </div>
+          <Textarea
+            id="theme-description"
+            placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+            value={customThemeDescription}
+            onChange={(e) => setCustomThemeDescription(e.target.value)}
+            className="absolute inset-0 w-full h-full resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10"
+            disabled={isGeneratingTheme || isProcessing}
+          />
         </div>
 
         {/* Action Buttons Section - Submit and Import Themes */}
