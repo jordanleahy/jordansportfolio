@@ -9,6 +9,10 @@ const config: Config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
+  safelist: [
+    'animate-shimmer',
+    'animate-fade-in',
+  ],
   prefix: "",
   theme: {
     container: {
