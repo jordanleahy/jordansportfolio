@@ -1,23 +1,24 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { IMAGE_STATUS } from '@/constants/agentConstants';
 
 interface ImageGenerationStatusProps {
-  status: 'pending' | 'generating' | 'completed' | 'failed';
+  status: string; // Using string to match database values
   className?: string;
 }
 
 export const ImageGenerationStatus = ({ status, className = "" }: ImageGenerationStatusProps) => {
   const getStatusConfig = () => {
     switch (status) {
-      case 'pending':
+      case IMAGE_STATUS.PENDING:
         return {
           icon: Clock,
           text: 'Images Pending',
           variant: 'secondary' as const,
           color: 'text-muted-foreground'
         };
-      case 'generating':
+      case IMAGE_STATUS.GENERATING:
         return {
           icon: Loader2,
           text: 'Generating Images...',
@@ -25,14 +26,14 @@ export const ImageGenerationStatus = ({ status, className = "" }: ImageGeneratio
           color: 'text-primary',
           animate: true
         };
-      case 'completed':
+      case IMAGE_STATUS.COMPLETED:
         return {
           icon: CheckCircle,
           text: 'Images Generated',
           variant: 'default' as const,
           color: 'text-primary'
         };
-      case 'failed':
+      case IMAGE_STATUS.FAILED:
         return {
           icon: XCircle,
           text: 'Generation Failed',

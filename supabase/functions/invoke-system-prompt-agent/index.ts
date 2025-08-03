@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 
-// Constants
+// Constants - Centralized to match src/constants/
 const AGENT_NAMES = {
   SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
   VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator',
@@ -11,8 +11,6 @@ const AGENT_NAMES = {
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
 } as const;
 
-// This function has been removed - only System Prompt Generator is allowed
-
 const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
 } as const;
@@ -20,13 +18,19 @@ const SYSTEM_PROMPT_CATEGORIES = {
 const OPENAI_CONFIG = {
   DEFAULT_TEMPERATURE: 0.1,
   DEFAULT_MODEL: 'gpt-4.1-2025-04-14',
+  MAX_TOKENS: 4000,
+  TIMEOUT_MS: 30000,
 } as const;
 
 const HTTP_STATUS = {
   OK: 200,
+  CREATED: 201,
   BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
 } as const;
 
 const ERROR_MESSAGES = {
@@ -35,6 +39,9 @@ const ERROR_MESSAGES = {
   SYSTEM_PROMPT_NOT_FOUND: 'No system prompt found for specified category',
   INVALID_REQUEST_BODY: 'Invalid request body',
   OPENAI_API_ERROR: 'OpenAI API error',
+  USER_NOT_AUTHENTICATED: 'User not authenticated',
+  RATE_LIMIT_EXCEEDED: 'Rate limit exceeded',
+  NETWORK_ERROR: 'Network error',
 } as const;
 
 const CORS_HEADERS = {

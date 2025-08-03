@@ -74,10 +74,36 @@ export const AGENT_STATUS = {
   DEPRECATED: 'deprecated',
 } as const;
 
+// Post/Content Status Values (matching database values)
+export const CONTENT_STATUS = {
+  DRAFT: 'draft',
+  SCHEDULED: 'scheduled', 
+  PUBLISHED: 'published',
+} as const;
+
+// Image Generation Status Values
+export const IMAGE_STATUS = {
+  NONE: 'none',
+  PENDING: 'pending',
+  GENERATING: 'generating',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+} as const;
+
 // Temperature Settings for Different Use Cases
 export const TEMPERATURE_SETTINGS = {
   DETERMINISTIC: 0.0,  // For consistent outputs
   FOCUSED: 0.1,        // For system prompts and structured content
+  LOW_CREATIVE: 0.3,   // For blog content generation
   BALANCED: 0.7,       // For creative but controlled content
+  HIGH_CREATIVE: 0.8,  // For visual prompts and hero content
   CREATIVE: 0.9,       // For highly creative content
+} as const;
+
+// Max Token Settings for Different Use Cases
+export const MAX_TOKENS = {
+  SHORT_RESPONSE: 500,      // For image prompts
+  MEDIUM_RESPONSE: 2000,    // For cover letters, scripts
+  LONG_RESPONSE: 2500,      // For comparison pages
+  COMPREHENSIVE: 4000,      // For blog content, system prompts
 } as const;
