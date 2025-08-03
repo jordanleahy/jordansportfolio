@@ -116,11 +116,11 @@ const Index = () => {
         <HeroParallaxDemo />
       </Suspense>
       
-      {/* Portfolio Content */}
+      {/* Portfolio Content - Reordered sections */}
+      <RecentBlogsSection />
+      <ProjectCardsSection />
       <CompaniesSection />
       <TestimonialsSection />
-      <ProjectCardsSection />
-      <RecentBlogsSection />
       <ContactSection />
     </AppLayout>
     </>
