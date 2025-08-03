@@ -426,40 +426,37 @@ Research all ${investors.length} firms listed above and return comprehensive dat
     try {
       let jsonData;
       if (processedData) {
+        // Use already processed data
         jsonData = processedData;
       } else {
-        // Check if the content looks like JSON before parsing
+        // Check if the content looks like JSON
         const trimmed = dataToSubmit.trim();
+        let needsProcessing = false;
+        
         if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
-          console.warn("❌ [VendorDetail] Content doesn't appear to be JSON:", trimmed.substring(0, 100));
-          toast({
-            title: "Invalid JSON Format",
-            description: "The pasted content doesn't appear to be valid JSON. Please use 'Process JSON (AI-Powered)' to clean the data first, or paste valid JSON data.",
-            variant: "destructive"
-          });
-          return;
+          needsProcessing = true;
+        } else {
+          try {
+            jsonData = JSON.parse(dataToSubmit);
+            if (!validateVendorData(jsonData)) {
+              needsProcessing = true;
+            }
+          } catch (parseError) {
+            needsProcessing = true;
+          }
         }
         
-        try {
-          jsonData = JSON.parse(dataToSubmit);
-        } catch (parseError) {
-          console.error("❌ [VendorDetail] JSON parse error:", parseError);
+        // If data needs processing, automatically trigger AI processing
+        if (needsProcessing) {
+          console.log("🤖 [VendorDetail] Auto-processing data with AI agent...");
           toast({
-            title: "JSON Parse Error",
-            description: "The data is not valid JSON. Please use 'Process JSON (AI-Powered)' to clean the data first, or paste valid JSON data.",
-            variant: "destructive"
+            title: "Processing with AI",
+            description: "Automatically cleaning and extracting JSON data...",
           });
-          return;
-        }
-        
-        if (!validateVendorData(jsonData)) {
-          console.warn("❌ [VendorDetail] Validation failed for raw JSON");
-          toast({
-            title: "Invalid Data Structure",
-            description: "The JSON doesn't contain required vendor fields. Try processing it first.",
-            variant: "destructive"
-          });
-          return;
+          
+          // Trigger AI processing
+          await processJsonData();
+          return; // Exit here as processJsonData will handle the rest
         }
       }
 
