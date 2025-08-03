@@ -48,6 +48,7 @@ interface UseRealtimePostsOptions {
   enabled?: boolean;
   userId?: string;
   onUpdate?: (update: RealtimePostUpdate) => void;
+  onInsert?: (post: SocialMediaPost) => void;
   enableAdvancedLogging?: boolean;
   verboseLogging?: boolean;
 }
@@ -56,6 +57,7 @@ export const useRealtimePosts = ({
   enabled = true, 
   userId,
   onUpdate,
+  onInsert,
   enableAdvancedLogging = true,
   verboseLogging = false
 }: UseRealtimePostsOptions = {}) => {
@@ -315,6 +317,85 @@ export const useRealtimePosts = ({
           trackPerformance('Full Update Processing', updateStartTime);
           
           addLog('INFO', 'Cache', 'Cache invalidation completed', {
+            category: newRecord.category,
+            invalidationTime: Date.now() - cacheInvalidationStart,
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'social_media_posts',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const insertStartTime = Date.now();
+          addLog('INFO', 'Update', 'Received INSERT payload', { 
+            payloadType: payload.eventType,
+            table: payload.table,
+            schema: payload.schema,
+          });
+          
+          setMetrics(prev => ({
+            ...prev,
+            totalUpdatesReceived: prev.totalUpdatesReceived + 1,
+          }));
+          
+          const newRecord = payload.new as SocialMediaPost;
+          
+          if (!newRecord) {
+            addLog('WARN', 'Update', 'Missing record data in INSERT payload', { 
+              payload: verboseLogging ? payload : 'Enable verbose logging to see full payload'
+            });
+            return;
+          }
+
+          addLog('INFO', 'Update', 'New post inserted', {
+            postId: newRecord.id,
+            category: newRecord.category,
+            title: newRecord.title,
+          });
+
+          // Call insert callback if provided
+          if (onInsert) {
+            addLog('DEBUG', 'Update', 'Calling insert callback', { postId: newRecord.id });
+            onInsert(newRecord);
+          }
+
+          // Cache invalidation for new posts
+          const cacheInvalidationStart = Date.now();
+          
+          addLog('INFO', 'Cache', `Starting cache invalidation for new post in category: ${newRecord.category}`, {
+            category: newRecord.category,
+            postId: newRecord.id,
+          });
+          
+          queryClient.invalidateQueries({ 
+            queryKey: ['category-posts', newRecord.category] 
+          });
+
+          queryClient.invalidateQueries({ 
+            queryKey: ['available-categories'] 
+          });
+          
+          // Also invalidate optimized stories cache
+          queryClient.invalidateQueries({ 
+            queryKey: ['optimized-stories'] 
+          });
+          
+          setMetrics(prev => ({
+            ...prev,
+            totalCacheInvalidations: prev.totalCacheInvalidations + 1,
+            totalUpdatesProcessed: prev.totalUpdatesProcessed + 1,
+            lastUpdateTimestamp: Date.now(),
+          }));
+
+          trackPerformance('Insert Cache Invalidation', cacheInvalidationStart);
+          trackPerformance('Full Insert Processing', insertStartTime);
+          
+          addLog('INFO', 'Cache', 'Insert cache invalidation completed', {
             category: newRecord.category,
             invalidationTime: Date.now() - cacheInvalidationStart,
           });

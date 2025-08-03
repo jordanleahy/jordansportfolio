@@ -12,6 +12,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
+import { useRealtimePosts } from '@/hooks/useRealtimePosts';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
@@ -57,6 +58,26 @@ export default function StoriesDashboard() {
   // Calculate post counts and first images for each category
   const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
+
+  // Setup realtime subscription for immediate updates
+  useRealtimePosts({
+    enabled: !!user,
+    userId: user?.id,
+    onInsert: (newPost) => {
+      console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
+      // Trigger cache invalidation to refresh the UI
+      invalidateCache();
+      // Show toast notification
+      toast({
+        title: "New Post Created!",
+        description: `"${newPost.title}" added to ${newPost.category}`,
+      });
+    },
+    onUpdate: (update) => {
+      console.log('📝 Post updated:', update.postId, 'in category:', update.category);
+      // Optionally refresh category data if needed
+    }
+  });
 
   React.useEffect(() => {
     const fetchPostCountsAndImages = async () => {
