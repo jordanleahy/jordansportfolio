@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useBlogPost } from "@/hooks/useBlogQueries";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,11 @@ const BlogDetail = () => {
     error,
     refetch
   } = useBlogPost(slug, isPreview);
+
+  // Scroll to top when component mounts or slug changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   if (loading) {
     return (
