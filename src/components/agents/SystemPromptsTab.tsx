@@ -155,7 +155,7 @@ export const SystemPromptsTab = ({
       <CardHeader>
         <CardTitle>System Prompts Configuration</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 h-full min-h-screen flex flex-col">
         {/* Active Categories Display */}
         <div>
           <h4 className="text-sm font-medium mb-2">Active Categories</h4>
