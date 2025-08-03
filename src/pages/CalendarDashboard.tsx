@@ -3,10 +3,10 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useUserRole } from '@/hooks/useUserRole';
 import { useOptimizedCalendar } from '@/hooks/useOptimizedCalendar';
 import { CategoriesGrid } from '@/components/calendar/CategoriesGrid';
 
@@ -15,8 +15,7 @@ const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImp
 const CustomThemeModal = React.lazy(() => import('@/components/calendar/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
 
 export default function CalendarDashboard() {
-  const { user, loading } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { user, loading, isAdmin, roleLoading } = useAuth();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeModalOpen, setCustomThemeModalOpen] = useState(false);
   const { toast } = useToast();
@@ -131,25 +130,31 @@ export default function CalendarDashboard() {
                   Custom
                 </Button>
                 
-                <Button
-                  onClick={() => setImportModalOpen(true)}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Import Themes
-                </Button>
+                {roleLoading ? (
+                  <Skeleton className="w-full h-10" />
+                ) : isAdmin && (
+                  <Button
+                    onClick={() => setImportModalOpen(true)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Import Themes
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <ThemeImportModal 
-            open={importModalOpen} 
-            onOpenChange={setImportModalOpen} 
-            onImportComplete={handleImportComplete} 
-          />
-        </Suspense>
+        {isAdmin && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ThemeImportModal 
+              open={importModalOpen} 
+              onOpenChange={setImportModalOpen} 
+              onImportComplete={handleImportComplete} 
+            />
+          </Suspense>
+        )}
 
         <Suspense fallback={<div>Loading...</div>}>
           <CustomThemeModal 
