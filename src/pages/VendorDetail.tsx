@@ -194,6 +194,7 @@ export default function VendorDetail() {
   const [isPasteOpen, setIsPasteOpen] = useState(false);
   const [pasteContent, setPasteContent] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -423,6 +424,10 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       return;
     }
     
+    // Close modal immediately for better UX
+    setIsPasteOpen(false);
+    setIsSubmitting(true);
+    
     try {
       let jsonData;
       if (processedData) {
@@ -450,15 +455,53 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         if (needsProcessing) {
           console.log("🤖 [VendorDetail] Auto-processing data with AI agent...");
           toast({
-            title: "Processing with AI",
-            description: "Automatically cleaning and extracting JSON data...",
+            title: "Processing & Submitting",
+            description: "AI is cleaning and extracting data, then submitting automatically...",
           });
           
-          // Trigger AI processing
-          await processJsonData();
-          return; // Exit here as processJsonData will handle the rest
+          // Process and auto-submit
+          await processAndAutoSubmit();
+          return;
         }
       }
+
+      await submitVendorData(jsonData);
+    } catch (error) {
+      console.error('❌ [VendorDetail] Error in submitPastedData:', error);
+      toast({
+        title: "Submission Error",
+        description: "Failed to submit vendor data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // New function to process and auto-submit
+  const processAndAutoSubmit = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('process-funding-json', {
+        body: { rawJson: pasteContent }
+      });
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        console.log("✅ [VendorDetail] Processing successful, auto-submitting...");
+        await submitVendorData(data.cleanedData);
+      } else {
+        throw new Error(`Processing failed: ${data.errors?.join(', ') || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('❌ [VendorDetail] Error in processAndAutoSubmit:', error);
+      throw error;
+    }
+  };
+
+  // Extract the submission logic into a separate function
+  const submitVendorData = async (jsonData: any) => {
+    try {
 
       // Map ChatGPT response to vendor fields with improved data handling
       const vendorUpdate: Partial<Vendor> = {
@@ -540,9 +583,10 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       }
 
       // Show success message
+      // Success toast
       toast({
         title: "Vendor Data Updated!",
-        description: "ChatGPT response has been processed and vendor data updated successfully."
+        description: "Vendor information has been successfully updated."
       });
 
       // Close modal and clear content
@@ -554,12 +598,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       // Refresh the page to show updated data
       window.location.reload();
     } catch (error) {
-      console.error('❌ [VendorDetail] Error processing JSON:', error);
+      console.error('❌ [VendorDetail] Error submitting vendor data:', error);
       toast({
-        title: "Processing Error",
-        description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
+        title: "Submission Error",
+        description: error instanceof Error ? error.message : "Failed to update vendor data.",
         variant: "destructive"
       });
+      throw error; // Re-throw to be caught by parent function
     }
   };
   const handleDeleteVendor = async () => {
@@ -1023,5 +1068,21 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           </div>
         </div>
       </div>
-    </PageLayout>;
+      
+      {/* Loading overlay with shimmer effect */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card p-8 rounded-lg shadow-lg border animate-fade-in">
+            <div className="flex items-center space-x-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div>
+                <p className="text-lg font-medium">Processing & Updating</p>
+                <p className="text-sm text-muted-foreground">AI is cleaning data and updating vendor information...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </PageLayout>
+  );
 }
