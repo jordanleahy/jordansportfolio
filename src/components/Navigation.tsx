@@ -34,13 +34,13 @@ const Navigation = () => {
   // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
-    { href: "/sec", label: "Funded Startups", icon: Database },
     { href: "/vendors", label: "Vendors", icon: Building2 },
     { href: "/investors", label: "Investors", icon: TrendingUp },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/calendar", label: "Calendar", icon: Calendar },
     // Admin-only items
     ...(isAdmin ? [
+      { href: "/sec", label: "Funded Startups", icon: Database },
       { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
       { href: "/admin/api-usage", label: "API Usage", icon: Activity },
       { href: "/jobs", label: "Jobs", icon: FileText },
@@ -54,7 +54,7 @@ const Navigation = () => {
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/companies", label: "Companies", icon: Heart },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
-    { href: "/sec", label: "Funded Startups", icon: Database },
+    
     { href: "/#about", label: "About", icon: User },
   ];
 
@@ -105,17 +105,20 @@ const Navigation = () => {
                 {user ? (
                   // Authenticated user navigation
                   <>
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/sec"
-                          className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
-                        >
-                          <span className="mr-2 text-sm font-bold">$$</span>
-                          Funded Startups
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                    {/* SEC - Admin Only */}
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/sec"
+                            className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
+                          >
+                            <span className="mr-2 text-sm font-bold">$$</span>
+                            Funded Startups
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -308,17 +311,6 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/sec"
-                          className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
-                        >
-                          <span className="mr-2 text-sm font-bold">$$</span>
-                          Funded Startups
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -357,15 +349,18 @@ const Navigation = () => {
                 {user ? (
                   // Authenticated user quick access icons
                   <>
-                    <Link
-                      to="/sec"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/sec") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Database className="h-4 w-4" />
-                    </Link>
+                    {/* SEC - Admin Only Quick Access */}
+                    {isAdmin && (
+                      <Link
+                        to="/sec"
+                        className={cn(
+                          "p-2 rounded-lg transition-colors hover:bg-accent",
+                          isActive("/sec") && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <Database className="h-4 w-4" />
+                      </Link>
+                    )}
                     <Link
                       to="/vendors"
                       className={cn(
@@ -455,15 +450,6 @@ const Navigation = () => {
                       )}
                     >
                       <FileText className="h-4 w-4" />
-                    </Link>
-                    <Link
-                      to="/sec"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/sec") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Database className="h-4 w-4" />
                     </Link>
                   </>
                 )}
