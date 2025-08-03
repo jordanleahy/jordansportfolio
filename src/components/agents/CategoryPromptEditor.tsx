@@ -65,7 +65,6 @@ export const CategoryPromptEditor = ({
       )}
       
       <div>
-        <Label htmlFor="prompt">System Prompt</Label>
         <div className="border border-input rounded-md overflow-hidden h-screen">
           <OptimizedMonacoEditor
             height="100vh"
