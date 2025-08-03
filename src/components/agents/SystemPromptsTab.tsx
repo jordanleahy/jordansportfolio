@@ -125,6 +125,10 @@ export const SystemPromptsTab = ({
   const deleteSystemPrompt = async (promptId: string) => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Get the prompt being deleted to check its category
+      const deletedPrompt = databasePrompts.find(p => p.id === promptId);
+      
       const { error } = await supabase
         .from('system_prompts')
         .delete()
@@ -135,9 +139,24 @@ export const SystemPromptsTab = ({
       // Remove from local state
       setDatabasePrompts(prev => prev.filter(p => p.id !== promptId));
       
+      // Update supported categories if this was the last prompt for a category
+      if (deletedPrompt) {
+        const categoryStillExists = databasePrompts.some(p => 
+          p.id !== promptId && p.category === deletedPrompt.category
+        );
+        
+        // Also check if category exists in legacy prompts
+        const categoryInLegacy = systemPrompts.some(p => p.category === deletedPrompt.category);
+        
+        if (!categoryStillExists && !categoryInLegacy) {
+          const updatedCategories = supportedCategories.filter(cat => cat !== deletedPrompt.category);
+          onChange(systemPrompts, updatedCategories);
+        }
+      }
+      
       toast({
         title: "System prompt deleted",
-        description: "The system prompt has been successfully deleted.",
+        description: "The system prompt has been successfully deleted from the database.",
       });
     } catch (error) {
       console.error('Error deleting system prompt:', error);
