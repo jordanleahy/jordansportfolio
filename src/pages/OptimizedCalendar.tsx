@@ -32,7 +32,7 @@ import {
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
 const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/calendar/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
-const ColorThemeManager = React.lazy(() => import('@/components/calendar/ColorThemeManager').then(module => ({ default: module.ColorThemeManager })));
+const CustomThemeModal = React.lazy(() => import('@/components/calendar/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
 
 type CategoryType = string;
 
@@ -40,7 +40,7 @@ export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [colorThemeManagerOpen, setColorThemeManagerOpen] = useState(false);
+  const [customThemeModalOpen, setCustomThemeModalOpen] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
 
@@ -197,7 +197,7 @@ export default function OptimizedCalendar() {
                 </div>
                 
                 <Button
-                  onClick={() => setColorThemeManagerOpen(true)}
+                  onClick={() => setCustomThemeModalOpen(true)}
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                 >
                   Custom
@@ -251,9 +251,10 @@ export default function OptimizedCalendar() {
         </Suspense>
 
         <Suspense fallback={<div>Loading...</div>}>
-          <ColorThemeManager 
-            isOpen={colorThemeManagerOpen}
-            onClose={() => setColorThemeManagerOpen(false)}
+          <CustomThemeModal 
+            isOpen={customThemeModalOpen}
+            onClose={() => setCustomThemeModalOpen(false)}
+            onImportComplete={handleImportComplete}
           />
         </Suspense>
 
