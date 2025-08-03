@@ -249,7 +249,7 @@ AVOID:
               ) : (
                 <Upload className="w-4 h-4 mr-2" />
               )}
-              Submit Raw Data
+              Submit
             </Button>
 
             {/* Advanced Step-by-Step Options */}
