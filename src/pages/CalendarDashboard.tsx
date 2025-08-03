@@ -196,12 +196,12 @@ export default function CalendarDashboard() {
 
         {/* Action Buttons Section - Submit and Import Themes */}
         <div className="container mx-auto px-4 mb-8">
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <div className="flex justify-center gap-4 max-w-md mx-auto">
             {/* Submit Button - Always visible */}
             <Button
               onClick={handleGenerateCustomTheme}
               disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 px-8"
+              className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
             >
               {isGeneratingTheme || isProcessing ? (
                 <>
@@ -219,12 +219,12 @@ export default function CalendarDashboard() {
             {/* Import Themes Button - Admin only */}
             {isAdmin && (
               roleLoading ? (
-                <Skeleton className="w-48 h-10" />
+                <Skeleton className="flex-1 h-10" />
               ) : (
                 <Button
                   onClick={() => setImportModalOpen(true)}
                   variant="outline"
-                  className="px-8"
+                  className="flex-1"
                 >
                   Import Themes
                 </Button>
