@@ -45,7 +45,8 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     onImportComplete: () => {
       onImportComplete?.();
       onOpenChange(false);
-      handleReset();
+      setJsonInput('');
+      reset();
     }
   });
 
@@ -71,11 +72,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   const handleImport = useCallback(() => {
     importData();
   }, [importData]);
-
-  const handleReset = useCallback(() => {
-    setJsonInput('');
-    reset();
-  }, [reset]);
 
   const handleCopyInstructions = useCallback(async () => {
     const instructions = `Please format your response as a JSON object with the following structure:
@@ -169,8 +165,17 @@ AVOID:
 
   const placeholderText = `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`;
 
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const handleReset = useCallback(() => {
+    setJsonInput('');
+    reset();
+  }, [reset]);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Theme Data</DialogTitle>
