@@ -9,7 +9,8 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCategoryPosts } from '@/hooks/useOptimizedCalendar';
 import { useColorThemes } from '@/hooks/useColorThemes';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ArrowLeft, Trash2, MoreVertical } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ export default function CategoryDetail() {
   const { isAdmin } = useUserRole();
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const decodedCategory = category ? decodeURIComponent(category) : '';
   
@@ -87,20 +89,20 @@ export default function CategoryDetail() {
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         {/* Header with back button and category info */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className={`mb-6 ${isMobile ? 'space-y-4' : 'flex items-center justify-between'}`}>
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/calendar')}
-              className="gap-2"
+              className="gap-2 flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              {isMobile ? 'Back' : 'Back to Dashboard'}
             </Button>
-            <div className="h-6 w-px bg-border" />
-            <div>
-              <h1 className="text-2xl font-bold capitalize text-foreground">
+            <div className="h-6 w-px bg-border flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold capitalize text-foreground truncate">
                 {decodedCategory}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -109,31 +111,37 @@ export default function CategoryDetail() {
             </div>
           </div>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete Theme
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Theme</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete the "{decodedCategory}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => handleDeleteTheme(decodedCategory)}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          <div className={`flex-shrink-0 ${isMobile ? 'self-start' : ''}`}>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-2"
                 >
-                  Delete Theme
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  <Trash2 className="h-4 w-4" />
+                  {isMobile ? 'Delete' : 'Delete Theme'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Theme</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete the "{decodedCategory}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleDeleteTheme(decodedCategory)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete Theme
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         {/* Content */}
