@@ -52,8 +52,7 @@ export default function OptimizedCalendar() {
     hasCategories,
     isEmpty,
     changeTab,
-    invalidateCache,
-    getCategoryPosts
+    invalidateCache
   } = useOptimizedCalendar(user);
 
   // Check if system prompt exists for active tab
@@ -138,9 +137,9 @@ export default function OptimizedCalendar() {
                 <div className="flex flex-wrap gap-6 mt-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary">
-                      {availableCategories.reduce((total, cat) => total + getCategoryPosts(cat).length, 0)}
+                      {activeTabPosts.length}
                     </div>
-                    <div className="text-sm text-muted-foreground">Total Posts</div>
+                    <div className="text-sm text-muted-foreground">Active Theme Posts</div>
                   </div>
                   <div className="text-center">
                      <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
@@ -268,7 +267,7 @@ export default function OptimizedCalendar() {
                   <ColorThemeConsistencyChecker category={category} />
                   
                   <PostsTable 
-                    posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
+                    posts={activeTabPosts}
                     onPostsChange={() => loadCategoryPosts(category)}
                     isAdmin={isAdmin}
                     category={category}

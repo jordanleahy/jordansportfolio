@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useRealtimeConnection } from './realtime/useRealtimeConnection';
@@ -55,6 +55,7 @@ export function useOptimizedCalendar(user: any) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const queryClient = useQueryClient();
 
   // Realtime connection
   const { status: connectionStatus, isConnected } = useRealtimeConnection({
@@ -114,7 +115,7 @@ export function useOptimizedCalendar(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      return data || [];
+      return (data || []) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id,
     staleTime: 10 * 60 * 1000, // Increased stale time
@@ -123,25 +124,29 @@ export function useOptimizedCalendar(user: any) {
 
   const activeTabPosts = activeTabQuery.data || [];
 
-  // Background loading for other categories
+  // Prefetch other categories using React Query
   useEffect(() => {
-    if (availableCategories.length > 0 && activeTab) {
-      const timer = setTimeout(() => {
-        availableCategories.forEach((category) => {
-          if (category !== activeTab) {
-            // Prefetch other categories
-            supabase
-              .from('social_media_posts')
-              .select('*')
-              .eq('category', category)
-              .order('day', { ascending: true });
-          }
-        });
-      }, 1000);
-
-      return () => clearTimeout(timer);
+    if (availableCategories.length > 0 && activeTab && isInitialized) {
+      availableCategories.forEach((category) => {
+        if (category !== activeTab) {
+          queryClient.prefetchQuery({
+            queryKey: ['posts', category],
+            queryFn: async () => {
+              const { data, error } = await supabase
+                .from('social_media_posts')
+                .select('*')
+                .eq('category', category)
+                .order('day', { ascending: true });
+              
+              if (error) throw error;
+              return data || [];
+            },
+            staleTime: 10 * 60 * 1000,
+          });
+        }
+      });
     }
-  }, [availableCategories, activeTab]);
+  }, [availableCategories, activeTab, isInitialized, queryClient]);
 
   const changeTab = (newTab: string) => {
     setActiveTab(newTab);
@@ -156,10 +161,6 @@ export function useOptimizedCalendar(user: any) {
     }
   };
 
-  const getCategoryPosts = (category: string) => {
-    // This would need to be implemented with proper caching
-    return [];
-  };
 
   return {
     // State
@@ -184,7 +185,6 @@ export function useOptimizedCalendar(user: any) {
     
     // Actions
     changeTab,
-    invalidateCache,
-    getCategoryPosts
+    invalidateCache
   };
 }
