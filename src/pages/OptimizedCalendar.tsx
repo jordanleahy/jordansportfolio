@@ -201,6 +201,14 @@ export default function OptimizedCalendar() {
                   Import Theme Data
                 </Button>
                 
+                <Button
+                  onClick={() => {/* TODO: Open Custom Theme modal */}}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Custom Theme
+                </Button>
+                
                 {/* Show manual system prompt button only if no system prompt exists */}
                 {!isCheckingPrompt && hasSystemPrompt === false && (
                   <Button
