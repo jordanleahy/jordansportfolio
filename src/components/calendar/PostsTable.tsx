@@ -232,7 +232,7 @@ export const PostsTable = ({
               </TabsList>
             </div>
             
-            {category && (
+            {category && isAdmin && (
               <div className="flex items-center gap-1">
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                   <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -273,8 +273,8 @@ export const PostsTable = ({
         </Card>
       </div>
 
-      {/* System Prompt Viewer Panel */}
-      {showSystemPrompt && category && <div className="relative transition-all duration-300" style={{
+      {/* System Prompt Viewer Panel - Admin Only */}
+      {showSystemPrompt && category && isAdmin && <div className="relative transition-all duration-300" style={{
       width: promptPanelWidth
     }}>
           {/* Resize handle */}
