@@ -10,22 +10,22 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useOptimizedCalendar } from '@/hooks/useOptimizedCalendar';
+import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { supabase } from '@/integrations/supabase/client';
-import { CategoriesGrid } from '@/components/calendar/CategoriesGrid';
+import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
 // Lazy load components
-const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
-export default function CalendarDashboard() {
+export default function StoriesDashboard() {
   const { user, loading, isAdmin, roleLoading } = useAuth();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const { toast } = useToast();
 
-  // Use the optimized calendar hook for performance
+  // Use the optimized stories hook for performance
   const {
     isInitialized,
     isLoadingCategories,
@@ -33,7 +33,7 @@ export default function CalendarDashboard() {
     hasCategories,
     isEmpty,
     invalidateCache
-  } = useOptimizedCalendar(user);
+  } = useOptimizedStories(user);
 
   // Hook for theme import functionality
   const {

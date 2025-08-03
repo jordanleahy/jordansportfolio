@@ -37,7 +37,7 @@ const Navigation = () => {
     
     { href: "/investors", label: "Investors", icon: TrendingUp },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
-    { href: "/calendar", label: "Calendar", icon: Calendar },
+    { href: "/stories", label: "Stories", icon: BookOpen },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/vendors", label: "Vendors", icon: Building2 },
@@ -151,13 +151,13 @@ const Navigation = () => {
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
-                          to="/calendar"
-                          className={cn(navLinkStyles, isActive("/calendar") && "bg-accent text-accent-foreground")}
-                          onMouseEnter={() => handleMouseEnter('/calendar')}
-                          onFocus={() => handleFocus('/calendar')}
+                          to="/stories"
+                          className={cn(navLinkStyles, isActive("/stories") && "bg-accent text-accent-foreground")}
+                          onMouseEnter={() => handleMouseEnter('/stories')}
+                          onFocus={() => handleFocus('/stories')}
                         >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Calendar
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          Stories
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -378,13 +378,13 @@ const Navigation = () => {
                       </Link>
                     )}
                     <Link
-                      to="/calendar"
+                      to="/stories"
                       className={cn(
                         "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/calendar") && "bg-accent text-accent-foreground"
+                        isActive("/stories") && "bg-accent text-accent-foreground"
                       )}
                     >
-                      <Calendar className="h-4 w-4" />
+                      <BookOpen className="h-4 w-4" />
                     </Link>
                     {/* Admin-only quick access icons */}
                     {isAdmin && (

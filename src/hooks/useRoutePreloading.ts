@@ -53,8 +53,8 @@ export const useRoutePreloading = () => {
     const userPrefs = getUserPreferences();
 
     switch (route) {
-      case '/calendar':
-        console.log('[Prefetch] Starting calendar data prefetch');
+      case '/stories':
+        console.log('[Prefetch] Starting stories data prefetch');
         
         // 1. Prefetch available categories first (highest priority)
         await queryClient.prefetchQuery({
@@ -83,7 +83,7 @@ export const useRoutePreloading = () => {
           });
         }, 500);
 
-        console.log('[Prefetch] Calendar prefetch completed');
+        console.log('[Prefetch] Stories prefetch completed');
         break;
 
       case '/vendors':

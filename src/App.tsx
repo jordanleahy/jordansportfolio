@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -50,7 +50,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
-const CalendarDashboard = lazy(() => import("./pages/CalendarDashboard"));
+const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
 const CategoryDetail = lazy(() => import("./pages/CategoryDetail"));
 
 
@@ -87,18 +87,22 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
+                {/* Redirect old calendar routes to stories */}
+                <Route path="/calendar" element={<Navigate to="/stories" replace />} />
+                <Route path="/calendar/category/:category" element={<Navigate to="/stories/category/:category" replace />} />
+                
                 <Route 
-                  path="/calendar" 
+                  path="/stories" 
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <CalendarDashboard />
+                        <StoriesDashboard />
                       </Suspense>
                     </ProtectedRoute>
                   } 
                 />
                 <Route 
-                  path="/calendar/category/:category" 
+                  path="/stories/category/:category" 
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>

@@ -10,10 +10,10 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useOptimizedCalendar } from '@/hooks/useOptimizedCalendar';
+import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useSystemPromptExists } from '@/hooks/useSystemPromptExists';
 import { useColorThemes } from '@/hooks/useColorThemes';
-import { ColorThemeSelector } from '@/components/calendar/ColorThemeSelector';
+import { ColorThemeSelector } from '@/components/stories/ColorThemeSelector';
 // Removed complex realtime debugging system
 import { Trash2 } from 'lucide-react';
 import {
@@ -29,10 +29,10 @@ import {
 } from '@/components/ui/alert-dialog';
 
 // Lazy load components
-const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
-const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
-const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/calendar/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
-const CustomThemeModal = React.lazy(() => import('@/components/calendar/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
+const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
+const CustomThemeModal = React.lazy(() => import('@/components/stories/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
 
 type CategoryType = string;
 
@@ -56,7 +56,7 @@ export default function OptimizedCalendar() {
     isEmpty,
     changeTab,
     invalidateCache
-  } = useOptimizedCalendar(user);
+  } = useOptimizedStories(user);
 
   // Check if system prompt exists for active tab
   const { data: hasSystemPrompt, isLoading: isCheckingPrompt } = useSystemPromptExists(activeTab);

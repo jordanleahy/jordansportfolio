@@ -51,7 +51,7 @@ export const useAvailableCategories = (enabled = true) => {
   });
 };
 
-export function useOptimizedCalendar(user: any) {
+export function useOptimizedStories(user: any) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
@@ -154,7 +154,7 @@ export function useOptimizedCalendar(user: any) {
   };
 
   const invalidateCache = () => {
-    console.log('🔄 Invalidating calendar cache');
+    console.log('🔄 Invalidating stories cache');
     // Use the cacheManager from realtime updates if available
     if (cacheManager) {
       cacheManager.invalidatePattern('posts');
