@@ -1,14 +1,13 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, ArrowRight, BookOpen } from "lucide-react";
-import { usePublishedBlogPosts } from "@/hooks/useBlogQueries";
-import { BlogPost } from "@/types/blog";
-import { calculateReadTime, extractPlainText } from "@/types/blog";
+import { ArrowRight, BookOpen } from "lucide-react";
+import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
+import { BlogCard } from "@/components/ui/BlogCard";
 
 const RecentBlogsSection = () => {
   const { data: blogPosts = [], isLoading, error } = usePublishedBlogPosts();
+  const prefetchBlogPost = usePrefetchBlogPost();
 
   // Get 6 most recent posts
   const recentPosts = blogPosts.slice(0, 6);
@@ -17,22 +16,9 @@ const RecentBlogsSection = () => {
     return null; // Hide section if no posts or error
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getReadTime = (post: BlogPost) => {
-    if (post.read_time) return `${post.read_time} min read`;
-    
-    // Calculate read time from intro content
-    const wordCount = post.intro_content ? 
-      extractPlainText(post.intro_content).split(/\s+/).length : 0;
-    const readTime = Math.max(1, Math.ceil(wordCount / 200));
-    return `${readTime} min read`;
+  // Handle prefetching on hover for performance
+  const handleMouseEnter = (slug: string) => {
+    prefetchBlogPost(slug);
   };
 
   return (
@@ -54,20 +40,21 @@ const RecentBlogsSection = () => {
         {isLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {[...Array(6)].map((_, index) => (
-              <Card key={index} className="h-full border border-border animate-pulse">
-                <CardContent className="p-6 h-full flex flex-col">
+              <div key={index} className="animate-pulse">
+                <div className="blog-image-container">
+                  <div className="blog-index-image bg-muted"></div>
+                </div>
+                <div className="p-6">
                   <div className="bg-muted rounded-md h-4 w-24 mb-3" />
                   <div className="bg-muted rounded-md h-6 w-full mb-3" />
                   <div className="bg-muted rounded-md h-4 w-full mb-2" />
                   <div className="bg-muted rounded-md h-4 w-3/4 mb-4" />
-                  <div className="mt-auto pt-4 border-t border-border">
-                    <div className="flex items-center justify-between">
-                      <div className="bg-muted rounded-md h-4 w-20" />
-                      <div className="bg-muted rounded-md h-4 w-16" />
-                    </div>
+                  <div className="flex items-center gap-4">
+                    <div className="bg-muted rounded-md h-4 w-20" />
+                    <div className="bg-muted rounded-md h-4 w-16" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -82,50 +69,10 @@ const RecentBlogsSection = () => {
                 whileHover={{ y: -8 }}
                 className="h-full"
               >
-                <Link to={`/blog/${post.slug}`}>
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 border border-border group cursor-pointer">
-                    {/* Hero Image */}
-                    {post.hero_image_url && (
-                      <div className="aspect-video overflow-hidden rounded-t-lg">
-                        <img
-                          src={post.hero_image_url}
-                          alt={post.hero_headline}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-                    
-                    <CardContent className="p-6 h-full flex flex-col">
-                      <div className="flex items-center gap-2 text-sm text-accent mb-3">
-                        <span className="bg-accent/10 px-2 py-1 rounded-md font-medium capitalize">
-                          {post.category}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                        {post.hero_headline}
-                      </h3>
-                      
-                      <p className="text-muted-foreground mb-4 line-clamp-3 flex-grow">
-                        {post.hero_subhead}
-                      </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} />
-                          <span>{formatDate(post.published_at || post.created_at)}</span>
-                        </div>
-                        <span>{getReadTime(post)}</span>
-                      </div>
-                      
-                      <div className="inline-flex items-center gap-2 text-primary font-medium mt-4 hover:text-primary/80 transition-colors group/link">
-                        Read More
-                        <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <BlogCard 
+                  post={post} 
+                  onMouseEnter={handleMouseEnter}
+                />
               </motion.div>
             ))}
           </div>
