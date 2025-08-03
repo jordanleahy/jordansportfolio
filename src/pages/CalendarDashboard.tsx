@@ -31,27 +31,48 @@ export default function CalendarDashboard() {
     invalidateCache
   } = useOptimizedCalendar(user);
 
-  // Calculate post counts for each category
+  // Calculate post counts and first images for each category
   const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
+  const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
-    const fetchPostCounts = async () => {
+    const fetchPostCountsAndImages = async () => {
       if (!availableCategories.length) return;
       
       const counts: Record<string, number> = {};
+      const images: Record<string, string> = {};
+      
       for (const category of availableCategories) {
         try {
           const posts = await optimizedSocialMediaService.getPostsByCategory(category);
           counts[category] = posts.length;
+          
+          // Find first post with an image (checking multiple aspect ratios)
+          const firstPostWithImage = posts.find(post => 
+            post.image_16_9_url || 
+            post.image_4_3_url || 
+            post.image_9_16_url || 
+            post.image_3_4_url
+          );
+          
+          if (firstPostWithImage) {
+            // Prefer 16:9 for card display, fallback to other ratios
+            images[category] = firstPostWithImage.image_16_9_url || 
+                              firstPostWithImage.image_4_3_url ||
+                              firstPostWithImage.image_9_16_url ||
+                              firstPostWithImage.image_3_4_url ||
+                              '';
+          }
         } catch (error) {
           console.error(`Error fetching posts for ${category}:`, error);
           counts[category] = 0;
         }
       }
       setPostCounts(counts);
+      setCategoryImages(images);
     };
 
-    fetchPostCounts();
+    fetchPostCountsAndImages();
   }, [availableCategories]);
 
   const handleImportComplete = async () => {
@@ -142,6 +163,7 @@ export default function CalendarDashboard() {
         <CategoriesGrid 
           categories={availableCategories}
           postCounts={postCounts}
+          categoryImages={categoryImages}
           onImportClick={() => setImportModalOpen(true)}
         />
       </div>

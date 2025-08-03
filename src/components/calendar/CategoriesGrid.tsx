@@ -4,10 +4,11 @@ import { EmptyState } from "./EmptyState";
 interface CategoriesGridProps {
   categories: string[];
   postCounts: Record<string, number>;
+  categoryImages: Record<string, string>;
   onImportClick?: () => void;
 }
 
-export const CategoriesGrid = ({ categories, postCounts, onImportClick }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ categories, postCounts, categoryImages, onImportClick }: CategoriesGridProps) => {
   if (categories.length === 0) {
     return <EmptyState onImportClick={onImportClick} />;
   }
@@ -19,6 +20,7 @@ export const CategoriesGrid = ({ categories, postCounts, onImportClick }: Catego
           key={category}
           category={category}
           postCount={postCounts[category] || 0}
+          imageUrl={categoryImages[category]}
         />
       ))}
     </div>
