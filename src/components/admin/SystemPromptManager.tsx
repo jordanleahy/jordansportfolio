@@ -8,6 +8,7 @@ import { useOpenAIAgents } from '@/hooks/useOpenAIAgents';
 import { Brain, Edit, Eye, TrendingUp, Clock, Target } from 'lucide-react';
 import type { OpenAIAgent } from '@/types/openaiAgent';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
+import { AGENT_NAMES } from '@/constants/agentConstants';
 
 export const SystemPromptManager = () => {
   const { data: agents, isLoading: loading } = useOpenAIAgents();
@@ -15,7 +16,7 @@ export const SystemPromptManager = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<any | null>(null);
   const [editingPrompt, setEditingPrompt] = useState(false);
 
-  const blogVisualAgent = agents?.find(agent => agent.name === 'Visual Prompt Generator');
+  const blogVisualAgent = agents?.find(agent => agent.name === AGENT_NAMES.VISUAL_PROMPT_GENERATOR);
 
   const getPromptMetrics = (category: string) => {
     // Mock metrics - in real implementation, this would come from API usage tracking
