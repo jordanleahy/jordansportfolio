@@ -28,12 +28,7 @@ export const BlogStatusBadge = ({ postId, className, blogStatus }: BlogStatusBad
   const status = blogStatus || defaultStatus;
 
   if (status.isLoading) {
-    return (
-      <Badge variant="outline" className={`text-xs ${className}`}>
-        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-        Checking
-      </Badge>
-    );
+    return null; // Hide badge entirely during loading
   }
 
   if (status.error) {
