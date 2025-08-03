@@ -255,20 +255,6 @@ AVOID:
             {/* Advanced Step-by-Step Options */}
             <div className="flex gap-2">
               <Button
-                onClick={handleProcess}
-                disabled={isProcessing || !jsonInput.trim()}
-                variant="outline"
-                className="text-xs"
-              >
-                {isProcessing && state.type === 'processing' && state.step === 'ai' ? (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                ) : (
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                )}
-                Validate Only
-              </Button>
-              
-              <Button
                 onClick={handleImport}
                 disabled={isProcessing || !canImport}
                 variant="outline"
