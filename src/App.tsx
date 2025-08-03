@@ -50,7 +50,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
-// Stories is now the default home page (Index component)
+const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
 const CategoryDetail = lazy(() => import("./pages/CategoryDetail"));
 
 
@@ -86,16 +86,23 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                
-                {/* Redirect old routes to home */}
-                <Route path="/calendar" element={<Navigate to="/" replace />} />
-                <Route path="/calendar/category/:category" element={<Navigate to="/category/:category" replace />} />
-                <Route path="/stories" element={<Navigate to="/" replace />} />
-                <Route path="/stories/category/:category" element={<Navigate to="/category/:category" replace />} />
+                <Route path="/" element={<Index />} />
+                {/* Redirect old calendar routes to stories */}
+                <Route path="/calendar" element={<Navigate to="/stories" replace />} />
+                <Route path="/calendar/category/:category" element={<Navigate to="/stories/category/:category" replace />} />
                 
                 <Route 
-                  path="/category/:category" 
+                  path="/stories" 
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<CalendarSkeletonLoader />}>
+                        <StoriesDashboard />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/stories/category/:category" 
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>

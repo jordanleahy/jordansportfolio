@@ -328,7 +328,7 @@ export const SystemPromptsTab = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        window.open(`/?category=${dbPrompt.category}`, '_blank');
+                        window.open(`/stories?category=${dbPrompt.category}`, '_blank');
                       }}
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
