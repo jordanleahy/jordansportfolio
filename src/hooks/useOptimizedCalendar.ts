@@ -102,7 +102,7 @@ export function useOptimizedCalendar(user: any) {
     }
   }, [availableCategories, isLoadingAvailableCategories, searchParams, setSearchParams, isInitialized]);
 
-  // Active category posts query
+  // Active category posts query with optimistic updates
   const activeTabQuery = useQuery({
     queryKey: ['posts', activeTab],
     queryFn: async () => {
@@ -117,7 +117,8 @@ export function useOptimizedCalendar(user: any) {
       return data || [];
     },
     enabled: !!activeTab && !!user?.id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000, // Increased stale time
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
   });
 
   const activeTabPosts = activeTabQuery.data || [];
