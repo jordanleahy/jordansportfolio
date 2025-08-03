@@ -94,7 +94,7 @@ export default function CalendarDashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  const totalPosts = Object.values(postCounts).reduce((sum, count) => sum + count, 0);
+  
 
   return (
     <PageLayout>
@@ -105,20 +105,6 @@ export default function CalendarDashboard() {
           <div className="relative">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
               <div className="flex-1">
-                {/* Quick Stats */}
-                <div className="flex flex-wrap gap-6 mb-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">
-                      {totalPosts}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                     <div className="text-3xl font-bold text-primary">{availableCategories.length}</div>
-                   </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-primary">{availableCategories.length}</div>
-                    </div>
-                </div>
               </div>
               
               {/* Theme Management Panel */}
