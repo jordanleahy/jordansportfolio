@@ -117,9 +117,9 @@ const Index = () => {
       </Suspense>
       
       {/* Portfolio Content - Reordered sections */}
+      <CompaniesSection />
       <RecentBlogsSection />
       <ProjectCardsSection />
-      <CompaniesSection />
       <TestimonialsSection />
       <ContactSection />
     </AppLayout>
