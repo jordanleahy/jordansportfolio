@@ -24,23 +24,7 @@ import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { ProductJobsCard } from '@/components/vendors/ProductJobsCard';
 import { OGMetadataCard } from '@/components/vendors/OGMetadataCard';
 import { useVendorEdit } from '@/hooks/useVendorEdit';
-import {
-  companyOverviewConfig,
-  servicesConfig,
-  specializationsConfig,
-  customersConfig,
-  featuresConfig,
-  benefitsConfig,
-  competitiveConfig,
-  competitorsConfig,
-  notableCustomersConfig,
-  fundingConfig,
-  businessConfig,
-  contactConfig,
-  socialConfig,
-  recognitionConfig,
-  technologyConfig,
-} from '@/data/vendorSectionConfigs';
+import { companyOverviewConfig, servicesConfig, specializationsConfig, customersConfig, featuresConfig, benefitsConfig, competitiveConfig, competitorsConfig, notableCustomersConfig, fundingConfig, businessConfig, contactConfig, socialConfig, recognitionConfig, technologyConfig } from '@/data/vendorSectionConfigs';
 
 // Utility function for generating vendor research prompts
 const generateVendorPrompt = (websiteUrl: string, vendor: Vendor) => {
@@ -193,20 +177,16 @@ Before returning JSON, verify:
 
 Begin your comprehensive website analysis now and return the complete JSON object.`;
 };
-
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-
-
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 export default function VendorDetail() {
-  const { slugname: category, vendorSlug } = useParams<{ slugname: string; vendorSlug: string }>();
+  const {
+    slugname: category,
+    vendorSlug
+  } = useParams<{
+    slugname: string;
+    vendorSlug: string;
+  }>();
   const navigate = useNavigate();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
@@ -217,28 +197,39 @@ export default function VendorDetail() {
   const [processedData, setProcessedData] = useState<any>(null);
   const [processingResult, setProcessingResult] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const {
+    user
+  } = useAuth();
+  const {
+    isAdmin
+  } = useUserRole();
   const queryClient = useQueryClient();
-  
-  const { data: vendor, isLoading, error } = useVendorBySlug(vendorSlug || '');
-  
-  const { togglePublishStatus, getPublicUrl, isPublishing } = useVendorPublish({
+  const {
+    data: vendor,
+    isLoading,
+    error
+  } = useVendorBySlug(vendorSlug || '');
+  const {
+    togglePublishStatus,
+    getPublicUrl,
+    isPublishing
+  } = useVendorPublish({
     vendorId: vendor?.id || '',
     vendorSlug: vendorSlug || '',
     category: category || ''
   });
 
   // Initialize vendor edit hook (must be called before any conditional returns)
-  const vendorEdit = useVendorEdit({ 
-    vendor: vendor || {} as Vendor, 
-    onSave: () => queryClient.invalidateQueries({ queryKey: ['vendor', vendorSlug] }) 
+  const vendorEdit = useVendorEdit({
+    vendor: vendor || {} as Vendor,
+    onSave: () => queryClient.invalidateQueries({
+      queryKey: ['vendor', vendorSlug]
+    })
   });
-
-
   if (!category || !vendorSlug) {
     console.log('Missing required params, redirecting to 404');
     return <Navigate to="/404" replace />;
@@ -249,48 +240,40 @@ export default function VendorDetail() {
     title: `${category.charAt(0).toUpperCase() + category.slice(1)} Companies`,
     description: `Analysis of ${category} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
   };
-
   if (isLoading) {
-    return (
-      <PageLayout>
+    return <PageLayout>
         <div className="container mx-auto py-8 px-4">
           <div className="text-center">Loading vendor details...</div>
         </div>
-      </PageLayout>
-    );
+      </PageLayout>;
   }
-
   if (error || !vendor) {
     console.log('Vendor not found or error:', error);
     return <Navigate to="/404" replace />;
   }
-
   const generateAdvancedPrompt = () => {
     if (!vendor.website_url) {
       toast({
         title: "Error",
         description: "This vendor doesn't have a website URL available.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     const prompt = generateVendorPrompt(vendor.website_url, vendor);
     navigator.clipboard.writeText(prompt);
     toast({
       title: "Copied!",
-      description: "Advanced research prompt copied to clipboard.",
+      description: "Advanced research prompt copied to clipboard."
     });
   };
-
   const copyPrompt = () => {
     navigator.clipboard.writeText(generatedPrompt);
     toast({
       title: "Copied!",
-      description: "Advanced research prompt copied to clipboard.",
+      description: "Advanced research prompt copied to clipboard."
     });
   };
-
   const generateInvestorResearchPrompt = (investors: string[], companyName: string) => {
     const prompt = `You are an expert investment research analyst. Research these specific venture capital and investment firms that have invested in ${companyName}. For each firm, extract comprehensive information that matches our investor database schema.
 
@@ -341,35 +324,26 @@ Return ONLY valid JSON array with detailed information for each of these specifi
 - Get accurate contact information and key partner details
 
 Research all ${investors.length} firms listed above and return comprehensive data for each one.`;
-
     setGeneratedPrompt(prompt);
     setIsPromptModalOpen(true);
-    
     toast({
-      title: "Research Prompt Generated", 
-      description: `Generated targeted research prompt for ${investors.length} investor(s)`,
+      title: "Research Prompt Generated",
+      description: `Generated targeted research prompt for ${investors.length} investor(s)`
     });
   };
-
   const openPasteModal = () => {
     setIsPasteOpen(true);
     setPasteContent("");
   };
-
   const validateVendorData = (data: any): boolean => {
-    
     // More lenient validation - only require company_name
     if (!data?.company_name || typeof data.company_name !== 'string') {
       console.warn("❌ [VendorDetail] Missing or invalid company_name");
       return false;
     }
-    
+
     // Check for at least one meaningful field beyond company_name
-    const meaningfulFields = [
-      'description', 'headquarters', 'core_services', 'specialties', 
-      'customers', 'key_features', 'key_benefits', 'competitive_advantages'
-    ];
-    
+    const meaningfulFields = ['description', 'headquarters', 'core_services', 'specialties', 'customers', 'key_features', 'key_benefits', 'competitive_advantages'];
     const hasValidFields = meaningfulFields.some(field => {
       const value = data[field];
       if (Array.isArray(value)) {
@@ -377,58 +351,52 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       }
       return value && typeof value === 'string' && value.trim().length > 0;
     });
-    
     if (!hasValidFields) {
       console.warn("❌ [VendorDetail] No meaningful data fields found");
       return false;
     }
     return true;
   };
-
   const processJsonData = async () => {
-    
     if (!pasteContent.trim()) {
       console.warn("❌ [VendorDetail] No paste content provided");
       toast({
         title: "No Data",
         description: "Please paste JSON data first.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
-
     setIsProcessing(true);
     try {
-      
-      const { data, error } = await supabase.functions.invoke('process-funding-json', {
-        body: { rawJson: pasteContent }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('process-funding-json', {
+        body: {
+          rawJson: pasteContent
+        }
       });
-
-      
-
       if (error) {
         console.error("❌ [VendorDetail] Edge function error:", error);
         throw error;
       }
-
       setProcessingResult(data);
       if (data.success) {
         setProcessedData(data.cleanedData);
         const fixCount = data.fixes?.length || 0;
         const warningCount = data.warnings?.length || 0;
         const aiUsed = data.aiCleaningUsed ? " (AI-powered)" : "";
-        
         toast({
           title: `JSON Processed Successfully${aiUsed}`,
-          description: `${fixCount} issues fixed, ${warningCount} warnings. Ready to submit!`,
+          description: `${fixCount} issues fixed, ${warningCount} warnings. Ready to submit!`
         });
       } else {
         console.error("❌ [VendorDetail] Processing failed:", data);
         toast({
           title: "Processing Failed",
           description: `${data.errors?.length || 0} errors found. Check console for details.`,
-          variant: "destructive",
+          variant: "destructive"
         });
       }
     } catch (error) {
@@ -436,29 +404,26 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       toast({
         title: "Processing Error",
         description: "Failed to process JSON data. Check console for details.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
     }
   };
-
   const submitPastedData = async () => {
     const dataToSubmit = processedData || pasteContent;
-    
     try {
       let jsonData;
       if (processedData) {
         jsonData = processedData;
       } else {
         jsonData = JSON.parse(dataToSubmit);
-        
         if (!validateVendorData(jsonData)) {
           console.warn("❌ [VendorDetail] Validation failed for raw JSON");
           toast({
             title: "Invalid Data Structure",
             description: "The JSON doesn't contain required vendor fields. Try processing it first.",
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
@@ -472,7 +437,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         headquarters: jsonData.headquarters || vendor?.headquarters,
         founding_year: jsonData.founding_year || vendor?.founding_year,
         company_type: jsonData.company_type || vendor?.company_type,
-        
         // Services and capabilities - with explicit logging
         core_services: jsonData.core_services || vendor?.core_services || [],
         specialties: jsonData.specialties || vendor?.specialties || [],
@@ -481,18 +445,14 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         key_benefits: jsonData.key_benefits || vendor?.key_benefits || [],
         competitive_advantages: jsonData.competitive_advantages || vendor?.competitive_advantages || [],
         notable_customers: jsonData.notable_customers || vendor?.notable_customers || [],
-        
         // Competitors - now properly handled
         competitors: jsonData.competitors || vendor?.competitors || [],
-        
         // Funding info
         funding_stage: jsonData.funding_stage || vendor?.funding_stage,
         total_funding: jsonData.total_funding || vendor?.total_funding,
         key_investors: jsonData.key_investors || vendor?.key_investors || [],
-        
         // Performance metrics - now properly structured
         performance_metrics: jsonData.performance_metrics || vendor?.performance_metrics || null,
-        
         // Extract new direct fields from JSON
         business_model: jsonData.business_model || vendor?.business_model,
         employee_count_range: jsonData.employee_count_range || vendor?.employee_count_range,
@@ -507,7 +467,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         office_locations: jsonData.office_locations || vendor?.office_locations || [],
         partnerships: jsonData.partnerships || vendor?.partnerships || [],
         tech_stack: jsonData.tech_stack || vendor?.tech_stack || [],
-        
         // Research data - flattened structure to match database schema
         research_data: {
           ...vendor?.research_data,
@@ -523,7 +482,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           data_completeness: jsonData.research_data?.data_completeness || '0%',
           notable_findings: jsonData.research_data?.notable_findings || []
         },
-        
         // Company data - now only contains unstructured fields
         company_data: {
           ...vendor?.company_data,
@@ -541,54 +499,52 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       };
 
       // Update vendor in database
-      const { data: updateResult, error } = await supabase
-        .from('vendors')
-        .update(vendorUpdate)
-        .eq('id', vendor?.id)
-        .select();
-
+      const {
+        data: updateResult,
+        error
+      } = await supabase.from('vendors').update(vendorUpdate).eq('id', vendor?.id).select();
       if (error) {
         console.error("❌ [VendorDetail] Database update error:", error);
         throw error;
       }
-      
+
       // Show success message
       toast({
         title: "Vendor Data Updated!",
-        description: "ChatGPT response has been processed and vendor data updated successfully.",
+        description: "ChatGPT response has been processed and vendor data updated successfully."
       });
-      
+
       // Close modal and clear content
       setIsPasteOpen(false);
       setPasteContent("");
       setProcessedData(null);
       setProcessingResult(null);
-      
+
       // Refresh the page to show updated data
       window.location.reload();
-      
     } catch (error) {
       console.error('❌ [VendorDetail] Error processing JSON:', error);
       toast({
         title: "Processing Error",
         description: error instanceof Error ? error.message : "Please paste valid JSON data from ChatGPT response.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleDeleteVendor = async () => {
     if (!vendor) return;
-
     setIsDeleting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
           description: "Please log in to delete vendors.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -598,28 +554,28 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         toast({
           title: "Permission Denied",
           description: "You can only delete vendors you created.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
-      const { error } = await supabase
-        .from('vendors')
-        .delete()
-        .eq('id', vendor.id);
-
+      const {
+        error
+      } = await supabase.from('vendors').delete().eq('id', vendor.id);
       if (error) {
         throw error;
       }
-
       toast({
         title: "Vendor Deleted",
-        description: `${vendor.company_name} has been permanently deleted.`,
+        description: `${vendor.company_name} has been permanently deleted.`
       });
 
       // Invalidate React Query cache to ensure the vendor list is updated
-      await queryClient.invalidateQueries({ queryKey: ["vendors"] });
-      await queryClient.invalidateQueries({ queryKey: ["vendor", vendorSlug] });
+      await queryClient.invalidateQueries({
+        queryKey: ["vendors"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["vendor", vendorSlug]
+      });
 
       // Navigate back to the vendors list
       navigate(`/vendors/${category}`);
@@ -628,20 +584,24 @@ Research all ${investors.length} firms listed above and return comprehensive dat
       toast({
         title: "Delete Failed",
         description: "Failed to delete vendor. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsDeleting(false);
     }
   };
-
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type) {
-      case 'Public': return 'default';
-      case 'Private': return 'secondary';
-      case 'Startup': return 'destructive';
-      case 'Subsidiary': return 'outline';
-      default: return 'secondary';
+      case 'Public':
+        return 'default';
+      case 'Private':
+        return 'secondary';
+      case 'Startup':
+        return 'destructive';
+      case 'Subsidiary':
+        return 'outline';
+      default:
+        return 'secondary';
     }
   };
 
@@ -649,13 +609,9 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   const ogTitle = vendor.og_title || `${vendor.company_name} - ${categoryConfig.title} Vendor Profile`;
   const ogDescription = vendor.og_description || `${vendor.description} ${vendor.founding_year ? `Founded in ${vendor.founding_year}, ` : ''}${vendor.company_name} offers ${vendor.core_services.join(', ')} for ${vendor.customers.join(', ')}.`;
   const ogImage = vendor.og_image_url || '/og-default.png';
-  
   const pageTitle = ogTitle;
   const pageDescription = ogDescription;
-
-
-  return (
-    <PageLayout>
+  return <PageLayout>
       <Helmet>
         <title>{pageTitle} | Competitive Intelligence</title>
         <meta name="description" content={pageDescription} />
@@ -674,19 +630,19 @@ Research all ${investors.length} firms listed above and return comprehensive dat
         
         <script type="application/ld+json">
           {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": vendor.company_name,
-            "description": vendor.description,
-            "foundingDate": vendor.founding_year?.toString(),
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": vendor.headquarters
-            },
-            "url": vendor.website_url,
-            "knowsLanguage": "en-US",
-            "industry": categoryConfig.title
-          })}
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": vendor.company_name,
+          "description": vendor.description,
+          "foundingDate": vendor.founding_year?.toString(),
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": vendor.headquarters
+          },
+          "url": vendor.website_url,
+          "knowsLanguage": "en-US",
+          "industry": categoryConfig.title
+        })}
         </script>
       </Helmet>
 
@@ -701,24 +657,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               Copy this prompt and use it with ChatGPT or Claude for detailed vendor research:
             </div>
             
-            <Textarea
-              value={generatedPrompt}
-              readOnly
-              className="min-h-[300px] sm:min-h-[400px] font-mono text-xs"
-            />
+            <Textarea value={generatedPrompt} readOnly className="min-h-[300px] sm:min-h-[400px] font-mono text-xs" />
             
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowPrompt(false)}
-                className="flex-1 order-2 sm:order-1"
-              >
+              <Button variant="outline" onClick={() => setShowPrompt(false)} className="flex-1 order-2 sm:order-1">
                 Close
               </Button>
-              <Button
-                onClick={copyPrompt}
-                className="flex-1 order-1 sm:order-2"
-              >
+              <Button onClick={copyPrompt} className="flex-1 order-1 sm:order-2">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Prompt
               </Button>
@@ -736,116 +681,70 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">
               Paste the JSON response from ChatGPT here. Use "Process JSON" to automatically fix common formatting issues using AI-powered cleaning.
-              {pasteContent.trim() && !processedData && (
-                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
-                  💡 <strong>Tip:</strong> Click "Process JSON" to validate and clean your data before submission for better results.
-                </div>
-              )}
+              {pasteContent.trim() && !processedData}
             </div>
             
-            <Textarea
-              value={pasteContent}
-              onChange={(e) => {
-                setPasteContent(e.target.value);
-                setProcessedData(null);
-                setProcessingResult(null);
-              }}
-              placeholder="Paste your ChatGPT JSON response here..."
-              className="min-h-[150px] font-mono text-sm"
-            />
+            <Textarea value={pasteContent} onChange={e => {
+            setPasteContent(e.target.value);
+            setProcessedData(null);
+            setProcessingResult(null);
+          }} placeholder="Paste your ChatGPT JSON response here..." className="min-h-[150px] font-mono text-sm" />
 
-            {processingResult && (
-              <div className="space-y-2">
-                {processingResult.aiCleaningUsed && (
-                  <div className="bg-blue-50 border border-blue-200 rounded p-3">
+            {processingResult && <div className="space-y-2">
+                {processingResult.aiCleaningUsed && <div className="bg-blue-50 border border-blue-200 rounded p-3">
                     <h4 className="font-medium text-blue-900 mb-2">🤖 AI-Powered Cleaning Used</h4>
-                    {processingResult.aiReasoning && (
-                      <p className="text-sm text-blue-800 whitespace-pre-wrap">{processingResult.aiReasoning}</p>
-                    )}
-                  </div>
-                )}
+                    {processingResult.aiReasoning && <p className="text-sm text-blue-800 whitespace-pre-wrap">{processingResult.aiReasoning}</p>}
+                  </div>}
 
-                {processingResult.fixes && processingResult.fixes.length > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded p-3">
+                {processingResult.fixes && processingResult.fixes.length > 0 && <div className="bg-green-50 border border-green-200 rounded p-3">
                     <h4 className="font-medium text-green-900 mb-2">✅ Fixes Applied ({processingResult.fixes.length})</h4>
                     <ul className="text-sm text-green-800 space-y-1">
-                      {processingResult.fixes.map((fix: string, idx: number) => (
-                        <li key={idx}>• {fix}</li>
-                      ))}
+                      {processingResult.fixes.map((fix: string, idx: number) => <li key={idx}>• {fix}</li>)}
                     </ul>
-                  </div>
-                )}
+                  </div>}
 
-                {processingResult.warnings && processingResult.warnings.length > 0 && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                {processingResult.warnings && processingResult.warnings.length > 0 && <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
                     <h4 className="font-medium text-yellow-900 mb-2">⚠️ Warnings ({processingResult.warnings.length})</h4>
                     <ul className="text-sm text-yellow-800 space-y-1">
-                      {processingResult.warnings.map((warning: string, idx: number) => (
-                        <li key={idx}>• {warning}</li>
-                      ))}
+                      {processingResult.warnings.map((warning: string, idx: number) => <li key={idx}>• {warning}</li>)}
                     </ul>
-                  </div>
-                )}
+                  </div>}
 
-                {processingResult.errors && processingResult.errors.length > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded p-3">
+                {processingResult.errors && processingResult.errors.length > 0 && <div className="bg-red-50 border border-red-200 rounded p-3">
                     <h4 className="font-medium text-red-900 mb-2">❌ Errors ({processingResult.errors.length})</h4>
                     <ul className="text-sm text-red-800 space-y-2">
-                      {processingResult.errors.map((error: string, idx: number) => (
-                        <li key={idx} className="flex items-center justify-between gap-2">
+                      {processingResult.errors.map((error: string, idx: number) => <li key={idx} className="flex items-center justify-between gap-2">
                           <span className="flex-1">• {error}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => processJsonData()}
-                            disabled={isProcessing}
-                            className="h-7 px-2 text-xs border-red-300 hover:bg-red-100 text-red-700"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => processJsonData()} disabled={isProcessing} className="h-7 px-2 text-xs border-red-300 hover:bg-red-100 text-red-700">
                             {isProcessing ? "Fixing..." : "Fix Error"}
                           </Button>
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
-                  </div>
-                )}
-              </div>
-            )}
+                  </div>}
+              </div>}
 
-            {processedData && (
-              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+            {processedData && <div className="bg-muted/50 p-4 rounded-lg space-y-3">
                 <h4 className="font-medium">✅ Data Ready for Submission</h4>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
-                  {processedData.key_benefits && Array.isArray(processedData.key_benefits) && processedData.key_benefits.length > 0 && (
-                    <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
+                  {processedData.key_benefits && Array.isArray(processedData.key_benefits) && processedData.key_benefits.length > 0 && <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
                       🎯 Key Benefits: {processedData.key_benefits.length} items
-                    </div>
-                  )}
-                  {processedData.competitive_advantages && Array.isArray(processedData.competitive_advantages) && processedData.competitive_advantages.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                    </div>}
+                  {processedData.competitive_advantages && Array.isArray(processedData.competitive_advantages) && processedData.competitive_advantages.length > 0 && <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1">
                       🏆 Competitive Advantages: {processedData.competitive_advantages.length} items
-                    </div>
-                  )}
-                  {processedData.key_features && Array.isArray(processedData.key_features) && processedData.key_features.length > 0 && (
-                    <div className="bg-purple-50 border border-purple-200 rounded px-2 py-1">
+                    </div>}
+                  {processedData.key_features && Array.isArray(processedData.key_features) && processedData.key_features.length > 0 && <div className="bg-purple-50 border border-purple-200 rounded px-2 py-1">
                       ⚡ Key Features: {processedData.key_features.length} items
-                    </div>
-                  )}
-                  {processedData.core_services && Array.isArray(processedData.core_services) && processedData.core_services.length > 0 && (
-                    <div className="bg-orange-50 border border-orange-200 rounded px-2 py-1">
+                    </div>}
+                  {processedData.core_services && Array.isArray(processedData.core_services) && processedData.core_services.length > 0 && <div className="bg-orange-50 border border-orange-200 rounded px-2 py-1">
                       🔧 Core Services: {processedData.core_services.length} items
-                    </div>
-                  )}
-                  {processedData.specialties && Array.isArray(processedData.specialties) && processedData.specialties.length > 0 && (
-                    <div className="bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
+                    </div>}
+                  {processedData.specialties && Array.isArray(processedData.specialties) && processedData.specialties.length > 0 && <div className="bg-indigo-50 border border-indigo-200 rounded px-2 py-1">
                       🎯 Specialties: {processedData.specialties.length} items
-                    </div>
-                  )}
-                  {processedData.customers && Array.isArray(processedData.customers) && processedData.customers.length > 0 && (
-                    <div className="bg-cyan-50 border border-cyan-200 rounded px-2 py-1">
+                    </div>}
+                  {processedData.customers && Array.isArray(processedData.customers) && processedData.customers.length > 0 && <div className="bg-cyan-50 border border-cyan-200 rounded px-2 py-1">
                       👥 Customers: {processedData.customers.length} items
-                    </div>
-                  )}
+                    </div>}
                 </div>
                 
                 <details className="mt-3">
@@ -856,22 +755,16 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                     {JSON.stringify(processedData, null, 2)}
                   </pre>
                 </details>
-              </div>
-            )}
+              </div>}
             
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsPasteOpen(false)}
-                className="flex-1 order-3 sm:order-1"
-              >
+              <Button variant="outline" onClick={() => setIsPasteOpen(false)} className="flex-1 order-3 sm:order-1">
                 Cancel
               </Button>
-              <Button
-                onClick={submitPastedData}
-                disabled={!pasteContent.trim() && !processedData}
-                className="flex-1 order-2 sm:order-3"
-              >
+              <Button variant="secondary" onClick={processJsonData} disabled={!pasteContent.trim() || isProcessing} className="flex-1 order-1 sm:order-2">
+                {isProcessing ? "Processing..." : "🤖 Process JSON (AI-Powered)"}
+              </Button>
+              <Button onClick={submitPastedData} disabled={!pasteContent.trim() && !processedData} className="flex-1 order-2 sm:order-3">
                 {processedData ? "Submit Processed Data" : "Submit Raw Data"}
               </Button>
             </div>
@@ -891,30 +784,19 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               Copy this prompt and use it with ChatGPT or Claude to research these specific investors:
             </div>
             
-            <Textarea
-              value={generatedPrompt}
-              readOnly
-              className="min-h-[300px] sm:min-h-[400px] font-mono text-xs"
-            />
+            <Textarea value={generatedPrompt} readOnly className="min-h-[300px] sm:min-h-[400px] font-mono text-xs" />
             
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsPromptModalOpen(false)}
-                className="flex-1 order-2 sm:order-1"
-              >
+              <Button variant="outline" onClick={() => setIsPromptModalOpen(false)} className="flex-1 order-2 sm:order-1">
                 Close
               </Button>
-              <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(generatedPrompt);
-                  toast({
-                    title: "Copied!",
-                    description: "Investor research prompt copied to clipboard.",
-                  });
-                }}
-                className="flex-1 order-1 sm:order-2"
-              >
+              <Button onClick={() => {
+              navigator.clipboard.writeText(generatedPrompt);
+              toast({
+                title: "Copied!",
+                description: "Investor research prompt copied to clipboard."
+              });
+            }} className="flex-1 order-1 sm:order-2">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Prompt
               </Button>
@@ -949,32 +831,21 @@ Research all ${investors.length} firms listed above and return comprehensive dat
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="space-y-3">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
-                  {vendor.website_url ? (
-                    <a 
-                      href={vendor.website_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors cursor-pointer hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4"
-                    >
+                  {vendor.website_url ? <a href={vendor.website_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors cursor-pointer hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4">
                       {vendor.company_name}
-                    </a>
-                  ) : (
-                    <span className="hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4 transition-all duration-200 cursor-default">
+                    </a> : <span className="hover:underline hover:decoration-green-500 hover:decoration-2 hover:underline-offset-4 transition-all duration-200 cursor-default">
                       {vendor.company_name}
-                    </span>
-                  )}
+                    </span>}
                 </h1>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Building className="h-4 w-4 flex-shrink-0" />
                     <span className="truncate">{vendor.headquarters}</span>
                   </div>
-                  {vendor.founding_year && (
-                    <div className="flex items-center gap-1">
+                  {vendor.founding_year && <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4 flex-shrink-0" />
                       <span>Founded {vendor.founding_year}</span>
-                    </div>
-                  )}
+                    </div>}
                   <span className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">
                     {vendor.company_type}
                   </span>
@@ -982,71 +853,34 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               </div>
               <div className="flex items-center gap-2 sm:flex-shrink-0">
                 {/* Admin-only Publish Button */}
-                {isAdmin && (
-                  <Button
-                    variant={vendor.status === 'published' ? "outline" : "default"}
-                    size={isMobile ? "icon" : "default"}
-                    onClick={() => togglePublishStatus(vendor.status || 'draft')}
-                    disabled={isPublishing}
-                    className="min-h-[44px]"
-                    aria-label={vendor.status === 'published' ? "Unpublish vendor" : "Publish vendor"}
-                  >
-                    {vendor.status === 'published' ? (
-                      <>
+                {isAdmin && <Button variant={vendor.status === 'published' ? "outline" : "default"} size={isMobile ? "icon" : "default"} onClick={() => togglePublishStatus(vendor.status || 'draft')} disabled={isPublishing} className="min-h-[44px]" aria-label={vendor.status === 'published' ? "Unpublish vendor" : "Publish vendor"}>
+                    {vendor.status === 'published' ? <>
                         <EyeOff className="h-4 w-4" />
                         {!isMobile && <span className="ml-2">Unpublish</span>}
-                      </>
-                    ) : (
-                      <>
+                      </> : <>
                         <Globe className="h-4 w-4" />
                         {!isMobile && <span className="ml-2">Publish</span>}
-                      </>
-                    )}
-                  </Button>
-                )}
+                      </>}
+                  </Button>}
                 
-                {vendor.website_url && (
-                  <>
+                {vendor.website_url && <>
                     <Button asChild size={isMobile ? "icon" : "default"} className="min-h-[44px]">
-                      <a 
-                        href={vendor.website_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        aria-label={isMobile ? `Visit ${vendor.company_name} website` : undefined}
-                      >
+                      <a href={vendor.website_url} target="_blank" rel="noopener noreferrer" aria-label={isMobile ? `Visit ${vendor.company_name} website` : undefined}>
                         <ExternalLink className="h-4 w-4" />
                         {!isMobile && <span className="ml-2">Visit Website</span>}
                       </a>
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={generateAdvancedPrompt}
-                      aria-label="Generate Research Prompt"
-                      className="min-h-[44px] min-w-[44px]"
-                    >
+                    <Button variant="outline" size="icon" onClick={generateAdvancedPrompt} aria-label="Generate Research Prompt" className="min-h-[44px] min-w-[44px]">
                       <Lightbulb className="h-4 w-4" />
                     </Button>
-                     <Button
-                       variant="outline"
-                       size="icon"
-                       onClick={openPasteModal}
-                       aria-label="Paste ChatGPT JSON Response"
-                       className="min-h-[44px] min-w-[44px]"
-                     >
+                     <Button variant="outline" size="icon" onClick={openPasteModal} aria-label="Paste ChatGPT JSON Response" className="min-h-[44px] min-w-[44px]">
                        <Clipboard className="h-4 w-4" />
                      </Button>
                      
                      {/* Delete Button with Confirmation */}
                      <AlertDialog>
                        <AlertDialogTrigger asChild>
-                         <Button
-                           variant="outline"
-                           size="icon"
-                           aria-label={`Delete ${vendor.company_name}`}
-                           className="min-h-[44px] min-w-[44px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                           disabled={isDeleting}
-                         >
+                         <Button variant="outline" size="icon" aria-label={`Delete ${vendor.company_name}`} className="min-h-[44px] min-w-[44px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={isDeleting}>
                            <Trash2 className="h-4 w-4" />
                          </Button>
                        </AlertDialogTrigger>
@@ -1060,18 +894,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                          </AlertDialogHeader>
                          <AlertDialogFooter>
                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                           <AlertDialogAction
-                             onClick={handleDeleteVendor}
-                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                             disabled={isDeleting}
-                           >
+                           <AlertDialogAction onClick={handleDeleteVendor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={isDeleting}>
                              {isDeleting ? "Deleting..." : "Delete"}
                            </AlertDialogAction>
                          </AlertDialogFooter>
                        </AlertDialogContent>
                      </AlertDialog>
-                  </>
-                )}
+                  </>}
               </div>
             </div>
           </div>
@@ -1081,138 +910,58 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               {/* Product Jobs Card - Admin Only - Updated to pass vendor prop */}
               <ProductJobsCard vendorId={vendor.id} vendor={vendor} />
               
-              <EditableSection 
-                vendor={vendor} 
-                config={companyOverviewConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={companyOverviewConfig} canEdit={isAdmin} />
               
-              <EditableSection 
-                vendor={vendor} 
-                config={servicesConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={servicesConfig} canEdit={isAdmin} />
               
-              <EditableSection 
-                vendor={vendor} 
-                config={customersConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={customersConfig} canEdit={isAdmin} />
               
-              <EditableSection 
-                vendor={vendor} 
-                config={specializationsConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={specializationsConfig} canEdit={isAdmin} />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-                <EditableSection 
-                  vendor={vendor} 
-                  config={featuresConfig} 
-                  canEdit={isAdmin}
-                />
+                <EditableSection vendor={vendor} config={featuresConfig} canEdit={isAdmin} />
 
-                <EditableSection 
-                  vendor={vendor} 
-                  config={benefitsConfig} 
-                  canEdit={isAdmin}
-                />
+                <EditableSection vendor={vendor} config={benefitsConfig} canEdit={isAdmin} />
               </div>
 
-              <EditableSection 
-                vendor={vendor} 
-                config={notableCustomersConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={notableCustomersConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={competitiveConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={competitiveConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={competitorsConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={competitorsConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={{
-                  ...fundingConfig,
-                  actionButtons: [
-                    {
-                      label: 'Research Investors',
-                      icon: Download,
-                      onClick: () => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name),
-                      condition: isAdmin && vendor.key_investors && vendor.key_investors.length > 0
-                    },
-                    {
-                      label: 'Paste ChatGPT Response',
-                      icon: Clipboard,
-                      onClick: openPasteModal,
-                      condition: isAdmin
-                    }
-                  ]
-                }}
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={{
+              ...fundingConfig,
+              actionButtons: [{
+                label: 'Research Investors',
+                icon: Download,
+                onClick: () => generateInvestorResearchPrompt(vendor.key_investors, vendor.company_name),
+                condition: isAdmin && vendor.key_investors && vendor.key_investors.length > 0
+              }, {
+                label: 'Paste ChatGPT Response',
+                icon: Clipboard,
+                onClick: openPasteModal,
+                condition: isAdmin
+              }]
+            }} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={businessConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={businessConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={contactConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={contactConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={socialConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={socialConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={recognitionConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={recognitionConfig} canEdit={isAdmin} />
 
-              <EditableSection 
-                vendor={vendor} 
-                config={technologyConfig} 
-                canEdit={isAdmin}
-              />
+              <EditableSection vendor={vendor} config={technologyConfig} canEdit={isAdmin} />
 
               {/* OG Metadata Card - Admin Only */}
-              <OGMetadataCard
-                vendor={vendor}
-                isEditing={vendorEdit.isEditing}
-                onEdit={vendorEdit.startEdit}
-                onSave={vendorEdit.publishChanges}
-                onCancel={vendorEdit.cancelEdit}
-                onUpdateField={vendorEdit.updateField}
-                editData={vendorEdit.editData}
-                isSaving={vendorEdit.isSaving}
-                hasChanges={vendorEdit.hasChanges}
-                canEdit={isAdmin}
-              />
+              <OGMetadataCard vendor={vendor} isEditing={vendorEdit.isEditing} onEdit={vendorEdit.startEdit} onSave={vendorEdit.publishChanges} onCancel={vendorEdit.cancelEdit} onUpdateField={vendorEdit.updateField} editData={vendorEdit.editData} isSaving={vendorEdit.isSaving} hasChanges={vendorEdit.hasChanges} canEdit={isAdmin} />
 
-              <VendorImageGallery 
-                vendor={vendor} 
-                canEdit={isAdmin}
-              />
+              <VendorImageGallery vendor={vendor} canEdit={isAdmin} />
 
 
-              <VendorRichData 
-                companyData={vendor.company_data}
-                researchData={vendor.research_data}
-              />
+              <VendorRichData companyData={vendor.company_data} researchData={vendor.research_data} />
             </div>
 
             <div className="space-y-4 lg:space-y-6">
@@ -1221,15 +970,13 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                   <CardTitle className="text-lg sm:text-xl">Company Stats</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {vendor.founding_year && (
-                    <>
+                  {vendor.founding_year && <>
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Founded</p>
                         <p className="text-xl sm:text-2xl font-bold">{vendor.founding_year}</p>
                       </div>
                       <Separator />
-                    </>
-                  )}
+                    </>}
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Headquarters</p>
                     <p className="font-medium text-sm sm:text-base break-words">{vendor.headquarters}</p>
@@ -1248,6 +995,5 @@ Research all ${investors.length} firms listed above and return comprehensive dat
           </div>
         </div>
       </div>
-    </PageLayout>
-  );
+    </PageLayout>;
 }
