@@ -44,10 +44,6 @@ const Index = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Redirect authenticated users to jobs page
-        if (session?.user) {
-          navigate('/jobs');
-        }
       }
     );
 
@@ -57,10 +53,6 @@ const Index = () => {
       setUser(session?.user ?? null);
       setLoading(false);
       
-      // Redirect authenticated users to jobs page
-      if (session?.user) {
-        navigate('/jobs');
-      }
     });
 
     return () => subscription.unsubscribe();
