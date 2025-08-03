@@ -97,25 +97,29 @@ export default function StoriesDashboard() {
   }, [availableCategories]);
 
   // Setup realtime subscription for immediate updates
+  const handlePostInsert = React.useCallback((newPost: any) => {
+    console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
+    // Trigger cache invalidation and refresh category data
+    invalidateCache();
+    refreshPostCountsAndImages();
+    // Show toast notification
+    toast({
+      title: "New Post Created!",
+      description: `"${newPost.title}" added to ${newPost.category}`,
+    });
+  }, [invalidateCache, refreshPostCountsAndImages, toast]);
+
+  const handlePostUpdate = React.useCallback((update: any) => {
+    console.log('📝 Post updated:', update.postId, 'in category:', update.category);
+    // Refresh category images in case image URLs changed
+    refreshPostCountsAndImages();
+  }, [refreshPostCountsAndImages]);
+
   useRealtimePosts({
     enabled: !!user,
     userId: user?.id,
-    onInsert: (newPost) => {
-      console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
-      // Trigger cache invalidation and refresh category data
-      invalidateCache();
-      refreshPostCountsAndImages();
-      // Show toast notification
-      toast({
-        title: "New Post Created!",
-        description: `"${newPost.title}" added to ${newPost.category}`,
-      });
-    },
-    onUpdate: (update) => {
-      console.log('📝 Post updated:', update.postId, 'in category:', update.category);
-      // Refresh category images in case image URLs changed
-      refreshPostCountsAndImages();
-    }
+    onInsert: handlePostInsert,
+    onUpdate: handlePostUpdate
   });
 
   React.useEffect(() => {
