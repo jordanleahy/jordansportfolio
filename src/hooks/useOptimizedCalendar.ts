@@ -76,25 +76,31 @@ export function useOptimizedCalendar(user: any) {
     isLoading: isLoadingAvailableCategories 
   } = useAvailableCategories(!!user);
 
-  // Initialize active tab
+  // Initialize active tab - Don't wait for categories to exist, initialize when query completes
   useEffect(() => {
-    if (!isInitialized && availableCategories.length > 0) {
-      const urlTab = searchParams.get('tab');
-      
-      let selectedTab = availableCategories[0]; // Fallback
-      
-      if (urlTab && availableCategories.includes(urlTab)) {
-        selectedTab = urlTab;
-      }
-      
-      setActiveTab(selectedTab);
-      setIsInitialized(true);
-      
-      if (!urlTab || urlTab !== selectedTab) {
-        setSearchParams({ tab: selectedTab });
+    if (!isInitialized && !isLoadingAvailableCategories) {
+      if (availableCategories.length > 0) {
+        const urlTab = searchParams.get('tab');
+        
+        let selectedTab = availableCategories[0]; // Fallback
+        
+        if (urlTab && availableCategories.includes(urlTab)) {
+          selectedTab = urlTab;
+        }
+        
+        setActiveTab(selectedTab);
+        setIsInitialized(true);
+        
+        if (!urlTab || urlTab !== selectedTab) {
+          setSearchParams({ tab: selectedTab });
+        }
+      } else {
+        // No categories exist for this user - initialize as empty
+        setActiveTab('');
+        setIsInitialized(true);
       }
     }
-  }, [availableCategories, searchParams, setSearchParams, isInitialized]);
+  }, [availableCategories, isLoadingAvailableCategories, searchParams, setSearchParams, isInitialized]);
 
   // Active category posts query
   const activeTabQuery = useQuery({
@@ -166,6 +172,10 @@ export function useOptimizedCalendar(user: any) {
     // Data
     availableCategories: availableCategories || [],
     activeTabPosts: activeTabPosts || [],
+    
+    // New state to distinguish between loading and empty
+    hasCategories: availableCategories.length > 0,
+    isEmpty: isInitialized && availableCategories.length === 0,
     
     // Realtime data
     connectionStatus,

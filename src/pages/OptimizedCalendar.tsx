@@ -49,6 +49,8 @@ export default function OptimizedCalendar() {
     isLoadingActiveTab,
     availableCategories,
     activeTabPosts,
+    hasCategories,
+    isEmpty,
     changeTab,
     invalidateCache,
     getCategoryPosts
@@ -100,7 +102,7 @@ export default function OptimizedCalendar() {
     }
   };
 
-  if (loading || (!isInitialized)) {
+  if (loading || (!isInitialized && isLoadingCategories)) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -238,44 +240,59 @@ export default function OptimizedCalendar() {
           />
         </Suspense>
 
-        <Tabs 
-          value={activeTab} 
-          onValueChange={changeTab} 
-          className="space-y-8"
-        >
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
-              {availableCategories.map((category) => (
-                <TabsTrigger 
-                  key={category} 
-                  value={category} 
-                  className="capitalize whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-sm"
-                >
-                  {category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+        {/* Show tabs only if user has categories, otherwise show empty state */}
+        {hasCategories ? (
+          <Tabs 
+            value={activeTab} 
+            onValueChange={changeTab} 
+            className="space-y-8"
+          >
+            <div className="overflow-x-auto">
+              <TabsList className="inline-flex w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+                {availableCategories.map((category) => (
+                  <TabsTrigger 
+                    key={category} 
+                    value={category} 
+                    className="capitalize whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-sm"
+                  >
+                    {category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
-          {availableCategories.map((category) => (
-            <TabsContent key={category} value={category} className="space-y-8">
-              <Suspense fallback={<CalendarSkeletonLoader />}>
-                {/* Color Theme Consistency Checker */}
-                <ColorThemeConsistencyChecker category={category} />
-                
-                <PostsTable 
-                  posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
-                  onPostsChange={() => loadCategoryPosts(category)}
-                  isAdmin={isAdmin}
-                  category={category}
-                  selectedThemeId={selectedThemeId}
-                  onThemeChange={setSelectedThemeId}
-                  onImportClick={() => setImportModalOpen(true)}
-                />
-              </Suspense>
-            </TabsContent>
-          ))}
-        </Tabs>
+            {availableCategories.map((category) => (
+              <TabsContent key={category} value={category} className="space-y-8">
+                <Suspense fallback={<CalendarSkeletonLoader />}>
+                  {/* Color Theme Consistency Checker */}
+                  <ColorThemeConsistencyChecker category={category} />
+                  
+                  <PostsTable 
+                    posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
+                    onPostsChange={() => loadCategoryPosts(category)}
+                    isAdmin={isAdmin}
+                    category={category}
+                    selectedThemeId={selectedThemeId}
+                    onThemeChange={setSelectedThemeId}
+                    onImportClick={() => setImportModalOpen(true)}
+                  />
+                </Suspense>
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : isEmpty ? (
+          <Suspense fallback={<CalendarSkeletonLoader />}>
+            <PostsTable 
+              posts={[]} 
+              onPostsChange={() => {}}
+              isAdmin={isAdmin}
+              category={undefined}
+              selectedThemeId={selectedThemeId}
+              onThemeChange={setSelectedThemeId}
+              onImportClick={() => setImportModalOpen(true)}
+            />
+          </Suspense>
+        ) : null}
         
         {/* Simplified calendar without complex realtime debugging */}
       </div>
