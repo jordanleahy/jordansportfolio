@@ -1,0 +1,150 @@
+import React, { useState, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useOptimizedCalendar } from '@/hooks/useOptimizedCalendar';
+import { CategoriesGrid } from '@/components/calendar/CategoriesGrid';
+
+// Lazy load components
+const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+const CustomThemeModal = React.lazy(() => import('@/components/calendar/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
+
+export default function CalendarDashboard() {
+  const { user, loading } = useAuth();
+  const { isAdmin } = useUserRole();
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [customThemeModalOpen, setCustomThemeModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Use the optimized calendar hook for performance
+  const {
+    isInitialized,
+    isLoadingCategories,
+    availableCategories,
+    hasCategories,
+    isEmpty,
+    invalidateCache
+  } = useOptimizedCalendar(user);
+
+  // Calculate post counts for each category
+  const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    const fetchPostCounts = async () => {
+      if (!availableCategories.length) return;
+      
+      const counts: Record<string, number> = {};
+      for (const category of availableCategories) {
+        try {
+          const posts = await optimizedSocialMediaService.getPostsByCategory(category);
+          counts[category] = posts.length;
+        } catch (error) {
+          console.error(`Error fetching posts for ${category}:`, error);
+          counts[category] = 0;
+        }
+      }
+      setPostCounts(counts);
+    };
+
+    fetchPostCounts();
+  }, [availableCategories]);
+
+  const handleImportComplete = async () => {
+    toast({
+      title: "Categories Updated",
+      description: "Available categories have been refreshed after import.",
+    });
+    invalidateCache();
+  };
+
+  if (loading || (!isInitialized && isLoadingCategories)) {
+    return (
+      <PageLayout>
+        <CalendarSkeletonLoader />
+      </PageLayout>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const totalPosts = Object.values(postCounts).reduce((sum, count) => sum + count, 0);
+
+  return (
+    <PageLayout>
+      <div className="container mx-auto py-8 px-4">
+        {/* Hero Header Section */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border p-8 mb-8">
+          <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
+          <div className="relative">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+              <div className="flex-1">
+                {/* Quick Stats */}
+                <div className="flex flex-wrap gap-6 mb-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-primary">
+                      {totalPosts}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                     <div className="text-3xl font-bold text-primary">{availableCategories.length}</div>
+                   </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-primary">{availableCategories.length}</div>
+                    </div>
+                </div>
+              </div>
+              
+              {/* Theme Management Panel */}
+              <div className="lg:w-80 space-y-4">
+                <Button
+                  onClick={() => setCustomThemeModalOpen(true)}
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  Custom
+                </Button>
+                
+                <Button
+                  onClick={() => setImportModalOpen(true)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Import Themes
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThemeImportModal 
+            open={importModalOpen} 
+            onOpenChange={setImportModalOpen} 
+            onImportComplete={handleImportComplete} 
+          />
+        </Suspense>
+
+        <Suspense fallback={<div>Loading...</div>}>
+          <CustomThemeModal 
+            isOpen={customThemeModalOpen}
+            onClose={() => setCustomThemeModalOpen(false)}
+            onImportComplete={handleImportComplete}
+          />
+        </Suspense>
+
+        {/* Categories Grid */}
+        <CategoriesGrid 
+          categories={availableCategories}
+          postCounts={postCounts}
+          onImportClick={() => setImportModalOpen(true)}
+        />
+      </div>
+    </PageLayout>
+  );
+}

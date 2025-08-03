@@ -54,6 +54,11 @@ export class OptimizedSocialMediaService {
     return posts;
   }
 
+  // Add new method for getting posts by category
+  async getPostsByCategory(category: string): Promise<SocialMediaPost[]> {
+    return this.getAllPosts(category);
+  }
+
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
