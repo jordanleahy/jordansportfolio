@@ -266,7 +266,7 @@ export default function CalendarDashboard() {
 
         {/* Categories Grid */}
         <CategoriesGrid 
-          categories={availableCategories}
+          categories={availableCategories.filter(category => (postCounts[category] || 0) > 0)}
           postCounts={postCounts}
           categoryImages={categoryImages}
           onImportClick={() => setImportModalOpen(true)}
