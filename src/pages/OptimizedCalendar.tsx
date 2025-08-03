@@ -30,6 +30,7 @@ import {
 // Lazy load components
 const PostsTable = React.lazy(() => import('@/components/calendar/PostsTable').then(module => ({ default: module.PostsTable })));
 const ThemeImportModal = React.lazy(() => import('@/components/calendar/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/calendar/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 
 type CategoryType = string;
 
@@ -259,6 +260,9 @@ export default function OptimizedCalendar() {
           {availableCategories.map((category) => (
             <TabsContent key={category} value={category} className="space-y-8">
               <Suspense fallback={<CalendarSkeletonLoader />}>
+                {/* Color Theme Consistency Checker */}
+                <ColorThemeConsistencyChecker category={category} />
+                
                 <PostsTable 
                   posts={category === activeTab ? activeTabPosts : getCategoryPosts(category)} 
                   onPostsChange={() => loadCategoryPosts(category)}
