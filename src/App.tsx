@@ -133,9 +133,9 @@ function App() {
                  <Route path="/agents/:id/edit" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
-                <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
-                <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
-                <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                <Route path="/vendors" element={<AdminRoute><VendorsIndex /></AdminRoute>} />
+                <Route path="/vendors/:slugname" element={<AdminRoute><Vendors /></AdminRoute>} />
+                <Route path="/vendors/:slugname/:vendorSlug" element={<AdminRoute><VendorDetail /></AdminRoute>} />
                 <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/homehealth" element={<HomeHealth />} />
                 

@@ -34,12 +34,13 @@ const Navigation = () => {
   // Build mobile menu items based on authentication and role
   const mobileMenuItems = user ? [
     // Authenticated user items
-    { href: "/vendors", label: "Vendors", icon: Building2 },
+    
     { href: "/investors", label: "Investors", icon: TrendingUp },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/calendar", label: "Calendar", icon: Calendar },
     // Admin-only items
     ...(isAdmin ? [
+      { href: "/vendors", label: "Vendors", icon: Building2 },
       { href: "/sec", label: "Funded Startups", icon: Database },
       { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3 },
       { href: "/admin/api-usage", label: "API Usage", icon: Activity },
@@ -120,17 +121,20 @@ const Navigation = () => {
                       </NavigationMenuItem>
                     )}
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/vendors"
-                          className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
-                        >
-                          <Building2 className="mr-2 h-4 w-4" />
-                          Vendors
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                    {/* Vendors - Admin Only */}
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/vendors"
+                            className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
+                          >
+                            <Building2 className="mr-2 h-4 w-4" />
+                            Vendors
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -361,15 +365,18 @@ const Navigation = () => {
                         <Database className="h-4 w-4" />
                       </Link>
                     )}
-                    <Link
-                      to="/vendors"
-                      className={cn(
-                        "p-2 rounded-lg transition-colors hover:bg-accent",
-                        isActive("/vendors") && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Building2 className="h-4 w-4" />
-                    </Link>
+                    {/* Vendors - Admin Only Quick Access */}
+                    {isAdmin && (
+                      <Link
+                        to="/vendors"
+                        className={cn(
+                          "p-2 rounded-lg transition-colors hover:bg-accent",
+                          isActive("/vendors") && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <Building2 className="h-4 w-4" />
+                      </Link>
+                    )}
                     <Link
                       to="/calendar"
                       className={cn(
