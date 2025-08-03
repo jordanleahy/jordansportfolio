@@ -125,16 +125,6 @@ export default function OptimizedCalendar() {
           <div className="relative">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
               <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    Content Management
-                  </div>
-                <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
-                  Social Media Calendar
-                </h1>
-                <p className="text-lg text-muted-foreground mt-4 max-w-2xl leading-relaxed">
-                  Create, manage, and schedule your social media content for LinkedIn and other platforms with our powerful content management system.
-                </p>
                 
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-6 mt-6">
@@ -142,15 +132,12 @@ export default function OptimizedCalendar() {
                     <div className="text-2xl font-bold text-primary">
                       {activeTabPosts.length}
                     </div>
-                    <div className="text-sm text-muted-foreground">Active Theme Posts</div>
                   </div>
                   <div className="text-center">
                      <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
-                     <div className="text-sm text-muted-foreground">Active Themes</div>
                    </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">{activeTabPosts.length}</div>
-                      <div className="text-sm text-muted-foreground">Current Theme</div>
                     </div>
                 </div>
               </div>
