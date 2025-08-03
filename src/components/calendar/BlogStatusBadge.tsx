@@ -1,17 +1,32 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Loader2 } from 'lucide-react';
-import { useBlogStatus } from '@/hooks/useBlogStatus';
+
+interface BlogStatus {
+  exists: boolean;
+  status?: 'draft' | 'published';
+  id?: string;
+  slug?: string;
+  isLoading: boolean;
+  error?: string;
+}
 
 interface BlogStatusBadgeProps {
   postId: string;
   className?: string;
+  blogStatus?: BlogStatus;
 }
 
-export const BlogStatusBadge = ({ postId, className }: BlogStatusBadgeProps) => {
-  const blogStatus = useBlogStatus(postId);
+export const BlogStatusBadge = ({ postId, className, blogStatus }: BlogStatusBadgeProps) => {
+  // Default to loading state if no blogStatus provided
+  const defaultStatus: BlogStatus = {
+    exists: false,
+    isLoading: true,
+  };
+  
+  const status = blogStatus || defaultStatus;
 
-  if (blogStatus.isLoading) {
+  if (status.isLoading) {
     return (
       <Badge variant="outline" className={`text-xs ${className}`}>
         <Loader2 className="h-3 w-3 animate-spin mr-1" />
@@ -20,11 +35,11 @@ export const BlogStatusBadge = ({ postId, className }: BlogStatusBadgeProps) => 
     );
   }
 
-  if (blogStatus.error) {
+  if (status.error) {
     return null; // Don't show anything if there's an error
   }
 
-  if (!blogStatus.exists) {
+  if (!status.exists) {
     return null; // Don't show anything if no blog exists
   }
 
@@ -41,11 +56,11 @@ export const BlogStatusBadge = ({ postId, className }: BlogStatusBadgeProps) => 
 
   return (
     <Badge 
-      className={`text-xs ${getBlogStatusColor(blogStatus.status!)} ${className}`}
-      title={`Blog post is ${blogStatus.status}`}
+      className={`text-xs ${getBlogStatusColor(status.status!)} ${className}`}
+      title={`Blog post is ${status.status}`}
     >
       <FileText className="h-3 w-3 mr-1" />
-      Blog: {blogStatus.status}
+      Blog: {status.status}
     </Badge>
   );
 };

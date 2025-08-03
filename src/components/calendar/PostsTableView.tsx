@@ -14,6 +14,15 @@ import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
+interface BlogStatus {
+  exists: boolean;
+  status?: 'draft' | 'published';
+  id?: string;
+  slug?: string;
+  isLoading: boolean;
+  error?: string;
+}
+
 interface PostsTableViewProps {
   posts: SocialMediaPost[];
   activeTab: 'draft' | 'published';
@@ -34,6 +43,7 @@ interface PostsTableViewProps {
   animatingRows?: Set<string>;
   completingRows?: Set<string>;
   getRowAnimationClass?: (postId: string) => string;
+  blogStatuses?: Record<string, BlogStatus>;
 }
 
 const getStatusColor = (status: string) => {
@@ -69,7 +79,8 @@ export const PostsTableView = memo(({
   isAdmin = false,
   animatingRows = new Set(),
   completingRows = new Set(),
-  getRowAnimationClass = () => ''
+  getRowAnimationClass = () => '',
+  blogStatuses = {}
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
@@ -270,7 +281,7 @@ export const PostsTableView = memo(({
                 >
                   {completingRows?.has(post.id) ? 'Published ✓' : post.status}
                 </Badge>
-                <BlogStatusBadge postId={post.id} />
+                <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
               </div>
             </TableCell>
             <TableCell className="w-40">
@@ -358,11 +369,12 @@ export const PostsTableView = memo(({
                   />
                 ))}
                 {isAdmin && (
-                  <BlogPostButtonForRow
-                    post={post}
-                    creatingBlogIds={creatingBlogIds}
-                    onCreateBlogPost={onCreateBlogPost}
-                  />
+                <BlogPostButtonForRow 
+                  post={post}
+                  creatingBlogIds={creatingBlogIds}
+                  onCreateBlogPost={onCreateBlogPost}
+                  blogStatus={blogStatuses[post.id]}
+                />
                 )}
                 <SingleAspectRatioSelector {...selectorProps} />
               </div>
