@@ -126,10 +126,10 @@ function App() {
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-                 <Route path="/agents" element={<AdminRoute><Agents /></AdminRoute>} />
-                 <Route path="/agents/:id" element={<AdminRoute><AgentDetail /></AdminRoute>} />
-                 <Route path="/agents/:id/edit" element={<AdminRoute><AgentEdit /></AdminRoute>} />
-                 <Route path="/agents/new" element={<AdminRoute><AgentEdit /></AdminRoute>} />
+                 <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
+                 <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
+                 <Route path="/agents/:id/edit" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
+                 <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                 <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
