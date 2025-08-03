@@ -26,16 +26,33 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating, setBulkProcessing } = useProcessingStates();
   
-  // Debug logging
+  // Advanced debug logging
   console.log('🔍 [BulkImageButton] Post:', post.id, 'isGenerating:', isGenerating(post.id));
+  console.log('🔍 [BulkImageButton] Progress:', progress);
+  console.log('🔍 [BulkImageButton] Button disabled:', isGenerating(post.id) || isUploading(post.id));
+  
+  const isCurrentlyGenerating = isGenerating(post.id);
+  const isCurrentlyUploading = isUploading(post.id);
+  
+  console.log('🔍 [BulkImageButton] States - generating:', isCurrentlyGenerating, 'uploading:', isCurrentlyUploading);
 
   const handleGenerateAllImages = async () => {
-    if (!post) return;
+    if (!post) {
+      console.log('❌ [BulkImageButton] No post provided');
+      return;
+    }
+    
     try {
-      console.log('🚀 [BulkImageButton] Starting generation for post:', post.id);
+      console.log('🚀 [BulkImageButton] STARTING generation for post:', post.id);
+      console.log('🚀 [BulkImageButton] Post data:', { id: post.id, title: post.title, category: post.category });
       
       // Set processing state immediately for visual feedback
+      console.log('⏳ [BulkImageButton] Setting bulk processing to TRUE');
       setBulkProcessing(post.id, true);
+      
+      // Force a small delay to ensure state updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log('⏳ [BulkImageButton] After delay - isGenerating:', isGenerating(post.id));
       
       const request: BulkImageGenerationRequest = {
         postId: post.id,
@@ -46,10 +63,13 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         colorThemeId: post.color_theme_id || undefined
       };
 
+      console.log('📡 [BulkImageButton] Calling generateAllImages with request:', request);
       const response = await generateAllImages(request);
+      console.log('📡 [BulkImageButton] Got response:', response);
 
       // Refresh the post data to show the new images
       if (response.success && onPostsChange) {
+        console.log('🔄 [BulkImageButton] Refreshing posts data');
         const { data: refreshedPosts } = await supabase
           .from('social_media_posts')
           .select('*')
@@ -57,16 +77,26 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
           .order('day', { ascending: true });
         
         if (refreshedPosts) {
+          console.log('🔄 [BulkImageButton] Updated posts data with', refreshedPosts.length, 'posts');
           onPostsChange(refreshedPosts as SocialMediaPost[]);
         }
+      } else {
+        console.log('⚠️ [BulkImageButton] Skipping refresh - success:', response.success, 'onPostsChange:', !!onPostsChange);
       }
       
     } catch (error) {
-      console.error('❌ Optimized batch generation error:', error);
+      console.error('❌ [BulkImageButton] Generation error:', error);
+      console.error('❌ [BulkImageButton] Error stack:', error.stack);
     } finally {
       // Clear processing state when done
+      console.log('🏁 [BulkImageButton] Setting bulk processing to FALSE');
       setBulkProcessing(post.id, false);
       console.log('✅ [BulkImageButton] Generation completed for post:', post.id);
+      
+      // Force another delay to ensure state clears
+      setTimeout(() => {
+        console.log('🏁 [BulkImageButton] Final check - isGenerating:', isGenerating(post.id));
+      }, 100);
     }
   };
 
@@ -74,13 +104,13 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     <>
       <Button
         onClick={handleGenerateAllImages}
-        disabled={isGenerating(post.id) || isUploading(post.id)}
+        disabled={isCurrentlyGenerating || isCurrentlyUploading}
         variant="outline"
         size="sm"
         className="h-8 flex-1"
         title="Generate All Images with AI"
       >
-        {isGenerating(post.id) ? (
+        {isCurrentlyGenerating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Sparkles className="h-4 w-4" />
@@ -88,27 +118,34 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       </Button>
       
       {/* Skeleton Grid - shown during generation */}
-      {isGenerating(post.id) && (
-        <div className="mt-4 animate-fade-in">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border" />
+      {(() => {
+        const showShimmer = isCurrentlyGenerating;
+        console.log('👻 [BulkImageButton] Shimmer decision - showing:', showShimmer, 'for post:', post.id);
+        if (showShimmer) {
+          console.log('👻 [BulkImageButton] RENDERING SHIMMER GRID');
+        }
+        return showShimmer ? (
+          <div className="mt-4 animate-fade-in">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-16 w-full">
+                <Skeleton className="w-full h-full rounded border" />
+              </div>
+              <div className="h-16 w-full">
+                <Skeleton className="w-full h-full rounded border" />
+              </div>
+              <div className="h-16 w-full">
+                <Skeleton className="w-full h-full rounded border" />
+              </div>
+              <div className="h-16 w-full">
+                <Skeleton className="w-full h-full rounded border" />
+              </div>
             </div>
-            <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border" />
-            </div>
-            <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border" />
-            </div>
-            <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border" />
-            </div>
+            <p className="text-sm text-muted-foreground mt-2 text-center">
+              Generating images... {progress.currentAspectRatio || 'Preparing'}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-2 text-center">
-            Generating images... {progress.currentAspectRatio || 'Preparing'}
-          </p>
-        </div>
-      )}
+        ) : null;
+      })()}
     </>
   );
 };
