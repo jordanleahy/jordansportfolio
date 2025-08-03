@@ -9,8 +9,10 @@ const RecentBlogsSection = () => {
   const { data: blogPosts = [], isLoading, error } = usePublishedBlogPosts();
   const prefetchBlogPost = usePrefetchBlogPost();
 
-  // Get 6 most recent posts
+  // Get different number of posts based on screen size
+  // On mobile: 3 posts, on larger screens: 6 posts
   const recentPosts = blogPosts.slice(0, 6);
+  const mobileRecentPosts = blogPosts.slice(0, 3);
 
   if (error || recentPosts.length === 0) {
     return null; // Hide section if no posts or error
@@ -38,44 +40,89 @@ const RecentBlogsSection = () => {
         </motion.div>
 
         {isLoading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="blog-image-container">
-                  <div className="blog-index-image bg-muted"></div>
-                </div>
-                <div className="p-6">
-                  <div className="bg-muted rounded-md h-4 w-24 mb-3" />
-                  <div className="bg-muted rounded-md h-6 w-full mb-3" />
-                  <div className="bg-muted rounded-md h-4 w-full mb-2" />
-                  <div className="bg-muted rounded-md h-4 w-3/4 mb-4" />
-                  <div className="flex items-center gap-4">
-                    <div className="bg-muted rounded-md h-4 w-20" />
-                    <div className="bg-muted rounded-md h-4 w-16" />
+          <>
+            {/* Mobile loading state - 3 items */}
+            <div className="grid grid-cols-1 gap-8 mb-12 md:hidden">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="blog-image-container">
+                    <div className="blog-index-image bg-muted"></div>
+                  </div>
+                  <div className="p-6">
+                    <div className="bg-muted rounded-md h-4 w-24 mb-3" />
+                    <div className="bg-muted rounded-md h-6 w-full mb-3" />
+                    <div className="bg-muted rounded-md h-4 w-full mb-2" />
+                    <div className="bg-muted rounded-md h-4 w-3/4 mb-4" />
+                    <div className="flex items-center gap-4">
+                      <div className="bg-muted rounded-md h-4 w-20" />
+                      <div className="bg-muted rounded-md h-4 w-16" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            {/* Desktop loading state - 6 items */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="blog-image-container">
+                    <div className="blog-index-image bg-muted"></div>
+                  </div>
+                  <div className="p-6">
+                    <div className="bg-muted rounded-md h-4 w-24 mb-3" />
+                    <div className="bg-muted rounded-md h-6 w-full mb-3" />
+                    <div className="bg-muted rounded-md h-4 w-full mb-2" />
+                    <div className="bg-muted rounded-md h-4 w-3/4 mb-4" />
+                    <div className="flex items-center gap-4">
+                      <div className="bg-muted rounded-md h-4 w-20" />
+                      <div className="bg-muted rounded-md h-4 w-16" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {recentPosts.map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -8 }}
-                className="h-full"
-              >
-                <BlogCard 
-                  post={post} 
-                  onMouseEnter={handleMouseEnter}
-                />
-              </motion.div>
-            ))}
-          </div>
+          <>
+            {/* Mobile view - 3 posts */}
+            <div className="grid grid-cols-1 gap-8 mb-12 md:hidden">
+              {mobileRecentPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -8 }}
+                  className="h-full"
+                >
+                  <BlogCard 
+                    post={post} 
+                    onMouseEnter={handleMouseEnter}
+                  />
+                </motion.div>
+              ))}
+            </div>
+            {/* Desktop view - 6 posts */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {recentPosts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -8 }}
+                  className="h-full"
+                >
+                  <BlogCard 
+                    post={post} 
+                    onMouseEnter={handleMouseEnter}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </>
         )}
 
         <motion.div
