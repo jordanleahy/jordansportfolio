@@ -868,14 +868,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 Cancel
               </Button>
               <Button
-                variant="secondary"
-                onClick={processJsonData}
-                disabled={!pasteContent.trim() || isProcessing}
-                className="flex-1 order-1 sm:order-2"
-              >
-                {isProcessing ? "Processing..." : "🤖 Process JSON (AI-Powered)"}
-              </Button>
-              <Button
                 onClick={submitPastedData}
                 disabled={!pasteContent.trim() && !processedData}
                 className="flex-1 order-2 sm:order-3"
