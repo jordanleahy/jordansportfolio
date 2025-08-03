@@ -85,8 +85,9 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <Routes>
+                <Route path="/" element={<Index />} />
                 <Route 
-                  path="/" 
+                  path="/calendar" 
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
@@ -105,16 +106,6 @@ function App() {
                 <Route path="/blog-editor" element={<BlogEditor />} />
                 <Route path="/blog-editor/:id" element={<BlogEditor />} />
                 <Route path="/admin-blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
-                <Route 
-                  path="/calendar" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <OptimizedCalendar />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
                 <Route 
                   path="/jobs" 
                   element={
