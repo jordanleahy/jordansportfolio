@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Save, Copy } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Save } from 'lucide-react';
 import { DEFAULT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
@@ -26,7 +25,6 @@ export const CategoryPromptEditor = ({
 }: CategoryPromptEditorProps) => {
   const [localCategory, setLocalCategory] = useState(category);
   const [localPrompt, setLocalPrompt] = useState(prompt);
-  const { toast } = useToast();
 
   const handleCategoryChange = (value: string) => {
     setLocalCategory(value);
@@ -43,22 +41,6 @@ export const CategoryPromptEditor = ({
       onSave?.(localCategory.trim(), localPrompt.trim());
       setLocalCategory('');
       setLocalPrompt('');
-    }
-  };
-
-  const handleCopyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(localPrompt);
-      toast({
-        title: "Copied!",
-        description: "System prompt copied to clipboard.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy prompt to clipboard.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -83,18 +65,6 @@ export const CategoryPromptEditor = ({
       )}
       
       <div>
-        <div className="flex justify-end mb-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCopyPrompt}
-            disabled={!localPrompt.trim()}
-            className="gap-2"
-          >
-            <Copy className="h-4 w-4" />
-            Copy Prompt
-          </Button>
-        </div>
         <div className="border border-input rounded-md overflow-hidden h-screen">
           <OptimizedMonacoEditor
             height="100vh"

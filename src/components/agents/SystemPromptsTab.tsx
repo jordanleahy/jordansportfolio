@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, ExternalLink, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import { CategoryPromptEditor } from './CategoryPromptEditor';
@@ -149,6 +149,21 @@ export const SystemPromptsTab = ({
     }
   };
 
+  const handleCopyPrompt = async (promptText: string) => {
+    try {
+      await navigator.clipboard.writeText(promptText);
+      toast({
+        title: "Copied!",
+        description: "System prompt copied to clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy prompt to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card>
@@ -200,6 +215,16 @@ export const SystemPromptsTab = ({
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
                       View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyPrompt(dbPrompt.prompt_text || '')}
+                      disabled={!dbPrompt.prompt_text?.trim()}
+                      className="gap-2"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy Prompt
                     </Button>
                     {agentId && (
                       <GenerateSystemPromptButton
