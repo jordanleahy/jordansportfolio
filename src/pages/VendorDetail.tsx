@@ -412,12 +412,46 @@ Research all ${investors.length} firms listed above and return comprehensive dat
   };
   const submitPastedData = async () => {
     const dataToSubmit = processedData || pasteContent;
+    
+    // Check if input is empty
+    if (!dataToSubmit?.trim()) {
+      toast({
+        title: "No Data to Submit",
+        description: "Please paste some data before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       let jsonData;
       if (processedData) {
         jsonData = processedData;
       } else {
-        jsonData = JSON.parse(dataToSubmit);
+        // Check if the content looks like JSON before parsing
+        const trimmed = dataToSubmit.trim();
+        if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+          console.warn("❌ [VendorDetail] Content doesn't appear to be JSON:", trimmed.substring(0, 100));
+          toast({
+            title: "Invalid JSON Format",
+            description: "The pasted content doesn't appear to be valid JSON. Please use 'Process JSON (AI-Powered)' to clean the data first, or paste valid JSON data.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        try {
+          jsonData = JSON.parse(dataToSubmit);
+        } catch (parseError) {
+          console.error("❌ [VendorDetail] JSON parse error:", parseError);
+          toast({
+            title: "JSON Parse Error",
+            description: "The data is not valid JSON. Please use 'Process JSON (AI-Powered)' to clean the data first, or paste valid JSON data.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         if (!validateVendorData(jsonData)) {
           console.warn("❌ [VendorDetail] Validation failed for raw JSON");
           toast({
