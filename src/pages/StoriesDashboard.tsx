@@ -59,14 +59,52 @@ export default function StoriesDashboard() {
   const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
 
+  // Helper function to refresh post counts and images
+  const refreshPostCountsAndImages = React.useCallback(async () => {
+    if (!availableCategories.length) return;
+    
+    const counts: Record<string, number> = {};
+    const images: Record<string, string> = {};
+    
+    for (const category of availableCategories) {
+      try {
+        const posts = await optimizedSocialMediaService.getPostsByCategory(category);
+        counts[category] = posts.length;
+        
+        // Find first post with an image (checking multiple aspect ratios)
+        const firstPostWithImage = posts.find(post => 
+          post.image_16_9_url || 
+          post.image_4_3_url || 
+          post.image_9_16_url || 
+          post.image_3_4_url
+        );
+        
+        if (firstPostWithImage) {
+          // Prefer 16:9 for card display, fallback to other ratios
+          images[category] = firstPostWithImage.image_16_9_url || 
+                            firstPostWithImage.image_4_3_url ||
+                            firstPostWithImage.image_9_16_url ||
+                            firstPostWithImage.image_3_4_url ||
+                            '';
+        }
+      } catch (error) {
+        console.error(`Error fetching posts for ${category}:`, error);
+        counts[category] = 0;
+      }
+    }
+    setPostCounts(counts);
+    setCategoryImages(images);
+  }, [availableCategories]);
+
   // Setup realtime subscription for immediate updates
   useRealtimePosts({
     enabled: !!user,
     userId: user?.id,
     onInsert: (newPost) => {
       console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
-      // Trigger cache invalidation to refresh the UI
+      // Trigger cache invalidation and refresh category data
       invalidateCache();
+      refreshPostCountsAndImages();
       // Show toast notification
       toast({
         title: "New Post Created!",
@@ -75,49 +113,14 @@ export default function StoriesDashboard() {
     },
     onUpdate: (update) => {
       console.log('📝 Post updated:', update.postId, 'in category:', update.category);
-      // Optionally refresh category data if needed
+      // Refresh category images in case image URLs changed
+      refreshPostCountsAndImages();
     }
   });
 
   React.useEffect(() => {
-    const fetchPostCountsAndImages = async () => {
-      if (!availableCategories.length) return;
-      
-      const counts: Record<string, number> = {};
-      const images: Record<string, string> = {};
-      
-      for (const category of availableCategories) {
-        try {
-          const posts = await optimizedSocialMediaService.getPostsByCategory(category);
-          counts[category] = posts.length;
-          
-          // Find first post with an image (checking multiple aspect ratios)
-          const firstPostWithImage = posts.find(post => 
-            post.image_16_9_url || 
-            post.image_4_3_url || 
-            post.image_9_16_url || 
-            post.image_3_4_url
-          );
-          
-          if (firstPostWithImage) {
-            // Prefer 16:9 for card display, fallback to other ratios
-            images[category] = firstPostWithImage.image_16_9_url || 
-                              firstPostWithImage.image_4_3_url ||
-                              firstPostWithImage.image_9_16_url ||
-                              firstPostWithImage.image_3_4_url ||
-                              '';
-          }
-        } catch (error) {
-          console.error(`Error fetching posts for ${category}:`, error);
-          counts[category] = 0;
-        }
-      }
-      setPostCounts(counts);
-      setCategoryImages(images);
-    };
-
-    fetchPostCountsAndImages();
-  }, [availableCategories]);
+    refreshPostCountsAndImages();
+  }, [refreshPostCountsAndImages]);
 
   const handleImportComplete = async () => {
     toast({

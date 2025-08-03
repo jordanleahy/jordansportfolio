@@ -448,7 +448,7 @@ export const useRealtimePosts = ({
         channelRef.current = null;
       }
     };
-  }, [enabled, userId, queryClient, onUpdate, enableAdvancedLogging, verboseLogging]);
+  }, [enabled, userId, queryClient, onUpdate, onInsert, enableAdvancedLogging, verboseLogging]);
 
   return {
     isSubscribed: channelRef.current?.state === 'joined',
