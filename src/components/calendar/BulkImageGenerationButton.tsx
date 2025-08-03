@@ -92,16 +92,16 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         <div className="mt-4 animate-fade-in">
           <div className="grid grid-cols-2 gap-3">
             <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border bg-muted animate-pulse" />
+              <Skeleton className="w-full h-full rounded border" />
             </div>
             <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border bg-muted animate-pulse" />
+              <Skeleton className="w-full h-full rounded border" />
             </div>
             <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border bg-muted animate-pulse" />
+              <Skeleton className="w-full h-full rounded border" />
             </div>
             <div className="h-16 w-full">
-              <Skeleton className="w-full h-full rounded border bg-muted animate-pulse" />
+              <Skeleton className="w-full h-full rounded border" />
             </div>
           </div>
           <p className="text-sm text-muted-foreground mt-2 text-center">
