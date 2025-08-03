@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useThemeImport } from '@/hooks/useThemeImport';
+import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
@@ -50,6 +51,16 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
+  // Streamlined import hook
+  const { submitRawData, isProcessing: isStreamlinedProcessing } = useStreamlinedThemeImport({
+    onImportComplete: () => {
+      onImportComplete?.();
+      onOpenChange(false);
+      setJsonInput('');
+      reset();
+    }
+  });
+
   // Debounced validation
   const debouncedInput = useDebounce(jsonInput, 500);
   
@@ -72,6 +83,10 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   const handleImport = useCallback(() => {
     importData();
   }, [importData]);
+
+  const handleStreamlinedSubmit = useCallback(() => {
+    submitRawData(jsonInput);
+  }, [submitRawData, jsonInput]);
 
   const handleCopyInstructions = useCallback(async () => {
     const instructions = `Please format your response as a JSON object with the following structure:
@@ -202,7 +217,7 @@ AVOID:
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
                 placeholder={placeholderText}
-                readOnly={isProcessing}
+                readOnly={isProcessing || isStreamlinedProcessing}
                 rows={12}
                 className="font-mono text-sm resize-none"
               />
@@ -214,7 +229,7 @@ AVOID:
                   value={jsonInput}
                   onChange={(value) => setJsonInput(value || '')}
                   placeholder={placeholderText}
-                  readOnly={isProcessing}
+                  readOnly={isProcessing || isStreamlinedProcessing}
                 />
               </div>
             )}
@@ -222,36 +237,57 @@ AVOID:
 
           {/* Action Buttons */}
           <div className="flex gap-2 flex-wrap">
+            {/* Streamlined One-Click Submit */}
             <Button
-              onClick={handleProcess}
-              disabled={isProcessing || !jsonInput.trim()}
-              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleStreamlinedSubmit}
+              disabled={isStreamlinedProcessing || !jsonInput.trim()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              size="lg"
             >
-              {isProcessing && state.type === 'processing' && state.step === 'ai' ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <CheckCircle className="w-4 h-4 mr-2" />
-              )}
-              Process & Validate
-            </Button>
-            
-            <Button
-              onClick={handleImport}
-              disabled={isProcessing || !canImport}
-              className="bg-primary"
-            >
-              {isProcessing && state.type === 'processing' && state.step === 'import' ? (
+              {isStreamlinedProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Upload className="w-4 h-4 mr-2" />
               )}
-              Import Data
+              Submit Raw Data
             </Button>
+
+            {/* Advanced Step-by-Step Options */}
+            <div className="flex gap-2">
+              <Button
+                onClick={handleProcess}
+                disabled={isProcessing || !jsonInput.trim()}
+                variant="outline"
+                className="text-xs"
+              >
+                {isProcessing && state.type === 'processing' && state.step === 'ai' ? (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                )}
+                Validate Only
+              </Button>
+              
+              <Button
+                onClick={handleImport}
+                disabled={isProcessing || !canImport}
+                variant="outline"
+                className="text-xs"
+              >
+                {isProcessing && state.type === 'processing' && state.step === 'import' ? (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                ) : (
+                  <Upload className="w-3 h-3 mr-1" />
+                )}
+                Import Only
+              </Button>
+            </div>
 
             <Button
               onClick={handleReset}
-              disabled={isProcessing}
+              disabled={isProcessing || isStreamlinedProcessing}
               variant="ghost"
+              size="sm"
             >
               Reset
             </Button>
@@ -259,9 +295,10 @@ AVOID:
             <Button
               onClick={handleCopyInstructions}
               variant="outline"
+              size="sm"
             >
-              <Copy className="w-4 h-4 mr-2" />
-              Copy JSON Prompt Instructions
+              <Copy className="w-3 h-3 mr-1" />
+              Copy Instructions
             </Button>
           </div>
 

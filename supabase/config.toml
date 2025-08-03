@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.invoke-system-prompt-agent]
 verify_jwt = false
+
+[functions.process-and-import-theme]
+verify_jwt = true
