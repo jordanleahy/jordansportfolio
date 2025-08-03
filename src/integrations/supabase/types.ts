@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_constants: {
+        Row: {
+          constant_name: string
+          constant_value: string
+          created_at: string | null
+          description: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          constant_name: string
+          constant_value: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          constant_name?: string
+          constant_value?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       agent_relationships: {
         Row: {
           created_at: string
@@ -2191,6 +2218,10 @@ export type Database = {
           depth: number
           is_required: boolean
         }[]
+      }
+      get_agent_name: {
+        Args: { constant_name: string }
+        Returns: string
       }
       get_cache_stats: {
         Args: { user_id_param?: string }
