@@ -180,9 +180,6 @@ export default function CalendarDashboard() {
               {/* Theme Management Panel */}
               <div className="lg:w-80 space-y-4">
                 <div className="space-y-3">
-                  <Label htmlFor="theme-description" className="text-sm font-medium">
-                    Create Custom Theme
-                  </Label>
                   <Textarea
                     id="theme-description"
                     placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
