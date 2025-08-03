@@ -74,6 +74,7 @@ export const GenerateSystemPromptButton = ({
         const { error: insertError } = await supabase
           .from('system_prompts')
           .upsert({
+            agent_id: crypto.randomUUID(),
             category,
             name: `${category} System Prompt`,
             prompt_text: data.system_prompt,

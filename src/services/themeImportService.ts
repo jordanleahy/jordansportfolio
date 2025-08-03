@@ -321,6 +321,7 @@ export class ThemeImportService {
       const { error: insertError } = await supabase
         .from('system_prompts')
         .insert({
+          agent_id: crypto.randomUUID(),
           category: category.toLowerCase(),
           name: `${category} System Prompt`,
           prompt_text: categoryPrompt,

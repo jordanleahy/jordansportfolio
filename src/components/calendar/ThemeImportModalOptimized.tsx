@@ -11,6 +11,8 @@ import { useThemeImport } from '@/hooks/useThemeImport';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ThemeImportModalOptimizedProps {
   open: boolean;
@@ -25,6 +27,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const {
     state,
@@ -188,16 +191,28 @@ AVOID:
           {/* JSON Input */}
           <div>
             <Label htmlFor="json-input">JSON Data</Label>
-            <div className="border border-input rounded-md overflow-hidden">
-              <OptimizedMonacoEditor
-                height="300px"
-                language="json"
+            {isMobile ? (
+              <Textarea
+                id="json-input"
                 value={jsonInput}
-                onChange={(value) => setJsonInput(value || '')}
+                onChange={(e) => setJsonInput(e.target.value)}
                 placeholder={placeholderText}
                 readOnly={isProcessing}
+                rows={12}
+                className="font-mono text-sm resize-none"
               />
-            </div>
+            ) : (
+              <div className="border border-input rounded-md overflow-hidden">
+                <OptimizedMonacoEditor
+                  height="300px"
+                  language="json"
+                  value={jsonInput}
+                  onChange={(value) => setJsonInput(value || '')}
+                  placeholder={placeholderText}
+                  readOnly={isProcessing}
+                />
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
