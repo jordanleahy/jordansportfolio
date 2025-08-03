@@ -85,7 +85,17 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<CalendarSkeletonLoader />}>
+                        <OptimizedCalendar />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/portfolio" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/sec" element={<SEC />} />
