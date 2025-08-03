@@ -166,8 +166,6 @@ export default function CalendarDashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  
-
   return (
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
@@ -194,65 +192,48 @@ export default function CalendarDashboard() {
                     disabled={isGeneratingTheme || isProcessing}
                   />
                   
-                  {/* Dynamic button based on user role and input state */}
-                  {isAdmin ? (
-                    // For admin users: Import Themes button transforms to Submit when typing
-                    customThemeDescription.trim() ? (
-                      <Button
-                        onClick={handleGenerateCustomTheme}
-                        disabled={isGeneratingTheme || isProcessing}
-                        className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                      >
-                        {isGeneratingTheme || isProcessing ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {isGeneratingTheme ? 'Generating...' : 'Importing...'}
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Submit
-                          </>
-                        )}
-                      </Button>
+                  {/* Submit button for custom theme */}
+                  <Button
+                    onClick={handleGenerateCustomTheme}
+                    disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
+                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  >
+                    {isGeneratingTheme || isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {isGeneratingTheme ? 'Generating...' : 'Importing...'}
+                      </>
                     ) : (
-                      roleLoading ? (
-                        <Skeleton className="w-full h-10" />
-                      ) : (
-                        <Button
-                          onClick={() => setImportModalOpen(true)}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          Import Themes
-                        </Button>
-                      )
-                    )
-                  ) : (
-                    // For non-admin users: Always show Submit button below input
-                    <Button
-                      onClick={handleGenerateCustomTheme}
-                      disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
-                      className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                    >
-                      {isGeneratingTheme || isProcessing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {isGeneratingTheme ? 'Generating...' : 'Importing...'}
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          Submit
-                        </>
-                      )}
-                    </Button>
-                  )}
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Submit
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Import Themes Button - Standalone below hero section */}
+        {isAdmin && (
+          <div className="container mx-auto px-4 mb-8">
+            {roleLoading ? (
+              <Skeleton className="w-48 h-10 mx-auto" />
+            ) : (
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => setImportModalOpen(true)}
+                  variant="outline"
+                  className="px-8"
+                >
+                  Import Themes
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {isAdmin && (
           <Suspense fallback={<div>Loading...</div>}>
