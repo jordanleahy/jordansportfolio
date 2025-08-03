@@ -136,12 +136,11 @@ serve(async (req) => {
 
     console.log('🤖 AI GENERATION MODE: Using OpenAI with default color theme integration');
     
-    // Get the System Prompt Generator agent for this user
-    const { data: agent, error: agentError } = await supabase
+    // Get the System Prompt Generator agent (look for system/shared agents first, then user-specific)
+    let { data: agent, error: agentError } = await supabase
       .from('openai_agents')
       .select('*')
       .eq('name', AGENT_NAMES.SYSTEM_PROMPT_GENERATOR)
-      .eq('user_id', user_id)
       .single();
 
     if (agentError || !agent) {
@@ -323,7 +322,6 @@ Please generate a detailed, professional system prompt following the established
           .from('openai_agents')
           .select('*')
           .eq('name', targetAgentName)
-          .eq('user_id', user_id)
           .single();
 
         if (targetAgentError || !targetAgent) {
