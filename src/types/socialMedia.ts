@@ -26,7 +26,8 @@ export interface SocialMediaPost {
   // Color theme
   color_theme_id?: string | null;
   
-  // Theme description
+  // Theme information for debugging and logging
+  theme?: string | null;
   theme_description?: string | null;
   
   // Theme image for category cards

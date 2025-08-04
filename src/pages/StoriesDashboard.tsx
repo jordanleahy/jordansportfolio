@@ -107,12 +107,32 @@ export default function StoriesDashboard() {
         
         if (firstPostWithImage) {
           // Prefer theme image for cards, then 16:9, fallback to other ratios
-          images[category] = firstPostWithImage.theme_image_4_3_url ||
+          const selectedImageUrl = firstPostWithImage.theme_image_4_3_url ||
                             firstPostWithImage.image_16_9_url || 
                             firstPostWithImage.image_4_3_url ||
                             firstPostWithImage.image_9_16_url ||
                             firstPostWithImage.image_3_4_url ||
                             '';
+          
+          images[category] = selectedImageUrl;
+          
+          // **LOG IMAGE SELECTION DECISION**
+          console.log(`📸 IMAGE SELECTED for ${category}:`, {
+            selectedType: firstPostWithImage.theme_image_4_3_url ? 'theme_image' :
+                         firstPostWithImage.image_16_9_url ? '16_9' :
+                         firstPostWithImage.image_4_3_url ? '4_3' :
+                         firstPostWithImage.image_9_16_url ? '9_16' :
+                         firstPostWithImage.image_3_4_url ? '3_4' : 'none',
+            imageUrl: selectedImageUrl?.substring(0, 100) + '...',
+            postId: firstPostWithImage.id,
+            hasThemeImage: !!firstPostWithImage.theme_image_4_3_url,
+            themeImageGenStatus: (firstPostWithImage as any).theme_image_generation_status
+          });
+        } else {
+          console.log(`❌ NO IMAGES FOUND for category: ${category}`, {
+            totalPosts: posts.length,
+            checkedImageFields: ['theme_image_4_3_url', 'image_16_9_url', 'image_4_3_url', 'image_9_16_url', 'image_3_4_url']
+          });
         }
       } catch (error) {
         console.error(`Error fetching posts for ${category}:`, error);
@@ -158,42 +178,79 @@ export default function StoriesDashboard() {
         },
         (payload) => {
           const { new: newData, old: oldData } = payload;
-          const { theme_image_generation_status, theme, category } = newData as any;
+          const { theme_image_generation_status, theme, category, theme_image_4_3_url } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
+          const oldThemeImageUrl = oldData?.theme_image_4_3_url;
+          
+          // **ENHANCED THEME IMAGE LOGGING**
+          console.group('🎨 THEME IMAGE UPDATE RECEIVED');
+          console.log('📥 Payload Data:', {
+            theme,
+            category,
+            statusTransition: `${oldStatus} → ${theme_image_generation_status}`,
+            urlChanged: oldThemeImageUrl !== theme_image_4_3_url,
+            hasNewUrl: !!theme_image_4_3_url,
+            timestamp: new Date().toISOString()
+          });
           
           // Remove shimmer when theme image generation completes - use normalized theme name
           if (theme_image_generation_status === 'complete' && theme) {
             const normalizedTheme = normalizeThemeName(theme);
+            
+            console.log('✅ THEME IMAGE GENERATION COMPLETED:', {
+              originalTheme: theme,
+              normalizedTheme,
+              category,
+              hasImageUrl: !!theme_image_4_3_url,
+              imageUrl: theme_image_4_3_url?.substring(0, 100) + '...'
+            });
+            
             debugThemeMapping('Real-time Complete', theme, normalizedTheme);
             
             setShimmerThemes(prev => {
               const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
-              console.log('🔄 [Shimmer Removal] Complete:', {
-                originalShimmer: prev,
+              
+              console.log('🔄 SHIMMER UPDATE:', {
+                previousShimmerThemes: prev,
                 removingTheme: normalizedTheme,
-                newShimmer: filtered
+                newShimmerThemes: filtered,
+                shimmerRemoved: prev.length !== filtered.length
               });
+              
               return filtered;
             });
+            
+            // **TRIGGER REFRESH FOR CATEGORY IMAGES**
+            console.log('🔄 TRIGGERING CATEGORY REFRESH due to theme image completion');
             refreshPostCountsAndImages(); // Refresh to show the new image
           }
           
-          // Also remove shimmer if generation failed
+          // Handle failed theme image generation
           if (
             oldStatus !== 'failed' && 
             theme_image_generation_status === 'failed' && 
             theme
           ) {
             const normalizedTheme = normalizeThemeName(theme);
+            
+            console.log('❌ THEME IMAGE GENERATION FAILED:', {
+              originalTheme: theme,
+              normalizedTheme,
+              category
+            });
+            
             debugThemeMapping('Real-time Failed', theme, normalizedTheme);
             
             setShimmerThemes(prev => {
               const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
-              console.log('🔄 [Shimmer Removal] Failed:', {
-                originalShimmer: prev,
+              
+              console.log('🔄 SHIMMER REMOVAL (FAILED):', {
+                previousShimmerThemes: prev,
                 removingTheme: normalizedTheme,
-                newShimmer: filtered
+                newShimmerThemes: filtered,
+                shimmerRemoved: prev.length !== filtered.length
               });
+              
               return filtered;
             });
             // Show error toast
@@ -203,6 +260,8 @@ export default function StoriesDashboard() {
               variant: "destructive"
             });
           }
+          
+          console.groupEnd();
         }
       )
       .subscribe();

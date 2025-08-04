@@ -167,11 +167,20 @@ export const useRealtimePosts = ({
         },
         (payload) => {
           const updateStartTime = Date.now();
-          addLog('INFO', 'Update', 'Received realtime payload', { 
+          
+          // **ENHANCED PAYLOAD LOGGING** 
+          addLog('INFO', 'Update', '🔄 REALTIME UPDATE RECEIVED', {
             payloadType: payload.eventType,
             table: payload.table,
             schema: payload.schema,
+            timestamp: new Date().toISOString(),
+            hasNewRecord: !!payload.new,
+            hasOldRecord: !!payload.old,
           });
+          
+          console.group('🔄 REALTIME UPDATE ANALYSIS');
+          console.log('📥 Raw Payload:', payload);
+          console.log('⏰ Timestamp:', new Date().toISOString());
           
           setMetrics(prev => ({
             ...prev,
@@ -182,15 +191,44 @@ export const useRealtimePosts = ({
           const oldRecord = payload.old as SocialMediaPost;
           
           if (!newRecord || !oldRecord) {
-            addLog('WARN', 'Update', 'Missing record data in payload', { 
+            addLog('WARN', 'Update', '⚠️ INCOMPLETE PAYLOAD DATA', { 
               hasNew: !!newRecord, 
               hasOld: !!oldRecord,
               payload: verboseLogging ? payload : 'Enable verbose logging to see full payload'
             });
+            console.warn('⚠️ Missing record data:', {
+              hasNewRecord: !!newRecord,
+              hasOldRecord: !!oldRecord
+            });
+            console.groupEnd();
             return;
           }
 
-          // Detailed field-by-field change analysis
+          // **ENHANCED IMAGE STATUS TRACKING**
+          console.log('🖼️ POST IMAGE STATUS ANALYSIS:', {
+            postId: newRecord.id,
+            title: newRecord.title?.substring(0, 50),
+            category: newRecord.category,
+            theme: newRecord.theme,
+          });
+          
+          // Track theme image changes separately
+          const themeImageChanges = {
+            status: { old: oldRecord.theme_image_generation_status, new: newRecord.theme_image_generation_status },
+            url: { old: oldRecord.theme_image_4_3_url, new: newRecord.theme_image_4_3_url }
+          };
+          
+          if (themeImageChanges.status.old !== themeImageChanges.status.new) {
+            console.log('🎨 THEME IMAGE STATUS CHANGE:', {
+              postId: newRecord.id,
+              theme: newRecord.theme,
+              statusTransition: `${themeImageChanges.status.old} → ${themeImageChanges.status.new}`,
+              hasNewUrl: !!themeImageChanges.url.new,
+              urlChanged: themeImageChanges.url.old !== themeImageChanges.url.new
+            });
+          }
+
+          // **COMPREHENSIVE IMAGE STATUS ANALYSIS**
           const statusChanges = {
             '16_9': { old: oldRecord.image_16_9_status, new: newRecord.image_16_9_status },
             '9_16': { old: oldRecord.image_9_16_status, new: newRecord.image_9_16_status },
@@ -205,7 +243,21 @@ export const useRealtimePosts = ({
             '4_3': { old: oldRecord.image_4_3_url, new: newRecord.image_4_3_url },
           };
 
-          // Check if this is an image-related update
+          // Log ALL status and URL changes
+          Object.keys(statusChanges).forEach(aspect => {
+            const statusChange = statusChanges[aspect as keyof typeof statusChanges];
+            const urlChange = urlChanges[aspect as keyof typeof urlChanges];
+            
+            if (statusChange.old !== statusChange.new || urlChange.old !== urlChange.new) {
+              console.log(`📊 ${aspect.toUpperCase()} IMAGE CHANGE:`, {
+                status: `${statusChange.old} → ${statusChange.new}`,
+                url: urlChange.old !== urlChange.new ? 'URL UPDATED' : 'URL UNCHANGED',
+                hasNewUrl: !!urlChange.new
+              });
+            }
+          });
+
+          // **CRITICAL: CHECK FOR IMAGE-RELATED UPDATES INCLUDING THEME IMAGES**
           const isImageUpdate = (
             newRecord.image_16_9_status !== oldRecord.image_16_9_status ||
             newRecord.image_9_16_status !== oldRecord.image_9_16_status ||
@@ -214,30 +266,55 @@ export const useRealtimePosts = ({
             newRecord.image_16_9_url !== oldRecord.image_16_9_url ||
             newRecord.image_9_16_url !== oldRecord.image_9_16_url ||
             newRecord.image_3_4_url !== oldRecord.image_3_4_url ||
-            newRecord.image_4_3_url !== oldRecord.image_4_3_url
+            newRecord.image_4_3_url !== oldRecord.image_4_3_url ||
+            // **ADD THEME IMAGE DETECTION**
+            newRecord.theme_image_generation_status !== oldRecord.theme_image_generation_status ||
+            newRecord.theme_image_4_3_url !== oldRecord.theme_image_4_3_url
           );
 
+          console.log('🔍 IMAGE UPDATE DETECTION:', {
+            isImageUpdate,
+            individualStatusChanges: Object.entries(statusChanges).filter(([_, change]) => change.old !== change.new),
+            individualUrlChanges: Object.entries(urlChanges).filter(([_, change]) => change.old !== change.new),
+            themeImageStatusChange: themeImageChanges.status.old !== themeImageChanges.status.new,
+            themeImageUrlChange: themeImageChanges.url.old !== themeImageChanges.url.new
+          });
+
           if (!isImageUpdate) {
-            addLog('DEBUG', 'Update', 'Non-image update filtered out', {
+            addLog('DEBUG', 'Update', '❌ NON-IMAGE UPDATE FILTERED OUT', {
               postId: newRecord.id,
               category: newRecord.category,
-              statusChanges,
-              urlChanges,
+              theme: newRecord.theme,
+              reason: 'No image-related fields changed'
             });
+            console.log('❌ UPDATE FILTERED: No image changes detected');
+            console.groupEnd();
             return;
           }
           
-          addLog('INFO', 'Update', 'Image-related update detected', {
+          
+          addLog('INFO', 'Update', '✅ IMAGE-RELATED UPDATE DETECTED', {
             postId: newRecord.id,
             category: newRecord.category,
+            theme: newRecord.theme,
             statusChanges,
             urlChanges,
+            themeImageChanges
           });
+          
+          console.log('✅ PROCESSING IMAGE UPDATE');
 
-          // Debounce rapid updates (within 1 second)
+          // **ENHANCED DEBOUNCE LOGIC WITH DETAILED LOGGING**
           const now = Date.now();
           const lastUpdate = lastUpdateRef.current[newRecord.id] || 0;
           const timeSinceLastUpdate = now - lastUpdate;
+          
+          console.log('⏱️ DEBOUNCE CHECK:', {
+            postId: newRecord.id,
+            timeSinceLastUpdate: `${timeSinceLastUpdate}ms`,
+            debounceThreshold: '1000ms',
+            willDebounce: timeSinceLastUpdate < 1000
+          });
           
           if (timeSinceLastUpdate < 1000) {
             setMetrics(prev => ({
@@ -245,28 +322,41 @@ export const useRealtimePosts = ({
               debounceHits: prev.debounceHits + 1,
             }));
             
-            addLog('DEBUG', 'Update', `Debouncing rapid update (${timeSinceLastUpdate}ms since last)`, {
+            addLog('DEBUG', 'Update', `⏭️ DEBOUNCING RAPID UPDATE (${timeSinceLastUpdate}ms since last)`, {
               postId: newRecord.id,
               timeSinceLastUpdate,
               debounceThreshold: 1000,
             });
+            console.log('⏭️ UPDATE DEBOUNCED');
+            console.groupEnd();
             return;
           }
           lastUpdateRef.current[newRecord.id] = now;
 
-          addLog('INFO', 'Update', `Processing image update for post: ${newRecord.id}`, {
+
+          addLog('INFO', 'Update', `🚀 PROCESSING IMAGE UPDATE FOR POST: ${newRecord.id}`, {
             postId: newRecord.id,
             category: newRecord.category,
+            theme: newRecord.theme,
             statusTransitions: {
               '16_9': `${oldRecord.image_16_9_status} → ${newRecord.image_16_9_status}`,
               '9_16': `${oldRecord.image_9_16_status} → ${newRecord.image_9_16_status}`,
               '3_4': `${oldRecord.image_3_4_status} → ${newRecord.image_3_4_status}`,
               '4_3': `${oldRecord.image_4_3_status} → ${newRecord.image_4_3_status}`,
+              'theme': `${oldRecord.theme_image_generation_status} → ${newRecord.theme_image_generation_status}`,
             },
             updateProcessingTime: Date.now() - updateStartTime,
           });
+          
+          console.log('🚀 FINAL STATUS TRANSITIONS:', {
+            '16_9': `${oldRecord.image_16_9_status} → ${newRecord.image_16_9_status}`,
+            '9_16': `${oldRecord.image_9_16_status} → ${newRecord.image_9_16_status}`,
+            '3_4': `${oldRecord.image_3_4_status} → ${newRecord.image_3_4_status}`,
+            '4_3': `${oldRecord.image_4_3_status} → ${newRecord.image_4_3_status}`,
+            'theme_image': `${oldRecord.theme_image_generation_status} → ${newRecord.theme_image_generation_status}`,
+          });
 
-          // Create update object for callback
+          // **ENHANCED UPDATE OBJECT WITH THEME IMAGE DATA**
           const update: RealtimePostUpdate = {
             postId: newRecord.id,
             category: newRecord.category,
@@ -284,27 +374,55 @@ export const useRealtimePosts = ({
             }
           };
 
-          // Call update callback if provided
+
+          // **ENHANCED CALLBACK LOGGING**
           if (onUpdate) {
-            addLog('DEBUG', 'Update', 'Calling update callback', { postId: newRecord.id });
+            addLog('DEBUG', 'Update', '📞 CALLING UPDATE CALLBACK', { 
+              postId: newRecord.id,
+              callbackProvided: true,
+              updateObject: update
+            });
+            console.log('📞 CALLING UPDATE CALLBACK WITH:', update);
             onUpdate(update);
+          } else {
+            console.log('⚠️ NO UPDATE CALLBACK PROVIDED');
           }
 
-          // Cache invalidation with detailed tracking
+          // **ENHANCED CACHE INVALIDATION WITH DETAILED TRACKING**
           const cacheInvalidationStart = Date.now();
           
-          addLog('INFO', 'Cache', `Starting cache invalidation for category: ${newRecord.category}`, {
+          addLog('INFO', 'Cache', `🗄️ STARTING CACHE INVALIDATION for category: ${newRecord.category}`, {
             category: newRecord.category,
             postId: newRecord.id,
+            theme: newRecord.theme,
           });
           
+          console.log('🗄️ CACHE INVALIDATION STARTING:', {
+            category: newRecord.category,
+            postId: newRecord.id,
+            queryKeys: [
+              `['category-posts', '${newRecord.category}']`,
+              `['available-categories']`
+            ]
+          });
+          
+          // Invalidate category-specific queries
           queryClient.invalidateQueries({ 
             queryKey: ['category-posts', newRecord.category] 
           });
 
+          // Invalidate general queries
           queryClient.invalidateQueries({ 
             queryKey: ['available-categories'] 
           });
+          
+          // **ADD THEME-SPECIFIC CACHE INVALIDATION**
+          if (newRecord.theme) {
+            queryClient.invalidateQueries({ 
+              queryKey: ['theme-posts', newRecord.theme] 
+            });
+            console.log('🎨 THEME CACHE INVALIDATED:', newRecord.theme);
+          }
           
           setMetrics(prev => ({
             ...prev,
@@ -316,10 +434,15 @@ export const useRealtimePosts = ({
           trackPerformance('Cache Invalidation', cacheInvalidationStart);
           trackPerformance('Full Update Processing', updateStartTime);
           
-          addLog('INFO', 'Cache', 'Cache invalidation completed', {
+          addLog('INFO', 'Cache', '✅ CACHE INVALIDATION COMPLETED', {
             category: newRecord.category,
+            theme: newRecord.theme,
             invalidationTime: Date.now() - cacheInvalidationStart,
+            totalProcessingTime: Date.now() - updateStartTime
           });
+          
+          console.log('✅ UPDATE PROCESSING COMPLETE');
+          console.groupEnd();
         }
       )
       .on(
