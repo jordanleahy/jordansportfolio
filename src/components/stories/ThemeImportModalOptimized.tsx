@@ -15,11 +15,14 @@ interface ThemeImportModalOptimizedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportComplete?: () => void;
+  onOptimisticStart?: (categoryName: string) => void;
 }
+
 export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps> = ({
   open,
   onOpenChange,
-  onImportComplete
+  onImportComplete,
+  onOptimisticStart
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const {
@@ -52,7 +55,9 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     isProcessing: isStreamlinedProcessing
   } = useStreamlinedThemeImport({
     onImportComplete,
-    onOptimisticStart: categoryName => {
+    onOptimisticStart: (categoryName) => {
+      // Call the prop callback to add shimmer
+      onOptimisticStart?.(categoryName);
       // Close modal immediately on submit
       onOpenChange(false);
       setJsonInput('');

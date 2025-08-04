@@ -11,6 +11,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
+import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,6 +98,31 @@ export default function StoriesDashboard() {
     setCategoryImages(images);
   }, [availableCategories]);
 
+  // Import completion handler
+  const handleImportComplete = React.useCallback(async () => {
+    setShimmerCategories([]);
+    invalidateCache();
+    await refreshPostCountsAndImages();
+  }, [invalidateCache, refreshPostCountsAndImages]);
+
+  // Optimistic import handling  
+  const optimisticImport = useStreamlinedThemeImport({
+    onImportComplete: handleImportComplete,
+    onOptimisticStart: (categoryName: string) => {
+      console.log('Adding shimmer for category:', categoryName);
+      setShimmerCategories(prev => [...prev, categoryName]);
+    },
+    onOptimisticComplete: (success: boolean, categoryName?: string) => {
+      if (categoryName) {
+        console.log('Removing shimmer for category:', categoryName);
+        setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
+      }
+      if (success) {
+        refreshPostCountsAndImages();
+      }
+    }
+  });
+
   // Setup realtime subscription for immediate updates
   const handlePostInsert = React.useCallback((newPost: any) => {
     console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
@@ -115,43 +141,6 @@ export default function StoriesDashboard() {
     // Refresh category images in case image URLs changed
     refreshPostCountsAndImages();
   }, [refreshPostCountsAndImages]);
-
-  const { isConnected, connectionStatus } = useUnifiedRealtime({
-    enabled: !!user,
-    userId: user?.id,
-    onPostInsert: handlePostInsert,
-    onPostUpdate: handlePostUpdate
-  });
-
-  // Debug connection status
-  React.useEffect(() => {
-    console.log(`[StoriesDashboard] Realtime connection status: ${connectionStatus}, connected: ${isConnected}`);
-  }, [connectionStatus, isConnected]);
-
-  React.useEffect(() => {
-    refreshPostCountsAndImages();
-  }, [refreshPostCountsAndImages]);
-
-  const handleImportComplete = async () => {
-    // Clear any shimmer states and refresh data
-    setShimmerCategories([]);
-    invalidateCache();
-  };
-
-  const handleOptimisticStart = (categoryName: string) => {
-    // Add shimmer card immediately
-    setShimmerCategories(prev => [...prev, categoryName]);
-  };
-
-  const handleOptimisticComplete = (success: boolean, categoryName?: string) => {
-    if (categoryName) {
-      // Remove shimmer card
-      setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
-    }
-    if (success) {
-      invalidateCache();
-    }
-  };
 
   const handleGenerateCustomTheme = async () => {
     console.log('🚀 [StoriesDashboard] Starting custom theme generation');
@@ -293,7 +282,15 @@ export default function StoriesDashboard() {
             <ThemeImportModal 
               open={importModalOpen} 
               onOpenChange={setImportModalOpen} 
-              onImportComplete={handleImportComplete}
+              onImportComplete={() => {
+                setShimmerCategories([]);
+                invalidateCache();
+                refreshPostCountsAndImages();
+              }}
+              onOptimisticStart={(categoryName) => {
+                console.log('🔄 Adding shimmer category:', categoryName);
+                setShimmerCategories(prev => [...prev, categoryName]);
+              }}
             />
           </Suspense>
         )}

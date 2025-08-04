@@ -10,6 +10,7 @@ interface CategoriesGridProps {
 }
 
 export const CategoriesGrid = ({ categories, postCounts, categoryImages, onImportClick, shimmerCategories = [] }: CategoriesGridProps) => {
+  console.log('🎛️ CategoriesGrid render:', { categories: categories.length, shimmerCategories: shimmerCategories.length, shimmerNames: shimmerCategories });
   const hasAnyContent = categories.length > 0 || shimmerCategories.length > 0;
   
   if (!hasAnyContent) {
