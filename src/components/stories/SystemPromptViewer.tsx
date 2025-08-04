@@ -8,7 +8,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
-import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 import { diffLines } from 'diff';
 import { stripMarkdownFormatting } from '@/utils/markdownUtils';
 import { ThemeAwareColorText } from '@/components/ui/theme-aware-color-text';
@@ -36,6 +37,7 @@ export const SystemPromptViewer = ({
   onThemeChange
 }: SystemPromptViewerProps) => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [showDiff, setShowDiff] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState<string>('');
   const [previousPrompt, setPreviousPrompt] = useState<string>('');
@@ -57,13 +59,16 @@ export const SystemPromptViewer = ({
   } = useSystemPromptCache(category);
 
   // Use realtime system prompts
-  const { isConnected } = useRealtimeSystemPrompts({
+  const { isConnected } = useUnifiedRealtime({
     enabled: isVisible,
-    onPromptUpdated: (data) => {
+    userId: user?.id,
+    onSystemPromptUpdate: (data) => {
       if (data.category === category) {
         setRealtimeUpdateReceived(true);
         // Show update indicator briefly
         setTimeout(() => setRealtimeUpdateReceived(false), 3000);
+        // Invalidate cache to refresh the prompt
+        invalidateCache();
       }
     }
   });

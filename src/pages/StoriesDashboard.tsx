@@ -12,7 +12,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
-import { useRealtimePosts } from '@/hooks/useRealtimePosts';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
@@ -115,12 +115,17 @@ export default function StoriesDashboard() {
     refreshPostCountsAndImages();
   }, [refreshPostCountsAndImages]);
 
-  useRealtimePosts({
+  const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
     userId: user?.id,
-    onInsert: handlePostInsert,
-    onUpdate: handlePostUpdate
+    onPostInsert: handlePostInsert,
+    onPostUpdate: handlePostUpdate
   });
+
+  // Debug connection status
+  React.useEffect(() => {
+    console.log(`[StoriesDashboard] Realtime connection status: ${connectionStatus}, connected: ${isConnected}`);
+  }, [connectionStatus, isConnected]);
 
   React.useEffect(() => {
     refreshPostCountsAndImages();

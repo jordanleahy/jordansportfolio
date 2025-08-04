@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
 import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
-import { useRealtimeSystemPrompts } from '@/hooks/realtime/useRealtimeSystemPrompts';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { DEFAULT_CATEGORIES, VISUAL_PROMPT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 
@@ -30,11 +31,13 @@ export const SystemPromptsTab = ({
   const [databasePrompts, setDatabasePrompts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Set up realtime updates for system prompts
-  useRealtimeSystemPrompts({
+  useUnifiedRealtime({
     enabled: !!agentId,
-    onPromptUpdated: () => {
+    userId: user?.id,
+    onSystemPromptUpdate: () => {
       if (agentId) {
         fetchDatabasePrompts();
       }
