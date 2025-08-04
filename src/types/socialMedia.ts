@@ -26,6 +26,9 @@ export interface SocialMediaPost {
   // Color theme
   color_theme_id?: string | null;
   
+  // Theme description
+  theme_description?: string | null;
+  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;
@@ -49,6 +52,9 @@ export interface CreateSocialMediaPost {
   
   // Color theme
   color_theme_id?: string;
+  
+  // Theme description
+  theme_description?: string;
   
   status?: PostStatus;
   scheduled_date?: string;
