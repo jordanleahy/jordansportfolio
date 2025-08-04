@@ -13,7 +13,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
-import { useUserIdeaPipeline } from '@/hooks/useUserIdeaPipeline';
+
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
