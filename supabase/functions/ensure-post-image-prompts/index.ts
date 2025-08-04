@@ -72,7 +72,7 @@ serve(async (req) => {
       .from('openai_agents')
       .select('id, system_prompts')
       .eq('user_id', userId)
-      .eq('name', 'Blog Visual Prompt Generator')
+      .eq('name', 'Visual Prompt Generator') // Note: matches VISUAL_PROMPT_GENERATOR constant from agent_constants
       .single();
 
     if (agentError || !visualAgent) {
