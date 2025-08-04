@@ -185,7 +185,7 @@ serve(async (req) => {
 
             sendProgress('prompt_generated', 30, { prompt });
 
-            // Generate image with OpenAI Responses API with streaming
+            // Generate image with OpenAI Responses API
             sendProgress('image_generation', 50);
 
             const imageSize = getAspectRatioSize(aspectRatio);
@@ -246,13 +246,20 @@ serve(async (req) => {
                 const lines = chunk.split('\n');
 
                 for (const line of lines) {
-                  if (line.startsWith('data: ')) {
+                  if (line.startsWith('data: ') && line.length > 6) {
+                    const dataContent = line.slice(6).trim();
+                    if (dataContent === '[DONE]') {
+                      console.log('Received [DONE] signal from OpenAI');
+                      continue;
+                    }
+
                     try {
-                      const data = JSON.parse(line.slice(6));
+                      const data = JSON.parse(dataContent);
+                      console.log('Received streaming data:', { type: data.type });
                       
                       if (data.type === 'response.image_generation_call.partial_image') {
                         partialCount++;
-                        const progressPercent = 60 + (partialCount * 10);
+                        const progressPercent = 60 + (partialCount * 5);
                         const imageBase64 = data.partial_image_b64;
                         
                         sendProgress(`partial_${partialCount}`, progressPercent, { 
@@ -262,19 +269,35 @@ serve(async (req) => {
                         
                         console.log(`Sent partial image ${partialCount}`);
                       } else if (data.type === 'response.image_generation_call.done') {
-                        // Final image
-                        const imageBase64 = data.result;
-                        finalBase64Image = imageBase64;
-                        
-                        sendProgress('image_generated', 70, { 
-                          partialImage: `data:image/png;base64,${imageBase64}`,
-                          isPartial: false
-                        });
-                        
-                        console.log('Received final image');
+                        // Final image in result field
+                        if (data.result) {
+                          finalBase64Image = data.result;
+                          
+                          sendProgress('image_generated', 70, { 
+                            partialImage: `data:image/png;base64,${finalBase64Image}`,
+                            isPartial: false
+                          });
+                          
+                          console.log('Received final image from result field');
+                        }
+                      } else if (data.output && Array.isArray(data.output)) {
+                        // Check if output contains image generation results
+                        for (const outputItem of data.output) {
+                          if (outputItem.type === 'image_generation_call' && outputItem.result) {
+                            finalBase64Image = outputItem.result;
+                            
+                            sendProgress('image_generated', 70, { 
+                              partialImage: `data:image/png;base64,${finalBase64Image}`,
+                              isPartial: false
+                            });
+                            
+                            console.log('Received final image from output array');
+                            break;
+                          }
+                        }
                       }
                     } catch (parseError) {
-                      console.log('Non-JSON line:', line);
+                      console.log('Could not parse JSON, skipping line:', line.substring(0, 100));
                     }
                   }
                 }
@@ -283,8 +306,41 @@ serve(async (req) => {
               reader.releaseLock();
             }
 
+            // If we still don't have a final image, try non-streaming fallback
             if (!finalBase64Image) {
-              throw new Error('No final image received from OpenAI');
+              console.log('No final image from streaming, trying non-streaming fallback');
+              
+              const fallbackResponse = await fetch('https://api.openai.com/v1/images/generations', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${openAIApiKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  model: 'gpt-image-1',
+                  prompt: prompt,
+                  size: imageSize,
+                  quality: 'high',
+                  n: 1
+                }),
+              });
+
+              if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json();
+                if (fallbackData.data && fallbackData.data[0] && fallbackData.data[0].b64_json) {
+                  finalBase64Image = fallbackData.data[0].b64_json;
+                  console.log('Successfully generated image via fallback');
+                  
+                  sendProgress('image_generated', 70, { 
+                    partialImage: `data:image/png;base64,${finalBase64Image}`,
+                    isPartial: false
+                  });
+                }
+              }
+            }
+
+            if (!finalBase64Image) {
+              throw new Error('No final image received from OpenAI after trying both streaming and fallback methods');
             }
 
             // Upload to storage if user is authenticated
