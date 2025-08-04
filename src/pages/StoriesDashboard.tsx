@@ -212,6 +212,63 @@ export default function StoriesDashboard() {
     };
   }, [user?.id, shimmerThemes, refreshPostCountsAndImages, toast]);
 
+  // Add polling fallback to catch missed real-time events
+  React.useEffect(() => {
+    if (!user?.id || shimmerThemes.length === 0) return;
+
+    const checkShimmerStatus = async () => {
+      try {
+        console.log('🔍 [Shimmer Check] Checking status for themes:', shimmerThemes);
+        
+        for (const shimmerTheme of shimmerThemes) {
+          const normalizedTheme = normalizeThemeName(shimmerTheme);
+          
+          const { data, error } = await supabase
+            .from('social_media_posts')
+            .select('theme_image_generation_status, theme')
+            .eq('user_id', user.id)
+            .eq('theme', normalizedTheme)
+            .limit(1)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('🚨 [Shimmer Check] Error:', error);
+            continue;
+          }
+
+          if (data && (data.theme_image_generation_status === 'complete' || data.theme_image_generation_status === 'failed')) {
+            console.log('🔄 [Shimmer Check] Found completed theme:', {
+              theme: normalizedTheme,
+              status: data.theme_image_generation_status
+            });
+
+            setShimmerThemes(prev => {
+              const filtered = prev.filter(theme => normalizeThemeName(theme) !== normalizedTheme);
+              console.log('🧹 [Shimmer Cleanup] Polling cleanup:', {
+                originalShimmer: prev,
+                removingTheme: normalizedTheme,
+                newShimmer: filtered,
+                status: data.theme_image_generation_status
+              });
+              return filtered;
+            });
+
+            // Refresh data to show the new image
+            refreshPostCountsAndImages();
+          }
+        }
+      } catch (error) {
+        console.error('🚨 [Shimmer Check] Polling error:', error);
+      }
+    };
+
+    // Check immediately, then every 10 seconds for missed events
+    checkShimmerStatus();
+    const interval = setInterval(checkShimmerStatus, 10000);
+
+    return () => clearInterval(interval);
+  }, [user?.id, shimmerThemes, refreshPostCountsAndImages]);
+
   const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
     userId: user?.id,
