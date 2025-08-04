@@ -23,7 +23,7 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick }: Categor
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden">
+    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden" onClick={handleClick}>
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         {imageUrl ? (
@@ -74,8 +74,8 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick }: Categor
         </div>
 
         <Button 
-          onClick={handleClick}
-          variant="ghost" 
+          onClick={(e) => { e.stopPropagation(); handleClick(); }}
+          variant="ghost"
           className="w-full justify-between text-muted-foreground hover:text-primary group-hover:bg-primary/5"
         >
           <span>View Details</span>
