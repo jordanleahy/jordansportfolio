@@ -27,8 +27,8 @@ import {
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 
-export default function CategoryDetail() {
-  const { category } = useParams<{ category: string }>();
+export default function ThemeDetail() {
+  const { theme } = useParams<{ theme: string }>();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
@@ -36,21 +36,21 @@ export default function CategoryDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const decodedCategory = category ? decodeURIComponent(category) : '';
+  const decodedTheme = theme ? decodeURIComponent(theme) : '';
   
-  // Fetch posts for this specific category
-  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useCategoryPosts(decodedCategory, !!decodedCategory);
+  // Fetch posts for this specific theme
+  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useCategoryPosts(decodedTheme, !!decodedTheme);
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
 
-  const handleDeleteTheme = async (categoryToDelete: string) => {
+  const handleDeleteTheme = async (themeToDelete: string) => {
     try {
-      console.log('Deleting theme:', categoryToDelete);
-      await optimizedSocialMediaService.deleteTheme(categoryToDelete);
+      console.log('Deleting theme:', themeToDelete);
+      await optimizedSocialMediaService.deleteTheme(themeToDelete);
       toast({
         title: "Theme Deleted",
-        description: `All posts in the "${categoryToDelete}" theme have been deleted.`,
+        description: `All posts in the "${themeToDelete}" theme have been deleted.`,
       });
       
       // Navigate back to dashboard after deletion
@@ -81,14 +81,14 @@ export default function CategoryDetail() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!category || !decodedCategory) {
+  if (!theme || !decodedTheme) {
     return <Navigate to="/stories" replace />;
   }
 
   return (
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
-        {/* Header with back button and category info */}
+        {/* Header with back button and theme info */}
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Button
@@ -102,7 +102,7 @@ export default function CategoryDetail() {
             <div className="h-6 w-px bg-border flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-2xl font-bold capitalize text-foreground truncate">
-                {decodedCategory}
+                {decodedTheme}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : 'No theme description available'}
@@ -125,13 +125,13 @@ export default function CategoryDetail() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Theme</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete the "{decodedCategory}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
+                    Are you sure you want to delete the "{decodedTheme}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => handleDeleteTheme(decodedCategory)}
+                    onClick={() => handleDeleteTheme(decodedTheme)}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
                     Delete Theme
@@ -146,13 +146,13 @@ export default function CategoryDetail() {
         <div className="space-y-8">
           <Suspense fallback={<CalendarSkeletonLoader />}>
             {/* Color Theme Consistency Checker */}
-            <ColorThemeConsistencyChecker category={decodedCategory} />
+            <ColorThemeConsistencyChecker category={decodedTheme} />
             
             <PostsTable 
               posts={posts as any}
               onPostsChange={handlePostsChange}
               isAdmin={isAdmin}
-              category={decodedCategory}
+              category={decodedTheme}
               selectedThemeId={selectedThemeId}
               onThemeChange={setSelectedThemeId}
             />

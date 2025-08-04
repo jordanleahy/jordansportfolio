@@ -48,11 +48,11 @@ export default function OptimizedCalendar() {
   const {
     activeTab,
     isInitialized,
-    isLoadingCategories,
+    isLoadingThemes,
     isLoadingActiveTab,
-    availableCategories,
+    availableThemes,
     activeTabPosts,
-    hasCategories,
+    hasThemes,
     isEmpty,
     changeTab,
     invalidateCache
@@ -84,11 +84,11 @@ export default function OptimizedCalendar() {
         description: `All posts in the "${category}" theme have been deleted.`,
       });
       
-      // If the deleted category was active, switch to the first available one
-        if (activeTab === category && availableCategories.length > 1) {
-          const remainingCategories = availableCategories.filter(c => c !== category);
-          if (remainingCategories.length > 0) {
-            changeTab(remainingCategories[0]);
+      // If the deleted theme was active, switch to the first available one
+        if (activeTab === category && availableThemes.length > 1) {
+          const remainingThemes = availableThemes.filter(t => t.theme !== category);
+          if (remainingThemes.length > 0) {
+            changeTab(remainingThemes[0].theme);
           }
         }
       
@@ -104,7 +104,7 @@ export default function OptimizedCalendar() {
     }
   };
 
-  if (loading || (!isInitialized && isLoadingCategories)) {
+  if (loading || (!isInitialized && isLoadingThemes)) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -134,7 +134,7 @@ export default function OptimizedCalendar() {
                     </div>
                   </div>
                   <div className="text-center">
-                     <div className="text-2xl font-bold text-primary">{availableCategories.length}</div>
+                     <div className="text-2xl font-bold text-primary">{availableThemes.length}</div>
                    </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">{activeTabPosts.length}</div>
@@ -219,8 +219,8 @@ export default function OptimizedCalendar() {
           />
         </Suspense>
 
-        {/* Show tabs only if user has categories, otherwise show empty state */}
-        {hasCategories ? (
+        {/* Show tabs only if user has themes, otherwise show empty state */}
+        {hasThemes ? (
           <Tabs 
             value={activeTab} 
             onValueChange={changeTab} 
@@ -228,29 +228,29 @@ export default function OptimizedCalendar() {
           >
             <div className="overflow-x-auto">
               <TabsList className="inline-flex w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
-                {availableCategories.map((category) => (
+                {availableThemes.map((theme) => (
                   <TabsTrigger 
-                    key={category} 
-                    value={category} 
+                    key={theme.theme} 
+                    value={theme.theme} 
                     className="capitalize whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-sm"
                   >
-                    {category}
+                    {theme.theme}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </div>
 
-            {availableCategories.map((category) => (
-              <TabsContent key={category} value={category} className="space-y-8">
+            {availableThemes.map((theme) => (
+              <TabsContent key={theme.theme} value={theme.theme} className="space-y-8">
                 <Suspense fallback={<CalendarSkeletonLoader />}>
                   {/* Color Theme Consistency Checker */}
-                  <ColorThemeConsistencyChecker category={category} />
+                  <ColorThemeConsistencyChecker category={theme.theme} />
                   
                    <PostsTable 
                      posts={activeTabPosts}
-                     onPostsChange={() => loadCategoryPosts(category)}
+                     onPostsChange={() => loadCategoryPosts(theme.theme)}
                      isAdmin={isAdmin}
-                     category={category}
+                     category={theme.theme}
                      selectedThemeId={selectedThemeId}
                      onThemeChange={setSelectedThemeId}
                    />

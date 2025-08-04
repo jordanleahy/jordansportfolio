@@ -56,10 +56,10 @@ export const useRoutePreloading = () => {
       case '/stories':
         console.log('[Prefetch] Starting stories data prefetch');
         
-        // 1. Prefetch available categories first (highest priority)
+        // 1. Prefetch available themes first (highest priority)
         await queryClient.prefetchQuery({
-          queryKey: ['available-categories'],
-          queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
+          queryKey: ['themes'],
+          queryFn: () => optimizedSocialMediaService.getAvailableThemes(),
           staleTime: 10 * 60 * 1000,
         });
 

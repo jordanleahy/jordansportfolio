@@ -21,19 +21,19 @@ export const CategoryInput = ({ value, onChange, placeholder = "Select or enter 
   const [inputValue, setInputValue] = useState(value);
   const [customInput, setCustomInput] = useState(false);
 
-  // Fetch available categories from the database
-  const { data: availableCategories = [] } = useQuery({
-    queryKey: ['available-categories'],
-    queryFn: () => optimizedSocialMediaService.getAvailableCategories(),
+  // Fetch available themes from the database
+  const { data: availableThemes = [] } = useQuery({
+    queryKey: ['themes'],
+    queryFn: () => optimizedSocialMediaService.getAvailableThemes(),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Combine default and available categories, prioritizing defaults
+  // Combine default and available themes, prioritizing defaults
   const allCategories = React.useMemo(() => {
     const knownCategories = [...DEFAULT_CATEGORIES] as string[];
-    const dynamicCategories = availableCategories.filter(c => !knownCategories.includes(c));
-    return [...knownCategories, ...dynamicCategories];
-  }, [availableCategories]);
+    const themeCategories = availableThemes.map(t => t.category).filter(c => !knownCategories.includes(c));
+    return [...knownCategories, ...themeCategories];
+  }, [availableThemes]);
 
   useEffect(() => {
     setInputValue(value);

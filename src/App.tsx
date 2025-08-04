@@ -51,7 +51,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
-const CategoryDetail = lazy(() => import("./pages/CategoryDetail"));
+const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 
 
@@ -90,7 +90,10 @@ function App() {
                 <Route path="/" element={<Index />} />
                 {/* Redirect old calendar routes to stories */}
                 <Route path="/calendar" element={<Navigate to="/stories" replace />} />
-                <Route path="/calendar/category/:category" element={<Navigate to="/stories/category/:category" replace />} />
+                <Route path="/calendar/category/:category" element={<Navigate to="/stories/theme/:category" replace />} />
+                
+                {/* Redirect old category routes to theme routes */}
+                <Route path="/stories/category/:category" element={<Navigate to="/stories/theme/:category" replace />} />
                 
                 <Route 
                   path="/stories" 
@@ -103,11 +106,11 @@ function App() {
                   } 
                 />
                 <Route 
-                  path="/stories/category/:category" 
+                  path="/stories/theme/:theme" 
                   element={
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <CategoryDetail />
+                        <ThemeDetail />
                       </Suspense>
                     </ProtectedRoute>
                   } 

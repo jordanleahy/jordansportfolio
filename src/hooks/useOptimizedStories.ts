@@ -24,14 +24,14 @@ export const useCategoryPosts = (category: string, enabled = true) => {
   });
 };
 
-// Optimized available categories hook
-export const useAvailableCategories = (enabled = true) => {
+// Optimized available themes hook
+export const useAvailableThemes = (enabled = true) => {
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: ['themes'],
     queryFn: async () => {
       // Import here to avoid circular dependency
       const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
-      return optimizedSocialMediaService.getAvailableCategories();
+      return optimizedSocialMediaService.getAvailableThemes();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     enabled,
@@ -54,22 +54,25 @@ export function useOptimizedStories(user: any) {
     }
   });
 
-  // Available categories query
+  // Available themes query
   const { 
-    data: availableCategories = [], 
-    isLoading: isLoadingAvailableCategories 
-  } = useAvailableCategories(!!user);
+    data: availableThemes = [], 
+    isLoading: isLoadingAvailableThemes 
+  } = useAvailableThemes(!!user);
 
-  // Initialize active tab - Don't wait for categories to exist, initialize when query completes
+  // Initialize active tab - Don't wait for themes to exist, initialize when query completes
   useEffect(() => {
-    if (!isInitialized && !isLoadingAvailableCategories) {
-      if (availableCategories.length > 0) {
+    if (!isInitialized && !isLoadingAvailableThemes) {
+      if (availableThemes.length > 0) {
         const urlTab = searchParams.get('tab');
         
-        let selectedTab = availableCategories[0]; // Fallback
+        let selectedTab = availableThemes[0].theme; // Use theme property
         
-        if (urlTab && availableCategories.includes(urlTab)) {
-          selectedTab = urlTab;
+        if (urlTab) {
+          const matchingTheme = availableThemes.find(t => t.theme === urlTab);
+          if (matchingTheme) {
+            selectedTab = matchingTheme.theme;
+          }
         }
         
         setActiveTab(selectedTab);
@@ -79,12 +82,12 @@ export function useOptimizedStories(user: any) {
           setSearchParams({ tab: selectedTab });
         }
       } else {
-        // No categories exist for this user - initialize as empty
+        // No themes exist for this user - initialize as empty
         setActiveTab('');
         setIsInitialized(true);
       }
     }
-  }, [availableCategories, isLoadingAvailableCategories, searchParams, setSearchParams, isInitialized]);
+  }, [availableThemes, isLoadingAvailableThemes, searchParams, setSearchParams, isInitialized]);
 
   // Active category posts query with optimistic updates
   const activeTabQuery = useQuery({
@@ -107,18 +110,18 @@ export function useOptimizedStories(user: any) {
 
   const activeTabPosts = activeTabQuery.data || [];
 
-  // Prefetch other categories using React Query
+  // Prefetch other themes using React Query
   useEffect(() => {
-    if (availableCategories.length > 0 && activeTab && isInitialized) {
-      availableCategories.forEach((category) => {
-        if (category !== activeTab) {
+    if (availableThemes.length > 0 && activeTab && isInitialized) {
+      availableThemes.forEach((theme) => {
+        if (theme.theme !== activeTab) {
           queryClient.prefetchQuery({
-            queryKey: ['posts', category],
+            queryKey: ['posts', theme.theme],
             queryFn: async () => {
               const { data, error } = await supabase
                 .from('social_media_posts')
                 .select('*')
-                .eq('category', category)
+                .eq('theme', theme.theme)
                 .order('day', { ascending: true });
               
               if (error) throw error;
@@ -129,7 +132,7 @@ export function useOptimizedStories(user: any) {
         }
       });
     }
-  }, [availableCategories, activeTab, isInitialized, queryClient]);
+  }, [availableThemes, activeTab, isInitialized, queryClient]);
 
   const changeTab = (newTab: string) => {
     setActiveTab(newTab);
@@ -139,7 +142,7 @@ export function useOptimizedStories(user: any) {
   const invalidateCache = () => {
     console.log('🔄 Invalidating stories cache');
     queryClient.invalidateQueries({ queryKey: ['posts'] });
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ['themes'] });
   };
 
 
@@ -149,16 +152,16 @@ export function useOptimizedStories(user: any) {
     isInitialized,
     
     // Loading states
-    isLoadingCategories: isLoadingAvailableCategories,
+    isLoadingThemes: isLoadingAvailableThemes,
     isLoadingActiveTab: activeTabQuery.isLoading,
     
     // Data
-    availableCategories: availableCategories || [],
+    availableThemes: availableThemes || [],
     activeTabPosts: activeTabPosts || [],
     
     // New state to distinguish between loading and empty
-    hasCategories: availableCategories.length > 0,
-    isEmpty: isInitialized && availableCategories.length === 0,
+    hasThemes: availableThemes.length > 0,
+    isEmpty: isInitialized && availableThemes.length === 0,
     
     // Realtime data
     connectionStatus,
