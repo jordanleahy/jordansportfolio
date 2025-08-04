@@ -11,21 +11,20 @@ import { useThemeImport } from '@/hooks/useThemeImport';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
-
 interface ThemeImportModalOptimizedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportComplete?: () => void;
 }
-
 export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps> = ({
   open,
   onOpenChange,
   onImportComplete
 }) => {
   const [jsonInput, setJsonInput] = useState('');
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const {
     state,
     progress,
@@ -48,9 +47,12 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   });
 
   // Streamlined import with optimistic UI
-  const { submitRawData, isProcessing: isStreamlinedProcessing } = useStreamlinedThemeImport({
+  const {
+    submitRawData,
+    isProcessing: isStreamlinedProcessing
+  } = useStreamlinedThemeImport({
     onImportComplete,
-    onOptimisticStart: (categoryName) => {
+    onOptimisticStart: categoryName => {
       // Close modal immediately on submit
       onOpenChange(false);
       setJsonInput('');
@@ -65,31 +67,27 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
       setJsonInput(JSON.stringify(parsed, null, 2));
       toast({
         title: "JSON formatted",
-        description: "Your JSON has been formatted for better readability",
+        description: "Your JSON has been formatted for better readability"
       });
     } catch (error) {
       toast({
         title: "Invalid JSON",
         description: "Cannot format invalid JSON syntax",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   }, [jsonInput, toast]);
-
   const handleProcess = useCallback(() => {
     if (!jsonInput.trim()) return;
     processWithAI(jsonInput);
   }, [jsonInput, processWithAI]);
-
   const handleImport = useCallback(() => {
     importData();
   }, [importData]);
-
   const handleStreamlinedSubmit = useCallback(() => {
     if (!jsonInput.trim()) return;
     submitRawData(jsonInput);
   }, [jsonInput, submitRawData]);
-
   const handleCopyInstructions = useCallback(async () => {
     const instructions = `Please format your response as a JSON object with the following structure:
 
@@ -143,18 +141,17 @@ AVOID:
 - Invalid status values
 - More than 100 posts
 - Missing required fields`;
-
     try {
       await navigator.clipboard.writeText(instructions);
       toast({
         title: "Instructions copied",
-        description: "JSON formatting instructions copied to clipboard",
+        description: "JSON formatting instructions copied to clipboard"
       });
     } catch (error) {
       toast({
         title: "Copy failed",
         description: "Could not copy to clipboard",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   }, [toast]);
@@ -164,35 +161,27 @@ AVOID:
     category: "healthcare innovation",
     theme: "Healthcare Technology",
     description: "Posts about healthcare technology trends",
-    posts: [
-      {
-        day: 1,
-        title: "AI in Healthcare: The Future is Now",
-        description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning.",
-        status: "draft"
-      },
-      {
-        day: 2,
-        title: "Telemedicine Best Practices",
-        description: "Telemedicine has become essential for modern healthcare delivery.",
-        status: "draft"
-      }
-    ]
+    posts: [{
+      day: 1,
+      title: "AI in Healthcare: The Future is Now",
+      description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning.",
+      status: "draft"
+    }, {
+      day: 2,
+      title: "Telemedicine Best Practices",
+      description: "Telemedicine has become essential for modern healthcare delivery.",
+      status: "draft"
+    }]
   }), []);
-
   const placeholderText = `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`;
-
   const handleClose = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
-
   const handleReset = useCallback(() => {
     setJsonInput('');
     reset();
   }, [reset]);
-
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
+  return <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Theme Data</DialogTitle>
@@ -200,144 +189,87 @@ AVOID:
 
         <div className="space-y-4">
           {/* Progress indicator */}
-          {progress && (
-            <div className="space-y-2">
+          {progress && <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>{progress.message}</span>
                 <span>{progress.progress}%</span>
               </div>
               <Progress value={progress.progress} className="w-full" />
-            </div>
-          )}
+            </div>}
 
           {/* JSON Input */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label htmlFor="json-input">JSON Data</Label>
-              <Button
-                onClick={formatJSON}
-                variant="ghost"
-                size="sm"
-                disabled={!jsonInput.trim() || isProcessing || isStreamlinedProcessing}
-                className="text-xs"
-              >
-                Format JSON
-              </Button>
-            </div>
-            <Textarea
-              id="json-input"
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              placeholder={placeholderText}
-              readOnly={isProcessing || isStreamlinedProcessing}
-              rows={16}
-              className="font-mono text-sm resize-none min-h-[400px] leading-relaxed"
-            />
+            
+            <Textarea id="json-input" value={jsonInput} onChange={e => setJsonInput(e.target.value)} placeholder={placeholderText} readOnly={isProcessing || isStreamlinedProcessing} rows={16} className="font-mono text-sm resize-none min-h-[400px] leading-relaxed" />
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 flex-wrap">
             {/* Streamlined One-Click Submit */}
-            <Button
-              onClick={handleStreamlinedSubmit}
-              disabled={isStreamlinedProcessing || !jsonInput.trim()}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              size="lg"
-            >
-              {isStreamlinedProcessing ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Upload className="w-4 h-4 mr-2" />
-              )}
+            <Button onClick={handleStreamlinedSubmit} disabled={isStreamlinedProcessing || !jsonInput.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg">
+              {isStreamlinedProcessing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
               Submit
             </Button>
 
-            <Button
-              onClick={handleReset}
-              disabled={isProcessing || isStreamlinedProcessing}
-              variant="ghost"
-              size="sm"
-            >
+            <Button onClick={handleReset} disabled={isProcessing || isStreamlinedProcessing} variant="ghost" size="sm">
               Reset
             </Button>
 
-            <Button
-              onClick={handleCopyInstructions}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleCopyInstructions} variant="outline" size="sm">
               <Copy className="w-3 h-3 mr-1" />
               Copy Instructions
             </Button>
           </div>
 
           {/* Results Display */}
-          {validationResult && (
-            <div className="space-y-4">
+          {validationResult && <div className="space-y-4">
               <Separator />
               
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold">Processing Results</h3>
                 
                 <div className="flex items-center gap-2">
-                  {validationResult.success ? (
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-red-500" />
-                  )}
+                  {validationResult.success ? <CheckCircle className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
                   <span className={validationResult.success ? "text-green-700" : "text-red-700"}>
                     {validationResult.success ? "Ready for import" : "Processing failed"}
                   </span>
                 </div>
 
                 {/* Errors */}
-                {hasErrors && validationResult.errors.length > 0 && (
-                  <Alert variant="destructive">
+                {hasErrors && validationResult.errors.length > 0 && <Alert variant="destructive">
                     <XCircle className="h-4 w-4" />
                     <AlertDescription>
                       <strong>Errors:</strong>
                       <ul className="list-disc list-inside mt-1">
-                        {validationResult.errors.map((error, index) => (
-                          <li key={index}>{error}</li>
-                        ))}
+                        {validationResult.errors.map((error, index) => <li key={index}>{error}</li>)}
                       </ul>
                     </AlertDescription>
-                  </Alert>
-                )}
+                  </Alert>}
 
                 {/* Warnings */}
-                {hasWarnings && validationResult.warnings.length > 0 && (
-                  <Alert>
+                {hasWarnings && validationResult.warnings.length > 0 && <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
                       <strong>Warnings:</strong>
                       <ul className="list-disc list-inside mt-1">
-                        {validationResult.warnings.map((warning, index) => (
-                          <li key={index}>{warning}</li>
-                        ))}
+                        {validationResult.warnings.map((warning, index) => <li key={index}>{warning}</li>)}
                       </ul>
                     </AlertDescription>
-                  </Alert>
-                )}
+                  </Alert>}
 
                 {/* Fixes */}
-                {validationResult.fixes && validationResult.fixes.length > 0 && (
-                  <Alert>
+                {validationResult.fixes && validationResult.fixes.length > 0 && <Alert>
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription>
                       <strong>Applied Fixes:</strong>
                       <ul className="list-disc list-inside mt-1">
-                        {validationResult.fixes.map((fix, index) => (
-                          <li key={index}>{fix}</li>
-                        ))}
+                        {validationResult.fixes.map((fix, index) => <li key={index}>{fix}</li>)}
                       </ul>
                     </AlertDescription>
-                  </Alert>
-                )}
+                  </Alert>}
 
                 {/* Data Preview */}
-                {validationResult.data && (
-                  <div className="space-y-3">
+                {validationResult.data && <div className="space-y-3">
                     <h4 className="font-medium">Preview:</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
@@ -357,8 +289,7 @@ AVOID:
                       </div>
                     </div>
                     
-                    {validationResult.data.posts.slice(0, 3).map((post, index) => (
-                      <div key={index} className="border rounded p-3 text-sm">
+                    {validationResult.data.posts.slice(0, 3).map((post, index) => <div key={index} className="border rounded p-3 text-sm">
                         <div className="font-medium">{post.title}</div>
                         <div className="text-muted-foreground mt-1 line-clamp-2">
                           {post.description}
@@ -367,21 +298,15 @@ AVOID:
                           {post.day && <Badge variant="secondary">Day {post.day}</Badge>}
                           <Badge variant="outline">{post.status}</Badge>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                     
-                    {validationResult.data.posts.length > 3 && (
-                      <div className="text-center text-muted-foreground">
+                    {validationResult.data.posts.length > 3 && <div className="text-center text-muted-foreground">
                         ... and {validationResult.data.posts.length - 3} more posts
-                      </div>
-                    )}
-                  </div>
-                )}
+                      </div>}
+                  </div>}
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
