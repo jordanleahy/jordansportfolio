@@ -106,7 +106,7 @@ export default function CategoryDetail() {
                 {decodedCategory}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`}
+                {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : 'No theme description available'}
               </p>
             </div>
           </div>
