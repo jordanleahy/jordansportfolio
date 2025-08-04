@@ -246,6 +246,46 @@ export default function StoriesDashboard() {
     }
   };
 
+  const handleDeleteCategory = async (category: string) => {
+    try {
+      // Delete all posts for this category
+      const { error: postsError } = await supabase
+        .from('social_media_posts')
+        .delete()
+        .eq('category', category)
+        .eq('user_id', user?.id);
+
+      if (postsError) throw postsError;
+
+      // Delete cached prompts for this category
+      const { error: cacheError } = await supabase
+        .from('cached_prompts')
+        .delete()
+        .eq('category', category)
+        .eq('user_id', user?.id);
+
+      if (cacheError) console.warn('Failed to delete cached prompts:', cacheError);
+
+      toast({
+        title: "Category Deleted",
+        description: `Successfully deleted "${category}" and all its posts`,
+      });
+
+      // Refresh data
+      invalidateCache();
+      refreshPostCountsAndImages();
+      setShimmerCategories(prev => prev.filter(cat => cat !== category));
+
+    } catch (error) {
+      console.error('Delete category error:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete category",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleGenerateCustomTheme = async () => {
     if (!customThemeDescription.trim()) {
       toast({
@@ -263,20 +303,30 @@ export default function StoriesDashboard() {
       const tempCategoryName = customThemeDescription.trim().toLowerCase().replace(/\s+/g, '-').substring(0, 30);
       setShimmerCategories(prev => [...prev, tempCategoryName]);
 
+      console.log('🚀 Calling edge function with:', {
+        description: customThemeDescription.trim(),
+        userId: user?.id,
+        stream: false
+      });
+
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: { 
           description: customThemeDescription.trim(),
           userId: user?.id,
-          stream: false // Non-streaming for simplicity
+          stream: false
         }
       });
 
+      console.log('📡 Edge function response:', { data, error });
+
       if (error) {
-        throw new Error(error.message);
+        console.error('🚨 Edge function error:', error);
+        throw new Error(`Edge function error: ${error.message}`);
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to generate theme');
+      if (!data?.success) {
+        console.error('🚨 Theme generation failed:', data);
+        throw new Error(data?.error || 'Failed to generate theme');
       }
 
       toast({
@@ -415,6 +465,7 @@ export default function StoriesDashboard() {
             return creatingShimmer;
           })()}
           firstPostsData={firstPostsData}
+          onDeleteCategory={handleDeleteCategory}
         />
       </div>
     </PageLayout>

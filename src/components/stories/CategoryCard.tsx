@@ -17,9 +17,10 @@ interface CategoryCardProps {
     title: string;
     description: string;
   };
+  onDelete?: (category: string) => void;
 }
 
-export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false, firstPostData }: CategoryCardProps) => {
+export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: CategoryCardProps) => {
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   
