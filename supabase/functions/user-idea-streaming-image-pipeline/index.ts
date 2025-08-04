@@ -410,58 +410,77 @@ serve(async (req) => {
               data: { promptGenerated: true }
             });
 
-            // Step 4: Generate Image Prompt (70% progress)
+            // Step 4: Set posts to generating status (80% progress)
             sendStreamEvent(controller, {
-              type: 'image_prompt_start',
-              progress: 65,
-              data: { status: 'Creating visual prompt...' }
-            });
-
-            const firstPost = themeData.posts[0];
-            const imagePrompt = await generateImagePrompt(
-              firstPost.title,
-              firstPost.description,
-              themeData.theme,
-              themeData.category
-            );
-            
-            sendStreamEvent(controller, {
-              type: 'image_prompt_complete',
+              type: 'posts_status_update',
               progress: 70,
-              data: { imagePrompt }
+              data: { status: 'Setting posts to generating status...' }
             });
 
-            // Step 5: Generate Theme Image (80-90% progress)
+            // Update posts to generating status (no longer waiting for image)
+            const { error: statusError } = await supabase
+              .from('social_media_posts')
+              .update({ 
+                theme_image_generation_status: 'generating',
+                updated_at: new Date().toISOString()
+              })
+              .eq('theme', themeData.theme)
+              .eq('user_id', userId);
+
+            if (statusError) {
+              console.error('❌ Error updating post status:', statusError);
+            } else {
+              console.log(`✅ Updated posts to status 'generating' for theme: ${themeData.theme}`);
+            }
+
             sendStreamEvent(controller, {
-              type: 'image_generation_start',
-              progress: 75,
-              data: { status: 'Generating theme image...' }
+              type: 'posts_status_updated',
+              progress: 80,
+              data: { status: 'Posts marked as generating' }
             });
 
-            const imageUrl = await generateThemeImage(supabase, imagePrompt, themeData.theme, userId);
-            
+            // Step 5: Trigger background image generation (90% progress)
             sendStreamEvent(controller, {
-              type: 'image_generation_complete',
+              type: 'background_trigger_start',
+              progress: 85,
+              data: { status: 'Starting background image generation...' }
+            });
+
+            // Trigger background image generation (fire-and-forget)
+            try {
+              const firstPost = themeData.posts[0];
+              const backgroundRequest = {
+                theme: themeData.theme,
+                category: themeData.category,
+                userId: userId,
+                firstPostTitle: firstPost.title,
+                firstPostDescription: firstPost.description
+              };
+
+              // Fire-and-forget background function call
+              supabase.functions.invoke('generate-theme-image-background', {
+                body: backgroundRequest
+              }).then(({ error: bgError }) => {
+                if (bgError) {
+                  console.error('❌ Background image generation failed to start:', bgError);
+                } else {
+                  console.log('✅ Background image generation started successfully');
+                }
+              });
+
+              console.log('🔥 Triggered background image generation for theme:', themeData.theme);
+            } catch (bgTriggerError) {
+              console.error('❌ Error triggering background function:', bgTriggerError);
+              // Don't fail the main pipeline if background trigger fails
+            }
+
+            sendStreamEvent(controller, {
+              type: 'background_trigger_complete',
               progress: 90,
-              data: { imageUrl }
+              data: { status: 'Background generation started' }
             });
 
-            // Step 6: Update Database (95% progress)
-            sendStreamEvent(controller, {
-              type: 'database_update_start',
-              progress: 92,
-              data: { status: 'Finalizing...' }
-            });
-
-            await updatePostsWithImage(supabase, imageUrl, themeData.theme, userId);
-            
-            sendStreamEvent(controller, {
-              type: 'database_update_complete',
-              progress: 95,
-              data: { status: 'Database updated' }
-            });
-
-            // Step 7: Pipeline Complete (100% progress)
+            // Step 6: Pipeline Complete (100% progress)
             sendStreamEvent(controller, {
               type: 'pipeline_complete',
               progress: 100,
@@ -469,9 +488,9 @@ serve(async (req) => {
                 success: true,
                 category: themeData.category,
                 theme: themeData.theme,
-                themeImageUrl: imageUrl,
                 postCount: insertedCount,
-                message: 'User idea pipeline completed successfully!'
+                message: 'Theme created successfully! Image generation continues in background.',
+                backgroundProcessing: true
               }
             });
 
@@ -496,28 +515,62 @@ serve(async (req) => {
         },
       });
     } else {
-      // Non-streaming response
+      // Non-streaming response (updated to use background processing)
       const themeData = await generateTheme(description);
       const insertedCount = await importThemeToDatabase(supabase, themeData, userId);
       await generateSystemPrompt(supabase, themeData, userId);
       
-      const firstPost = themeData.posts[0];
-      const imagePrompt = await generateImagePrompt(
-        firstPost.title,
-        firstPost.description,
-        themeData.theme,
-        themeData.category
-      );
-      
-      const imageUrl = await generateThemeImage(supabase, imagePrompt, themeData.theme, userId);
-      await updatePostsWithImage(supabase, imageUrl, themeData.theme, userId);
+      // Set posts to generating status
+      const { error: statusError } = await supabase
+        .from('social_media_posts')
+        .update({ 
+          theme_image_generation_status: 'generating',
+          updated_at: new Date().toISOString()
+        })
+        .eq('theme', themeData.theme)
+        .eq('user_id', userId);
+
+      if (statusError) {
+        console.error('❌ Error updating post status:', statusError);
+      } else {
+        console.log(`✅ Updated posts to status 'generating' for theme: ${themeData.theme}`);
+      }
+
+      // Trigger background image generation (fire-and-forget)
+      try {
+        const firstPost = themeData.posts[0];
+        const backgroundRequest = {
+          theme: themeData.theme,
+          category: themeData.category,
+          userId: userId,
+          firstPostTitle: firstPost.title,
+          firstPostDescription: firstPost.description
+        };
+
+        // Fire-and-forget background function call
+        supabase.functions.invoke('generate-theme-image-background', {
+          body: backgroundRequest
+        }).then(({ error: bgError }) => {
+          if (bgError) {
+            console.error('❌ Background image generation failed to start:', bgError);
+          } else {
+            console.log('✅ Background image generation started successfully');
+          }
+        });
+
+        console.log('🔥 Triggered background image generation for theme:', themeData.theme);
+      } catch (bgTriggerError) {
+        console.error('❌ Error triggering background function:', bgTriggerError);
+        // Don't fail the main pipeline if background trigger fails
+      }
 
       return new Response(JSON.stringify({
         success: true,
         category: themeData.category,
         theme: themeData.theme,
-        themeImageUrl: imageUrl,
-        postCount: insertedCount
+        postCount: insertedCount,
+        message: 'Theme created successfully! Image generation continues in background.',
+        backgroundProcessing: true
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
