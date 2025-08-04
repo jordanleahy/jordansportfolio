@@ -75,6 +75,27 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         throw new Error('Not authenticated');
       }
 
+      // Get the first post from this category to get the postId
+      const { data: posts, error: postsError } = await supabase
+        .from('social_media_posts')
+        .select('id')
+        .eq('category', category)
+        .eq('user_id', session.user.id)
+        .limit(1);
+
+      if (postsError || !posts || posts.length === 0) {
+        throw new Error('No posts found for this category');
+      }
+
+      const postId = posts[0].id;
+
+      // Set generating status in database
+      await supabase
+        .from('social_media_posts')
+        .update({ theme_image_generation_status: 'generating' })
+        .eq('category', category)
+        .eq('user_id', session.user.id);
+
       // Close existing EventSource
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
@@ -88,6 +109,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
+          postId: postId,
           title: postData.title,
           description: postData.description,
           category,

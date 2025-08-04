@@ -195,10 +195,10 @@ serve(async (req) => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                model: 'dall-e-3',
+                model: 'gpt-image-1',
                 prompt: prompt,
                 size: imageSize,
-                quality: 'hd',
+                quality: 'high',
                 response_format: 'b64_json',
                 n: 1
               }),
@@ -226,14 +226,15 @@ serve(async (req) => {
                 finalImageUrl = uploadedUrl;
                 
                 // Update database if this is for a theme
-                if (mode === 'theme' && postId) {
+                if (mode === 'theme' && category && userId) {
                   await supabase
                     .from('social_media_posts')
                     .update({
                       theme_image_4_3_url: finalImageUrl,
                       theme_image_generation_status: 'complete'
                     })
-                    .eq('id', postId);
+                    .eq('category', category)
+                    .eq('user_id', userId);
                 }
               }
             }
@@ -250,6 +251,15 @@ serve(async (req) => {
             
           } catch (error) {
             console.error('Streaming error:', error);
+            
+            // Update status to failed in database
+            if (mode === 'theme' && category && userId) {
+              await supabase
+                .from('social_media_posts')
+                .update({ theme_image_generation_status: 'failed' })
+                .eq('category', category)
+                .eq('user_id', userId);
+            }
             
             // Track failed API usage
             await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', false, 0, userId, error.message);
