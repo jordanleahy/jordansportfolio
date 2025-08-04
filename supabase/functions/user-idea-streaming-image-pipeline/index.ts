@@ -1,21 +1,68 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
-import { 
-  corsHeaders, 
-  StreamingEvent, 
-  sendStreamEvent, 
-  updateThemeImageStatus 
-} from '../_shared/image-utils.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Cache-Control': 'no-cache',
+  'Connection': 'keep-alive',
+};
+
 interface UserIdeaRequest {
   description: string;
   stream?: boolean;
 }
+
+interface StreamingEvent {
+  type: string;
+  progress: number;
+  data?: any;
+  error?: string;
+}
+
+const sendStreamEvent = (controller: ReadableStreamDefaultController, event: StreamingEvent) => {
+  const encoder = new TextEncoder();
+  const message = `data: ${JSON.stringify(event)}\n\n`;
+  try {
+    controller.enqueue(encoder.encode(message));
+  } catch (error) {
+    console.error('Error sending stream event:', error);
+  }
+};
+
+// Helper function to safely update generation status
+const updateThemeImageStatus = async (supabase: any, status: string, theme: string, userId: string, imageUrl?: string): Promise<void> => {
+  console.log(`🔄 Updating theme image status to '${status}' for theme: ${theme}`);
+  
+  const updateData: any = {
+    theme_image_generation_status: status,
+    updated_at: new Date().toISOString()
+  };
+  
+  if (imageUrl && status === 'complete') {
+    updateData.theme_image_4_3_url = imageUrl;
+  }
+  
+  const { data, error } = await supabase
+    .from('social_media_posts')
+    .update(updateData)
+    .eq('theme', theme)
+    .eq('user_id', userId)
+    .select('id, title');
+
+  if (error) {
+    console.error(`❌ Failed to update theme image status:`, error);
+    throw new Error(`Database update failed: ${error.message}`);
+  }
+  
+  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme: ${theme}`);
+  return;
+};
 
 const generateTheme = async (description: string): Promise<any> => {
   console.log('🎯 Generating theme for description:', description);
