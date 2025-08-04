@@ -377,13 +377,17 @@ export default function StoriesDashboard() {
         {/* Categories Grid */}
         <CategoriesGrid 
           categories={availableCategories.filter(category => {
-            // Exclude categories that are still in shimmer state
-            if (shimmerCategories.includes(category)) return false;
-            return (postCounts[category] || 0) > 0;
+            // Only show categories with posts that are NOT in shimmer state
+            const hasRealPosts = (postCounts[category] || 0) > 0;
+            const isInShimmer = shimmerCategories.includes(category);
+            return hasRealPosts && !isInShimmer;
           })}
           postCounts={postCounts}
           categoryImages={categoryImages}
-          shimmerCategories={shimmerCategories}
+          shimmerCategories={shimmerCategories.filter(category => {
+            // Only show shimmer for categories that don't have real posts yet
+            return (postCounts[category] || 0) === 0;
+          })}
           firstPostsData={firstPostsData}
         />
       </div>

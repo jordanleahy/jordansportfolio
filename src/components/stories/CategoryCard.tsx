@@ -23,10 +23,18 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   
   // Use streaming hook for real-time image generation
-  const { streamingProgress, isGenerating, error } = useThemeImageStreaming({
+  const { streamingProgress, isGenerating, error, startStreaming } = useThemeImageStreaming({
     category,
     enabled: !isShimmer && !!firstPostData
   });
+
+  // Auto-start streaming when firstPostData becomes available
+  useEffect(() => {
+    if (!isShimmer && firstPostData && !currentImageUrl && !isGenerating && !streamingProgress) {
+      console.log(`🚀 Auto-starting theme image generation for category: ${category}`);
+      startStreaming(firstPostData);
+    }
+  }, [firstPostData, isShimmer, currentImageUrl, isGenerating, streamingProgress, category, startStreaming]);
 
   // Update image URL when streaming completes or imageUrl prop changes
   useEffect(() => {

@@ -170,6 +170,11 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
                     // Preserve previous image briefly for smooth transition
                     previousImage: prevProgress?.partialImage
                   }));
+                  
+                  // If we have a partial image, show it immediately
+                  if (data.partialImage) {
+                    console.log(`📸 Received ${data.isPartial ? 'partial' : 'final'} image for ${category}, stage: ${data.stage}`);
+                  }
                 } else {
                   setStreamingProgress(data);
                 }
