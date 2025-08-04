@@ -1,16 +1,26 @@
 import { CategoryCard } from "./CategoryCard";
 
+interface Theme {
+  theme: string;
+  theme_description: string | null;
+  category: string;
+  post_count: number;
+  first_post: {
+    id: string;
+    title: string;
+    description: string;
+    image_url?: string;
+  } | null;
+}
+
 interface CategoriesGridProps {
-  categories: string[];
-  postCounts: Record<string, number>;
-  categoryImages: Record<string, string>;
-  shimmerCategories?: string[];
-  firstPostsData?: Record<string, { title: string; description: string }>;
+  themes: Theme[];
+  shimmerThemes?: string[];
   onDeleteCategory?: (category: string) => void;
 }
 
-export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [], firstPostsData = {}, onDeleteCategory }: CategoriesGridProps) => {
-  const hasAnyContent = categories.length > 0 || shimmerCategories.length > 0;
+export const CategoriesGrid = ({ themes, shimmerThemes = [], onDeleteCategory }: CategoriesGridProps) => {
+  const hasAnyContent = themes.length > 0 || shimmerThemes.length > 0;
   
   if (!hasAnyContent) {
     return null;
@@ -19,23 +29,29 @@ export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmer
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {/* Shimmer cards first */}
-      {shimmerCategories.map((category) => (
+      {shimmerThemes.map((theme) => (
         <CategoryCard
-          key={`shimmer-${category}`}
-          category={category}
+          key={`shimmer-${theme}`}
+          theme={theme}
+          category={theme} // fallback for routing
           postCount={0}
           isShimmer={true}
         />
       ))}
       
-      {/* Real categories */}
-      {categories.map((category) => (
+      {/* Real theme cards */}
+      {themes.map((theme) => (
         <CategoryCard
-          key={category}
-          category={category}
-          postCount={postCounts[category] || 0}
-          imageUrl={categoryImages[category]}
-          firstPostData={firstPostsData[category]}
+          key={theme.theme}
+          theme={theme.theme}
+          themeDescription={theme.theme_description}
+          category={theme.category}
+          postCount={theme.post_count}
+          imageUrl={theme.first_post?.image_url}
+          firstPostData={theme.first_post ? {
+            title: theme.first_post.title,
+            description: theme.first_post.description
+          } : undefined}
           onDelete={onDeleteCategory}
         />
       ))}

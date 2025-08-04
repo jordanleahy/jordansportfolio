@@ -6,21 +6,31 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
-import { normalizeThemeName, createThemeIdentifier, extractThemeFromPost, debugThemeMapping } from '@/utils/themeNameUtils';
-
+import { normalizeThemeName, debugThemeMapping } from '@/utils/themeNameUtils';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+
+type Theme = {
+  theme: string;
+  theme_description: string | null;
+  category: string;
+  post_count: number;
+  first_post: {
+    id: string;
+    title: string;
+    description: string;
+    image_url?: string;
+  } | null;
+};
 
 export default function StoriesDashboard() {
   const { user, loading, isAdmin, roleLoading } = useAuth();
@@ -30,15 +40,10 @@ export default function StoriesDashboard() {
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const { toast } = useToast();
 
-  // Use the optimized stories hook for performance
-  const {
-    isInitialized,
-    isLoadingCategories,
-    availableCategories,
-    hasCategories,
-    isEmpty,
-    invalidateCache
-  } = useOptimizedStories(user);
+  // Simplified theme-based state
+  const [availableThemes, setAvailableThemes] = useState<Theme[]>([]);
+  const [shimmerThemes, setShimmerThemes] = useState<string[]>([]);
+  const [isLoadingThemes, setIsLoadingThemes] = useState(true);
 
   // Hook for theme import functionality
   const {
@@ -55,129 +60,42 @@ export default function StoriesDashboard() {
         description: "Custom theme imported successfully",
       });
       setCustomThemeDescription('');
-      invalidateCache();
+      refreshThemes();
     }
   });
 
-  // Calculate post counts and first images for each category
-  const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
-  const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
-  const [firstPostsData, setFirstPostsData] = React.useState<Record<string, { title: string; description: string }>>({});
-  const [shimmerThemes, setShimmerThemes] = React.useState<string[]>([]);
-  const [themeToCategory, setThemeToCategory] = React.useState<Record<string, string>>({});
+  // Simplified function to refresh themes
+  const refreshThemes = React.useCallback(async () => {
+    console.log('🔄 REFRESH: Starting refreshThemes');
+    setIsLoadingThemes(true);
+    
+    try {
+      const themes = await optimizedSocialMediaService.getAvailableThemes();
+      console.log('📊 REFRESH: Themes loaded:', themes);
+      setAvailableThemes(themes);
+    } catch (error) {
+      console.error('❌ REFRESH: Failed to fetch themes:', error);
+      setAvailableThemes([]);
+    } finally {
+      setIsLoadingThemes(false);
+    }
+  }, []);
 
-  // Helper function to refresh post counts and images
-  const refreshPostCountsAndImages = React.useCallback(async () => {
-    console.log('🔄 REFRESH: Starting refreshPostCountsAndImages for categories:', availableCategories);
-    
-    // If availableCategories is empty, force-fetch categories first
-    let categoriesToUse = availableCategories;
-    if (!availableCategories.length) {
-      console.log('🔄 REFRESH: Categories empty, force-fetching from service');
-      try {
-        categoriesToUse = await optimizedSocialMediaService.getAvailableCategories();
-        console.log('🔄 REFRESH: Force-fetched categories:', categoriesToUse);
-      } catch (error) {
-        console.error('❌ REFRESH: Failed to force-fetch categories:', error);
-        return;
-      }
+  // Initial load
+  React.useEffect(() => {
+    if (user?.id) {
+      refreshThemes();
     }
-    
-    if (!categoriesToUse.length) return;
-    
-    const counts: Record<string, number> = {};
-    const images: Record<string, string> = {};
-    const firstPosts: Record<string, { title: string; description: string }> = {};
-    const themeToCategoryMap: Record<string, string> = {};
-    
-    for (const category of categoriesToUse) {
-      try {
-        const posts = await optimizedSocialMediaService.getPostsByCategory(category);
-        counts[category] = posts.length;
-        
-        // Get first post for streaming data and theme mapping
-        const firstPost = posts[0];
-        if (firstPost) {
-          firstPosts[category] = {
-            title: firstPost.title,
-            description: firstPost.description
-          };
-          
-          // Map theme to category for shimmer tracking - use theme_description as fallback
-          const themeKey = (firstPost as any).theme || firstPost.theme_description || category;
-          if (themeKey) {
-            themeToCategoryMap[themeKey] = category;
-          }
-        }
-        
-        // Sort posts by day first, then find the first one with an image
-        const sortedPosts = posts.sort((a, b) => (a.day || 0) - (b.day || 0));
-        const firstPostWithImage = sortedPosts.find(post => 
-          post.theme_image_4_3_url || // Priority to theme image
-          post.image_16_9_url || 
-          post.image_4_3_url || 
-          post.image_9_16_url || 
-          post.image_3_4_url
-        );
-        
-        if (firstPostWithImage) {
-          // Prefer theme image for cards, then 16:9, fallback to other ratios
-          const selectedImageUrl = firstPostWithImage.theme_image_4_3_url ||
-                            firstPostWithImage.image_16_9_url || 
-                            firstPostWithImage.image_4_3_url ||
-                            firstPostWithImage.image_9_16_url ||
-                            firstPostWithImage.image_3_4_url ||
-                            '';
-          
-          images[category] = selectedImageUrl;
-          
-          // **LOG IMAGE SELECTION DECISION**
-          console.log(`📸 IMAGE SELECTED for ${category}:`, {
-            selectedType: firstPostWithImage.theme_image_4_3_url ? 'theme_image' :
-                         firstPostWithImage.image_16_9_url ? '16_9' :
-                         firstPostWithImage.image_4_3_url ? '4_3' :
-                         firstPostWithImage.image_9_16_url ? '9_16' :
-                         firstPostWithImage.image_3_4_url ? '3_4' : 'none',
-            imageUrl: selectedImageUrl?.substring(0, 100) + '...',
-            postId: firstPostWithImage.id,
-            hasThemeImage: !!firstPostWithImage.theme_image_4_3_url,
-            themeImageGenStatus: (firstPostWithImage as any).theme_image_generation_status
-          });
-        } else {
-          console.log(`❌ NO IMAGES FOUND for category: ${category}`, {
-            totalPosts: posts.length,
-            checkedImageFields: ['theme_image_4_3_url', 'image_16_9_url', 'image_4_3_url', 'image_9_16_url', 'image_3_4_url']
-          });
-        }
-      } catch (error) {
-        console.error(`Error fetching posts for ${category}:`, error);
-        counts[category] = 0;
-      }
-    }
-    
-    console.log('📊 REFRESH: Setting state with results:', {
-      counts,
-      imageCount: Object.keys(images).length,
-      images: Object.entries(images).map(([cat, url]) => ({ category: cat, hasImage: !!url }))
-    });
-    
-    setPostCounts(counts);
-    setCategoryImages(images);
-    setFirstPostsData(firstPosts);
-    setThemeToCategory(themeToCategoryMap);
-  }, [availableCategories]);
+  }, [user?.id, refreshThemes]);
 
   // Setup realtime subscription for immediate updates
   const handlePostInsert = React.useCallback((newPost: any) => {
-    // Trigger cache invalidation and refresh category data
-    invalidateCache();
-    refreshPostCountsAndImages();
-    // Show toast notification
+    refreshThemes();
     toast({
       title: "New Post Created!",
       description: `"${newPost.title}" added to ${newPost.category}`,
     });
-  }, [invalidateCache, refreshPostCountsAndImages, toast]);
+  }, [refreshThemes, toast]);
 
   const handlePostUpdate = React.useCallback((update: any) => {
     console.log('🔄 REALTIME: handlePostUpdate called for post update', {
@@ -186,13 +104,10 @@ export default function StoriesDashboard() {
       triggeringRefresh: true
     });
     
-    // Refresh category images in case image URLs changed
-    refreshPostCountsAndImages();
-    
-    // Force invalidate React Query cache to ensure fresh data
+    refreshThemes();
     queryClient.invalidateQueries({ queryKey: ['available-categories'] });
     queryClient.invalidateQueries({ queryKey: ['posts'] });
-  }, [refreshPostCountsAndImages, queryClient]);
+  }, [refreshThemes, queryClient]);
 
   // Theme image generation listener to remove shimmer when image generation completes
   React.useEffect(() => {
@@ -212,90 +127,31 @@ export default function StoriesDashboard() {
           const { new: newData, old: oldData } = payload;
           const { theme_image_generation_status, theme, category, theme_image_4_3_url } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
-          const oldThemeImageUrl = oldData?.theme_image_4_3_url;
           
-          // **ENHANCED THEME IMAGE LOGGING**
-          console.group('🎨 THEME IMAGE UPDATE RECEIVED');
-          console.log('📥 Payload Data:', {
-            theme,
-            category,
-            statusTransition: `${oldStatus} → ${theme_image_generation_status}`,
-            urlChanged: oldThemeImageUrl !== theme_image_4_3_url,
-            hasNewUrl: !!theme_image_4_3_url,
-            timestamp: new Date().toISOString()
-          });
-          
-          // Remove shimmer when theme image generation completes - use normalized theme name
+          // Remove shimmer when theme image generation completes
           if (theme_image_generation_status === 'complete' && theme) {
             const normalizedTheme = normalizeThemeName(theme);
-            
-            console.log('✅ THEME IMAGE GENERATION COMPLETED:', {
-              originalTheme: theme,
-              normalizedTheme,
-              category,
-              hasImageUrl: !!theme_image_4_3_url,
-              imageUrl: theme_image_4_3_url?.substring(0, 100) + '...'
-            });
-            
             debugThemeMapping('Real-time Complete', theme, normalizedTheme);
             
             setShimmerThemes(prev => {
               const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
-              
-              console.log('🔄 SHIMMER UPDATE:', {
-                previousShimmerThemes: prev,
-                removingTheme: normalizedTheme,
-                newShimmerThemes: filtered,
-                shimmerRemoved: prev.length !== filtered.length
-              });
-              
               return filtered;
             });
             
-            // **TRIGGER REFRESH FOR CATEGORY IMAGES WITH PROPER SEQUENCING**
-            console.log('🔄 TRIGGERING CATEGORY REFRESH due to theme image completion');
-            // Force invalidate categories cache first, then refresh images
-            queryClient.invalidateQueries({ queryKey: ['categories'] });
-            setTimeout(() => refreshPostCountsAndImages(), 100); // Small delay to ensure cache invalidation completes
+            // Refresh themes to show new image
+            setTimeout(() => refreshThemes(), 100);
           }
           
           // Handle failed theme image generation
-          if (
-            oldStatus !== 'failed' && 
-            theme_image_generation_status === 'failed' && 
-            theme
-          ) {
+          if (oldStatus !== 'failed' && theme_image_generation_status === 'failed' && theme) {
             const normalizedTheme = normalizeThemeName(theme);
-            
-            console.log('❌ THEME IMAGE GENERATION FAILED:', {
-              originalTheme: theme,
-              normalizedTheme,
-              category
-            });
-            
-            debugThemeMapping('Real-time Failed', theme, normalizedTheme);
-            
-            setShimmerThemes(prev => {
-              const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
-              
-              console.log('🔄 SHIMMER REMOVAL (FAILED):', {
-                previousShimmerThemes: prev,
-                removingTheme: normalizedTheme,
-                newShimmerThemes: filtered,
-                shimmerRemoved: prev.length !== filtered.length
-              });
-              
-              return filtered;
-            });
-            // Show error toast
+            setShimmerThemes(prev => prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme));
             toast({
               title: "Image Generation Failed",
               description: `Theme image generation failed for "${theme}"`,
               variant: "destructive"
             });
           }
-          
-          console.groupEnd();
         }
       )
       .subscribe();
@@ -303,136 +159,9 @@ export default function StoriesDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, shimmerThemes, refreshPostCountsAndImages, toast]);
+  }, [user?.id, refreshThemes, toast]);
 
-  // Add polling fallback to catch missed real-time events
-  React.useEffect(() => {
-    if (!user?.id || shimmerThemes.length === 0) return;
-
-    const checkShimmerStatus = async () => {
-      try {
-        console.log('🔍 [Shimmer Check] Checking status for themes:', shimmerThemes);
-        
-        for (const shimmerTheme of shimmerThemes) {
-          // Skip temporary generating themes that don't exist in DB yet
-          if (shimmerTheme.startsWith('generating-theme-')) {
-            console.log('⏳ [Shimmer Check] Skipping temporary theme:', shimmerTheme);
-            continue;
-          }
-
-          const normalizedTheme = normalizeThemeName(shimmerTheme);
-          
-          const { data, error } = await supabase
-            .from('social_media_posts')
-            .select('theme_image_generation_status, theme')
-            .eq('user_id', user.id)
-            .eq('theme', normalizedTheme)
-            .limit(1)
-            .single();
-
-          if (error && error.code !== 'PGRST116') {
-            console.error('🚨 [Shimmer Check] Error:', error);
-            continue;
-          }
-
-          if (data && (data.theme_image_generation_status === 'complete' || data.theme_image_generation_status === 'failed')) {
-            console.log('🔄 [Shimmer Check] Found completed theme:', {
-              theme: normalizedTheme,
-              status: data.theme_image_generation_status
-            });
-
-            setShimmerThemes(prev => {
-              const filtered = prev.filter(theme => normalizeThemeName(theme) !== normalizedTheme);
-              console.log('🧹 [Shimmer Cleanup] Polling cleanup:', {
-                originalShimmer: prev,
-                removingTheme: normalizedTheme,
-                newShimmer: filtered,
-                status: data.theme_image_generation_status
-              });
-              return filtered;
-            });
-
-            // Refresh data to show the new image
-            refreshPostCountsAndImages();
-          }
-        }
-      } catch (error) {
-        console.error('🚨 [Shimmer Check] Polling error:', error);
-      }
-    };
-
-    // Check immediately, then every 10 seconds for missed events
-    checkShimmerStatus();
-    const interval = setInterval(checkShimmerStatus, 10000);
-
-    return () => clearInterval(interval);
-  }, [user?.id, shimmerThemes, refreshPostCountsAndImages]);
-
-  // Add polling fallback for individual image updates to catch missed real-time events
-  React.useEffect(() => {
-    if (!user?.id || !availableCategories.length) return;
-
-    const checkForImageUpdates = async () => {
-      try {
-        // Check if any posts have pending image generation that might have been missed
-        const { data: postsWithPendingImages } = await supabase
-          .from('social_media_posts')
-          .select('id, category, image_16_9_status, image_9_16_status, image_3_4_status, image_4_3_status')
-          .eq('user_id', user.id)
-          .or('image_16_9_status.eq.processing,image_9_16_status.eq.processing,image_3_4_status.eq.processing,image_4_3_status.eq.processing');
-
-        if (postsWithPendingImages && postsWithPendingImages.length > 0) {
-          console.log('🔍 [Image Status Check] Found posts with processing images:', postsWithPendingImages.length);
-          
-          // Check if any have been completed since last check
-          let hasUpdates = false;
-          for (const post of postsWithPendingImages) {
-            const { data: currentPost } = await supabase
-              .from('social_media_posts')
-              .select('image_16_9_status, image_9_16_status, image_3_4_status, image_4_3_status, image_16_9_url, image_9_16_url, image_3_4_url, image_4_3_url')
-              .eq('id', post.id)
-              .single();
-
-            if (currentPost) {
-              const statusChanged = (
-                currentPost.image_16_9_status !== post.image_16_9_status ||
-                currentPost.image_9_16_status !== post.image_9_16_status ||
-                currentPost.image_3_4_status !== post.image_3_4_status ||
-                currentPost.image_4_3_status !== post.image_4_3_status
-              );
-
-              if (statusChanged) {
-                console.log('📸 [Image Status Check] Status changed for post:', {
-                  postId: post.id,
-                  category: post.category,
-                  changes: {
-                    '16_9': `${post.image_16_9_status} → ${currentPost.image_16_9_status}`,
-                    '9_16': `${post.image_9_16_status} → ${currentPost.image_9_16_status}`,
-                    '3_4': `${post.image_3_4_status} → ${currentPost.image_3_4_status}`,
-                    '4_3': `${post.image_4_3_status} → ${currentPost.image_4_3_status}`
-                  }
-                });
-                hasUpdates = true;
-              }
-            }
-          }
-
-          if (hasUpdates) {
-            console.log('🔄 [Image Status Check] Refreshing data due to image status changes');
-            refreshPostCountsAndImages();
-          }
-        }
-      } catch (error) {
-        console.error('🚨 [Image Status Check] Error:', error);
-      }
-    };
-
-    // Check every 15 seconds for individual image updates
-    const imageUpdateInterval = setInterval(checkForImageUpdates, 15000);
-
-    return () => clearInterval(imageUpdateInterval);
-  }, [user?.id, availableCategories, refreshPostCountsAndImages]);
-
+  // Realtime setup
   const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
     userId: user?.id,
@@ -440,43 +169,8 @@ export default function StoriesDashboard() {
     onPostUpdate: handlePostUpdate
   });
 
-
-  React.useEffect(() => {
-    refreshPostCountsAndImages();
-  }, [refreshPostCountsAndImages]);
-
-  const handleImportComplete = async () => {
-    // Clear any shimmer states and refresh data
-    setShimmerThemes([]);
-    invalidateCache();
-  };
-
-  const handleOptimisticStart = (themeName: string) => {
-    // Add shimmer card immediately  
-    setShimmerThemes(prev => [...prev, themeName]);
-  };
-
-  const handleOptimisticComplete = async (success: boolean, themeName?: string) => {
-    if (themeName && success) {
-      // Wait for categories query to refresh first
-      await queryClient.invalidateQueries({ queryKey: ['available-categories'] });
-      await queryClient.refetchQueries({ queryKey: ['available-categories'] });
-      
-      // Then wait for data to actually load
-      await refreshPostCountsAndImages();
-      
-      // DON'T remove shimmer here - let it persist until theme image generation completes
-      // The shimmer will be removed by real-time updates when theme image is generated
-      
-    } else if (themeName) {
-      // Remove shimmer immediately on failure
-      setShimmerThemes(prev => prev.filter(theme => theme !== themeName));
-    }
-  };
-
   const handleDeleteCategory = async (category: string) => {
     try {
-      // Delete all posts for this category
       const { error: postsError } = await supabase
         .from('social_media_posts')
         .delete()
@@ -485,7 +179,6 @@ export default function StoriesDashboard() {
 
       if (postsError) throw postsError;
 
-      // Delete cached prompts for this category
       const { error: cacheError } = await supabase
         .from('cached_prompts')
         .delete()
@@ -499,12 +192,7 @@ export default function StoriesDashboard() {
         description: `Successfully deleted "${category}" and all its posts`,
       });
 
-      // Refresh data
-      invalidateCache();
-      refreshPostCountsAndImages();
-      // Remove any shimmer themes associated with this category
-      setShimmerThemes(prev => prev.filter(theme => themeToCategory[theme] !== category));
-
+      refreshThemes();
     } catch (error) {
       console.error('Delete category error:', error);
       toast({
@@ -528,7 +216,6 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     
     try {
-      // Add optimistic shimmer using theme name
       const tempThemeName = 'generating-theme-' + Date.now();
       setShimmerThemes(prev => [...prev, tempThemeName]);
 
@@ -547,19 +234,12 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to generate theme');
       }
 
-      // Remove temporary shimmer and add the actual theme to shimmer (normalized)
       const normalizedTheme = normalizeThemeName(data.theme);
       debugThemeMapping('Custom Theme Generation', data.theme, normalizedTheme);
       
       setShimmerThemes(prev => {
         const filtered = prev.filter(theme => !theme.startsWith('generating-theme-'));
-        const newShimmer = [...filtered, normalizedTheme];
-        console.log('🔄 [Shimmer Addition] Custom Theme:', {
-          originalShimmer: prev,
-          addingTheme: normalizedTheme,
-          newShimmer
-        });
-        return newShimmer;
+        return [...filtered, normalizedTheme];
       });
 
       toast({
@@ -577,19 +257,13 @@ export default function StoriesDashboard() {
         variant: "destructive"
       });
       
-      // Remove shimmer on error  
       setShimmerThemes(prev => prev.filter(theme => !theme.startsWith('generating-theme-')));
     } finally {
       setIsGeneratingTheme(false);
     }
   };
 
-  // Manual shimmer clear function for debugging
-  const clearShimmer = () => {
-    setShimmerThemes([]);
-  };
-
-  if (loading || (!isInitialized && isLoadingCategories)) {
+  if (loading || isLoadingThemes) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -617,10 +291,9 @@ export default function StoriesDashboard() {
           />
         </div>
 
-        {/* Action Buttons Section - Submit and Import Themes */}
+        {/* Action Buttons Section */}
         <div className="container mx-auto px-4 mb-8">
           <div className="flex justify-center gap-4 max-w-md mx-auto">
-            {/* Submit Button - Always visible */}
             <Button
               onClick={handleGenerateCustomTheme}
               disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
@@ -639,7 +312,6 @@ export default function StoriesDashboard() {
               )}
             </Button>
 
-            {/* Import Themes Button - Admin only */}
             {isAdmin && (
               roleLoading ? (
                 <Skeleton className="flex-1 h-10" />
@@ -654,9 +326,8 @@ export default function StoriesDashboard() {
               )
             )}
 
-            {/* Debug/Fallback buttons */}
             <Button
-              onClick={clearShimmer}
+              onClick={() => setShimmerThemes([])}
               variant="ghost"
               size="sm"
               className="text-xs"
@@ -664,7 +335,7 @@ export default function StoriesDashboard() {
               Clear Shimmer
             </Button>
             <Button
-              onClick={refreshPostCountsAndImages}
+              onClick={refreshThemes}
               variant="ghost"
               size="sm"
               className="text-xs"
@@ -679,29 +350,26 @@ export default function StoriesDashboard() {
             <ThemeImportModal 
               open={importModalOpen} 
               onOpenChange={setImportModalOpen} 
-              onImportComplete={handleImportComplete}
-              onOptimisticStart={handleOptimisticStart}
-              onOptimisticComplete={handleOptimisticComplete}
+              onImportComplete={() => {
+                setShimmerThemes([]);
+                refreshThemes();
+              }}
+              onOptimisticStart={(themeName) => setShimmerThemes(prev => [...prev, themeName])}
+              onOptimisticComplete={async (success, themeName) => {
+                if (success && themeName) {
+                  await refreshThemes();
+                } else if (themeName) {
+                  setShimmerThemes(prev => prev.filter(theme => theme !== themeName));
+                }
+              }}
             />
           </Suspense>
         )}
 
-        {/* Categories Grid */}
+        {/* Themes Grid */}
         <CategoriesGrid 
-          categories={availableCategories.filter(category => {
-            // Show categories with posts that are NOT in shimmer state (check by theme)
-            const hasRealPosts = (postCounts[category] || 0) > 0;
-            const categoryThemes = Object.keys(themeToCategory).filter(theme => themeToCategory[theme] === category);
-            const isInShimmer = categoryThemes.some(theme => shimmerThemes.includes(theme));
-            return hasRealPosts && !isInShimmer;
-          })}
-          postCounts={postCounts}
-          categoryImages={categoryImages}
-          shimmerCategories={(() => {
-            // Convert shimmer themes to categories for display
-            return shimmerThemes.map(theme => themeToCategory[theme] || theme).filter(Boolean);
-          })()}
-          firstPostsData={firstPostsData}
+          themes={availableThemes}
+          shimmerThemes={shimmerThemes}
           onDeleteCategory={handleDeleteCategory}
         />
       </div>

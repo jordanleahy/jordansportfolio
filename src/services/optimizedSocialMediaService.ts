@@ -179,8 +179,19 @@ export class OptimizedSocialMediaService {
     return data || 0;
   }
 
-  async getAvailableCategories(): Promise<string[]> {
-    const cacheKey = this.getCacheKey(undefined, 'categories');
+  async getAvailableThemes(): Promise<Array<{
+    theme: string;
+    theme_description: string | null;
+    category: string;
+    post_count: number;
+    first_post: {
+      id: string;
+      title: string;
+      description: string;
+      image_url?: string;
+    } | null;
+  }>> {
+    const cacheKey = this.getCacheKey(undefined, 'themes');
     
     if (this.isValidCache(cacheKey)) {
       return this.getFromCache(cacheKey);
@@ -188,42 +199,89 @@ export class OptimizedSocialMediaService {
 
     // Check authentication first
     const { data: { user } } = await supabase.auth.getUser();
-    console.log('🔐 SERVICE: getAvailableCategories - User authentication:', { 
+    console.log('🔐 SERVICE: getAvailableThemes - User authentication:', { 
       isAuthenticated: !!user, 
       userId: user?.id 
     });
     
     if (!user) {
-      console.error('❌ SERVICE: No authenticated user for getAvailableCategories');
+      console.error('❌ SERVICE: No authenticated user for getAvailableThemes');
       return [];
     }
 
-    // Get categories with their latest creation date for ordering, filtered by user
+    // Get all posts grouped by theme with post counts and first post data
     const { data, error } = await supabase
       .from('social_media_posts')
-      .select('category, created_at')
+      .select('id, category, theme, theme_description, title, description, created_at, theme_image_4_3_url, image_16_9_url, image_4_3_url, image_9_16_url, image_3_4_url')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
     
-    // Group by category and find the latest created_at for each
-    const categoryDates = new Map<string, string>();
-    (data || []).forEach((item: any) => {
-      if (item.category) {
-        if (!categoryDates.has(item.category) || item.created_at > categoryDates.get(item.category)!) {
-          categoryDates.set(item.category, item.created_at);
-        }
+    // Group by theme (use theme_description as fallback, then category)
+    const themeGroups = new Map<string, {
+      theme: string;
+      theme_description: string | null;
+      category: string;
+      posts: any[];
+      latest_created_at: string;
+    }>();
+    
+    (data || []).forEach((post: any) => {
+      const themeKey = post.theme || post.theme_description || post.category;
+      
+      if (!themeGroups.has(themeKey)) {
+        themeGroups.set(themeKey, {
+          theme: themeKey,
+          theme_description: post.theme_description,
+          category: post.category,
+          posts: [],
+          latest_created_at: post.created_at
+        });
+      }
+      
+      const group = themeGroups.get(themeKey)!;
+      group.posts.push(post);
+      
+      // Update latest date if this post is newer
+      if (post.created_at > group.latest_created_at) {
+        group.latest_created_at = post.created_at;
       }
     });
     
-    // Sort categories by their latest creation date (newest first)
-    const sortedCategories = Array.from(categoryDates.entries())
-      .sort(([, dateA], [, dateB]) => dateB.localeCompare(dateA))
-      .map(([category]) => category);
+    // Convert to result format, sorted by latest creation date
+    const themes = Array.from(themeGroups.values())
+      .sort((a, b) => b.latest_created_at.localeCompare(a.latest_created_at))
+      .map(group => {
+        const firstPost = group.posts[0];
+        const imageUrl = firstPost?.theme_image_4_3_url ||
+                        firstPost?.image_16_9_url || 
+                        firstPost?.image_4_3_url ||
+                        firstPost?.image_9_16_url ||
+                        firstPost?.image_3_4_url;
+        
+        return {
+          theme: group.theme,
+          theme_description: group.theme_description,
+          category: group.category,
+          post_count: group.posts.length,
+          first_post: firstPost ? {
+            id: firstPost.id,
+            title: firstPost.title,
+            description: firstPost.description,
+            image_url: imageUrl
+          } : null
+        };
+      });
     
-    this.setCache(cacheKey, sortedCategories, 10 * 60 * 1000); // 10 minutes
-    return sortedCategories;
+    this.setCache(cacheKey, themes, 10 * 60 * 1000); // 10 minutes
+    return themes;
+  }
+
+  // Keep the old method for backward compatibility
+  async getAvailableCategories(): Promise<string[]> {
+    const themes = await this.getAvailableThemes();
+    return [...new Set(themes.map(t => t.category))];
   }
 
   async deleteTheme(category: string): Promise<void> {

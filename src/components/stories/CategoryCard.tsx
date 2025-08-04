@@ -7,7 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
 import { useEffect, useState } from "react";
 
-interface CategoryCardProps {
+interface ThemeCardProps {
+  theme: string;
+  themeDescription?: string | null;
   category: string;
   postCount: number;
   imageUrl?: string;
@@ -20,7 +22,7 @@ interface CategoryCardProps {
   onDelete?: (category: string) => void;
 }
 
-export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: CategoryCardProps) => {
+export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: ThemeCardProps) => {
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   
@@ -51,7 +53,7 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
     if (onClick) {
       onClick();
     } else {
-      navigate(`/stories/category/${encodeURIComponent(category)}`);
+      navigate(`/stories/theme/${encodeURIComponent(theme)}`);
     }
   };
 
@@ -90,7 +92,7 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
         {currentImageUrl || streamingProgress?.partialImage ? (
           <img 
             src={streamingProgress?.partialImage || currentImageUrl} 
-            alt={`${category} preview`}
+            alt={`${theme} preview`}
             className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-105 ${
               streamingProgress?.partialImage ? 'opacity-80' : ''
             }`}
@@ -144,9 +146,14 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold text-lg capitalize text-foreground group-hover:text-primary transition-colors">
-              {category}
+            <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+              {theme}
             </h3>
+            {themeDescription && (
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {themeDescription}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <FileText className="h-3 w-3 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
@@ -186,3 +193,6 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
     </Card>
   );
 };
+
+// Backward compatibility alias
+export const CategoryCard = ThemeCard;
