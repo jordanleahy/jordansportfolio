@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { EDGE_FUNCTION_NAMES } from '@/constants/edgeFunctionConstants';
 
 interface StreamingProgress {
   stage: string;
@@ -76,38 +77,20 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         throw new Error('Not authenticated');
       }
 
-      // Get the Day 1 post specifically for theme image generation
+      // Get theme info for the description
       const { data: posts, error: postsError } = await supabase
         .from('social_media_posts')
-        .select('id, title, description')
+        .select('theme, theme_description')
         .eq('category', category)
         .eq('user_id', session.user.id)
-        .eq('day', 1) // Specifically target Day 1 post
         .limit(1);
 
-      let postId: string;
-      let selectedPostData: { title: string; description: string };
-
       if (postsError || !posts || posts.length === 0) {
-        // Fallback to any post if Day 1 doesn't exist
-        const { data: fallbackPosts, error: fallbackError } = await supabase
-          .from('social_media_posts')
-          .select('id, title, description')
-          .eq('category', category)
-          .eq('user_id', session.user.id)
-          .order('day', { ascending: true })
-          .limit(1);
-        
-        if (fallbackError || !fallbackPosts || fallbackPosts.length === 0) {
-          throw new Error('No posts found for this category');
-        }
-        
-        postId = fallbackPosts[0].id;
-        selectedPostData = { title: fallbackPosts[0].title, description: fallbackPosts[0].description };
-      } else {
-        postId = posts[0].id;
-        selectedPostData = { title: posts[0].title, description: posts[0].description };
+        throw new Error('No posts found for this category');
       }
+
+      const theme = posts[0].theme;
+      const themeDescription = posts[0].theme_description || postData.description;
 
       // Set generating status in database
       await supabase
@@ -121,20 +104,15 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         eventSourceRef.current.close();
       }
 
-      // Use fetch for streaming instead of EventSource for auth support
-      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/streaming-image-pipeline`, {
+      // Use the correct function for theme image generation
+      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/${EDGE_FUNCTION_NAMES.USER_IDEA_STREAMING_IMAGE_PIPELINE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          postId: postId,
-          title: selectedPostData.title,
-          description: selectedPostData.description,
-          category,
-          aspectRatio: '4:3',
-          mode: 'theme',
+          description: themeDescription,
           stream: true
         })
       });
