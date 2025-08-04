@@ -230,7 +230,7 @@ export default function StoriesDashboard() {
   };
 
   const handleOptimisticStart = (categoryName: string) => {
-    // Add shimmer card immediately
+    // Add shimmer card immediately  
     setShimmerCategories(prev => [...prev, categoryName]);
   };
 
@@ -305,8 +305,8 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     
     try {
-      // Add optimistic shimmer for new category
-      const tempCategoryName = customThemeDescription.trim().toLowerCase().replace(/\s+/g, '-').substring(0, 30);
+      // Add optimistic shimmer - use a consistent temporary name that will be replaced
+      const tempCategoryName = 'generating-theme-' + Date.now();
       setShimmerCategories(prev => [...prev, tempCategoryName]);
 
       console.log('🚀 Calling edge function with:', {
@@ -334,6 +334,14 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to generate theme');
       }
 
+      console.log('✅ Theme generation successful:', data);
+
+      // Remove temporary shimmer and add the actual category to shimmer
+      setShimmerCategories(prev => {
+        const filtered = prev.filter(cat => !cat.startsWith('generating-theme-'));
+        return [...filtered, data.category];
+      });
+
       toast({
         title: "Theme Created!",
         description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`,
@@ -353,9 +361,8 @@ export default function StoriesDashboard() {
         variant: "destructive"
       });
       
-      // Remove shimmer on error
-      const tempCategoryName = customThemeDescription.trim().toLowerCase().replace(/\s+/g, '-').substring(0, 30);
-      setShimmerCategories(prev => prev.filter(cat => cat !== tempCategoryName));
+      // Remove shimmer on error  
+      setShimmerCategories(prev => prev.filter(cat => !cat.startsWith('generating-theme-')));
     } finally {
       setIsGeneratingTheme(false);
     }

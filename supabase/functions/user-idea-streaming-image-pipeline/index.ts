@@ -92,17 +92,39 @@ JSON STRUCTURE REQUIRED:
 const importThemeToDatabase = async (supabase: any, themeData: any, userId: string): Promise<number> => {
   console.log('💾 Importing theme to database:', themeData.category);
   
-  const { data, error } = await supabase.rpc('insert_category_content', {
-    category_name: themeData.category,
-    posts_data: themeData.posts,
-    theme_description_param: themeData.theme_description
-  });
+  try {
+    // Import posts using direct insert instead of RPC to ensure proper authentication context
+    const postsToInsert = themeData.posts.map((post: any) => ({
+      day: post.day,
+      title: post.title,
+      description: post.description, // Fixed: use post.description not post.story_description
+      theme: themeData.theme,
+      theme_description: themeData.theme_description,
+      category: themeData.category,
+      user_id: userId,
+      status: 'draft',
+      theme_image_generation_status: 'pending'
+    }));
 
-  if (error) {
-    throw new Error(`Database import failed: ${error.message}`);
+    console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
+
+    const { data, error } = await supabase
+      .from('social_media_posts')
+      .insert(postsToInsert)
+      .select('id, category, theme');
+
+    if (error) {
+      console.error('❌ Database insert error:', error);
+      throw new Error(`Database import failed: ${error.message}`);
+    }
+
+    console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
+    return data.length;
+    
+  } catch (error) {
+    console.error('❌ Import theme error:', error);
+    throw error;
   }
-
-  return data || themeData.posts.length;
 };
 
 const generateSystemPrompt = async (supabase: any, themeData: any, userId: string): Promise<void> => {
