@@ -312,7 +312,6 @@ export default function StoriesDashboard() {
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: { 
           description: customThemeDescription.trim(),
-          userId: user?.id,
           stream: false
         }
       });
@@ -354,6 +353,13 @@ export default function StoriesDashboard() {
     } finally {
       setIsGeneratingTheme(false);
     }
+  };
+
+  // Manual shimmer clear function for debugging
+  const clearShimmer = () => {
+    setShimmerCategories([]);
+    setImageGeneratingCategories([]);
+    console.log('🧹 Manually cleared all shimmer states');
   };
 
   if (loading || (!isInitialized && isLoadingCategories)) {
@@ -420,6 +426,16 @@ export default function StoriesDashboard() {
                 </Button>
               )
             )}
+
+            {/* Debug button to clear shimmer - temporary */}
+            <Button
+              onClick={clearShimmer}
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+            >
+              Clear Shimmer
+            </Button>
           </div>
         </div>
 

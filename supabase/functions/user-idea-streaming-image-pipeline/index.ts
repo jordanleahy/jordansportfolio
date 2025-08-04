@@ -15,7 +15,6 @@ const corsHeaders = {
 
 interface UserIdeaRequest {
   description: string;
-  userId: string;
   stream?: boolean;
 }
 
@@ -258,7 +257,20 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { description, userId, stream = true }: UserIdeaRequest = await req.json();
+    // Get authenticated user from the request
+    const authHeader = req.headers.get('Authorization');
+    let userId: string | null = null;
+    
+    if (authHeader) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+      if (authError || !user) {
+        throw new Error('User not authenticated');
+      }
+      userId = user.id;
+      console.log('🔐 Authenticated user:', userId);
+    }
+
+    const { description, stream = true } = await req.json();
 
     if (!description || !userId) {
       throw new Error('Description and authentication required');
