@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.process-and-import-theme]
 verify_jwt = true
+
+[functions.generate-theme-image-background]
+verify_jwt = true
