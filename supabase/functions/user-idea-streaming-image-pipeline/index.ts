@@ -1,39 +1,21 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { 
+  corsHeaders, 
+  StreamingEvent, 
+  sendStreamEvent, 
+  updateThemeImageStatus 
+} from '../_shared/image-utils.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Cache-Control': 'no-cache',
-  'Connection': 'keep-alive',
-};
-
 interface UserIdeaRequest {
   description: string;
   stream?: boolean;
 }
-
-interface StreamingEvent {
-  type: string;
-  progress: number;
-  data?: any;
-  error?: string;
-}
-
-const sendStreamEvent = (controller: ReadableStreamDefaultController, event: StreamingEvent) => {
-  const encoder = new TextEncoder();
-  const message = `data: ${JSON.stringify(event)}\n\n`;
-  try {
-    controller.enqueue(encoder.encode(message));
-  } catch (error) {
-    console.error('Error sending stream event:', error);
-  }
-};
 
 const generateTheme = async (description: string): Promise<any> => {
   console.log('🎯 Generating theme for description:', description);
@@ -176,150 +158,8 @@ const generateSystemPrompt = async (supabase: any, themeData: any, userId: strin
   }
 };
 
-const generateImagePrompt = async (title: string, description: string, theme: string, category: string): Promise<string> => {
-  console.log('🎨 Generating image prompt for theme:', theme);
-  
-  const systemPrompt = `You are an expert at creating detailed, professional image generation prompts for ${theme}-themed AI image generators.
-
-Create prompts that will generate:
-- Professional, credible visuals suitable for ${theme} content
-- Clear focal points that support the content message
-- Appropriate industry context and environmental elements
-- Balanced composition with good visual hierarchy
-- Consistent branding feel across different ${theme} topics
-
-CRITICAL FORMATTING RULES:
-- DO NOT include any title, headline, or text overlays in the generated image
-- Include "in a 4:3 landscape format" naturally within the prompt description
-- Focus purely on the visual elements, composition, and professional aesthetic
-- End the prompt with a period, no additional formatting or labels`;
-
-  const userPrompt = `Title: ${title}
-Description: ${description}
-Theme: ${theme}
-Category: ${category}
-
-Create a detailed image generation prompt for this ${theme} theme content.`;
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.1,
-      max_tokens: 500
-    }),
-  });
-
-  const data = await response.json();
-  return data.choices[0].message.content;
-};
-
-const generateThemeImage = async (supabase: any, prompt: string, theme: string, userId: string): Promise<string> => {
-  console.log('🖼️ Generating theme image');
-  
-  try {
-    // Update posts to indicate image generation has started
-    await updateThemeImageStatus(supabase, 'generating', theme, userId);
-
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-image-1',
-      prompt: prompt,
-      size: '1024x1024',
-      quality: 'high',
-      n: 1
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Image generation failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const base64Image = data.data[0].b64_json;
-
-  // Upload to storage - sanitize theme name for filename
-  const sanitizedTheme = theme.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-  const fileName = `${sanitizedTheme}_theme_${Date.now()}.png`;
-  const filePath = `${userId}/${fileName}`;
-  
-  const byteCharacters = atob(base64Image);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-
-  const { error: uploadError } = await supabase.storage
-    .from('social-media-images')
-    .upload(filePath, byteArray, {
-      contentType: 'image/png',
-      upsert: true
-    });
-
-  if (uploadError) {
-    throw new Error(`Image upload failed: ${uploadError.message}`);
-  }
-
-  const { data: urlData } = supabase.storage
-    .from('social-media-images')
-    .getPublicUrl(filePath);
-
-    return urlData.publicUrl;
-    
-  } catch (error) {
-    console.error('❌ Theme image generation failed:', error);
-    // Set status to failed on error
-    await updateThemeImageStatus(supabase, 'failed', theme, userId);
-    throw error;
-  }
-};
-
-// Helper function to safely update generation status
-const updateThemeImageStatus = async (supabase: any, status: string, theme: string, userId: string, imageUrl?: string): Promise<void> => {
-  console.log(`🔄 Updating theme image status to '${status}' for theme: ${theme}`);
-  
-  const updateData: any = {
-    theme_image_generation_status: status,
-    updated_at: new Date().toISOString()
-  };
-  
-  if (imageUrl && status === 'complete') {
-    updateData.theme_image_4_3_url = imageUrl;
-  }
-  
-  const { data, error } = await supabase
-    .from('social_media_posts')
-    .update(updateData)
-    .eq('theme', theme)
-    .eq('user_id', userId)
-    .select('id, title');
-
-  if (error) {
-    console.error(`❌ Failed to update theme image status:`, error);
-    throw new Error(`Database update failed: ${error.message}`);
-  }
-  
-  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme: ${theme}`);
-  return;
-};
-
-const updatePostsWithImage = async (supabase: any, imageUrl: string, theme: string, userId: string): Promise<void> => {
-  return updateThemeImageStatus(supabase, 'complete', theme, userId, imageUrl);
-};
+// Note: generateImagePrompt, generateThemeImage, updateThemeImageStatus, and updatePostsWithImage
+// are now imported from the shared utilities module
 
 serve(async (req) => {
   // Handle CORS preflight requests
