@@ -13,6 +13,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
+import { normalizeThemeName, createThemeIdentifier, extractThemeFromPost, debugThemeMapping } from '@/utils/themeNameUtils';
 
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
@@ -160,9 +161,20 @@ export default function StoriesDashboard() {
           const { theme_image_generation_status, theme, category } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
           
-          // Remove shimmer when theme image generation completes - use theme instead of category
+          // Remove shimmer when theme image generation completes - use normalized theme name
           if (theme_image_generation_status === 'complete' && theme) {
-            setShimmerThemes(prev => prev.filter(shimmerTheme => shimmerTheme !== theme));
+            const normalizedTheme = normalizeThemeName(theme);
+            debugThemeMapping('Real-time Complete', theme, normalizedTheme);
+            
+            setShimmerThemes(prev => {
+              const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
+              console.log('🔄 [Shimmer Removal] Complete:', {
+                originalShimmer: prev,
+                removingTheme: normalizedTheme,
+                newShimmer: filtered
+              });
+              return filtered;
+            });
             refreshPostCountsAndImages(); // Refresh to show the new image
           }
           
@@ -172,7 +184,18 @@ export default function StoriesDashboard() {
             theme_image_generation_status === 'failed' && 
             theme
           ) {
-            setShimmerThemes(prev => prev.filter(shimmerTheme => shimmerTheme !== theme));
+            const normalizedTheme = normalizeThemeName(theme);
+            debugThemeMapping('Real-time Failed', theme, normalizedTheme);
+            
+            setShimmerThemes(prev => {
+              const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
+              console.log('🔄 [Shimmer Removal] Failed:', {
+                originalShimmer: prev,
+                removingTheme: normalizedTheme,
+                newShimmer: filtered
+              });
+              return filtered;
+            });
             // Show error toast
             toast({
               title: "Image Generation Failed",
@@ -303,10 +326,19 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to generate theme');
       }
 
-      // Remove temporary shimmer and add the actual theme to shimmer
+      // Remove temporary shimmer and add the actual theme to shimmer (normalized)
+      const normalizedTheme = normalizeThemeName(data.theme);
+      debugThemeMapping('Custom Theme Generation', data.theme, normalizedTheme);
+      
       setShimmerThemes(prev => {
         const filtered = prev.filter(theme => !theme.startsWith('generating-theme-'));
-        return [...filtered, data.theme];
+        const newShimmer = [...filtered, normalizedTheme];
+        console.log('🔄 [Shimmer Addition] Custom Theme:', {
+          originalShimmer: prev,
+          addingTheme: normalizedTheme,
+          newShimmer
+        });
+        return newShimmer;
       });
 
       toast({
