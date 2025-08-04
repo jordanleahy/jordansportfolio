@@ -17,20 +17,16 @@ interface ProcessingResult {
 }
 
 serve(async (req) => {
-  console.log('🚀 Edge Function: process-and-import-theme started');
-  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get user authentication
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
       throw new Error('Authentication required');
     }
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -39,37 +35,24 @@ serve(async (req) => {
       },
     });
 
-    // Verify user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       throw new Error('Invalid authentication');
     }
 
-    console.log('✅ User authenticated:', user.id);
-
-    // Parse request
     const { rawJson } = await req.json();
-    console.log('📦 Processing raw JSON for user:', user.id);
 
-    // Step 1: AI Processing
-    console.log('🤖 Step 1: AI Processing...');
+    // Combined AI processing and validation
     const aiResult = await processThemeJsonWithAI(rawJson);
-    
     if (!aiResult.success) {
-      console.log('❌ AI processing failed');
       return new Response(JSON.stringify(aiResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('✅ AI processing completed');
-
-    // Step 2: Database Import
-    console.log('💾 Step 2: Database Import...');
+    // Database import
     const importResult = await importToDatabase(supabase, aiResult.cleanedData, user.id);
-    
     if (!importResult.success) {
-      console.log('❌ Database import failed');
       return new Response(JSON.stringify({
         ...aiResult,
         success: false,
@@ -79,16 +62,11 @@ serve(async (req) => {
       });
     }
 
-    console.log('✅ Database import completed');
-
-    // Step 3: Auto-generate system prompt (background)
+    // Background system prompt generation
     if (aiResult.cleanedData?.category) {
-      console.log('🎯 Step 3: Auto-generating system prompt...');
-      // Don't await - run in background
       generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id);
     }
 
-    // Return combined result
     const finalResult: ProcessingResult = {
       success: true,
       data: aiResult.cleanedData,
@@ -98,15 +76,11 @@ serve(async (req) => {
       errors: []
     };
 
-    console.log('🎉 Complete success:', finalResult);
-
     return new Response(JSON.stringify(finalResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('💥 Error in process-and-import-theme:', error);
-    
     return new Response(JSON.stringify({
       success: false,
       errors: [error.message || 'Unknown error occurred'],
@@ -154,36 +128,15 @@ async function aiProcessThemeData(rawData: any) {
     throw new Error('OpenAI API key not configured');
   }
 
-  const prompt = `Fix and clean this JSON data for a social media content calendar. 
+  const prompt = `Clean and fix this JSON for a content calendar:
 
-Expected structure:
-{
-  "category": "string",
-  "theme": "string", 
-  "description": "string (optional)",
-  "posts": [
-    {
-      "day": number,
-      "title": "string",
-      "description": "string",
-      "status": "draft|scheduled|published"
-    }
-  ]
-}
+Structure: {"category": "string", "theme": "string", "posts": [{"day": number, "title": "string", "description": "string", "status": "draft"}]}
 
-Rules:
-- Fix JSON syntax errors
-- Ensure all posts have title and description
-- Generate sequential day numbers if missing
-- Set status to "draft" if not provided
-- Limit to 100 posts maximum
-- Clean and improve content quality
-- Make titles concise and descriptions informative
+Rules: Fix syntax, ensure title/description exist, set status="draft", limit 100 posts, generate day numbers.
 
-Raw data:
-${JSON.stringify(rawData, null, 2)}
+Data: ${JSON.stringify(rawData)}
 
-Return only the cleaned JSON:`;
+Return only valid JSON:`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -192,19 +145,15 @@ Return only the cleaned JSON:`;
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'o4-mini-2025-04-16',
       messages: [
-        {
-          role: 'system',
-          content: 'You are a JSON processor. Return only valid JSON without explanations or markdown.'
-        },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.1,
-      max_tokens: 4000,
+      temperature: 0,
+      max_tokens: 2000,
     }),
   });
 
@@ -367,9 +316,6 @@ async function importToDatabase(supabase: any, data: any, userId: string): Promi
 
 async function generateSystemPromptBackground(supabase: any, category: string, userId: string) {
   try {
-    console.log('🎯 Background: Generating system prompt for:', category);
-    
-    // Check if system prompt already exists
     const { data: existingPrompts } = await supabase
       .from('system_prompts')
       .select('id')
@@ -377,22 +323,12 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       .eq('user_id', userId)
       .limit(1);
 
-    if (existingPrompts && existingPrompts.length > 0) {
-      console.log('✅ Background: System prompt already exists for:', category);
-      return;
-    }
+    if (existingPrompts?.length > 0) return;
 
-    // Call system prompt generation function
-    const { error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+    await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: { category }
     });
-
-    if (error) {
-      console.error('❌ Background: System prompt generation failed:', error);
-    } else {
-      console.log('✅ Background: System prompt generated successfully for:', category);
-    }
   } catch (error) {
-    console.error('💥 Background: System prompt generation error:', error);
+    // Silent fail for background process
   }
 }

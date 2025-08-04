@@ -6,6 +6,8 @@ import type { ProcessingResult } from '@/types/themeImportStrict';
 
 interface UseStreamlinedThemeImportOptions {
   onImportComplete?: () => void;
+  onOptimisticStart?: (categoryName: string) => void;
+  onOptimisticComplete?: (success: boolean, categoryName?: string) => void;
 }
 
 export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOptions = {}) => {
@@ -14,33 +16,17 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
   const queryClient = useQueryClient();
 
   const submitMutation = useMutation({
-    mutationFn: async (rawJson: string): Promise<ProcessingResult> => {
-      // Basic JSON validation first
-      let parsedData;
-      try {
-        parsedData = JSON.parse(rawJson);
-      } catch (error) {
-        throw new Error(`Invalid JSON: ${error instanceof Error ? error.message : 'Parse error'}`);
-      }
-
+    mutationFn: async ({ rawJson, categoryName }: { rawJson: string; categoryName: string }): Promise<ProcessingResult & { categoryName: string }> => {
       // Call the combined edge function
       const response = await supabase.functions.invoke('process-and-import-theme', {
-        body: { rawJson: parsedData }
+        body: { rawJson: JSON.parse(rawJson) }
       });
 
       if (response.error) {
         throw new Error(response.error.message);
       }
 
-      return response.data;
-    },
-    onMutate: () => {
-      setIsProcessing(true);
-      // Show initial processing toast
-      toast({
-        title: "Processing...",
-        description: "Processing your data with AI and importing to database",
-      });
+      return { ...response.data, categoryName };
     },
     onSuccess: (result) => {
       setIsProcessing(false);
@@ -51,49 +37,34 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         queryClient.invalidateQueries({ queryKey: ['available-categories'] });
         queryClient.invalidateQueries({ queryKey: ['system-prompts'] });
         
-        // Show success toast with details
-        const fixCount = result.fixes?.length || 0;
-        const warningCount = result.warnings?.length || 0;
-        
-        let description = `Successfully imported ${result.insertedCount || 0} posts`;
-        if (fixCount > 0) description += ` with ${fixCount} fixes applied`;
-        if (warningCount > 0) description += ` (${warningCount} warnings)`;
-        
         toast({
-          title: "Import successful! 🎉",
-          description,
+          title: "Theme imported successfully! 🎉",
+          description: `${result.insertedCount || 0} posts imported`,
         });
 
-        // Show system prompt generation status
-        if (result.data?.category) {
-          setTimeout(() => {
-            toast({
-              title: "System prompt generated",
-              description: `Auto-generated visual prompt system for "${result.data.category}"`,
-            });
-          }, 2000);
-        }
-
+        options.onOptimisticComplete?.(true, result.categoryName);
         options.onImportComplete?.();
       } else {
-        // Show error toast
         toast({
           title: "Import failed",
           description: result.errors.join(', '),
           variant: "destructive"
         });
+        options.onOptimisticComplete?.(false, result.categoryName);
       }
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       setIsProcessing(false);
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       toast({
-        title: "Processing failed",
+        title: "Import failed",
         description: errorMessage,
         variant: "destructive"
       });
+      
+      options.onOptimisticComplete?.(false, variables.categoryName);
     }
   });
 
@@ -107,8 +78,20 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       return;
     }
 
-    submitMutation.mutate(rawJson);
-  }, [submitMutation, toast]);
+    // Extract category name for optimistic UI
+    let categoryName = 'New Theme';
+    try {
+      const parsed = JSON.parse(rawJson);
+      categoryName = parsed.category || parsed.theme || 'New Theme';
+    } catch {
+      // Use default if parsing fails
+    }
+
+    setIsProcessing(true);
+    options.onOptimisticStart?.(categoryName);
+    
+    submitMutation.mutate({ rawJson, categoryName });
+  }, [submitMutation, toast, options]);
 
   return {
     submitRawData,

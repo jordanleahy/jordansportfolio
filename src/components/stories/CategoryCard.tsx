@@ -9,18 +9,42 @@ interface CategoryCardProps {
   postCount: number;
   imageUrl?: string;
   onClick?: () => void;
+  isShimmer?: boolean;
 }
 
-export const CategoryCard = ({ category, postCount, imageUrl, onClick }: CategoryCardProps) => {
+export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false }: CategoryCardProps) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
+    if (isShimmer) return; // Prevent clicks on shimmer cards
     if (onClick) {
       onClick();
     } else {
       navigate(`/stories/category/${encodeURIComponent(category)}`);
     }
   };
+
+  if (isShimmer) {
+    return (
+      <Card className="group overflow-hidden border-border/50 animate-pulse">
+        {/* Shimmer Image Section */}
+        <div className="relative h-48 bg-muted/50">
+          <div className="w-full h-full bg-gradient-to-br from-muted/30 to-muted/60 animate-pulse" />
+        </div>
+
+        {/* Shimmer Content Section */}
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div>
+              <div className="h-6 bg-muted/50 rounded animate-pulse mb-2" />
+              <div className="h-4 w-2/3 bg-muted/30 rounded animate-pulse" />
+            </div>
+            <div className="h-9 bg-muted/30 rounded animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden" onClick={handleClick}>

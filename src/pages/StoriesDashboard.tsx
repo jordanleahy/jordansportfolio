@@ -58,6 +58,7 @@ export default function StoriesDashboard() {
   // Calculate post counts and first images for each category
   const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
+  const [shimmerCategories, setShimmerCategories] = React.useState<string[]>([]);
 
   // Helper function to refresh post counts and images
   const refreshPostCountsAndImages = React.useCallback(async () => {
@@ -132,11 +133,24 @@ export default function StoriesDashboard() {
   }, [refreshPostCountsAndImages]);
 
   const handleImportComplete = async () => {
-    toast({
-      title: "Categories Updated",
-      description: "Available categories have been refreshed after import.",
-    });
+    // Clear any shimmer states and refresh data
+    setShimmerCategories([]);
     invalidateCache();
+  };
+
+  const handleOptimisticStart = (categoryName: string) => {
+    // Add shimmer card immediately
+    setShimmerCategories(prev => [...prev, categoryName]);
+  };
+
+  const handleOptimisticComplete = (success: boolean, categoryName?: string) => {
+    if (categoryName) {
+      // Remove shimmer card
+      setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
+    }
+    if (success) {
+      invalidateCache();
+    }
   };
 
   const handleGenerateCustomTheme = async () => {
@@ -279,7 +293,7 @@ export default function StoriesDashboard() {
             <ThemeImportModal 
               open={importModalOpen} 
               onOpenChange={setImportModalOpen} 
-              onImportComplete={handleImportComplete} 
+              onImportComplete={handleImportComplete}
             />
           </Suspense>
         )}
@@ -289,6 +303,7 @@ export default function StoriesDashboard() {
           categories={availableCategories.filter(category => (postCounts[category] || 0) > 0)}
           postCounts={postCounts}
           categoryImages={categoryImages}
+          shimmerCategories={shimmerCategories}
           onImportClick={() => setImportModalOpen(true)}
         />
       </div>

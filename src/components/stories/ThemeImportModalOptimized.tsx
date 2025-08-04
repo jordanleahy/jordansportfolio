@@ -47,10 +47,11 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Streamlined import hook
+  // Streamlined import with optimistic UI
   const { submitRawData, isProcessing: isStreamlinedProcessing } = useStreamlinedThemeImport({
-    onImportComplete: () => {
-      onImportComplete?.();
+    onImportComplete,
+    onOptimisticStart: (categoryName) => {
+      // Close modal immediately on submit
       onOpenChange(false);
       setJsonInput('');
       reset();
@@ -85,8 +86,9 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   }, [importData]);
 
   const handleStreamlinedSubmit = useCallback(() => {
+    if (!jsonInput.trim()) return;
     submitRawData(jsonInput);
-  }, [submitRawData, jsonInput]);
+  }, [jsonInput, submitRawData]);
 
   const handleCopyInstructions = useCallback(async () => {
     const instructions = `Please format your response as a JSON object with the following structure:
