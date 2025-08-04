@@ -105,22 +105,8 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
         
         {/* Generation in progress overlay */}
         {isGenerating && (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex flex-col items-center justify-center">
-            <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
-            <div className="text-sm text-primary font-medium mb-1">Generating Image</div>
-            {streamingProgress && (
-              <div className="text-xs text-muted-foreground capitalize">
-                {streamingProgress.stage.replace('_', ' ')}
-              </div>
-            )}
-            {streamingProgress?.progress && (
-              <div className="w-24 h-1 bg-muted rounded-full mt-2 overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${streamingProgress.progress}%` }}
-                />
-              </div>
-            )}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 text-primary animate-spin" />
           </div>
         )}
         
@@ -153,14 +139,6 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
           </Badge>
         </div>
         
-        {/* Generation status badge */}
-        {isGenerating && streamingProgress && (
-          <div className="absolute bottom-3 left-3">
-            <Badge variant="outline" className="bg-white/90 text-primary border-primary/20">
-              {streamingProgress.progress}%
-            </Badge>
-          </div>
-        )}
       </div>
 
       <CardContent className="p-6">

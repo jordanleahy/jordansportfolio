@@ -103,33 +103,10 @@ export const StreamingShimmer = ({
         />
       )}
 
-      {/* Generation overlay */}
-      {isGenerating && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex flex-col items-center justify-center">
-          <Loader2 className="h-6 w-6 text-white animate-spin mb-2" />
-          <div className="text-xs text-white font-medium mb-1">Generating</div>
-          {streamingProgress?.progress && (
-            <div className="text-xs text-white/80">
-              {streamingProgress.progress}%
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Fallback icon when no image and not generating */}
       {!currentImage && !isGenerating && !error && (
         <div className="absolute inset-0 flex items-center justify-center">
           {fallbackIcon || <ImageIcon className="h-12 w-12 text-primary/40" />}
-        </div>
-      )}
-
-      {/* Progress bar */}
-      {isGenerating && streamingProgress?.progress && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-          <div 
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${streamingProgress.progress}%` }}
-          />
         </div>
       )}
     </div>
