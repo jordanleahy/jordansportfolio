@@ -20,7 +20,12 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
   const [streamingProgress, setStreamingProgress] = useState<StreamingProgress | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 5-minute timeout for shimmer removal
+  const GENERATION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
   // Listen for real-time database updates
   useEffect(() => {
@@ -44,16 +49,40 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
           if (theme_image_generation_status === 'generating') {
             setIsGenerating(true);
             setError(null);
+            setHasTimedOut(false);
+            
+            // Start timeout timer
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+            timeoutRef.current = setTimeout(() => {
+              console.log('⏰ Theme image generation timed out after 5 minutes');
+              setIsGenerating(false);
+              setHasTimedOut(true);
+              setError('Image generation timed out. You can retry or use the theme without an image.');
+            }, GENERATION_TIMEOUT_MS);
+            
           } else if (theme_image_generation_status === 'complete' && theme_image_4_3_url) {
+            // Clear timeout on success
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
             setIsGenerating(false);
+            setHasTimedOut(false);
             setStreamingProgress({
               stage: 'complete',
               progress: 100,
               imageUrl: theme_image_4_3_url
             });
           } else if (theme_image_generation_status === 'failed') {
+            // Clear timeout on failure
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
             setIsGenerating(false);
-            setError('Image generation failed');
+            setError('Image generation failed. You can retry or use the theme without an image.');
           }
         }
       )
@@ -214,8 +243,64 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
     }
   };
 
+  // Retry function for failed or timed-out generations
+  const retryGeneration = async () => {
+    if (!category) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Reset states
+      setError(null);
+      setHasTimedOut(false);
+      setIsGenerating(true);
+
+      // Trigger background image generation directly
+      const { data: posts } = await supabase
+        .from('social_media_posts')
+        .select('theme, title, description')
+        .eq('category', category)
+        .eq('user_id', session.user.id)
+        .limit(1);
+
+      if (!posts || posts.length === 0) {
+        throw new Error('No posts found for retry');
+      }
+
+      const post = posts[0];
+
+      // Call background function directly
+      const { error: bgError } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_THEME_IMAGE_BACKGROUND, {
+        body: {
+          theme: post.theme,
+          category: category,
+          userId: session.user.id,
+          firstPostTitle: post.title,
+          firstPostDescription: post.description
+        }
+      });
+
+      if (bgError) {
+        throw bgError;
+      }
+
+      console.log('✅ Retry: Background image generation started');
+    } catch (err) {
+      console.error('Error retrying generation:', err);
+      setError(err instanceof Error ? err.message : 'Retry failed');
+      setIsGenerating(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
+      // Cleanup timeout on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
@@ -226,6 +311,8 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
     streamingProgress,
     isGenerating,
     error,
-    startStreaming
+    hasTimedOut,
+    startStreaming,
+    retryGeneration
   };
 };

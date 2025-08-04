@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StreamingShimmer } from "@/components/ui/streaming-shimmer";
-import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2 } from "lucide-react";
+import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   
   // Use streaming hook for real-time image generation (enabled for both shimmer and regular cards)
-  const { streamingProgress, isGenerating, error, startStreaming } = useThemeImageStreaming({
+  const { streamingProgress, isGenerating, error, hasTimedOut, startStreaming, retryGeneration } = useThemeImageStreaming({
     category,
     enabled: !!firstPostData // Enable for both shimmer and regular cards
   });
@@ -155,6 +155,24 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
             </div>
           </div>
         </div>
+
+        {/* Show retry button for failed/timed-out generations */}
+        {(error || hasTimedOut) && !isGenerating && (
+          <div className="flex gap-2 mb-3">
+            <Button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                retryGeneration(); 
+              }}
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+            >
+              <RotateCcw className="h-3 w-3 mr-1" />
+              Retry Image
+            </Button>
+          </div>
+        )}
 
         <Button 
           onClick={(e) => { e.stopPropagation(); handleClick(); }}
