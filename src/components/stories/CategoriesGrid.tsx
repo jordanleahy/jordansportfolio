@@ -6,9 +6,10 @@ interface CategoriesGridProps {
   categoryImages: Record<string, string>;
   shimmerCategories?: string[];
   firstPostsData?: Record<string, { title: string; description: string }>;
+  themeGenerationStatus?: Record<string, string>;
 }
 
-export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [], firstPostsData = {} }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [], firstPostsData = {}, themeGenerationStatus = {} }: CategoriesGridProps) => {
   const hasAnyContent = categories.length > 0 || shimmerCategories.length > 0;
   
   if (!hasAnyContent) {
@@ -28,15 +29,22 @@ export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmer
       ))}
       
       {/* Real categories */}
-      {categories.map((category) => (
-        <CategoryCard
-          key={category}
-          category={category}
-          postCount={postCounts[category] || 0}
-          imageUrl={categoryImages[category]}
-          firstPostData={firstPostsData[category]}
-        />
-      ))}
+      {categories.map((category) => {
+        // Show shimmer if category is in shimmerCategories OR if theme image is generating
+        const isGeneratingTheme = themeGenerationStatus[category] === 'generating';
+        const shouldShowShimmer = shimmerCategories.includes(category) || isGeneratingTheme;
+        
+        return (
+          <CategoryCard
+            key={category}
+            category={category}
+            postCount={postCounts[category] || 0}
+            imageUrl={categoryImages[category]}
+            firstPostData={firstPostsData[category]}
+            isShimmer={shouldShowShimmer}
+          />
+        );
+      })}
     </div>
   );
 };
