@@ -177,6 +177,25 @@ export const useUnifiedRealtime = ({
 
     console.log(`[UnifiedRealtime] Color theme ${eventType}: ${record?.id || oldRecord?.id}`);
     
+    // Emit specific color theme event for backward compatibility
+    let action: 'created' | 'updated' | 'deleted';
+    if (eventType === 'INSERT') {
+      action = 'created';
+    } else if (eventType === 'UPDATE') {
+      action = 'updated';
+    } else {
+      action = 'deleted';
+    }
+
+    realtimeEventBus.emit({
+      type: 'color-theme-changed',
+      payload: {
+        action,
+        theme: record || oldRecord,
+        timestamp: Date.now()
+      }
+    });
+    
     if (eventType === 'INSERT' || eventType === 'UPDATE') {
       if (onThemeUpdate && record) {
         onThemeUpdate(record);
@@ -186,9 +205,15 @@ export const useUnifiedRealtime = ({
       toast.success('Color theme deleted');
     }
 
-    // Invalidate color theme caches
+    // Invalidate color theme caches with proper query keys
     queryClient.invalidateQueries({ queryKey: ['color-themes'] });
-    queryClient.invalidateQueries({ queryKey: ['available-themes'] });
+    queryClient.invalidateQueries({ queryKey: ['color-theme'] });
+    queryClient.invalidateQueries({ queryKey: ['color-theme', 'default'] });
+    
+    // Clear service cache
+    import('@/services/colorThemeService').then(({ colorThemeService }) => {
+      colorThemeService.invalidateCache();
+    });
   };
 
   const handleSystemPromptUpdate = (eventType: string, data: any) => {

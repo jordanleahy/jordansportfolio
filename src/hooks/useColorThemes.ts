@@ -1,10 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { colorThemeService } from '@/services/colorThemeService';
 import { ColorTheme, CreateColorTheme, UpdateColorTheme } from '@/types/colorTheme';
 import { toast } from 'sonner';
-import { realtimeEventBus } from '@/services/realtime/RealtimeEventBus';
 
 export const useColorThemes = () => {
   const queryClient = useQueryClient();
@@ -15,72 +12,8 @@ export const useColorThemes = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('color-themes-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'color_themes'
-        },
-        (payload) => {
-          console.log('🎨 [ColorThemes] Real-time update received:', payload);
-          
-          // Emit generic event
-          realtimeEventBus.emit({
-            type: 'update-received',
-            payload: {
-              table: 'color_themes',
-              eventType: payload.eventType,
-              data: payload.new || payload.old,
-              timestamp: Date.now()
-            }
-          });
-
-          // Emit specific color theme event
-          let action: 'created' | 'updated' | 'deleted';
-          if (payload.eventType === 'INSERT') {
-            action = 'created';
-          } else if (payload.eventType === 'UPDATE') {
-            action = 'updated';
-          } else {
-            action = 'deleted';
-          }
-
-          realtimeEventBus.emit({
-            type: 'color-theme-changed',
-            payload: {
-              action,
-              theme: payload.new || payload.old,
-              timestamp: Date.now()
-            }
-          });
-          
-          // Invalidate queries to refresh data
-          queryClient.invalidateQueries({ queryKey: ['color-themes'] });
-          queryClient.invalidateQueries({ queryKey: ['color-theme'] });
-          
-          // Clear service cache
-          colorThemeService.invalidateCache();
-          
-          // Show toast notifications
-          if (payload.eventType === 'INSERT') {
-            toast.success('New color theme created');
-          } else if (payload.eventType === 'UPDATE') {
-            toast.success('Color theme updated');
-          } else if (payload.eventType === 'DELETE') {
-            toast.success('Color theme deleted');
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Realtime updates are now handled by UnifiedRealtimeManager
+  // Individual components should use useUnifiedRealtime for realtime functionality
 
   return query;
 };
