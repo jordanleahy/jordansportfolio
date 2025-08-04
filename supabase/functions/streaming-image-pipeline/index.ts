@@ -357,14 +357,31 @@ serve(async (req) => {
                 
                 // Update database if this is for a theme
                 if (mode === 'theme' && category && userId) {
-                  await supabase
+                  console.log('🔄 Updating database for theme image generation:', {
+                    category,
+                    userId,
+                    finalImageUrl
+                  });
+                  
+                  const { data: updateData, error: updateError } = await supabase
                     .from('social_media_posts')
                     .update({
                       theme_image_4_3_url: finalImageUrl,
                       theme_image_generation_status: 'complete'
                     })
                     .eq('category', category)
-                    .eq('user_id', userId);
+                    .eq('user_id', userId)
+                    .select();
+                  
+                  if (updateError) {
+                    console.error('❌ Database update failed:', updateError);
+                    throw new Error(`Database update failed: ${updateError.message}`);
+                  } else {
+                    console.log('✅ Database updated successfully:', {
+                      updatedRows: updateData?.length || 0,
+                      data: updateData
+                    });
+                  }
                 }
               }
             }
@@ -384,11 +401,19 @@ serve(async (req) => {
             
             // Update status to failed in database
             if (mode === 'theme' && category && userId) {
-              await supabase
+              console.log('❌ Updating database status to failed for:', { category, userId });
+              
+              const { error: failError } = await supabase
                 .from('social_media_posts')
                 .update({ theme_image_generation_status: 'failed' })
                 .eq('category', category)
                 .eq('user_id', userId);
+              
+              if (failError) {
+                console.error('❌ Failed to update status to failed:', failError);
+              } else {
+                console.log('✅ Successfully updated status to failed');
+              }
             }
             
             // Track failed API usage
@@ -448,6 +473,33 @@ serve(async (req) => {
         
         if (uploadedUrl) {
           finalImageUrl = uploadedUrl;
+          
+          // Update database for non-streaming theme mode
+          if (mode === 'theme' && category) {
+            console.log('🔄 Non-streaming: Updating database for theme image:', {
+              category,
+              userId,
+              finalImageUrl
+            });
+            
+            const { data: updateData, error: updateError } = await supabase
+              .from('social_media_posts')
+              .update({
+                theme_image_4_3_url: finalImageUrl,
+                theme_image_generation_status: 'complete'
+              })
+              .eq('category', category)
+              .eq('user_id', userId)
+              .select();
+            
+            if (updateError) {
+              console.error('❌ Non-streaming database update failed:', updateError);
+            } else {
+              console.log('✅ Non-streaming database updated successfully:', {
+                updatedRows: updateData?.length || 0
+              });
+            }
+          }
         }
       }
 
