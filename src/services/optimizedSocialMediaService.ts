@@ -204,9 +204,9 @@ export class OptimizedSocialMediaService {
       }
     });
     
-    // Sort categories by their earliest creation date
+    // Sort categories by their earliest creation date (newest first)
     const sortedCategories = Array.from(categoryDates.entries())
-      .sort(([, dateA], [, dateB]) => dateA.localeCompare(dateB))
+      .sort(([, dateA], [, dateB]) => dateB.localeCompare(dateA))
       .map(([category]) => category);
     
     this.setCache(cacheKey, sortedCategories, 10 * 60 * 1000); // 10 minutes
