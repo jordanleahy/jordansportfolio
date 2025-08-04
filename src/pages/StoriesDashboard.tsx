@@ -294,6 +294,7 @@ export default function StoriesDashboard() {
               open={importModalOpen} 
               onOpenChange={setImportModalOpen} 
               onImportComplete={handleImportComplete}
+              onOptimisticStart={handleOptimisticStart}
             />
           </Suspense>
         )}
