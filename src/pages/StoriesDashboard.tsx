@@ -1,5 +1,6 @@
 import React, { useState, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImpo
 
 export default function StoriesDashboard() {
   const { user, loading, isAdmin, roleLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
@@ -145,8 +147,13 @@ export default function StoriesDashboard() {
 
   const handleOptimisticComplete = async (success: boolean, categoryName?: string) => {
     if (categoryName && success) {
-      // Wait for data to actually load before removing shimmer
+      // Wait for categories query to refresh first
+      await queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+      await queryClient.refetchQueries({ queryKey: ['available-categories'] });
+      
+      // Then wait for data to actually load
       await refreshPostCountsAndImages();
+      
       // Remove shimmer card only after data is refreshed
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
     } else if (categoryName) {
