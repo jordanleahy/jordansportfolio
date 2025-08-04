@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle, AlertTriangle, XCircle, Upload } from 'lucide-react';
 import { themeImportService } from '@/services/themeImportService';
-import type { ProcessingResult } from '@/types/themeImport';
+import type { ProcessingResult } from '@/types/themeImportStrict';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
@@ -91,16 +91,16 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
       console.log('📦 Starting import mutation');
       console.log('📋 Current result state:', result);
       
-      if (!result?.cleanedData) {
+      if (!result?.data) {
         console.error('❌ No processed data to import');
         throw new Error('No processed data to import');
       }
       
-      console.log('🗂️ Cleaned data to import:', result.cleanedData);
-      console.log('📊 Posts count:', result.cleanedData.posts?.length);
+      console.log('🗂️ Cleaned data to import:', result.data);
+      console.log('📊 Posts count:', result.data.posts?.length);
       
       try {
-        const importResult = await themeImportService.importThemeData(JSON.stringify(result.cleanedData));
+        const importResult = await themeImportService.importThemeData(JSON.stringify(result.data));
         console.log('📥 Import service result:', importResult);
         return importResult;
       } catch (error) {
@@ -309,28 +309,28 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
                   </Alert>
                 )}
 
-                {result.cleanedData && (
+                {result.data && (
                   <div className="space-y-3">
                     <h4 className="font-medium">Preview:</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-medium">Category:</span> 
                         <Badge variant="outline" className="ml-2">
-                          {result.cleanedData.category}
+                          {result.data.category}
                         </Badge>
                       </div>
                       <div>
                         <span className="font-medium">Theme:</span> 
                         <Badge variant="outline" className="ml-2">
-                          {result.cleanedData.theme}
+                          {result.data.theme}
                         </Badge>
                       </div>
                       <div className="col-span-2">
-                        <span className="font-medium">Posts:</span> {result.cleanedData.posts.length}
+                        <span className="font-medium">Posts:</span> {result.data.posts.length}
                       </div>
                     </div>
                     
-                    {result.cleanedData.posts.slice(0, 3).map((post, index) => (
+                    {result.data.posts.slice(0, 3).map((post, index) => (
                       <div key={index} className="border rounded p-3 text-sm">
                         <div className="font-medium">{post.title}</div>
                         <div className="text-muted-foreground mt-1 line-clamp-2">
@@ -343,9 +343,9 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
                       </div>
                     ))}
                     
-                    {result.cleanedData.posts.length > 3 && (
+                    {result.data.posts.length > 3 && (
                       <div className="text-center text-muted-foreground">
-                        ... and {result.cleanedData.posts.length - 3} more posts
+                        ... and {result.data.posts.length - 3} more posts
                       </div>
                     )}
                   </div>

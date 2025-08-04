@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ThemeImportData, ThemePost, ProcessingResult } from "@/types/themeImport";
+import type { ThemeImportData, ThemePost, ProcessingResult } from "@/types/themeImportStrict";
 
 export class ThemeImportService {
   private readonly MAX_POSTS_PER_IMPORT = 100;
@@ -96,7 +96,7 @@ export class ThemeImportService {
         success: true,
         errors: [],
         warnings,
-        cleanedData
+        data: cleanedData
       };
       
     } catch (error) {
@@ -121,7 +121,7 @@ export class ThemeImportService {
       const validation = this.validateThemeData(rawData);
       console.log('📊 Validation result:', validation);
       
-      if (!validation.success || !validation.cleanedData) {
+      if (!validation.success || !validation.data) {
         console.error('❌ Validation failed:', validation.errors);
         return validation;
       }
@@ -130,13 +130,13 @@ export class ThemeImportService {
       // Check for duplicate categories
       const existingCategories = await this.getExistingCategories();
       console.log('📋 Existing categories:', existingCategories);
-      console.log('🆕 New category:', validation.cleanedData.category);
+      console.log('🆕 New category:', validation.data.category);
       
-      if (existingCategories.includes(validation.cleanedData.category)) {
+      if (existingCategories.includes(validation.data.category)) {
         console.warn('⚠️ Category already exists');
         return {
           success: false,
-          errors: [`Category '${validation.cleanedData.category}' already exists. Use a different category name.`],
+          errors: [`Category '${validation.data.category}' already exists. Use a different category name.`],
           warnings: validation.warnings
         };
       }
@@ -144,14 +144,14 @@ export class ThemeImportService {
       console.log('💾 Starting bulk insert...');
       // Import data using the existing database function
       const insertedCount = await this.bulkInsertPosts(
-        validation.cleanedData.category,
-        validation.cleanedData.posts,
-        validation.cleanedData.theme_description
+        validation.data.category,
+        validation.data.posts,
+        validation.data.theme_description
       );
       
       // Auto-create system prompt for new category
       console.log('🤖 Creating system prompt for new category...');
-      await this.createSystemPromptForCategory(validation.cleanedData.category);
+      await this.createSystemPromptForCategory(validation.data.category);
       
       console.log('🎉 Import completed successfully, inserted:', insertedCount);
       
@@ -160,7 +160,7 @@ export class ThemeImportService {
         insertedCount,
         errors: [],
         warnings: validation.warnings,
-        cleanedData: validation.cleanedData
+        data: validation.data
       };
       
     } catch (error) {
