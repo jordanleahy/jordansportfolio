@@ -195,10 +195,10 @@ serve(async (req) => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                model: 'gpt-image-1',
+                model: 'dall-e-3',
                 prompt: prompt,
                 size: imageSize,
-                quality: 'high',
+                quality: 'hd',
                 response_format: 'b64_json',
                 n: 1
               }),
@@ -245,7 +245,7 @@ serve(async (req) => {
             });
 
             // Track successful API usage
-            await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', true, 0.04, userId);
+            await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);
 
             controller.close();
             
@@ -262,7 +262,7 @@ serve(async (req) => {
             }
             
             // Track failed API usage
-            await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', false, 0, userId, error.message);
+            await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', false, 0, userId, error.message);
             
             const errorMessage = JSON.stringify({
               type: 'error',
@@ -294,10 +294,10 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-image-1',
+          model: 'dall-e-3',
           prompt: prompt,
           size: imageSize,
-          quality: 'high',
+          quality: 'hd',
           response_format: 'b64_json',
           n: 1
         }),
@@ -321,7 +321,7 @@ serve(async (req) => {
         }
       }
 
-      await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', true, 0.04, userId);
+      await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);
 
       return new Response(JSON.stringify({
         success: true,
