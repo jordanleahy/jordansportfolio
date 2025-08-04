@@ -1,14 +1,14 @@
 export interface ThemePost {
   day?: number;
   title: string;
-  description: string;
+  story_description: string;
   status?: 'draft' | 'scheduled' | 'published';
 }
 
 export interface ThemeImportData {
   category: string;
   theme: string;
-  description?: string;
+  theme_description?: string;
   posts: ThemePost[];
 }
 

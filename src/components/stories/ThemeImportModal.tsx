@@ -183,18 +183,18 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
   const exampleData = {
     category: "healthcare innovation",
     theme: "Healthcare Technology",
-    description: "Posts about healthcare technology trends",
+    theme_description: "Posts about healthcare technology trends",
     posts: [
       {
         day: 1,
         title: "AI in Healthcare: The Future is Now",
-        description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning. Modern AI systems can analyze medical images faster than radiologists, predict patient outcomes, and personalize treatment protocols.",
+        story_description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning. Modern AI systems can analyze medical images faster than radiologists, predict patient outcomes, and personalize treatment protocols.",
         status: "draft"
       },
       {
         day: 2,
         title: "Telemedicine Best Practices",
-        description: "Telemedicine has become essential for modern healthcare delivery. Key best practices include ensuring secure communication, maintaining patient privacy, and providing clear virtual consultation guidelines.",
+        story_description: "Telemedicine has become essential for modern healthcare delivery. Key best practices include ensuring secure communication, maintaining patient privacy, and providing clear virtual consultation guidelines.",
         status: "draft"
       }
     ]
@@ -334,7 +334,7 @@ export const ThemeImportModal: React.FC<ThemeImportModalProps> = ({
                       <div key={index} className="border rounded p-3 text-sm">
                         <div className="font-medium">{post.title}</div>
                         <div className="text-muted-foreground mt-1 line-clamp-2">
-                          {post.description}
+                          {post.story_description}
                         </div>
                         <div className="flex gap-2 mt-2">
                           {post.day && <Badge variant="secondary">Day {post.day}</Badge>}

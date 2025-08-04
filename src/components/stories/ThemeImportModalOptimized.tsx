@@ -98,12 +98,12 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 {
   "category": "string (1-100 characters, required)",
   "theme": "string (1-200 characters, required)", 
-  "description": "string (max 1000 characters, optional)",
+  "theme_description": "string (max 1000 characters, optional)",
   "posts": [
     {
       "day": number (1-365, optional),
       "title": "string (1-500 characters, required)",
-      "description": "string (1-2000 characters, required)",
+      "story_description": "string (1-2000 characters, required)",
       "status": "draft" | "scheduled" | "published" (default: "draft")
     }
   ]
@@ -121,18 +121,18 @@ EXAMPLE:
 {
   "category": "healthcare innovation",
   "theme": "AI in Healthcare",
-  "description": "Weekly posts about AI applications in healthcare",
+  "theme_description": "Weekly posts about AI applications in healthcare",
   "posts": [
     {
       "day": 1,
       "title": "AI Diagnostics Revolution", 
-      "description": "How artificial intelligence is transforming medical diagnostics and improving patient outcomes.",
+      "story_description": "How artificial intelligence is transforming medical diagnostics and improving patient outcomes.",
       "status": "draft"
     },
     {
       "day": 2,
       "title": "Machine Learning in Drug Discovery",
-      "description": "Exploring how ML algorithms accelerate pharmaceutical research and development.",
+      "story_description": "Exploring how ML algorithms accelerate pharmaceutical research and development.",
       "status": "draft"
     }
   ]
@@ -164,16 +164,16 @@ AVOID:
   const exampleData = useMemo(() => ({
     category: "healthcare innovation",
     theme: "Healthcare Technology",
-    description: "Posts about healthcare technology trends",
+    theme_description: "Posts about healthcare technology trends",
     posts: [{
       day: 1,
       title: "AI in Healthcare: The Future is Now",
-      description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning.",
+      story_description: "Artificial Intelligence is revolutionizing healthcare delivery, from diagnostic imaging to treatment planning.",
       status: "draft"
     }, {
       day: 2,
       title: "Telemedicine Best Practices",
-      description: "Telemedicine has become essential for modern healthcare delivery.",
+      story_description: "Telemedicine has become essential for modern healthcare delivery.",
       status: "draft"
     }]
   }), []);
@@ -299,7 +299,7 @@ AVOID:
                     {validationResult.data.posts.slice(0, 3).map((post, index) => <div key={index} className="border rounded p-3 text-sm">
                         <div className="font-medium">{post.title}</div>
                         <div className="text-muted-foreground mt-1 line-clamp-2">
-                          {post.description}
+                          {post.story_description}
                         </div>
                         <div className="flex gap-2 mt-2">
                           {post.day && <Badge variant="secondary">Day {post.day}</Badge>}

@@ -4,14 +4,14 @@ import { z } from 'zod';
 export const ThemePostSchema = z.object({
   day: z.number().int().min(1).max(365).optional(),
   title: z.string().min(1).max(500),
-  description: z.string().min(1).max(2000),
+  story_description: z.string().min(1).max(2000),
   status: z.enum(['draft', 'scheduled', 'published']).default('draft'),
 });
 
 export const ThemeImportDataSchema = z.object({
   category: z.string().min(1).max(100),
   theme: z.string().min(1).max(200),
-  description: z.string().max(1000).optional(),
+  theme_description: z.string().max(1000).optional(),
   posts: z.array(ThemePostSchema).min(1).max(200),
 });
 

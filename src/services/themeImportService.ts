@@ -48,8 +48,8 @@ export class ThemeImportService {
           postErrors.push(`Post ${index + 1}: Title is required`);
         }
         
-        if (!post.description || typeof post.description !== 'string') {
-          postErrors.push(`Post ${index + 1}: Description is required`);
+        if (!post.story_description || typeof post.story_description !== 'string') {
+          postErrors.push(`Post ${index + 1}: Story description is required`);
         }
         
         // Validate day if provided
@@ -72,7 +72,7 @@ export class ThemeImportService {
         if (postErrors.length === 0) {
           cleanedPosts.push({
             title: this.sanitizeText(post.title),
-            description: this.sanitizeText(post.description),
+            story_description: this.sanitizeText(post.story_description),
             day: post.day,
             status: post.status || 'draft'
           });
@@ -88,7 +88,7 @@ export class ThemeImportService {
       const cleanedData: ThemeImportData = {
         category: this.sanitizeText(data.category),
         theme: this.sanitizeText(data.theme),
-        description: data.description ? this.sanitizeText(data.description) : undefined,
+        theme_description: data.theme_description ? this.sanitizeText(data.theme_description) : undefined,
         posts: cleanedPosts
       };
       
