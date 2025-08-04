@@ -96,6 +96,11 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
   // Import mutation
   const importMutation = useMutation({
     mutationFn: async (data: ThemeImportData): Promise<ProcessingResult> => {
+      console.log('🚀 [useThemeImport] Starting import mutation');
+      console.log('📊 [useThemeImport] Data to import:', data);
+      console.log('🏷️ [useThemeImport] Category:', data.category);
+      console.log('📝 [useThemeImport] Posts count:', data.posts.length);
+      
       setProgress({ step: 'importing', progress: 70, message: 'Importing to database...' });
       
       // Optional: Check for existing categories (removed to allow dynamic categories)
@@ -115,16 +120,24 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
         status: post.status || 'draft'
       }));
 
+      console.log('🔄 [useThemeImport] Converted posts for DB:', postsForDb);
+
       // Insert using RPC
+      console.log('💾 [useThemeImport] Calling insert_category_content RPC');
       const { data: insertCount, error } = await supabase
         .rpc('insert_category_content', {
           category_name: data.category,
           posts_data: postsForDb
         });
 
+      console.log('📥 [useThemeImport] RPC response:', { insertCount, error });
+
       if (error) {
+        console.log('❌ [useThemeImport] RPC error:', error);
         throw error;
       }
+
+      console.log('✅ [useThemeImport] Import successful, inserted count:', insertCount);
 
       return {
         success: true,

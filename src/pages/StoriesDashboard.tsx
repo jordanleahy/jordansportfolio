@@ -135,7 +135,12 @@ export default function StoriesDashboard() {
   };
 
   const handleGenerateCustomTheme = async () => {
+    console.log('🚀 [StoriesDashboard] Starting custom theme generation');
+    console.log('📝 [StoriesDashboard] Description:', customThemeDescription.trim());
+    console.log('👤 [StoriesDashboard] User:', user?.id);
+    
     if (!customThemeDescription.trim()) {
+      console.log('❌ [StoriesDashboard] No description provided');
       toast({
         title: "Description Required",
         description: "Please describe the theme you want to create",
@@ -147,21 +152,35 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     
     try {
+      console.log('🎯 [StoriesDashboard] Calling generate-custom-theme edge function');
       const { data, error } = await supabase.functions.invoke('generate-custom-theme', {
         body: { description: customThemeDescription.trim() }
       });
 
+      console.log('📥 [StoriesDashboard] Edge function response:', { data, error });
+
       if (error) {
+        console.log('❌ [StoriesDashboard] Edge function error:', error);
         throw new Error(error.message);
       }
 
       if (!data.success) {
+        console.log('❌ [StoriesDashboard] Edge function returned failure:', data);
         throw new Error(data.error || 'Failed to generate theme');
       }
 
+      console.log('✅ [StoriesDashboard] Theme generated successfully:', data.themeData);
+      console.log('📊 [StoriesDashboard] Generated posts count:', data.themeData.posts.length);
+      console.log('🏷️ [StoriesDashboard] Generated category:', data.themeData.category);
+
       // Automatically validate and import the generated theme
-      await validateInput(JSON.stringify(data.themeData, null, 2));
+      console.log('🔍 [StoriesDashboard] Starting validation');
+      const validationResult = await validateInput(JSON.stringify(data.themeData, null, 2));
+      console.log('📋 [StoriesDashboard] Validation result:', validationResult);
+      
+      console.log('💾 [StoriesDashboard] Starting import');
       await importData();
+      console.log('✅ [StoriesDashboard] Import completed');
       
       toast({
         title: "Theme Generated & Imported!",
@@ -171,7 +190,7 @@ export default function StoriesDashboard() {
       setCustomThemeDescription('');
 
     } catch (error) {
-      console.error('Error generating theme:', error);
+      console.error('💥 [StoriesDashboard] Error generating theme:', error);
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",
@@ -179,6 +198,7 @@ export default function StoriesDashboard() {
       });
     } finally {
       setIsGeneratingTheme(false);
+      console.log('🏁 [StoriesDashboard] Theme generation process finished');
     }
   };
 

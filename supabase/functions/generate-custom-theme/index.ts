@@ -14,17 +14,22 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 [generate-custom-theme] Function started');
+    
     if (!openAIApiKey) {
+      console.log('❌ [generate-custom-theme] OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
     }
 
     const { description } = await req.json();
+    console.log('📝 [generate-custom-theme] Received description:', description);
 
     if (!description || description.trim().length === 0) {
+      console.log('❌ [generate-custom-theme] No description provided');
       throw new Error('Theme description is required');
     }
 
-    console.log('Generating custom theme for description:', description);
+    console.log('🎯 [generate-custom-theme] Generating custom theme for description:', description);
 
     const systemPrompt = `You are a professional social media content strategist. Convert user descriptions into structured theme JSON for social media calendar generation.
 
@@ -57,6 +62,7 @@ Output: {"category": "ai-healthcare", "theme": "AI in Healthcare", "description"
 User: "Marketing tips for small business"
 Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...]}`;
 
+    console.log('🤖 [generate-custom-theme] Calling OpenAI API');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -74,43 +80,57 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
       }),
     });
 
+    console.log('📥 [generate-custom-theme] OpenAI response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
+      console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
     const generatedContent = data.choices[0].message.content.trim();
 
-    console.log('Generated content:', generatedContent);
+    console.log('📄 [generate-custom-theme] Generated content:', generatedContent);
 
     // Parse and validate the JSON
+    console.log('🔍 [generate-custom-theme] Parsing generated JSON');
     let themeData;
     try {
       themeData = JSON.parse(generatedContent);
+      console.log('✅ [generate-custom-theme] JSON parsed successfully:', themeData);
     } catch (parseError) {
-      console.error('Failed to parse generated JSON:', parseError);
+      console.error('❌ [generate-custom-theme] Failed to parse generated JSON:', parseError);
       throw new Error('Generated content is not valid JSON');
     }
 
     // Basic validation
+    console.log('🔍 [generate-custom-theme] Validating theme data structure');
     if (!themeData.category || !themeData.theme || !themeData.posts || !Array.isArray(themeData.posts)) {
+      console.log('❌ [generate-custom-theme] Missing required fields:', {
+        hasCategory: !!themeData.category,
+        hasTheme: !!themeData.theme,
+        hasPosts: !!themeData.posts,
+        isPostsArray: Array.isArray(themeData.posts)
+      });
       throw new Error('Generated theme data is missing required fields');
     }
 
     if (themeData.posts.length !== 10) {
+      console.log('❌ [generate-custom-theme] Wrong number of posts:', themeData.posts.length);
       throw new Error('Theme must contain exactly 10 posts');
     }
 
     // Validate each post
+    console.log('🔍 [generate-custom-theme] Validating individual posts');
     for (const post of themeData.posts) {
       if (!post.day || !post.title || !post.description) {
+        console.log('❌ [generate-custom-theme] Invalid post:', post);
         throw new Error('Each post must have day, title, and description');
       }
     }
 
-    console.log('Theme generation successful:', themeData.category);
+    console.log('✅ [generate-custom-theme] Theme generation successful:', themeData.category);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -121,7 +141,7 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
     });
 
   } catch (error) {
-    console.error('Error in generate-custom-theme function:', error);
+    console.error('💥 [generate-custom-theme] Error in function:', error);
     return new Response(JSON.stringify({ 
       success: false, 
       error: error.message 
