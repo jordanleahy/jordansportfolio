@@ -75,19 +75,38 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         throw new Error('Not authenticated');
       }
 
-      // Get the first post from this category to get the postId
+      // Get the Day 1 post specifically for theme image generation
       const { data: posts, error: postsError } = await supabase
         .from('social_media_posts')
-        .select('id')
+        .select('id, title, description')
         .eq('category', category)
         .eq('user_id', session.user.id)
+        .eq('day', 1) // Specifically target Day 1 post
         .limit(1);
 
-      if (postsError || !posts || posts.length === 0) {
-        throw new Error('No posts found for this category');
-      }
+      let postId: string;
+      let selectedPostData: { title: string; description: string };
 
-      const postId = posts[0].id;
+      if (postsError || !posts || posts.length === 0) {
+        // Fallback to any post if Day 1 doesn't exist
+        const { data: fallbackPosts, error: fallbackError } = await supabase
+          .from('social_media_posts')
+          .select('id, title, description')
+          .eq('category', category)
+          .eq('user_id', session.user.id)
+          .order('day', { ascending: true })
+          .limit(1);
+        
+        if (fallbackError || !fallbackPosts || fallbackPosts.length === 0) {
+          throw new Error('No posts found for this category');
+        }
+        
+        postId = fallbackPosts[0].id;
+        selectedPostData = { title: fallbackPosts[0].title, description: fallbackPosts[0].description };
+      } else {
+        postId = posts[0].id;
+        selectedPostData = { title: posts[0].title, description: posts[0].description };
+      }
 
       // Set generating status in database
       await supabase
@@ -110,8 +129,8 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         },
         body: JSON.stringify({
           postId: postId,
-          title: postData.title,
-          description: postData.description,
+          title: selectedPostData.title,
+          description: selectedPostData.description,
           category,
           aspectRatio: '4:3',
           mode: 'theme',
