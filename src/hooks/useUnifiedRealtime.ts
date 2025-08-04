@@ -120,6 +120,7 @@ export const useUnifiedRealtime = ({
 
       // Invalidate relevant caches
       queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
+      queryClient.invalidateQueries({ queryKey: ['theme-posts', record.theme] });
       queryClient.invalidateQueries({ queryKey: ['themes'] });
 
       toast.success(`New post created in ${record.category}`);
@@ -164,7 +165,7 @@ export const useUnifiedRealtime = ({
         // Invalidate relevant caches
         console.log(`🗄️ REALTIME: Invalidating caches for category: ${record.category}`);
         queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
-        queryClient.invalidateQueries({ queryKey: ['themes'] });
+        queryClient.invalidateQueries({ queryKey: ['theme-posts', record.theme] });
         queryClient.invalidateQueries({ queryKey: ['themes'] });
         queryClient.invalidateQueries({ queryKey: ['posts'] });
 
@@ -192,6 +193,7 @@ export const useUnifiedRealtime = ({
       
       // Invalidate relevant caches
       queryClient.invalidateQueries({ queryKey: ['posts', oldRecord.category] });
+      queryClient.invalidateQueries({ queryKey: ['theme-posts', oldRecord.theme] });
       queryClient.invalidateQueries({ queryKey: ['themes'] });
     }
   };

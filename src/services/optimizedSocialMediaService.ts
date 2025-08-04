@@ -59,6 +59,30 @@ export class OptimizedSocialMediaService {
     return this.getAllPosts(category);
   }
 
+  // Add method for getting posts by theme
+  async getPostsByTheme(theme: string): Promise<SocialMediaPost[]> {
+    const cacheKey = `theme-posts:${theme}`;
+    
+    // Return cached data if valid
+    if (this.isValidCache(cacheKey)) {
+      return this.getFromCache(cacheKey);
+    }
+
+    const { data, error } = await supabase
+      .from('social_media_posts')
+      .select('*')
+      .eq('theme', theme)
+      .order('day', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    
+    const posts = (data || []) as SocialMediaPost[];
+    this.setCache(cacheKey, posts);
+    return posts;
+  }
+
   // Add method for getting a single post by ID
   async getPostById(id: string): Promise<SocialMediaPost | null> {
     const cacheKey = `post:${id}`;
@@ -114,7 +138,7 @@ export class OptimizedSocialMediaService {
     if (error) throw error;
     
     // Invalidate relevant caches
-    this.invalidateCache(post.category);
+    this.invalidateCache(post.category, data.theme);
     
     return data as SocialMediaPost;
   }
@@ -141,7 +165,7 @@ export class OptimizedSocialMediaService {
     console.log('🖼️ IMAGE_UPLOAD: Database update successful', { postId: id, updatedPost: data });
     
     // Invalidate relevant caches
-    this.invalidateCache(updates.category);
+    this.invalidateCache(updates.category, data.theme);
     
     return data as SocialMediaPost;
   }
@@ -284,24 +308,39 @@ export class OptimizedSocialMediaService {
     return [...new Set(themes.map(t => t.category))];
   }
 
-  async deleteTheme(category: string): Promise<void> {
-    const { error } = await supabase
+  async deleteTheme(themeOrCategory: string): Promise<void> {
+    // Try to delete by theme first, then by category for backward compatibility
+    const { error: themeError } = await supabase
       .from('social_media_posts')
       .delete()
-      .eq('category', category);
+      .eq('theme', themeOrCategory);
 
-    if (error) throw error;
+    if (themeError) {
+      // If theme deletion fails, try category
+      const { error: categoryError } = await supabase
+        .from('social_media_posts')
+        .delete()
+        .eq('category', themeOrCategory);
 
-    // Clear cache for this category and categories list
-    this.cache.delete(this.getCacheKey(category));
+      if (categoryError) throw categoryError;
+    }
+
+    // Clear relevant caches
+    this.cache.delete(this.getCacheKey(themeOrCategory));
+    this.cache.delete(`theme-posts:${themeOrCategory}`);
+    this.cache.delete(this.getCacheKey(undefined, 'themes'));
     this.cache.delete(this.getCacheKey(undefined, 'categories'));
   }
 
-  private invalidateCache(category?: string) {
+  private invalidateCache(category?: string, theme?: string) {
     if (category) {
       this.cache.delete(this.getCacheKey(category));
     }
+    if (theme) {
+      this.cache.delete(`theme-posts:${theme}`);
+    }
     this.cache.delete(this.getCacheKey()); // all posts cache
+    this.cache.delete(this.getCacheKey(undefined, 'themes')); // themes cache
   }
 
   private invalidateAllCaches() {

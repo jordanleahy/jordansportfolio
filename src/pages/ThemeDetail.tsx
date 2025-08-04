@@ -7,7 +7,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useCategoryPosts } from '@/hooks/useOptimizedStories';
+import { useThemePosts } from '@/hooks/useOptimizedStories';
 import { useColorThemes } from '@/hooks/useColorThemes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowLeft, Trash2, MoreVertical } from 'lucide-react';
@@ -39,7 +39,7 @@ export default function ThemeDetail() {
   const decodedTheme = theme ? decodeURIComponent(theme) : '';
   
   // Fetch posts for this specific theme
-  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useCategoryPosts(decodedTheme, !!decodedTheme);
+  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(decodedTheme, !!decodedTheme);
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();

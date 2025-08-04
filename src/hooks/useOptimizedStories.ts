@@ -24,6 +24,25 @@ export const useCategoryPosts = (category: string, enabled = true) => {
   });
 };
 
+// Theme-specific query hook for theme detail pages
+export const useThemePosts = (theme: string, enabled = true) => {
+  return useQuery({
+    queryKey: ['theme-posts', theme],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('social_media_posts')
+        .select('*')
+        .eq('theme', theme)
+        .order('day', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: enabled && !!theme,
+  });
+};
+
 // Optimized available themes hook
 export const useAvailableThemes = (enabled = true) => {
   return useQuery({
@@ -50,6 +69,7 @@ export function useOptimizedStories(user: any) {
     userId: user?.id,
     onPostUpdate: (post: SocialMediaPost) => {
       queryClient.invalidateQueries({ queryKey: ['posts', post.category] });
+      queryClient.invalidateQueries({ queryKey: ['theme-posts', post.theme] });
       queryClient.invalidateQueries({ queryKey: ['themes'] });
     }
   });
