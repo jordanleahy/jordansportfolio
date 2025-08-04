@@ -17,21 +17,50 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
 
   const submitMutation = useMutation({
     mutationFn: async ({ rawJson, categoryName }: { rawJson: string; categoryName: string }): Promise<ProcessingResult & { categoryName: string }> => {
+      console.log('🚀 FRONTEND: Starting streamlined theme import');
+      console.log('📋 IMPORT DETAILS:', {
+        categoryName,
+        dataLength: rawJson.length,
+        timestamp: new Date().toISOString()
+      });
+      
       // Call the combined edge function
+      console.log('📡 CALLING: process-and-import-theme edge function');
       const response = await supabase.functions.invoke('process-and-import-theme', {
         body: { rawJson: JSON.parse(rawJson) }
       });
 
+      console.log('📡 EDGE FUNCTION RESPONSE:', {
+        hasError: !!response.error,
+        hasData: !!response.data,
+        errorMessage: response.error?.message
+      });
+
       if (response.error) {
+        console.error('❌ EDGE FUNCTION ERROR:', response.error);
         throw new Error(response.error.message);
       }
+
+      console.log('✅ EDGE FUNCTION SUCCESS:', {
+        success: response.data?.success,
+        insertedCount: response.data?.insertedCount,
+        category: response.data?.data?.category
+      });
 
       return { ...response.data, categoryName };
     },
     onSuccess: (result) => {
+      console.log('✅ MUTATION SUCCESS:', {
+        success: result.success,
+        insertedCount: result.insertedCount,
+        categoryName: result.categoryName,
+        errorCount: result.errors?.length || 0
+      });
+      
       setIsProcessing(false);
       
       if (result.success) {
+        console.log('🔄 INVALIDATING QUERIES: Refreshing UI data');
         // Invalidate queries to refresh UI
         queryClient.invalidateQueries({ queryKey: ['social-media-posts'] });
         queryClient.invalidateQueries({ queryKey: ['available-categories'] });
@@ -45,6 +74,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         options.onOptimisticComplete?.(true, result.categoryName);
         options.onImportComplete?.();
       } else {
+        console.log('❌ IMPORT FAILED:', result.errors);
         toast({
           title: "Import failed",
           description: result.errors.join(', '),
@@ -69,7 +99,15 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
   });
 
   const submitRawData = useCallback((rawJson: string) => {
+    console.log('📥 FRONTEND: Submit raw data called');
+    console.log('📊 RAW DATA STATS:', {
+      hasData: !!rawJson.trim(),
+      dataLength: rawJson.length,
+      timestamp: new Date().toISOString()
+    });
+    
     if (!rawJson.trim()) {
+      console.log('❌ NO DATA: Empty raw JSON provided');
       toast({
         title: "No data provided",
         description: "Please paste your JSON data first",
@@ -83,10 +121,13 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     try {
       const parsed = JSON.parse(rawJson);
       categoryName = parsed.category || parsed.theme || 'New Theme';
-    } catch {
+      console.log('📋 EXTRACTED CATEGORY:', categoryName);
+    } catch (parseError) {
+      console.log('⚠️ CATEGORY EXTRACTION FAILED:', parseError.message);
       // Use default if parsing fails
     }
 
+    console.log('🚀 STARTING MUTATION:', { categoryName, processing: true });
     setIsProcessing(true);
     options.onOptimisticStart?.(categoryName);
     

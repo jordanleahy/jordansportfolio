@@ -17,16 +17,20 @@ interface ProcessingResult {
 }
 
 serve(async (req) => {
+  console.log('🚀 PROCESS-AND-IMPORT-THEME: Function started');
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('🔐 AUTHENTICATION: Checking auth header');
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
       throw new Error('Authentication required');
     }
 
+    console.log('🔗 SUPABASE: Creating client connection');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -35,24 +39,60 @@ serve(async (req) => {
       },
     });
 
+    console.log('👤 USER: Validating authentication');
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       throw new Error('Invalid authentication');
     }
+    console.log('✅ USER AUTHENTICATED:', { user_id: user.id, email: user.email });
 
-    const { rawJson } = await req.json();
+    console.log('📥 REQUEST: Parsing incoming JSON data');
+    const requestBody = await req.json();
+    console.log('📋 REQUEST BODY STRUCTURE:', {
+      hasRawJson: !!requestBody.rawJson,
+      rawJsonType: typeof requestBody.rawJson,
+      requestKeys: Object.keys(requestBody)
+    });
+    
+    const { rawJson } = requestBody;
 
     // Combined AI processing and validation
+    console.log('🤖 AI PROCESSING: Starting theme JSON processing');
     const aiResult = await processThemeJsonWithAI(rawJson);
+    console.log('🤖 AI PROCESSING RESULT:', {
+      success: aiResult.success,
+      errorCount: aiResult.errors.length,
+      warningCount: aiResult.warnings.length,
+      fixCount: aiResult.fixes.length,
+      hasCleanedData: !!aiResult.cleanedData,
+      extractedCategory: aiResult.cleanedData?.category
+    });
+    
     if (!aiResult.success) {
+      console.log('❌ AI PROCESSING FAILED - returning error response');
       return new Response(JSON.stringify(aiResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Database import
+    console.log('💾 DATABASE IMPORT: Starting data import to database');
+    console.log('📊 IMPORT DATA PREVIEW:', {
+      category: aiResult.cleanedData?.category,
+      theme: aiResult.cleanedData?.theme,
+      postsCount: aiResult.cleanedData?.posts?.length || 0,
+      userId: user.id
+    });
+    
     const importResult = await importToDatabase(supabase, aiResult.cleanedData, user.id);
+    console.log('💾 DATABASE IMPORT RESULT:', {
+      success: importResult.success,
+      insertedCount: importResult.insertedCount,
+      errorCount: importResult.errors.length
+    });
+    
     if (!importResult.success) {
+      console.log('❌ DATABASE IMPORT FAILED - returning error response');
       return new Response(JSON.stringify({
         ...aiResult,
         success: false,
@@ -64,7 +104,10 @@ serve(async (req) => {
 
     // Background system prompt generation
     if (aiResult.cleanedData?.category) {
+      console.log('🎯 SYSTEM PROMPT: Triggering background generation for category:', aiResult.cleanedData.category);
       generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id);
+    } else {
+      console.log('⚠️ SYSTEM PROMPT: No category found, skipping background generation');
     }
 
     const finalResult: ProcessingResult = {
@@ -329,20 +372,55 @@ async function importToDatabase(supabase: any, data: any, userId: string): Promi
 }
 
 async function generateSystemPromptBackground(supabase: any, category: string, userId: string) {
+  console.log('🔄 BACKGROUND TASK: Starting system prompt generation check');
+  console.log('📋 BACKGROUND PARAMS:', {
+    category,
+    userId,
+    timestamp: new Date().toISOString()
+  });
+  
   try {
-    const { data: existingPrompts } = await supabase
+    console.log('🔍 CHECKING: Existing system prompts for category');
+    const { data: existingPrompts, error: checkError } = await supabase
       .from('system_prompts')
       .select('id')
       .eq('category', category)
       .eq('user_id', userId)
       .limit(1);
 
-    if (existingPrompts?.length > 0) return;
-
-    await supabase.functions.invoke('invoke-system-prompt-agent', {
-      body: { category }
+    console.log('📊 EXISTING PROMPTS CHECK:', {
+      existingPromptsCount: existingPrompts?.length || 0,
+      checkError: checkError?.message,
+      needsGeneration: !existingPrompts?.length
     });
+
+    if (existingPrompts?.length > 0) {
+      console.log('✅ SYSTEM PROMPT EXISTS: Skipping generation');
+      return;
+    }
+
+    console.log('🚀 INVOKING: invoke-system-prompt-agent edge function');
+    const invokeResult = await supabase.functions.invoke('invoke-system-prompt-agent', {
+      body: { 
+        category: 'system_prompt_generation',
+        theme: category,
+        description: `Generated content for ${category} category`,
+        user_id: userId
+      }
+    });
+    
+    console.log('📡 INVOKE RESULT:', {
+      success: !invokeResult.error,
+      error: invokeResult.error?.message,
+      data: !!invokeResult.data
+    });
+    
   } catch (error) {
-    // Silent fail for background process
+    console.error('💥 BACKGROUND GENERATION ERROR:', {
+      error: error.message,
+      category,
+      userId,
+      timestamp: new Date().toISOString()
+    });
   }
 }

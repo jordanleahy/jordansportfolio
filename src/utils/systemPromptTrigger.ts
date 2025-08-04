@@ -5,31 +5,46 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const triggerSystemPromptGeneration = async (category: string) => {
   console.log('🚀 MANUAL TRIGGER: Starting system prompt generation for category:', category);
+  console.log('🕐 TRIGGER TIMESTAMP:', new Date().toISOString());
   
   try {
+    console.log('🔍 STEP 1: Checking existing posts for category');
     // Check if posts exist for this category
-    const { data: existingPosts } = await supabase
+    const { data: existingPosts, error: postsError } = await supabase
       .from('social_media_posts')
       .select('id, title, description')
       .eq('category', category)
       .limit(3);
     
+    console.log('📊 POSTS QUERY RESULT:', {
+      postsFound: existingPosts?.length || 0,
+      postsError: postsError?.message,
+      firstPostTitle: existingPosts?.[0]?.title
+    });
+    
+    console.log('🔍 STEP 2: Checking existing system prompts for category');
     // Check if a system prompt exists for this category
-    const { data: existingSystemPrompts } = await supabase
+    const { data: existingSystemPrompts, error: promptsError } = await supabase
       .from('system_prompts')
       .select('id')
       .eq('category', category)
       .limit(1);
     
+    console.log('📊 SYSTEM PROMPTS QUERY RESULT:', {
+      promptsFound: existingSystemPrompts?.length || 0,
+      promptsError: promptsError?.message
+    });
+    
     const hasExistingPosts = existingPosts && existingPosts.length > 0;
     const hasSystemPrompt = existingSystemPrompts && existingSystemPrompts.length > 0;
     
-    console.log('📊 CATEGORY STATUS:', {
+    console.log('📊 CATEGORY STATUS SUMMARY:', {
       category,
       hasExistingPosts,
       postsCount: existingPosts?.length || 0,
       hasSystemPrompt,
-      needsGeneration: !hasSystemPrompt
+      needsGeneration: hasExistingPosts && !hasSystemPrompt,
+      timestamp: new Date().toISOString()
     });
     
     if (!hasExistingPosts) {
@@ -42,14 +57,29 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       return { success: false, error: 'System prompt already exists for this category' };
     }
     
+    console.log('🔍 STEP 3: Getting current authenticated user');
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log('👤 USER AUTH RESULT:', {
+      userFound: !!user,
+      userId: user?.id,
+      userError: userError?.message
+    });
+    
     if (!user) {
       console.log('❌ User not authenticated');
       return { success: false, error: 'User not authenticated' };
     }
     
-    console.log('🤖 CALLING: invoke-system-prompt-agent edge function');
+    console.log('🚀 STEP 4: Calling invoke-system-prompt-agent edge function');
+    console.log('📋 EDGE FUNCTION PAYLOAD:', {
+      category: 'system_prompt_generation',
+      theme: category,
+      description: `Generated content for ${category} category`,
+      sample_posts_count: existingPosts.slice(0, 3).length,
+      user_id: user.id
+    });
+    
     const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: {
         category: 'system_prompt_generation',
@@ -60,7 +90,12 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       }
     });
     
-    console.log('📡 EDGE FUNCTION RESPONSE:', { invokeData, invokeError });
+    console.log('📡 EDGE FUNCTION COMPLETE:', {
+      hasData: !!invokeData,
+      hasError: !!invokeError,
+      errorMessage: invokeError?.message,
+      successData: invokeData?.success
+    });
     
     if (invokeError) {
       console.error('❌ SYSTEM PROMPT GENERATION ERROR:', invokeError);
