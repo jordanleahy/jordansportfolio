@@ -9,10 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
-import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
-import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Textarea } from '@/components/ui/textarea';
 
 interface ThemeImportModalOptimizedProps {
@@ -28,7 +25,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   
   const {
     state,
@@ -61,19 +57,23 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Debounced validation
-  const debouncedInput = useDebounce(jsonInput, 500);
-  
-  // Auto-validate on input change
-  React.useEffect(() => {
-    if (debouncedInput.trim() && state.type === 'idle') {
-      try {
-        validateInput(debouncedInput);
-      } catch {
-        // Ignore validation errors during typing
-      }
+  // Format JSON helper
+  const formatJSON = useCallback(() => {
+    try {
+      const parsed = JSON.parse(jsonInput);
+      setJsonInput(JSON.stringify(parsed, null, 2));
+      toast({
+        title: "JSON formatted",
+        description: "Your JSON has been formatted for better readability",
+      });
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Cannot format invalid JSON syntax",
+        variant: "destructive",
+      });
     }
-  }, [debouncedInput, state.type, validateInput]);
+  }, [jsonInput, toast]);
 
   const handleProcess = useCallback(() => {
     if (!jsonInput.trim()) return;
@@ -210,29 +210,27 @@ AVOID:
 
           {/* JSON Input */}
           <div>
-            <Label htmlFor="json-input">JSON Data</Label>
-            {isMobile ? (
-              <Textarea
-                id="json-input"
-                value={jsonInput}
-                onChange={(e) => setJsonInput(e.target.value)}
-                placeholder={placeholderText}
-                readOnly={isProcessing || isStreamlinedProcessing}
-                rows={12}
-                className="font-mono text-sm resize-none"
-              />
-            ) : (
-              <div className="border border-input rounded-md overflow-hidden">
-                <OptimizedMonacoEditor
-                  height="300px"
-                  language="json"
-                  value={jsonInput}
-                  onChange={(value) => setJsonInput(value || '')}
-                  placeholder={placeholderText}
-                  readOnly={isProcessing || isStreamlinedProcessing}
-                />
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="json-input">JSON Data</Label>
+              <Button
+                onClick={formatJSON}
+                variant="ghost"
+                size="sm"
+                disabled={!jsonInput.trim() || isProcessing || isStreamlinedProcessing}
+                className="text-xs"
+              >
+                Format JSON
+              </Button>
+            </div>
+            <Textarea
+              id="json-input"
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              placeholder={placeholderText}
+              readOnly={isProcessing || isStreamlinedProcessing}
+              rows={16}
+              className="font-mono text-sm resize-none min-h-[400px] leading-relaxed"
+            />
           </div>
 
           {/* Action Buttons */}
