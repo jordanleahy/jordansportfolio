@@ -336,10 +336,10 @@ export default function StoriesDashboard() {
 
       console.log('✅ Theme generation successful:', data);
 
-      // Remove temporary shimmer and add the actual category to shimmer
+      // Remove temporary shimmer and add the actual theme to shimmer
       setShimmerCategories(prev => {
         const filtered = prev.filter(cat => !cat.startsWith('generating-theme-'));
-        return [...filtered, data.category];
+        return [...filtered, data.theme];
       });
 
       toast({
