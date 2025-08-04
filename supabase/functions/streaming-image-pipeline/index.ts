@@ -195,7 +195,6 @@ serve(async (req) => {
               prompt: prompt,
               size: imageSize,
               quality: 'high',
-              response_format: 'b64_json',
               n: 1,
               partial_images: 2  // Enable partial image streaming for smooth transitions
             };
