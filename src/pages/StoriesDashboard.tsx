@@ -305,7 +305,6 @@ export default function StoriesDashboard() {
           postCounts={postCounts}
           categoryImages={categoryImages}
           shimmerCategories={shimmerCategories}
-          onImportClick={() => setImportModalOpen(true)}
         />
       </div>
     </PageLayout>

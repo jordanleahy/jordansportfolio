@@ -157,7 +157,6 @@ export default function CategoryDetail() {
               category={decodedCategory}
               selectedThemeId={selectedThemeId}
               onThemeChange={setSelectedThemeId}
-              onImportClick={() => navigate('/stories')} // Navigate back to main dashboard for import
             />
           </Suspense>
         </div>

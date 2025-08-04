@@ -1,19 +1,17 @@
 import { CategoryCard } from "./CategoryCard";
-import { EmptyState } from "./EmptyState";
 
 interface CategoriesGridProps {
   categories: string[];
   postCounts: Record<string, number>;
   categoryImages: Record<string, string>;
-  onImportClick?: () => void;
   shimmerCategories?: string[];
 }
 
-export const CategoriesGrid = ({ categories, postCounts, categoryImages, onImportClick, shimmerCategories = [] }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [] }: CategoriesGridProps) => {
   const hasAnyContent = categories.length > 0 || shimmerCategories.length > 0;
   
   if (!hasAnyContent) {
-    return <EmptyState onImportClick={onImportClick} />;
+    return null;
   }
 
   return (

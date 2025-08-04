@@ -21,7 +21,6 @@ import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { toast } from "sonner";
-import { EmptyState } from "./EmptyState";
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
   onPostsChange: () => void;
@@ -29,7 +28,6 @@ interface PostsTableOptimizedProps {
   category?: string;
   selectedThemeId?: string;
   onThemeChange?: (themeId: string) => void;
-  onImportClick?: () => void;
 }
 export const PostsTable = ({
   posts,
@@ -38,7 +36,6 @@ export const PostsTable = ({
   category,
   selectedThemeId,
   onThemeChange,
-  onImportClick,
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -203,11 +200,6 @@ export const PostsTable = ({
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
-  
-  // Show empty state if no posts exist at all
-  if (posts.length === 0) {
-    return <EmptyState category={category} onImportClick={onImportClick} />;
-  }
   
   return (
     <div className="flex gap-4 h-full">

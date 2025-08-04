@@ -246,15 +246,14 @@ export default function OptimizedCalendar() {
                   {/* Color Theme Consistency Checker */}
                   <ColorThemeConsistencyChecker category={category} />
                   
-                  <PostsTable 
-                    posts={activeTabPosts}
-                    onPostsChange={() => loadCategoryPosts(category)}
-                    isAdmin={isAdmin}
-                    category={category}
-                    selectedThemeId={selectedThemeId}
-                    onThemeChange={setSelectedThemeId}
-                    onImportClick={() => setImportModalOpen(true)}
-                  />
+                   <PostsTable 
+                     posts={activeTabPosts}
+                     onPostsChange={() => loadCategoryPosts(category)}
+                     isAdmin={isAdmin}
+                     category={category}
+                     selectedThemeId={selectedThemeId}
+                     onThemeChange={setSelectedThemeId}
+                   />
                 </Suspense>
               </TabsContent>
             ))}
@@ -268,7 +267,6 @@ export default function OptimizedCalendar() {
               category={undefined}
               selectedThemeId={selectedThemeId}
               onThemeChange={setSelectedThemeId}
-              onImportClick={() => setImportModalOpen(true)}
             />
           </Suspense>
         ) : null}
