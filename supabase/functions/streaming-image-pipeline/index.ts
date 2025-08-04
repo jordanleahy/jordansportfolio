@@ -191,12 +191,13 @@ serve(async (req) => {
             const imageSize = getAspectRatioSize(aspectRatio);
             
             const requestBody = {
-              model: 'dall-e-3',
+              model: 'gpt-image-1',
               prompt: prompt,
               size: imageSize,
-              quality: 'hd',
+              quality: 'high',
               response_format: 'b64_json',
-              n: 1
+              n: 1,
+              partial_images: 2  // Enable partial image streaming for smooth transitions
             };
             
             console.log('Making OpenAI request with:', {
@@ -226,40 +227,62 @@ serve(async (req) => {
             }
 
             const imageData = await imageResponse.json();
-            const base64Image = imageData.data[0].b64_json;
-
-            sendProgress('image_generated', 70, { partialImage: `data:image/png;base64,${base64Image}` });
-
-            // Upload to storage if user is authenticated
-            let finalImageUrl = `data:image/png;base64,${base64Image}`;
             
-            if (userId) {
-              sendProgress('uploading', 80);
+            // Handle partial images for smooth streaming
+            if (imageData.data && imageData.data.length > 0) {
+              const images = imageData.data;
               
-              const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
-              const uploadedUrl = await uploadImageToStorage(supabase, base64Image, fileName, userId);
-              
-              if (uploadedUrl) {
-                finalImageUrl = uploadedUrl;
+              // Send partial images with smooth progression
+              for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+                const isPartial = i < images.length - 1;
+                const progressPercent = isPartial ? 60 + (i * 5) : 70;
+                const stage = isPartial ? `partial_${i + 1}` : 'image_generated';
                 
-                // Update database if this is for a theme
-                if (mode === 'theme' && category && userId) {
-                  await supabase
-                    .from('social_media_posts')
-                    .update({
-                      theme_image_4_3_url: finalImageUrl,
-                      theme_image_generation_status: 'complete'
-                    })
-                    .eq('category', category)
-                    .eq('user_id', userId);
+                sendProgress(stage, progressPercent, { 
+                  partialImage: `data:image/png;base64,${image.b64_json}`,
+                  isPartial: isPartial
+                });
+                
+                console.log(`Sent ${isPartial ? 'partial' : 'final'} image ${i + 1}/${images.length}`);
+              }
+              
+              // Use the final image for storage
+              const finalBase64Image = images[images.length - 1].b64_json;
+
+              // Upload to storage if user is authenticated
+              let finalImageUrl = `data:image/png;base64,${finalBase64Image}`;
+              
+              if (userId) {
+                sendProgress('uploading', 80);
+                
+                const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+                const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
+              
+                if (uploadedUrl) {
+                  finalImageUrl = uploadedUrl;
+                  
+                  // Update database if this is for a theme
+                  if (mode === 'theme' && category && userId) {
+                    await supabase
+                      .from('social_media_posts')
+                      .update({
+                        theme_image_4_3_url: finalImageUrl,
+                        theme_image_generation_status: 'complete'
+                      })
+                      .eq('category', category)
+                      .eq('user_id', userId);
+                  }
                 }
               }
-            }
 
-            sendProgress('complete', 100, { 
-              imageUrl: finalImageUrl,
-              prompt: prompt
-            });
+              sendProgress('complete', 100, { 
+                imageUrl: finalImageUrl,
+                prompt: prompt
+              });
+            } else {
+              throw new Error('No image data received from OpenAI');
+            }
 
             // Track successful API usage
             await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);

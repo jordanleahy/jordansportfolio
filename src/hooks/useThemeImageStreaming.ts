@@ -7,6 +7,7 @@ interface StreamingProgress {
   partialImage?: string;
   imageUrl?: string;
   prompt?: string;
+  isPartial?: boolean;
 }
 
 interface UseThemeImageStreamingProps {
@@ -162,7 +163,16 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
               const data = JSON.parse(line.slice(6));
               
               if (data.type === 'progress') {
-                setStreamingProgress(data);
+                // Handle smooth partial image transitions
+                if (data.stage.startsWith('partial_') || data.stage === 'image_generated') {
+                  setStreamingProgress(prevProgress => ({
+                    ...data,
+                    // Preserve previous image briefly for smooth transition
+                    previousImage: prevProgress?.partialImage
+                  }));
+                } else {
+                  setStreamingProgress(data);
+                }
               } else if (data.type === 'error') {
                 setError(data.message);
                 setIsGenerating(false);
