@@ -132,6 +132,56 @@ export default function StoriesDashboard() {
     refreshPostCountsAndImages();
   }, [refreshPostCountsAndImages]);
 
+  // Theme image generation listener to remove shimmer when image generation completes
+  React.useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('theme-image-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'social_media_posts',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const { new: newData, old: oldData } = payload;
+          const { theme_image_generation_status, category } = newData as any;
+          const oldStatus = oldData?.theme_image_generation_status;
+          
+          // Remove shimmer when theme image generation completes successfully
+          if (
+            oldStatus !== 'complete' && 
+            theme_image_generation_status === 'complete' && 
+            category &&
+            shimmerCategories.includes(category)
+          ) {
+            console.log('🎨 Theme image generation completed for:', category);
+            setShimmerCategories(prev => prev.filter(cat => cat !== category));
+            refreshPostCountsAndImages(); // Refresh to show the new image
+          }
+          
+          // Also remove shimmer if generation failed
+          if (
+            oldStatus !== 'failed' && 
+            theme_image_generation_status === 'failed' && 
+            category &&
+            shimmerCategories.includes(category)
+          ) {
+            console.log('❌ Theme image generation failed for:', category);
+            setShimmerCategories(prev => prev.filter(cat => cat !== category));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, shimmerCategories, refreshPostCountsAndImages]);
+
   const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
     userId: user?.id,
@@ -168,8 +218,9 @@ export default function StoriesDashboard() {
       // Then wait for data to actually load
       await refreshPostCountsAndImages();
       
-      // Remove shimmer card only after data is refreshed
-      setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
+      // DON'T remove shimmer here - let it persist until theme image generation completes
+      // The shimmer will be removed by real-time updates when theme image is generated
+      console.log('🎉 Theme import successful, but keeping shimmer until image generation completes');
     } else if (categoryName) {
       // Remove shimmer immediately on failure
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));

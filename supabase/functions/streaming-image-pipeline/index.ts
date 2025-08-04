@@ -188,24 +188,39 @@ serve(async (req) => {
 
             const imageSize = getAspectRatioSize(aspectRatio);
             
+            const requestBody = {
+              model: 'dall-e-3',
+              prompt: prompt,
+              size: imageSize,
+              quality: 'hd',
+              response_format: 'b64_json',
+              n: 1
+            };
+            
+            console.log('Making OpenAI request with:', {
+              model: requestBody.model,
+              promptLength: prompt.length,
+              size: requestBody.size,
+              quality: requestBody.quality
+            });
+
             const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${openAIApiKey}`,
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({
-                model: 'dall-e-3',
-                prompt: prompt,
-                size: imageSize,
-                quality: 'hd',
-                response_format: 'b64_json',
-                n: 1
-              }),
+              body: JSON.stringify(requestBody),
             });
 
             if (!imageResponse.ok) {
-              throw new Error(`OpenAI API error: ${imageResponse.status}`);
+              const errorText = await imageResponse.text();
+              console.error('OpenAI API error details:', {
+                status: imageResponse.status,
+                statusText: imageResponse.statusText,
+                error: errorText
+              });
+              throw new Error(`OpenAI API error: ${imageResponse.status} - ${errorText}`);
             }
 
             const imageData = await imageResponse.json();
