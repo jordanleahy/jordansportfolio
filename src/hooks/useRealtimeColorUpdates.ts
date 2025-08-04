@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { ColorTheme } from '@/types/colorTheme';
-import { useRealtimeColorThemes } from '@/hooks/useRealtimeColorThemes';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface ColorChangeEvent {
@@ -38,16 +39,76 @@ export const useRealtimeColorUpdates = (options: UseRealtimeColorUpdatesOptions 
   const previewTimeoutRef = useRef<NodeJS.Timeout>();
   const conflictTimeoutRef = useRef<NodeJS.Timeout>();
 
+  const { user } = useAuth();
+
+  // Validate color values
+  const isValidColor = useCallback((color: string): boolean => {
+    // Check for common color formats
+    const colorRegex = /^(#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|rgb\(|rgba\(|hsl\(|hsla\(|\d+\s+\d+%?\s+\d+%?)/;
+    return colorRegex.test(color.trim());
+  }, []);
+
+  // Apply colors to the DOM
+  const applyColorsToDOM = useCallback((colors: Record<string, string>, isPreview = false) => {
+    const root = document.documentElement;
+    
+    // Store current colors for rollback if this is the first change
+    if (!isPreview && Object.keys(colorHistory).length === 0) {
+      const currentColors: Record<string, string> = {};
+      Object.keys(colors).forEach(property => {
+        const currentValue = getComputedStyle(root).getPropertyValue(property);
+        if (currentValue) {
+          currentColors[property] = currentValue.trim();
+        }
+      });
+      setColorHistory(currentColors);
+    }
+
+    // Apply the colors with smooth transition
+    root.style.transition = 'all 0.3s ease-in-out';
+    
+    Object.entries(colors).forEach(([property, value]) => {
+      // Validate color value before applying
+      if (isValidColor(value)) {
+        root.style.setProperty(property, value);
+      } else {
+        console.warn(`Invalid color value: ${value} for property: ${property}`);
+      }
+    });
+
+    // Remove transition after applying
+    setTimeout(() => {
+      root.style.removeProperty('transition');
+    }, 300);
+  }, [colorHistory, isValidColor]);
+
+
   // Debounced color changes to prevent rapid updates
   const debouncedColorChange = useDebounce((colors: Record<string, string>) => {
     applyColorsToDOM(colors, false);
     setAppliedColors(colors);
   }, debounceMs);
 
-  // Listen to real-time color theme updates
-  useRealtimeColorThemes({
-    enabled,
-    onThemeUpdated: useCallback((theme: ColorTheme) => {
+  // Apply preview colors permanently
+  const applyPreviewColors = useCallback(() => {
+    if (Object.keys(previewColors).length === 0) return;
+
+    debouncedColorChange(previewColors);
+    setIsPreviewMode(false);
+    setPreviewColors({});
+    
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+
+    toast.success('Colors applied successfully');
+  }, [previewColors, debouncedColorChange]);
+
+  // Listen to real-time color theme updates via unified realtime
+  useUnifiedRealtime({
+    enabled: enabled && !!user?.id,
+    userId: user?.id,
+    onThemeUpdate: useCallback((theme: ColorTheme) => {
       const newColors = {
         '--primary': theme.primary_color,
         '--secondary': theme.secondary_color,
@@ -89,49 +150,22 @@ export const useRealtimeColorUpdates = (options: UseRealtimeColorUpdatesOptions 
       }
 
       setLastChangeUser(theme.user_id);
-    }, [previewColors, isPreviewMode, onConflict, debouncedColorChange]),
+    }, [previewColors, isPreviewMode, onConflict, debouncedColorChange, applyPreviewColors]),
   });
 
-  // Apply colors to the DOM
-  const applyColorsToDOM = useCallback((colors: Record<string, string>, isPreview = false) => {
-    const root = document.documentElement;
+
+  // Revert preview to last applied state
+  const revertPreview = useCallback(() => {
+    if (!isPreviewMode) return;
+
+    applyColorsToDOM(appliedColors);
+    setIsPreviewMode(false);
+    setPreviewColors({});
     
-    // Store current colors for rollback if this is the first change
-    if (!isPreview && Object.keys(colorHistory).length === 0) {
-      const currentColors: Record<string, string> = {};
-      Object.keys(colors).forEach(property => {
-        const currentValue = getComputedStyle(root).getPropertyValue(property);
-        if (currentValue) {
-          currentColors[property] = currentValue.trim();
-        }
-      });
-      setColorHistory(currentColors);
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
     }
-
-    // Apply the colors with smooth transition
-    root.style.transition = 'all 0.3s ease-in-out';
-    
-    Object.entries(colors).forEach(([property, value]) => {
-      // Validate color value before applying
-      if (isValidColor(value)) {
-        root.style.setProperty(property, value);
-      } else {
-        console.warn(`Invalid color value: ${value} for property: ${property}`);
-      }
-    });
-
-    // Remove transition after applying
-    setTimeout(() => {
-      root.style.removeProperty('transition');
-    }, 300);
-  }, [colorHistory]);
-
-  // Validate color values
-  const isValidColor = useCallback((color: string): boolean => {
-    // Check for common color formats
-    const colorRegex = /^(#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})|rgb\(|rgba\(|hsl\(|hsla\(|\d+\s+\d+%?\s+\d+%?)/;
-    return colorRegex.test(color.trim());
-  }, []);
+  }, [isPreviewMode, appliedColors, applyColorsToDOM]);
 
   // Preview color changes
   const previewColor = useCallback((property: string, value: string) => {
@@ -161,35 +195,7 @@ export const useRealtimeColorUpdates = (options: UseRealtimeColorUpdatesOptions 
         preview: true
       });
     }
-  }, [allowPreview, enabled, previewColors, applyColorsToDOM, onColorChange]);
-
-  // Apply preview colors permanently
-  const applyPreviewColors = useCallback(() => {
-    if (Object.keys(previewColors).length === 0) return;
-
-    debouncedColorChange(previewColors);
-    setIsPreviewMode(false);
-    setPreviewColors({});
-    
-    if (previewTimeoutRef.current) {
-      clearTimeout(previewTimeoutRef.current);
-    }
-
-    toast.success('Colors applied successfully');
-  }, [previewColors, debouncedColorChange]);
-
-  // Revert preview to last applied state
-  const revertPreview = useCallback(() => {
-    if (!isPreviewMode) return;
-
-    applyColorsToDOM(appliedColors);
-    setIsPreviewMode(false);
-    setPreviewColors({});
-    
-    if (previewTimeoutRef.current) {
-      clearTimeout(previewTimeoutRef.current);
-    }
-  }, [isPreviewMode, appliedColors, applyColorsToDOM]);
+  }, [allowPreview, enabled, previewColors, applyColorsToDOM, onColorChange, revertPreview]);
 
   // Rollback to previous colors
   const rollbackColors = useCallback(() => {

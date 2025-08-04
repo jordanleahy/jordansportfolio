@@ -14,6 +14,7 @@ export interface UseUnifiedRealtimeOptions {
   onThemeUpdate?: (theme: ColorTheme) => void;
   onSystemPromptUpdate?: (prompt: any) => void;
   onAgentUpdate?: (agent: any) => void;
+  onVendorUpdate?: (vendor: any) => void;
 }
 
 export const useUnifiedRealtime = ({
@@ -24,6 +25,7 @@ export const useUnifiedRealtime = ({
   onThemeUpdate,
   onSystemPromptUpdate,
   onAgentUpdate,
+  onVendorUpdate,
 }: UseUnifiedRealtimeOptions = {}) => {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
@@ -70,6 +72,9 @@ export const useUnifiedRealtime = ({
           break;
         case 'openai_agents':
           handleAgentUpdate(eventType, data);
+          break;
+        case 'vendors':
+          handleVendorUpdate(eventType, data);
           break;
       }
     };
@@ -257,6 +262,29 @@ export const useUnifiedRealtime = ({
       toast.success('Agent updated');
     } else if (eventType === 'DELETE') {
       toast.success('Agent deleted');
+    }
+  };
+
+  const handleVendorUpdate = (eventType: string, data: any) => {
+    const record = data.new;
+    const oldRecord = data.old;
+
+    console.log(`[UnifiedRealtime] Vendor ${eventType}: ${record?.id || oldRecord?.id}`);
+    
+    if (onVendorUpdate && record) {
+      onVendorUpdate(record);
+    }
+
+    // Invalidate vendor caches
+    queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    queryClient.invalidateQueries({ queryKey: ['vendor'] });
+
+    if (eventType === 'INSERT') {
+      toast.success('New vendor created');
+    } else if (eventType === 'UPDATE') {
+      toast.success('Vendor updated');
+    } else if (eventType === 'DELETE') {
+      toast.success('Vendor deleted');
     }
   };
 

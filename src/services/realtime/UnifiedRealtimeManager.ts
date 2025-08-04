@@ -127,7 +127,7 @@ export class UnifiedRealtimeManager {
       id: connectionKey,
       channel,
       userId: config.userId,
-      tables: ['social_media_posts', 'color_themes', 'system_prompts', 'openai_agents'],
+      tables: ['social_media_posts', 'color_themes', 'system_prompts', 'openai_agents', 'vendors'],
       subscriberCount: this.subscribers.get(connectionKey)?.size || 0,
       lastActivity: Date.now(),
       status: 'connecting',
@@ -231,6 +231,20 @@ export class UnifiedRealtimeManager {
       },
       (payload) => {
         this.handleDebouncedUpdate('openai_agents', payload);
+      }
+    );
+
+    // Vendors subscription
+    channel.on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'vendors',
+        filter: `user_id=eq.${userId}`
+      },
+      (payload) => {
+        this.handleDebouncedUpdate('vendors', payload);
       }
     );
   }

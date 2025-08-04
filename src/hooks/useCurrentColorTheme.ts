@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ColorTheme } from '@/types/colorTheme';
 import { useColorThemes } from '@/hooks/useColorThemes';
-import { useRealtimeColorThemes } from '@/hooks/useRealtimeColorThemes';
+import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseCurrentColorThemeOptions {
   selectedThemeId?: string;
@@ -13,15 +14,18 @@ export function useCurrentColorTheme(options: UseCurrentColorThemeOptions = {}) 
   const { data: themes = [] } = useColorThemes();
   const [currentTheme, setCurrentTheme] = useState<ColorTheme | null>(null);
 
-  // Listen for real-time theme updates
-  useRealtimeColorThemes({
-    onThemeUpdated: (updatedTheme) => {
+  const { user } = useAuth();
+
+  // Listen for real-time theme updates via unified realtime
+  useUnifiedRealtime({
+    enabled: !!user?.id,
+    userId: user?.id,
+    onThemeUpdate: (updatedTheme) => {
       if (currentTheme?.id === updatedTheme.id) {
         setCurrentTheme(updatedTheme);
       }
-    },
-    onThemeDeleted: (deletedTheme) => {
-      if (currentTheme?.id === deletedTheme.id) {
+      // Handle deletion by checking if the theme still exists
+      if (currentTheme && !themes.find(t => t.id === currentTheme.id)) {
         setCurrentTheme(null);
       }
     }
