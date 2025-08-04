@@ -36,7 +36,7 @@ export const SystemPromptsTab = ({
   // Set up realtime updates for system prompts
   useUnifiedRealtime({
     enabled: !!agentId,
-    user_Id: user?.id,
+    userId: user?.id,
     onSystemPromptUpdate: () => {
       if (agentId) {
         fetchDatabasePrompts();
