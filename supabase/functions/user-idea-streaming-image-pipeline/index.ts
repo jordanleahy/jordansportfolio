@@ -1,70 +1,14 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { UserIdeaRequest, ThemeData, ThemePost, SupabaseClient } from '../_shared/types.ts';
+import { streamingCorsHeaders, updateThemeImageStatus, sendStreamEvent } from '../_shared/utils.ts';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Cache-Control': 'no-cache',
-  'Connection': 'keep-alive',
-};
-
-interface UserIdeaRequest {
-  description: string;
-  stream?: boolean;
-}
-
-interface StreamingEvent {
-  type: string;
-  progress: number;
-  data?: any;
-  error?: string;
-}
-
-const sendStreamEvent = (controller: ReadableStreamDefaultController, event: StreamingEvent) => {
-  const encoder = new TextEncoder();
-  const message = `data: ${JSON.stringify(event)}\n\n`;
-  try {
-    controller.enqueue(encoder.encode(message));
-  } catch (error) {
-    console.error('Error sending stream event:', error);
-  }
-};
-
-// Helper function to safely update generation status
-const updateThemeImageStatus = async (supabase: any, status: string, theme: string, userId: string, imageUrl?: string): Promise<void> => {
-  console.log(`🔄 Updating theme image status to '${status}' for theme: ${theme}`);
-  
-  const updateData: any = {
-    theme_image_generation_status: status,
-    updated_at: new Date().toISOString()
-  };
-  
-  if (imageUrl && status === 'complete') {
-    updateData.theme_image_4_3_url = imageUrl;
-  }
-  
-  const { data, error } = await supabase
-    .from('social_media_posts')
-    .update(updateData)
-    .eq('theme', theme)
-    .eq('user_id', userId)
-    .select('id, title');
-
-  if (error) {
-    console.error(`❌ Failed to update theme image status:`, error);
-    throw new Error(`Database update failed: ${error.message}`);
-  }
-  
-  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme: ${theme}`);
-  return;
-};
-
-const generateTheme = async (description: string): Promise<any> => {
+const generateTheme = async (description: string): Promise<ThemeData> => {
   console.log('🎯 Generating theme for description:', description);
 
   const systemPrompt = `You are a professional social media content strategist. Convert user descriptions into structured theme JSON for social media calendar generation.
@@ -94,7 +38,7 @@ JSON STRUCTURE REQUIRED:
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
+      'Authorization': `Bearer ${openaiApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -118,13 +62,13 @@ JSON STRUCTURE REQUIRED:
   return JSON.parse(generatedContent);
 };
 
-const importThemeToDatabase = async (supabase: any, themeData: any, userId: string): Promise<number> => {
+const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<number> => {
   console.log('💾 Importing theme to database:', themeData.category);
   console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
   
   try {
     // Import posts using direct insert instead of RPC to ensure proper authentication context
-    const postsToInsert = themeData.posts.map((post: any) => ({
+    const postsToInsert = themeData.posts.map((post: ThemePost) => ({
       day: post.day,
       title: post.title,
       description: post.description, // Fixed: use post.description not post.story_description
@@ -186,7 +130,7 @@ const importThemeToDatabase = async (supabase: any, themeData: any, userId: stri
   }
 };
 
-const generateSystemPrompt = async (supabase: any, themeData: any, userId: string): Promise<void> => {
+const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<void> => {
   console.log('🤖 Generating system prompt for theme:', themeData.theme);
   
   const { error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
@@ -209,7 +153,7 @@ const generateSystemPrompt = async (supabase: any, themeData: any, userId: strin
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: streamingCorsHeaders });
   }
 
   try {
@@ -234,7 +178,7 @@ serve(async (req) => {
       throw new Error('Description and authentication required');
     }
 
-    if (!openAIApiKey) {
+    if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
@@ -393,7 +337,7 @@ serve(async (req) => {
 
       return new Response(streamResponse, {
         headers: {
-          ...corsHeaders,
+          ...streamingCorsHeaders,
           'Content-Type': 'text/event-stream',
         },
       });
@@ -455,7 +399,7 @@ serve(async (req) => {
         message: 'Theme created successfully! Image generation continues in background.',
         backgroundProcessing: true
       }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -466,7 +410,7 @@ serve(async (req) => {
       error: error.message
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
