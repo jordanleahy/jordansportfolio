@@ -93,17 +93,19 @@ async function generateThemeImage(supabase: any, prompt: string, theme: string, 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-image-1',
+        model: 'dall-e-3',
         prompt: prompt,
         n: 1,
-        size: '1024x1024', // Will be cropped to 4:3
-        quality: 'high',
+        size: '1024x1024',
+        quality: 'hd',
         response_format: 'b64_json'
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI Image API error: ${response.status}`);
+      const errorData = await response.text();
+      console.error('❌ OpenAI Image API Error Details:', errorData);
+      throw new Error(`OpenAI Image API error: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
@@ -195,13 +197,16 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let requestData: BackgroundImageRequest | null = null;
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Parse request body
-    const { theme, category, userId, firstPostTitle, firstPostDescription }: BackgroundImageRequest = await req.json();
+    // Parse request body and store it for error handling
+    requestData = await req.json();
+    const { theme, category, userId, firstPostTitle, firstPostDescription } = requestData;
 
     console.log(`🚀 Starting background image generation for theme: ${theme}`);
     console.log(`📋 Request data: { theme: "${theme}", category: "${category}", userId: "${userId}" }`);
@@ -264,13 +269,12 @@ serve(async (req) => {
 
     // Try to update status to failed if we have the necessary info
     try {
-      const body = await req.clone().json();
-      if (body.theme && body.userId) {
+      if (requestData?.theme && requestData?.userId) {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseKey);
         
-        await updateThemeImageStatus(supabase, 'failed', body.theme, body.userId);
+        await updateThemeImageStatus(supabase, 'failed', requestData.theme, requestData.userId);
         console.log('✅ Updated theme status to failed');
       }
     } catch (statusError) {
