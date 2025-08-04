@@ -84,11 +84,13 @@ Create a detailed image generation prompt for this ${category} content.`;
 };
 
 const getAspectRatioSize = (aspectRatio: string): string => {
+  // DALL-E 3 only supports these specific sizes
   const sizeMap: Record<string, string> = {
-    '16:9': '1792x1024',
-    '9:16': '1024x1792',
-    '4:3': '1536x1024',
-    '3:4': '1024x1536'
+    '16:9': '1792x1024',  // Landscape
+    '9:16': '1024x1792',  // Portrait
+    '4:3': '1024x1024',   // Square (closest to 4:3)
+    '3:4': '1024x1792',   // Portrait (closest to 3:4)
+    '1:1': '1024x1024'    // Square
   };
   return sizeMap[aspectRatio] || '1024x1024';
 };
