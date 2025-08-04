@@ -195,8 +195,7 @@ serve(async (req) => {
               prompt: prompt,
               size: imageSize,
               quality: 'high',
-              n: 1,
-              partial_images: 2  // Enable partial image streaming for smooth transitions
+              n: 1
             };
             
             console.log('Making OpenAI request with:', {
