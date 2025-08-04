@@ -398,16 +398,34 @@ export default function StoriesDashboard() {
             const hasRealPosts = (postCounts[category] || 0) > 0;
             const isInShimmer = shimmerCategories.includes(category);
             const isGeneratingImage = imageGeneratingCategories.includes(category);
+            console.log('🔍 Category filtering debug:', {
+              category,
+              hasRealPosts,
+              isInShimmer,
+              isGeneratingImage,
+              postCount: postCounts[category],
+              willShow: hasRealPosts && !isInShimmer && !isGeneratingImage
+            });
             return hasRealPosts && !isInShimmer && !isGeneratingImage;
           })}
           postCounts={postCounts}
           categoryImages={categoryImages}
-          shimmerCategories={[
+          shimmerCategories={(() => {
             // Show shimmer for categories being created (no posts yet)
-            ...shimmerCategories.filter(category => (postCounts[category] || 0) === 0),
+            const creatingShimmer = shimmerCategories.filter(category => (postCounts[category] || 0) === 0);
             // Show shimmer for categories with posts but still generating theme images
-            ...imageGeneratingCategories.filter(category => (postCounts[category] || 0) > 0)
-          ]}
+            const generatingShimmer = imageGeneratingCategories.filter(category => (postCounts[category] || 0) > 0);
+            const finalShimmer = [...creatingShimmer, ...generatingShimmer];
+            console.log('🎭 Shimmer debug:', {
+              shimmerCategories,
+              imageGeneratingCategories,
+              postCounts,
+              creatingShimmer,
+              generatingShimmer,
+              finalShimmer
+            });
+            return finalShimmer;
+          })()}
           firstPostsData={firstPostsData}
         />
       </div>
