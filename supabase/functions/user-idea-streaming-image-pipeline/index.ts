@@ -53,7 +53,7 @@ JSON STRUCTURE REQUIRED:
 {
   "category": "lowercase-category-name",
   "theme": "Professional Theme Title",
-  "description": "Brief description of the theme focus",
+  "theme_description": "Brief description of the theme focus",
   "posts": [
     {
       "day": 1,
@@ -96,7 +96,7 @@ const importThemeToDatabase = async (supabase: any, themeData: any, userId: stri
   const { data, error } = await supabase.rpc('insert_category_content', {
     category_name: themeData.category,
     posts_data: themeData.posts,
-    theme_description_param: themeData.description
+    theme_description_param: themeData.theme_description
   });
 
   if (error) {
@@ -113,7 +113,7 @@ const generateSystemPrompt = async (supabase: any, themeData: any, userId: strin
     body: {
       theme: themeData.theme,
       category: themeData.category,
-      description: themeData.description,
+      description: themeData.theme_description,
       sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
       user_id: userId
     }
