@@ -9,34 +9,37 @@ interface SystemPromptData {
   agentName: string;
   lastUpdated: string;
   version: number;
+  theme?: string;
+  themeDescription?: string;
 }
 
-export const useSystemPromptCache = (category: string) => {
+export const useSystemPromptCache = (theme: string, category?: string) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const query = useQuery({
-    queryKey: ['system-prompt-cached', category],
+    queryKey: ['system-prompt-cached', theme, category],
     queryFn: async (): Promise<SystemPromptData | null> => {
-      if (!category) return null;
+      if (!theme) return null;
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Try cache first
-        const cached = await systemPromptCache.get(category, user.id);
+        // Try cache first with theme-based key
+        const cacheKey = `${theme}${category ? `-${category}` : ''}`;
+        const cached = await systemPromptCache.get(cacheKey, user.id);
         if (cached) {
-          console.log(`⚡ [useSystemPromptCache] Cache hit for ${category}`);
+          console.log(`⚡ [useSystemPromptCache] Cache hit for theme: ${theme}`);
           
           // Background update - don't await this
           setTimeout(async () => {
             try {
-              const fresh = await fetchFreshPrompt(category, user.id);
+              const fresh = await fetchFreshPrompt(theme, user.id, category);
               if (fresh && fresh.version > cached.version) {
-                await systemPromptCache.set(category, user.id, fresh);
-                queryClient.setQueryData(['system-prompt-cached', category], fresh);
-                console.log(`🔄 [useSystemPromptCache] Background update for ${category}`);
+                await systemPromptCache.set(cacheKey, user.id, fresh);
+                queryClient.setQueryData(['system-prompt-cached', theme, category], fresh);
+                console.log(`🔄 [useSystemPromptCache] Background update for theme: ${theme}`);
               }
             } catch (error) {
               console.warn('Background update failed:', error);
@@ -47,11 +50,11 @@ export const useSystemPromptCache = (category: string) => {
         }
 
         // Cache miss - fetch fresh data
-        console.log(`💾 [useSystemPromptCache] Cache miss for ${category}, fetching fresh data`);
-        const fresh = await fetchFreshPrompt(category, user.id);
+        console.log(`💾 [useSystemPromptCache] Cache miss for theme: ${theme}, fetching fresh data`);
+        const fresh = await fetchFreshPrompt(theme, user.id, category);
         
         if (fresh) {
-          await systemPromptCache.set(category, user.id, fresh);
+          await systemPromptCache.set(cacheKey, user.id, fresh);
         }
         
         return fresh;
@@ -85,14 +88,17 @@ export const useSystemPromptCache = (category: string) => {
           prompt: newPrompt,
           agentName: currentData.agentName,
           lastUpdated: new Date().toISOString(),
-          version: currentData.version + 1
+          version: currentData.version + 1,
+          theme: currentData.theme,
+          themeDescription: currentData.themeDescription
         };
         
-        queryClient.setQueryData(['system-prompt-cached', category], optimisticData);
-        await systemPromptCache.set(category, user.id, optimisticData);
+        const cacheKey = `${theme}${category ? `-${category}` : ''}`;
+        queryClient.setQueryData(['system-prompt-cached', theme, category], optimisticData);
+        await systemPromptCache.set(cacheKey, user.id, optimisticData);
       }
 
-      // Update in new system_prompts table
+      // Update in new system_prompts table with theme priority
       const { error: updateError } = await supabase
         .from('system_prompts')
         .update({ 
@@ -101,23 +107,24 @@ export const useSystemPromptCache = (category: string) => {
           version: (currentData?.version || 0) + 1
         })
         .eq('user_id', user.id)
-        .eq('category', category);
+        .eq('theme', theme)
+        .eq('category', category || 'general');
 
       if (updateError) throw updateError;
 
       return { newPrompt, userId: user.id };
     },
     onSuccess: async ({ newPrompt, userId }) => {
-      // Clear cached prompts for this category when system prompt is updated
+      // Clear cached prompts for this theme when system prompt is updated
       try {
         await supabase
           .from('cached_prompts')
           .delete()
-          .eq('category', category)
+          .eq('category', category || 'general')
           .eq('user_id', userId);
         
         // Invalidate cached prompts queries
-        queryClient.invalidateQueries({ queryKey: ['cached-prompts', category] });
+        queryClient.invalidateQueries({ queryKey: ['cached-prompts', theme] });
         queryClient.invalidateQueries({ queryKey: ['cached-prompts-stats'] });
         
         toast({
@@ -135,7 +142,7 @@ export const useSystemPromptCache = (category: string) => {
     },
     onError: (error) => {
       // Revert optimistic update
-      queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', category] });
+      queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', theme, category] });
       
       toast({
         title: "Error",
@@ -152,7 +159,7 @@ export const useSystemPromptCache = (category: string) => {
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-        body: { category, user_id: user.id }
+        body: { theme, category, user_id: user.id }
       });
 
       if (error) throw error;
@@ -162,10 +169,11 @@ export const useSystemPromptCache = (category: string) => {
       // Invalidate cache and refetch
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await systemPromptCache.invalidate(category, user.id);
+        const cacheKey = `${theme}${category ? `-${category}` : ''}`;
+        await systemPromptCache.invalidate(cacheKey, user.id);
       }
       
-      queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', category] });
+      queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', theme, category] });
       
       toast({
         title: "Success",
@@ -185,19 +193,20 @@ export const useSystemPromptCache = (category: string) => {
   const invalidateCache = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await systemPromptCache.invalidate(category, user.id);
+      const cacheKey = `${theme}${category ? `-${category}` : ''}`;
+      await systemPromptCache.invalidate(cacheKey, user.id);
     }
-    queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', category] });
-  }, [category, queryClient]);
+    queryClient.invalidateQueries({ queryKey: ['system-prompt-cached', theme, category] });
+  }, [theme, category, queryClient]);
 
   const prefetchPrompt = useCallback(async () => {
     if (!query.data) {
       queryClient.prefetchQuery({
-        queryKey: ['system-prompt-cached', category],
+        queryKey: ['system-prompt-cached', theme, category],
         queryFn: () => query.refetch()
       });
     }
-  }, [category, query, queryClient]);
+  }, [theme, category, query, queryClient]);
 
   return {
     data: query.data,
@@ -214,20 +223,43 @@ export const useSystemPromptCache = (category: string) => {
   };
 };
 
-// Helper function to fetch fresh prompt data from new system_prompts table
-async function fetchFreshPrompt(category: string, userId: string): Promise<SystemPromptData | null> {
+// Helper function to fetch fresh prompt data from new system_prompts table with theme priority
+async function fetchFreshPrompt(theme: string, userId: string, category?: string): Promise<SystemPromptData | null> {
   const { data, error } = await supabase
     .from('system_prompts')
-    .select('prompt_text, agent_name, updated_at, version')
+    .select('prompt_text, agent_name, updated_at, version, theme, theme_description')
     .eq('user_id', userId)
-    .eq('category', category)
+    .eq('theme', theme)
+    .eq('category', category || 'general')
     .order('updated_at', { ascending: false })
     .limit(1)
     .single();
 
   if (error) {
     if (error.code === 'PGRST116') {
-      // No data found, return null
+      // No data found for theme, try fallback to category-only
+      if (category) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, agent_name, updated_at, version, theme, theme_description')
+          .eq('user_id', userId)
+          .eq('category', category)
+          .is('theme', null)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (fallbackError || !fallbackData) return null;
+        
+        return {
+          prompt: fallbackData.prompt_text,
+          agentName: fallbackData.agent_name,
+          lastUpdated: fallbackData.updated_at,
+          version: fallbackData.version,
+          theme: fallbackData.theme,
+          themeDescription: fallbackData.theme_description
+        };
+      }
       return null;
     }
     throw error;
@@ -237,6 +269,8 @@ async function fetchFreshPrompt(category: string, userId: string): Promise<Syste
     prompt: data.prompt_text,
     agentName: data.agent_name,
     lastUpdated: data.updated_at,
-    version: data.version
+    version: data.version,
+    theme: data.theme,
+    themeDescription: data.theme_description
   };
 }

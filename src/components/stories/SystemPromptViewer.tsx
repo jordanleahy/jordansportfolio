@@ -21,6 +21,7 @@ import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
 
 interface SystemPromptViewerProps {
   category: string;
+  theme?: string;
   isVisible: boolean;
   onClose: () => void;
   selectedThemeId?: string;
@@ -30,6 +31,7 @@ interface SystemPromptViewerProps {
 
 export const SystemPromptViewer = ({
   category,
+  theme,
   isVisible,
   onClose,
   selectedThemeId,
@@ -56,14 +58,14 @@ export const SystemPromptViewer = ({
     regeneratePrompt,
     isRegenerating,
     invalidateCache
-  } = useSystemPromptCache(category);
+  } = useSystemPromptCache(theme || category, category);
 
   // Use realtime system prompts
   const { isConnected } = useUnifiedRealtime({
     enabled: isVisible,
     userId: user?.id,
     onSystemPromptUpdate: (data) => {
-      if (data.category === category) {
+      if (data.theme === (theme || category) || data.category === category) {
         setRealtimeUpdateReceived(true);
         // Show update indicator briefly
         setTimeout(() => setRealtimeUpdateReceived(false), 3000);
@@ -116,7 +118,7 @@ export const SystemPromptViewer = ({
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    if (!category) return;
+    if (!theme && !category) return;
     
     try {
       setPreviousPrompt(promptData?.prompt || '');
@@ -126,7 +128,7 @@ export const SystemPromptViewer = ({
       console.error('Error regenerating system prompt:', error);
       toast.error('Failed to regenerate system prompt');
     }
-  }, [category, promptData?.prompt, regeneratePrompt]);
+  }, [theme, category, promptData?.prompt, regeneratePrompt]);
 
 
   // Compute diff when in diff view mode

@@ -1779,6 +1779,8 @@ export type Database = {
           is_active: boolean
           name: string | null
           prompt_text: string
+          theme: string | null
+          theme_description: string | null
           updated_at: string
           user_id: string
           version: number
@@ -1795,6 +1797,8 @@ export type Database = {
           is_active?: boolean
           name?: string | null
           prompt_text: string
+          theme?: string | null
+          theme_description?: string | null
           updated_at?: string
           user_id: string
           version?: number
@@ -1811,6 +1815,8 @@ export type Database = {
           is_active?: boolean
           name?: string | null
           prompt_text?: string
+          theme?: string | null
+          theme_description?: string | null
           updated_at?: string
           user_id?: string
           version?: number

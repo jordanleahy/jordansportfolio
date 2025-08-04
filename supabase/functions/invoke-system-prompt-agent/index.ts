@@ -95,11 +95,11 @@ serve(async (req) => {
     const requestBody = await req.json();
     const { category, theme, description, sample_posts, user_id } = requestBody;
     
-    // Input validation
-    if (!category || !user_id) {
+    // Input validation - theme is now primary, category secondary
+    if (!theme || !user_id) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: ERROR_MESSAGES.INVALID_REQUEST_BODY 
+        error: 'Missing required fields: theme and user_id are required' 
       }), {
         status: HTTP_STATUS.BAD_REQUEST,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -109,7 +109,7 @@ serve(async (req) => {
     // Allow any category for system prompt generation
     // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
     
-    console.log('Processing request for category:', category, 'user_id:', user_id);
+    console.log('Processing request for theme:', theme, 'category:', category, 'user_id:', user_id);
 
     if (!openAIApiKey) {
       return new Response(JSON.stringify({ 
@@ -172,16 +172,14 @@ serve(async (req) => {
 
     const systemPrompt = systemPromptObj.prompt;
 
-    // Use the actual theme as the category for system prompt generation
-    // Default to "healthcare" theme for visual content when no specific theme provided
-    const isVisualContent = ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(category) || 
-                           description?.toLowerCase().includes('visual') || 
-                           description?.toLowerCase().includes('image');
+    // Theme is now primary focus, category provides context
+    const actualTheme = theme;
+    const contextCategory = category || 'general';
     
-    const actualCategory = theme || (isVisualContent ? 'healthcare' : category);
-    let userPrompt = `Create a comprehensive system prompt for the "${actualCategory}" category.
+    let userPrompt = `Create a comprehensive system prompt for the "${actualTheme}" theme with "${contextCategory}" category context.
 
-Theme: ${actualCategory}
+Primary Theme: ${actualTheme}
+Category Context: ${contextCategory}
 Description: ${description || 'No description provided'}
 
 Default Color Palette to Include:
@@ -195,10 +193,10 @@ Default Color Palette to Include:
 Visual Style: ${defaultColorTheme.visual_style}
 Color Usage: ${defaultColorTheme.color_instructions}
 
-Sample content from this category:
+Sample content from this theme:
 ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
 
-Please generate a detailed, professional system prompt following the established template format with industry-specific visual frameworks, the provided color palette, and content analysis guidelines. Include the color palette in the standard format with the exact hex values provided above.`;
+Please generate a detailed, professional system prompt following the established template format with theme-specific visual frameworks, the provided color palette, and content analysis guidelines. Focus primarily on "${actualTheme}" with "${contextCategory}" context. Include the color palette in the standard format with the exact hex values provided above.`;
 
     console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
 
@@ -242,7 +240,8 @@ Please generate a detailed, professional system prompt following the established
       user_id,
       agent_id: agent.id,
       agent_name: agent.name,
-      category: actualCategory,
+      theme: actualTheme,
+      category: contextCategory,
       prompt_length: generatedPrompt.length,
       timestamp: new Date().toISOString()
     });
@@ -258,10 +257,12 @@ Please generate a detailed, professional system prompt following the established
           agent_name: agent.name,
           agent_purpose: agent.purpose,
           agent_owner: agent.owner,
-          name: `${actualCategory} System Prompt`,
-          category: actualCategory,
+          name: `${actualTheme} Theme System Prompt`,
+          category: contextCategory,
+          theme: actualTheme,
+          theme_description: description,
           prompt_text: generatedPrompt,
-          description: `Generated system prompt for ${actualCategory} category`
+          description: `Generated system prompt for ${actualTheme} theme with ${contextCategory} context`
         })
         .select();
 
@@ -293,30 +294,33 @@ Please generate a detailed, professional system prompt following the established
     // 🎯 Step 2: Determine target agent based on prompt type
       let targetAgentName = null;
       
-      // Route to Visual Prompt Generator for visual content categories
-      if (['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(actualCategory) || 
+      // Route based on theme first, then category context
+      if (actualTheme?.toLowerCase().includes('visual') || 
+          ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(actualTheme) ||
+          ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(contextCategory) ||
           description?.toLowerCase().includes('visual') || 
-          description?.toLowerCase().includes('image') ||
-          theme?.toLowerCase().includes('visual')) {
+          description?.toLowerCase().includes('image')) {
         targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
       }
-      // Route to other agents based on category patterns
-      else if (actualCategory.includes('blog') || actualCategory.includes('content')) {
+      // Route to other agents based on theme or category patterns
+      else if (actualTheme?.includes('blog') || actualTheme?.includes('content') ||
+               contextCategory?.includes('blog') || contextCategory?.includes('content')) {
         targetAgentName = AGENT_NAMES.BLOG_CONTENT_GENERATOR;
       }
-      else if (actualCategory.includes('cover_letter')) {
+      else if (actualTheme?.includes('cover_letter') || contextCategory?.includes('cover_letter')) {
         targetAgentName = AGENT_NAMES.COVER_LETTER_GENERATOR;
       }
-      else if (actualCategory.includes('calendar') || actualCategory.includes('theme') || actualCategory.includes('json')) {
+      else if (actualTheme?.includes('calendar') || actualTheme?.includes('json') ||
+               contextCategory?.includes('calendar') || contextCategory?.includes('theme') || contextCategory?.includes('json')) {
         targetAgentName = AGENT_NAMES.CALENDAR_THEME_JSON_PROCESSOR;
       }
       else {
-        // Default to Visual Prompt Generator for unknown categories
+        // Default to Visual Prompt Generator for unknown themes
         targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
       }
       
       if (targetAgentName) {
-        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for category "${actualCategory}"`);
+        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for theme "${actualTheme}" with category context "${contextCategory}"`);
         
         const { data: targetAgent, error: targetAgentError } = await supabase
           .from('openai_agents')
@@ -334,37 +338,41 @@ Please generate a detailed, professional system prompt following the established
           console.log('✅ TARGET AGENT FOUND:', {
             agent_name: targetAgent.name,
             agent_id: targetAgent.id,
-            category: actualCategory,
-            routing_logic: targetAgentName === AGENT_NAMES.VISUAL_PROMPT_GENERATOR ? 'visual_content' : 'other_agent'
+            theme: actualTheme,
+            category: contextCategory,
+            routing_logic: 'theme_based'
           });
 
-          // Add the new prompt to the target agent's system_prompts array
+          // Add the new prompt to the target agent's system_prompts array with theme focus
           const existingPrompts = targetAgent.system_prompts || [];
           const newPromptObj = {
-            category: actualCategory,
+            category: contextCategory,
+            theme: actualTheme,
             prompt: generatedPrompt
           };
 
-          // Check if a prompt for this category already exists
-          const existingIndex = existingPrompts.findIndex((p: any) => p.category === actualCategory);
+          // Check if a prompt for this theme already exists (or category fallback)
+          const existingIndex = existingPrompts.findIndex((p: any) => 
+            (p.theme === actualTheme) || (p.category === contextCategory && !p.theme)
+          );
           let updatedPrompts;
           
           if (existingIndex >= 0) {
-            // Replace existing prompt
+            // Replace existing prompt with theme-based version
             updatedPrompts = [...existingPrompts];
             updatedPrompts[existingIndex] = newPromptObj;
-            console.log(`🔄 REPLACING: Existing prompt for category "${actualCategory}" in ${targetAgent.name}`);
+            console.log(`🔄 REPLACING: Existing prompt for theme "${actualTheme}" in ${targetAgent.name}`);
           } else {
-            // Add new prompt
+            // Add new theme-based prompt
             updatedPrompts = [...existingPrompts, newPromptObj];
-            console.log(`➕ ADDING: New prompt for category "${actualCategory}" to ${targetAgent.name}`);
+            console.log(`➕ ADDING: New prompt for theme "${actualTheme}" to ${targetAgent.name}`);
           }
 
-          // Update target agent's supported categories
+          // Update target agent's supported categories (keep for backward compatibility)
           const existingCategories = targetAgent.supported_categories || [];
-          const updatedCategories = existingCategories.includes(actualCategory) 
+          const updatedCategories = existingCategories.includes(contextCategory) 
             ? existingCategories 
-            : [...existingCategories, actualCategory];
+            : [...existingCategories, contextCategory];
 
           // Update the target agent with the new prompt
           const currentTimestamp = new Date().toISOString();
@@ -432,7 +440,8 @@ Please generate a detailed, professional system prompt following the established
       try {
         const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
           body: { 
-            category: actualCategory, 
+            category: contextCategory,
+            theme: actualTheme,
             userId: user_id 
           }
         });
@@ -443,7 +452,8 @@ Please generate a detailed, professional system prompt following the established
         } else {
           const promptResults = imagePromptResponse.data;
           console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
-            category: actualCategory,
+            theme: actualTheme,
+            category: contextCategory,
             totalPosts: promptResults?.totalPosts || 0,
             successCount: promptResults?.successCount || 0,
             errorCount: promptResults?.errorCount || 0
@@ -459,7 +469,8 @@ Please generate a detailed, professional system prompt following the established
       console.log('📈 FINAL STATS:', {
         operation: 'system_prompt_generation',
         user_id,
-        category: actualCategory,
+        theme: actualTheme,
+        category: contextCategory,
         agent_id: agent.id,
         prompt_length: generatedPrompt.length,
         database_records_created: insertedPrompt?.length || 0,
@@ -471,9 +482,10 @@ Please generate a detailed, professional system prompt following the established
         success: true, 
         system_prompt: generatedPrompt,
         agent_id: agent.id,
-        category: actualCategory,
+        theme: actualTheme,
+        category: contextCategory,
         database_record_id: insertedPrompt?.[0]?.id,
-        message: `System prompt for "${actualCategory}" generated and saved successfully`
+        message: `Theme-based system prompt for "${actualTheme}" generated and saved successfully`
       }), {
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
@@ -484,14 +496,16 @@ Please generate a detailed, professional system prompt following the established
         message: dbError.message,
         stack: dbError.stack,
         user_id,
-        category: actualCategory,
+        theme: actualTheme,
+        category: contextCategory,
         agent_id: agent.id
       });
 
       return new Response(JSON.stringify({ 
         success: false, 
         error: `Database operation failed: ${dbError.message}`,
-        category: actualCategory,
+        theme: actualTheme,
+        category: contextCategory,
         agent_id: agent.id
       }), {
         status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
