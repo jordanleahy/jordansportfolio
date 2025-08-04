@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StreamingShimmer } from "@/components/ui/streaming-shimmer";
 import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
@@ -22,19 +23,19 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   
-  // Use streaming hook for real-time image generation
+  // Use streaming hook for real-time image generation (enabled for both shimmer and regular cards)
   const { streamingProgress, isGenerating, error, startStreaming } = useThemeImageStreaming({
     category,
-    enabled: !isShimmer && !!firstPostData
+    enabled: !!firstPostData // Enable for both shimmer and regular cards
   });
 
-  // Auto-start streaming when firstPostData becomes available
+  // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
   useEffect(() => {
-    if (!isShimmer && firstPostData && !currentImageUrl && !isGenerating && !streamingProgress) {
+    if (firstPostData && !currentImageUrl && !isGenerating && !streamingProgress) {
       console.log(`🚀 Auto-starting theme image generation for category: ${category}`);
       startStreaming(firstPostData);
     }
-  }, [firstPostData, isShimmer, currentImageUrl, isGenerating, streamingProgress, category, startStreaming]);
+  }, [firstPostData, currentImageUrl, isGenerating, streamingProgress, category, startStreaming]);
 
   // Update image URL when streaming completes or imageUrl prop changes
   useEffect(() => {
@@ -56,10 +57,15 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
 
   if (isShimmer) {
     return (
-      <Card className="group overflow-hidden border-border/50 animate-pulse">
-        {/* Shimmer Image Section */}
-        <div className="relative h-48 bg-muted/50">
-          <div className="w-full h-full bg-gradient-to-br from-muted/30 to-muted/60 animate-pulse" />
+      <Card className="group overflow-hidden border-border/50">
+        {/* Streaming Shimmer Image Section */}
+        <div className="relative h-48">
+          <StreamingShimmer
+            streamingProgress={streamingProgress}
+            isGenerating={isGenerating}
+            error={error}
+            fallbackIcon={<FolderOpen className="h-12 w-12 text-primary/40" />}
+          />
         </div>
 
         {/* Shimmer Content Section */}
