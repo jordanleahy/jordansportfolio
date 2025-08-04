@@ -105,13 +105,9 @@ export class ThemeValidationService {
       cleaned.title = this.sanitizeText(cleaned.title);
     }
 
-    // Map description to story_description if needed
-    if (typeof cleaned.description === 'string' && !cleaned.story_description) {
-      cleaned.story_description = this.sanitizeText(cleaned.description);
-      delete cleaned.description;
-      fixes.push(`Post ${index + 1}: Mapped description to story_description`);
-    } else if (typeof cleaned.story_description === 'string') {
-      cleaned.story_description = this.sanitizeText(cleaned.story_description);
+    // Clean description
+    if (typeof cleaned.description === 'string') {
+      cleaned.description = this.sanitizeText(cleaned.description);
     }
 
     // Normalize day
