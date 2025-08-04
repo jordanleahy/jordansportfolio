@@ -293,6 +293,13 @@ export default function StoriesDashboard() {
       await importData();
       console.log('✅ [StoriesDashboard] Import completed');
       
+      // Refresh data after successful import
+      console.log('🔄 [StoriesDashboard] Refreshing data after custom theme import');
+      await queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+      await queryClient.refetchQueries({ queryKey: ['available-categories'] });
+      await refreshPostCountsAndImages();
+      console.log('✅ [StoriesDashboard] Data refresh completed');
+      
       toast({
         title: "Theme Generated & Imported!",
         description: `Generated and imported ${data.themeData.posts.length} posts for "${data.themeData.theme}"`,
