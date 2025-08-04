@@ -17,7 +17,8 @@ interface StreamingImageRequest {
   postId?: string;
   title: string;
   description: string;
-  category: string;
+  theme: string;
+  category?: string;
   aspectRatio: '4:3' | '16:9' | '9:16' | '3:4';
   colorThemeId?: string;
   mode: 'theme' | 'single' | 'bulk';
@@ -36,17 +37,18 @@ const trackApiUsage = async (supabase: any, functionName: string, model: string,
   });
 };
 
-const generateImagePrompt = async (title: string, description: string, category: string, aspectRatio: string): Promise<string> => {
-  console.log(`Generating image prompt for: ${title} (${category}, ${aspectRatio})`);
+const generateImagePrompt = async (title: string, description: string, theme: string, aspectRatio: string, category?: string): Promise<string> => {
+  console.log(`Generating image prompt for: ${title} (${theme}, ${aspectRatio})`);
   
-  const systemPrompt = `You are an expert at creating detailed, professional image generation prompts for ${category}-themed AI image generators.
+  const systemPrompt = `You are an expert at creating detailed, professional image generation prompts for ${theme}-themed AI image generators.
 
 Create prompts that will generate:
-- Professional, credible visuals suitable for ${category} content
+- Professional, credible visuals suitable for ${theme} content
 - Clear focal points that support the content message
 - Appropriate industry context and environmental elements
 - Balanced composition with good visual hierarchy
-- Consistent branding feel across different ${category} topics
+- Consistent branding feel across different ${theme} topics
+${category ? `- Context-aware visuals that relate to ${category} industry` : ''}
 
 CRITICAL FORMATTING RULES:
 - DO NOT include any title, headline, or text overlays in the generated image
@@ -58,9 +60,11 @@ Generate professional, high-quality visual prompts that seamlessly integrate the
 
   const userPrompt = `Title: ${title}
 Description: ${description}
+Theme: ${theme}
+${category ? `Category Context: ${category}` : ''}
 Aspect Ratio: ${aspectRatio}
 
-Create a detailed image generation prompt for this ${category} content.`;
+Create a detailed image generation prompt for this ${theme} content${category ? ` within the ${category} context` : ''}.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -149,9 +153,9 @@ serve(async (req) => {
     }
 
     const requestData: StreamingImageRequest = await req.json();
-    const { postId, title, description, category, aspectRatio, colorThemeId, mode, stream = true } = requestData;
+    const { postId, title, description, theme, category, aspectRatio, colorThemeId, mode, stream = true } = requestData;
 
-    console.log(`Processing ${mode} image generation request for category: ${category}`);
+    console.log(`Processing ${mode} image generation request for theme: ${theme}${category ? ` (category: ${category})` : ''}`);
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -180,7 +184,7 @@ serve(async (req) => {
             sendProgress('prompt_generation', 10);
 
             // Generate image prompt
-            const prompt = await generateImagePrompt(title, description, category, aspectRatio);
+            const prompt = await generateImagePrompt(title, description, theme, aspectRatio, category);
             console.log('Generated prompt:', prompt);
 
             sendProgress('prompt_generated', 30, { prompt });
@@ -349,15 +353,16 @@ serve(async (req) => {
             if (userId) {
               sendProgress('uploading', 80);
               
-              const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+              const fileName = `${theme.replace(/\s+/g, '_')}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
               const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
             
               if (uploadedUrl) {
                 finalImageUrl = uploadedUrl;
                 
                 // Update database if this is for a theme
-                if (mode === 'theme' && category && userId) {
+                if (mode === 'theme' && theme && userId) {
                   console.log('🔄 Updating database for theme image generation:', {
+                    theme,
                     category,
                     userId,
                     finalImageUrl
@@ -369,7 +374,7 @@ serve(async (req) => {
                       theme_image_4_3_url: finalImageUrl,
                       theme_image_generation_status: 'complete'
                     })
-                    .eq('category', category)
+                    .eq('theme', theme)
                     .eq('user_id', userId)
                     .select();
                   
@@ -400,13 +405,13 @@ serve(async (req) => {
             console.error('Streaming error:', error);
             
             // Update status to failed in database
-            if (mode === 'theme' && category && userId) {
-              console.log('❌ Updating database status to failed for:', { category, userId });
+            if (mode === 'theme' && theme && userId) {
+              console.log('❌ Updating database status to failed for:', { theme, category, userId });
               
               const { error: failError } = await supabase
                 .from('social_media_posts')
                 .update({ theme_image_generation_status: 'failed' })
-                .eq('category', category)
+                .eq('theme', theme)
                 .eq('user_id', userId);
               
               if (failError) {
@@ -439,7 +444,7 @@ serve(async (req) => {
       });
     } else {
       // Non-streaming response for backwards compatibility
-      const prompt = await generateImagePrompt(title, description, category, aspectRatio);
+      const prompt = await generateImagePrompt(title, description, theme, aspectRatio, category);
       const imageSize = getAspectRatioSize(aspectRatio);
       
       const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -468,15 +473,16 @@ serve(async (req) => {
       let finalImageUrl = `data:image/png;base64,${base64Image}`;
       
       if (userId) {
-        const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+        const fileName = `${theme.replace(/\s+/g, '_')}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
         const uploadedUrl = await uploadImageToStorage(supabase, base64Image, fileName, userId);
         
         if (uploadedUrl) {
           finalImageUrl = uploadedUrl;
           
           // Update database for non-streaming theme mode
-          if (mode === 'theme' && category) {
+          if (mode === 'theme' && theme) {
             console.log('🔄 Non-streaming: Updating database for theme image:', {
+              theme,
               category,
               userId,
               finalImageUrl
@@ -488,7 +494,7 @@ serve(async (req) => {
                 theme_image_4_3_url: finalImageUrl,
                 theme_image_generation_status: 'complete'
               })
-              .eq('category', category)
+              .eq('theme', theme)
               .eq('user_id', userId)
               .select();
             
