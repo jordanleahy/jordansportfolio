@@ -68,6 +68,7 @@ export default function StoriesDashboard() {
 
   // Helper function to refresh post counts and images
   const refreshPostCountsAndImages = React.useCallback(async () => {
+    console.log('🔄 REFRESH: Starting refreshPostCountsAndImages for categories:', availableCategories);
     if (!availableCategories.length) return;
     
     const counts: Record<string, number> = {};
@@ -139,6 +140,13 @@ export default function StoriesDashboard() {
         counts[category] = 0;
       }
     }
+    
+    console.log('📊 REFRESH: Setting state with results:', {
+      counts,
+      imageCount: Object.keys(images).length,
+      images: Object.entries(images).map(([cat, url]) => ({ category: cat, hasImage: !!url }))
+    });
+    
     setPostCounts(counts);
     setCategoryImages(images);
     setFirstPostsData(firstPosts);
@@ -158,9 +166,19 @@ export default function StoriesDashboard() {
   }, [invalidateCache, refreshPostCountsAndImages, toast]);
 
   const handlePostUpdate = React.useCallback((update: any) => {
+    console.log('🔄 REALTIME: handlePostUpdate called for post update', {
+      postId: update?.id,
+      category: update?.category,
+      triggeringRefresh: true
+    });
+    
     // Refresh category images in case image URLs changed
     refreshPostCountsAndImages();
-  }, [refreshPostCountsAndImages]);
+    
+    // Force invalidate React Query cache to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+    queryClient.invalidateQueries({ queryKey: ['posts'] });
+  }, [refreshPostCountsAndImages, queryClient]);
 
   // Theme image generation listener to remove shimmer when image generation completes
   React.useEffect(() => {
@@ -333,6 +351,71 @@ export default function StoriesDashboard() {
 
     return () => clearInterval(interval);
   }, [user?.id, shimmerThemes, refreshPostCountsAndImages]);
+
+  // Add polling fallback for individual image updates to catch missed real-time events
+  React.useEffect(() => {
+    if (!user?.id || !availableCategories.length) return;
+
+    const checkForImageUpdates = async () => {
+      try {
+        // Check if any posts have pending image generation that might have been missed
+        const { data: postsWithPendingImages } = await supabase
+          .from('social_media_posts')
+          .select('id, category, image_16_9_status, image_9_16_status, image_3_4_status, image_4_3_status')
+          .eq('user_id', user.id)
+          .or('image_16_9_status.eq.processing,image_9_16_status.eq.processing,image_3_4_status.eq.processing,image_4_3_status.eq.processing');
+
+        if (postsWithPendingImages && postsWithPendingImages.length > 0) {
+          console.log('🔍 [Image Status Check] Found posts with processing images:', postsWithPendingImages.length);
+          
+          // Check if any have been completed since last check
+          let hasUpdates = false;
+          for (const post of postsWithPendingImages) {
+            const { data: currentPost } = await supabase
+              .from('social_media_posts')
+              .select('image_16_9_status, image_9_16_status, image_3_4_status, image_4_3_status, image_16_9_url, image_9_16_url, image_3_4_url, image_4_3_url')
+              .eq('id', post.id)
+              .single();
+
+            if (currentPost) {
+              const statusChanged = (
+                currentPost.image_16_9_status !== post.image_16_9_status ||
+                currentPost.image_9_16_status !== post.image_9_16_status ||
+                currentPost.image_3_4_status !== post.image_3_4_status ||
+                currentPost.image_4_3_status !== post.image_4_3_status
+              );
+
+              if (statusChanged) {
+                console.log('📸 [Image Status Check] Status changed for post:', {
+                  postId: post.id,
+                  category: post.category,
+                  changes: {
+                    '16_9': `${post.image_16_9_status} → ${currentPost.image_16_9_status}`,
+                    '9_16': `${post.image_9_16_status} → ${currentPost.image_9_16_status}`,
+                    '3_4': `${post.image_3_4_status} → ${currentPost.image_3_4_status}`,
+                    '4_3': `${post.image_4_3_status} → ${currentPost.image_4_3_status}`
+                  }
+                });
+                hasUpdates = true;
+              }
+            }
+          }
+
+          if (hasUpdates) {
+            console.log('🔄 [Image Status Check] Refreshing data due to image status changes');
+            refreshPostCountsAndImages();
+          }
+        }
+      } catch (error) {
+        console.error('🚨 [Image Status Check] Error:', error);
+      }
+    };
+
+    // Check every 15 seconds for individual image updates
+    const imageUpdateInterval = setInterval(checkForImageUpdates, 15000);
+
+    return () => clearInterval(imageUpdateInterval);
+  }, [user?.id, availableCategories, refreshPostCountsAndImages]);
 
   const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
@@ -559,7 +642,7 @@ export default function StoriesDashboard() {
               )
             )}
 
-            {/* Debug button to clear shimmer - temporary */}
+            {/* Debug/Fallback buttons */}
             <Button
               onClick={clearShimmer}
               variant="ghost"
@@ -567,6 +650,14 @@ export default function StoriesDashboard() {
               className="text-xs"
             >
               Clear Shimmer
+            </Button>
+            <Button
+              onClick={refreshPostCountsAndImages}
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+            >
+              🔄 Refresh
             </Button>
           </div>
         </div>

@@ -198,6 +198,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
 
       // Update status to uploading
       const statusField = `image_${aspectRatio}_status`;
+      console.log(`🎨 IMAGE_GEN: Starting generation for post ${postId}, ratio ${aspectRatio}, setting status to 'uploading'`);
       await supabase
         .from('social_media_posts')
         .update({ [statusField]: 'uploading' })
@@ -279,6 +280,12 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       // Update post with image URL
       const imageField = `image_${aspectRatio}_url`;
       
+      console.log(`🎨 IMAGE_GEN: Setting image URL and status to 'processing' for post ${postId}`, {
+        imageField,
+        statusField,
+        url: urlData.publicUrl.substring(0, 100) + '...'
+      });
+      
       await supabase
         .from('social_media_posts')
         .update({ 
@@ -307,6 +314,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       
       // Update status to failed
       const statusField = `image_${aspectRatio}_status`;
+      console.log(`❌ IMAGE_GEN: Setting status to 'failed' for post ${postId}, ratio ${aspectRatio}`);
       await supabase
         .from('social_media_posts')
         .update({ [statusField]: 'failed' })

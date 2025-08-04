@@ -137,16 +137,36 @@ export const useUnifiedRealtime = ({
       );
 
       if (isImageUpdate) {
-        console.log(`[UnifiedRealtime] Image update for post: ${record.id}`);
+        console.log(`🎨 REALTIME: Image update detected for post: ${record.id}`, {
+          category: record.category,
+          statusChanges: {
+            '16_9': `${oldRecord.image_16_9_status} → ${record.image_16_9_status}`,
+            '9_16': `${oldRecord.image_9_16_status} → ${record.image_9_16_status}`,
+            '3_4': `${oldRecord.image_3_4_status} → ${record.image_3_4_status}`,
+            '4_3': `${oldRecord.image_4_3_status} → ${record.image_4_3_status}`
+          },
+          urlChanges: {
+            '16_9': oldRecord.image_16_9_url !== record.image_16_9_url ? 'CHANGED' : 'same',
+            '9_16': oldRecord.image_9_16_url !== record.image_9_16_url ? 'CHANGED' : 'same',
+            '3_4': oldRecord.image_3_4_url !== record.image_3_4_url ? 'CHANGED' : 'same',
+            '4_3': oldRecord.image_4_3_url !== record.image_4_3_url ? 'CHANGED' : 'same'
+          }
+        });
         
         // Call update callback
         if (onPostUpdate) {
+          console.log(`🔄 REALTIME: Calling onPostUpdate callback for post: ${record.id}`);
           onPostUpdate(record);
+        } else {
+          console.warn(`⚠️ REALTIME: No onPostUpdate callback available for post: ${record.id}`);
         }
 
         // Invalidate relevant caches
+        console.log(`🗄️ REALTIME: Invalidating caches for category: ${record.category}`);
         queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
         queryClient.invalidateQueries({ queryKey: ['categories'] });
+        queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
 
         // Show toast for completed images
         const completedImages = [];
