@@ -240,6 +240,7 @@ serve(async (req) => {
             const decoder = new TextDecoder();
             let finalBase64Image = '';
             let partialCount = 0;
+            let buffer = ''; // Buffer for incomplete lines
 
             try {
               while (true) {
@@ -247,7 +248,13 @@ serve(async (req) => {
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
+                
+                // Add chunk to buffer
+                buffer += chunk;
+                
+                // Split buffer by newlines, but keep the last incomplete line
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || ''; // Keep the last potentially incomplete line
 
                 for (const line of lines) {
                   if (line.startsWith('data: ') && line.length > 6) {
@@ -255,6 +262,10 @@ serve(async (req) => {
                     if (dataContent === '[DONE]') {
                       console.log('Received [DONE] signal from OpenAI');
                       continue;
+                    }
+
+                    if (!dataContent) {
+                      continue; // Skip empty data lines
                     }
 
                     try {
@@ -301,8 +312,27 @@ serve(async (req) => {
                         }
                       }
                     } catch (parseError) {
-                      console.log('Could not parse JSON, skipping line:', line.substring(0, 100));
+                      console.log('Could not parse JSON, skipping line:', line.substring(0, 100) + (line.length > 100 ? '...' : ''));
+                      console.log('Parse error:', parseError.message);
                     }
+                  }
+                }
+              }
+              
+              // Process any remaining data in buffer after stream ends
+              if (buffer.trim() && buffer.startsWith('data: ')) {
+                const dataContent = buffer.slice(6).trim();
+                if (dataContent && dataContent !== '[DONE]') {
+                  try {
+                    const data = JSON.parse(dataContent);
+                    console.log('Processed final buffered data:', { type: data.type });
+                    
+                    if (data.type === 'response.image_generation_call.done' && data.result) {
+                      finalBase64Image = data.result;
+                      console.log('Received final image from buffered data');
+                    }
+                  } catch (parseError) {
+                    console.log('Could not parse final buffered JSON:', buffer.substring(0, 100));
                   }
                 }
               }
