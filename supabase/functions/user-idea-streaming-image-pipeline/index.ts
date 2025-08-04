@@ -91,6 +91,7 @@ JSON STRUCTURE REQUIRED:
 
 const importThemeToDatabase = async (supabase: any, themeData: any, userId: string): Promise<number> => {
   console.log('💾 Importing theme to database:', themeData.category);
+  console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
   
   try {
     // Import posts using direct insert instead of RPC to ensure proper authentication context
@@ -107,22 +108,51 @@ const importThemeToDatabase = async (supabase: any, themeData: any, userId: stri
     }));
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
+    console.log('📝 Sample post data:', JSON.stringify(postsToInsert[0], null, 2));
 
+    // Use the service role client to bypass RLS
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert(postsToInsert)
-      .select('id, category, theme');
+      .select('id, category, theme, title');
 
     if (error) {
-      console.error('❌ Database insert error:', error);
+      console.error('❌ Database insert error:', JSON.stringify(error, null, 2));
+      console.error('❌ Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       throw new Error(`Database import failed: ${error.message}`);
     }
 
+    if (!data || data.length === 0) {
+      console.error('❌ No data returned from insert operation');
+      throw new Error('No posts were created - database insert returned empty result');
+    }
+
     console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
+    console.log('📊 Imported posts:', data.map(p => ({ id: p.id, theme: p.theme, title: p.title })));
+    
+    // Verify posts were actually created by querying them back
+    const { data: verification, error: verifyError } = await supabase
+      .from('social_media_posts')
+      .select('id, theme, category, title')
+      .eq('theme', themeData.theme)
+      .eq('user_id', userId);
+    
+    if (verifyError) {
+      console.warn('⚠️ Could not verify posts were created:', verifyError);
+    } else {
+      console.log(`🔍 Verification: Found ${verification?.length || 0} posts in database for theme: ${themeData.theme}`);
+    }
+    
     return data.length;
     
   } catch (error) {
     console.error('❌ Import theme error:', error);
+    console.error('❌ Full error details:', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -221,8 +251,9 @@ const generateThemeImage = async (supabase: any, prompt: string, theme: string, 
   const data = await response.json();
   const base64Image = data.data[0].b64_json;
 
-  // Upload to storage
-  const fileName = `${theme.replace(/\s+/g, '_')}_theme_${Date.now()}.png`;
+  // Upload to storage - sanitize theme name for filename
+  const sanitizedTheme = theme.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+  const fileName = `${sanitizedTheme}_theme_${Date.now()}.png`;
   const filePath = `${userId}/${fileName}`;
   
   const byteCharacters = atob(base64Image);
