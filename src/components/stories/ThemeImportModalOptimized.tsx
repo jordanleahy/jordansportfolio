@@ -252,23 +252,6 @@ AVOID:
               Submit
             </Button>
 
-            {/* Advanced Step-by-Step Options */}
-            <div className="flex gap-2">
-              <Button
-                onClick={handleImport}
-                disabled={isProcessing || !canImport}
-                variant="outline"
-                className="text-xs"
-              >
-                {isProcessing && state.type === 'processing' && state.step === 'import' ? (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                ) : (
-                  <Upload className="w-3 h-3 mr-1" />
-                )}
-                Import Only
-              </Button>
-            </div>
-
             <Button
               onClick={handleReset}
               disabled={isProcessing || isStreamlinedProcessing}
