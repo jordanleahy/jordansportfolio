@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useRealtimeConnection } from './realtime/useRealtimeConnection';
-import { useRealtimeUpdates } from './realtime/useRealtimeUpdates';
+import { useUnifiedRealtime } from './useUnifiedRealtime';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Individual category query hook for granular caching
@@ -57,17 +56,13 @@ export function useOptimizedStories(user: any) {
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
 
-  // Realtime connection
-  const { status: connectionStatus, isConnected } = useRealtimeConnection({
+  // Unified realtime connection
+  const { connectionStatus, isConnected } = useUnifiedRealtime({
     enabled: !!user?.id,
-    userId: user?.id
-  });
-
-  // Realtime updates processing
-  const { processor, cacheManager } = useRealtimeUpdates({
-    enabled: !!user?.id,
-    onImageComplete: (data) => {
-      console.log('Image completed:', data);
+    userId: user?.id,
+    onPostUpdate: (post: SocialMediaPost) => {
+      queryClient.invalidateQueries({ queryKey: ['posts', post.category] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   });
 
@@ -155,10 +150,8 @@ export function useOptimizedStories(user: any) {
 
   const invalidateCache = () => {
     console.log('🔄 Invalidating stories cache');
-    // Use the cacheManager from realtime updates if available
-    if (cacheManager) {
-      cacheManager.invalidatePattern('posts');
-    }
+    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
 
