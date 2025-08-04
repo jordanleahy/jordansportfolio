@@ -170,11 +170,7 @@ export default function StoriesDashboard() {
           }
           
           // Remove from generating and shimmer when theme image generation completes
-          if (
-            oldStatus !== 'complete' && 
-            theme_image_generation_status === 'complete' && 
-            category
-          ) {
+          if (theme_image_generation_status === 'complete' && category) {
             console.log('🎨 Theme image generation completed for:', category);
             setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
