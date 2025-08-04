@@ -13,6 +13,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
+import { useUserIdeaPipeline } from '@/hooks/useUserIdeaPipeline';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
@@ -246,12 +247,7 @@ export default function StoriesDashboard() {
   };
 
   const handleGenerateCustomTheme = async () => {
-    console.log('🚀 [StoriesDashboard] Starting custom theme generation');
-    console.log('📝 [StoriesDashboard] Description:', customThemeDescription.trim());
-    console.log('👤 [StoriesDashboard] User:', user?.id);
-    
     if (!customThemeDescription.trim()) {
-      console.log('❌ [StoriesDashboard] No description provided');
       toast({
         title: "Description Required",
         description: "Please describe the theme you want to create",
@@ -263,53 +259,50 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     
     try {
-      console.log('🎯 [StoriesDashboard] Calling generate-custom-theme edge function');
-      const { data, error } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { description: customThemeDescription.trim() }
+      // Add optimistic shimmer for new category
+      const tempCategoryName = customThemeDescription.trim().toLowerCase().replace(/\s+/g, '-').substring(0, 30);
+      setShimmerCategories(prev => [...prev, tempCategoryName]);
+
+      const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+        body: { 
+          description: customThemeDescription.trim(),
+          userId: user?.id,
+          stream: false // Non-streaming for simplicity
+        }
       });
 
-      console.log('📥 [StoriesDashboard] Edge function response:', { data, error });
-
       if (error) {
-        console.log('❌ [StoriesDashboard] Edge function error:', error);
         throw new Error(error.message);
       }
 
       if (!data.success) {
-        console.log('❌ [StoriesDashboard] Edge function returned failure:', data);
         throw new Error(data.error || 'Failed to generate theme');
       }
 
-      console.log('✅ [StoriesDashboard] Theme generated successfully:', data.themeData);
-      console.log('📊 [StoriesDashboard] Generated posts count:', data.themeData.posts.length);
-      console.log('🏷️ [StoriesDashboard] Generated category:', data.themeData.category);
-
-      // Automatically validate and import the generated theme
-      console.log('🔍 [StoriesDashboard] Starting validation');
-      const validationResult = await validateInput(JSON.stringify(data.themeData, null, 2));
-      console.log('📋 [StoriesDashboard] Validation result:', validationResult);
-      
-      console.log('💾 [StoriesDashboard] Starting import');
-      await importData();
-      console.log('✅ [StoriesDashboard] Import completed');
-      
       toast({
-        title: "Theme Generated & Imported!",
-        description: `Generated and imported ${data.themeData.posts.length} posts for "${data.themeData.theme}"`,
+        title: "Theme Created!",
+        description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`,
       });
 
       setCustomThemeDescription('');
+      
+      // Refresh data after successful generation
+      invalidateCache();
+      refreshPostCountsAndImages();
 
     } catch (error) {
-      console.error('💥 [StoriesDashboard] Error generating theme:', error);
+      console.error('Theme generation error:', error);
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",
         variant: "destructive"
       });
+      
+      // Remove shimmer on error
+      const tempCategoryName = customThemeDescription.trim().toLowerCase().replace(/\s+/g, '-').substring(0, 30);
+      setShimmerCategories(prev => prev.filter(cat => cat !== tempCategoryName));
     } finally {
       setIsGeneratingTheme(false);
-      console.log('🏁 [StoriesDashboard] Theme generation process finished');
     }
   };
 
