@@ -245,7 +245,7 @@ export const PostsTableView = memo(({
 
           return (
           <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
-            <TableCell className="font-medium w-16">
+            <TableCell className="font-medium w-12">
               <div className="truncate">
                 {post.day || '-'}
               </div>
