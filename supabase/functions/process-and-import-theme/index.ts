@@ -106,6 +106,10 @@ serve(async (req) => {
     if (aiResult.cleanedData?.category) {
       console.log('🎯 SYSTEM PROMPT: Triggering background generation for category:', aiResult.cleanedData.category);
       generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id);
+      
+      // Background theme image generation
+      console.log('🖼️ THEME IMAGE: Triggering background generation for category:', aiResult.cleanedData.category);
+      generateThemeImageBackground(aiResult.cleanedData.category, user.id);
     } else {
       console.log('⚠️ SYSTEM PROMPT: No category found, skipping background generation');
     }
@@ -422,5 +426,89 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       userId,
       timestamp: new Date().toISOString()
     });
+  }
+}
+
+// Background function to trigger theme image generation
+async function generateThemeImageBackground(category: string, userId: string) {
+  try {
+    console.log(`🖼️ THEME IMAGE: Starting generation for category: ${category}`);
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase configuration for theme image generation');
+      return;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get the first post from this category for the user
+    const { data: firstPost, error: postError } = await supabase
+      .from('social_media_posts')
+      .select('id, title, description, category, theme')
+      .eq('user_id', userId)
+      .eq('category', category)
+      .order('day', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (postError || !firstPost) {
+      console.error('Failed to get first post for theme image:', postError);
+      return;
+    }
+
+    console.log(`🎯 THEME IMAGE: Found first post: ${firstPost.title}`);
+
+    // Mark as generating
+    await supabase
+      .from('social_media_posts')
+      .update({ theme_image_generation_status: 'generating' })
+      .eq('id', firstPost.id);
+
+    // Trigger the streaming image pipeline for 4:3 theme image
+    const imageResponse = await fetch(`${supabaseUrl}/functions/v1/streaming-image-pipeline`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        postId: firstPost.id,
+        title: firstPost.title,
+        description: firstPost.description,
+        category: firstPost.category,
+        aspectRatio: '4:3',
+        mode: 'theme',
+        stream: false // Don't stream for background generation
+      }),
+    });
+
+    if (imageResponse.ok) {
+      const result = await imageResponse.json();
+      console.log(`✅ THEME IMAGE: Generated successfully: ${result.imageUrl}`);
+      
+      // Update the post with theme image URL
+      await supabase
+        .from('social_media_posts')
+        .update({
+          theme_image_4_3_url: result.imageUrl,
+          theme_image_generation_status: 'complete'
+        })
+        .eq('id', firstPost.id);
+
+    } else {
+      console.error('❌ THEME IMAGE: Generation failed:', await imageResponse.text());
+      
+      // Mark as failed
+      await supabase
+        .from('social_media_posts')
+        .update({ theme_image_generation_status: 'failed' })
+        .eq('id', firstPost.id);
+    }
+
+  } catch (error) {
+    console.error('💥 THEME IMAGE: Error in generation:', error);
   }
 }

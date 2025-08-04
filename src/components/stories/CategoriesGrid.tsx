@@ -5,9 +5,10 @@ interface CategoriesGridProps {
   postCounts: Record<string, number>;
   categoryImages: Record<string, string>;
   shimmerCategories?: string[];
+  firstPostsData?: Record<string, { title: string; description: string }>;
 }
 
-export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [] }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmerCategories = [], firstPostsData = {} }: CategoriesGridProps) => {
   const hasAnyContent = categories.length > 0 || shimmerCategories.length > 0;
   
   if (!hasAnyContent) {
@@ -33,6 +34,7 @@ export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmer
           category={category}
           postCount={postCounts[category] || 0}
           imageUrl={categoryImages[category]}
+          firstPostData={firstPostsData[category]}
         />
       ))}
     </div>

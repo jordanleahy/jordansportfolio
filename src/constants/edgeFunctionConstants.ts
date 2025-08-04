@@ -16,6 +16,7 @@ export const EDGE_FUNCTION_NAMES = {
   PROCESS_THEME_JSON: 'process-theme-json',
   PROCESS_UPLOADED_IMAGES: 'process-uploaded-images',
   COVER_LETTER_AGENT: 'cover-letter-agent',
+  STREAMING_IMAGE_PIPELINE: 'streaming-image-pipeline',
 } as const;
 
 // OpenAI API Configuration

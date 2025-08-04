@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FolderOpen, FileText, ArrowRight } from "lucide-react";
+import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
+import { useEffect, useState } from "react";
 
 interface CategoryCardProps {
   category: string;
@@ -10,10 +12,30 @@ interface CategoryCardProps {
   imageUrl?: string;
   onClick?: () => void;
   isShimmer?: boolean;
+  firstPostData?: {
+    title: string;
+    description: string;
+  };
 }
 
-export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false }: CategoryCardProps) => {
+export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer = false, firstPostData }: CategoryCardProps) => {
   const navigate = useNavigate();
+  const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
+  
+  // Use streaming hook for real-time image generation
+  const { streamingProgress, isGenerating, error } = useThemeImageStreaming({
+    category,
+    enabled: !isShimmer && !!firstPostData
+  });
+
+  // Update image URL when streaming completes or imageUrl prop changes
+  useEffect(() => {
+    if (streamingProgress?.imageUrl) {
+      setCurrentImageUrl(streamingProgress.imageUrl);
+    } else if (imageUrl) {
+      setCurrentImageUrl(imageUrl);
+    }
+  }, [streamingProgress?.imageUrl, imageUrl]);
   
   const handleClick = () => {
     if (isShimmer) return; // Prevent clicks on shimmer cards
@@ -50,11 +72,14 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
     <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden" onClick={handleClick}>
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
-        {imageUrl ? (
+        {/* Display current or streaming image */}
+        {currentImageUrl || streamingProgress?.partialImage ? (
           <img 
-            src={imageUrl} 
+            src={streamingProgress?.partialImage || currentImageUrl} 
             alt={`${category} preview`}
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-105 ${
+              streamingProgress?.partialImage ? 'opacity-80' : ''
+            }`}
             onError={(e) => {
               // Fallback to gradient background if image fails to load
               const target = e.target as HTMLImageElement;
@@ -64,13 +89,46 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
           />
         ) : null}
         
+        {/* Generation in progress overlay */}
+        {isGenerating && (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+            <div className="text-sm text-primary font-medium mb-1">Generating Image</div>
+            {streamingProgress && (
+              <div className="text-xs text-muted-foreground capitalize">
+                {streamingProgress.stage.replace('_', ' ')}
+              </div>
+            )}
+            {streamingProgress?.progress && (
+              <div className="w-24 h-1 bg-muted rounded-full mt-2 overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${streamingProgress.progress}%` }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Error state overlay */}
+        {error && !isGenerating && (
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/20 via-destructive/10 to-muted/20 flex flex-col items-center justify-center">
+            <ImageIcon className="h-8 w-8 text-destructive/60 mb-2" />
+            <div className="text-xs text-destructive text-center px-2">
+              Failed to generate
+            </div>
+          </div>
+        )}
+        
         {/* Fallback gradient background */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center ${imageUrl ? 'hidden' : ''}`}>
+        <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center ${
+          currentImageUrl || streamingProgress?.partialImage || isGenerating || error ? 'hidden' : ''
+        }`}>
           <FolderOpen className="h-12 w-12 text-primary/60" />
         </div>
         
         {/* Overlay for better text readability when we have an image */}
-        {imageUrl && (
+        {(currentImageUrl || streamingProgress?.partialImage) && !isGenerating && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         )}
         
@@ -80,6 +138,15 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
             {postCount}
           </Badge>
         </div>
+        
+        {/* Generation status badge */}
+        {isGenerating && streamingProgress && (
+          <div className="absolute bottom-3 left-3">
+            <Badge variant="outline" className="bg-white/90 text-primary border-primary/20">
+              {streamingProgress.progress}%
+            </Badge>
+          </div>
+        )}
       </div>
 
       <CardContent className="p-6">

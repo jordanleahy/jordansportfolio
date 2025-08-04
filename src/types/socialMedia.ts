@@ -29,6 +29,10 @@ export interface SocialMediaPost {
   // Theme description
   theme_description?: string | null;
   
+  // Theme image for category cards
+  theme_image_4_3_url?: string | null;
+  theme_image_generation_status?: string | null;
+  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;

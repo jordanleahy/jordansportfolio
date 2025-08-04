@@ -60,6 +60,7 @@ export default function StoriesDashboard() {
   // Calculate post counts and first images for each category
   const [postCounts, setPostCounts] = React.useState<Record<string, number>>({});
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
+  const [firstPostsData, setFirstPostsData] = React.useState<Record<string, { title: string; description: string }>>({});
   const [shimmerCategories, setShimmerCategories] = React.useState<string[]>([]);
 
   // Helper function to refresh post counts and images
@@ -68,14 +69,25 @@ export default function StoriesDashboard() {
     
     const counts: Record<string, number> = {};
     const images: Record<string, string> = {};
+    const firstPosts: Record<string, { title: string; description: string }> = {};
     
     for (const category of availableCategories) {
       try {
         const posts = await optimizedSocialMediaService.getPostsByCategory(category);
         counts[category] = posts.length;
         
-        // Find first post with an image (checking multiple aspect ratios)
+        // Get first post for streaming data
+        const firstPost = posts[0];
+        if (firstPost) {
+          firstPosts[category] = {
+            title: firstPost.title,
+            description: firstPost.description
+          };
+        }
+        
+        // Find first post with an image or theme image (checking multiple aspect ratios)
         const firstPostWithImage = posts.find(post => 
+          post.theme_image_4_3_url || // Priority to theme image
           post.image_16_9_url || 
           post.image_4_3_url || 
           post.image_9_16_url || 
@@ -83,8 +95,9 @@ export default function StoriesDashboard() {
         );
         
         if (firstPostWithImage) {
-          // Prefer 16:9 for card display, fallback to other ratios
-          images[category] = firstPostWithImage.image_16_9_url || 
+          // Prefer theme image for cards, then 16:9, fallback to other ratios
+          images[category] = firstPostWithImage.theme_image_4_3_url ||
+                            firstPostWithImage.image_16_9_url || 
                             firstPostWithImage.image_4_3_url ||
                             firstPostWithImage.image_9_16_url ||
                             firstPostWithImage.image_3_4_url ||
@@ -97,6 +110,7 @@ export default function StoriesDashboard() {
     }
     setPostCounts(counts);
     setCategoryImages(images);
+    setFirstPostsData(firstPosts);
   }, [availableCategories]);
 
   // Setup realtime subscription for immediate updates
@@ -315,6 +329,7 @@ export default function StoriesDashboard() {
           postCounts={postCounts}
           categoryImages={categoryImages}
           shimmerCategories={shimmerCategories}
+          firstPostsData={firstPostsData}
         />
       </div>
     </PageLayout>
