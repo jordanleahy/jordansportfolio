@@ -221,6 +221,12 @@ export default function StoriesDashboard() {
         console.log('🔍 [Shimmer Check] Checking status for themes:', shimmerThemes);
         
         for (const shimmerTheme of shimmerThemes) {
+          // Skip temporary generating themes that don't exist in DB yet
+          if (shimmerTheme.startsWith('generating-theme-')) {
+            console.log('⏳ [Shimmer Check] Skipping temporary theme:', shimmerTheme);
+            continue;
+          }
+
           const normalizedTheme = normalizeThemeName(shimmerTheme);
           
           const { data, error } = await supabase
