@@ -154,8 +154,17 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('🎨 IMAGE_GENERATION: OpenAI API error:', JSON.stringify(errorData, null, 2));
+      console.error('🎨 IMAGE_GENERATION: OpenAI API error - Status:', response.status, 'StatusText:', response.statusText);
+      let errorData;
+      try {
+        errorData = await response.json();
+        console.error('🎨 IMAGE_GENERATION: OpenAI API error data:', JSON.stringify(errorData, null, 2));
+      } catch (jsonError) {
+        console.error('🎨 IMAGE_GENERATION: Failed to parse error response as JSON:', jsonError);
+        const textResponse = await response.text();
+        console.error('🎨 IMAGE_GENERATION: Raw error response:', textResponse.substring(0, 500));
+        errorData = { error: { message: `Invalid response format: ${textResponse.substring(0, 200)}` } };
+      }
       console.error('🎨 IMAGE_GENERATION: Request details:', {
         url: 'https://api.openai.com/v1/images/generations',
         method: 'POST',
@@ -182,7 +191,27 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
+    console.log('🎨 IMAGE_GENERATION: Response status:', response.status, 'Content-Type:', response.headers.get('content-type'));
+    
+    let data;
+    try {
+      data = await response.json();
+      console.log('🎨 IMAGE_GENERATION: Successfully parsed JSON response');
+    } catch (jsonError) {
+      console.error('🎨 IMAGE_GENERATION: Failed to parse success response as JSON:', jsonError);
+      const textResponse = await response.text();
+      console.error('🎨 IMAGE_GENERATION: Raw success response:', textResponse.substring(0, 500));
+      
+      // Track failed usage for JSON parsing error
+      if (userId) {
+        await trackApiUsage(supabase, userId, 'generate-image-gpt', 'gpt-image-1', 'image_generation', false, 0, size, 'high', Date.now() - startTime, `JSON parsing error: ${jsonError.message}`, { prompt: prompt.substring(0, 200), aspectRatio });
+      }
+      
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON response from OpenAI API', details: `Parse error: ${jsonError.message}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
     
     if (!data.data || !data.data[0] || !data.data[0].b64_json) {
       console.error('🎨 IMAGE_GENERATION: Unexpected response format:', data);
