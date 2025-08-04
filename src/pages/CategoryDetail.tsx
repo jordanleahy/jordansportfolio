@@ -89,7 +89,7 @@ export default function CategoryDetail() {
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
         {/* Header with back button and category info */}
-        <div className={`mb-6 ${isMobile ? 'space-y-4' : 'flex items-center justify-between'}`}>
+        <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Button
               variant="ghost"
@@ -111,7 +111,7 @@ export default function CategoryDetail() {
             </div>
           </div>
 
-          <div className={`flex-shrink-0 ${isMobile ? 'self-start' : ''}`}>
+          <div className="flex-shrink-0">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
