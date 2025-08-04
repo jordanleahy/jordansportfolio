@@ -181,7 +181,7 @@ export const PostsTableView = memo(({
       <TableHeader>
         <TableRow className="h-12">
           <SortableHeader field="day">
-            <div className="w-16">Day</div>
+            <div className="w-12">Day</div>
           </SortableHeader>
           <SortableHeader field="title">
             <div className="w-48">Title</div>
