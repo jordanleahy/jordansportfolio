@@ -186,10 +186,23 @@ export class OptimizedSocialMediaService {
       return this.getFromCache(cacheKey);
     }
 
-    // Get categories with their latest creation date for ordering
+    // Check authentication first
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('🔐 SERVICE: getAvailableCategories - User authentication:', { 
+      isAuthenticated: !!user, 
+      userId: user?.id 
+    });
+    
+    if (!user) {
+      console.error('❌ SERVICE: No authenticated user for getAvailableCategories');
+      return [];
+    }
+
+    // Get categories with their latest creation date for ordering, filtered by user
     const { data, error } = await supabase
       .from('social_media_posts')
       .select('category, created_at')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
