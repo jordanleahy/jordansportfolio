@@ -3,7 +3,7 @@ import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -28,9 +28,6 @@ interface PostsTableOptimizedProps {
   category?: string;
   selectedThemeId?: string;
   onThemeChange?: (themeId: string) => void;
-  themeName?: string;
-  themeDescription?: string;
-  onDeleteTheme?: () => void;
 }
 export const PostsTable = ({
   posts,
@@ -39,9 +36,6 @@ export const PostsTable = ({
   category,
   selectedThemeId,
   onThemeChange,
-  themeName,
-  themeDescription,
-  onDeleteTheme,
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -221,36 +215,6 @@ export const PostsTable = ({
       }}>
         <Card className="h-full">
           <div className="p-6">
-            {/* Theme Header - Optional */}
-            {(themeName || themeDescription) && (
-              <div className="mb-6 pb-4 border-b border-border">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    {themeName && (
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
-                        {themeName}
-                      </h3>
-                    )}
-                    {themeDescription && (
-                      <p className="text-sm text-muted-foreground">
-                        {themeDescription}
-                      </p>
-                    )}
-                  </div>
-                  {onDeleteTheme && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onDeleteTheme}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-4"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-            
             <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
               <div className="flex items-center justify-between mb-4 gap-2">{/* Removed flex-wrap to keep in one line */}
                 <div className="flex items-center gap-2 flex-wrap">
