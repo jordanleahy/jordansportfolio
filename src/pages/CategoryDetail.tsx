@@ -95,10 +95,9 @@ export default function CategoryDetail() {
               variant="ghost"
               size="sm"
               onClick={() => navigate('/stories')}
-              className="gap-2 flex-shrink-0"
+              className="flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
-              {isMobile ? 'Back' : 'Back to Dashboard'}
             </Button>
             <div className="h-6 w-px bg-border flex-shrink-0" />
             <div className="min-w-0 flex-1">
