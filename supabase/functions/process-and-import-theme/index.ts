@@ -515,6 +515,7 @@ async function generateThemeImageBackground(category: string, userId: string): P
         postId: firstPost.id,
         title: firstPost.title,
         description: firstPost.description,
+        theme: firstPost.theme, // Add the theme parameter here
         category: firstPost.category,
         aspectRatio: '4:3',
         mode: 'theme',
