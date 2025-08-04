@@ -258,16 +258,7 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get authenticated user
-    const authHeader = req.headers.get('Authorization');
-    let userId: string | undefined;
-    
-    if (authHeader) {
-      const { data: { user } } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
-      userId = user?.id;
-    }
-
-    const { description, stream = true }: UserIdeaRequest = await req.json();
+    const { description, userId, stream = true }: UserIdeaRequest = await req.json();
 
     if (!description || !userId) {
       throw new Error('Description and authentication required');
