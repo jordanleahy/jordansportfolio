@@ -297,7 +297,7 @@ export default function StoriesDashboard() {
 
         {/* Categories Grid */}
         <CategoriesGrid 
-          categories={availableCategories.filter(category => (postCounts[category] || 0) > 0)}
+          categories={availableCategories}
           postCounts={postCounts}
           categoryImages={categoryImages}
           shimmerCategories={shimmerCategories}
