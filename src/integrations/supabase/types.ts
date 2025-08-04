@@ -1681,6 +1681,7 @@ export type Database = {
           seed_value: number | null
           status: Database["public"]["Enums"]["post_status"]
           theme: string | null
+          theme_description: string | null
           title: string
           updated_at: string
           user_id: string
@@ -1712,6 +1713,7 @@ export type Database = {
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
+          theme_description?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -1743,6 +1745,7 @@ export type Database = {
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
           theme?: string | null
+          theme_description?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -1815,36 +1818,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      theme_descriptions: {
-        Row: {
-          category: string
-          created_at: string
-          description: string | null
-          id: string
-          theme: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          theme: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          theme?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       user_roles: {
         Row: {
