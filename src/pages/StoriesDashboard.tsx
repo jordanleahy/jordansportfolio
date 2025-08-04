@@ -62,6 +62,7 @@ export default function StoriesDashboard() {
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
   const [firstPostsData, setFirstPostsData] = React.useState<Record<string, { title: string; description: string }>>({});
   const [shimmerCategories, setShimmerCategories] = React.useState<string[]>([]);
+  const [imageGeneratingCategories, setImageGeneratingCategories] = React.useState<string[]>([]);
 
   // Helper function to refresh post counts and images
   const refreshPostCountsAndImages = React.useCallback(async () => {
@@ -76,13 +77,20 @@ export default function StoriesDashboard() {
         const posts = await optimizedSocialMediaService.getPostsByCategory(category);
         counts[category] = posts.length;
         
-        // Get first post for streaming data
+        // Get first post for streaming data and check theme image status
         const firstPost = posts[0];
         if (firstPost) {
           firstPosts[category] = {
             title: firstPost.title,
             description: firstPost.description
           };
+          
+          // Track if theme image is being generated
+          if (firstPost.theme_image_generation_status === 'generating') {
+            setImageGeneratingCategories(prev => 
+              prev.includes(category) ? prev : [...prev, category]
+            );
+          }
         }
         
         // Find first post with an image or theme image (checking multiple aspect ratios)
@@ -151,26 +159,34 @@ export default function StoriesDashboard() {
           const { theme_image_generation_status, category } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
           
-          // Remove shimmer when theme image generation completes successfully
+          // Track theme image generation status changes
+          if (oldStatus !== 'generating' && theme_image_generation_status === 'generating' && category) {
+            console.log('🎨 Theme image generation started for:', category);
+            setImageGeneratingCategories(prev => 
+              prev.includes(category) ? prev : [...prev, category]
+            );
+          }
+          
+          // Remove from generating and shimmer when theme image generation completes
           if (
             oldStatus !== 'complete' && 
             theme_image_generation_status === 'complete' && 
-            category &&
-            shimmerCategories.includes(category)
+            category
           ) {
             console.log('🎨 Theme image generation completed for:', category);
+            setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
             refreshPostCountsAndImages(); // Refresh to show the new image
           }
           
-          // Also remove shimmer if generation failed
+          // Also remove from generating and shimmer if generation failed
           if (
             oldStatus !== 'failed' && 
             theme_image_generation_status === 'failed' && 
-            category &&
-            shimmerCategories.includes(category)
+            category
           ) {
             console.log('❌ Theme image generation failed for:', category);
+            setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
           }
         }
@@ -180,7 +196,7 @@ export default function StoriesDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, shimmerCategories, refreshPostCountsAndImages]);
+  }, [user?.id, shimmerCategories, imageGeneratingCategories, refreshPostCountsAndImages]);
 
   const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
@@ -201,6 +217,7 @@ export default function StoriesDashboard() {
   const handleImportComplete = async () => {
     // Clear any shimmer states and refresh data
     setShimmerCategories([]);
+    setImageGeneratingCategories([]);
     invalidateCache();
   };
 
@@ -377,17 +394,20 @@ export default function StoriesDashboard() {
         {/* Categories Grid */}
         <CategoriesGrid 
           categories={availableCategories.filter(category => {
-            // Only show categories with posts that are NOT in shimmer state
+            // Only show categories with posts that are NOT in shimmer state AND NOT generating images
             const hasRealPosts = (postCounts[category] || 0) > 0;
             const isInShimmer = shimmerCategories.includes(category);
-            return hasRealPosts && !isInShimmer;
+            const isGeneratingImage = imageGeneratingCategories.includes(category);
+            return hasRealPosts && !isInShimmer && !isGeneratingImage;
           })}
           postCounts={postCounts}
           categoryImages={categoryImages}
-          shimmerCategories={shimmerCategories.filter(category => {
-            // Only show shimmer for categories that don't have real posts yet
-            return (postCounts[category] || 0) === 0;
-          })}
+          shimmerCategories={[
+            // Show shimmer for categories being created (no posts yet)
+            ...shimmerCategories.filter(category => (postCounts[category] || 0) === 0),
+            // Show shimmer for categories with posts but still generating theme images
+            ...imageGeneratingCategories.filter(category => (postCounts[category] || 0) > 0)
+          ]}
           firstPostsData={firstPostsData}
         />
       </div>
