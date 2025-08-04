@@ -395,37 +395,31 @@ export default function StoriesDashboard() {
         {/* Categories Grid */}
         <CategoriesGrid 
           categories={availableCategories.filter(category => {
-            // Only show categories with posts that are NOT in shimmer state AND NOT generating images
+            // Show categories with posts that are NOT in shimmer state
             const hasRealPosts = (postCounts[category] || 0) > 0;
             const isInShimmer = shimmerCategories.includes(category);
-            const isGeneratingImage = imageGeneratingCategories.includes(category);
             console.log('🔍 Category filtering debug:', {
               category,
               hasRealPosts,
               isInShimmer,
-              isGeneratingImage,
               postCount: postCounts[category],
-              willShow: hasRealPosts && !isInShimmer && !isGeneratingImage
+              willShow: hasRealPosts && !isInShimmer
             });
-            return hasRealPosts && !isInShimmer && !isGeneratingImage;
+            return hasRealPosts && !isInShimmer;
           })}
           postCounts={postCounts}
           categoryImages={categoryImages}
           shimmerCategories={(() => {
-            // Show shimmer for categories being created (no posts yet)
+            // Only show shimmer for categories being created (no posts yet)
             const creatingShimmer = shimmerCategories.filter(category => (postCounts[category] || 0) === 0);
-            // Show shimmer for categories with posts but still generating theme images
-            const generatingShimmer = imageGeneratingCategories.filter(category => (postCounts[category] || 0) > 0);
-            const finalShimmer = [...creatingShimmer, ...generatingShimmer];
             console.log('🎭 Shimmer debug:', {
               shimmerCategories,
               imageGeneratingCategories,
               postCounts,
               creatingShimmer,
-              generatingShimmer,
-              finalShimmer
+              finalShimmer: creatingShimmer
             });
-            return finalShimmer;
+            return creatingShimmer;
           })()}
           firstPostsData={firstPostsData}
         />
