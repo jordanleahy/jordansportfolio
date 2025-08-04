@@ -185,27 +185,31 @@ serve(async (req) => {
 
             sendProgress('prompt_generated', 30, { prompt });
 
-            // Generate image with OpenAI
+            // Generate image with OpenAI Responses API with streaming
             sendProgress('image_generation', 50);
 
             const imageSize = getAspectRatioSize(aspectRatio);
             
             const requestBody = {
-              model: 'gpt-image-1',
-              prompt: prompt,
-              size: imageSize,
-              quality: 'high',
-              n: 1
+              model: 'gpt-4.1-mini',
+              input: prompt,
+              stream: true,
+              tools: [{ 
+                type: "image_generation", 
+                partial_images: 2,
+                size: imageSize,
+                quality: 'high'
+              }]
             };
             
-            console.log('Making OpenAI request with:', {
+            console.log('Making OpenAI Responses API request with:', {
               model: requestBody.model,
               promptLength: prompt.length,
-              size: requestBody.size,
-              quality: requestBody.quality
+              size: imageSize,
+              partialImages: 2
             });
 
-            const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+            const imageResponse = await fetch('https://api.openai.com/v1/responses', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${openAIApiKey}`,
@@ -224,63 +228,95 @@ serve(async (req) => {
               throw new Error(`OpenAI API error: ${imageResponse.status} - ${errorText}`);
             }
 
-            const imageData = await imageResponse.json();
-            
-            // Handle partial images for smooth streaming
-            if (imageData.data && imageData.data.length > 0) {
-              const images = imageData.data;
-              
-              // Send partial images with smooth progression
-              for (let i = 0; i < images.length; i++) {
-                const image = images[i];
-                const isPartial = i < images.length - 1;
-                const progressPercent = isPartial ? 60 + (i * 5) : 70;
-                const stage = isPartial ? `partial_${i + 1}` : 'image_generated';
-                
-                sendProgress(stage, progressPercent, { 
-                  partialImage: `data:image/png;base64,${image.b64_json}`,
-                  isPartial: isPartial
-                });
-                
-                console.log(`Sent ${isPartial ? 'partial' : 'final'} image ${i + 1}/${images.length}`);
-              }
-              
-              // Use the final image for storage
-              const finalBase64Image = images[images.length - 1].b64_json;
+            if (!imageResponse.body) {
+              throw new Error('No response body received');
+            }
 
-              // Upload to storage if user is authenticated
-              let finalImageUrl = `data:image/png;base64,${finalBase64Image}`;
-              
-              if (userId) {
-                sendProgress('uploading', 80);
-                
-                const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
-                const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
-              
-                if (uploadedUrl) {
-                  finalImageUrl = uploadedUrl;
-                  
-                  // Update database if this is for a theme
-                  if (mode === 'theme' && category && userId) {
-                    await supabase
-                      .from('social_media_posts')
-                      .update({
-                        theme_image_4_3_url: finalImageUrl,
-                        theme_image_generation_status: 'complete'
-                      })
-                      .eq('category', category)
-                      .eq('user_id', userId);
+            const reader = imageResponse.body.getReader();
+            const decoder = new TextDecoder();
+            let finalBase64Image = '';
+            let partialCount = 0;
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                  if (line.startsWith('data: ')) {
+                    try {
+                      const data = JSON.parse(line.slice(6));
+                      
+                      if (data.type === 'response.image_generation_call.partial_image') {
+                        partialCount++;
+                        const progressPercent = 60 + (partialCount * 10);
+                        const imageBase64 = data.partial_image_b64;
+                        
+                        sendProgress(`partial_${partialCount}`, progressPercent, { 
+                          partialImage: `data:image/png;base64,${imageBase64}`,
+                          isPartial: true
+                        });
+                        
+                        console.log(`Sent partial image ${partialCount}`);
+                      } else if (data.type === 'response.image_generation_call.done') {
+                        // Final image
+                        const imageBase64 = data.result;
+                        finalBase64Image = imageBase64;
+                        
+                        sendProgress('image_generated', 70, { 
+                          partialImage: `data:image/png;base64,${imageBase64}`,
+                          isPartial: false
+                        });
+                        
+                        console.log('Received final image');
+                      }
+                    } catch (parseError) {
+                      console.log('Non-JSON line:', line);
+                    }
                   }
                 }
               }
-
-              sendProgress('complete', 100, { 
-                imageUrl: finalImageUrl,
-                prompt: prompt
-              });
-            } else {
-              throw new Error('No image data received from OpenAI');
+            } finally {
+              reader.releaseLock();
             }
+
+            if (!finalBase64Image) {
+              throw new Error('No final image received from OpenAI');
+            }
+
+            // Upload to storage if user is authenticated
+            let finalImageUrl = `data:image/png;base64,${finalBase64Image}`;
+            
+            if (userId) {
+              sendProgress('uploading', 80);
+              
+              const fileName = `${category}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+              const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
+            
+              if (uploadedUrl) {
+                finalImageUrl = uploadedUrl;
+                
+                // Update database if this is for a theme
+                if (mode === 'theme' && category && userId) {
+                  await supabase
+                    .from('social_media_posts')
+                    .update({
+                      theme_image_4_3_url: finalImageUrl,
+                      theme_image_generation_status: 'complete'
+                    })
+                    .eq('category', category)
+                    .eq('user_id', userId);
+                }
+              }
+            }
+
+            sendProgress('complete', 100, { 
+              imageUrl: finalImageUrl,
+              prompt: prompt
+            });
 
             // Track successful API usage
             await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);
