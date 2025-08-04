@@ -186,17 +186,31 @@ export class OptimizedSocialMediaService {
       return this.getFromCache(cacheKey);
     }
 
+    // Get categories with their earliest creation date for ordering
     const { data, error } = await supabase
       .from('social_media_posts')
-      .select('category');
+      .select('category, created_at')
+      .order('created_at', { ascending: true });
 
     if (error) throw error;
     
-    const categories = [...new Set((data || []).map((item: any) => item.category as string))];
-    const filteredCategories = categories.filter(Boolean);
+    // Group by category and find the earliest created_at for each
+    const categoryDates = new Map<string, string>();
+    (data || []).forEach((item: any) => {
+      if (item.category) {
+        if (!categoryDates.has(item.category) || item.created_at < categoryDates.get(item.category)!) {
+          categoryDates.set(item.category, item.created_at);
+        }
+      }
+    });
     
-    this.setCache(cacheKey, filteredCategories, 10 * 60 * 1000); // 10 minutes
-    return filteredCategories;
+    // Sort categories by their earliest creation date
+    const sortedCategories = Array.from(categoryDates.entries())
+      .sort(([, dateA], [, dateB]) => dateA.localeCompare(dateB))
+      .map(([category]) => category);
+    
+    this.setCache(cacheKey, sortedCategories, 10 * 60 * 1000); // 10 minutes
+    return sortedCategories;
   }
 
   async deleteTheme(category: string): Promise<void> {
