@@ -102,16 +102,39 @@ serve(async (req) => {
       });
     }
 
-    // Background system prompt generation
+    // Sequential background generation: System Prompt -> Theme Image
     if (aiResult.cleanedData?.category) {
-      console.log('🎯 SYSTEM PROMPT: Triggering background generation for category:', aiResult.cleanedData.category);
-      generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id);
+      console.log('🎯 SYSTEM PROMPT: Starting sequential background generation for category:', aiResult.cleanedData.category);
       
-      // Background theme image generation
-      console.log('🖼️ THEME IMAGE: Triggering background generation for category:', aiResult.cleanedData.category);
-      generateThemeImageBackground(aiResult.cleanedData.category, user.id);
+      // Start system prompt generation (don't await - keep response fast)
+      generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id)
+        .then((promptResult) => {
+          console.log('📊 SYSTEM PROMPT RESULT:', {
+            success: promptResult.success,
+            category: aiResult.cleanedData.category,
+            timestamp: new Date().toISOString()
+          });
+          
+          if (promptResult.success) {
+            console.log('🖼️ THEME IMAGE: System prompts ready, triggering image generation');
+            return generateThemeImageBackground(aiResult.cleanedData.category, user.id);
+          } else {
+            console.log('❌ THEME IMAGE: Skipping image generation due to system prompt failure:', promptResult.error);
+            return Promise.resolve({ success: false, error: 'System prompt generation failed' });
+          }
+        })
+        .then((imageResult) => {
+          console.log('🎨 THEME IMAGE RESULT:', {
+            success: imageResult?.success || false,
+            category: aiResult.cleanedData.category,
+            timestamp: new Date().toISOString()
+          });
+        })
+        .catch((error) => {
+          console.error('💥 BACKGROUND GENERATION ERROR:', error);
+        });
     } else {
-      console.log('⚠️ SYSTEM PROMPT: No category found, skipping background generation');
+      console.log('⚠️ BACKGROUND GENERATION: No category found, skipping all background tasks');
     }
 
     const finalResult: ProcessingResult = {
@@ -375,7 +398,7 @@ async function importToDatabase(supabase: any, data: any, userId: string): Promi
   }
 }
 
-async function generateSystemPromptBackground(supabase: any, category: string, userId: string) {
+async function generateSystemPromptBackground(supabase: any, category: string, userId: string): Promise<{ success: boolean; error?: string }> {
   console.log('🔄 BACKGROUND TASK: Starting system prompt generation check');
   console.log('📋 BACKGROUND PARAMS:', {
     category,
@@ -398,9 +421,14 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       needsGeneration: !existingPrompts?.length
     });
 
+    if (checkError) {
+      console.error('❌ Error checking existing prompts:', checkError);
+      return { success: false, error: checkError.message };
+    }
+
     if (existingPrompts?.length > 0) {
       console.log('✅ SYSTEM PROMPT EXISTS: Skipping generation');
-      return;
+      return { success: true };
     }
 
     console.log('🚀 INVOKING: invoke-system-prompt-agent edge function');
@@ -418,6 +446,14 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       error: invokeResult.error?.message,
       data: !!invokeResult.data
     });
+
+    if (invokeResult.error) {
+      console.error('❌ SYSTEM PROMPT: Generation failed:', invokeResult.error);
+      return { success: false, error: invokeResult.error.message };
+    }
+
+    console.log('✅ SYSTEM PROMPT: Generation completed successfully');
+    return { success: true };
     
   } catch (error) {
     console.error('💥 BACKGROUND GENERATION ERROR:', {
@@ -426,11 +462,12 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       userId,
       timestamp: new Date().toISOString()
     });
+    return { success: false, error: error.message };
   }
 }
 
 // Background function to trigger theme image generation
-async function generateThemeImageBackground(category: string, userId: string) {
+async function generateThemeImageBackground(category: string, userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     console.log(`🖼️ THEME IMAGE: Starting generation for category: ${category}`);
     
@@ -439,7 +476,7 @@ async function generateThemeImageBackground(category: string, userId: string) {
     
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing Supabase configuration for theme image generation');
-      return;
+      return { success: false, error: 'Missing Supabase configuration' };
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -456,7 +493,7 @@ async function generateThemeImageBackground(category: string, userId: string) {
 
     if (postError || !firstPost) {
       console.error('Failed to get first post for theme image:', postError);
-      return;
+      return { success: false, error: postError?.message || 'No posts found' };
     }
 
     console.log(`🎯 THEME IMAGE: Found first post: ${firstPost.title}`);
@@ -498,17 +535,22 @@ async function generateThemeImageBackground(category: string, userId: string) {
         })
         .eq('id', firstPost.id);
 
+      return { success: true };
     } else {
-      console.error('❌ THEME IMAGE: Generation failed:', await imageResponse.text());
+      const errorText = await imageResponse.text();
+      console.error('❌ THEME IMAGE: Generation failed:', errorText);
       
       // Mark as failed
       await supabase
         .from('social_media_posts')
         .update({ theme_image_generation_status: 'failed' })
         .eq('id', firstPost.id);
+      
+      return { success: false, error: errorText };
     }
 
   } catch (error) {
     console.error('💥 THEME IMAGE: Error in generation:', error);
+    return { success: false, error: error.message };
   }
 }
