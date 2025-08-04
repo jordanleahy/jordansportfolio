@@ -114,9 +114,8 @@ export const useUnifiedRealtime = ({
       }
 
       // Invalidate relevant caches
-      queryClient.invalidateQueries({ queryKey: ['category-posts', record.category] });
-      queryClient.invalidateQueries({ queryKey: ['available-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['optimized-stories'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
 
       toast.success(`New post created in ${record.category}`);
     } else if (eventType === 'UPDATE' && record && oldRecord) {
@@ -141,8 +140,8 @@ export const useUnifiedRealtime = ({
         }
 
         // Invalidate relevant caches
-        queryClient.invalidateQueries({ queryKey: ['category-posts', record.category] });
-        queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+        queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
 
         // Show toast for completed images
         const completedImages = [];
@@ -167,9 +166,8 @@ export const useUnifiedRealtime = ({
       console.log(`[UnifiedRealtime] Post deleted: ${oldRecord.id}`);
       
       // Invalidate relevant caches
-      queryClient.invalidateQueries({ queryKey: ['category-posts', oldRecord.category] });
-      queryClient.invalidateQueries({ queryKey: ['available-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['optimized-stories'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', oldRecord.category] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     }
   };
 
