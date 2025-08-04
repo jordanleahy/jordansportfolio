@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🚀 BULK IMAGE PROMPT GENERATION: Function started');
+    console.log('🚀 ENSURE POST IMAGE PROMPTS: Function started');
     
     const { category, userId } = await req.json();
 
@@ -33,7 +33,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📋 BULK GENERATION REQUEST: Category: ${category}, User: ${userId}`);
+    console.log(`📋 ENSURE PROMPTS REQUEST: Category: ${category}, User: ${userId}`);
 
     // Create Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
@@ -96,7 +96,7 @@ serve(async (req) => {
     let errorCount = 0;
     const results = [];
 
-    console.log('🎨 STEP 3: Starting bulk image prompt generation');
+    console.log('🎨 STEP 3: Starting image prompt generation for posts');
 
     for (const post of posts) {
       try {
@@ -185,7 +185,7 @@ Please generate a detailed, professional image prompt that will create an approp
     }
 
     // Step 5: Log final results
-    console.log(`📈 BULK GENERATION COMPLETE: {
+    console.log(`📈 IMAGE PROMPT GENERATION COMPLETE: {
   category: "${category}",
   totalPosts: ${posts.length},
   successCount: ${successCount},
@@ -207,7 +207,7 @@ Please generate a detailed, professional image prompt that will create an approp
     );
 
   } catch (error) {
-    console.error('❌ BULK GENERATION ERROR:', error);
+    console.error('❌ IMAGE PROMPT GENERATION ERROR:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

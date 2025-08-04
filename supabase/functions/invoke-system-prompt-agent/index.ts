@@ -427,31 +427,31 @@ Please generate a detailed, professional system prompt following the established
         console.log('✅ AGENT UPDATE SUCCESS: Updated last_run timestamp');
       }
 
-      // 🎨 Step 4: Trigger bulk image prompt generation for all posts in this category
-      console.log('🎨 STEP 4: Starting bulk image prompt generation');
+      // 🎨 Step 4: Ensure all posts have image prompts
+      console.log('🎨 STEP 4: Ensuring posts have image prompts');
       try {
-        const bulkGenerationResponse = await supabase.functions.invoke('generate-bulk-image-prompts', {
+        const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
           body: { 
             category: actualCategory, 
             userId: user_id 
           }
         });
 
-        if (bulkGenerationResponse.error) {
-          console.error('⚠️  BULK GENERATION WARNING:', bulkGenerationResponse.error);
+        if (imagePromptResponse.error) {
+          console.error('⚠️  IMAGE PROMPT GENERATION WARNING:', imagePromptResponse.error);
           // Non-critical error, don't fail the whole operation
         } else {
-          const bulkResults = bulkGenerationResponse.data;
-          console.log('✅ BULK GENERATION SUCCESS:', {
+          const promptResults = imagePromptResponse.data;
+          console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
             category: actualCategory,
-            totalPosts: bulkResults?.totalPosts || 0,
-            successCount: bulkResults?.successCount || 0,
-            errorCount: bulkResults?.errorCount || 0
+            totalPosts: promptResults?.totalPosts || 0,
+            successCount: promptResults?.successCount || 0,
+            errorCount: promptResults?.errorCount || 0
           });
         }
-      } catch (bulkError) {
-        console.error('⚠️  BULK GENERATION ERROR (non-critical):', bulkError);
-        // Continue with success response even if bulk generation fails
+      } catch (promptError) {
+        console.error('⚠️  IMAGE PROMPT GENERATION ERROR (non-critical):', promptError);
+        // Continue with success response even if prompt generation fails
       }
 
       // 🎉 Final success response
