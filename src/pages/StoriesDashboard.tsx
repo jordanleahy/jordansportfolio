@@ -190,6 +190,12 @@ export default function StoriesDashboard() {
             console.log('❌ Theme image generation failed for:', category);
             setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
+            // Show error toast
+            toast({
+              title: "Image Generation Failed",
+              description: `Theme image generation failed for "${category}"`,
+              variant: "destructive"
+            });
           }
         }
       )

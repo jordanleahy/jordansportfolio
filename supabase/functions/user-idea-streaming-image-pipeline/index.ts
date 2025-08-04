@@ -173,14 +173,11 @@ Create a detailed image generation prompt for this ${theme} theme content.`;
 const generateThemeImage = async (supabase: any, prompt: string, theme: string, userId: string): Promise<string> => {
   console.log('🖼️ Generating theme image');
   
-  // Update posts to indicate image generation has started
-  await supabase
-    .from('social_media_posts')
-    .update({ theme_image_generation_status: 'generating' })
-    .eq('theme', theme)
-    .eq('user_id', userId);
+  try {
+    // Update posts to indicate image generation has started
+    await updateThemeImageStatus(supabase, 'generating', theme, userId);
 
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${openAIApiKey}`,
@@ -228,24 +225,47 @@ const generateThemeImage = async (supabase: any, prompt: string, theme: string, 
     .from('social-media-images')
     .getPublicUrl(filePath);
 
-  return urlData.publicUrl;
+    return urlData.publicUrl;
+    
+  } catch (error) {
+    console.error('❌ Theme image generation failed:', error);
+    // Set status to failed on error
+    await updateThemeImageStatus(supabase, 'failed', theme, userId);
+    throw error;
+  }
+};
+
+// Helper function to safely update generation status
+const updateThemeImageStatus = async (supabase: any, status: string, theme: string, userId: string, imageUrl?: string): Promise<void> => {
+  console.log(`🔄 Updating theme image status to '${status}' for theme: ${theme}`);
+  
+  const updateData: any = {
+    theme_image_generation_status: status,
+    updated_at: new Date().toISOString()
+  };
+  
+  if (imageUrl && status === 'complete') {
+    updateData.theme_image_4_3_url = imageUrl;
+  }
+  
+  const { data, error } = await supabase
+    .from('social_media_posts')
+    .update(updateData)
+    .eq('theme', theme)
+    .eq('user_id', userId)
+    .select('id, title');
+
+  if (error) {
+    console.error(`❌ Failed to update theme image status:`, error);
+    throw new Error(`Database update failed: ${error.message}`);
+  }
+  
+  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme: ${theme}`);
+  return;
 };
 
 const updatePostsWithImage = async (supabase: any, imageUrl: string, theme: string, userId: string): Promise<void> => {
-  console.log('🔄 Updating posts with theme image');
-  
-  const { error } = await supabase
-    .from('social_media_posts')
-    .update({
-      theme_image_4_3_url: imageUrl,
-      theme_image_generation_status: 'complete'
-    })
-    .eq('theme', theme)
-    .eq('user_id', userId);
-
-  if (error) {
-    throw new Error(`Database update failed: ${error.message}`);
-  }
+  return updateThemeImageStatus(supabase, 'complete', theme, userId, imageUrl);
 };
 
 serve(async (req) => {
