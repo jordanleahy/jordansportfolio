@@ -128,11 +128,18 @@ async function aiProcessThemeData(rawData: any) {
     throw new Error('OpenAI API key not configured');
   }
 
-  const prompt = `Clean and fix this JSON for a content calendar:
+  const prompt = `Clean and fix this JSON for a content calendar with the exact structure:
 
-Structure: {"category": "string", "theme": "string", "posts": [{"day": number, "title": "string", "description": "string", "status": "draft"}]}
+{"category": "string", "theme": "string", "theme_description": "optional string", "posts": [{"day": number, "title": "string", "story_description": "string", "status": "draft"}]}
 
-Rules: Fix syntax, ensure title/description exist, set status="draft", limit 100 posts, generate day numbers.
+Rules: 
+- Fix syntax errors
+- Ensure title/story_description exist
+- Set status="draft" if missing
+- Limit 100 posts max
+- Generate day numbers if missing
+- Keep theme_description if provided
+- Map description → story_description
 
 Data: ${JSON.stringify(rawData)}
 
@@ -191,6 +198,12 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
     fixes.push('Truncated theme to 200 characters');
   }
 
+  // Optional theme_description validation
+  if (validated.theme_description && (typeof validated.theme_description !== 'string' || validated.theme_description.length > 1000)) {
+    validated.theme_description = String(validated.theme_description).substring(0, 1000);
+    fixes.push('Truncated theme_description to 1000 characters');
+  }
+
   if (!Array.isArray(validated.posts)) {
     errors.push('Posts must be an array');
     return validated;
@@ -224,12 +237,12 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
       fixes.push(`Truncated title for post ${index + 1}`);
     }
 
-    // Validate description
-    if (!validatedPost.description || typeof validatedPost.description !== 'string') {
-      errors.push(`Post ${index + 1}: Description is required`);
-    } else if (validatedPost.description.length > 2000) {
-      validatedPost.description = validatedPost.description.substring(0, 2000);
-      fixes.push(`Truncated description for post ${index + 1}`);
+    // Validate story_description
+    if (!validatedPost.story_description || typeof validatedPost.story_description !== 'string') {
+      errors.push(`Post ${index + 1}: Story description is required`);
+    } else if (validatedPost.story_description.length > 2000) {
+      validatedPost.story_description = validatedPost.story_description.substring(0, 2000);
+      fixes.push(`Truncated story_description for post ${index + 1}`);
     }
 
     // Set default status
@@ -288,7 +301,8 @@ async function importToDatabase(supabase: any, data: any, userId: string): Promi
     const { data: insertCount, error } = await supabase
       .rpc('insert_category_content', {
         category_name: data.category,
-        posts_data: postsForDb
+        posts_data: postsForDb,
+        theme_description_param: data.theme_description
       });
 
     if (error) {

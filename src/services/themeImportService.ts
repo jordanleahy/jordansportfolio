@@ -145,7 +145,8 @@ export class ThemeImportService {
       // Import data using the existing database function
       const insertedCount = await this.bulkInsertPosts(
         validation.cleanedData.category,
-        validation.cleanedData.posts
+        validation.cleanedData.posts,
+        validation.cleanedData.theme_description
       );
       
       // Auto-create system prompt for new category
@@ -231,11 +232,12 @@ export class ThemeImportService {
     return [...new Set((data || []).map((item: any) => item.category as string))].filter(Boolean);
   }
 
-  private async bulkInsertPosts(category: string, posts: ThemePost[]): Promise<number> {
+  private async bulkInsertPosts(category: string, posts: ThemePost[], themeDescription?: string): Promise<number> {
     try {
       console.log('🗄️ Starting bulk insert');
       console.log('📂 Category:', category);
       console.log('📊 Posts count:', posts.length);
+      console.log('📝 Theme description:', themeDescription);
       console.log('📋 Posts sample:', posts.slice(0, 2));
       
       // Convert ThemePost array to JSON and ensure status is properly typed
@@ -251,13 +253,15 @@ export class ThemeImportService {
       console.log('🔗 Calling Supabase RPC: insert_category_content');
       console.log('📤 RPC parameters:', {
         category_name: category,
-        posts_data: postsAsJson
+        posts_data: postsAsJson,
+        theme_description_param: themeDescription
       });
       
       const { data, error } = await supabase
         .rpc('insert_category_content', {
           category_name: category,
-          posts_data: postsAsJson
+          posts_data: postsAsJson,
+          theme_description_param: themeDescription
         });
 
       console.log('📥 RPC response - data:', data);

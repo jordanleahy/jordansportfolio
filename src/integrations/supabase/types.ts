@@ -2256,7 +2256,11 @@ export type Database = {
         Returns: undefined
       }
       insert_category_content: {
-        Args: { category_name: string; posts_data: Json }
+        Args: {
+          category_name: string
+          posts_data: Json
+          theme_description_param?: string
+        }
         Returns: number
       }
       insert_cdi_content: {
