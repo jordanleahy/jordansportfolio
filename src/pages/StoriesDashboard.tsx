@@ -69,14 +69,28 @@ export default function StoriesDashboard() {
   // Helper function to refresh post counts and images
   const refreshPostCountsAndImages = React.useCallback(async () => {
     console.log('🔄 REFRESH: Starting refreshPostCountsAndImages for categories:', availableCategories);
-    if (!availableCategories.length) return;
+    
+    // If availableCategories is empty, force-fetch categories first
+    let categoriesToUse = availableCategories;
+    if (!availableCategories.length) {
+      console.log('🔄 REFRESH: Categories empty, force-fetching from service');
+      try {
+        categoriesToUse = await optimizedSocialMediaService.getAvailableCategories();
+        console.log('🔄 REFRESH: Force-fetched categories:', categoriesToUse);
+      } catch (error) {
+        console.error('❌ REFRESH: Failed to force-fetch categories:', error);
+        return;
+      }
+    }
+    
+    if (!categoriesToUse.length) return;
     
     const counts: Record<string, number> = {};
     const images: Record<string, string> = {};
     const firstPosts: Record<string, { title: string; description: string }> = {};
     const themeToCategoryMap: Record<string, string> = {};
     
-    for (const category of availableCategories) {
+    for (const category of categoriesToUse) {
       try {
         const posts = await optimizedSocialMediaService.getPostsByCategory(category);
         counts[category] = posts.length;
@@ -238,9 +252,11 @@ export default function StoriesDashboard() {
               return filtered;
             });
             
-            // **TRIGGER REFRESH FOR CATEGORY IMAGES**
+            // **TRIGGER REFRESH FOR CATEGORY IMAGES WITH PROPER SEQUENCING**
             console.log('🔄 TRIGGERING CATEGORY REFRESH due to theme image completion');
-            refreshPostCountsAndImages(); // Refresh to show the new image
+            // Force invalidate categories cache first, then refresh images
+            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            setTimeout(() => refreshPostCountsAndImages(), 100); // Small delay to ensure cache invalidation completes
           }
           
           // Handle failed theme image generation
