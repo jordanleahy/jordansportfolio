@@ -231,6 +231,35 @@ export default function VendorDetail() {
       queryKey: ['vendor', vendorSlug]
     })
   });
+
+  // Fix slug mismatch for Clarion portfolio
+  const handleFixSlug = async () => {
+    if (vendor?.company_name === 'Clarion, Inc.' && vendor.slug === 'clarionhealth') {
+      try {
+        const { error } = await supabase
+          .from('vendors')
+          .update({ slug: 'clarion-inc' })
+          .eq('id', vendor.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Slug Updated",
+          description: "Vendor slug updated to match portfolio slug."
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ['vendor'] });
+        navigate(`/vendors/${category}/clarion-inc`);
+      } catch (error) {
+        console.error('Error updating slug:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update vendor slug.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
   if (!category || !vendorSlug) {
     console.log('Missing required params, redirecting to 404');
     return <Navigate to="/404" replace />;
@@ -926,6 +955,18 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:flex-shrink-0">
+                {/* Fix Slug Button for Clarion */}
+                {isAdmin && vendor?.company_name === 'Clarion, Inc.' && vendor.slug === 'clarionhealth' && (
+                  <Button 
+                    variant="outline" 
+                    size={isMobile ? "icon" : "default"} 
+                    onClick={handleFixSlug}
+                    className="min-h-[44px]" 
+                    title="Fix slug to match portfolio"
+                  >
+                    🔧 Fix Slug
+                  </Button>
+                )}
                 {/* Admin-only Publish Button */}
                 {isAdmin && <Button variant={vendor.status === 'published' ? "outline" : "default"} size={isMobile ? "icon" : "default"} onClick={() => togglePublishStatus(vendor.status || 'draft')} disabled={isPublishing} className="min-h-[44px]" aria-label={vendor.status === 'published' ? "Unpublish vendor" : "Publish vendor"}>
                     {vendor.status === 'published' ? <>
