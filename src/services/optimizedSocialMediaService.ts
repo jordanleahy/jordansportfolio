@@ -186,25 +186,25 @@ export class OptimizedSocialMediaService {
       return this.getFromCache(cacheKey);
     }
 
-    // Get categories with their earliest creation date for ordering
+    // Get categories with their latest creation date for ordering
     const { data, error } = await supabase
       .from('social_media_posts')
       .select('category, created_at')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     
-    // Group by category and find the earliest created_at for each
+    // Group by category and find the latest created_at for each
     const categoryDates = new Map<string, string>();
     (data || []).forEach((item: any) => {
       if (item.category) {
-        if (!categoryDates.has(item.category) || item.created_at < categoryDates.get(item.category)!) {
+        if (!categoryDates.has(item.category) || item.created_at > categoryDates.get(item.category)!) {
           categoryDates.set(item.category, item.created_at);
         }
       }
     });
     
-    // Sort categories by their earliest creation date (newest first)
+    // Sort categories by their latest creation date (newest first)
     const sortedCategories = Array.from(categoryDates.entries())
       .sort(([, dateA], [, dateB]) => dateB.localeCompare(dateA))
       .map(([category]) => category);

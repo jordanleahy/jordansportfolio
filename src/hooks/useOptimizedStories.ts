@@ -29,23 +29,11 @@ export const useAvailableCategories = (enabled = true) => {
   return useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('social_media_posts')
-        .select('category')
-        .not('category', 'is', null);
-      
-      if (error) throw error;
-      
-      const categories = Array.from(new Set(data?.map(item => item.category) || []));
-      return categories.filter(Boolean);
+      // Import here to avoid circular dependency
+      const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
+      return optimizedSocialMediaService.getAvailableCategories();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    select: (data) => {
-      // Ensure known categories appear first
-      const knownCategories = ['cdi', 'contracts', 'coding ai', 'ai agents'];
-      const dynamicCategories = data.filter(c => !knownCategories.includes(c));
-      return [...knownCategories.filter(c => data.includes(c)), ...dynamicCategories];
-    },
     enabled,
   });
 };
