@@ -26,8 +26,10 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Try cache first with theme-based key
-        const cacheKey = `${theme}${category ? `-${category}` : ''}`;
+        // Try cache first with normalized theme-based key
+        const normalizedTheme = theme.toLowerCase().replace(/\s+/g, '-');
+        const normalizedCategory = category?.toLowerCase().replace(/\s+/g, '-');
+        const cacheKey = `${normalizedTheme}${normalizedCategory ? `-${normalizedCategory}` : ''}`;
         const cached = await systemPromptCache.get(cacheKey, user.id);
         if (cached) {
           console.log(`⚡ [useSystemPromptCache] Cache hit for theme: ${theme}`);
