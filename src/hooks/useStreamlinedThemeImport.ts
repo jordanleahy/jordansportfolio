@@ -24,10 +24,6 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         timestamp: new Date().toISOString()
       });
       
-      // Start the minimum shimmer duration timer
-      const startTime = Date.now();
-      const MINIMUM_SHIMMER_DURATION = 1500; // 1.5 seconds
-      
       // Call the combined edge function
       console.log('📡 CALLING: process-and-import-theme edge function');
       const response = await supabase.functions.invoke('process-and-import-theme', {
@@ -43,15 +39,6 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       if (response.error) {
         console.error('❌ EDGE FUNCTION ERROR:', response.error);
         throw new Error(response.error.message);
-      }
-
-      // Ensure minimum shimmer duration
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, MINIMUM_SHIMMER_DURATION - elapsedTime);
-      
-      if (remainingTime > 0) {
-        console.log(`⏳ SHIMMER DELAY: Waiting ${remainingTime}ms to ensure visible loading state`);
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
       console.log('✅ EDGE FUNCTION SUCCESS:', {

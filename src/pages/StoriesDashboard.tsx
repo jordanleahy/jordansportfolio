@@ -143,13 +143,15 @@ export default function StoriesDashboard() {
     setShimmerCategories(prev => [...prev, categoryName]);
   };
 
-  const handleOptimisticComplete = (success: boolean, categoryName?: string) => {
-    if (categoryName) {
-      // Remove shimmer card
+  const handleOptimisticComplete = async (success: boolean, categoryName?: string) => {
+    if (categoryName && success) {
+      // Wait for data to actually load before removing shimmer
+      await refreshPostCountsAndImages();
+      // Remove shimmer card only after data is refreshed
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
-    }
-    if (success) {
-      invalidateCache();
+    } else if (categoryName) {
+      // Remove shimmer immediately on failure
+      setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
     }
   };
 
@@ -295,6 +297,7 @@ export default function StoriesDashboard() {
               onOpenChange={setImportModalOpen} 
               onImportComplete={handleImportComplete}
               onOptimisticStart={handleOptimisticStart}
+              onOptimisticComplete={handleOptimisticComplete}
             />
           </Suspense>
         )}

@@ -16,12 +16,14 @@ interface ThemeImportModalOptimizedProps {
   onOpenChange: (open: boolean) => void;
   onImportComplete?: () => void;
   onOptimisticStart?: (categoryName: string) => void;
+  onOptimisticComplete?: (success: boolean, categoryName?: string) => void;
 }
 export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps> = ({
   open,
   onOpenChange,
   onImportComplete,
-  onOptimisticStart
+  onOptimisticStart,
+  onOptimisticComplete
 }) => {
   const [jsonInput, setJsonInput] = useState('');
   const {
@@ -61,7 +63,8 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
       reset();
       // Trigger shimmer in parent component
       onOptimisticStart?.(categoryName);
-    }
+    },
+    onOptimisticComplete
   });
 
   // Format JSON helper
