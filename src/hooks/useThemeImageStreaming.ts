@@ -18,7 +18,6 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
   const [streamingProgress, setStreamingProgress] = useState<StreamingProgress | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   // Listen for real-time database updates
@@ -43,10 +42,8 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
           if (theme_image_generation_status === 'generating') {
             setIsGenerating(true);
             setError(null);
-            setIsComplete(false);
           } else if (theme_image_generation_status === 'complete' && theme_image_4_3_url) {
             setIsGenerating(false);
-            setIsComplete(true);
             setStreamingProgress({
               stage: 'complete',
               progress: 100,
@@ -54,7 +51,6 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
             });
           } else if (theme_image_generation_status === 'failed') {
             setIsGenerating(false);
-            setIsComplete(true);
             setError('Image generation failed');
           }
         }
@@ -159,7 +155,6 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
     streamingProgress,
     isGenerating,
     error,
-    isComplete,
     startStreaming
   };
 };

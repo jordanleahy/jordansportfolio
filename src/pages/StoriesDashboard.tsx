@@ -62,7 +62,6 @@ export default function StoriesDashboard() {
   const [categoryImages, setCategoryImages] = React.useState<Record<string, string>>({});
   const [firstPostsData, setFirstPostsData] = React.useState<Record<string, { title: string; description: string }>>({});
   const [shimmerCategories, setShimmerCategories] = React.useState<string[]>([]);
-  const [themeGenerationStatus, setThemeGenerationStatus] = React.useState<Record<string, string>>({});
 
   // Helper function to refresh post counts and images
   const refreshPostCountsAndImages = React.useCallback(async () => {
@@ -103,14 +102,6 @@ export default function StoriesDashboard() {
                             firstPostWithImage.image_9_16_url ||
                             firstPostWithImage.image_3_4_url ||
                             '';
-          
-          // Track theme image generation status
-          if (firstPostWithImage.theme_image_generation_status) {
-            setThemeGenerationStatus(prev => ({
-              ...prev,
-              [category]: firstPostWithImage.theme_image_generation_status
-            }));
-          }
         }
       } catch (error) {
         console.error(`Error fetching posts for ${category}:`, error);
@@ -137,13 +128,6 @@ export default function StoriesDashboard() {
 
   const handlePostUpdate = React.useCallback((update: any) => {
     console.log('📝 Post updated:', update.postId, 'in category:', update.category);
-    
-    // Check if theme image generation completed
-    if (update.theme_image_generation_status === 'complete' || update.theme_image_generation_status === 'failed') {
-      // Remove from shimmer categories once theme generation is done
-      setShimmerCategories(prev => prev.filter(cat => cat !== update.category));
-    }
-    
     // Refresh category images in case image URLs changed
     refreshPostCountsAndImages();
   }, [refreshPostCountsAndImages]);
@@ -176,8 +160,6 @@ export default function StoriesDashboard() {
   };
 
   const handleOptimisticComplete = async (success: boolean, categoryName?: string) => {
-    console.log('🎯 [StoriesDashboard] handleOptimisticComplete:', { success, categoryName });
-    
     if (categoryName && success) {
       // Wait for categories query to refresh first
       await queryClient.invalidateQueries({ queryKey: ['available-categories'] });
@@ -186,18 +168,10 @@ export default function StoriesDashboard() {
       // Then wait for data to actually load
       await refreshPostCountsAndImages();
       
-      // Keep category in shimmer until theme image generation starts
-      // Mark this category as needing theme image generation
-      setThemeGenerationStatus(prev => ({
-        ...prev,
-        [categoryName]: 'pending'
-      }));
-      
-      console.log('✅ [StoriesDashboard] Import complete, keeping shimmer until theme image generates');
-      // DON'T remove shimmer here - keep it until theme image generation completes
+      // Remove shimmer card only after data is refreshed
+      setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
     } else if (categoryName) {
       // Remove shimmer immediately on failure
-      console.log('❌ [StoriesDashboard] Import failed, removing shimmer for:', categoryName);
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
     }
   };
@@ -356,7 +330,6 @@ export default function StoriesDashboard() {
           categoryImages={categoryImages}
           shimmerCategories={shimmerCategories}
           firstPostsData={firstPostsData}
-          themeGenerationStatus={themeGenerationStatus}
         />
       </div>
     </PageLayout>
