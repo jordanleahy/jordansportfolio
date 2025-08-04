@@ -30,8 +30,8 @@ export const CategoriesGrid = ({ categories, postCounts, categoryImages, shimmer
       
       {/* Real categories */}
       {categories.map((category) => {
-        // Show shimmer if category is in shimmerCategories OR if theme image is generating
-        const isGeneratingTheme = themeGenerationStatus[category] === 'generating';
+        // Show shimmer if category is in shimmerCategories OR if theme image is generating/pending
+        const isGeneratingTheme = themeGenerationStatus[category] === 'generating' || themeGenerationStatus[category] === 'pending';
         const shouldShowShimmer = shimmerCategories.includes(category) || isGeneratingTheme;
         
         return (

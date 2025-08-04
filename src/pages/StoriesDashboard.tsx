@@ -176,6 +176,8 @@ export default function StoriesDashboard() {
   };
 
   const handleOptimisticComplete = async (success: boolean, categoryName?: string) => {
+    console.log('🎯 [StoriesDashboard] handleOptimisticComplete:', { success, categoryName });
+    
     if (categoryName && success) {
       // Wait for categories query to refresh first
       await queryClient.invalidateQueries({ queryKey: ['available-categories'] });
@@ -184,10 +186,18 @@ export default function StoriesDashboard() {
       // Then wait for data to actually load
       await refreshPostCountsAndImages();
       
+      // Keep category in shimmer until theme image generation starts
+      // Mark this category as needing theme image generation
+      setThemeGenerationStatus(prev => ({
+        ...prev,
+        [categoryName]: 'pending'
+      }));
+      
+      console.log('✅ [StoriesDashboard] Import complete, keeping shimmer until theme image generates');
       // DON'T remove shimmer here - keep it until theme image generation completes
-      // The shimmer will be removed by handlePostUpdate when theme image is ready
     } else if (categoryName) {
       // Remove shimmer immediately on failure
+      console.log('❌ [StoriesDashboard] Import failed, removing shimmer for:', categoryName);
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
     }
   };
