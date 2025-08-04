@@ -93,8 +93,9 @@ export default function StoriesDashboard() {
           }
         }
         
-        // Find first post with an image or theme image (checking multiple aspect ratios)
-        const firstPostWithImage = posts.find(post => 
+        // Sort posts by day first, then find the first one with an image
+        const sortedPosts = posts.sort((a, b) => (a.day || 0) - (b.day || 0));
+        const firstPostWithImage = sortedPosts.find(post => 
           post.theme_image_4_3_url || // Priority to theme image
           post.image_16_9_url || 
           post.image_4_3_url || 
