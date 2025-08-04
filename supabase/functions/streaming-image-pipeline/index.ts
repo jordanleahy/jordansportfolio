@@ -168,7 +168,7 @@ serve(async (req) => {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            // Send progress update
+            // Send progress update with proper SSE formatting for large payloads
             const sendProgress = (stage: string, progress: number, data?: any) => {
               const message = JSON.stringify({ 
                 type: 'progress', 
@@ -178,7 +178,27 @@ serve(async (req) => {
                 mode,
                 ...data 
               });
-              controller.enqueue(encoder.encode(`data: ${message}\n\n`));
+              
+              // For large messages (like base64 images), ensure proper chunk boundaries
+              const formattedMessage = `data: ${message}\n\n`;
+              
+              try {
+                controller.enqueue(encoder.encode(formattedMessage));
+              } catch (error) {
+                console.error('Error sending progress update:', error);
+                // Try to send without the large data payload as fallback
+                if (data && (data.partialImage || data.imageUrl)) {
+                  const fallbackMessage = JSON.stringify({ 
+                    type: 'progress', 
+                    stage, 
+                    progress, 
+                    postId,
+                    mode,
+                    error: 'Image data too large for streaming'
+                  });
+                  controller.enqueue(encoder.encode(`data: ${fallbackMessage}\n\n`));
+                }
+              }
             };
 
             sendProgress('prompt_generation', 10);

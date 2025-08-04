@@ -149,42 +149,79 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       }
 
       const decoder = new TextDecoder();
+      let buffer = '';
       
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
         
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
+        // Split by double newlines (SSE message boundaries)
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop() || ''; // Keep the last incomplete message
+        
+        for (const message of messages) {
+          const lines = message.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ') && line.length > 6) {
+              const dataContent = line.slice(6).trim();
               
-              if (data.type === 'progress') {
-                // Handle smooth partial image transitions
-                if (data.stage.startsWith('partial_') || data.stage === 'image_generated') {
-                  setStreamingProgress(prevProgress => ({
-                    ...data,
-                    // Preserve previous image briefly for smooth transition
-                    previousImage: prevProgress?.partialImage
-                  }));
-                  
-                  // If we have a partial image, show it immediately
-                  if (data.partialImage) {
-                    console.log(`📸 Received ${data.isPartial ? 'partial' : 'final'} image for ${category}, stage: ${data.stage}`);
+              if (!dataContent || dataContent === '[DONE]') {
+                continue;
+              }
+              
+              try {
+                const data = JSON.parse(dataContent);
+                
+                if (data.type === 'progress') {
+                  // Handle smooth partial image transitions
+                  if (data.stage.startsWith('partial_') || data.stage === 'image_generated') {
+                    setStreamingProgress(prevProgress => ({
+                      ...data,
+                      // Preserve previous image briefly for smooth transition
+                      previousImage: prevProgress?.partialImage
+                    }));
+                    
+                    // If we have a partial image, show it immediately
+                    if (data.partialImage) {
+                      console.log(`📸 Received ${data.isPartial ? 'partial' : 'final'} image for ${category}, stage: ${data.stage}`);
+                    }
+                  } else {
+                    setStreamingProgress(data);
                   }
-                } else {
+                } else if (data.type === 'error') {
+                  setError(data.message);
+                  setIsGenerating(false);
+                  return;
+                }
+              } catch (err) {
+                console.error('Error parsing SSE data:', err);
+                // Log first part of problematic data for debugging
+                console.log('Problematic data preview:', dataContent.substring(0, 200) + '...');
+              }
+            }
+          }
+        }
+      }
+      
+      // Process any remaining buffered data
+      if (buffer.trim()) {
+        const lines = buffer.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line.length > 6) {
+            const dataContent = line.slice(6).trim();
+            if (dataContent && dataContent !== '[DONE]') {
+              try {
+                const data = JSON.parse(dataContent);
+                if (data.type === 'progress') {
                   setStreamingProgress(data);
                 }
-              } else if (data.type === 'error') {
-                setError(data.message);
-                setIsGenerating(false);
-                return;
+              } catch (err) {
+                console.log('Error parsing final buffered data:', err);
               }
-            } catch (err) {
-              console.error('Error parsing SSE data:', err);
             }
           }
         }
