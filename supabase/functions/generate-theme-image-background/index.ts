@@ -113,7 +113,7 @@ async function generateThemeImage(supabase: any, prompt: string, theme: string, 
     // Upload to Supabase Storage
     const fileName = `theme-images/${userId}/${theme.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.png`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('social-media-images')
       .upload(fileName, blob, {
         contentType: 'image/png',

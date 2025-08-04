@@ -205,8 +205,6 @@ const generateSystemPrompt = async (supabase: any, themeData: any, userId: strin
   }
 };
 
-// Note: generateImagePrompt, generateThemeImage, updateThemeImageStatus, and updatePostsWithImage
-// are now imported from the shared utilities module
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -243,8 +241,6 @@ serve(async (req) => {
     console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
 
     if (stream) {
-      const encoder = new TextEncoder();
-      
       const streamResponse = new ReadableStream({
         async start(controller) {
           try {
