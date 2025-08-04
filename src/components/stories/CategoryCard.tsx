@@ -33,7 +33,6 @@ export const CategoryCard = ({ category, postCount, imageUrl, onClick, isShimmer
   // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
   useEffect(() => {
     if (firstPostData && !currentImageUrl && !isGenerating && !streamingProgress) {
-      console.log(`🚀 Auto-starting theme image generation for category: ${category}`);
       startStreaming(firstPostData);
     }
   }, [firstPostData, currentImageUrl, isGenerating, streamingProgress, category, startStreaming]);

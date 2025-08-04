@@ -203,7 +203,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         .update({ [statusField]: 'uploading' })
         .eq('id', postId);
 
-      console.log('🎨 SINGLE_IMAGE_GENERATION: Starting for post:', postId, 'aspect:', aspectRatio);
+      
       
       // Step 1: Generate prompt
       toast.info('Generating image prompt...');

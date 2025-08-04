@@ -197,7 +197,6 @@ const PostCardComponent = ({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  console.log('🎤 Voiceover button clicked for post:', post.id, post.title);
                   onGenerateVoiceover(post);
                 }}
                 className="flex-1"

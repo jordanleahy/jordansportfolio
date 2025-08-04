@@ -53,21 +53,9 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
   };
 
   const handleCreatePortfolio = async (application: JobApplication) => {
-    console.log('🎯 Starting portfolio creation for:', application.company_name);
-    console.log('🎯 Application data:', {
-      id: application.id,
-      company_name: application.company_name,
-      user_id: application.user_id,
-      created_at: application.created_at
-    });
-    console.log('🎯 User authenticated:', !!user);
-    console.log('🎯 User ID:', user?.id);
-    console.log('🎯 Application user_id:', application.user_id);
-    console.log('🎯 User IDs match:', user?.id === application.user_id);
 
     // Check authentication first
     if (!user) {
-      console.error('🎯 User not authenticated');
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a personalized portfolio.",
@@ -78,13 +66,10 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
     }
 
     const companySlug = application.company_name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
-    console.log('🎯 Creating portfolio with slug:', companySlug);
     
     setCreatingPortfolio(application.id);
     try {
       await createPersonalizedPortfolio(application, companySlug);
-      
-      console.log('🎯 Portfolio created successfully');
       toast({
         title: "Success",
         description: "Personalized landing page created successfully!",
@@ -92,7 +77,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
       
       // Wait a bit longer to ensure database transaction is committed and cache is updated
       setTimeout(() => {
-        console.log('🎯 Navigating to portfolio:', `/portfolio/${companySlug}`);
         navigate(`/portfolio/${companySlug}`);
       }, 500); // Increased delay
     } catch (error: any) {

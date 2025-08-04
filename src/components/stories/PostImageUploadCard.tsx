@@ -64,7 +64,7 @@ export const PostImageUploadCard = ({
       setIsGenerating(true);
       setGenerationStep('prompt');
       
-      console.log('🎨 IMAGE_GENERATION: Starting generation for post:', post.id, 'aspect:', aspectRatio);
+      
       
       // Step 1: Generate prompt
       toast.info('Generating image prompt...');
@@ -84,11 +84,8 @@ export const PostImageUploadCard = ({
 
       const generatedPrompt = promptResponse.data?.generatedPrompt;
       if (!generatedPrompt) {
-        console.error('🎨 IMAGE_GENERATION: No prompt in response:', promptResponse.data);
         throw new Error('No prompt generated');
       }
-
-      console.log('🎨 IMAGE_GENERATION: Generated prompt:', generatedPrompt);
 
       // Step 2: Generate image
       setGenerationStep('image');

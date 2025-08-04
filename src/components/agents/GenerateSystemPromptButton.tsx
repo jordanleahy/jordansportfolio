@@ -29,7 +29,7 @@ export const GenerateSystemPromptButton = ({
     }
 
     setIsGenerating(true);
-    console.log('Starting system prompt generation for category:', category);
+    
     
     try {
       // Get current user
@@ -38,10 +38,7 @@ export const GenerateSystemPromptButton = ({
         throw new Error('User not authenticated');
       }
       
-      console.log('User ID:', user.id);
-      
       // Call the edge function directly
-      console.log('Calling invoke-system-prompt-agent edge function...');
       const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
         body: {
           category,
@@ -57,19 +54,13 @@ export const GenerateSystemPromptButton = ({
         }
       });
 
-      console.log('Edge function response:', { data, error });
-      console.log('Edge function response status:', { data, error });
 
       if (error) {
-        console.error('Edge function error details:', JSON.stringify(error, null, 2));
         throw new Error(`Edge function error: ${error.message || JSON.stringify(error)}`);
       }
 
       if (data?.system_prompt) {
-        console.log('Generated system prompt:', data.system_prompt);
-        
         // Insert into the new system_prompts table
-        console.log('Inserting into system_prompts table...');
         
         const { error: insertError } = await supabase
           .from('system_prompts')
@@ -89,11 +80,8 @@ export const GenerateSystemPromptButton = ({
           });
 
         if (insertError) {
-          console.error('Insert error:', insertError);
           throw insertError;
         }
-
-        console.log('System prompt saved successfully');
         toast({
           title: "System prompt generated!",
           description: `Rich system prompt for ${category} has been created`,
@@ -101,7 +89,6 @@ export const GenerateSystemPromptButton = ({
 
         onSuccess?.();
       } else {
-        console.error('No system prompt in response:', data);
         throw new Error('No system prompt returned from edge function');
       }
     } catch (error: any) {

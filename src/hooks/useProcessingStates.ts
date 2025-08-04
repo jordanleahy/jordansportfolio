@@ -28,23 +28,16 @@ export const useProcessingStates = () => {
     isActive: boolean,
     aspectRatio?: AspectRatio
   ) => {
-    console.log(`🔧 [ProcessingStates] setProcessing - postId: ${postId}, operation: ${operation}, isActive: ${isActive}, aspectRatio: ${aspectRatio}`);
-    
     setProcessingStates(prev => {
       const newMap = new Map(prev);
       const key = createKey(postId, operation, aspectRatio);
       
-      console.log(`🔧 [ProcessingStates] Generated key: ${key}`);
-      
       if (isActive) {
         newMap.set(key, { operation, aspectRatio, isActive });
-        console.log(`🔧 [ProcessingStates] Set active state for key: ${key}`);
       } else {
         newMap.delete(key);
-        console.log(`🔧 [ProcessingStates] Deleted state for key: ${key}`);
       }
       
-      console.log(`🔧 [ProcessingStates] Current states:`, Array.from(newMap.entries()));
       return newMap;
     });
   }, [createKey]);
@@ -54,8 +47,6 @@ export const useProcessingStates = () => {
     isActive: boolean,
     aspectRatios: AspectRatio[] = ['16:9', '4:3', '9:16', '3:4']
   ) => {
-    console.log(`🔧 [ProcessingStates] setBulkProcessing - postId: ${postId}, isActive: ${isActive}, aspectRatios:`, aspectRatios);
-    
     // Set individual aspect ratio states for shimmer effects
     aspectRatios.forEach(aspectRatio => {
       setProcessing(postId, 'upload', isActive, aspectRatio);
@@ -63,8 +54,6 @@ export const useProcessingStates = () => {
     
     // Also set bulk generate state
     setProcessing(postId, 'bulk_generate', isActive);
-    
-    console.log(`🔧 [ProcessingStates] setBulkProcessing completed for ${postId}`);
   }, [setProcessing]);
 
   const isProcessing = useCallback((
@@ -109,9 +98,7 @@ export const useProcessingStates = () => {
   const isGenerating = useCallback((
     postId: string
   ): boolean => {
-    const result = isProcessing(postId, 'generate') || isProcessing(postId, 'bulk_generate');
-    console.log(`🔧 [ProcessingStates] isGenerating(${postId}) = ${result}`);
-    return result;
+    return isProcessing(postId, 'generate') || isProcessing(postId, 'bulk_generate');
   }, [isProcessing]);
 
   const getUploadType = useCallback((

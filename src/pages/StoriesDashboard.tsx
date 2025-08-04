@@ -125,7 +125,6 @@ export default function StoriesDashboard() {
 
   // Setup realtime subscription for immediate updates
   const handlePostInsert = React.useCallback((newPost: any) => {
-    console.log('🆕 New post created:', newPost.title, 'in category:', newPost.category);
     // Trigger cache invalidation and refresh category data
     invalidateCache();
     refreshPostCountsAndImages();
@@ -137,7 +136,6 @@ export default function StoriesDashboard() {
   }, [invalidateCache, refreshPostCountsAndImages, toast]);
 
   const handlePostUpdate = React.useCallback((update: any) => {
-    console.log('📝 Post updated:', update.postId, 'in category:', update.category);
     // Refresh category images in case image URLs changed
     refreshPostCountsAndImages();
   }, [refreshPostCountsAndImages]);
@@ -163,7 +161,6 @@ export default function StoriesDashboard() {
           
           // Track theme image generation status changes
           if (oldStatus !== 'generating' && theme_image_generation_status === 'generating' && category) {
-            console.log('🎨 Theme image generation started for:', category);
             setImageGeneratingCategories(prev => 
               prev.includes(category) ? prev : [...prev, category]
             );
@@ -171,7 +168,6 @@ export default function StoriesDashboard() {
           
           // Remove from generating and shimmer when theme image generation completes
           if (theme_image_generation_status === 'complete' && category) {
-            console.log('🎨 Theme image generation completed for:', category);
             setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
             refreshPostCountsAndImages(); // Refresh to show the new image
@@ -183,7 +179,7 @@ export default function StoriesDashboard() {
             theme_image_generation_status === 'failed' && 
             category
           ) {
-            console.log('❌ Theme image generation failed for:', category);
+            
             setImageGeneratingCategories(prev => prev.filter(cat => cat !== category));
             setShimmerCategories(prev => prev.filter(cat => cat !== category));
             // Show error toast
@@ -209,10 +205,6 @@ export default function StoriesDashboard() {
     onPostUpdate: handlePostUpdate
   });
 
-  // Debug connection status
-  React.useEffect(() => {
-    console.log(`[StoriesDashboard] Realtime connection status: ${connectionStatus}, connected: ${isConnected}`);
-  }, [connectionStatus, isConnected]);
 
   React.useEffect(() => {
     refreshPostCountsAndImages();
@@ -241,7 +233,7 @@ export default function StoriesDashboard() {
       
       // DON'T remove shimmer here - let it persist until theme image generation completes
       // The shimmer will be removed by real-time updates when theme image is generated
-      console.log('🎉 Theme import successful, but keeping shimmer until image generation completes');
+      
     } else if (categoryName) {
       // Remove shimmer immediately on failure
       setShimmerCategories(prev => prev.filter(cat => cat !== categoryName));
@@ -305,11 +297,6 @@ export default function StoriesDashboard() {
       const tempCategoryName = 'generating-theme-' + Date.now();
       setShimmerCategories(prev => [...prev, tempCategoryName]);
 
-      console.log('🚀 Calling edge function with:', {
-        description: customThemeDescription.trim(),
-        userId: user?.id,
-        stream: false
-      });
 
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: { 
@@ -318,19 +305,17 @@ export default function StoriesDashboard() {
         }
       });
 
-      console.log('📡 Edge function response:', { data, error });
+      
 
       if (error) {
-        console.error('🚨 Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
 
       if (!data?.success) {
-        console.error('🚨 Theme generation failed:', data);
         throw new Error(data?.error || 'Failed to generate theme');
       }
 
-      console.log('✅ Theme generation successful:', data);
+      
 
       // Remove temporary shimmer and add the actual theme to shimmer
       setShimmerCategories(prev => {
@@ -368,7 +353,6 @@ export default function StoriesDashboard() {
   const clearShimmer = () => {
     setShimmerCategories([]);
     setImageGeneratingCategories([]);
-    console.log('🧹 Manually cleared all shimmer states');
   };
 
   if (loading || (!isInitialized && isLoadingCategories)) {
@@ -466,13 +450,6 @@ export default function StoriesDashboard() {
             // Show categories with posts that are NOT in shimmer state
             const hasRealPosts = (postCounts[category] || 0) > 0;
             const isInShimmer = shimmerCategories.includes(category);
-            console.log('🔍 Category filtering debug:', {
-              category,
-              hasRealPosts,
-              isInShimmer,
-              postCount: postCounts[category],
-              willShow: hasRealPosts && !isInShimmer
-            });
             return hasRealPosts && !isInShimmer;
           })}
           postCounts={postCounts}
@@ -480,13 +457,6 @@ export default function StoriesDashboard() {
           shimmerCategories={(() => {
             // Only show shimmer for categories being created (no posts yet)
             const creatingShimmer = shimmerCategories.filter(category => (postCounts[category] || 0) === 0);
-            console.log('🎭 Shimmer debug:', {
-              shimmerCategories,
-              imageGeneratingCategories,
-              postCounts,
-              creatingShimmer,
-              finalShimmer: creatingShimmer
-            });
             return creatingShimmer;
           })()}
           firstPostsData={firstPostsData}
