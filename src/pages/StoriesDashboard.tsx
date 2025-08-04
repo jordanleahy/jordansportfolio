@@ -105,7 +105,7 @@ export default function StoriesDashboard() {
     });
     
     refreshThemes();
-    queryClient.invalidateQueries({ queryKey: ['available-categories'] });
+    queryClient.invalidateQueries({ queryKey: ['themes'] });
     queryClient.invalidateQueries({ queryKey: ['posts'] });
   }, [refreshThemes, queryClient]);
 

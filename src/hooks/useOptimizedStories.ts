@@ -50,7 +50,7 @@ export function useOptimizedStories(user: any) {
     userId: user?.id,
     onPostUpdate: (post: SocialMediaPost) => {
       queryClient.invalidateQueries({ queryKey: ['posts', post.category] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['themes'] });
     }
   });
 
