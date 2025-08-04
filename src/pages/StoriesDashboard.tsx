@@ -376,7 +376,11 @@ export default function StoriesDashboard() {
 
         {/* Categories Grid */}
         <CategoriesGrid 
-          categories={availableCategories.filter(category => (postCounts[category] || 0) > 0)}
+          categories={availableCategories.filter(category => {
+            // Exclude categories that are still in shimmer state
+            if (shimmerCategories.includes(category)) return false;
+            return (postCounts[category] || 0) > 0;
+          })}
           postCounts={postCounts}
           categoryImages={categoryImages}
           shimmerCategories={shimmerCategories}
