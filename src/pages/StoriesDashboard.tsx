@@ -13,6 +13,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useThemeImport } from '@/hooks/useThemeImport';
+import { useThemeImageStreaming } from '@/hooks/useThemeImageStreaming';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
@@ -55,6 +56,12 @@ export default function StoriesDashboard() {
       setCustomThemeDescription('');
       invalidateCache();
     }
+  });
+
+  // Hook for theme image streaming
+  const { startStreaming } = useThemeImageStreaming({
+    category: '', // Will be set dynamically when calling startStreaming
+    enabled: false // Disabled by default since we'll trigger manually
   });
 
   // Calculate post counts and first images for each category
@@ -299,6 +306,21 @@ export default function StoriesDashboard() {
       await queryClient.refetchQueries({ queryKey: ['available-categories'] });
       await refreshPostCountsAndImages();
       console.log('✅ [StoriesDashboard] Data refresh completed');
+      
+      // Trigger streaming image pipeline directly after import
+      console.log('🎨 [StoriesDashboard] Starting theme image generation');
+      const firstPost = data.themeData.posts[0];
+      if (firstPost) {
+        try {
+          await startStreaming({
+            title: firstPost.title,
+            description: firstPost.description
+          });
+          console.log('✅ [StoriesDashboard] Theme image generation triggered successfully');
+        } catch (streamingError) {
+          console.error('❌ [StoriesDashboard] Failed to trigger theme image generation:', streamingError);
+        }
+      }
       
       toast({
         title: "Theme Generated & Imported!",
