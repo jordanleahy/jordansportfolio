@@ -552,10 +552,6 @@ export default function StoriesDashboard() {
       });
 
       setCustomThemeDescription('');
-      
-      // Refresh data after successful generation
-      invalidateCache();
-      refreshPostCountsAndImages();
 
     } catch (error) {
       console.error('Theme generation error:', error);
