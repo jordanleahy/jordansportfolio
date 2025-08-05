@@ -1,25 +1,22 @@
 import { useState, useCallback, useEffect } from "react";
-import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
-import { ColorThemeSelector } from "./ColorThemeSelector";
 import { useColorThemes } from "@/hooks/useColorThemes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
-import { usePostActions } from "@/hooks/usePostActions";
-import { useImageManager } from "@/hooks/useImageManager";
-import { useProcessingStates } from "@/hooks/useProcessingStates";
+import { usePostStateManager } from "@/hooks/usePostStateManager";
+import { useTableLoadingState } from "@/hooks/useTableLoadingState";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
-
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
-import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
+import type { SocialMediaPost } from "@/types/socialMedia";
+import { ASPECT_RATIO_KEYS } from "@/utils/postConstants";
 import { toast } from "sonner";
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
@@ -45,20 +42,29 @@ export const PostsTable = ({
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
   
-  // Color themes
-  const { data: colorThemes = [], isLoading: colorThemesLoading } = useColorThemes();
-
-  // Batch blog status for all posts
-  const postIds = posts.map(post => post.id);
-  const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
-
-  // Animation state management
+  // Unified post state management
+  const postStateManager = usePostStateManager(onPostsChange);
   const {
+    isUploading,
+    getUploadType,
+    hasUploadingPosts,
+    hasAnimatingPosts,
+    hasCreatingBlogs,
+    hasGeneratingImages,
+    handleStatusChangeWithAnimation,
+    getRowAnimationClass,
     animatingRows,
     completingRows,
-    handleStatusChangeWithAnimation,
-    getRowAnimationClass
-  } = useRowAnimations();
+    handleStatusChange: originalHandleStatusChange,
+    handleCopyContent,
+    handleDeletePost,
+    handleCreateBlogPost,
+    handleFileSelect,
+    handleGenerateImage,
+    creatingBlogIds
+  } = postStateManager;
+
+  // Modal management
   const {
     voiceoverModal,
     individualPromptPanel,
@@ -70,65 +76,53 @@ export const PostsTable = ({
     openPreviewImage,
     closePreviewImage
   } = useModalManager();
-  const {
-    creatingBlogIds,
-    handleStatusChange: originalHandleStatusChange,
-    handleCopyContent,
-    handleDeletePost,
-    handleCreateBlogPost
-  } = usePostActions(onPostsChange);
 
-  // Use unified processing states
-  const {
-    isUploading: unifiedIsUploading,
-    getUploadType: unifiedGetUploadType
-  } = useProcessingStates();
+  // Color themes for admin features
+  const { data: colorThemes = [] } = useColorThemes();
 
-  const {
-    uploadingPosts,
-    handleFileSelect,
-    handleGenerateImage,
-    isUploading: originalIsUploading,
-    getUploadType: originalGetUploadType
-  } = useImageManager({
-    onPostsChange
+  // Blog statuses (still needed for PostsTableView)
+  const postIds = posts.map(post => post.id);
+  const { blogStatuses } = useBatchBlogStatus(postIds);
+
+  // Table loading state management
+  const { isTableLoading } = useTableLoadingState({
+    posts,
+    hasUploadingPosts,
+    hasAnimatingPosts,
+    hasCreatingBlogs,
+    hasGeneratingImages,
+    onLoadingChange
   });
 
-  // Combine original upload states with unified processing states
-  const isUploading = (postId: string, aspectRatio?: any) => {
-    const originalState = originalIsUploading(postId, aspectRatio);
-    const unifiedState = unifiedIsUploading(postId, aspectRatio);
-    const result = originalState || unifiedState;
-    return result;
-  };
-  const getUploadType = (postId: string): any => {
-    const originalType = originalGetUploadType(postId);
-    const unifiedType = unifiedGetUploadType(postId);
-    const result = originalType || unifiedType;
-    return result;
-  };
+  // Create wrapper functions to handle interface compatibility
+  const wrappedHandleFileSelect = useCallback((postId: string, aspectRatio: string, post?: SocialMediaPost) => {
+    if (post) {
+      return handleFileSelect(postId, aspectRatio.replace('_', ':') as any);
+    }
+    // For cases where we don't have the post object, find it from posts array
+    const foundPost = posts.find(p => p.id === postId);
+    if (foundPost) {
+      return handleFileSelect(postId, aspectRatio.replace('_', ':') as any);
+    }
+  }, [handleFileSelect, posts]);
 
-  // Check if any posts are uploading
-  const hasUploadingPosts = posts.some(post => 
-    isUploading(post.id, '16_9') || 
-    isUploading(post.id, '9_16') || 
-    isUploading(post.id, '3_4') || 
-    isUploading(post.id, '4_3')
-  );
-  
-  // Check if any posts are animating
-  const hasAnimatingPosts = animatingRows.size > 0 || completingRows.size > 0;
-  
-  // Check if any blog posts are being created
-  const hasCreatingBlogs = creatingBlogIds.size > 0;
-  
-  // Combine all loading states
-  const isTableLoading = blogStatusesLoading || colorThemesLoading || hasUploadingPosts || hasAnimatingPosts || hasCreatingBlogs;
-  
-  // Notify parent of loading state changes
-  useEffect(() => {
-    onLoadingChange?.(isTableLoading);
-  }, [isTableLoading, onLoadingChange]);
+  const wrappedHandleGenerateImage = useCallback(async (postId: string, aspectRatio: string, title: string, description: string, category?: string) => {
+    const foundPost = posts.find(p => p.id === postId);
+    if (foundPost) {
+      await handleGenerateImage(foundPost, aspectRatio.replace('_', ':') as any);
+      return { success: true };
+    }
+    return { success: false, error: 'Post not found' };
+  }, [handleGenerateImage, posts]);
+
+  const wrappedIsUploading = useCallback((postId: string, aspectRatio?: string) => {
+    return isUploading(postId, aspectRatio?.replace('_', ':') as any);
+  }, [isUploading]);
+
+  const wrappedGetUploadType = useCallback((postId: string) => {
+    const uploadType = getUploadType(postId);
+    return uploadType?.replace(':', '_') as any;
+  }, [getUploadType]);
 
   // Enhanced status change with animation
   const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
@@ -213,10 +207,10 @@ export const PostsTable = ({
     }
   };
 
-  // Convert nested uploading states to flat format for PostCard
-  const flatUploadingStates = Object.entries(uploadingPosts).reduce((acc, [postId, aspectRatios]) => {
-    Object.entries(aspectRatios).forEach(([aspectRatio, isUploading]) => {
-      acc[`${postId}_${aspectRatio}`] = isUploading;
+  // Convert uploading states to flat format for PostCard
+  const flatUploadingStates = posts.reduce((acc, post) => {
+    ASPECT_RATIO_KEYS.forEach(aspectRatio => {
+      acc[`${post.id}_${aspectRatio}`] = isUploading(post.id, aspectRatio.replace('_', ':') as any);
     });
     return acc;
   }, {} as Record<string, boolean>);
@@ -267,8 +261,8 @@ export const PostsTable = ({
               </div>
             ) : (
                 isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => wrappedHandleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={wrappedIsUploading} getUploadType={wrappedGetUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={wrappedHandleFileSelect} onGenerateImage={wrappedHandleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
             )}
           </TabsContent>
 
@@ -280,8 +274,8 @@ export const PostsTable = ({
               </div>
             ) : (
               isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => wrappedHandleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={wrappedIsUploading} getUploadType={wrappedGetUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={wrappedHandleFileSelect} onGenerateImage={wrappedHandleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
             )}
           </TabsContent>
         </Tabs>
