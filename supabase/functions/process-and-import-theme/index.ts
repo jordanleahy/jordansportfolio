@@ -14,6 +14,8 @@ interface ProcessingResult {
   fixes: string[];
   warnings: string[];
   errors: string[];
+  idempotencyKey?: string;
+  submissionId?: string;
 }
 
 serve(async (req) => {
@@ -48,13 +50,32 @@ serve(async (req) => {
 
     console.log('📥 REQUEST: Parsing incoming JSON data');
     const requestBody = await req.json();
-    console.log('📋 REQUEST BODY STRUCTURE:', {
+    
+    console.log('📥 RAW REQUEST BODY:', {
       hasRawJson: !!requestBody.rawJson,
-      rawJsonType: typeof requestBody.rawJson,
-      requestKeys: Object.keys(requestBody)
+      hasIdempotencyKey: !!requestBody.idempotencyKey,
+      dataType: typeof requestBody.rawJson,
+      timestamp: new Date().toISOString()
     });
     
     const { rawJson } = requestBody;
+
+    if (!requestBody.rawJson) {
+      console.log('❌ VALIDATION FAILED: Missing rawJson');
+      return new Response(
+        JSON.stringify({ success: false, errors: ['Missing rawJson data'] }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Generate idempotency key if not provided
+    const idempotencyKey = requestBody.idempotencyKey || `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    console.log('🔑 IDEMPOTENCY KEY:', {
+      provided: !!requestBody.idempotencyKey,
+      key: idempotencyKey,
+      timestamp: new Date().toISOString()
+    });
 
     // Combined AI processing and validation
     console.log('🤖 AI PROCESSING: Starting theme JSON processing');
@@ -70,96 +91,148 @@ serve(async (req) => {
     
     if (!aiResult.success) {
       console.log('❌ AI PROCESSING FAILED - returning error response');
-      return new Response(JSON.stringify(aiResult), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Database import
-    console.log('💾 DATABASE IMPORT: Starting data import to database');
-    console.log('📊 IMPORT DATA PREVIEW:', {
-      category: aiResult.cleanedData?.category,
-      theme: aiResult.cleanedData?.theme,
-      postsCount: aiResult.cleanedData?.posts?.length || 0,
-      userId: user.id
-    });
-    
-    const importResult = await importToDatabase(supabase, aiResult.cleanedData, user.id);
-    console.log('💾 DATABASE IMPORT RESULT:', {
-      success: importResult.success,
-      insertedCount: importResult.insertedCount,
-      errorCount: importResult.errors.length
-    });
-    
-    if (!importResult.success) {
-      console.log('❌ DATABASE IMPORT FAILED - returning error response');
       return new Response(JSON.stringify({
         ...aiResult,
-        success: false,
-        errors: [...aiResult.errors, ...importResult.errors]
+        idempotencyKey
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Sequential background generation: System Prompt -> Theme Image
-    if (aiResult.cleanedData?.category) {
-      console.log('🎯 SYSTEM PROMPT: Starting sequential background generation for category:', aiResult.cleanedData.category);
-      
-      // Start system prompt generation (don't await - keep response fast)
-      generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id)
-        .then((promptResult) => {
-          console.log('📊 SYSTEM PROMPT RESULT:', {
-            success: promptResult.success,
-            category: aiResult.cleanedData.category,
-            timestamp: new Date().toISOString()
-          });
-          
-          if (promptResult.success) {
-            console.log('🖼️ THEME IMAGE: System prompts ready, triggering image generation');
-            return generateThemeImageBackground(aiResult.cleanedData.category, user.id);
-          } else {
-            console.log('❌ THEME IMAGE: Skipping image generation due to system prompt failure:', promptResult.error);
-            return Promise.resolve({ success: false, error: 'System prompt generation failed' });
-          }
-        })
-        .then((imageResult) => {
-          console.log('🎨 THEME IMAGE RESULT:', {
-            success: imageResult?.success || false,
-            category: aiResult.cleanedData.category,
-            timestamp: new Date().toISOString()
-          });
-          
-          // Start blog post prompt generation after theme image (regardless of image result)
-          console.log('📝 BLOG POST PROMPTS: Starting prompt generation');
-          return generateBlogPostPromptsBackground(aiResult.cleanedData.category, user.id);
-        })
-        .then((promptsResult) => {
-          console.log('📝 BLOG POST PROMPTS RESULT:', {
-            success: promptsResult?.success || false,
-            category: aiResult.cleanedData.category,
-            timestamp: new Date().toISOString()
-          });
-        })
-        .catch((error) => {
-          console.error('💥 BACKGROUND GENERATION ERROR:', error);
-        });
-    } else {
-      console.log('⚠️ BACKGROUND GENERATION: No category found, skipping all background tasks');
-    }
-
-    const finalResult: ProcessingResult = {
-      success: true,
-      data: aiResult.cleanedData,
-      insertedCount: importResult.insertedCount,
-      fixes: [...aiResult.fixes, ...importResult.fixes],
-      warnings: [...aiResult.warnings, ...importResult.warnings],
-      errors: []
-    };
-
-    return new Response(JSON.stringify(finalResult), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    console.log('📊 PROCESSING DATA:', {
+      category: aiResult.cleanedData.category,
+      theme: aiResult.cleanedData.theme,
+      postsCount: aiResult.cleanedData.posts?.length || 0,
+      hasThemeDescription: !!aiResult.cleanedData.theme_description,
+      idempotencyKey,
+      timestamp: new Date().toISOString()
     });
+
+    try {
+      // Use the new transaction-based import function with idempotency
+      console.log('💾 CALLING TRANSACTION IMPORT:', {
+        category: aiResult.cleanedData.category,
+        theme: aiResult.cleanedData.theme,
+        idempotencyKey,
+        timestamp: new Date().toISOString()
+      });
+
+      const { data: importResult, error: importError } = await supabase
+        .rpc('import_theme_with_transaction', {
+          p_user_id: user.id,
+          p_idempotency_key: idempotencyKey,
+          p_category: aiResult.cleanedData.category,
+          p_theme: aiResult.cleanedData.theme,
+          p_theme_description: aiResult.cleanedData.theme_description || null,
+          p_posts_data: aiResult.cleanedData.posts
+        });
+
+      if (importError) {
+        console.error('💥 IMPORT ERROR:', importError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            errors: [importError.message],
+            idempotencyKey 
+          }),
+          { status: 500, headers: corsHeaders }
+        );
+      }
+
+      const result = importResult[0]; // RPC returns array
+      
+      console.log('✅ IMPORT RESULT:', {
+        success: result.success,
+        insertedCount: result.inserted_count,
+        submissionId: result.submission_id,
+        error: result.error_message,
+        idempotencyKey,
+        timestamp: new Date().toISOString()
+      });
+
+      if (!result.success) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            errors: [result.error_message],
+            idempotencyKey,
+            submissionId: result.submission_id
+          }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      // Start background tasks after successful import
+      console.log('🚀 STARTING BACKGROUND TASKS:', {
+        category: aiResult.cleanedData.category,
+        submissionId: result.submission_id,
+        idempotencyKey,
+        timestamp: new Date().toISOString()
+      });
+
+      // Generate system prompt in background
+      EdgeRuntime.waitUntil(
+        generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id)
+          .then((promptResult) => {
+            console.log('📝 SYSTEM PROMPT RESULT:', {
+              success: promptResult?.success || false,
+              category: aiResult.cleanedData.category,
+              submissionId: result.submission_id,
+              timestamp: new Date().toISOString()
+            });
+            
+            // Generate theme image after system prompt (regardless of prompt result)
+            return generateThemeImageBackground(aiResult.cleanedData.category, user.id);
+          })
+          .then((imageResult) => {
+            console.log('🖼️ THEME IMAGE RESULT:', {
+              success: imageResult?.success || false,
+              category: aiResult.cleanedData.category,
+              submissionId: result.submission_id,
+              timestamp: new Date().toISOString()
+            });
+            
+            // Start blog post prompt generation after theme image (regardless of image result)
+            console.log('📝 BLOG POST PROMPTS: Starting prompt generation');
+            return generateBlogPostPromptsBackground(aiResult.cleanedData.category, user.id);
+          })
+          .then((promptsResult) => {
+            console.log('📝 BLOG POST PROMPTS RESULT:', {
+              success: promptsResult?.success || false,
+              category: aiResult.cleanedData.category,
+              submissionId: result.submission_id,
+              timestamp: new Date().toISOString()
+            });
+          })
+          .catch((error) => {
+            console.error('💥 BACKGROUND GENERATION ERROR:', error);
+          })
+      );
+
+      // Return immediate success response
+      return new Response(
+        JSON.stringify({
+          success: true,
+          insertedCount: result.inserted_count,
+          data: aiResult.cleanedData,
+          idempotencyKey,
+          submissionId: result.submission_id,
+          message: 'Theme imported successfully. Background processing initiated.'
+        }),
+        { status: 200, headers: corsHeaders }
+      );
+
+    } catch (error) {
+      console.error('💥 IMPORT TRANSACTION ERROR:', error);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          errors: [error.message || 'Database transaction failed'],
+          idempotencyKey
+        }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
 
   } catch (error) {
     return new Response(JSON.stringify({
@@ -336,77 +409,6 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
   });
 
   return validated;
-}
-
-async function importToDatabase(supabase: any, data: any, userId: string): Promise<ProcessingResult> {
-  const fixes: string[] = [];
-  const warnings: string[] = [];
-  const errors: string[] = [];
-
-  try {
-    // Rate limiting check - max 5 imports per hour per user
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { data: recentImports, error: rateLimitError } = await supabase
-      .from('social_media_posts')
-      .select('id')
-      .eq('user_id', userId)
-      .gte('created_at', oneHourAgo);
-
-    if (rateLimitError) {
-      console.warn('Rate limit check failed:', rateLimitError);
-    } else if (recentImports && recentImports.length > 200) {
-      errors.push('Rate limit exceeded: Maximum 200 posts per hour');
-      return { success: false, fixes, warnings, errors };
-    }
-
-    // Check for existing category (warn but don't block)
-    const { data: existingPosts } = await supabase
-      .from('social_media_posts')
-      .select('id')
-      .eq('category', data.category)
-      .eq('user_id', userId)
-      .limit(1);
-
-    if (existingPosts && existingPosts.length > 0) {
-      warnings.push(`Category '${data.category}' already exists - posts will be added to it`);
-    }
-
-    // Convert posts for database insertion
-    const postsForDb = data.posts.map((post: any) => ({
-      ...post,
-      status: post.status || 'draft',
-      theme: data.theme
-    }));
-
-    // Insert using RPC with error handling
-    const { data: insertCount, error } = await supabase
-      .rpc('insert_category_content', {
-        category_name: data.category,
-        posts_data: postsForDb,
-        theme_description_param: data.theme_description
-      });
-
-    if (error) {
-      console.error('Database insert error:', error);
-      errors.push(`Database error: ${error.message}`);
-      return { success: false, fixes, warnings, errors };
-    }
-
-    fixes.push(`Successfully inserted ${insertCount || postsForDb.length} posts`);
-
-    return {
-      success: true,
-      insertedCount: insertCount || postsForDb.length,
-      fixes,
-      warnings,
-      errors: []
-    };
-
-  } catch (error) {
-    console.error('Import to database failed:', error);
-    errors.push(`Import failed: ${error.message}`);
-    return { success: false, fixes, warnings, errors };
-  }
 }
 
 async function generateSystemPromptBackground(supabase: any, category: string, userId: string): Promise<{ success: boolean; error?: string }> {

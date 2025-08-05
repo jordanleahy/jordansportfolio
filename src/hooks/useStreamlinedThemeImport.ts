@@ -16,24 +16,34 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
   const queryClient = useQueryClient();
 
   const submitMutation = useMutation({
-    mutationFn: async ({ rawJson, categoryName }: { rawJson: string; categoryName: string }): Promise<ProcessingResult & { categoryName: string }> => {
+    mutationFn: async ({ rawJson, categoryName, idempotencyKey }: { 
+      rawJson: string; 
+      categoryName: string;
+      idempotencyKey: string;
+    }): Promise<ProcessingResult & { categoryName: string }> => {
       console.log('🚀 FRONTEND: Starting streamlined theme import');
       console.log('📋 IMPORT DETAILS:', {
         categoryName,
         dataLength: rawJson.length,
+        idempotencyKey,
         timestamp: new Date().toISOString()
       });
       
       // Call the combined edge function
       console.log('📡 CALLING: process-and-import-theme edge function');
       const response = await supabase.functions.invoke('process-and-import-theme', {
-        body: { rawJson: JSON.parse(rawJson) }
+        body: { 
+          rawJson: JSON.parse(rawJson),
+          idempotencyKey
+        }
       });
 
       console.log('📡 EDGE FUNCTION RESPONSE:', {
         hasError: !!response.error,
         hasData: !!response.data,
-        errorMessage: response.error?.message
+        errorMessage: response.error?.message,
+        idempotencyKey: response.data?.idempotencyKey,
+        submissionId: response.data?.submissionId
       });
 
       if (response.error) {
@@ -44,7 +54,9 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       console.log('✅ EDGE FUNCTION SUCCESS:', {
         success: response.data?.success,
         insertedCount: response.data?.insertedCount,
-        category: response.data?.data?.category
+        category: response.data?.data?.category,
+        idempotencyKey: response.data?.idempotencyKey,
+        submissionId: response.data?.submissionId
       });
 
       return { ...response.data, categoryName };
@@ -54,7 +66,9 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         success: result.success,
         insertedCount: result.insertedCount,
         categoryName: result.categoryName,
-        errorCount: result.errors?.length || 0
+        errorCount: result.errors?.length || 0,
+        idempotencyKey: result.idempotencyKey,
+        submissionId: result.submissionId
       });
       
       setIsProcessing(false);
@@ -75,9 +89,10 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         options.onImportComplete?.();
       } else {
         console.log('❌ IMPORT FAILED:', result.errors);
+        const errorMessage = result.errors?.join(', ') || 'Import failed';
         toast({
           title: "Import failed",
-          description: result.errors.join(', '),
+          description: errorMessage,
           variant: "destructive"
         });
         options.onOptimisticComplete?.(false, result.categoryName);
@@ -87,6 +102,12 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       setIsProcessing(false);
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      console.log('❌ MUTATION ERROR:', {
+        error: errorMessage,
+        categoryName: variables.categoryName,
+        idempotencyKey: variables.idempotencyKey
+      });
       
       toast({
         title: "Import failed",
@@ -98,11 +119,12 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     }
   });
 
-  const submitRawData = useCallback((rawJson: string) => {
+  const submitRawData = useCallback((rawJson: string, providedIdempotencyKey?: string) => {
     console.log('📥 FRONTEND: Submit raw data called');
     console.log('📊 RAW DATA STATS:', {
       hasData: !!rawJson.trim(),
       dataLength: rawJson.length,
+      hasIdempotencyKey: !!providedIdempotencyKey,
       timestamp: new Date().toISOString()
     });
     
@@ -116,6 +138,9 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       return;
     }
 
+    // Generate idempotency key if not provided (UUID + timestamp for uniqueness)
+    const idempotencyKey = providedIdempotencyKey || `${crypto.randomUUID()}-${Date.now()}`;
+
     // Extract category name for optimistic UI
     let categoryName = 'New Theme';
     try {
@@ -127,11 +152,15 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       // Use default if parsing fails
     }
 
-    console.log('🚀 STARTING MUTATION:', { categoryName, processing: true });
+    console.log('🚀 STARTING MUTATION:', { 
+      categoryName, 
+      processing: true, 
+      idempotencyKey 
+    });
     setIsProcessing(true);
     options.onOptimisticStart?.(categoryName);
     
-    submitMutation.mutate({ rawJson, categoryName });
+    submitMutation.mutate({ rawJson, categoryName, idempotencyKey });
   }, [submitMutation, toast, options]);
 
   return {

@@ -1917,6 +1917,54 @@ export type Database = {
           },
         ]
       }
+      theme_submissions: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string
+          inserted_count: number | null
+          status: string
+          submission_data: Json
+          theme: string
+          theme_description: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key: string
+          inserted_count?: number | null
+          status?: string
+          submission_data: Json
+          theme: string
+          theme_description?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string
+          inserted_count?: number | null
+          status?: string
+          submission_data?: Json
+          theme?: string
+          theme_description?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2373,6 +2421,14 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      check_theme_submission_rate_limit: {
+        Args: {
+          p_user_id: string
+          p_time_window_minutes?: number
+          p_max_submissions?: number
+        }
+        Returns: boolean
+      }
       cleanup_expired_cache: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -2380,6 +2436,14 @@ export type Database = {
       detect_dependency_cycle: {
         Args: { p_source_agent_id: string; p_target_agent_id: string }
         Returns: boolean
+      }
+      find_duplicate_theme: {
+        Args: { p_user_id: string; p_category: string; p_theme: string }
+        Returns: {
+          existing_id: string
+          existing_count: number
+          created_at: string
+        }[]
       }
       fix_hardcoded_aspect_ratio_in_prompts: {
         Args: Record<PropertyKey, never>
@@ -2423,6 +2487,22 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      import_theme_with_transaction: {
+        Args: {
+          p_user_id: string
+          p_idempotency_key: string
+          p_category: string
+          p_theme: string
+          p_theme_description: string
+          p_posts_data: Json
+        }
+        Returns: {
+          success: boolean
+          inserted_count: number
+          submission_id: string
+          error_message: string
+        }[]
       }
       insert_blog_agent: {
         Args: Record<PropertyKey, never>

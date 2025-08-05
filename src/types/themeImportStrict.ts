@@ -34,6 +34,9 @@ export interface ProcessingResult {
   errors: readonly string[];
   warnings: readonly string[];
   fixes?: readonly string[];
+  idempotencyKey?: string;
+  submissionId?: string;
+  message?: string;
 }
 
 // Validation error type for better error handling
