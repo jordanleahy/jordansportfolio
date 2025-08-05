@@ -156,8 +156,39 @@ const PostCardComponent = ({
 
       setGenerationStep('Uploading image...');
       
-      // Use the existing onImageGenerated callback which handles storage upload
-      onImageGenerated(post.id, '16_9', base64Image);
+      // Convert base64 to blob and upload to storage
+      const response = await fetch(`data:image/png;base64,${base64Image}`);
+      const blob = await response.blob();
+      
+      // Create file object
+      const fileName = `generated_${post.id}_16_9_${Date.now()}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      // Upload to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('social-media-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('social-media-images')
+        .getPublicUrl(uploadData.path);
+
+      // Update post with image URL
+      await supabase
+        .from('social_media_posts')
+        .update({ 
+          image_16_9_url: urlData.publicUrl,
+          image_16_9_status: 'complete'
+        })
+        .eq('id', post.id);
+
+      // Refresh the posts data
+      onPostsChange?.();
       
       toast({
         title: "Hero image generated!",
