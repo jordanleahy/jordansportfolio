@@ -104,21 +104,23 @@ const PostCardComponent = ({
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
             <div className="flex gap-2 mt-2 flex-wrap">
-              <Badge 
-                className={`${getStatusColor(post.status)} text-xs cursor-pointer hover:opacity-80 transition-opacity`}
-                onClick={() => {
-                  if (post.status === 'draft') {
-                    onStatusChange(post.id, 'published');
-                    toast({
-                      title: "Status Updated",
-                      description: "Post marked as published",
-                    });
-                  }
-                }}
-              >
-                {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
-              </Badge>
-              {post.status === 'draft' && post.day && (
+              {isAdmin && (
+                <Badge 
+                  className={`${getStatusColor(post.status)} text-xs cursor-pointer hover:opacity-80 transition-opacity`}
+                  onClick={() => {
+                    if (post.status === 'draft') {
+                      onStatusChange(post.id, 'published');
+                      toast({
+                        title: "Status Updated",
+                        description: "Post marked as published",
+                      });
+                    }
+                  }}
+                >
+                  {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
+                </Badge>
+              )}
+              {isAdmin && post.status === 'draft' && post.day && (
                 <Badge variant="outline" className="text-xs">
                   {post.day}
                 </Badge>
