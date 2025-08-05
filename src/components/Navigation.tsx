@@ -552,14 +552,6 @@ const Navigation = () => {
                                   <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
                                 )}
                               </div>
-                              <div className="ml-8 text-sm text-muted-foreground">
-                                <div className="font-medium">{user.email}</div>
-                                {user.user_metadata?.first_name && user.user_metadata?.last_name && (
-                                  <div className="text-xs mt-1">
-                                    {user.user_metadata.first_name} {user.user_metadata.last_name}
-                                  </div>
-                                )}
-                              </div>
                             </Link>
                           </SheetClose>
                         );
