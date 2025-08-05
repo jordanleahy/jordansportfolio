@@ -227,7 +227,13 @@ export const PostsTable = ({
                   <div className="flex items-center gap-2 flex-wrap">
                     {userIsAdmin && (
                       <TabsList>
-                        <TabsTrigger value="draft">Draft</TabsTrigger>
+                        <TabsTrigger value="draft">
+                          Draft {posts.filter(p => p.status === 'draft').length > 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
+                              {posts.filter(p => p.status === 'draft').length}
+                            </span>
+                          )}
+                        </TabsTrigger>
                         <TabsTrigger value="published">Published</TabsTrigger>
                       </TabsList>
                     )}
@@ -281,7 +287,13 @@ export const PostsTable = ({
                   <div className="flex items-center gap-2 flex-wrap">
                     {userIsAdmin && (
                       <TabsList>
-                        <TabsTrigger value="draft">Draft</TabsTrigger>
+                        <TabsTrigger value="draft">
+                          Draft {posts.filter(p => p.status === 'draft').length > 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
+                              {posts.filter(p => p.status === 'draft').length}
+                            </span>
+                          )}
+                        </TabsTrigger>
                         <TabsTrigger value="published">Published</TabsTrigger>
                       </TabsList>
                     )}
