@@ -26,21 +26,24 @@ export const useCategoryPosts = (category: string, enabled = true) => {
 };
 
 // Theme-specific query hook for theme detail pages
-export const useThemePosts = (theme: string, enabled = true) => {
+export const useThemePosts = (themeId: string, enabled = true) => {
   return useQuery({
-    queryKey: QUERY_KEYS.postsByTheme(theme),
+    queryKey: QUERY_KEYS.postsByTheme(themeId),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('social_media_posts')
-        .select('*')
-        .eq('theme', theme)
+        .select(`
+          *,
+          themes!inner(*)
+        `)
+        .eq('theme_id', themeId)
         .order('day', { ascending: true });
       
       if (error) throw error;
       return data || [];
     },
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
-    enabled: enabled && !!theme,
+    enabled: enabled && !!themeId,
   });
 };
 
@@ -97,12 +100,12 @@ export function useOptimizedStories(user: any) {
       if (availableThemes.length > 0) {
         const urlTab = searchParams.get('tab');
         
-        let selectedTab = availableThemes[0].theme; // Use theme property
+        let selectedTab = availableThemes[0].name; // Use name property
         
         if (urlTab) {
-          const matchingTheme = availableThemes.find(t => t.theme === urlTab);
+          const matchingTheme = availableThemes.find(t => t.name === urlTab);
           if (matchingTheme) {
-            selectedTab = matchingTheme.theme;
+            selectedTab = matchingTheme.name;
           }
         }
         
@@ -146,14 +149,17 @@ export function useOptimizedStories(user: any) {
   useEffect(() => {
     if (availableThemes.length > 0 && activeTab && isInitialized) {
       availableThemes.forEach((theme) => {
-        if (theme.theme !== activeTab) {
+        if (theme.id !== activeTab) {
           queryClient.prefetchQuery({
-            queryKey: QUERY_KEYS.postsByTheme(theme.theme),
+            queryKey: QUERY_KEYS.postsByTheme(theme.id),
             queryFn: async () => {
               const { data, error } = await supabase
                 .from('social_media_posts')
-                .select('*')
-                .eq('theme', theme.theme)
+                .select(`
+                  *,
+                  themes!inner(*)
+                `)
+                .eq('theme_id', theme.id)
                 .order('day', { ascending: true });
               
               if (error) throw error;

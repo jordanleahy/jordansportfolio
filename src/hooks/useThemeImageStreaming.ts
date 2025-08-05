@@ -109,7 +109,9 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       // Get theme info for the description
       const { data: posts, error: postsError } = await supabase
         .from('social_media_posts')
-        .select('theme, theme_description')
+        .select(`
+          themes!inner(name, description)
+        `)
         .eq('category', category)
         .eq('user_id', session.user.id)
         .limit(1);
@@ -118,8 +120,8 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         throw new Error('No posts found for this category');
       }
 
-      const theme = posts[0].theme;
-      const themeDescription = posts[0].theme_description || postData.description;
+      const theme = posts[0].themes?.name || category;
+      const themeDescription = posts[0].themes?.description || postData.description;
 
       // Set generating status in database
       await supabase
@@ -261,7 +263,11 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       // Trigger background image generation directly
       const { data: posts } = await supabase
         .from('social_media_posts')
-        .select('theme, title, description')
+        .select(`
+          title,
+          description,
+          themes!inner(name)
+        `)
         .eq('category', category)
         .eq('user_id', session.user.id)
         .limit(1);
@@ -275,7 +281,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       // Call background function directly
       const { error: bgError } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_THEME_IMAGE_BACKGROUND, {
         body: {
-          theme: post.theme,
+          theme: post.themes?.name || category,
           category: category,
           userId: session.user.id,
           firstPostTitle: post.title,

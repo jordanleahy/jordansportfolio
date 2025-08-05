@@ -59,9 +59,9 @@ export class OptimizedSocialMediaService {
     return this.getAllPosts(category);
   }
 
-  // Add method for getting posts by theme
-  async getPostsByTheme(theme: string): Promise<SocialMediaPost[]> {
-    const cacheKey = `theme-posts:${theme}`;
+  // Add method for getting posts by theme ID
+  async getPostsByThemeId(themeId: string): Promise<SocialMediaPost[]> {
+    const cacheKey = `theme-posts:${themeId}`;
     
     // Return cached data if valid
     if (this.isValidCache(cacheKey)) {
@@ -70,8 +70,11 @@ export class OptimizedSocialMediaService {
 
     const { data, error } = await supabase
       .from('social_media_posts')
-      .select('*')
-      .eq('theme', theme)
+      .select(`
+        *,
+        themes!inner(*)
+      `)
+      .eq('theme_id', themeId)
       .order('day', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
       .order('id', { ascending: true });
@@ -138,7 +141,7 @@ export class OptimizedSocialMediaService {
     if (error) throw error;
     
     // Invalidate relevant caches
-    this.invalidateCache(post.category, data.theme);
+    this.invalidateCache(post.category);
     
     return data as SocialMediaPost;
   }
@@ -165,7 +168,7 @@ export class OptimizedSocialMediaService {
     console.log('🖼️ IMAGE_UPLOAD: Database update successful', { postId: id, updatedPost: data });
     
     // Invalidate relevant caches
-    this.invalidateCache(updates.category, data.theme);
+    this.invalidateCache(updates.category);
     
     return data as SocialMediaPost;
   }
@@ -204,8 +207,9 @@ export class OptimizedSocialMediaService {
   }
 
   async getAvailableThemes(): Promise<Array<{
-    theme: string;
-    theme_description: string | null;
+    id: string;
+    name: string;
+    description: string | null;
     category: string;
     post_count: number;
     first_post: {
@@ -233,70 +237,56 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // Get all posts grouped by theme with post counts and first post data
+    // Get themes with post counts and first post data
     const { data, error } = await supabase
-      .from('social_media_posts')
-      .select('id, category, theme, theme_description, title, description, created_at, theme_image_4_3_url, image_16_9_url, image_4_3_url, image_9_16_url, image_3_4_url')
+      .from('themes')
+      .select(`
+        id,
+        name,
+        description,
+        category,
+        created_at,
+        social_media_posts!inner(
+          id,
+          title,
+          description,
+          created_at,
+          theme_image_4_3_url,
+          image_16_9_url,
+          image_4_3_url,
+          image_9_16_url,
+          image_3_4_url
+        )
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
     
-    // Group by theme (use theme_description as fallback, then category)
-    const themeGroups = new Map<string, {
-      theme: string;
-      theme_description: string | null;
-      category: string;
-      posts: any[];
-      latest_created_at: string;
-    }>();
-    
-    (data || []).forEach((post: any) => {
-      const themeKey = post.theme || post.theme_description || post.category;
+    // Process themes and their posts
+    const themes = (data || []).map((theme: any) => {
+      const posts = theme.social_media_posts || [];
+      const firstPost = posts[0];
+      const imageUrl = firstPost?.theme_image_4_3_url ||
+                      firstPost?.image_16_9_url || 
+                      firstPost?.image_4_3_url ||
+                      firstPost?.image_9_16_url ||
+                      firstPost?.image_3_4_url;
       
-      if (!themeGroups.has(themeKey)) {
-        themeGroups.set(themeKey, {
-          theme: themeKey,
-          theme_description: post.theme_description,
-          category: post.category,
-          posts: [],
-          latest_created_at: post.created_at
-        });
-      }
-      
-      const group = themeGroups.get(themeKey)!;
-      group.posts.push(post);
-      
-      // Update latest date if this post is newer
-      if (post.created_at > group.latest_created_at) {
-        group.latest_created_at = post.created_at;
-      }
+      return {
+        id: theme.id,
+        name: theme.name,
+        description: theme.description,
+        category: theme.category,
+        post_count: posts.length,
+        first_post: firstPost ? {
+          id: firstPost.id,
+          title: firstPost.title,
+          description: firstPost.description,
+          image_url: imageUrl
+        } : null
+      };
     });
-    
-    // Convert to result format, sorted by latest creation date
-    const themes = Array.from(themeGroups.values())
-      .sort((a, b) => b.latest_created_at.localeCompare(a.latest_created_at))
-      .map(group => {
-        const firstPost = group.posts[0];
-        const imageUrl = firstPost?.theme_image_4_3_url ||
-                        firstPost?.image_16_9_url || 
-                        firstPost?.image_4_3_url ||
-                        firstPost?.image_9_16_url ||
-                        firstPost?.image_3_4_url;
-        
-        return {
-          theme: group.theme,
-          theme_description: group.theme_description,
-          category: group.category,
-          post_count: group.posts.length,
-          first_post: firstPost ? {
-            id: firstPost.id,
-            title: firstPost.title,
-            description: firstPost.description,
-            image_url: imageUrl
-          } : null
-        };
-      });
     
     this.setCache(cacheKey, themes, 10 * 60 * 1000); // 10 minutes
     return themes;
@@ -308,36 +298,32 @@ export class OptimizedSocialMediaService {
     return [...new Set(themes.map(t => t.category))];
   }
 
-  async deleteTheme(themeOrCategory: string): Promise<void> {
-    // Try to delete by theme first, then by category for backward compatibility
-    const { error: themeError } = await supabase
+  async deleteTheme(themeId: string): Promise<void> {
+    // Delete all posts associated with this theme
+    const { error: postsError } = await supabase
       .from('social_media_posts')
       .delete()
-      .eq('theme', themeOrCategory);
+      .eq('theme_id', themeId);
 
-    if (themeError) {
-      // If theme deletion fails, try category
-      const { error: categoryError } = await supabase
-        .from('social_media_posts')
-        .delete()
-        .eq('category', themeOrCategory);
+    if (postsError) throw postsError;
 
-      if (categoryError) throw categoryError;
-    }
+    // Delete the theme itself
+    const { error: themeError } = await supabase
+      .from('themes')
+      .delete()
+      .eq('id', themeId);
+
+    if (themeError) throw themeError;
 
     // Clear relevant caches
-    this.cache.delete(this.getCacheKey(themeOrCategory));
-    this.cache.delete(`theme-posts:${themeOrCategory}`);
+    this.cache.delete(`theme-posts:${themeId}`);
     this.cache.delete(this.getCacheKey(undefined, 'themes'));
-    this.cache.delete(this.getCacheKey(undefined, 'categories'));
+    this.invalidateAllCaches();
   }
 
-  private invalidateCache(category?: string, theme?: string) {
+  private invalidateCache(category?: string) {
     if (category) {
       this.cache.delete(this.getCacheKey(category));
-    }
-    if (theme) {
-      this.cache.delete(`theme-posts:${theme}`);
     }
     this.cache.delete(this.getCacheKey()); // all posts cache
     this.cache.delete(this.getCacheKey(undefined, 'themes')); // themes cache

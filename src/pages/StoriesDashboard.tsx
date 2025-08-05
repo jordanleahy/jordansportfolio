@@ -20,9 +20,10 @@ import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
 
-type Theme = {
-  theme: string;
-  theme_description: string | null;
+type ThemeWithPosts = {
+  id: string;
+  name: string;
+  description: string | null;
   category: string;
   post_count: number;
   first_post: {
@@ -42,7 +43,7 @@ export default function StoriesDashboard() {
   const { toast } = useToast();
 
   // Simplified state management
-  const [availableThemes, setAvailableThemes] = useState<Theme[]>([]);
+  const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
   const [shimmerThemes, setShimmerThemes] = useState<Set<string>>(new Set());
 
   // Hook for theme import functionality
@@ -88,7 +89,7 @@ export default function StoriesDashboard() {
 
   React.useEffect(() => {
     if (debouncedRefresh) {
-      queryClient.setQueryData(QUERY_KEYS.themes, (oldData: Theme[] | undefined) => {
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldData: ThemeWithPosts[] | undefined) => {
         return oldData; // Keep existing data, let real-time handle updates
       });
       setShouldRefreshThemes(false);

@@ -634,7 +634,7 @@ const PostCardComponent = ({
             id: post.id,
             title: post.title,
             description: post.description,
-            theme: post.theme,
+            theme: post.category, // Use category as theme for now
             category: post.category
           }}
         />

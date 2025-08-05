@@ -26,9 +26,8 @@ export interface SocialMediaPost {
   // Color theme
   color_theme_id?: string | null;
   
-  // Theme information for debugging and logging
-  theme?: string | null;
-  theme_description?: string | null;
+  // Theme relationship
+  theme_id?: string | null;
   
   // Theme image for category cards
   theme_image_4_3_url?: string | null;
@@ -58,8 +57,8 @@ export interface CreateSocialMediaPost {
   // Color theme
   color_theme_id?: string;
   
-  // Theme description
-  theme_description?: string;
+  // Theme relationship
+  theme_id?: string;
   
   status?: PostStatus;
   scheduled_date?: string;

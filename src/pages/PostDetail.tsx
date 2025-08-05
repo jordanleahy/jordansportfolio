@@ -48,8 +48,8 @@ export default function PostDetail() {
 
   const handleBackClick = () => {
     // Navigate back to the theme if we have it, otherwise go to stories dashboard
-    if (post?.theme) {
-      navigate(`/stories/theme/${encodeURIComponent(post.theme)}`);
+    if (post?.theme_id) {
+      navigate(`/stories/theme/${encodeURIComponent(post.theme_id)}`);
     } else if (post?.category) {
       // Fallback to category for backward compatibility
       navigate(`/stories/theme/${encodeURIComponent(post.category)}`);
@@ -100,7 +100,7 @@ export default function PostDetail() {
             className="gap-2 mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to {post.theme || post.category || 'Stories'}
+            Back to {post.category || 'Stories'}
           </Button>
         </div>
 
