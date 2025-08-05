@@ -1810,6 +1810,48 @@ export type Database = {
           },
         ]
       }
+      subscription_tiers: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_dalle_images: number | null
+          max_image_generations: number | null
+          max_text_generations: number | null
+          name: string
+          price_cents: number
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_dalle_images?: number | null
+          max_image_generations?: number | null
+          max_text_generations?: number | null
+          name: string
+          price_cents: number
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_dalle_images?: number | null
+          max_image_generations?: number | null
+          max_text_generations?: number | null
+          name?: string
+          price_cents?: number
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_prompts: {
         Row: {
           agent_id: string
@@ -1892,6 +1934,89 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_usage_tracking: {
+        Row: {
+          billing_period_end: string
+          billing_period_start: string
+          created_at: string
+          dalle_images_used: number
+          id: string
+          image_generations_used: number
+          text_generations_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_period_end: string
+          billing_period_start: string
+          created_at?: string
+          dalle_images_used?: number
+          id?: string
+          image_generations_used?: number
+          text_generations_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_period_end?: string
+          billing_period_start?: string
+          created_at?: string
+          dalle_images_used?: number
+          id?: string
+          image_generations_used?: number
+          text_generations_used?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

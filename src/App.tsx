@@ -44,6 +44,8 @@ import { ComparisonForm } from "./pages/admin/ComparisonForm";
 
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
+const SubscriptionAnalytics = lazy(() => import("./pages/admin/SubscriptionAnalytics"));
+const Subscription = lazy(() => import("./pages/Subscription"));
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -188,6 +190,26 @@ function App() {
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
+                <Route 
+                  path="/admin/subscription-analytics" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <SubscriptionAnalytics />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/subscription" 
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <Subscription />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
