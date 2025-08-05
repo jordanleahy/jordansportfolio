@@ -278,15 +278,21 @@ const PostCardComponent = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (navigator.share) {
-                  navigator.share({
-                    title: post.title || 'Check out this post',
-                    text: post.description || '',
-                    url: window.location.href
-                  });
+                  try {
+                    await navigator.share({
+                      title: post.title || 'Check out this post',
+                      text: `${post.title || 'Post'}${post.description ? `\n\n${post.description}` : ''}`,
+                      url: window.location.href
+                    });
+                  } catch (error) {
+                    // User cancelled or error occurred
+                    console.log('Share cancelled or failed:', error);
+                  }
                 } else {
-                  navigator.clipboard.writeText(window.location.href);
+                  // Fallback: copy to clipboard
+                  navigator.clipboard.writeText(`${post.title || 'Post'}${post.description ? `\n\n${post.description}` : ''}\n\n${window.location.href}`);
                 }
               }}
               className="h-8 w-8 p-0"
