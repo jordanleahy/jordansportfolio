@@ -57,10 +57,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
   };
 
-  // Prevent transition from shimmer if no image URL is available
-  const shouldShowShimmer = isShimmer || (!currentImageUrl && (isGenerating || !firstPostData));
-  
-  if (shouldShowShimmer) {
+  if (isShimmer) {
     return (
       <Card className="group overflow-hidden border-border/50">
         {/* Streaming Shimmer Image Section */}
