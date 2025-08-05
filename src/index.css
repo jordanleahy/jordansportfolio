@@ -99,8 +99,8 @@
 }
 
 @layer components {
-  /* Blog image with 4:3 aspect ratio - only for actual blog content */
-  .blog-card .blog-index-image {
+  /* Blog image with 4:3 aspect ratio - enhanced specificity */
+  .blog-index-image {
     aspect-ratio: 4 / 3 !important;
     width: 100% !important;
     height: auto !important;
@@ -110,8 +110,8 @@
     min-height: 0 !important;
   }
   
-  /* Blog image container to ensure proper aspect ratio - only for blog cards */
-  .blog-card .blog-image-container {
+  /* Blog image container to ensure proper aspect ratio */
+  .blog-image-container {
     aspect-ratio: 4 / 3 !important;
     width: 100% !important;
     position: relative;
@@ -120,9 +120,9 @@
     height: auto !important;
   }
   
-  /* Ensure blog cards don't override image dimensions - only for blog cards */
-  .blog-card .blog-image-container img,
-  .blog-card .blog-image-container div {
+  /* Ensure blog cards don't override image dimensions */
+  .blog-image-container img,
+  .blog-image-container div {
     aspect-ratio: 4 / 3 !important;
     width: 100% !important;
     height: auto !important;
@@ -130,17 +130,17 @@
     display: block !important;
   }
   
-  /* Responsive breakpoints for blog images - only for blog cards */
+  /* Responsive breakpoints for blog images */
   @media (max-width: 768px) {
-    .blog-card .blog-index-image,
-    .blog-card .blog-image-container {
+    .blog-index-image,
+    .blog-image-container {
       aspect-ratio: 4 / 3 !important;
     }
   }
   
   @media (min-width: 769px) {
-    .blog-card .blog-index-image,
-    .blog-card .blog-image-container {
+    .blog-index-image,
+    .blog-image-container {
       aspect-ratio: 4 / 3 !important;
     }
   }
