@@ -13,29 +13,24 @@ import {
   User, 
   Bell, 
   Shield, 
-  Palette, 
   Database,
   CreditCard,
   LogOut,
   Trash2,
   Eye,
   EyeOff,
-  Moon,
-  Sun,
   Mail,
   Phone,
   MapPin,
   Edit2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from 'next-themes';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
   const { data: subscriptionStatus } = useSubscriptionStatus();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -103,7 +98,7 @@ const Settings: React.FC = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               {isMobile ? 'Profile' : 'Profile'}
@@ -113,16 +108,10 @@ const Settings: React.FC = () => {
               {isMobile ? 'Alerts' : 'Notifications'}
             </TabsTrigger>
             {!isMobile && (
-              <>
-                <TabsTrigger value="appearance" className="flex items-center gap-2">
-                  <Palette className="h-4 w-4" />
-                  Appearance
-                </TabsTrigger>
-                <TabsTrigger value="security" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Security
-                </TabsTrigger>
-              </>
+              <TabsTrigger value="security" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Security
+              </TabsTrigger>
             )}
           </TabsList>
 
@@ -308,61 +297,6 @@ const Settings: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* Appearance Tab - Desktop only */}
-          {!isMobile && (
-            <TabsContent value="appearance" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Palette className="h-5 w-5" />
-                    Appearance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <Label className="text-base">Theme</Label>
-                    <div className="grid grid-cols-3 gap-4">
-                      <Card 
-                        className={`cursor-pointer border-2 transition-colors ${
-                          theme === 'light' ? 'border-primary' : 'border-border'
-                        }`}
-                        onClick={() => setTheme('light')}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <Sun className="h-6 w-6 mx-auto mb-2" />
-                          <p className="text-sm font-medium">Light</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card 
-                        className={`cursor-pointer border-2 transition-colors ${
-                          theme === 'dark' ? 'border-primary' : 'border-border'
-                        }`}
-                        onClick={() => setTheme('dark')}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <Moon className="h-6 w-6 mx-auto mb-2" />
-                          <p className="text-sm font-medium">Dark</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card 
-                        className={`cursor-pointer border-2 transition-colors ${
-                          theme === 'system' ? 'border-primary' : 'border-border'
-                        }`}
-                        onClick={() => setTheme('system')}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <Database className="h-6 w-6 mx-auto mb-2" />
-                          <p className="text-sm font-medium">System</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
 
           {/* Security Tab - Desktop only */}
           {!isMobile && (
@@ -438,24 +372,6 @@ const Settings: React.FC = () => {
         {/* Mobile-only bottom actions */}
         {isMobile && (
           <div className="space-y-4 pb-20">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
-                  Appearance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <Label>Dark Mode</Label>
-                  <Switch
-                    checked={theme === 'dark'}
-                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             <Card>
               <CardContent className="pt-6 space-y-2">
                 <Button
