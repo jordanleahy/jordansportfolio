@@ -123,34 +123,65 @@ export default function StoriesDashboard() {
           table: 'social_media_posts',
           filter: `user_id=eq.${user.id}`
         },
-        (payload) => {
+        async (payload) => {
           const { new: newData, old: oldData } = payload;
-          const { theme_image_generation_status, theme, category, theme_image_4_3_url } = newData as any;
+          const { theme_image_generation_status, theme_id, category } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
           
-          // Simplified shimmer removal using theme ID directly
-          if (theme_image_generation_status === 'complete' && theme) {
-            setShimmerThemes(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(theme);
-              return newSet;
-            });
-            
-            setShouldRefreshThemes(true);
+          // When image generation completes, get theme name to remove shimmer
+          if (theme_image_generation_status === 'complete' && theme_id) {
+            try {
+              const { data: themeData } = await supabase
+                .from('themes')
+                .select('name')
+                .eq('id', theme_id)
+                .single();
+              
+              if (themeData?.name) {
+                console.log('🎉 Theme image complete, removing shimmer for:', themeData.name);
+                setShimmerThemes(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(themeData.name);
+                  return newSet;
+                });
+                
+                setShouldRefreshThemes(true);
+                toast({
+                  title: "Theme Image Ready!",
+                  description: `"${themeData.name}" theme image has been generated`,
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching theme name for shimmer removal:', error);
+            }
           }
           
           // Handle failed theme image generation
-          if (oldStatus !== 'failed' && theme_image_generation_status === 'failed' && theme) {
-            setShimmerThemes(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(theme);
-              return newSet;
-            });
-            toast({
-              title: "Image Generation Failed",
-              description: `Theme image generation failed for "${theme}"`,
-              variant: "destructive"
-            });
+          if (oldStatus !== 'failed' && theme_image_generation_status === 'failed' && theme_id) {
+            try {
+              const { data: themeData } = await supabase
+                .from('themes')
+                .select('name')
+                .eq('id', theme_id)
+                .single();
+              
+              if (themeData?.name) {
+                console.log('❌ Theme image failed, removing shimmer for:', themeData.name);
+                setShimmerThemes(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(themeData.name);
+                  return newSet;
+                });
+                
+                toast({
+                  title: "Image Generation Failed",
+                  description: `Theme image generation failed for "${themeData.name}"`,
+                  variant: "destructive"
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching theme name for failed shimmer removal:', error);
+            }
           }
         }
       )
@@ -159,7 +190,7 @@ export default function StoriesDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, refreshThemes, toast]);
+  }, [user?.id, toast]);
 
   // Realtime setup
   const { isConnected, connectionStatus } = useUnifiedRealtime({
