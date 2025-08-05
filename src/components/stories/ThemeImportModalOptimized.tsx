@@ -11,6 +11,7 @@ import { useThemeImport } from '@/hooks/useThemeImport';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { useDebounce } from '@/hooks/useDebounce';
 interface ThemeImportModalOptimizedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,9 +27,13 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   onOptimisticComplete
 }) => {
   const [jsonInput, setJsonInput] = useState('');
-  const {
-    toast
-  } = useToast();
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  // Debounce input to prevent rapid submissions
+  const debouncedJsonInput = useDebounce(jsonInput, 300);
   const {
     state,
     progress,
@@ -50,21 +55,37 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Streamlined import with optimistic UI
+  // Streamlined import with improved feedback
   const {
     submitRawData,
     isProcessing: isStreamlinedProcessing
   } = useStreamlinedThemeImport({
-    onImportComplete,
-    onOptimisticStart: categoryName => {
-      // Close modal immediately on submit
-      onOpenChange(false);
-      setJsonInput('');
-      reset();
+    onImportComplete: () => {
+      setShowSuccessMessage(true);
+      onImportComplete?.();
       // Trigger shimmer in parent component
+      onOptimisticStart?.(jsonInput ? JSON.parse(jsonInput).category || 'New Theme' : 'New Theme');
+      
+      // Auto-close modal after showing success message
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        setShowErrorMessage(null);
+        onOpenChange(false);
+        setJsonInput('');
+        reset();
+      }, 2000);
+    },
+    onOptimisticStart: categoryName => {
+      setShowSuccessMessage(false);
+      setShowErrorMessage(null);
       onOptimisticStart?.(categoryName);
     },
-    onOptimisticComplete
+    onOptimisticComplete: (success, categoryName) => {
+      if (!success) {
+        setShowErrorMessage('Import failed. Please check your data and try again.');
+      }
+      onOptimisticComplete?.(success, categoryName);
+    }
   });
 
   // Format JSON helper
@@ -92,9 +113,24 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     importData();
   }, [importData]);
   const handleStreamlinedSubmit = useCallback(() => {
-    if (!jsonInput.trim()) return;
-    submitRawData(jsonInput);
-  }, [jsonInput, submitRawData]);
+    if (!debouncedJsonInput.trim()) return;
+    
+    // Prevent rapid successive submissions
+    const now = Date.now();
+    if (now - lastSubmitTime < 2000) {
+      toast({
+        title: "Please wait",
+        description: "Please wait a moment before submitting again",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLastSubmitTime(now);
+    setShowSuccessMessage(false);
+    setShowErrorMessage(null);
+    submitRawData(debouncedJsonInput);
+  }, [debouncedJsonInput, submitRawData, lastSubmitTime, toast]);
   const handleCopyInstructions = useCallback(async () => {
     const instructions = `Please format your response as a JSON object with the following structure:
 
@@ -182,10 +218,23 @@ AVOID:
   }), []);
   const placeholderText = `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`;
   const handleClose = useCallback(() => {
+    // Prevent closing while processing
+    if (isProcessing || isStreamlinedProcessing) {
+      toast({
+        title: "Processing in progress",
+        description: "Please wait for the import to complete",
+      });
+      return;
+    }
+    setShowSuccessMessage(false);
+    setShowErrorMessage(null);
     onOpenChange(false);
-  }, [onOpenChange]);
+  }, [onOpenChange, isProcessing, isStreamlinedProcessing, toast]);
+  
   const handleReset = useCallback(() => {
     setJsonInput('');
+    setShowSuccessMessage(false);
+    setShowErrorMessage(null);
     reset();
   }, [reset]);
   return <Dialog open={open} onOpenChange={handleClose}>
@@ -198,6 +247,39 @@ AVOID:
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Processing Status */}
+          {(isProcessing || isStreamlinedProcessing) && (
+            <Alert>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span>Processing your theme data...</span>
+                  <div className="text-sm text-muted-foreground">This may take a few moments</div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Success Message */}
+          {showSuccessMessage && (
+            <Alert className="border-green-200 bg-green-50 text-green-800">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription>
+                <strong>Success!</strong> Your theme has been imported successfully. The modal will close automatically.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Error Message */}
+          {showErrorMessage && (
+            <Alert variant="destructive">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Import Failed:</strong> {showErrorMessage}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Progress indicator */}
           {progress && <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -216,16 +298,41 @@ AVOID:
           {/* Action Buttons */}
           <div className="flex gap-2 flex-wrap">
             {/* Streamlined One-Click Submit */}
-            <Button onClick={handleStreamlinedSubmit} disabled={isStreamlinedProcessing || !jsonInput.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg">
-              {isStreamlinedProcessing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-              Submit
+            <Button 
+              onClick={handleStreamlinedSubmit} 
+              disabled={
+                isStreamlinedProcessing || 
+                isProcessing ||
+                !debouncedJsonInput.trim() ||
+                showSuccessMessage ||
+                (Date.now() - lastSubmitTime < 2000)
+              } 
+              className="bg-primary text-primary-foreground hover:bg-primary/90" 
+              size="lg"
+            >
+              {(isStreamlinedProcessing || isProcessing) ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 mr-2" />
+              )}
+              {(isStreamlinedProcessing || isProcessing) ? 'Processing...' : 'Submit'}
             </Button>
 
-            <Button onClick={handleReset} disabled={isProcessing || isStreamlinedProcessing} variant="ghost" size="sm">
+            <Button 
+              onClick={handleReset} 
+              disabled={isProcessing || isStreamlinedProcessing} 
+              variant="ghost" 
+              size="sm"
+            >
               Reset
             </Button>
 
-            <Button onClick={handleCopyInstructions} variant="outline" size="sm">
+            <Button 
+              onClick={handleCopyInstructions} 
+              disabled={isProcessing || isStreamlinedProcessing}
+              variant="outline" 
+              size="sm"
+            >
               <Copy className="w-3 h-3 mr-1" />
               Copy Instructions
             </Button>
