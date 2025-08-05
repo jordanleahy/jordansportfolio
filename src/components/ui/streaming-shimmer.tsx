@@ -145,7 +145,7 @@ export const StreamingShimmer = ({
 
       {/* Countdown timer overlay */}
       {isGenerating && (
-        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border">
             <Clock className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
