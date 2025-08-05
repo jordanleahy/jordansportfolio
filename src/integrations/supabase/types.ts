@@ -2502,19 +2502,12 @@ export type Database = {
         Returns: boolean
       }
       cleanup_duplicate_posts: {
-        Args:
-          | {
-              p_user_id: string
-              p_category: string
-              p_theme: string
-              p_keep_latest?: boolean
-            }
-          | {
-              p_user_id: string
-              p_category: string
-              p_theme_id: string
-              p_keep_latest?: boolean
-            }
+        Args: {
+          p_user_id: string
+          p_category: string
+          p_theme_id: string
+          p_keep_latest?: boolean
+        }
         Returns: {
           action: string
           post_count: number
@@ -2544,7 +2537,7 @@ export type Database = {
           category: string
           theme: string
           duplicate_count: number
-          latest_submission_id: string
+          latest_theme_id: string
           earliest_created_at: string
         }[]
       }
