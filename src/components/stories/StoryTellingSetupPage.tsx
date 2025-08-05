@@ -84,26 +84,13 @@ const StoryTellingSetupPage: React.FC<StoryTellingSetupPageProps> = ({
         </div>
       </div>
 
-      {/* Post Preview */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-3">
-            <h3 className="font-semibold text-lg">{post.title}</h3>
-            <p className="text-muted-foreground leading-relaxed">{post.description}</p>
-            <div className="text-xs text-muted-foreground border-t pt-2">
-              Source content for your {storyType === 'childrens_story' ? "children's story" : 'professional narrative'}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Generate Button */}
-      <div className="flex justify-center pt-4">
+      <div className="pt-4">
         <Button 
           onClick={onGenerateScript}
           disabled={isGenerating}
           size="lg"
-          className="min-w-[200px]"
+          className="w-full"
         >
           {isGenerating ? (
             <>
@@ -118,6 +105,19 @@ const StoryTellingSetupPage: React.FC<StoryTellingSetupPageProps> = ({
           )}
         </Button>
       </div>
+
+      {/* Post Preview */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">{post.title}</h3>
+            <p className="text-muted-foreground leading-relaxed">{post.description}</p>
+            <div className="text-xs text-muted-foreground border-t pt-2">
+              Source content for your {storyType === 'childrens_story' ? "children's story" : 'professional narrative'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
