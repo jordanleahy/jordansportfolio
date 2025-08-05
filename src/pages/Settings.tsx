@@ -19,8 +19,6 @@ import {
   Eye,
   EyeOff,
   Mail,
-  Phone,
-  MapPin,
   Edit2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,8 +38,6 @@ const Settings: React.FC = () => {
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.full_name || 'Jordan Leahy',
     email: user?.email || '',
-    phone: '+33',
-    location: 'Paris, France',
     bio: 'Product designer and entrepreneur',
   });
 
@@ -149,34 +145,6 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone</Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="phone"
-                            value={profile.phone}
-                            onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                            disabled={!isEditing}
-                            className="pl-10"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="location"
-                            value={profile.location}
-                            onChange={(e) => setProfile({...profile, location: e.target.value})}
-                            disabled={!isEditing}
-                            className="pl-10"
-                          />
-                        </div>
-                      </div>
-                    </div>
 
                     {isEditing && (
                       <div className="flex gap-2 pt-4">
