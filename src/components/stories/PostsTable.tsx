@@ -221,7 +221,7 @@ export const PostsTable = ({
           /* Mobile: Edge-to-edge layout without Card wrapper */
           <div>
             {/* Tabs and controls with selective padding */}
-            <div className="px-4 pb-4">
+            <div>
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
                 <div className="flex items-center justify-between mb-4 gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
