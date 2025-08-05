@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   User, 
-  Bell, 
   Shield, 
   Database,
   CreditCard,
@@ -37,11 +36,6 @@ const Settings: React.FC = () => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-    marketing: false,
-  });
 
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.full_name || 'Jordan Leahy',
@@ -98,14 +92,10 @@ const Settings: React.FC = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              {isMobile ? 'Profile' : 'Profile'}
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              {isMobile ? 'Alerts' : 'Notifications'}
+              Profile
             </TabsTrigger>
             {!isMobile && (
               <TabsTrigger value="security" className="flex items-center gap-2">
@@ -235,67 +225,6 @@ const Settings: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Notification Preferences
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Email notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get notified about important updates via email
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notifications.email}
-                    onCheckedChange={(checked) => 
-                      setNotifications({...notifications, email: checked})
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Push notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive push notifications in your browser
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notifications.push}
-                    onCheckedChange={(checked) => 
-                      setNotifications({...notifications, push: checked})
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Marketing emails</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get updates about new features and promotions
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notifications.marketing}
-                    onCheckedChange={(checked) => 
-                      setNotifications({...notifications, marketing: checked})
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
 
           {/* Security Tab - Desktop only */}
