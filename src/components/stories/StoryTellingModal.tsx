@@ -1,11 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Mic, Square, Play, Pause, Download, Save, Loader2, MessageSquare, Book, Briefcase } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -14,6 +10,8 @@ import {
   AudioRecorder,
   StoryRecording
 } from '@/hooks/useStoryTelling';
+import StoryTellingSetupPage from './StoryTellingSetupPage';
+import StoryTellingReadPage from './StoryTellingReadPage';
 
 interface StoryTellingModalProps {
   isOpen: boolean;
@@ -28,9 +26,11 @@ interface StoryTellingModalProps {
 }
 
 type StoryType = 'childrens_story' | 'convincing_story';
+type ModalPage = 'setup' | 'read';
 
 const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, post }) => {
   const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState<ModalPage>('setup');
   const [storyType, setStoryType] = useState<StoryType>('childrens_story');
   const [generatedScript, setGeneratedScript] = useState<string>('');
   const [isRecording, setIsRecording] = useState(false);
@@ -57,6 +57,16 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
     };
   }, []);
 
+  // Reset modal state when opening
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentPage('setup');
+      setGeneratedScript('');
+      setRecordedAudio(null);
+      setRecordingDuration(0);
+    }
+  }, [isOpen]);
+
   const handleGenerateScript = async () => {
     try {
       const result = await generateScript.mutateAsync({
@@ -66,9 +76,14 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
       });
       
       setGeneratedScript(result.script);
+      setCurrentPage('read');
     } catch (error) {
       console.error('Error generating script:', error);
     }
+  };
+
+  const handleBack = () => {
+    setCurrentPage('setup');
   };
 
   const startRecording = async () => {
@@ -215,6 +230,7 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
       setGeneratedScript('');
       setRecordedAudio(null);
       setRecordingDuration(0);
+      setCurrentPage('setup');
       
       onClose();
     } catch (error) {
@@ -239,154 +255,38 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
             Create Story Narration
           </DialogTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Transform your post into an engaging {storyType === 'childrens_story' ? 'children\'s story' : 'professional narrative'} with AI-generated script and voice recording
+            Transform your post into an engaging {storyType === 'childrens_story' ? "children's story" : 'professional narrative'} with AI-generated script and voice recording
           </p>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Story Type Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Story Type</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  storyType === 'childrens_story' 
-                    ? 'ring-2 ring-primary bg-primary/5' 
-                    : 'hover:border-primary/50'
-                }`}
-                onClick={() => setStoryType('childrens_story')}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">📚</div>
-                    <div className="flex-1">
-                      <div className="font-medium mb-1">Children's Story</div>
-                      <div className="text-sm text-muted-foreground mb-2">
-                        Warm, engaging narrative perfect for parent-child interaction
-                      </div>
-                      <div className="text-xs text-muted-foreground italic">
-                        "Once upon a time in a magical brewery..."
-                      </div>
-                    </div>
-                    <Book className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="py-6">
+          {currentPage === 'setup' ? (
+            <StoryTellingSetupPage
+              storyType={storyType}
+              setStoryType={setStoryType}
+              post={post}
+              onGenerateScript={handleGenerateScript}
+              isGenerating={generateScript.isPending}
+            />
+          ) : (
+            <StoryTellingReadPage
+              storyType={storyType}
+              generatedScript={generatedScript}
+              post={post}
+              onBack={handleBack}
+              onSave={saveStoryRecording}
+              isSaving={createStoryRecording.isPending}
+            />
+          )}
+        </div>
 
-              <Card 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  storyType === 'convincing_story' 
-                    ? 'ring-2 ring-primary bg-primary/5' 
-                    : 'hover:border-primary/50'
-                }`}
-                onClick={() => setStoryType('convincing_story')}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">💼</div>
-                    <div className="flex-1">
-                      <div className="font-medium mb-1">Convincing Story</div>
-                      <div className="text-sm text-muted-foreground mb-2">
-                        Professional presentation for stakeholder pitches
-                      </div>
-                      <div className="text-xs text-muted-foreground italic">
-                        "Let me tell you why this brewery matters..."
-                      </div>
-                    </div>
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Post Preview */}
-          <Card className="border-l-4 border-l-primary">
-            <CardContent className="pt-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">{post.category || 'Post'}</Badge>
-                  {post.theme && <Badge variant="secondary" className="text-xs">{post.theme}</Badge>}
-                </div>
-                <h3 className="font-semibold text-lg">{post.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{post.description}</p>
-                <div className="text-xs text-muted-foreground border-t pt-2">
-                  Source content for your {storyType === 'childrens_story' ? 'children\'s story' : 'professional narrative'}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Script Generation */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium">Generated Script</Label>
-                {generatedScript && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {Math.ceil(generatedScript.split(' ').length / 150)} min read • {generatedScript.split(' ').length} words
-                  </div>
-                )}
-              </div>
-              <Button 
-                onClick={handleGenerateScript}
-                disabled={generateScript.isPending}
-                size="sm"
-                className="min-w-[120px]"
-              >
-                {generateScript.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {storyType === 'childrens_story' ? 'Creating magical story...' : 'Crafting compelling narrative...'}
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Generate Script
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            <div className="relative">
-              <Textarea
-                value={generatedScript}
-                onChange={(e) => setGeneratedScript(e.target.value)}
-                placeholder={`Click 'Generate Script' to create a ${storyType === 'childrens_story' ? 'magical children\'s story' : 'professional narrative'} script, or write your own...`}
-                className="min-h-[240px] text-sm leading-relaxed pr-4 resize-none"
-              />
-              {generatedScript && (
-                <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs text-muted-foreground">
-                  {generatedScript.length} characters
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
+        {currentPage === 'setup' && (
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              onClick={saveStoryRecording}
-              disabled={!generatedScript || createStoryRecording.isPending}
-              className="min-w-[120px]"
-            >
-              {createStoryRecording.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving story...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Story
-                </>
-              )}
-            </Button>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
