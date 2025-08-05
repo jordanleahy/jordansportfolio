@@ -93,6 +93,10 @@ const config: Config = {
           "0%": { transform: "translateX(0)", opacity: "1" },
           "100%": { transform: "translateX(100%)", opacity: "0" }
         },
+        "slide-in-up": {
+          "0%": { transform: "translateY(100%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" }
+        },
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" }
@@ -114,6 +118,7 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-in-right": "slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         "slide-out-right": "slide-out-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "slide-in-up": "slide-in-up 0.3s ease-out",
         "fade-in": "fade-in-stagger 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "scale-in": "scale-in 0.2s ease-out",
         "shimmer": "shimmer 2s infinite",

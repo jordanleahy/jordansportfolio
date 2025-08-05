@@ -6,10 +6,21 @@ import { UsageDashboard } from '@/components/subscription/UsageDashboard';
 import { SubscriptionPlans } from '@/components/subscription/SubscriptionPlans';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, BarChart3, Settings } from 'lucide-react';
+import { CreditCard, BarChart3, Settings, Smartphone } from 'lucide-react';
+import { PlanCarousel } from '@/components/subscription/PlanCarousel';
+import { MobilePlanComparison } from '@/components/subscription/MobilePlanComparison';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
 
 const Subscription: React.FC = () => {
   const { data: status } = useSubscriptionStatus();
+  const { data: tiers = [] } = useSubscriptionTiers();
+  const isMobile = useIsMobile();
+
+  const handleSelectPlan = (tier: any) => {
+    // Navigate to mobile checkout or trigger subscription
+    console.log('Selected plan:', tier);
+  };
 
   return (
     <PageLayout>
@@ -28,19 +39,21 @@ const Subscription: React.FC = () => {
         </div>
 
         <Tabs defaultValue="usage" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
             <TabsTrigger value="usage" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Usage & Billing
+              {isMobile ? 'Usage' : 'Usage & Billing'}
             </TabsTrigger>
             <TabsTrigger value="plans" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Plans & Pricing
+              {isMobile ? 'Plans' : 'Plans & Pricing'}
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
-            </TabsTrigger>
+            {!isMobile && (
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="usage">
@@ -48,21 +61,38 @@ const Subscription: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="plans">
-            <SubscriptionPlans />
+            {isMobile ? (
+              <div className="space-y-6">
+                <PlanCarousel 
+                  tiers={tiers}
+                  currentTier={status?.subscription?.tier?.id}
+                  onSelectPlan={handleSelectPlan}
+                />
+                <MobilePlanComparison 
+                  tiers={tiers}
+                  currentTier={status?.subscription?.tier?.id}
+                  onSelectPlan={handleSelectPlan}
+                />
+              </div>
+            ) : (
+              <SubscriptionPlans />
+            )}
           </TabsContent>
 
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Subscription Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Subscription settings and preferences will be available here.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {!isMobile && (
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Subscription Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Subscription settings and preferences will be available here.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </PageLayout>
