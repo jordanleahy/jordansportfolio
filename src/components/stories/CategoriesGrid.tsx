@@ -1,8 +1,9 @@
 import { CategoryCard } from "./CategoryCard";
 
 interface Theme {
-  theme: string;
-  theme_description: string | null;
+  id: string;
+  name: string;
+  description: string | null;
   category: string;
   post_count: number;
   first_post: {
@@ -42,9 +43,9 @@ export const CategoriesGrid = ({ themes, shimmerThemes, onDeleteCategory }: Cate
       {/* Real theme cards */}
       {themes.map((theme) => (
         <CategoryCard
-          key={theme.theme}
-          theme={theme.theme}
-          themeDescription={theme.theme_description}
+          key={theme.name}
+          theme={theme.name}
+          themeDescription={theme.description}
           category={theme.category}
           postCount={theme.post_count}
           imageUrl={theme.first_post?.image_url}

@@ -134,7 +134,7 @@ export default function ThemeDetail() {
             {decodedTheme}
           </h1>
           <p className="text-base text-muted-foreground leading-relaxed">
-            {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : 'No theme description available'}
+            Theme details for {theme}
           </p>
         </div>
 
