@@ -195,7 +195,8 @@ export class OptimizedSocialMediaService {
     const { data, error } = await supabase
       .rpc('insert_category_content', {
         category_name: category,
-        posts_data: posts
+        posts_data: posts,
+        theme_id_param: null // Bulk import doesn't use theme relationships
       });
 
     if (error) throw error;

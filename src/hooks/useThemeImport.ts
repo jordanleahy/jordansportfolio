@@ -122,12 +122,14 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
 
       console.log('🔄 [useThemeImport] Converted posts for DB:', postsForDb);
 
-      // Insert using RPC
+      // Insert using RPC with theme_id_param
       console.log('💾 [useThemeImport] Calling insert_category_content RPC');
       const { data: insertCount, error } = await supabase
         .rpc('insert_category_content', {
           category_name: data.category,
-          posts_data: postsForDb
+          posts_data: postsForDb,
+          theme_description_param: data.theme_description,
+          theme_id_param: null // This hook doesn't create themes, so theme_id is null
         });
 
       console.log('📥 [useThemeImport] RPC response:', { insertCount, error });

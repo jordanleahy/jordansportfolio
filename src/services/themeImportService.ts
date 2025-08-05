@@ -261,7 +261,8 @@ export class ThemeImportService {
         .rpc('insert_category_content', {
           category_name: category,
           posts_data: postsAsJson,
-          theme_description_param: themeDescription
+          theme_description_param: themeDescription,
+          theme_id_param: null // Legacy service doesn't use theme_id relationships
         });
 
       console.log('📥 RPC response - data:', data);
