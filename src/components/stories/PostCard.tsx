@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
@@ -64,6 +65,8 @@ const PostCardComponent = ({
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
   const [showGallery, setShowGallery] = useState(false);
+  const [isGeneratingHero, setIsGeneratingHero] = useState(false);
+  const [generationStep, setGenerationStep] = useState('');
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -94,17 +97,105 @@ const PostCardComponent = ({
     return null;
   };
 
+  const handleHeroImageGenerate = async () => {
+    try {
+      setIsGeneratingHero(true);
+      setGenerationStep('Generating prompt...');
+      
+      // Generate prompt using the same edge function as PostImageUploadCard
+      const promptResponse = await fetch('/api/functions/v1/generate-image-prompt-dynamic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: post.title,
+          description: post.description,
+          category: post.category || 'general',
+          colorTheme: colorTheme?.name || ''
+        }),
+      });
+
+      if (!promptResponse.ok) {
+        throw new Error('Failed to generate prompt');
+      }
+
+      const promptData = await promptResponse.json();
+      const prompt = promptData.generatedText || promptData.prompt;
+
+      setGenerationStep('Generating image...');
+      
+      // Generate image using the prompt
+      const imageResponse = await fetch('/api/functions/v1/generate-image-gpt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          aspectRatio: '16_9'
+        }),
+      });
+
+      if (!imageResponse.ok) {
+        throw new Error('Failed to generate image');
+      }
+
+      const imageData = await imageResponse.json();
+      const base64Image = imageData.image;
+
+      setGenerationStep('Uploading image...');
+      
+      // Convert base64 to file and upload to storage
+      const response = await fetch(base64Image);
+      const blob = await response.blob();
+      const file = new File([blob], `generated-16-9-${Date.now()}.png`, { type: 'image/png' });
+
+      // Use the existing onImageGenerated callback which handles storage upload
+      onImageGenerated(post.id, '16_9', base64Image);
+      
+      toast({
+        title: "Hero image generated!",
+        description: "Your 16:9 hero image has been created successfully.",
+      });
+
+    } catch (error) {
+      console.error('Error generating hero image:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate hero image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingHero(false);
+      setGenerationStep('');
+    }
+  };
+
 
 
 
   return (
     <Card className="w-full">
-      {/* 16:9 Hero Image Placeholder */}
-      <div className="aspect-video bg-muted rounded-t-lg flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">16:9 Hero Image</p>
-        </div>
+      {/* 16:9 Hero Image */}
+      <div className="aspect-video rounded-t-lg overflow-hidden">
+        {isGeneratingHero || isUploading(post.id, '16_9') ? (
+          <SimpleShimmer aspectRatio="16/9" className="w-full h-full" />
+        ) : post.image_16_9_url ? (
+          <img
+            src={post.image_16_9_url}
+            alt="Hero image"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="bg-muted w-full h-full flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">16:9 Hero Image</p>
+            </div>
+          </div>
+        )}
       </div>
       
       <CardHeader className="pb-3">
@@ -178,8 +269,20 @@ const PostCardComponent = ({
             variant="outline"
             size="sm"
             className="mt-2 w-full"
+            onClick={handleHeroImageGenerate}
+            disabled={isGeneratingHero || isUploading(post.id, '16_9')}
           >
-            Generate
+            {isGeneratingHero ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-xs">{generationStep}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Generate
+              </div>
+            )}
           </Button>
         </div>
 
