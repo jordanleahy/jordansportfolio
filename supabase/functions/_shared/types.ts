@@ -172,8 +172,7 @@ export interface PostInsertData {
   day: number;
   title: string;
   description: string;
-  theme: string;
-  theme_description: string;
+  theme_id: string;
   category: string;
   user_id: string;
   status: PostStatus;

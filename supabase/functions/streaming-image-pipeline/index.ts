@@ -418,13 +418,26 @@ serve(async (req) => {
                     finalImageUrl
                   });
                   
+                  // Get theme ID from theme name
+                  const { data: themeData, error: themeError } = await supabase
+                    .from('themes')
+                    .select('id')
+                    .eq('name', theme)
+                    .eq('user_id', userId)
+                    .maybeSingle();
+
+                  if (themeError || !themeData) {
+                    console.error('❌ Theme not found:', theme);
+                    throw new Error(`Theme not found: ${theme}`);
+                  }
+                  
                   const { data: updateData, error: updateError } = await supabase
                     .from('social_media_posts')
                     .update({
                       theme_image_4_3_url: finalImageUrl,
                       theme_image_generation_status: 'complete'
                     })
-                    .eq('theme', theme)
+                    .eq('theme_id', themeData.id)
                     .eq('user_id', userId)
                     .select();
                   
@@ -458,16 +471,26 @@ serve(async (req) => {
             if (mode === 'theme' && theme && userId) {
               console.log('❌ Updating database status to failed for:', { theme, category, userId });
               
-              const { error: failError } = await supabase
-                .from('social_media_posts')
-                .update({ theme_image_generation_status: 'failed' })
-                .eq('theme', theme)
-                .eq('user_id', userId);
+              // Get theme ID for failed status update
+              const { data: themeData } = await supabase
+                .from('themes')
+                .select('id')
+                .eq('name', theme)
+                .eq('user_id', userId)
+                .maybeSingle();
+
+              if (themeData) {
+                const { error: failError } = await supabase
+                  .from('social_media_posts')
+                  .update({ theme_image_generation_status: 'failed' })
+                  .eq('theme_id', themeData.id)
+                  .eq('user_id', userId);
               
-              if (failError) {
-                console.error('❌ Failed to update status to failed:', failError);
-              } else {
-                console.log('✅ Successfully updated status to failed');
+                if (failError) {
+                  console.error('❌ Failed to update status to failed:', failError);
+                } else {
+                  console.log('✅ Successfully updated status to failed');
+                }
               }
             }
             
@@ -538,22 +561,34 @@ serve(async (req) => {
               finalImageUrl
             });
             
-            const { data: updateData, error: updateError } = await supabase
-              .from('social_media_posts')
-              .update({
-                theme_image_4_3_url: finalImageUrl,
-                theme_image_generation_status: 'complete'
-              })
-              .eq('theme', theme)
+            // Get theme ID from theme name
+            const { data: themeData, error: themeError } = await supabase
+              .from('themes')
+              .select('id')
+              .eq('name', theme)
               .eq('user_id', userId)
-              .select();
-            
-            if (updateError) {
-              console.error('❌ Non-streaming database update failed:', updateError);
+              .maybeSingle();
+
+            if (themeError || !themeData) {
+              console.error('❌ Theme not found for non-streaming update:', theme);
             } else {
-              console.log('✅ Non-streaming database updated successfully:', {
-                updatedRows: updateData?.length || 0
-              });
+              const { data: updateData, error: updateError } = await supabase
+                .from('social_media_posts')
+                .update({
+                  theme_image_4_3_url: finalImageUrl,
+                  theme_image_generation_status: 'complete'
+                })
+                .eq('theme_id', themeData.id)
+                .eq('user_id', userId)
+                .select();
+            
+              if (updateError) {
+                console.error('❌ Non-streaming database update failed:', updateError);
+              } else {
+                console.log('✅ Non-streaming database updated successfully:', {
+                  updatedRows: updateData?.length || 0
+                });
+              }
             }
           }
         }

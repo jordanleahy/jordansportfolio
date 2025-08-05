@@ -42,10 +42,22 @@ serve(async (req) => {
 
     if (!postTitle || !postDescription) {
       console.log('🔍 Fetching first post data for image generation');
+      // Get theme ID from theme name
+      const { data: themeData, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('name', theme)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (themeError || !themeData) {
+        throw new Error(`Theme not found: ${theme}`);
+      }
+
       const { data: posts, error: postsError } = await supabase
         .from('social_media_posts')
         .select('title, description')
-        .eq('theme', theme)
+        .eq('theme_id', themeData.id)
         .eq('user_id', userId)
         .order('day', { ascending: true })
         .limit(1);

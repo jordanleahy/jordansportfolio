@@ -15,11 +15,11 @@ export const streamingCorsHeaders = {
 export const updateThemeImageStatus = async (
   supabase: SupabaseClient, 
   status: string, 
-  theme: string, 
+  themeId: string, 
   userId: string, 
   imageUrl?: string
 ): Promise<void> => {
-  console.log(`🔄 Updating theme image status to '${status}' for theme: ${theme}`);
+  console.log(`🔄 Updating theme image status to '${status}' for theme ID: ${themeId}`);
   
   const updateData: Record<string, any> = {
     theme_image_generation_status: status,
@@ -33,7 +33,7 @@ export const updateThemeImageStatus = async (
   const { data, error } = await supabase
     .from('social_media_posts')
     .update(updateData)
-    .eq('theme', theme)
+    .eq('theme_id', themeId)
     .eq('user_id', userId)
     .select('id, title');
 
@@ -42,7 +42,7 @@ export const updateThemeImageStatus = async (
     throw new Error(`Database update failed: ${error.message}`);
   }
   
-  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme: ${theme}`);
+  console.log(`✅ Updated ${data?.length || 0} posts to status '${status}' for theme ID: ${themeId}`);
 };
 
 // Helper function to generate image prompt using OpenAI
