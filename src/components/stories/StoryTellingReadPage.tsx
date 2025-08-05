@@ -82,7 +82,7 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
         <Button variant="ghost" onClick={onBack} size="sm">
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-nowrap">
           <Badge variant="outline" className="text-xs">
             {storyType === 'childrens_story' ? "Children's Story" : 'Professional Narrative'}
           </Badge>
