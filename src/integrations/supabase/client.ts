@@ -12,7 +12,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'sb-auth-token',
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   }
 });
