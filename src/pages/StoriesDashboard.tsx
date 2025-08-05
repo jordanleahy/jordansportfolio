@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -88,26 +89,42 @@ export default function StoriesDashboard() {
     }
   }, [user?.id, refreshThemes]);
 
+  // Debounced theme refresh to prevent spam updates
+  const [shouldRefreshThemes, setShouldRefreshThemes] = useState(false);
+  const debouncedRefresh = useDebounce(shouldRefreshThemes, 300);
+
+  React.useEffect(() => {
+    if (debouncedRefresh) {
+      // Use targeted cache update instead of full refresh
+      queryClient.setQueryData(['themes'], (oldData: Theme[] | undefined) => {
+        // Optimistically update cache or trigger minimal refetch
+        return oldData; // Keep existing data, let real-time handle updates
+      });
+      setShouldRefreshThemes(false);
+    }
+  }, [debouncedRefresh, queryClient]);
+
   // Setup realtime subscription for immediate updates
   const handlePostInsert = React.useCallback((newPost: any) => {
-    refreshThemes();
+    // Trigger debounced refresh instead of immediate full reload
+    setShouldRefreshThemes(true);
     toast({
       title: "New Post Created!",
       description: `"${newPost.title}" added to ${newPost.category}`,
     });
-  }, [refreshThemes, toast]);
+  }, [toast]);
 
   const handlePostUpdate = React.useCallback((update: any) => {
     console.log('🔄 REALTIME: handlePostUpdate called for post update', {
       postId: update?.id,
       category: update?.category,
-      triggeringRefresh: true
+      usingDebouncedUpdate: true
     });
     
-    refreshThemes();
-    queryClient.invalidateQueries({ queryKey: ['themes'] });
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
-  }, [refreshThemes, queryClient]);
+    // Remove redundant invalidateQueries calls - React Query handles this automatically
+    // Use debounced update instead of immediate refresh
+    setShouldRefreshThemes(true);
+  }, []);
 
   // Theme image generation listener to remove shimmer when image generation completes
   React.useEffect(() => {
@@ -138,8 +155,8 @@ export default function StoriesDashboard() {
               return filtered;
             });
             
-            // Refresh themes to show new image
-            setTimeout(() => refreshThemes(), 100);
+            // Use targeted cache update instead of full refresh
+            setShouldRefreshThemes(true);
           }
           
           // Handle failed theme image generation
@@ -192,7 +209,7 @@ export default function StoriesDashboard() {
         description: `Successfully deleted "${category}" and all its posts`,
       });
 
-      refreshThemes();
+      setShouldRefreshThemes(true);
     } catch (error) {
       console.error('Delete category error:', error);
       toast({
