@@ -120,7 +120,8 @@ const PostCardComponent = ({
       console.log('Prompt response:', promptData);
       
       // Try different possible response structures
-      const prompt = promptData?.generatedText || 
+      const prompt = promptData?.generatedPrompt || 
+                    promptData?.generatedText || 
                     promptData?.prompt || 
                     promptData?.generated_prompt || 
                     promptData?.result ||
