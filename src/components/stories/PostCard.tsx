@@ -117,9 +117,18 @@ const PostCardComponent = ({
         throw new Error(`Failed to generate prompt: ${promptError.message}`);
       }
 
-      const prompt = promptData?.generatedText || promptData?.prompt;
+      console.log('Prompt response:', promptData);
+      
+      // Try different possible response structures
+      const prompt = promptData?.generatedText || 
+                    promptData?.prompt || 
+                    promptData?.generated_prompt || 
+                    promptData?.result ||
+                    (typeof promptData === 'string' ? promptData : null);
+      
       if (!prompt) {
-        throw new Error('No prompt generated');
+        console.error('No prompt found in response:', promptData);
+        throw new Error(`No prompt generated. Response: ${JSON.stringify(promptData)}`);
       }
 
       setGenerationStep('Generating image...');
@@ -136,9 +145,12 @@ const PostCardComponent = ({
         throw new Error(`Failed to generate image: ${imageError.message}`);
       }
 
+      console.log('Image response:', imageData);
+
       const base64Image = imageData?.image;
       if (!base64Image) {
-        throw new Error('No image generated');
+        console.error('No image found in response:', imageData);
+        throw new Error(`No image generated. Response: ${JSON.stringify(imageData)}`);
       }
 
       setGenerationStep('Uploading image...');
