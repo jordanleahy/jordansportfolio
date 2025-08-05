@@ -344,6 +344,105 @@ const PostCardComponent = ({
           </Button>
         </div>
 
+        {/* Admin-only expanded content */}
+        {isAdmin && (
+          <div className="space-y-4">
+            {/* Bulk Generation Button */}
+            <BulkImageGenerationButton
+              post={post}
+              isUploading={(postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => isUploading(postId, aspectRatio)}
+              getUploadType={getUploadType}
+              onFileSelect={(postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => onFileSelect(postId, aspectRatio, post)}
+              onPostsChange={() => onPostsChange?.()}
+            />
+
+            {/* Photos & Videos Tabs */}
+            <Tabs defaultValue="photos" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="photos" className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Photos
+                </TabsTrigger>
+                <TabsTrigger value="videos" className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Videos
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="photos" className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 9:16 Portrait */}
+                  <PostImageUploadCard
+                    post={post}
+                    type="9_16"
+                    label="9:16"
+                    imageUrl={post.image_9_16_url}
+                    onImageGenerated={onImageGenerated}
+                    onImageDelete={onImageDelete}
+                    onFileSelect={onFileSelect}
+                    isUploading={isUploading(post.id, '9_16')}
+                  />
+                  
+                  {/* 3:4 Portrait */}
+                  <PostImageUploadCard
+                    post={post}
+                    type="3_4"
+                    label="3:4"
+                    imageUrl={post.image_3_4_url}
+                    onImageGenerated={onImageGenerated}
+                    onImageDelete={onImageDelete}
+                    onFileSelect={onFileSelect}
+                    isUploading={isUploading(post.id, '3_4')}
+                  />
+                  
+                  {/* 4:3 Landscape */}
+                  <PostImageUploadCard
+                    post={post}
+                    type="4_3"
+                    label="4:3"
+                    imageUrl={post.image_4_3_url}
+                    onImageGenerated={onImageGenerated}
+                    onImageDelete={onImageDelete}
+                    onFileSelect={onFileSelect}
+                    isUploading={isUploading(post.id, '4_3')}
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="videos" className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 gap-4">
+                  {/* 16:9 Video */}
+                  <VideoUploadCard
+                    title="16:9 Video"
+                    aspectRatio="16_9"
+                    videoUrl={post.image_16_9_video_url}
+                    onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
+                    onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
+                  />
+                  
+                  {/* 3:4 Video */}
+                  <VideoUploadCard
+                    title="3:4 Video"
+                    aspectRatio="3_4"
+                    videoUrl={post.image_3_4_video_url}
+                    onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
+                    onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
+                  />
+                  
+                  {/* General Video */}
+                  <VideoUploadCard
+                    title="General Video"
+                    aspectRatio="general"
+                    videoUrl={post.general_video_url}
+                    onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
+                    onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="space-y-2">
           <div className={`grid gap-2 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
@@ -381,6 +480,25 @@ const PostCardComponent = ({
             ) : null}
           </div>
         </div>
+
+        {/* Image Preview Modal */}
+        {previewImage && (
+          <ImagePreviewModal
+            isOpen={!!previewImage}
+            onClose={() => setPreviewImage(null)}
+            imageUrl={previewImage.url}
+            imageAlt={previewImage.alt}
+          />
+        )}
+
+        {/* Media Gallery Modal */}
+        {showGallery && (
+          <PostMediaGalleryModal
+            isOpen={showGallery}
+            onClose={() => setShowGallery(false)}
+            post={post}
+          />
+        )}
 
       </CardContent>
     </Card>
