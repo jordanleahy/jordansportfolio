@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { Loader2, ImageIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Loader2, ImageIcon, Clock } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 interface StreamingProgress {
   stage: string;
@@ -26,6 +26,8 @@ export const StreamingShimmer = ({
 }: StreamingShimmerProps) => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [imageOpacity, setImageOpacity] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(180); // 3 minutes in seconds
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update current image and opacity based on streaming progress
   useEffect(() => {
@@ -46,6 +48,37 @@ export const StreamingShimmer = ({
     }
   }, [streamingProgress]);
 
+  // Countdown timer logic
+  useEffect(() => {
+    if (isGenerating) {
+      // Reset timer to 3 minutes when generation starts
+      setTimeRemaining(180);
+      
+      // Start countdown
+      intervalRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      // Clear interval when generation stops
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isGenerating]);
+
   // Cleanup image URL on unmount
   useEffect(() => {
     return () => {
@@ -55,6 +88,13 @@ export const StreamingShimmer = ({
       }
     };
   }, [currentImage]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   if (error) {
     return (
@@ -101,6 +141,18 @@ export const StreamingShimmer = ({
           }}
           onError={() => setCurrentImage(null)}
         />
+      )}
+
+      {/* Countdown timer overlay */}
+      {isGenerating && (
+        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border">
+            <Clock className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">
+              {formatTime(timeRemaining)}
+            </span>
+          </div>
+        </div>
       )}
 
       {/* Fallback icon when no image and not generating */}
