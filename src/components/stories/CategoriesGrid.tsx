@@ -16,31 +16,17 @@ interface Theme {
 
 interface CategoriesGridProps {
   themes: Theme[];
-  shimmerThemes: string[];
   onDeleteCategory: (category: string) => void;
 }
 
-export const CategoriesGrid = ({ themes, shimmerThemes, onDeleteCategory }: CategoriesGridProps) => {
-  const hasAnyContent = themes.length > 0 || shimmerThemes.length > 0;
-  
-  if (!hasAnyContent) {
+export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps) => {
+  if (themes.length === 0) {
     return null;
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {/* Shimmer cards first */}
-      {shimmerThemes.map((theme) => (
-        <CategoryCard
-          key={`shimmer-${theme}`}
-          theme={theme}
-          category={theme} // fallback for routing
-          postCount={0}
-          isShimmer={true}
-        />
-      ))}
-      
-      {/* Real theme cards */}
+      {/* Theme cards */}
       {themes.map((theme) => (
         <CategoryCard
           key={theme.name}
