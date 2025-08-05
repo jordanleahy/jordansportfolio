@@ -87,7 +87,7 @@ export default function ThemeDetail() {
 
   return (
     <PageLayout>
-      <div className="container mx-auto pb-8 px-4">
+      <div className="container mx-auto py-8 px-4">
         {/* Navigation Header */}
         <div className="mb-4 flex items-center justify-between">
           <Button
