@@ -44,20 +44,6 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
         </div>
       </div>
 
-      {/* Post context */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2">
-          <Badge variant="outline" className="text-xs">{post.category || 'Post'}</Badge>
-          {post.theme && <Badge variant="secondary" className="text-xs">{post.theme}</Badge>}
-        </div>
-        <h2 className="text-xl font-semibold">{post.title}</h2>
-        <p className="text-sm text-muted-foreground">
-          {storyType === 'childrens_story' 
-            ? 'A magical story for young minds' 
-            : 'A compelling narrative for professional audiences'
-          }
-        </p>
-      </div>
 
       {/* Script display */}
       <div className="prose prose-gray dark:prose-invert max-w-none">
