@@ -99,6 +99,14 @@ const PostCardComponent = ({
 
   return (
     <Card className="w-full">
+      {/* 16:9 Hero Image Placeholder */}
+      <div className="aspect-video bg-muted rounded-t-lg flex items-center justify-center">
+        <div className="text-center text-muted-foreground">
+          <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">16:9 Hero Image</p>
+        </div>
+      </div>
+      
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-3">
           <div className="flex-1 min-w-0">
