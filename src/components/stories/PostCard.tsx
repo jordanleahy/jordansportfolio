@@ -21,6 +21,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 interface PostCardProps {
   post: SocialMediaPost;
   draftIndex?: number;
+  themeName?: string;
   onCopy: (post: SocialMediaPost) => void;
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
@@ -41,6 +42,7 @@ interface PostCardProps {
 const PostCardComponent = ({ 
   post, 
   draftIndex, 
+  themeName,
   onCopy, 
   onDelete,
   onGeneratePrompt,
@@ -102,6 +104,9 @@ const PostCardComponent = ({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-3">
           <div className="flex-1 min-w-0">
+            {themeName && (
+              <div className="text-sm font-medium text-primary mb-1">{themeName}</div>
+            )}
             <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
             <div className="flex gap-2 mt-2 flex-wrap">
               <Badge 
