@@ -130,24 +130,6 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<void> => {
-  console.log('🤖 Generating system prompt for theme:', themeData.theme);
-  
-  const { error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-    body: {
-      theme: themeData.theme,
-      category: themeData.category,
-      description: themeData.theme_description,
-      sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
-      user_id: userId
-    }
-  });
-
-  if (error) {
-    console.warn('System prompt generation warning:', error);
-    // Non-critical error, continue pipeline
-  }
-};
 
 
 serve(async (req) => {
@@ -222,25 +204,10 @@ serve(async (req) => {
               data: { insertedCount }
             });
 
-            // Step 3: Generate System Prompt (60% progress)
-            sendStreamEvent(controller, {
-              type: 'system_prompt_start',
-              progress: 45,
-              data: { status: 'Generating AI system prompts...' }
-            });
-
-            await generateSystemPrompt(supabase, themeData, userId);
-            
-            sendStreamEvent(controller, {
-              type: 'system_prompt_complete',
-              progress: 60,
-              data: { promptGenerated: true }
-            });
-
-            // Step 4: Set posts to generating status (80% progress)
+            // Step 3: Set posts to generating status (80% progress)
             sendStreamEvent(controller, {
               type: 'posts_status_update',
-              progress: 70,
+              progress: 45,
               data: { status: 'Setting posts to generating status...' }
             });
 
@@ -262,14 +229,14 @@ serve(async (req) => {
 
             sendStreamEvent(controller, {
               type: 'posts_status_updated',
-              progress: 80,
+              progress: 60,
               data: { status: 'Posts marked as generating' }
             });
 
-            // Step 5: Trigger background image generation (90% progress)
+            // Step 4: Trigger background image generation (90% progress)
             sendStreamEvent(controller, {
               type: 'background_trigger_start',
-              progress: 85,
+              progress: 70,
               data: { status: 'Starting background image generation...' }
             });
 
@@ -307,7 +274,7 @@ serve(async (req) => {
               data: { status: 'Background generation started' }
             });
 
-            // Step 6: Pipeline Complete (100% progress)
+            // Step 5: Pipeline Complete (100% progress)
             sendStreamEvent(controller, {
               type: 'pipeline_complete',
               progress: 100,
@@ -345,7 +312,6 @@ serve(async (req) => {
       // Non-streaming response (updated to use background processing)
       const themeData = await generateTheme(description);
       const insertedCount = await importThemeToDatabase(supabase, themeData, userId);
-      await generateSystemPrompt(supabase, themeData, userId);
       
       // Set posts to generating status
       const { error: statusError } = await supabase
