@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -278,28 +278,6 @@ const PostCardComponent = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: post.title,
-                    text: post.description,
-                    url: window.location.href
-                  });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast({
-                    title: "Link copied!",
-                    description: "Post link has been copied to clipboard.",
-                  });
-                }
-              }}
-              className="h-8 w-8 p-0"
-            >
-              <Share className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={() => onCopy(post)}
               className="h-8 w-8 p-0"
             >
@@ -344,105 +322,6 @@ const PostCardComponent = ({
           </Button>
         </div>
 
-        {/* Admin-only expanded content */}
-        {isAdmin && (
-          <div className="space-y-4">
-            {/* Bulk Generation Button */}
-            <BulkImageGenerationButton
-              post={post}
-              isUploading={(postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => isUploading(postId, aspectRatio)}
-              getUploadType={getUploadType}
-              onFileSelect={(postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => onFileSelect(postId, aspectRatio, post)}
-              onPostsChange={() => onPostsChange?.()}
-            />
-
-            {/* Photos & Videos Tabs */}
-            <Tabs defaultValue="photos" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="photos" className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4" />
-                  Photos
-                </TabsTrigger>
-                <TabsTrigger value="videos" className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Videos
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="photos" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {/* 9:16 Portrait */}
-                  <PostImageUploadCard
-                    post={post}
-                    type="9_16"
-                    label="9:16"
-                    imageUrl={post.image_9_16_url}
-                    onImageGenerated={onImageGenerated}
-                    onImageDelete={onImageDelete}
-                    onFileSelect={onFileSelect}
-                    isUploading={isUploading(post.id, '9_16')}
-                  />
-                  
-                  {/* 3:4 Portrait */}
-                  <PostImageUploadCard
-                    post={post}
-                    type="3_4"
-                    label="3:4"
-                    imageUrl={post.image_3_4_url}
-                    onImageGenerated={onImageGenerated}
-                    onImageDelete={onImageDelete}
-                    onFileSelect={onFileSelect}
-                    isUploading={isUploading(post.id, '3_4')}
-                  />
-                  
-                  {/* 4:3 Landscape */}
-                  <PostImageUploadCard
-                    post={post}
-                    type="4_3"
-                    label="4:3"
-                    imageUrl={post.image_4_3_url}
-                    onImageGenerated={onImageGenerated}
-                    onImageDelete={onImageDelete}
-                    onFileSelect={onFileSelect}
-                    isUploading={isUploading(post.id, '4_3')}
-                  />
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="videos" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 gap-4">
-                  {/* 16:9 Video */}
-                  <VideoUploadCard
-                    title="16:9 Video"
-                    aspectRatio="16_9"
-                    videoUrl={post.image_16_9_video_url}
-                    onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
-                    onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
-                  />
-                  
-                  {/* 3:4 Video */}
-                  <VideoUploadCard
-                    title="3:4 Video"
-                    aspectRatio="3_4"
-                    videoUrl={post.image_3_4_video_url}
-                    onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
-                    onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
-                  />
-                  
-                  {/* General Video */}
-                  <VideoUploadCard
-                    title="General Video"
-                    aspectRatio="general"
-                    videoUrl={post.general_video_url}
-                    onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
-                    onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="space-y-2">
           <div className={`grid gap-2 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
@@ -479,27 +358,238 @@ const PostCardComponent = ({
               </Button>
             ) : null}
           </div>
+          
+          <div className="flex gap-2">
+            {isAdmin && (
+              <BulkImageGenerationButton
+                post={post}
+                isUploading={isUploading}
+                getUploadType={getUploadType}
+                onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+                onPostsChange={onPostsChange}
+              />
+            )}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPhotos(!showPhotos)}
+                className="h-8 flex-1"
+                title={showPhotos ? "Hide photos" : "Show photos"}
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+            )}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowVideos(!showVideos)}
+                className="h-8 flex-1"
+              >
+                <Video className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Photos Section */}
+        {showPhotos && (
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-3">Photo Uploads</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <PostImageUploadCard
+                post={post}
+                type="16_9"
+                label="Landscape (16:9)"
+                imageUrl={post.image_16_9_url || undefined}
+                isUploading={uploadingStates[`${post.id}_16_9`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
+              />
+              <PostImageUploadCard
+                post={post}
+                type="9_16"
+                label="Portrait (9:16)"
+                imageUrl={post.image_9_16_url || undefined}
+                isUploading={uploadingStates[`${post.id}_9_16`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
+              />
+              <PostImageUploadCard
+                post={post}
+                type="3_4"
+                label="Social (3:4)"
+                imageUrl={post.image_3_4_url || undefined}
+                isUploading={uploadingStates[`${post.id}_3_4`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
+              />
+              <PostImageUploadCard
+                post={post}
+                type="4_3"
+                label="Standard (4:3)"
+                imageUrl={post.image_4_3_url || undefined}
+                isUploading={uploadingStates[`${post.id}_4_3`] || false}
+                onFileSelect={onFileSelect}
+                onImageDelete={onImageDelete}
+                onImageGenerated={onImageGenerated}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Videos Section */}
+        {showVideos && (
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-3">Video Uploads</h4>
+            <div className="grid grid-cols-1 gap-3">
+              <VideoUploadCard
+                title="16:9 Video (Landscape)"
+                aspectRatio="16/9"
+                videoUrl={post.image_16_9_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, '16_9_video')}
+                onVideoRemove={() => onVideoRemove(post.id, '16_9_video')}
+              />
+              <VideoUploadCard
+                title="3:4 Video (Portrait)"
+                aspectRatio="3/4"
+                videoUrl={post.image_3_4_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, '3_4_video')}
+                onVideoRemove={() => onVideoRemove(post.id, '3_4_video')}
+              />
+              <VideoUploadCard
+                title="General Video"
+                aspectRatio="16/9"
+                videoUrl={post.general_video_url || undefined}
+                onVideoUpload={(url) => onVideoUpload(post.id, url, 'general_video')}
+                onVideoRemove={() => onVideoRemove(post.id, 'general_video')}
+              />
+              
+            </div>
+          </div>
+        )}
+
+        {/* Media Previews - Show any existing images or videos */}
+        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
+          <div className="flex gap-2 overflow-x-auto">
+            {post.image_16_9_url && (
+              <ImageHoverOverlay
+                onView={() => navigate(`/stories/post/${post.id}`)}
+                onDelete={() => onImageDelete(post.id, '16_9')}
+                imageUrl={post.image_16_9_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <img
+                  src={post.image_16_9_url}
+                  alt="16:9 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
+                />
+              </ImageHoverOverlay>
+            )}
+            {post.image_9_16_url && (
+              <ImageHoverOverlay
+                onView={() => navigate(`/stories/post/${post.id}`)}
+                onDelete={() => onImageDelete(post.id, '9_16')}
+                imageUrl={post.image_9_16_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <img
+                  src={post.image_9_16_url}
+                  alt="9:16 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
+                />
+              </ImageHoverOverlay>
+            )}
+            {post.image_3_4_url && (
+              <ImageHoverOverlay
+                onView={() => navigate(`/stories/post/${post.id}`)}
+                onDelete={() => onImageDelete(post.id, '3_4')}
+                imageUrl={post.image_3_4_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <img
+                  src={post.image_3_4_url}
+                  alt="3:4 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
+                />
+              </ImageHoverOverlay>
+            )}
+            {post.image_4_3_url && (
+              <ImageHoverOverlay
+                onView={() => navigate(`/stories/post/${post.id}`)}
+                onDelete={() => onImageDelete(post.id, '4_3')}
+                imageUrl={post.image_4_3_url}
+                showUpload={false}
+                className="flex-shrink-0"
+              >
+                <img
+                  src={post.image_4_3_url}
+                  alt="4:3 image"
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  loading="lazy"
+                  onClick={() => navigate(`/stories/post/${post.id}`)}
+                />
+              </ImageHoverOverlay>
+            )}
+            {post.image_16_9_video_url && (
+              <div className="flex-shrink-0">
+                <video
+                  src={post.image_16_9_video_url}
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setShowGallery(true)}
+                />
+              </div>
+            )}
+            {post.image_3_4_video_url && (
+              <div className="flex-shrink-0">
+                <video
+                  src={post.image_3_4_video_url}
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setShowGallery(true)}
+                />
+              </div>
+            )}
+            {post.general_video_url && (
+              <div className="flex-shrink-0">
+                <video
+                  src={post.general_video_url}
+                  className="h-12 w-auto rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => setShowGallery(true)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Gallery Modal */}
+        <PostMediaGalleryModal
+          isOpen={showGallery}
+          onClose={() => setShowGallery(false)}
+          post={post}
+        />
 
         {/* Image Preview Modal */}
         {previewImage && (
           <ImagePreviewModal
-            isOpen={!!previewImage}
+            isOpen={true}
             onClose={() => setPreviewImage(null)}
             imageUrl={previewImage.url}
             imageAlt={previewImage.alt}
           />
         )}
-
-        {/* Media Gallery Modal */}
-        {showGallery && (
-          <PostMediaGalleryModal
-            isOpen={showGallery}
-            onClose={() => setShowGallery(false)}
-            post={post}
-          />
-        )}
-
       </CardContent>
     </Card>
   );
