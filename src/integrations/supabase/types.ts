@@ -1810,6 +1810,44 @@ export type Database = {
           },
         ]
       }
+      submission_logs: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          processing_time_ms: number | null
+          submission_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          processing_time_ms?: number | null
+          submission_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          processing_time_ms?: number | null
+          submission_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_logs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "theme_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_tiers: {
         Row: {
           billing_interval: string
@@ -2429,6 +2467,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_duplicate_posts: {
+        Args: {
+          p_user_id: string
+          p_category: string
+          p_theme: string
+          p_keep_latest?: boolean
+        }
+        Returns: {
+          action: string
+          post_count: number
+          kept_posts: number
+          removed_posts: number
+        }[]
+      }
       cleanup_expired_cache: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -2443,6 +2495,16 @@ export type Database = {
           existing_id: string
           existing_count: number
           created_at: string
+        }[]
+      }
+      find_duplicate_themes: {
+        Args: { p_user_id: string }
+        Returns: {
+          category: string
+          theme: string
+          duplicate_count: number
+          latest_submission_id: string
+          earliest_created_at: string
         }[]
       }
       fix_hardcoded_aspect_ratio_in_prompts: {
@@ -2479,6 +2541,17 @@ export type Database = {
           total_hits: number
           categories_count: number
           avg_hit_count: number
+        }[]
+      }
+      get_submission_analytics: {
+        Args: { p_user_id: string }
+        Returns: {
+          total_submissions: number
+          successful_submissions: number
+          failed_submissions: number
+          duplicate_attempts: number
+          avg_processing_time_ms: number
+          last_submission_date: string
         }[]
       }
       has_role: {
@@ -2551,6 +2624,16 @@ export type Database = {
       is_bootstrap_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      log_submission_event: {
+        Args: {
+          p_user_id: string
+          p_submission_id: string
+          p_event_type: string
+          p_event_data?: Json
+          p_processing_time_ms?: number
+        }
+        Returns: string
       }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
