@@ -34,11 +34,10 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
     const timestamp = Date.now();
     const fileExt = file.name.split('.').pop();
     const fileName = `${timestamp}.${fileExt}`;
-    const filePath = `general/${fileName}`;
 
     const { data, error } = await supabase.storage
-      .from('images')
-      .upload(filePath, file, {
+      .from('social-media-images')
+      .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false
       });
@@ -49,7 +48,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
     }
 
     const { data: urlData } = supabase.storage
-      .from('images')
+      .from('social-media-images')
       .getPublicUrl(data.path);
 
     return urlData.publicUrl;
