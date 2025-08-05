@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     const alertColor = isNearLimit ? '#dc2626' : '#f59e0b';
 
     const emailResponse = await resend.emails.send({
-      from: "Your App <alerts@resend.dev>", // Replace with your verified domain
+      from: "Your App <alerts@jordanleahy.com>",
       to: [userEmail],
       subject: `${alertType}: ${usageType} Usage at ${Math.round(percentageUsed)}%`,
       html: `
@@ -63,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
               '<p>Consider monitoring your usage or upgrading your plan if you need more capacity.</p>'
             }
             
-            <a href="https://your-app-url.com/subscription" 
+            <a href="https://jordanleahy.com/subscription" 
                style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
               Manage Subscription
             </a>

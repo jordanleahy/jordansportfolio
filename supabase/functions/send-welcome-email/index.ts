@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Sending welcome email to:', userEmail, 'for plan:', planName);
 
     const emailResponse = await resend.emails.send({
-      from: "Your App <onboarding@resend.dev>", // Replace with your verified domain
+      from: "Your App <noreply@jordanleahy.com>",
       to: [userEmail],
       subject: `Welcome to ${planName}!`,
       html: `
@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
           
           <p>You can track your usage and manage your subscription anytime in your dashboard.</p>
           
-          <a href="https://your-app-url.com/subscription" 
+          <a href="https://jordanleahy.com/subscription" 
              style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
             View Dashboard
           </a>
