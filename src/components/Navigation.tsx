@@ -35,6 +35,7 @@ const Navigation = () => {
   const mobileMenuItems = user ? [
     // Authenticated user items
     { href: "/stories", label: "Stories", icon: BookOpen },
+    { href: "/settings", label: "Settings", icon: User, userInfo: true },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/investors", label: "Investors", icon: TrendingUp },
@@ -523,11 +524,40 @@ const Navigation = () => {
                     </SheetClose>
                   </div>
                   
-                  {/* Navigation Links */}
+                   {/* Navigation Links */}
                   <nav className="flex flex-col p-4 space-y-1 flex-1">
                     {mobileMenuItems.map((item, index) => {
                       const Icon = item.icon;
                       const itemIsActive = isActive(item.href);
+                      
+                      // Special handling for Settings item to show user info
+                      if (item.userInfo && user) {
+                        return (
+                          <div
+                            key={item.href}
+                            className={cn(
+                              "flex flex-col gap-2 py-3 px-4 text-base font-medium rounded-lg bg-accent/20 border border-accent/30",
+                            )}
+                            style={{ 
+                              animationDelay: `${index * 50}ms`,
+                              animationFillMode: 'both'
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon className="h-5 w-5 text-primary" />
+                              <span className="font-semibold text-primary">{item.label}</span>
+                            </div>
+                            <div className="ml-8 text-sm text-muted-foreground">
+                              <div className="font-medium">{user.email}</div>
+                              {user.user_metadata?.first_name && user.user_metadata?.last_name && (
+                                <div className="text-xs mt-1">
+                                  {user.user_metadata.first_name} {user.user_metadata.last_name}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
                       
                       return (
                         <SheetClose key={item.href} asChild>
