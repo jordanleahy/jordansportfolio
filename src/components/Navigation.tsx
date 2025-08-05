@@ -533,29 +533,35 @@ const Navigation = () => {
                       // Special handling for Settings item to show user info
                       if (item.userInfo && user) {
                         return (
-                          <div
-                            key={item.href}
-                            className={cn(
-                              "flex flex-col gap-2 py-3 px-4 text-base font-medium rounded-lg bg-accent/20 border border-accent/30",
-                            )}
-                            style={{ 
-                              animationDelay: `${index * 50}ms`,
-                              animationFillMode: 'both'
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Icon className="h-5 w-5 text-primary" />
-                              <span className="font-semibold text-primary">{item.label}</span>
-                            </div>
-                            <div className="ml-8 text-sm text-muted-foreground">
-                              <div className="font-medium">{user.email}</div>
-                              {user.user_metadata?.first_name && user.user_metadata?.last_name && (
-                                <div className="text-xs mt-1">
-                                  {user.user_metadata.first_name} {user.user_metadata.last_name}
-                                </div>
+                          <SheetClose key={item.href} asChild>
+                            <Link
+                              to={item.href}
+                              className={cn(
+                                "flex flex-col gap-2 py-3 px-4 text-base font-medium rounded-lg bg-accent/20 border border-accent/30 transition-all duration-200 hover:bg-accent/30 hover:scale-[1.02] active:scale-[0.98]",
+                                itemIsActive && "bg-accent text-accent-foreground font-semibold shadow-sm"
                               )}
-                            </div>
-                          </div>
+                              style={{ 
+                                animationDelay: `${index * 50}ms`,
+                                animationFillMode: 'both'
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Icon className="h-5 w-5 text-primary" />
+                                <span className="font-semibold text-primary">{item.label}</span>
+                                {itemIsActive && (
+                                  <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                )}
+                              </div>
+                              <div className="ml-8 text-sm text-muted-foreground">
+                                <div className="font-medium">{user.email}</div>
+                                {user.user_metadata?.first_name && user.user_metadata?.last_name && (
+                                  <div className="text-xs mt-1">
+                                    {user.user_metadata.first_name} {user.user_metadata.last_name}
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          </SheetClose>
                         );
                       }
                       
