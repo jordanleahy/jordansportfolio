@@ -7,7 +7,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useThemePosts } from '@/hooks/useOptimizedStories';
+import { useThemeDetailsByName } from '@/hooks/useOptimizedStories';
 import { useColorThemes } from '@/hooks/useColorThemes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowLeft, Trash2, MoreVertical } from 'lucide-react';
@@ -38,8 +38,8 @@ export default function ThemeDetail() {
 
   const decodedTheme = theme ? decodeURIComponent(theme) : '';
   
-  // Fetch posts for this specific theme
-  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(decodedTheme, !!decodedTheme);
+  // Fetch theme and posts for this specific theme name
+  const { theme: themeData, posts = [], isLoading: isLoadingPosts, refetch } = useThemeDetailsByName(decodedTheme, !!decodedTheme);
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
@@ -134,7 +134,7 @@ export default function ThemeDetail() {
             {decodedTheme}
           </h1>
           <p className="text-base text-muted-foreground leading-relaxed">
-            Theme details for {theme}
+            {themeData?.description || `Theme details for ${decodedTheme}`}
           </p>
         </div>
 

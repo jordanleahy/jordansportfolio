@@ -47,6 +47,38 @@ export const useThemePosts = (themeId: string, enabled = true) => {
   });
 };
 
+// Theme lookup by name hook - gets theme ID from theme name
+export const useThemeByName = (themeName: string, enabled = true) => {
+  return useQuery({
+    queryKey: ['theme-by-name', themeName],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('themes')
+        .select('*')
+        .eq('name', themeName)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: QUERY_CONFIG.THEMES_STALE_TIME,
+    enabled: enabled && !!themeName,
+  });
+};
+
+// Combined hook for theme details by name - gets theme and posts
+export const useThemeDetailsByName = (themeName: string, enabled = true) => {
+  const { data: theme, isLoading: isLoadingTheme } = useThemeByName(themeName, enabled);
+  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(theme?.id || '', !!theme?.id);
+
+  return {
+    theme,
+    posts,
+    isLoading: isLoadingTheme || isLoadingPosts,
+    refetch
+  };
+};
+
 // Optimized available themes hook
 export const useAvailableThemes = (enabled = true) => {
   return useQuery({
