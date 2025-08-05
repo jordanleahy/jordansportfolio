@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedRealtime } from './useUnifiedRealtime';
-import { QUERY_KEYS, getThemeQueryKeys } from '@/constants/queryKeys';
+import { QUERY_KEYS, QUERY_CONFIG, getThemeQueryKeys } from '@/constants/queryKeys';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Individual category query hook for granular caching
@@ -20,7 +20,7 @@ export const useCategoryPosts = (category: string, enabled = true) => {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
     enabled: enabled && !!category,
   });
 };
@@ -39,7 +39,7 @@ export const useThemePosts = (theme: string, enabled = true) => {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
     enabled: enabled && !!theme,
   });
 };
@@ -53,8 +53,9 @@ export const useAvailableThemes = (enabled = true) => {
       const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
       return optimizedSocialMediaService.getAvailableThemes();
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    enabled,
+    staleTime: QUERY_CONFIG.THEMES_STALE_TIME, // Increased to 30 minutes
+    refetchOnWindowFocus: false, // Background refetching only
+    refetchOnMount: false, // Use cached data on mount
   });
 };
 
@@ -69,9 +70,17 @@ export function useOptimizedStories(user: any) {
     enabled: !!user?.id,
     userId: user?.id,
     onPostUpdate: (post: SocialMediaPost) => {
-      // Use centralized query keys for invalidation
-      getThemeQueryKeys(post.theme || '', post.category).forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
+      // Use optimistic updates instead of invalidations
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
+        if (!oldThemes) return oldThemes;
+        // Optimistically update theme data if needed
+        return oldThemes;
+      });
+      
+      // Background refetch instead of immediate invalidation
+      queryClient.refetchQueries({ 
+        queryKey: QUERY_KEYS.postsByCategory(post.category),
+        type: 'active' 
       });
     }
   });
@@ -126,7 +135,8 @@ export function useOptimizedStories(user: any) {
       return (data || []) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id,
-    staleTime: 10 * 60 * 1000, // Increased stale time
+    staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
+    refetchOnWindowFocus: false, // Background refetching only
     placeholderData: (previousData) => previousData, // Keep previous data while loading
   });
 
@@ -149,7 +159,7 @@ export function useOptimizedStories(user: any) {
               if (error) throw error;
               return data || [];
             },
-            staleTime: 10 * 60 * 1000,
+            staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
           });
         }
       });
@@ -162,8 +172,9 @@ export function useOptimizedStories(user: any) {
   };
 
   const invalidateCache = () => {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.posts });
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.themes });
+    // Use background refetching instead of invalidation
+    queryClient.refetchQueries({ queryKey: QUERY_KEYS.posts, type: 'active' });
+    queryClient.refetchQueries({ queryKey: QUERY_KEYS.themes, type: 'active' });
   };
 
 

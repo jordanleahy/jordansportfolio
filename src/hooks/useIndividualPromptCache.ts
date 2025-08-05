@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
-import { QUERY_KEYS, getAllPostQueryKeys } from '@/constants/queryKeys';
+import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
 
 interface IndividualPromptData {
   prompt: string;
@@ -52,7 +52,7 @@ export const useIndividualPromptCache = (postId: string) => {
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: QUERY_CONFIG.DEFAULT_STALE_TIME,
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: (failureCount, error) => {
       if (error.message?.includes('not authenticated')) {
@@ -93,11 +93,11 @@ export const useIndividualPromptCache = (postId: string) => {
       return { newPrompt, userId: user.id };
     },
     onSuccess: async () => {
-      // Use centralized query keys
+      // Use background refetching instead of invalidation
+      queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
       getAllPostQueryKeys().forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key, type: 'active' });
       });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
       
       toast({
         title: "Success",
@@ -153,9 +153,9 @@ export const useIndividualPromptCache = (postId: string) => {
       return data;
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+      queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
       getAllPostQueryKeys().forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
+        queryClient.refetchQueries({ queryKey: key, type: 'active' });
       });
       
       toast({
@@ -174,9 +174,9 @@ export const useIndividualPromptCache = (postId: string) => {
   });
 
   const invalidateCache = useCallback(async () => {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+    queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
     getAllPostQueryKeys().forEach(key => {
-      queryClient.invalidateQueries({ queryKey: key });
+      queryClient.refetchQueries({ queryKey: key, type: 'active' });
     });
   }, [postId, queryClient]);
 

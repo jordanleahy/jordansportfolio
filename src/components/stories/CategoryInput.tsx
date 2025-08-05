@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/constants/queryKeys';
+import { QUERY_KEYS, QUERY_CONFIG } from '@/constants/queryKeys';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { getCategoryLabel, validateCategoryName, DEFAULT_CATEGORIES } from '@/constants/categoryConstants';
 
@@ -26,7 +26,8 @@ export const CategoryInput = ({ value, onChange, placeholder = "Select or enter 
   const { data: availableThemes = [] } = useQuery({
     queryKey: QUERY_KEYS.themes,
     queryFn: () => optimizedSocialMediaService.getAvailableThemes(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: QUERY_CONFIG.THEMES_STALE_TIME, // Use optimized cache time
+    refetchOnWindowFocus: false, // Background refetching only
   });
 
   // Combine default and available themes, prioritizing defaults

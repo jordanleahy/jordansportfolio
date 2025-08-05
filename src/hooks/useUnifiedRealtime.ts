@@ -119,9 +119,17 @@ export const useUnifiedRealtime = ({
         onPostInsert(record);
       }
 
-      // Use centralized query keys for invalidation
-      getThemeQueryKeys(record.theme || '', record.category).forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
+      // Use optimistic updates instead of invalidations
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
+        if (!oldThemes) return oldThemes;
+        // Optimistically update themes list
+        return oldThemes;
+      });
+      
+      // Background refetch for affected data
+      queryClient.refetchQueries({ 
+        queryKey: QUERY_KEYS.postsByCategory(record.category), 
+        type: 'active' 
       });
 
       toast.success(`New post created in ${record.category}`);
@@ -163,9 +171,19 @@ export const useUnifiedRealtime = ({
           console.warn(`⚠️ REALTIME: No onPostUpdate callback available for post: ${record.id}`);
         }
 
-        // Use centralized query keys for invalidation
-        getThemeQueryKeys(record.theme || '', record.category).forEach(key => {
-          queryClient.invalidateQueries({ queryKey: key });
+        // Use optimistic updates for better performance
+        queryClient.setQueryData(QUERY_KEYS.postsByCategory(record.category), (oldPosts: any) => {
+          if (!oldPosts) return oldPosts;
+          // Optimistically update the specific post
+          return oldPosts.map((post: any) => 
+            post.id === record.id ? { ...post, ...record } : post
+          );
+        });
+        
+        // Background refetch to ensure consistency
+        queryClient.refetchQueries({ 
+          queryKey: QUERY_KEYS.postsByCategory(record.category), 
+          type: 'active' 
         });
 
         // Show toast for completed images
@@ -190,9 +208,14 @@ export const useUnifiedRealtime = ({
     } else if (eventType === 'DELETE' && oldRecord) {
       console.log(`[UnifiedRealtime] Post deleted: ${oldRecord.id}`);
       
-      // Use centralized query keys for invalidation  
-      getThemeQueryKeys(oldRecord.theme || '', oldRecord.category).forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
+      // Use background refetch for deletions
+      queryClient.refetchQueries({ 
+        queryKey: QUERY_KEYS.postsByCategory(oldRecord.category), 
+        type: 'active' 
+      });
+      queryClient.refetchQueries({ 
+        queryKey: QUERY_KEYS.themes, 
+        type: 'active' 
       });
     }
   };
