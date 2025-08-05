@@ -28,6 +28,7 @@ interface PostsTableOptimizedProps {
   category?: string;
   selectedThemeId?: string;
   onThemeChange?: (themeId: string) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 export const PostsTable = ({
   posts,
@@ -36,6 +37,7 @@ export const PostsTable = ({
   category,
   selectedThemeId,
   onThemeChange,
+  onLoadingChange,
 }: PostsTableOptimizedProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -44,12 +46,11 @@ export const PostsTable = ({
   const isMobile = useIsMobile();
   
   // Color themes
-  const { data: colorThemes = [] } = useColorThemes();
+  const { data: colorThemes = [], isLoading: colorThemesLoading } = useColorThemes();
 
   // Batch blog status for all posts
   const postIds = posts.map(post => post.id);
   const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
-
 
   // Animation state management
   const {
@@ -77,10 +78,12 @@ export const PostsTable = ({
     handleCreateBlogPost
   } = usePostActions(onPostsChange);
 
-  // Enhanced status change with animation
-  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
-    await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
-  };
+  // Use unified processing states
+  const {
+    isUploading: unifiedIsUploading,
+    getUploadType: unifiedGetUploadType
+  } = useProcessingStates();
+
   const {
     uploadingPosts,
     handleFileSelect,
@@ -90,12 +93,6 @@ export const PostsTable = ({
   } = useImageManager({
     onPostsChange
   });
-
-  // Use unified processing states
-  const {
-    isUploading: unifiedIsUploading,
-    getUploadType: unifiedGetUploadType
-  } = useProcessingStates();
 
   // Combine original upload states with unified processing states
   const isUploading = (postId: string, aspectRatio?: any) => {
@@ -109,6 +106,33 @@ export const PostsTable = ({
     const unifiedType = unifiedGetUploadType(postId);
     const result = originalType || unifiedType;
     return result;
+  };
+
+  // Check if any posts are uploading
+  const hasUploadingPosts = posts.some(post => 
+    isUploading(post.id, '16_9') || 
+    isUploading(post.id, '9_16') || 
+    isUploading(post.id, '3_4') || 
+    isUploading(post.id, '4_3')
+  );
+  
+  // Check if any posts are animating
+  const hasAnimatingPosts = animatingRows.size > 0 || completingRows.size > 0;
+  
+  // Check if any blog posts are being created
+  const hasCreatingBlogs = creatingBlogIds.size > 0;
+  
+  // Combine all loading states
+  const isTableLoading = blogStatusesLoading || colorThemesLoading || hasUploadingPosts || hasAnimatingPosts || hasCreatingBlogs;
+  
+  // Notify parent of loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isTableLoading);
+  }, [isTableLoading, onLoadingChange]);
+
+  // Enhanced status change with animation
+  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
+    await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
   };
 
   // Resize functionality
