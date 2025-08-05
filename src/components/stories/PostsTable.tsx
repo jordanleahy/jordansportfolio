@@ -207,7 +207,7 @@ export const PostsTable = ({
   
   return (
     <div className="flex gap-4 h-full">
-      {/* Main content - table */}
+      {/* Main content - conditional mobile/desktop layout */}
       <div className="transition-all duration-300 flex-1" style={{
         width: showSystemPrompt && !individualPromptPanel.isOpen 
           ? `calc(100% - ${promptPanelWidth}px - 1rem)` 
@@ -217,58 +217,112 @@ export const PostsTable = ({
               ? `calc(100% - ${promptPanelWidth}px - 1rem)`
               : '100%'
       }}>
-        <Card className="h-full">
-          <div className="p-6">
-            <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-              <div className="flex items-center justify-between mb-4 gap-2">{/* Removed flex-wrap to keep in one line */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  {userIsAdmin && (
-                    <TabsList>
-                      <TabsTrigger value="draft">Draft</TabsTrigger>
-                      <TabsTrigger value="published">Published</TabsTrigger>
-                    </TabsList>
+        {isMobile ? (
+          /* Mobile: Edge-to-edge layout without Card wrapper */
+          <div>
+            {/* Tabs and controls with selective padding */}
+            <div className="px-4 pb-4">
+              <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
+                <div className="flex items-center justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {userIsAdmin && (
+                      <TabsList>
+                        <TabsTrigger value="draft">Draft</TabsTrigger>
+                        <TabsTrigger value="published">Published</TabsTrigger>
+                      </TabsList>
+                    )}
+                  </div>
+              
+                  {category && userIsAdmin && (
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Category Prompt</span>
+                        <span className="sm:hidden">Category Prompt</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
-            
-            {category && userIsAdmin && (
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
-                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Category Prompt</span>
-                  <span className="sm:hidden">Category Prompt</span>
-                </Button>
-              </div>
-            )}
-          </div>
 
-          <TabsContent value="draft">
-            {filteredPosts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <div className="text-lg font-medium mb-2">No draft posts</div>
-                <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
-              </div>
-            ) : (
-                isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
-            )}
-          </TabsContent>
+                <TabsContent value="draft">
+                  {filteredPosts.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <div className="text-lg font-medium mb-2">No draft posts</div>
+                      <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                    </div>
+                  )}
+                </TabsContent>
 
-          <TabsContent value="published">
-            {filteredPosts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <div className="text-lg font-medium mb-2">No published posts</div>
-                <div className="text-sm">No posts have been published in this theme yet.</div>
-              </div>
-            ) : (
-              isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
-                </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
-            )}
-          </TabsContent>
-        </Tabs>
+                <TabsContent value="published">
+                  {filteredPosts.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <div className="text-lg font-medium mb-2">No published posts</div>
+                      <div className="text-sm">No posts have been published in this theme yet.</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
-        </Card>
+        ) : (
+          /* Desktop: Keep existing Card container layout */
+          <Card className="h-full">
+            <div className="p-6">
+              <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
+                <div className="flex items-center justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {userIsAdmin && (
+                      <TabsList>
+                        <TabsTrigger value="draft">Draft</TabsTrigger>
+                        <TabsTrigger value="published">Published</TabsTrigger>
+                      </TabsList>
+                    )}
+                  </div>
+              
+                  {category && userIsAdmin && (
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Category Prompt</span>
+                        <span className="sm:hidden">Category Prompt</span>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <TabsContent value="draft">
+                  {filteredPosts.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <div className="text-lg font-medium mb-2">No draft posts</div>
+                      <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
+                    </div>
+                  ) : (
+                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                  )}
+                </TabsContent>
+
+                <TabsContent value="published">
+                  {filteredPosts.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <div className="text-lg font-medium mb-2">No published posts</div>
+                      <div className="text-sm">No posts have been published in this theme yet.</div>
+                    </div>
+                  ) : (
+                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* System Prompt Viewer Panel - Admin Only */}
