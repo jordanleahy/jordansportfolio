@@ -130,57 +130,29 @@ export default function StoriesDashboard() {
           
           // When image generation completes, get theme name to remove shimmer
           if (theme_image_generation_status === 'complete' && theme_id) {
-            try {
-              const { data: themeData } = await supabase
-                .from('themes')
-                .select('name')
-                .eq('id', theme_id)
-                .single();
-              
-              if (themeData?.name) {
-                console.log('🎉 Theme image complete, removing shimmer for:', themeData.name);
-                setShimmerThemes(prev => {
-                  const newSet = new Set(prev);
-                  newSet.delete(themeData.name);
-                  return newSet;
-                });
-                
-                setShouldRefreshThemes(true);
-                toast({
-                  title: "Theme Image Ready!",
-                  description: `"${themeData.name}" theme image has been generated`,
-                });
-              }
-            } catch (error) {
-              console.error('Error fetching theme name for shimmer removal:', error);
+            const { handleThemeImageCompletion } = await import('@/utils/shimmerUtils');
+            const themeName = await handleThemeImageCompletion(theme_id, setShimmerThemes);
+            
+            if (themeName) {
+              setShouldRefreshThemes(true);
+              toast({
+                title: "Theme Image Ready!",
+                description: `"${themeName}" theme image has been generated`,
+              });
             }
           }
           
           // Handle failed theme image generation
           if (oldStatus !== 'failed' && theme_image_generation_status === 'failed' && theme_id) {
-            try {
-              const { data: themeData } = await supabase
-                .from('themes')
-                .select('name')
-                .eq('id', theme_id)
-                .single();
-              
-              if (themeData?.name) {
-                console.log('❌ Theme image failed, removing shimmer for:', themeData.name);
-                setShimmerThemes(prev => {
-                  const newSet = new Set(prev);
-                  newSet.delete(themeData.name);
-                  return newSet;
-                });
-                
-                toast({
-                  title: "Image Generation Failed",
-                  description: `Theme image generation failed for "${themeData.name}"`,
-                  variant: "destructive"
-                });
-              }
-            } catch (error) {
-              console.error('Error fetching theme name for failed shimmer removal:', error);
+            const { handleThemeImageCompletion } = await import('@/utils/shimmerUtils');
+            const themeName = await handleThemeImageCompletion(theme_id, setShimmerThemes);
+            
+            if (themeName) {
+              toast({
+                title: "Image Generation Failed",
+                description: `Theme image generation failed for "${themeName}"`,
+                variant: "destructive"
+              });
             }
           }
         }
