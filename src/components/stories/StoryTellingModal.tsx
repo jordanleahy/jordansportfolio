@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mic, Square, Play, Pause, Download, Save, Loader2, MessageSquare, Book, Briefcase } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   useGenerateStoryScript, 
@@ -231,11 +231,16 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Mic className="h-5 w-5" />
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Mic className="h-5 w-5 text-primary" />
+            </div>
             Create Story Narration
           </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Transform your post into an engaging {storyType === 'childrens_story' ? 'children\'s story' : 'professional narrative'} with AI-generated script and voice recording
+          </p>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -296,33 +301,43 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
           </div>
 
           {/* Post Preview */}
-          <Card>
+          <Card className="border-l-4 border-l-primary">
             <CardContent className="pt-6">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline">{post.category || 'Post'}</Badge>
-                  {post.theme && <Badge variant="secondary">{post.theme}</Badge>}
+                  <Badge variant="outline" className="text-xs">{post.category || 'Post'}</Badge>
+                  {post.theme && <Badge variant="secondary" className="text-xs">{post.theme}</Badge>}
                 </div>
-                <h3 className="font-semibold">{post.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-3">{post.description}</p>
+                <h3 className="font-semibold text-lg">{post.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{post.description}</p>
+                <div className="text-xs text-muted-foreground border-t pt-2">
+                  Source content for your {storyType === 'childrens_story' ? 'children\'s story' : 'professional narrative'}
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Script Generation */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Generated Script</Label>
+              <div>
+                <Label className="text-sm font-medium">Generated Script</Label>
+                {generatedScript && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {Math.ceil(generatedScript.split(' ').length / 150)} min read • {generatedScript.split(' ').length} words
+                  </div>
+                )}
+              </div>
               <Button 
                 onClick={handleGenerateScript}
                 disabled={generateScript.isPending}
                 size="sm"
-                variant="outline"
+                className="min-w-[120px]"
               >
                 {generateScript.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
+                    {storyType === 'childrens_story' ? 'Creating magical story...' : 'Crafting compelling narrative...'}
                   </>
                 ) : (
                   <>
@@ -333,12 +348,19 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
               </Button>
             </div>
             
-            <Textarea
-              value={generatedScript}
-              onChange={(e) => setGeneratedScript(e.target.value)}
-              placeholder="Click 'Generate Script' to create a voice-optimized narration script, or write your own..."
-              className="min-h-[200px] font-mono text-sm"
-            />
+            <div className="relative">
+              <Textarea
+                value={generatedScript}
+                onChange={(e) => setGeneratedScript(e.target.value)}
+                placeholder={`Click 'Generate Script' to create a ${storyType === 'childrens_story' ? 'magical children\'s story' : 'professional narrative'} script, or write your own...`}
+                className="min-h-[240px] text-sm leading-relaxed pr-4 resize-none"
+              />
+              {generatedScript && (
+                <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs text-muted-foreground">
+                  {generatedScript.length} characters
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Recording Controls */}
@@ -405,11 +427,12 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
             <Button 
               onClick={saveStoryRecording}
               disabled={!generatedScript || createStoryRecording.isPending}
+              className="min-w-[120px]"
             >
               {createStoryRecording.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  Saving story...
                 </>
               ) : (
                 <>
