@@ -247,7 +247,7 @@ export class OptimizedSocialMediaService {
         description,
         category,
         created_at,
-        social_media_posts!inner(
+        social_media_posts(
           id,
           title,
           description,
