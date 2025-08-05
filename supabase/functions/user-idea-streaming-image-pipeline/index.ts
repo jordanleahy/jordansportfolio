@@ -217,7 +217,8 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
+console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
+    console.log('🔧 Using updated pipeline v2.0 with proper theme table integration');
 
     if (stream) {
       const streamResponse = new ReadableStream({
