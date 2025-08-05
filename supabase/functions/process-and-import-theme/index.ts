@@ -129,6 +129,17 @@ serve(async (req) => {
             category: aiResult.cleanedData.category,
             timestamp: new Date().toISOString()
           });
+          
+          // Start blog post prompt generation after theme image (regardless of image result)
+          console.log('📝 BLOG POST PROMPTS: Starting prompt generation');
+          return generateBlogPostPromptsBackground(aiResult.cleanedData.category, user.id);
+        })
+        .then((promptsResult) => {
+          console.log('📝 BLOG POST PROMPTS RESULT:', {
+            success: promptsResult?.success || false,
+            category: aiResult.cleanedData.category,
+            timestamp: new Date().toISOString()
+          });
         })
         .catch((error) => {
           console.error('💥 BACKGROUND GENERATION ERROR:', error);
@@ -552,6 +563,53 @@ async function generateThemeImageBackground(category: string, userId: string): P
 
   } catch (error) {
     console.error('💥 THEME IMAGE: Error in generation:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Background function to generate blog post prompts
+async function generateBlogPostPromptsBackground(category: string, userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log(`📝 BLOG POST PROMPTS: Starting generation for category: ${category}`);
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ BLOG POST PROMPTS: Missing Supabase configuration');
+      return { success: false, error: 'Missing Supabase configuration' };
+    }
+
+    // Call the ensure-post-image-prompts function
+    const response = await fetch(`${supabaseUrl}/functions/v1/ensure-post-image-prompts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+      },
+      body: JSON.stringify({
+        category: category,
+        userId: userId
+      }),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ BLOG POST PROMPTS: Generation completed successfully:', {
+        successCount: result.successCount,
+        totalPosts: result.totalPosts,
+        category: category
+      });
+      
+      return { success: true };
+    } else {
+      const errorText = await response.text();
+      console.error('❌ BLOG POST PROMPTS: Generation failed:', errorText);
+      return { success: false, error: errorText };
+    }
+
+  } catch (error) {
+    console.error('💥 BLOG POST PROMPTS: Error in generation:', error);
     return { success: false, error: error.message };
   }
 }
