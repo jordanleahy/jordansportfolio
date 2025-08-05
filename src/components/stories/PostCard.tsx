@@ -164,22 +164,8 @@ const PostCardComponent = ({
         {/* Description */}
         <div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            {isExpanded ? post.description : truncateText(post.description, 120)}
+            {post.description}
           </p>
-          {post.description.length > 120 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-auto p-0 mt-1 text-xs text-primary"
-            >
-              {isExpanded ? (
-                <>Show less <ChevronUp className="h-3 w-3 ml-1" /></>
-              ) : (
-                <>Read more <ChevronDown className="h-3 w-3 ml-1" /></>
-              )}
-            </Button>
-          )}
         </div>
 
         {/* Action Buttons */}
