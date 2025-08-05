@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -34,6 +35,8 @@ const Settings: React.FC = () => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const [profile, setProfile] = useState({
     name: user?.user_metadata?.full_name || 'Jordan Leahy',
@@ -59,6 +62,45 @@ const Settings: React.FC = () => {
       description: "We'll send you an email with instructions to delete your account.",
       variant: "destructive",
     });
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully changed.",
+      });
+      
+      setNewPassword('');
+      setShowPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Failed to update password",
+        description: error.message || "An error occurred while updating your password.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   };
 
   return (
@@ -216,6 +258,8 @@ const Settings: React.FC = () => {
                               id="password"
                               type={showPassword ? "text" : "password"}
                               placeholder="Enter new password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
                             />
                             <Button
                               type="button"
@@ -232,8 +276,13 @@ const Settings: React.FC = () => {
                             </Button>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">
-                          Update Password
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleUpdatePassword}
+                          disabled={isUpdatingPassword || !newPassword}
+                        >
+                          {isUpdatingPassword ? "Updating..." : "Update Password"}
                         </Button>
                       </div>
 
