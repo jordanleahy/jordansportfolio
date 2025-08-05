@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Loader2, ImageIcon, Clock } from "lucide-react";
+import { Loader2, ImageIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface StreamingProgress {
@@ -26,7 +26,6 @@ export const StreamingShimmer = ({
 }: StreamingShimmerProps) => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [imageOpacity, setImageOpacity] = useState(0);
-  const [countdown, setCountdown] = useState(180); // 3 minutes in seconds
 
   // Update current image and opacity based on streaming progress
   useEffect(() => {
@@ -47,30 +46,6 @@ export const StreamingShimmer = ({
     }
   }, [streamingProgress]);
 
-  // Countdown timer for generation
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isGenerating) {
-      // Reset countdown when generation starts
-      setCountdown(180);
-      
-      interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isGenerating]);
-
   // Cleanup image URL on unmount
   useEffect(() => {
     return () => {
@@ -80,13 +55,6 @@ export const StreamingShimmer = ({
       }
     };
   }, [currentImage]);
-
-  // Format countdown time as MM:SS
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   if (error) {
     return (
@@ -110,18 +78,6 @@ export const StreamingShimmer = ({
       "w-full h-full relative overflow-hidden",
       className
     )}>
-      {/* Countdown timer */}
-      {isGenerating && (
-        <div className="absolute top-2 left-2 right-2 z-10">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 border border-border/50">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">
-              {formatTime(countdown)}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Background shimmer animation */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10",
