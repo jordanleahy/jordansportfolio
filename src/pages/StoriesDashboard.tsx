@@ -128,13 +128,16 @@ export default function StoriesDashboard() {
           const { theme_image_generation_status, theme_id, category } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
           
-          // When image generation completes, get theme name to remove shimmer
+          // When image generation completes, verify image URL and remove shimmer
           if (theme_image_generation_status === 'complete' && theme_id) {
             const { handleThemeImageCompletion } = await import('@/utils/shimmerUtils');
-            const themeName = await handleThemeImageCompletion(theme_id, setShimmerThemes);
+            const themeName = await handleThemeImageCompletion(
+              theme_id, 
+              setShimmerThemes, 
+              () => setShouldRefreshThemes(true)
+            );
             
             if (themeName) {
-              setShouldRefreshThemes(true);
               toast({
                 title: "Theme Image Ready!",
                 description: `"${themeName}" theme image has been generated`,

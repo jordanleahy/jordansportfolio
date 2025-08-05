@@ -58,15 +58,70 @@ export function addShimmerByName(
 }
 
 /**
- * Handle theme image completion - combines lookup and shimmer removal
+ * Get theme data with image URL verification
+ */
+async function getThemeWithImageUrl(themeId: string): Promise<{ name: string; hasImageUrl: boolean } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('social_media_posts')
+      .select('theme_image_4_3_url')
+      .eq('theme_id', themeId)
+      .not('theme_image_4_3_url', 'is', null)
+      .limit(1)
+      .single();
+    
+    if (error || !data?.theme_image_4_3_url) {
+      return null;
+    }
+
+    const themeName = await getThemeNameById(themeId);
+    if (!themeName) return null;
+
+    return {
+      name: themeName,
+      hasImageUrl: !!data.theme_image_4_3_url
+    };
+  } catch (error) {
+    console.error('Error in getThemeWithImageUrl:', error);
+    return null;
+  }
+}
+
+/**
+ * Handle theme image completion with image URL verification
  */
 export async function handleThemeImageCompletion(
   themeId: string,
-  setShimmerThemes: React.Dispatch<React.SetStateAction<Set<string>>>
+  setShimmerThemes: React.Dispatch<React.SetStateAction<Set<string>>>,
+  refreshThemesCallback?: () => void
 ): Promise<string | null> {
-  const themeName = await getThemeNameById(themeId);
-  if (themeName) {
-    removeShimmerByName(themeName, setShimmerThemes);
+  console.log('🔍 Checking theme completion for ID:', themeId);
+  
+  // First attempt: Check if image URL is immediately available
+  let themeData = await getThemeWithImageUrl(themeId);
+  
+  // If no image URL yet, wait briefly and retry
+  if (!themeData?.hasImageUrl) {
+    console.log('⏳ Image URL not ready, waiting briefly...');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    themeData = await getThemeWithImageUrl(themeId);
   }
-  return themeName;
+  
+  if (themeData?.hasImageUrl) {
+    console.log('✅ Image URL confirmed, removing shimmer for:', themeData.name);
+    
+    // Refresh themes data first if callback provided
+    if (refreshThemesCallback) {
+      refreshThemesCallback();
+      // Small delay to ensure data propagation
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    removeShimmerByName(themeData.name, setShimmerThemes);
+    return themeData.name;
+  } else {
+    console.log('⚠️ Image URL still not available, keeping shimmer active');
+    const themeName = await getThemeNameById(themeId);
+    return themeName;
+  }
 }
