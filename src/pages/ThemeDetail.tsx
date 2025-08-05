@@ -88,58 +88,54 @@ export default function ThemeDetail() {
   return (
     <PageLayout>
       <div className="container mx-auto py-8 px-4">
-        {/* Header with back button and theme info */}
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/stories')}
-              className="flex-shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="h-6 w-px bg-border flex-shrink-0" />
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold capitalize text-foreground truncate">
-                {decodedTheme}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : 'No theme description available'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex-shrink-0">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        {/* Navigation Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/stories')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Theme</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete the "{decodedTheme}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleDeleteTheme(decodedTheme)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Theme</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete the "{decodedTheme}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDeleteTheme(decodedTheme)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Delete Theme
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                  Delete Theme
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
+        {/* Theme Title Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2">
+            {decodedTheme}
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            {posts.length > 0 && posts[0].theme_description ? posts[0].theme_description : 'No theme description available'}
+          </p>
         </div>
 
         {/* Content */}
