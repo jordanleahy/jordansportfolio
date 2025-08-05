@@ -5,6 +5,7 @@ export const AGENT_NAMES = {
   BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
+  STORY_TELLING_AGENT: 'Story Telling Agent',
 } as const;
 
 // System Prompt Categories
@@ -15,6 +16,8 @@ export const SYSTEM_PROMPT_CATEGORIES = {
   DESIGN: 'design',
   PRODUCT_MANAGER: 'product_manager',
   PRODUCT_DESIGNER: 'product_designer',
+  CHILDRENS_STORY: 'childrens_story',
+  CONVINCING_STORY: 'convincing_story',
 } as const;
 
 // OpenAI Model Versions (Latest)
