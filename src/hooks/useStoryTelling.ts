@@ -241,6 +241,52 @@ export const encodeAudioForAPI = (float32Array: Float32Array): string => {
   return btoa(binary);
 };
 
+// Translation functionality
+export interface TranslateStoryScriptParams {
+  script_text: string;
+  target_language: 'german' | 'spanish' | 'chinese' | 'swedish';
+  story_type: 'childrens_story' | 'convincing_story';
+}
+
+export interface TranslationResult {
+  translated_script: string;
+  target_language: string;
+  word_count: number;
+}
+
+export const useTranslateScript = () => {
+  const { toast } = useToast();
+  
+  return useMutation<TranslationResult, Error, TranslateStoryScriptParams>({
+    mutationFn: async ({ script_text, target_language, story_type }) => {
+      const { data, error } = await supabase.functions.invoke('translate-story-script', {
+        body: { script_text, target_language, story_type }
+      });
+
+      if (error) {
+        console.error('Translation error:', error);
+        throw new Error(error.message || 'Failed to translate script');
+      }
+
+      return data;
+    },
+    onError: (error) => {
+      console.error('Translation failed:', error);
+      toast({
+        title: "Translation Failed",
+        description: error.message || "Failed to translate the script. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Translation Complete",
+        description: "Script has been successfully translated.",
+      });
+    },
+  });
+};
+
 export class AudioRecorder {
   private stream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;

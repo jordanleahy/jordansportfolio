@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ArrowLeft, Save, Loader2, Globe, Check } from 'lucide-react';
+import { useTranslateScript } from '@/hooks/useStoryTelling';
 
 interface StoryTellingReadPageProps {
   storyType: 'childrens_story' | 'convincing_story';
@@ -24,8 +26,54 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
   onSave,
   isSaving
 }) => {
-  const wordCount = generatedScript.split(' ').length;
-  const readingTime = Math.ceil(wordCount / 150);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('original');
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [currentScript, setCurrentScript] = useState(generatedScript);
+  
+  const translateMutation = useTranslateScript();
+
+  const languages = [
+    { code: 'original', label: 'Original', flag: '🇺🇸' },
+    { code: 'german', label: 'Deutsch', flag: '🇩🇪' },
+    { code: 'spanish', label: 'Español', flag: '🇪🇸' },
+    { code: 'chinese', label: '中文', flag: '🇨🇳' },
+    { code: 'swedish', label: 'Svenska', flag: '🇸🇪' },
+  ];
+
+  const handleTranslate = async (targetLanguage: string) => {
+    if (targetLanguage === 'original') {
+      setCurrentScript(generatedScript);
+      setCurrentLanguage('original');
+      return;
+    }
+
+    // Check if translation already exists
+    if (translations[targetLanguage]) {
+      setCurrentScript(translations[targetLanguage]);
+      setCurrentLanguage(targetLanguage);
+      return;
+    }
+
+    try {
+      const result = await translateMutation.mutateAsync({
+        script_text: generatedScript,
+        target_language: targetLanguage as any,
+        story_type: storyType,
+      });
+
+      setTranslations(prev => ({
+        ...prev,
+        [targetLanguage]: result.translated_script
+      }));
+      setCurrentScript(result.translated_script);
+      setCurrentLanguage(targetLanguage);
+    } catch (error) {
+      console.error('Translation failed:', error);
+    }
+  };
+
+  const currentWordCount = currentScript.split(' ').length;
+  const readingTime = Math.ceil(currentWordCount / 150);
 
   return (
     <div className="space-y-6">
@@ -41,6 +89,46 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
           <Badge variant="secondary" className="text-xs">
             {readingTime} min read
           </Badge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                disabled={translateMutation.isPending}
+              >
+                {translateMutation.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Globe className="h-3 w-3" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48" align="end">
+              <div className="space-y-1">
+                <p className="text-sm font-medium mb-2">Translate to:</p>
+                {languages.map((language) => (
+                  <Button
+                    key={language.code}
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start h-8 px-2"
+                    onClick={() => handleTranslate(language.code)}
+                    disabled={translateMutation.isPending && currentLanguage !== language.code}
+                  >
+                    <span className="mr-2">{language.flag}</span>
+                    <span className="flex-1 text-left">{language.label}</span>
+                    {currentLanguage === language.code && (
+                      <Check className="h-3 w-3 ml-2" />
+                    )}
+                    {translateMutation.isPending && currentLanguage === language.code && (
+                      <Loader2 className="h-3 w-3 ml-2 animate-spin" />
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -49,7 +137,7 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
       <div className="prose prose-gray dark:prose-invert max-w-none">
         <div className="bg-muted/30 rounded-lg p-6 md:p-8">
           <div className="whitespace-pre-wrap text-base leading-relaxed font-serif">
-            {generatedScript}
+            {currentScript}
           </div>
         </div>
       </div>
@@ -57,7 +145,10 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
       {/* Reading stats */}
       <div className="flex justify-center">
         <div className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border">
-          {wordCount} words • {generatedScript.length} characters • {readingTime} minute read
+          {currentWordCount} words • {currentScript.length} characters • {readingTime} minute read
+          {currentLanguage !== 'original' && (
+            <span className="ml-2">• {languages.find(l => l.code === currentLanguage)?.label}</span>
+          )}
         </div>
       </div>
 
