@@ -15,7 +15,6 @@ import {
   Database,
   CreditCard,
   LogOut,
-  Trash2,
   Eye,
   EyeOff,
   Mail,
@@ -56,13 +55,6 @@ const Settings: React.FC = () => {
     await signOut();
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      title: "Account deletion requested",
-      description: "We'll send you an email with instructions to delete your account.",
-      variant: "destructive",
-    });
-  };
 
   const handleUpdatePassword = async () => {
     if (!newPassword || newPassword.length < 6) {
@@ -300,15 +292,6 @@ const Settings: React.FC = () => {
                             <LogOut className="h-4 w-4 mr-2" />
                             Sign Out
                           </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleDeleteAccount}
-                            className="w-full justify-start"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Account
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -330,15 +313,6 @@ const Settings: React.FC = () => {
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDeleteAccount}
-                      className="w-full justify-start"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Account
                     </Button>
                   </CardContent>
                 </Card>
