@@ -247,17 +247,6 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="border-b pb-4">
-          <DialogTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Mic className="h-5 w-5 text-primary" />
-            </div>
-            Create Story Narration
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            Transform your post into an engaging {storyType === 'childrens_story' ? "children's story" : 'professional narrative'} with AI-generated script and voice recording
-          </p>
-        </DialogHeader>
 
         <div className="py-6">
           {currentPage === 'setup' ? (
