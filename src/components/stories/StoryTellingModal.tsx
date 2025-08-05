@@ -363,62 +363,6 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
             </div>
           </div>
 
-          {/* Recording Controls */}
-          {generatedScript && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Voice Recording</Label>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {isRecording && (
-                    <Badge variant="destructive" className="animate-pulse">
-                      Recording {formatDuration(recordingDuration)}
-                    </Badge>
-                  )}
-                  {recordedAudio && !isRecording && (
-                    <Badge variant="outline">
-                      Recorded {formatDuration(recordingDuration)}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {!isRecording ? (
-                  <Button onClick={startRecording} disabled={isPlaying}>
-                    <Mic className="h-4 w-4 mr-2" />
-                    Start Recording
-                  </Button>
-                ) : (
-                  <Button onClick={stopRecording} variant="destructive">
-                    <Square className="h-4 w-4 mr-2" />
-                    Stop Recording
-                  </Button>
-                )}
-
-                {recordedAudio && (
-                  <>
-                    {!isPlaying ? (
-                      <Button onClick={playRecording} variant="outline" disabled={isRecording}>
-                        <Play className="h-4 w-4 mr-2" />
-                        Play
-                      </Button>
-                    ) : (
-                      <Button onClick={pauseRecording} variant="outline">
-                        <Pause className="h-4 w-4 mr-2" />
-                        Pause
-                      </Button>
-                    )}
-
-                    <Button onClick={downloadRecording} variant="outline" disabled={isRecording}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Action Buttons */}
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
