@@ -63,9 +63,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: "Your App <welcome@jordanleahy.com>",
+      from: "Story Generator <welcome@jordanleahy.com>",
       to: [userEmail],
-      subject: `Welcome to ${planName}! 🎉`,
+      subject: `Welcome to ${planName} - Story Generator! 🎉`,
       html: emailContent,
     });
 

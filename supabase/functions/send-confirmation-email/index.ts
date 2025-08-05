@@ -26,31 +26,31 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Sending confirmation email to:', userEmail);
 
     const emailContent = createEmailTemplate({
-      title: "Confirm Your Account",
-      preheader: "Please confirm your email address to complete your registration",
+      title: "Start Generating Stories Now",
+      preheader: "Confirm your email to begin creating amazing stories",
       content: `
         <h2>Welcome${userName ? `, ${userName}` : ''}! 🎉</h2>
-        <p>Thank you for creating an account with us. To get started, please confirm your email address by clicking the button below.</p>
+        <p>You're one step away from creating incredible stories! Please confirm your email address to unlock your storytelling potential.</p>
         
         <div class="highlight">
-          <p><strong>📧 Email verification required</strong></p>
-          <p>For security purposes, we need to verify that this email address belongs to you. This helps protect your account and ensures you receive important updates.</p>
+          <p><strong>📚 Start Your Story Journey</strong></p>
+          <p>Once verified, you'll have access to powerful story generation tools and can start creating captivating narratives instantly.</p>
         </div>
         
         <p>This confirmation link will expire in 24 hours for security reasons.</p>
         <p>If you didn't create this account, you can safely ignore this email.</p>
       `,
       ctaButton: {
-        text: "Confirm Email Address",
+        text: "Start Generating Stories Now",
         url: confirmationUrl
       },
       footerText: "If the button doesn't work, copy and paste this link into your browser: " + confirmationUrl
     });
 
     const emailResponse = await resend.emails.send({
-      from: "Your App <noreply@jordanleahy.com>",
+      from: "Story Generator <noreply@jordanleahy.com>",
       to: [userEmail],
-      subject: "Confirm your email address",
+      subject: "Start Generating Stories Now - Confirm Your Account",
       html: emailContent,
     });
 

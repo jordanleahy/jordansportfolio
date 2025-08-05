@@ -56,9 +56,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: "Your App <security@jordanleahy.com>",
+      from: "Story Generator <security@jordanleahy.com>",
       to: [userEmail],
-      subject: "Reset your password",
+      subject: "Reset Your Password - Story Generator",
       html: emailContent,
     });
 
