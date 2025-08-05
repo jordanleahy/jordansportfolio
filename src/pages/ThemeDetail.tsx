@@ -33,7 +33,6 @@ export default function ThemeDetail() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
-  const [isTableLoading, setIsTableLoading] = useState(true);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -70,7 +69,7 @@ export default function ThemeDetail() {
     refetch();
   };
 
-  if (loading || isLoadingPosts || isTableLoading) {
+  if (loading || isLoadingPosts) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -156,7 +155,6 @@ export default function ThemeDetail() {
               category={decodedTheme}
               selectedThemeId={selectedThemeId}
               onThemeChange={setSelectedThemeId}
-              onLoadingChange={setIsTableLoading}
             />
           </Suspense>
         </div>

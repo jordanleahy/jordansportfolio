@@ -35,7 +35,6 @@ export const useUnifiedRealtime = ({
 
   useEffect(() => {
     if (!enabled || !userId) {
-      console.log(`[UnifiedRealtime] Skipping setup - enabled: ${enabled}, userId: ${userId}`);
       setIsConnected(false);
       setConnectionStatus('disconnected');
       return;
