@@ -2578,7 +2578,7 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       detection_method: "manual" | "voice_pattern" | "hybrid"
       event_status: "upcoming" | "in-progress" | "completed" | "cancelled"
-      post_status: "draft" | "scheduled" | "published"
+      post_status: "draft" | "scheduled" | "published" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2710,7 +2710,7 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       detection_method: ["manual", "voice_pattern", "hybrid"],
       event_status: ["upcoming", "in-progress", "completed", "cancelled"],
-      post_status: ["draft", "scheduled", "published"],
+      post_status: ["draft", "scheduled", "published", "deleted"],
     },
   },
 } as const
