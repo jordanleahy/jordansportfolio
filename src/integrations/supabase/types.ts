@@ -1842,15 +1842,7 @@ export type Database = {
           submission_id?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "submission_logs_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "theme_submissions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       subscription_tiers: {
         Row: {
@@ -1958,54 +1950,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      theme_submissions: {
-        Row: {
-          category: string
-          completed_at: string | null
-          created_at: string
-          error_message: string | null
-          id: string
-          idempotency_key: string
-          inserted_count: number | null
-          status: string
-          submission_data: Json
-          theme: string
-          theme_description: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category: string
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          idempotency_key: string
-          inserted_count?: number | null
-          status?: string
-          submission_data: Json
-          theme: string
-          theme_description?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          idempotency_key?: string
-          inserted_count?: number | null
-          status?: string
-          submission_data?: Json
-          theme?: string
-          theme_description?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       themes: {
         Row: {
