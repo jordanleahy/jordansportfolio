@@ -166,6 +166,13 @@ const PostCardComponent = ({
           <p className="text-sm text-muted-foreground leading-relaxed">
             {post.description}
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+          >
+            Generate
+          </Button>
         </div>
 
         {/* Action Buttons */}
