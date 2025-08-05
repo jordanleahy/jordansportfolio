@@ -85,7 +85,7 @@ const StoryTellingSetupPage: React.FC<StoryTellingSetupPageProps> = ({
       </div>
 
       {/* Post Preview */}
-      <Card className="border-l-4 border-l-primary">
+      <Card>
         <CardContent className="pt-6">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
