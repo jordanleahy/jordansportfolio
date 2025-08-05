@@ -88,10 +88,6 @@ const StoryTellingSetupPage: React.FC<StoryTellingSetupPageProps> = ({
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">{post.category || 'Post'}</Badge>
-              {post.theme && <Badge variant="secondary" className="text-xs">{post.theme}</Badge>}
-            </div>
             <h3 className="font-semibold text-lg">{post.title}</h3>
             <p className="text-muted-foreground leading-relaxed">{post.description}</p>
             <div className="text-xs text-muted-foreground border-t pt-2">
