@@ -222,11 +222,13 @@ export const PostsTable = ({
             <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
               <div className="flex items-center justify-between mb-4 gap-2">{/* Removed flex-wrap to keep in one line */}
                 <div className="flex items-center gap-2 flex-wrap">
-              <TabsList>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
-                <TabsTrigger value="published">Published</TabsTrigger>
-              </TabsList>
-            </div>
+                  {userIsAdmin && (
+                    <TabsList>
+                      <TabsTrigger value="draft">Draft</TabsTrigger>
+                      <TabsTrigger value="published">Published</TabsTrigger>
+                    </TabsList>
+                  )}
+                </div>
             
             {category && userIsAdmin && (
               <div className="flex items-center gap-1">
