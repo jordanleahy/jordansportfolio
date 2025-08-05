@@ -169,7 +169,7 @@ const PostCardComponent = ({
           <Button
             variant="outline"
             size="sm"
-            className="mt-2"
+            className="mt-2 w-full"
           >
             Generate
           </Button>
