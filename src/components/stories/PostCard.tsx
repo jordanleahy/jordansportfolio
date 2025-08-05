@@ -474,7 +474,7 @@ const PostCardComponent = ({
         )}
 
         {/* Media Previews - Show any existing images or videos */}
-        {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
+        {isAdmin && (post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url || post.image_16_9_video_url || post.image_3_4_video_url || post.general_video_url) && !showPhotos && !showVideos && (
           <div className="flex gap-2 overflow-x-auto">
             {post.image_16_9_url && (
               <ImageHoverOverlay
