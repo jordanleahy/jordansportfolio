@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share2 } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -291,7 +291,7 @@ const PostCardComponent = ({
               }}
               className="h-8 w-8 p-0"
             >
-              <Share2 className="h-4 w-4" />
+              <Share className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
