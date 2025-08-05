@@ -223,7 +223,7 @@ const PostCardComponent = ({
           <img
             src={post.image_16_9_url}
             alt="Hero image"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
