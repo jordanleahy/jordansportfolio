@@ -33,8 +33,24 @@ serve(async (req) => {
       throw new Error('Missing required parameters: theme, category, or userId');
     }
 
+    // Get theme ID first
+    console.log('🔍 Looking up theme ID for theme:', theme);
+    const { data: themeData, error: themeError } = await supabase
+      .from('themes')
+      .select('id')
+      .eq('name', theme)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (themeError || !themeData) {
+      throw new Error(`Theme not found: ${theme}`);
+    }
+
+    const themeId = themeData.id;
+    console.log('✅ Found theme ID:', themeId);
+
     // Set status to generating
-    await updateThemeImageStatus(supabase, 'generating', theme, userId);
+    await updateThemeImageStatus(supabase, 'generating', themeId, userId);
 
     // Get first post data if not provided
     let postTitle = firstPostTitle;
@@ -42,22 +58,11 @@ serve(async (req) => {
 
     if (!postTitle || !postDescription) {
       console.log('🔍 Fetching first post data for image generation');
-      // Get theme ID from theme name
-      const { data: themeData, error: themeError } = await supabase
-        .from('themes')
-        .select('id')
-        .eq('name', theme)
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (themeError || !themeData) {
-        throw new Error(`Theme not found: ${theme}`);
-      }
 
       const { data: posts, error: postsError } = await supabase
         .from('social_media_posts')
         .select('title, description')
-        .eq('theme_id', themeData.id)
+        .eq('theme_id', themeId)
         .eq('user_id', userId)
         .order('day', { ascending: true })
         .limit(1);
@@ -79,7 +84,7 @@ serve(async (req) => {
     console.log('✅ Generated and uploaded theme image successfully');
 
     // Update all posts with the image URL and mark as complete
-    await updateThemeImageStatus(supabase, 'complete', theme, userId, imageUrl);
+    await updateThemeImageStatus(supabase, 'complete', themeId, userId, imageUrl);
 
     console.log(`🎉 Background image generation completed successfully for theme: ${theme}`);
 
@@ -103,8 +108,18 @@ serve(async (req) => {
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseKey);
         
-        await updateThemeImageStatus(supabase, 'failed', requestData.theme, requestData.userId);
-        console.log('✅ Updated theme status to failed');
+        // Look up theme ID for error handling
+        const { data: themeData } = await supabase
+          .from('themes')
+          .select('id')
+          .eq('name', requestData.theme)
+          .eq('user_id', requestData.userId)
+          .maybeSingle();
+
+        if (themeData) {
+          await updateThemeImageStatus(supabase, 'failed', themeData.id, requestData.userId);
+          console.log('✅ Updated theme status to failed');
+        }
       }
     } catch (statusError) {
       console.error('❌ Error updating failed status:', statusError);
