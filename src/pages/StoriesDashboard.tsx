@@ -12,7 +12,6 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useThemeImport } from '@/hooks/useThemeImport';
-import { normalizeThemeName, debugThemeMapping } from '@/utils/themeNameUtils';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
@@ -41,10 +40,9 @@ export default function StoriesDashboard() {
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const { toast } = useToast();
 
-  // Simplified theme-based state
+  // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<Theme[]>([]);
-  const [shimmerThemes, setShimmerThemes] = useState<string[]>([]);
-  const [isLoadingThemes, setIsLoadingThemes] = useState(true);
+  const [shimmerThemes, setShimmerThemes] = useState<Set<string>>(new Set());
 
   // Hook for theme import functionality
   const {
@@ -65,10 +63,9 @@ export default function StoriesDashboard() {
     }
   });
 
-  // Simplified function to refresh themes
-  const refreshThemes = React.useCallback(async () => {
+  // Simplified function to refresh themes - removed useCallback as it's not preventing re-renders
+  const refreshThemes = async () => {
     console.log('🔄 REFRESH: Starting refreshThemes');
-    setIsLoadingThemes(true);
     
     try {
       const themes = await optimizedSocialMediaService.getAvailableThemes();
@@ -77,17 +74,15 @@ export default function StoriesDashboard() {
     } catch (error) {
       console.error('❌ REFRESH: Failed to fetch themes:', error);
       setAvailableThemes([]);
-    } finally {
-      setIsLoadingThemes(false);
     }
-  }, []);
+  };
 
-  // Initial load
+  // Initial load using React Query pattern
   React.useEffect(() => {
     if (user?.id) {
       refreshThemes();
     }
-  }, [user?.id, refreshThemes]);
+  }, [user?.id]);
 
   // Debounced theme refresh to prevent spam updates
   const [shouldRefreshThemes, setShouldRefreshThemes] = useState(false);
@@ -104,27 +99,24 @@ export default function StoriesDashboard() {
     }
   }, [debouncedRefresh, queryClient]);
 
-  // Setup realtime subscription for immediate updates
-  const handlePostInsert = React.useCallback((newPost: any) => {
-    // Trigger debounced refresh instead of immediate full reload
+  // Simplified realtime handlers - removed unnecessary useCallback wrappers
+  const handlePostInsert = (newPost: any) => {
     setShouldRefreshThemes(true);
     toast({
       title: "New Post Created!",
       description: `"${newPost.title}" added to ${newPost.category}`,
     });
-  }, [toast]);
+  };
 
-  const handlePostUpdate = React.useCallback((update: any) => {
+  const handlePostUpdate = (update: any) => {
     console.log('🔄 REALTIME: handlePostUpdate called for post update', {
       postId: update?.id,
       category: update?.category,
       usingDebouncedUpdate: true
     });
     
-    // Remove redundant invalidateQueries calls - React Query handles this automatically
-    // Use debounced update instead of immediate refresh
     setShouldRefreshThemes(true);
-  }, []);
+  };
 
   // Theme image generation listener to remove shimmer when image generation completes
   React.useEffect(() => {
@@ -145,24 +137,24 @@ export default function StoriesDashboard() {
           const { theme_image_generation_status, theme, category, theme_image_4_3_url } = newData as any;
           const oldStatus = oldData?.theme_image_generation_status;
           
-          // Remove shimmer when theme image generation completes
+          // Simplified shimmer removal using theme ID directly
           if (theme_image_generation_status === 'complete' && theme) {
-            const normalizedTheme = normalizeThemeName(theme);
-            debugThemeMapping('Real-time Complete', theme, normalizedTheme);
-            
             setShimmerThemes(prev => {
-              const filtered = prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme);
-              return filtered;
+              const newSet = new Set(prev);
+              newSet.delete(theme);
+              return newSet;
             });
             
-            // Use targeted cache update instead of full refresh
             setShouldRefreshThemes(true);
           }
           
           // Handle failed theme image generation
           if (oldStatus !== 'failed' && theme_image_generation_status === 'failed' && theme) {
-            const normalizedTheme = normalizeThemeName(theme);
-            setShimmerThemes(prev => prev.filter(shimmerTheme => normalizeThemeName(shimmerTheme) !== normalizedTheme));
+            setShimmerThemes(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(theme);
+              return newSet;
+            });
             toast({
               title: "Image Generation Failed",
               description: `Theme image generation failed for "${theme}"`,
@@ -231,10 +223,10 @@ export default function StoriesDashboard() {
     }
 
     setIsGeneratingTheme(true);
+    const tempThemeName = 'generating-theme-' + Date.now();
     
     try {
-      const tempThemeName = 'generating-theme-' + Date.now();
-      setShimmerThemes(prev => [...prev, tempThemeName]);
+      setShimmerThemes(prev => new Set([...prev, tempThemeName]));
 
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: { 
@@ -251,12 +243,12 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to generate theme');
       }
 
-      const normalizedTheme = normalizeThemeName(data.theme);
-      debugThemeMapping('Custom Theme Generation', data.theme, normalizedTheme);
-      
+      // Simplified shimmer update using theme name directly
       setShimmerThemes(prev => {
-        const filtered = prev.filter(theme => !theme.startsWith('generating-theme-'));
-        return [...filtered, normalizedTheme];
+        const newSet = new Set(prev);
+        newSet.delete(tempThemeName);
+        newSet.add(data.theme);
+        return newSet;
       });
 
       toast({
@@ -274,13 +266,18 @@ export default function StoriesDashboard() {
         variant: "destructive"
       });
       
-      setShimmerThemes(prev => prev.filter(theme => !theme.startsWith('generating-theme-')));
+      setShimmerThemes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(tempThemeName);
+        return newSet;
+      });
     } finally {
       setIsGeneratingTheme(false);
     }
   };
 
-  if (loading || isLoadingThemes) {
+  // Use React Query loading pattern instead of local loading state
+  if (loading) {
     return (
       <PageLayout>
         <CalendarSkeletonLoader />
@@ -344,7 +341,7 @@ export default function StoriesDashboard() {
             )}
 
             <Button
-              onClick={() => setShimmerThemes([])}
+              onClick={() => setShimmerThemes(new Set())}
               variant="ghost"
               size="sm"
               className="text-xs"
@@ -368,15 +365,19 @@ export default function StoriesDashboard() {
               open={importModalOpen} 
               onOpenChange={setImportModalOpen} 
               onImportComplete={() => {
-                setShimmerThemes([]);
+                setShimmerThemes(new Set());
                 refreshThemes();
               }}
-              onOptimisticStart={(themeName) => setShimmerThemes(prev => [...prev, themeName])}
+              onOptimisticStart={(themeName) => setShimmerThemes(prev => new Set([...prev, themeName]))}
               onOptimisticComplete={async (success, themeName) => {
                 if (success && themeName) {
                   await refreshThemes();
                 } else if (themeName) {
-                  setShimmerThemes(prev => prev.filter(theme => theme !== themeName));
+                  setShimmerThemes(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(themeName);
+                    return newSet;
+                  });
                 }
               }}
             />
@@ -386,7 +387,7 @@ export default function StoriesDashboard() {
         {/* Themes Grid */}
         <CategoriesGrid 
           themes={availableThemes}
-          shimmerThemes={shimmerThemes}
+          shimmerThemes={Array.from(shimmerThemes)}
           onDeleteCategory={handleDeleteCategory}
         />
       </div>
