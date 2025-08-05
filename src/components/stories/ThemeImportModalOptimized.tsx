@@ -1,13 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
-import { useThemeImport } from '@/hooks/useThemeImport';
+import { CheckCircle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,26 +29,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   
   // Debounce input to prevent rapid submissions
   const debouncedJsonInput = useDebounce(jsonInput, 300);
-  const {
-    state,
-    progress,
-    validationResult,
-    isProcessing,
-    canImport,
-    hasErrors,
-    hasWarnings,
-    validateInput,
-    processWithAI,
-    importData,
-    reset
-  } = useThemeImport({
-    onImportComplete: () => {
-      onImportComplete?.();
-      onOpenChange(false);
-      setJsonInput('');
-      reset();
-    }
-  });
 
   // Streamlined import with improved feedback
   const {
@@ -72,7 +47,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
         setShowErrorMessage(null);
         onOpenChange(false);
         setJsonInput('');
-        reset();
       }, 2000);
     },
     onOptimisticStart: categoryName => {
@@ -88,30 +62,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Format JSON helper
-  const formatJSON = useCallback(() => {
-    try {
-      const parsed = JSON.parse(jsonInput);
-      setJsonInput(JSON.stringify(parsed, null, 2));
-      toast({
-        title: "JSON formatted",
-        description: "Your JSON has been formatted for better readability"
-      });
-    } catch (error) {
-      toast({
-        title: "Invalid JSON",
-        description: "Cannot format invalid JSON syntax",
-        variant: "destructive"
-      });
-    }
-  }, [jsonInput, toast]);
-  const handleProcess = useCallback(() => {
-    if (!jsonInput.trim()) return;
-    processWithAI(jsonInput);
-  }, [jsonInput, processWithAI]);
-  const handleImport = useCallback(() => {
-    importData();
-  }, [importData]);
   const handleStreamlinedSubmit = useCallback(() => {
     if (!debouncedJsonInput.trim()) return;
     
@@ -219,7 +169,7 @@ AVOID:
   const placeholderText = `Paste your JSON data here or use this example:\n\n${JSON.stringify(exampleData, null, 2)}`;
   const handleClose = useCallback(() => {
     // Prevent closing while processing
-    if (isProcessing || isStreamlinedProcessing) {
+    if (isStreamlinedProcessing) {
       toast({
         title: "Processing in progress",
         description: "Please wait for the import to complete",
@@ -229,14 +179,13 @@ AVOID:
     setShowSuccessMessage(false);
     setShowErrorMessage(null);
     onOpenChange(false);
-  }, [onOpenChange, isProcessing, isStreamlinedProcessing, toast]);
+  }, [onOpenChange, isStreamlinedProcessing, toast]);
   
   const handleReset = useCallback(() => {
     setJsonInput('');
     setShowSuccessMessage(false);
     setShowErrorMessage(null);
-    reset();
-  }, [reset]);
+  }, []);
   return <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -248,7 +197,7 @@ AVOID:
 
         <div className="space-y-4">
           {/* Processing Status */}
-          {(isProcessing || isStreamlinedProcessing) && (
+          {isStreamlinedProcessing && (
             <Alert>
               <Loader2 className="h-4 w-4 animate-spin" />
               <AlertDescription>
@@ -280,19 +229,18 @@ AVOID:
             </Alert>
           )}
 
-          {/* Progress indicator */}
-          {progress && <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>{progress.message}</span>
-                <span>{progress.progress}%</span>
-              </div>
-              <Progress value={progress.progress} className="w-full" />
-            </div>}
 
           {/* JSON Input */}
           <div>
-            
-            <Textarea id="json-input" value={jsonInput} onChange={e => setJsonInput(e.target.value)} placeholder={placeholderText} readOnly={isProcessing || isStreamlinedProcessing} rows={16} className="font-mono text-sm resize-none min-h-[400px] leading-relaxed" />
+            <Textarea 
+              id="json-input" 
+              value={jsonInput} 
+              onChange={e => setJsonInput(e.target.value)} 
+              placeholder={placeholderText} 
+              readOnly={isStreamlinedProcessing} 
+              rows={16} 
+              className="font-mono text-sm resize-none min-h-[400px] leading-relaxed" 
+            />
           </div>
 
           {/* Action Buttons */}
@@ -302,7 +250,6 @@ AVOID:
               onClick={handleStreamlinedSubmit} 
               disabled={
                 isStreamlinedProcessing || 
-                isProcessing ||
                 !debouncedJsonInput.trim() ||
                 showSuccessMessage ||
                 (Date.now() - lastSubmitTime < 2000)
@@ -310,17 +257,17 @@ AVOID:
               className="bg-primary text-primary-foreground hover:bg-primary/90" 
               size="lg"
             >
-              {(isStreamlinedProcessing || isProcessing) ? (
+              {isStreamlinedProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Upload className="w-4 h-4 mr-2" />
               )}
-              {(isStreamlinedProcessing || isProcessing) ? 'Processing...' : 'Submit'}
+              {isStreamlinedProcessing ? 'Processing...' : 'Submit'}
             </Button>
 
             <Button 
               onClick={handleReset} 
-              disabled={isProcessing || isStreamlinedProcessing} 
+              disabled={isStreamlinedProcessing} 
               variant="ghost" 
               size="sm"
             >
@@ -329,7 +276,7 @@ AVOID:
 
             <Button 
               onClick={handleCopyInstructions} 
-              disabled={isProcessing || isStreamlinedProcessing}
+              disabled={isStreamlinedProcessing}
               variant="outline" 
               size="sm"
             >
@@ -338,91 +285,6 @@ AVOID:
             </Button>
           </div>
 
-          {/* Results Display */}
-          {validationResult && <div className="space-y-4">
-              <Separator />
-              
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Processing Results</h3>
-                
-                <div className="flex items-center gap-2">
-                  {validationResult.success ? <CheckCircle className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
-                  <span className={validationResult.success ? "text-green-700" : "text-red-700"}>
-                    {validationResult.success ? "Ready for import" : "Processing failed"}
-                  </span>
-                </div>
-
-                {/* Errors */}
-                {hasErrors && validationResult.errors.length > 0 && <Alert variant="destructive">
-                    <XCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Errors:</strong>
-                      <ul className="list-disc list-inside mt-1">
-                        {validationResult.errors.map((error, index) => <li key={index}>{error}</li>)}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>}
-
-                {/* Warnings */}
-                {hasWarnings && validationResult.warnings.length > 0 && <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Warnings:</strong>
-                      <ul className="list-disc list-inside mt-1">
-                        {validationResult.warnings.map((warning, index) => <li key={index}>{warning}</li>)}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>}
-
-                {/* Fixes */}
-                {validationResult.fixes && validationResult.fixes.length > 0 && <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      <strong>Applied Fixes:</strong>
-                      <ul className="list-disc list-inside mt-1">
-                        {validationResult.fixes.map((fix, index) => <li key={index}>{fix}</li>)}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>}
-
-                {/* Data Preview */}
-                {validationResult.data && <div className="space-y-3">
-                    <h4 className="font-medium">Preview:</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Category:</span> 
-                        <Badge variant="outline" className="ml-2">
-                          {validationResult.data.category}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="font-medium">Theme:</span> 
-                        <Badge variant="outline" className="ml-2">
-                          {validationResult.data.theme}
-                        </Badge>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="font-medium">Posts:</span> {validationResult.data.posts.length}
-                      </div>
-                    </div>
-                    
-                    {validationResult.data.posts.slice(0, 3).map((post, index) => <div key={index} className="border rounded p-3 text-sm">
-                        <div className="font-medium">{post.title}</div>
-                        <div className="text-muted-foreground mt-1 line-clamp-2">
-                          {post.story_description}
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          {post.day && <Badge variant="secondary">Day {post.day}</Badge>}
-                          <Badge variant="outline">{post.status}</Badge>
-                        </div>
-                      </div>)}
-                    
-                    {validationResult.data.posts.length > 3 && <div className="text-center text-muted-foreground">
-                        ... and {validationResult.data.posts.length - 3} more posts
-                      </div>}
-                  </div>}
-              </div>
-            </div>}
         </div>
       </DialogContent>
     </Dialog>;
