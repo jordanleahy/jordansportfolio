@@ -184,15 +184,17 @@ const PostCardComponent = ({
         <div className="space-y-2">
           <div className={`grid gap-2 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {isAdmin && <BlogPostButton post={post} />}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onGeneratePrompt(post)}
-              className="flex-1"
-            >
-              <Lightbulb className="h-4 w-4" />
-            </Button>
-            {onGenerateVoiceover ? (
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onGeneratePrompt(post)}
+                className="flex-1"
+              >
+                <Lightbulb className="h-4 w-4" />
+              </Button>
+            )}
+            {isAdmin && onGenerateVoiceover ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -204,7 +206,7 @@ const PostCardComponent = ({
               >
                 <Mic className="h-4 w-4" />
               </Button>
-            ) : (
+            ) : isAdmin ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -212,34 +214,40 @@ const PostCardComponent = ({
               >
                 <BookOpen className="h-4 w-4" />
               </Button>
-            )}
+            ) : null}
           </div>
           
           <div className="flex gap-2">
-            <BulkImageGenerationButton
-              post={post}
-              isUploading={isUploading}
-              getUploadType={getUploadType}
-              onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
-              onPostsChange={onPostsChange}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPhotos(!showPhotos)}
-              className="h-8 flex-1"
-              title={showPhotos ? "Hide photos" : "Show photos"}
-            >
-              <ImageIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowVideos(!showVideos)}
-              className="h-8 flex-1"
-            >
-              <Video className="h-4 w-4" />
-            </Button>
+            {isAdmin && (
+              <BulkImageGenerationButton
+                post={post}
+                isUploading={isUploading}
+                getUploadType={getUploadType}
+                onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
+                onPostsChange={onPostsChange}
+              />
+            )}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPhotos(!showPhotos)}
+                className="h-8 flex-1"
+                title={showPhotos ? "Hide photos" : "Show photos"}
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+            )}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowVideos(!showVideos)}
+                className="h-8 flex-1"
+              >
+                <Video className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
 

@@ -205,34 +205,45 @@ export const PostsTableView = memo(({
       </TableHeader>
       <TableBody>
         {sortedPosts.map((post, index) => {
-          const createPostActions = () => [
-            {
-              icon: <Copy className="h-4 w-4" />,
-              onClick: () => onCopyContent(post),
-              title: "Copy content"
-            },
-            {
-              icon: <Sparkles className="h-4 w-4" />,
-              onClick: () => handleGenerateAllImages(post),
-              loading: isGenerating(post.id),
-              title: "Generate all images with AI"
-            },
-            {
-              icon: <Lightbulb className="h-4 w-4" />,
-              onClick: () => onGenerateImagePrompt(post),
-              title: "Generate image prompt"
-            },
-            {
-              icon: <Mic className="h-4 w-4" />,
-              onClick: () => onGenerateVoiceoverScript(post),
-              title: "Generate voiceover script"
-            },
-            {
-              icon: <Trash2 className="h-4 w-4" />,
-              onClick: () => onDeletePost(post.id),
-              title: "Delete post"
-            }
-          ];
+          const createPostActions = () => {
+            const baseActions = [
+              {
+                icon: <Copy className="h-4 w-4" />,
+                onClick: () => onCopyContent(post),
+                title: "Copy content",
+                loading: false
+              },
+              {
+                icon: <Trash2 className="h-4 w-4" />,
+                onClick: () => onDeletePost(post.id),
+                title: "Delete post",
+                loading: false
+              }
+            ];
+
+            const adminActions = [
+              {
+                icon: <Sparkles className="h-4 w-4" />,
+                onClick: () => handleGenerateAllImages(post),
+                loading: isGenerating(post.id),
+                title: "Generate all images with AI"
+              },
+              {
+                icon: <Lightbulb className="h-4 w-4" />,
+                onClick: () => onGenerateImagePrompt(post),
+                title: "Generate image prompt",
+                loading: false
+              },
+              {
+                icon: <Mic className="h-4 w-4" />,
+                onClick: () => onGenerateVoiceoverScript(post),
+                title: "Generate voiceover script",
+                loading: false
+              }
+            ];
+
+            return isAdmin ? [...baseActions.slice(0, 1), ...adminActions, ...baseActions.slice(1)] : baseActions;
+          };
 
           const selectorProps = {
             post,
