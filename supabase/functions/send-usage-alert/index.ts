@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createEmailTemplate } from "../_shared/email-template.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -30,46 +31,52 @@ const handler = async (req: Request): Promise<Response> => {
     const isWarning = percentageUsed >= 80;
     const isNearLimit = percentageUsed >= 95;
     
-    const alertType = isNearLimit ? 'Critical' : 'Warning';
-    const alertColor = isNearLimit ? '#dc2626' : '#f59e0b';
+    const alertType = isNearLimit ? 'Critical Usage Alert' : 'Usage Warning';
+    const alertEmoji = isNearLimit ? '🚨' : '⚠️';
+    const urgencyText = isNearLimit ? 
+      "You're almost at your limit! Consider upgrading your plan to continue using our services." : 
+      "You're approaching your monthly limit. Consider monitoring your usage or upgrading your plan.";
+
+    const emailContent = createEmailTemplate({
+      title: `${alertType}: ${usageType}`,
+      preheader: `${Math.round(percentageUsed)}% of your ${usageType} limit used`,
+      content: `
+        <h2>${alertEmoji} ${alertType}</h2>
+        <p>Hi${userName ? ` ${userName}` : ''},</p>
+        <p>You've used <strong>${Math.round(percentageUsed)}%</strong> of your monthly <strong>${usageType}</strong> limit.</p>
+        
+        <div class="highlight">
+          <p><strong>📊 Usage Details:</strong></p>
+          <p><strong>Current Usage:</strong> ${currentUsage} / ${limit}</p>
+          <p><strong>Remaining:</strong> ${limit - currentUsage}</p>
+          
+          <div style="background-color: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; margin: 12px 0;">
+            <div style="background: ${isNearLimit ? 'linear-gradient(90deg, #dc2626, #ef4444)' : 'linear-gradient(90deg, #f59e0b, #fbbf24)'}; height: 100%; width: ${percentageUsed}%; transition: width 0.3s ease; border-radius: 6px;"></div>
+          </div>
+        </div>
+        
+        <p style="color: ${isNearLimit ? '#dc2626' : '#f59e0b'}; font-weight: 600;">${urgencyText}</p>
+        
+        <p><strong>What you can do:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li>Monitor your usage in the dashboard</li>
+          <li>Upgrade to a higher plan for more capacity</li>
+          <li>Optimize your usage patterns</li>
+          <li>Contact support for usage optimization tips</li>
+        </ul>
+      `,
+      ctaButton: {
+        text: "Manage Subscription",
+        url: "https://jordanleahy.com/subscription"
+      },
+      footerText: "Your usage resets at the beginning of each billing cycle."
+    });
 
     const emailResponse = await resend.emails.send({
       from: "Your App <alerts@jordanleahy.com>",
       to: [userEmail],
-      subject: `${alertType}: ${usageType} Usage at ${Math.round(percentageUsed)}%`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: ${alertColor}; color: white; padding: 16px; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0;">${alertType}: Usage Alert</h1>
-          </div>
-          
-          <div style="border: 2px solid ${alertColor}; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
-            ${userName ? `<p>Hi ${userName},</p>` : '<p>Hi there,</p>'}
-            
-            <p>You've used <strong>${Math.round(percentageUsed)}%</strong> of your monthly ${usageType} limit.</p>
-            
-            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3>Usage Details:</h3>
-              <p><strong>Current Usage:</strong> ${currentUsage} / ${limit}</p>
-              <p><strong>Remaining:</strong> ${limit - currentUsage}</p>
-              
-              <div style="background-color: #e5e7eb; height: 20px; border-radius: 10px; overflow: hidden;">
-                <div style="background-color: ${alertColor}; height: 100%; width: ${percentageUsed}%; transition: width 0.3s ease;"></div>
-              </div>
-            </div>
-            
-            ${isNearLimit ? 
-              '<p style="color: #dc2626;"><strong>You\'re almost at your limit!</strong> Consider upgrading your plan to continue using our services.</p>' : 
-              '<p>Consider monitoring your usage or upgrading your plan if you need more capacity.</p>'
-            }
-            
-            <a href="https://jordanleahy.com/subscription" 
-               style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-              Manage Subscription
-            </a>
-          </div>
-        </div>
-      `,
+      subject: `${alertType}: ${usageType} at ${Math.round(percentageUsed)}%`,
+      html: emailContent,
     });
 
     console.log("Usage alert sent successfully:", emailResponse);

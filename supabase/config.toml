@@ -54,6 +54,12 @@ verify_jwt = false
 [functions.send-usage-alert]
 verify_jwt = false
 
+[functions.send-confirmation-email]
+verify_jwt = false
+
+[functions.send-password-reset]
+verify_jwt = false
+
 [functions.check-usage-limits]
 verify_jwt = true
 
