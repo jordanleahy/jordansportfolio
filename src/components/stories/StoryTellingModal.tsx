@@ -5,8 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Mic, Square, Play, Pause, Download, Save, Loader2, MessageSquare } from 'lucide-react';
+import { Mic, Square, Play, Pause, Download, Save, Loader2, MessageSquare, Book, Briefcase } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -243,30 +242,57 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
           {/* Story Type Selection */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">Story Type</Label>
-            <RadioGroup value={storyType} onValueChange={(value) => setStoryType(value as StoryType)}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="childrens_story" id="childrens_story" />
-                <Label htmlFor="childrens_story" className="flex-1 cursor-pointer">
-                  <div>
-                    <div className="font-medium">Children's Story</div>
-                    <div className="text-sm text-muted-foreground">
-                      Warm, engaging narrative perfect for parent-child interaction and bedtime stories
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  storyType === 'childrens_story' 
+                    ? 'ring-2 ring-primary bg-primary/5' 
+                    : 'hover:border-primary/50'
+                }`}
+                onClick={() => setStoryType('childrens_story')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">📚</div>
+                    <div className="flex-1">
+                      <div className="font-medium mb-1">Children's Story</div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Warm, engaging narrative perfect for parent-child interaction
+                      </div>
+                      <div className="text-xs text-muted-foreground italic">
+                        "Once upon a time in a magical brewery..."
+                      </div>
                     </div>
+                    <Book className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="convincing_story" id="convincing_story" />
-                <Label htmlFor="convincing_story" className="flex-1 cursor-pointer">
-                  <div>
-                    <div className="font-medium">Convincing Story</div>
-                    <div className="text-sm text-muted-foreground">
-                      Professional presentation style for stakeholder pitches and feature explanations
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  storyType === 'convincing_story' 
+                    ? 'ring-2 ring-primary bg-primary/5' 
+                    : 'hover:border-primary/50'
+                }`}
+                onClick={() => setStoryType('convincing_story')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">💼</div>
+                    <div className="flex-1">
+                      <div className="font-medium mb-1">Convincing Story</div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Professional presentation for stakeholder pitches
+                      </div>
+                      <div className="text-xs text-muted-foreground italic">
+                        "Let me tell you why this brewery matters..."
+                      </div>
                     </div>
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </Label>
-              </div>
-            </RadioGroup>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Post Preview */}
