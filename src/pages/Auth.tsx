@@ -105,7 +105,7 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `https://www.jordanleahy.com/`;
       
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
