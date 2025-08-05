@@ -43,7 +43,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         hasData: !!response.data,
         errorMessage: response.error?.message,
         idempotencyKey: response.data?.idempotencyKey,
-        submissionId: response.data?.submissionId
+        themeId: response.data?.themeId
       });
 
       if (response.error) {
@@ -56,7 +56,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         insertedCount: response.data?.insertedCount,
         category: response.data?.data?.category,
         idempotencyKey: response.data?.idempotencyKey,
-        submissionId: response.data?.submissionId
+        themeId: response.data?.themeId
       });
 
       return { ...response.data, categoryName };
@@ -68,7 +68,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         categoryName: result.categoryName,
         errorCount: result.errors?.length || 0,
         idempotencyKey: result.idempotencyKey,
-        submissionId: result.submissionId
+        themeId: result.themeId
       });
       
       setIsProcessing(false);

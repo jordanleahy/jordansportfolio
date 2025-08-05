@@ -35,7 +35,7 @@ export interface ProcessingResult {
   warnings: readonly string[];
   fixes?: readonly string[];
   idempotencyKey?: string;
-  submissionId?: string;
+  themeId?: string;
   message?: string;
 }
 

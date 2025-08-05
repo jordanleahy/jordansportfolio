@@ -15,7 +15,6 @@ interface ProcessingResult {
   warnings: string[];
   errors: string[];
   idempotencyKey?: string;
-  submissionId?: string;
 }
 
 serve(async (req) => {
@@ -109,63 +108,102 @@ serve(async (req) => {
     });
 
     try {
-      // Use the new transaction-based import function with idempotency
-      console.log('💾 CALLING TRANSACTION IMPORT:', {
+      // Create theme directly in themes table
+      console.log('💾 CREATING THEME:', {
         category: aiResult.cleanedData.category,
         theme: aiResult.cleanedData.theme,
-        idempotencyKey,
         timestamp: new Date().toISOString()
       });
 
-      const { data: importResult, error: importError } = await supabase
-        .rpc('import_theme_with_transaction', {
-          p_user_id: user.id,
-          p_idempotency_key: idempotencyKey,
-          p_category: aiResult.cleanedData.category,
-          p_theme: aiResult.cleanedData.theme,
-          p_theme_description: aiResult.cleanedData.theme_description || null,
-          p_posts_data: aiResult.cleanedData.posts
-        });
+      // Check for duplicate theme
+      const { data: existingTheme, error: checkError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', aiResult.cleanedData.theme)
+        .eq('category', aiResult.cleanedData.category)
+        .single();
 
-      if (importError) {
-        console.error('💥 IMPORT ERROR:', importError);
+      if (checkError && checkError.code !== 'PGRST116') { // Not a "no rows" error
+        console.error('💥 DUPLICATE CHECK ERROR:', checkError);
         return new Response(
           JSON.stringify({ 
             success: false, 
-            errors: [importError.message],
+            errors: [checkError.message],
             idempotencyKey 
           }),
           { status: 500, headers: corsHeaders }
         );
       }
 
-      const result = importResult[0]; // RPC returns array
-      
-      console.log('✅ IMPORT RESULT:', {
-        success: result.success,
-        insertedCount: result.inserted_count,
-        submissionId: result.submission_id,
-        error: result.error_message,
-        idempotencyKey,
-        timestamp: new Date().toISOString()
-      });
-
-      if (!result.success) {
+      if (existingTheme) {
+        console.log('⚠️ DUPLICATE THEME DETECTED');
         return new Response(
           JSON.stringify({ 
             success: false, 
-            errors: [result.error_message],
-            idempotencyKey,
-            submissionId: result.submission_id
+            errors: ['A theme with this category and name already exists.'],
+            idempotencyKey
           }),
           { status: 400, headers: corsHeaders }
         );
       }
 
+      // Create the theme
+      const { data: createdTheme, error: themeError } = await supabase
+        .from('themes')
+        .insert({
+          user_id: user.id,
+          name: aiResult.cleanedData.theme,
+          description: aiResult.cleanedData.theme_description || null,
+          category: aiResult.cleanedData.category
+        })
+        .select('id')
+        .single();
+
+      if (themeError) {
+        console.error('💥 THEME CREATION ERROR:', themeError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            errors: [themeError.message],
+            idempotencyKey 
+          }),
+          { status: 500, headers: corsHeaders }
+        );
+      }
+
+      // Insert posts using existing function
+      const { data: insertedCount, error: postsError } = await supabase
+        .rpc('insert_category_content', {
+          category_name: aiResult.cleanedData.category,
+          posts_data: aiResult.cleanedData.posts,
+          theme_description_param: aiResult.cleanedData.theme_description || null,
+          theme_id_param: createdTheme.id
+        });
+
+      if (postsError) {
+        console.error('💥 POSTS INSERT ERROR:', postsError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            errors: [postsError.message],
+            idempotencyKey 
+          }),
+          { status: 500, headers: corsHeaders }
+        );
+      }
+
+      console.log('✅ THEME AND POSTS CREATED:', {
+        themeId: createdTheme.id,
+        insertedCount: insertedCount,
+        idempotencyKey,
+        timestamp: new Date().toISOString()
+      });
+
       // Start background tasks after successful import
       console.log('🚀 STARTING BACKGROUND TASKS:', {
         category: aiResult.cleanedData.category,
-        submissionId: result.submission_id,
+        themeId: createdTheme.id,
         idempotencyKey,
         timestamp: new Date().toISOString()
       });
@@ -177,7 +215,7 @@ serve(async (req) => {
             console.log('📝 SYSTEM PROMPT RESULT:', {
               success: promptResult?.success || false,
               category: aiResult.cleanedData.category,
-              submissionId: result.submission_id,
+              themeId: createdTheme.id,
               timestamp: new Date().toISOString()
             });
             
@@ -188,7 +226,7 @@ serve(async (req) => {
             console.log('🖼️ THEME IMAGE RESULT:', {
               success: imageResult?.success || false,
               category: aiResult.cleanedData.category,
-              submissionId: result.submission_id,
+              themeId: createdTheme.id,
               timestamp: new Date().toISOString()
             });
             
@@ -200,7 +238,7 @@ serve(async (req) => {
             console.log('📝 BLOG POST PROMPTS RESULT:', {
               success: promptsResult?.success || false,
               category: aiResult.cleanedData.category,
-              submissionId: result.submission_id,
+              themeId: createdTheme.id,
               timestamp: new Date().toISOString()
             });
           })
@@ -213,10 +251,10 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: true,
-          insertedCount: result.inserted_count,
+          insertedCount: insertedCount,
           data: aiResult.cleanedData,
           idempotencyKey,
-          submissionId: result.submission_id,
+          themeId: createdTheme.id,
           message: 'Theme imported successfully. Background processing initiated.'
         }),
         { status: 200, headers: corsHeaders }
