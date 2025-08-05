@@ -53,10 +53,6 @@ export const useGenerateStoryScript = () => {
     },
     onSuccess: (data) => {
       console.log('Story script generated successfully');
-      toast({
-        title: "Script Generated",
-        description: `Your ${data.story_type === 'childrens_story' ? 'children\'s story' : 'convincing story'} script is ready!`,
-      });
     },
     onError: (error) => {
       console.error('Error generating story script:', error);
