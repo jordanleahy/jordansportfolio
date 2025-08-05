@@ -20,7 +20,6 @@ import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModa
 import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
-import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 interface PostsTableOptimizedProps {
   posts: SocialMediaPost[];
@@ -43,9 +42,6 @@ export const PostsTable = ({
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
-  
-  // Check user role for admin features
-  const { isAdmin: userIsAdmin } = useUserRole();
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
@@ -222,15 +218,13 @@ export const PostsTable = ({
             <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
               <div className="flex items-center justify-between mb-4 gap-2">{/* Removed flex-wrap to keep in one line */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  {userIsAdmin && (
-                    <TabsList>
-                      <TabsTrigger value="draft">Draft</TabsTrigger>
-                      <TabsTrigger value="published">Published</TabsTrigger>
-                    </TabsList>
-                  )}
-                </div>
+              <TabsList>
+                <TabsTrigger value="draft">Draft</TabsTrigger>
+                <TabsTrigger value="published">Published</TabsTrigger>
+              </TabsList>
+            </div>
             
-            {category && userIsAdmin && (
+            {category && isAdmin && (
               <div className="flex items-center gap-1">
                 <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                   <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -249,7 +243,7 @@ export const PostsTable = ({
               </div>
             ) : (
                 isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} themeName={category} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
                 </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
             )}
           </TabsContent>
@@ -262,7 +256,7 @@ export const PostsTable = ({
               </div>
             ) : (
               isMobile ? <div className="space-y-4">
-                  {filteredPosts.map(post => <PostCard key={post.id} post={post} themeName={category} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
+                  {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={isAdmin} />)}
                 </div> : <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onFileSelect={(postId, aspectRatio, post) => handleFileSelect(postId, aspectRatio, post)} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={isAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
             )}
           </TabsContent>
@@ -272,7 +266,7 @@ export const PostsTable = ({
       </div>
 
       {/* System Prompt Viewer Panel - Admin Only */}
-      {showSystemPrompt && category && userIsAdmin && <div className="relative transition-all duration-300" style={{
+      {showSystemPrompt && category && isAdmin && <div className="relative transition-all duration-300" style={{
       width: promptPanelWidth
     }}>
           {/* Resize handle */}
