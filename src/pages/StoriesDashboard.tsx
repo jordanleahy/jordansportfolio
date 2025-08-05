@@ -14,6 +14,7 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 import { useThemeImport } from '@/hooks/useThemeImport';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 
 // Lazy load components
@@ -63,16 +64,13 @@ export default function StoriesDashboard() {
     }
   });
 
-  // Simplified function to refresh themes - removed useCallback as it's not preventing re-renders
+  // Simplified function to refresh themes - removed console logs
   const refreshThemes = async () => {
-    console.log('🔄 REFRESH: Starting refreshThemes');
-    
     try {
       const themes = await optimizedSocialMediaService.getAvailableThemes();
-      console.log('📊 REFRESH: Themes loaded:', themes);
       setAvailableThemes(themes);
     } catch (error) {
-      console.error('❌ REFRESH: Failed to fetch themes:', error);
+      console.error('Failed to fetch themes:', error);
       setAvailableThemes([]);
     }
   };
@@ -90,9 +88,7 @@ export default function StoriesDashboard() {
 
   React.useEffect(() => {
     if (debouncedRefresh) {
-      // Use targeted cache update instead of full refresh
-      queryClient.setQueryData(['themes'], (oldData: Theme[] | undefined) => {
-        // Optimistically update cache or trigger minimal refetch
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldData: Theme[] | undefined) => {
         return oldData; // Keep existing data, let real-time handle updates
       });
       setShouldRefreshThemes(false);
@@ -109,12 +105,6 @@ export default function StoriesDashboard() {
   };
 
   const handlePostUpdate = (update: any) => {
-    console.log('🔄 REALTIME: handlePostUpdate called for post update', {
-      postId: update?.id,
-      category: update?.category,
-      usingDebouncedUpdate: true
-    });
-    
     setShouldRefreshThemes(true);
   };
 
@@ -258,7 +248,7 @@ export default function StoriesDashboard() {
 
       setCustomThemeDescription('');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Theme generation error:', error);
       toast({
         title: "Generation Failed",

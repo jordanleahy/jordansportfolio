@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { unifiedRealtimeManager } from '@/services/realtime/UnifiedRealtimeManager';
 import { realtimeEventBus } from '@/services/realtime/RealtimeEventBus';
 import { toast } from 'sonner';
+import { QUERY_KEYS, getThemeQueryKeys } from '@/constants/queryKeys';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { ColorTheme } from '@/types/colorTheme';
 
@@ -118,10 +119,10 @@ export const useUnifiedRealtime = ({
         onPostInsert(record);
       }
 
-      // Invalidate relevant caches
-      queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
-      queryClient.invalidateQueries({ queryKey: ['theme-posts', record.theme] });
-      queryClient.invalidateQueries({ queryKey: ['themes'] });
+      // Use centralized query keys for invalidation
+      getThemeQueryKeys(record.theme || '', record.category).forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
 
       toast.success(`New post created in ${record.category}`);
     } else if (eventType === 'UPDATE' && record && oldRecord) {
@@ -162,12 +163,10 @@ export const useUnifiedRealtime = ({
           console.warn(`⚠️ REALTIME: No onPostUpdate callback available for post: ${record.id}`);
         }
 
-        // Invalidate relevant caches
-        console.log(`🗄️ REALTIME: Invalidating caches for category: ${record.category}`);
-        queryClient.invalidateQueries({ queryKey: ['posts', record.category] });
-        queryClient.invalidateQueries({ queryKey: ['theme-posts', record.theme] });
-        queryClient.invalidateQueries({ queryKey: ['themes'] });
-        queryClient.invalidateQueries({ queryKey: ['posts'] });
+        // Use centralized query keys for invalidation
+        getThemeQueryKeys(record.theme || '', record.category).forEach(key => {
+          queryClient.invalidateQueries({ queryKey: key });
+        });
 
         // Show toast for completed images
         const completedImages = [];
@@ -191,10 +190,10 @@ export const useUnifiedRealtime = ({
     } else if (eventType === 'DELETE' && oldRecord) {
       console.log(`[UnifiedRealtime] Post deleted: ${oldRecord.id}`);
       
-      // Invalidate relevant caches
-      queryClient.invalidateQueries({ queryKey: ['posts', oldRecord.category] });
-      queryClient.invalidateQueries({ queryKey: ['theme-posts', oldRecord.theme] });
-      queryClient.invalidateQueries({ queryKey: ['themes'] });
+      // Use centralized query keys for invalidation  
+      getThemeQueryKeys(oldRecord.theme || '', oldRecord.category).forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
     }
   };
 

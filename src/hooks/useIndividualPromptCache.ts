@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
+import { QUERY_KEYS, getAllPostQueryKeys } from '@/constants/queryKeys';
 
 interface IndividualPromptData {
   prompt: string;
@@ -14,7 +15,7 @@ export const useIndividualPromptCache = (postId: string) => {
   const { toast } = useToast();
 
   const query = useQuery({
-    queryKey: ['individual-prompt', postId],
+    queryKey: QUERY_KEYS.individualPrompt(postId),
     queryFn: async (): Promise<IndividualPromptData | null> => {
       if (!postId) return null;
 
@@ -75,7 +76,7 @@ export const useIndividualPromptCache = (postId: string) => {
         version: (query.data?.version || 0) + 1
       };
       
-      queryClient.setQueryData(['individual-prompt', postId], optimisticData);
+      queryClient.setQueryData(QUERY_KEYS.individualPrompt(postId), optimisticData);
 
       // Update the social_media_posts table
       const { error: updateError } = await supabase
@@ -92,9 +93,11 @@ export const useIndividualPromptCache = (postId: string) => {
       return { newPrompt, userId: user.id };
     },
     onSuccess: async () => {
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['individual-prompt', postId] });
+      // Use centralized query keys
+      getAllPostQueryKeys().forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
       
       toast({
         title: "Success",
@@ -103,7 +106,7 @@ export const useIndividualPromptCache = (postId: string) => {
     },
     onError: (error) => {
       // Revert optimistic update
-      queryClient.invalidateQueries({ queryKey: ['individual-prompt', postId] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
       
       toast({
         title: "Error",
@@ -150,8 +153,10 @@ export const useIndividualPromptCache = (postId: string) => {
       return data;
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['individual-prompt', postId] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+      getAllPostQueryKeys().forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
       
       toast({
         title: "Success",
@@ -169,8 +174,10 @@ export const useIndividualPromptCache = (postId: string) => {
   });
 
   const invalidateCache = useCallback(async () => {
-    queryClient.invalidateQueries({ queryKey: ['individual-prompt', postId] });
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+    getAllPostQueryKeys().forEach(key => {
+      queryClient.invalidateQueries({ queryKey: key });
+    });
   }, [postId, queryClient]);
 
   return {

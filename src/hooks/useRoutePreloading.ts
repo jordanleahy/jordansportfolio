@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
 // Get user preferences from localStorage with enhanced debugging
@@ -58,7 +59,7 @@ export const useRoutePreloading = () => {
         
         // 1. Prefetch available themes first (highest priority)
         await queryClient.prefetchQuery({
-          queryKey: ['themes'],
+          queryKey: QUERY_KEYS.themes,
           queryFn: () => optimizedSocialMediaService.getAvailableThemes(),
           staleTime: 10 * 60 * 1000,
         });

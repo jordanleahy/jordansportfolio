@@ -15,11 +15,11 @@ interface Theme {
 
 interface CategoriesGridProps {
   themes: Theme[];
-  shimmerThemes?: string[];
-  onDeleteCategory?: (category: string) => void;
+  shimmerThemes: string[];
+  onDeleteCategory: (category: string) => void;
 }
 
-export const CategoriesGrid = ({ themes, shimmerThemes = [], onDeleteCategory }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ themes, shimmerThemes, onDeleteCategory }: CategoriesGridProps) => {
   const hasAnyContent = themes.length > 0 || shimmerThemes.length > 0;
   
   if (!hasAnyContent) {

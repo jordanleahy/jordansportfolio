@@ -3,12 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedRealtime } from './useUnifiedRealtime';
+import { QUERY_KEYS, getThemeQueryKeys } from '@/constants/queryKeys';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Individual category query hook for granular caching
 export const useCategoryPosts = (category: string, enabled = true) => {
   return useQuery({
-    queryKey: ['posts', category],
+    queryKey: QUERY_KEYS.postsByCategory(category),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('social_media_posts')
@@ -27,7 +28,7 @@ export const useCategoryPosts = (category: string, enabled = true) => {
 // Theme-specific query hook for theme detail pages
 export const useThemePosts = (theme: string, enabled = true) => {
   return useQuery({
-    queryKey: ['theme-posts', theme],
+    queryKey: QUERY_KEYS.postsByTheme(theme),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('social_media_posts')
@@ -46,7 +47,7 @@ export const useThemePosts = (theme: string, enabled = true) => {
 // Optimized available themes hook
 export const useAvailableThemes = (enabled = true) => {
   return useQuery({
-    queryKey: ['themes'],
+    queryKey: QUERY_KEYS.themes,
     queryFn: async () => {
       // Import here to avoid circular dependency
       const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
@@ -68,9 +69,10 @@ export function useOptimizedStories(user: any) {
     enabled: !!user?.id,
     userId: user?.id,
     onPostUpdate: (post: SocialMediaPost) => {
-      queryClient.invalidateQueries({ queryKey: ['posts', post.category] });
-      queryClient.invalidateQueries({ queryKey: ['theme-posts', post.theme] });
-      queryClient.invalidateQueries({ queryKey: ['themes'] });
+      // Use centralized query keys for invalidation
+      getThemeQueryKeys(post.theme || '', post.category).forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
     }
   });
 
@@ -111,7 +113,7 @@ export function useOptimizedStories(user: any) {
 
   // Active category posts query with optimistic updates
   const activeTabQuery = useQuery({
-    queryKey: ['posts', activeTab],
+    queryKey: QUERY_KEYS.postsByCategory(activeTab),
     queryFn: async () => {
       if (!activeTab) return [];
       const { data, error } = await supabase
@@ -136,7 +138,7 @@ export function useOptimizedStories(user: any) {
       availableThemes.forEach((theme) => {
         if (theme.theme !== activeTab) {
           queryClient.prefetchQuery({
-            queryKey: ['posts', theme.theme],
+            queryKey: QUERY_KEYS.postsByTheme(theme.theme),
             queryFn: async () => {
               const { data, error } = await supabase
                 .from('social_media_posts')
@@ -160,9 +162,8 @@ export function useOptimizedStories(user: any) {
   };
 
   const invalidateCache = () => {
-    console.log('🔄 Invalidating stories cache');
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
-    queryClient.invalidateQueries({ queryKey: ['themes'] });
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.posts });
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.themes });
   };
 
 
