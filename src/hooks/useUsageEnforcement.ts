@@ -29,6 +29,30 @@ export const useUsageEnforcement = () => {
         toast.error(data.message || `Usage limit exceeded for ${usageType}`);
       }
 
+      // Send usage alert if approaching limit (80% or more)
+      if (data.remaining !== undefined && data.limit !== undefined) {
+        const usagePercentage = ((data.limit - data.remaining) / data.limit) * 100;
+        if (usagePercentage >= 80) {
+          try {
+            const user = (await supabase.auth.getUser()).data.user;
+            if (user) {
+              await supabase.functions.invoke('send-usage-alert', {
+                body: {
+                  userEmail: user.email,
+                  userName: user.user_metadata?.name,
+                  usageType: usageType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                  currentUsage: data.limit - data.remaining,
+                  limit: data.limit,
+                  percentageUsed: usagePercentage
+                }
+              });
+            }
+          } catch (emailError) {
+            console.error('Failed to send usage alert email:', emailError);
+          }
+        }
+      }
+
       return data;
     } catch (error) {
       console.error('Usage check failed:', error);
