@@ -58,8 +58,10 @@ export function useTableLoadingState({
 
   // Notify parent of loading state changes
   useEffect(() => {
-    onLoadingChange?.(isTableLoading);
-  }, [isTableLoading, onLoadingChange]);
+    if (onLoadingChange) {
+      onLoadingChange(isTableLoading);
+    }
+  }, [isTableLoading]); // Remove onLoadingChange from deps to prevent re-renders
 
   return {
     isTableLoading,
