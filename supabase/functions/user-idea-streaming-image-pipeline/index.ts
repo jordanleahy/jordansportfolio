@@ -62,18 +62,53 @@ JSON STRUCTURE REQUIRED:
   return JSON.parse(generatedContent);
 };
 
-const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<number> => {
+const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
   console.log('💾 Importing theme to database:', themeData.category);
   console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
   
   try {
+    // First, create or find the theme
+    const { data: existingTheme, error: themeSelectError } = await supabase
+      .from('themes')
+      .select('id')
+      .eq('name', themeData.theme)
+      .eq('category', themeData.category)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    let themeId: string;
+
+    if (existingTheme) {
+      themeId = existingTheme.id;
+      console.log('🔍 Found existing theme:', themeId);
+    } else {
+      // Create new theme
+      const { data: newTheme, error: themeInsertError } = await supabase
+        .from('themes')
+        .insert({
+          user_id: userId,
+          name: themeData.theme,
+          description: themeData.theme_description,
+          category: themeData.category
+        })
+        .select('id')
+        .single();
+
+      if (themeInsertError) {
+        console.error('❌ Theme creation error:', themeInsertError);
+        throw new Error(`Theme creation failed: ${themeInsertError.message}`);
+      }
+
+      themeId = newTheme.id;
+      console.log('✅ Created new theme:', themeId);
+    }
+
     // Import posts using direct insert instead of RPC to ensure proper authentication context
     const postsToInsert = themeData.posts.map((post: ThemePost) => ({
       day: post.day,
       title: post.title,
-      description: post.description, // Fixed: use post.description not post.story_description
-      theme: themeData.theme,
-      theme_description: themeData.theme_description,
+      description: post.description,
+      theme_id: themeId,
       category: themeData.category,
       user_id: userId,
       status: 'draft',
@@ -87,7 +122,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert(postsToInsert)
-      .select('id, category, theme, title');
+      .select('id, category, theme_id, title');
 
     if (error) {
       console.error('❌ Database insert error:', JSON.stringify(error, null, 2));
@@ -106,22 +141,22 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     }
 
     console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
-    console.log('📊 Imported posts:', data.map(p => ({ id: p.id, theme: p.theme, title: p.title })));
+    console.log('📊 Imported posts:', data.map(p => ({ id: p.id, theme_id: p.theme_id, title: p.title })));
     
     // Verify posts were actually created by querying them back
     const { data: verification, error: verifyError } = await supabase
       .from('social_media_posts')
-      .select('id, theme, category, title')
-      .eq('theme', themeData.theme)
+      .select('id, theme_id, category, title')
+      .eq('theme_id', themeId)
       .eq('user_id', userId);
     
     if (verifyError) {
       console.warn('⚠️ Could not verify posts were created:', verifyError);
     } else {
-      console.log(`🔍 Verification: Found ${verification?.length || 0} posts in database for theme: ${themeData.theme}`);
+    console.log(`🔍 Verification: Found ${verification?.length || 0} posts in database for theme: ${themeData.theme}`);
     }
     
-    return data.length;
+    return { insertedCount: data.length, createdThemeId: themeId };
     
   } catch (error) {
     console.error('❌ Import theme error:', error);
@@ -187,6 +222,7 @@ serve(async (req) => {
     if (stream) {
       const streamResponse = new ReadableStream({
         async start(controller) {
+          let themeId: string;
           try {
             // Step 1: Generate Theme (20% progress)
             sendStreamEvent(controller, {
@@ -214,7 +250,8 @@ serve(async (req) => {
               data: { status: 'Importing posts to database...' }
             });
 
-            const insertedCount = await importThemeToDatabase(supabase, themeData, userId);
+            const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+            themeId = createdThemeId;
             
             sendStreamEvent(controller, {
               type: 'database_import_complete',
@@ -251,7 +288,7 @@ serve(async (req) => {
                 theme_image_generation_status: 'generating',
                 updated_at: new Date().toISOString()
               })
-              .eq('theme', themeData.theme)
+              .eq('theme_id', themeId)
               .eq('user_id', userId);
 
             if (statusError) {
@@ -344,7 +381,8 @@ serve(async (req) => {
     } else {
       // Non-streaming response (updated to use background processing)
       const themeData = await generateTheme(description);
-      const insertedCount = await importThemeToDatabase(supabase, themeData, userId);
+      const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+      const themeId = createdThemeId;
       await generateSystemPrompt(supabase, themeData, userId);
       
       // Set posts to generating status
@@ -354,7 +392,7 @@ serve(async (req) => {
           theme_image_generation_status: 'generating',
           updated_at: new Date().toISOString()
         })
-        .eq('theme', themeData.theme)
+        .eq('theme_id', themeId)
         .eq('user_id', userId);
 
       if (statusError) {
