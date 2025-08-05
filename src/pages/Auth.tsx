@@ -117,31 +117,11 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.user && !data.session) {
-        // Send custom branded confirmation email
-        try {
-          await supabase.functions.invoke('send-confirmation-email', {
-            body: {
-              userEmail: formData.email,
-              confirmationUrl: `${redirectUrl}auth/callback?access_token=${data.user.id}&type=signup`,
-              userName: formData.email.split('@')[0]
-            }
-          });
-        } catch (emailError) {
-          console.error('Failed to send custom confirmation email:', emailError);
-          // Continue with success message even if custom email fails
-        }
-
+      if (data.user) {
         toast({
-          title: "Check your email",
-          description: "We sent you a confirmation link to complete your registration.",
+          title: "Success",
+          description: "Account created! Please check your email to verify your account.",
         });
-      } else if (data.session) {
-        toast({
-          title: "Account created successfully!",
-          description: "Welcome to Story Generator!",
-        });
-        window.location.href = '/';
       }
     } catch (error: any) {
       console.error('Sign up error:', error);
