@@ -27,12 +27,26 @@ export function useTableLoadingState({
 
   // Compute combined loading state
   const isTableLoading = useMemo(() => {
-    return blogStatusesLoading || 
+    const loading = blogStatusesLoading || 
            colorThemesLoading || 
            hasUploadingPosts || 
            hasAnimatingPosts || 
            hasCreatingBlogs ||
            hasGeneratingImages;
+    
+    // Debug log to see what's causing the loading
+    if (loading) {
+      console.log('Table still loading:', {
+        blogStatusesLoading,
+        colorThemesLoading,
+        hasUploadingPosts,
+        hasAnimatingPosts,
+        hasCreatingBlogs,
+        hasGeneratingImages
+      });
+    }
+    
+    return loading;
   }, [
     blogStatusesLoading,
     colorThemesLoading,
