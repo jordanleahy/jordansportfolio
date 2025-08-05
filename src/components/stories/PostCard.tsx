@@ -17,6 +17,7 @@ import VideoUploadCard from './VideoUploadCard';
 import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { useColorTheme } from '@/hooks/useColorThemes';
+import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -102,55 +103,46 @@ const PostCardComponent = ({
       setIsGeneratingHero(true);
       setGenerationStep('Generating prompt...');
       
-      // Generate prompt using the same edge function as PostImageUploadCard
-      const promptResponse = await fetch('/api/functions/v1/generate-image-prompt-dynamic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Generate prompt using Supabase functions
+      const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+        body: {
           title: post.title,
           description: post.description,
           category: post.category || 'general',
           colorTheme: colorTheme?.name || ''
-        }),
+        }
       });
 
-      if (!promptResponse.ok) {
-        throw new Error('Failed to generate prompt');
+      if (promptError) {
+        throw new Error(`Failed to generate prompt: ${promptError.message}`);
       }
 
-      const promptData = await promptResponse.json();
-      const prompt = promptData.generatedText || promptData.prompt;
+      const prompt = promptData?.generatedText || promptData?.prompt;
+      if (!prompt) {
+        throw new Error('No prompt generated');
+      }
 
       setGenerationStep('Generating image...');
       
       // Generate image using the prompt
-      const imageResponse = await fetch('/api/functions/v1/generate-image-gpt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt', {
+        body: {
           prompt: prompt,
           aspectRatio: '16_9'
-        }),
+        }
       });
 
-      if (!imageResponse.ok) {
-        throw new Error('Failed to generate image');
+      if (imageError) {
+        throw new Error(`Failed to generate image: ${imageError.message}`);
       }
 
-      const imageData = await imageResponse.json();
-      const base64Image = imageData.image;
+      const base64Image = imageData?.image;
+      if (!base64Image) {
+        throw new Error('No image generated');
+      }
 
       setGenerationStep('Uploading image...');
       
-      // Convert base64 to file and upload to storage
-      const response = await fetch(base64Image);
-      const blob = await response.blob();
-      const file = new File([blob], `generated-16-9-${Date.now()}.png`, { type: 'image/png' });
-
       // Use the existing onImageGenerated callback which handles storage upload
       onImageGenerated(post.id, '16_9', base64Image);
       
@@ -163,7 +155,7 @@ const PostCardComponent = ({
       console.error('Error generating hero image:', error);
       toast({
         title: "Generation failed",
-        description: "Failed to generate hero image. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate hero image. Please try again.",
         variant: "destructive"
       });
     } finally {
