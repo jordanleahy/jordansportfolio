@@ -32,8 +32,7 @@ const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
       {/* Header with back button */}
       <div className="flex items-center justify-between border-b pb-4">
         <Button variant="ghost" onClick={onBack} size="sm">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Setup
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs">
