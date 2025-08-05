@@ -18,6 +18,7 @@ import { BlogPostButton } from './BlogPostButton';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { useColorTheme } from '@/hooks/useColorThemes';
 import { supabase } from '@/integrations/supabase/client';
+import StoryTellingModal from './StoryTellingModal';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardProps {
@@ -68,6 +69,7 @@ const PostCardComponent = ({
   const [showGallery, setShowGallery] = useState(false);
   const [isGeneratingHero, setIsGeneratingHero] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
+  const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -298,6 +300,15 @@ const PostCardComponent = ({
               className="h-8 w-8 p-0"
             >
               <Share className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStoryTellingModal(true)}
+              className="h-8 w-8 p-0"
+              title="Create Story Narration"
+            >
+              <Mic className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -614,6 +625,19 @@ const PostCardComponent = ({
             imageAlt={previewImage.alt}
           />
         )}
+        
+        {/* Story Telling Modal */}
+        <StoryTellingModal
+          isOpen={showStoryTellingModal}
+          onClose={() => setShowStoryTellingModal(false)}
+          post={{
+            id: post.id,
+            title: post.title,
+            description: post.description,
+            theme: post.theme,
+            category: post.category
+          }}
+        />
       </CardContent>
     </Card>
   );

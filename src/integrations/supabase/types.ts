@@ -1766,6 +1766,50 @@ export type Database = {
           },
         ]
       }
+      story_recordings: {
+        Row: {
+          audio_file_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          generated_script: string
+          id: string
+          post_id: string
+          story_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_file_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          generated_script: string
+          id?: string
+          post_id: string
+          story_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_file_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          generated_script?: string
+          id?: string
+          post_id?: string
+          story_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_recordings_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_media_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_prompts: {
         Row: {
           agent_id: string
@@ -2294,6 +2338,10 @@ export type Database = {
       insert_sirs_agent: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      insert_story_telling_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       is_bootstrap_admin: {
         Args: { _user_id: string }

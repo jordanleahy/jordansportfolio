@@ -35,6 +35,13 @@ export const getCoverLetterGeneratorName = (): string => {
 };
 
 /**
+ * Get the Story Telling Agent name
+ */
+export const getStoryTellingAgentName = (): string => {
+  return AGENT_NAMES.STORY_TELLING_AGENT;
+};
+
+/**
  * Check if an agent name matches the Visual Prompt Generator
  * @param agentName - The agent name to check
  * @returns true if the name matches the Visual Prompt Generator
