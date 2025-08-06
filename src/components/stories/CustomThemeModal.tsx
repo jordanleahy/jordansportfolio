@@ -74,8 +74,11 @@ export const CustomThemeModal: React.FC<CustomThemeModalProps> = ({
     setIsGenerating(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { description: description.trim() }
+      const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+        body: { 
+          description: description.trim(),
+          stream: false 
+        }
       });
 
       if (error) {

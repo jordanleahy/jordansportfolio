@@ -5,7 +5,7 @@ export const EDGE_FUNCTION_NAMES = {
   GENERATE_CONTENT: 'generate-content',
   GENERATE_IMAGE_PROMPT_DYNAMIC: 'generate-image-prompt-dynamic',
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
-  GENERATE_CUSTOM_THEME: 'generate-custom-theme',
+  
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE_GPT: 'generate-image-gpt',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
