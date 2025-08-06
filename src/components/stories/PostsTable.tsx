@@ -26,9 +26,11 @@ import { PostsTableProps } from '@/types/stories';
 
 export const PostsTable = ({
   posts,
-  onPostUpdate,
-  onPostDelete,
-  showBulkActions = false,
+  onPostsChange,
+  isAdmin = false,
+  category,
+  selectedThemeId,
+  onThemeChange,
 }: PostsTableProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);

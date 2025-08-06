@@ -34,9 +34,11 @@ export interface PostCardProps {
 
 export interface PostsTableProps {
   posts: SocialMediaPost[];
-  onPostUpdate?: (post: SocialMediaPost) => void;
-  onPostDelete?: (postId: string) => void;
-  showBulkActions?: boolean;
+  onPostsChange: () => void | Promise<void>;
+  isAdmin?: boolean;
+  category?: string;
+  selectedThemeId?: string;
+  onThemeChange?: (themeId: string) => void;
 }
 
 export interface PostsTableViewProps {
