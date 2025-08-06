@@ -38,42 +38,24 @@ const Subscription: React.FC = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="usage" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="usage" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              {isMobile ? 'Usage' : 'Usage & Billing'}
-            </TabsTrigger>
-            <TabsTrigger value="plans" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              {isMobile ? 'Plans' : 'Plans & Pricing'}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="usage">
-            <UsageDashboard />
-          </TabsContent>
-
-          <TabsContent value="plans">
-            {isMobile ? (
-              <div className="space-y-6">
-                <PlanCarousel 
-                  tiers={tiers}
-                  currentTier={status?.subscription?.tier?.id}
-                  onSelectPlan={handleSelectPlan}
-                />
-                <MobilePlanComparison 
-                  tiers={tiers}
-                  currentTier={status?.subscription?.tier?.id}
-                  onSelectPlan={handleSelectPlan}
-                />
-              </div>
-            ) : (
-              <SubscriptionPlans />
-            )}
-          </TabsContent>
-
-        </Tabs>
+        <div className="space-y-6">
+          {isMobile ? (
+            <div className="space-y-6">
+              <PlanCarousel 
+                tiers={tiers}
+                currentTier={status?.subscription?.tier?.id}
+                onSelectPlan={handleSelectPlan}
+              />
+              <MobilePlanComparison 
+                tiers={tiers}
+                currentTier={status?.subscription?.tier?.id}
+                onSelectPlan={handleSelectPlan}
+              />
+            </div>
+          ) : (
+            <SubscriptionPlans />
+          )}
+        </div>
       </div>
     </PageLayout>
   );
