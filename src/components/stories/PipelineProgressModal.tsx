@@ -4,15 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-interface PipelineProgressModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  progress: number;
-  currentStage: string;
-  isProcessing: boolean;
-  error: string | null;
-  result: any | null;
-}
+import type { PipelineProgressModalProps } from '@/types/stories/ui';
 
 export const PipelineProgressModal: React.FC<PipelineProgressModalProps> = ({
   open,

@@ -22,25 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 import StoryTellingModal from './StoryTellingModal';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-interface PostCardProps {
-  post: SocialMediaPost;
-  draftIndex?: number;
-  onCopy: (post: SocialMediaPost) => void;
-  onDelete: (postId: string) => void;
-  onGeneratePrompt: (post: SocialMediaPost) => void;
-  onGenerateVoiceover?: (post: SocialMediaPost) => void;
-  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
-  onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
-  onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
-  onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
-  onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
-  onPostsChange?: () => void;
-  uploadingStates: {
-    [key: string]: boolean;
-  };
-  isAdmin?: boolean;
-}
+import type { PostCardProps } from '@/types/stories/ui';
 
 const PostCardComponent = ({ 
   post, 
@@ -57,6 +39,8 @@ const PostCardComponent = ({
   onStatusChange,
   onPostsChange,
   uploadingStates,
+  completingPosts,
+  isUploading: isUploadingProp,
   isAdmin = false
 }: PostCardProps) => {
   const { toast } = useToast();
@@ -83,12 +67,12 @@ const PostCardComponent = ({
     return text.length > limit ? text.substring(0, limit) + '...' : text;
   };
 
-  const isUploading = (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
+  const isUploading = isUploadingProp || ((postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
     if (aspectRatio) {
       return uploadingStates[`${postId}_${aspectRatio}`] || false;
     }
     return Object.keys(uploadingStates).some(key => key.startsWith(`${postId}_`));
-  };
+  });
 
   const getUploadType = (postId: string): '16_9' | '9_16' | '3_4' | '4_3' | null => {
     const uploadKey = Object.keys(uploadingStates).find(key => 

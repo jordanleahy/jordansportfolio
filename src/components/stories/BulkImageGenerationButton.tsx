@@ -7,14 +7,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
-
-interface BulkImageGenerationButtonProps {
-  post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
-  onPostsChange?: (posts: SocialMediaPost[]) => void;
-}
+import type { BulkImageGenerationButtonProps } from '@/types/stories/ui';
 
 export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps> = ({
   post,

@@ -25,9 +25,7 @@ interface ColorConsistencyReport {
   }>;
 }
 
-interface ColorThemeConsistencyCheckerProps {
-  category: string;
-}
+import type { ColorThemeConsistencyCheckerProps } from '@/types/stories/ui';
 
 export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyCheckerProps> = ({ category }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);

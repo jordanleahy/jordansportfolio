@@ -17,21 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface ImageUploadCardProps {
-  title: string;
-  aspectRatio: string;
-  displayAspectRatio?: string;
-  imageUrl?: string;
-  onImageUpload: (url: string) => void;
-  onImageRemove: () => void;
-  // For AI generation
-  postData?: {
-    id: string;
-    title: string;
-    description: string;
-    category?: string;
-  };
-}
+import type { ImageUploadCardProps } from '@/types/stories/ui';
 
 export const ImageUploadCard = ({ 
   title, 

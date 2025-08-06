@@ -9,13 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, QUERY_CONFIG } from '@/constants/queryKeys';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { getCategoryLabel, validateCategoryName, DEFAULT_CATEGORIES } from '@/constants/categoryConstants';
-
-interface CategoryInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-}
+import type { CategoryInputProps } from '@/types/stories/ui';
 
 export const CategoryInput = ({ value, onChange, placeholder = "Select or enter category...", disabled = false }: CategoryInputProps) => {
   const [open, setOpen] = useState(false);

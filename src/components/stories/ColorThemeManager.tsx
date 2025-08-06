@@ -15,11 +15,7 @@ import { CreateColorTheme, ColorTheme, VISUAL_STYLES } from '@/types/colorTheme'
 import { useToast } from '@/hooks/use-toast';
 import { colorThemeService } from '@/services/colorThemeService';
 
-interface ColorThemeManagerProps {
-  trigger?: React.ReactNode;
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+import type { ColorThemeManagerProps } from '@/types/stories/ui';
 
 export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger, isOpen: externalIsOpen, onClose: externalOnClose }) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);

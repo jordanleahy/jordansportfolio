@@ -23,28 +23,7 @@ interface BlogStatus {
   error?: string;
 }
 
-interface PostsTableViewProps {
-  posts: SocialMediaPost[];
-  activeTab: 'draft' | 'published';
-  creatingBlogIds: Set<string>;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
-  onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
-  onCopyContent: (post: SocialMediaPost) => void;
-  onDeletePost: (postId: string) => void;
-  onCreateBlogPost: (post: SocialMediaPost) => void;
-  onGenerateVoiceoverScript: (post: SocialMediaPost) => void;
-  onGenerateImagePrompt: (post: SocialMediaPost) => void;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey, post: SocialMediaPost) => void;
-  onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
-  onPreviewImage: (url: string, alt: string) => void;
-  onPostsChange: () => void;
-  isAdmin?: boolean;
-  animatingRows?: Set<string>;
-  completingRows?: Set<string>;
-  getRowAnimationClass?: (postId: string) => string;
-  blogStatuses?: Record<string, BlogStatus>;
-}
+import type { PostsTableViewProps } from '@/types/stories/ui';
 
 const getStatusColor = (status: string) => {
   switch (status) {

@@ -2,18 +2,7 @@ import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Loader2 } from 'lucide-react';
-
-interface BatchProcessingSkeletonProps {
-  isGenerating: boolean;
-  progress: {
-    completed: number;
-    total: number;
-    currentAspectRatio?: string;
-    isProcessing?: boolean;
-    isFinalizing?: boolean;
-  };
-  className?: string;
-}
+import type { BatchProcessingSkeletonProps } from '@/types/stories/ui';
 
 export const BatchProcessingSkeleton: React.FC<BatchProcessingSkeletonProps> = ({
   isGenerating,

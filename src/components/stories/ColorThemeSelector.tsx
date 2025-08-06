@@ -5,14 +5,7 @@ import { Palette, Plus } from "lucide-react";
 import { ColorTheme } from "@/types/colorTheme";
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 
-interface ColorThemeSelectorProps {
-  themes: ColorTheme[];
-  selectedThemeId?: string;
-  onThemeChange: (themeId: string) => void;
-  showAddOption?: boolean;
-  onAddTheme?: () => void;
-  className?: string;
-}
+import type { ColorThemeSelectorProps } from '@/types/stories/ui';
 
 export function ColorThemeSelector({ 
   themes, 

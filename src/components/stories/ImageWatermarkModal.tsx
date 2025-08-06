@@ -4,13 +4,7 @@ import { Button } from '@/components/ui/button';
 import { WatermarkCanvas } from './WatermarkCanvas';
 import { Loader2 } from 'lucide-react';
 
-interface ImageWatermarkModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  file: File | null;
-  onConfirm: (watermarkedFile: File) => void;
-  watermarkText?: string;
-}
+import type { ImageWatermarkModalProps } from '@/types/stories/ui';
 
 export const ImageWatermarkModal: React.FC<ImageWatermarkModalProps> = ({
   isOpen,

@@ -6,10 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useBlogStatus } from '@/hooks/useBlogStatus';
 import type { SocialMediaPost } from '@/types/socialMedia';
-
-interface BlogPostButtonProps {
-  post: SocialMediaPost;
-}
+import type { BlogPostButtonProps } from '@/types/stories/ui';
 
 export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
   const { toast } = useToast();

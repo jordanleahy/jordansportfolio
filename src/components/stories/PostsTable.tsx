@@ -252,7 +252,7 @@ export const PostsTable = ({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} completingPosts={new Set()} isUploading={isUploading} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -265,7 +265,7 @@ export const PostsTable = ({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onFileSelect={(postId, aspectRatio) => handleFileSelect(postId, aspectRatio, post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} completingPosts={new Set()} isUploading={isUploading} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>

@@ -11,11 +11,7 @@ import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { diffLines } from 'diff';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-interface IndividualPromptViewerProps {
-  post: SocialMediaPost | null;
-  isVisible: boolean;
-  onClose: () => void;
-}
+import type { IndividualPromptViewerProps } from '@/types/stories/ui';
 
 export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   post,

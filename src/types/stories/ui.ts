@@ -29,10 +29,24 @@ export interface CategoryCardProps {
 
 export interface PostCardProps {
   post: SocialMediaPost;
-  onGenerateImages?: (post: SocialMediaPost) => void;
-  onViewPrompt?: (post: SocialMediaPost) => void;
-  onDelete?: (postId: string) => void;
-  showActions?: boolean;
+  draftIndex?: number;
+  onCopy: (post: SocialMediaPost) => void;
+  onDelete: (postId: string) => void;
+  onGeneratePrompt: (post: SocialMediaPost) => void;
+  onGenerateVoiceover?: (post: SocialMediaPost) => void;
+  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
+  onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
+  onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
+  onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
+  onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
+  onPostsChange?: () => void;
+  uploadingStates: {
+    [key: string]: boolean;
+  };
+  completingPosts?: Set<string>;
+  isUploading: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => boolean;
+  isAdmin?: boolean;
 }
 
 export interface PostsTableProps {
@@ -47,19 +61,24 @@ export interface PostsTableProps {
 export interface PostsTableViewProps {
   posts: SocialMediaPost[];
   activeTab: 'draft' | 'published';
-  uploadStates: UploadState[];
   creatingBlogIds: Set<string>;
-  blogStatuses: Record<string, { exists: boolean; status?: string; id?: string; slug?: string; isLoading: boolean; error?: string }>;
-  onStatusChange: (postId: string, newStatus: string) => void;
-  onBulkStatusChange: (postIds: string[], newStatus: string) => void;
-  onCopyPost: (post: SocialMediaPost) => void;
+  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
+  getUploadType: (postId: string) => AspectRatioKey | null;
+  onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
+  onCopyContent: (post: SocialMediaPost) => void;
   onDeletePost: (postId: string) => void;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey, file: File) => void;
-  onPreviewMedia: (post: SocialMediaPost) => void;
-  onCreateBlogPost: (postId: string) => void;
-  onGenerateVoiceoverScript: (postId: string) => void;
+  onCreateBlogPost: (post: SocialMediaPost) => void;
+  onGenerateVoiceoverScript: (post: SocialMediaPost) => void;
+  onGenerateImagePrompt: (post: SocialMediaPost) => void;
+  onFileSelect: (postId: string, aspectRatio: AspectRatioKey, post: SocialMediaPost) => void;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
+  onPreviewImage: (url: string, alt: string) => void;
+  onPostsChange: () => void;
   isAdmin?: boolean;
+  animatingRows?: Set<string>;
+  completingRows?: Set<string>;
+  getRowAnimationClass?: (postId: string) => string;
+  blogStatuses?: Record<string, BlogStatus>;
 }
 
 export interface UploadState {
@@ -86,8 +105,7 @@ export interface ThemeImportModalOptimizedProps {
 export interface CustomThemeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGenerateTheme: (description: string) => Promise<void>;
-  isGenerating?: boolean;
+  onImportComplete?: () => void;
 }
 
 export interface JsonImportDialogProps {
@@ -106,7 +124,6 @@ export interface CategoryInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  suggestions?: string[];
   disabled?: boolean;
 }
 
@@ -132,15 +149,20 @@ export interface LoadingState {
 export interface ImagePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  imageUrl?: string;
+  imageUrl: string;
+  imageAlt: string;
   title?: string;
+  aspectRatio?: string;
 }
 
 export interface ImagePromptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  post: SocialMediaPost;
-  onPromptGenerated?: (prompt: string) => void;
+  title: string;
+  description: string;
+  postId: string;
+  cachedPrompt?: string | null;
+  category?: string;
 }
 
 // Subscription Component Props
@@ -197,9 +219,10 @@ export interface SystemPromptViewerProps {
 // Image Generation Props
 export interface BulkImageGenerationButtonProps {
   post: SocialMediaPost;
-  onGenerationStart?: () => void;
-  onGenerationComplete?: (urls: string[]) => void;
-  disabled?: boolean;
+  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
+  getUploadType: (postId: string) => AspectRatioKey | null;
+  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
+  onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
 export interface BulkGenerationThumbnailsProps {
@@ -225,7 +248,7 @@ export interface BlogPostButtonProps {
 
 export interface BlogStatus {
   exists: boolean;
-  status?: string;
+  status?: 'draft' | 'published';
   id?: string;
   slug?: string;
   isLoading: boolean;
@@ -248,10 +271,17 @@ export interface BlogStatusBadgeProps {
 // Upload and Media Props
 export interface ImageUploadCardProps {
   title: string;
-  description?: string;
-  onImageUpload: (file: File) => void;
-  maxSizeInMB?: number;
-  acceptedFormats?: string[];
+  aspectRatio: string;
+  displayAspectRatio?: string;
+  imageUrl?: string;
+  onImageUpload: (url: string) => void;
+  onImageRemove: () => void;
+  postData?: {
+    id: string;
+    title: string;
+    description: string;
+    category?: string;
+  };
 }
 
 export interface VideoUploadCardProps {
@@ -289,26 +319,30 @@ export interface MediaItem {
 // Color Theme Props
 export interface ColorThemeManagerProps {
   trigger?: React.ReactNode;
-  onThemeSelected?: (theme: any) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export interface ColorThemeSelectorProps {
-  themes: any[];
-  selectedTheme?: string;
-  onThemeSelect: (themeId: string) => void;
+  themes: ColorTheme[];
+  selectedThemeId?: string;
+  onThemeChange: (themeId: string) => void;
+  showAddOption?: boolean;
+  onAddTheme?: () => void;
+  className?: string;
 }
 
 export interface ColorThemeConsistencyCheckerProps {
   category: string;
-  onInconsistencyFound?: (issues: string[]) => void;
 }
 
 // Watermark Props
 export interface ImageWatermarkModalProps {
   isOpen: boolean;
   onClose: () => void;
-  imageFile?: File;
-  onWatermarkedImage?: (file: File) => void;
+  file: File | null;
+  onConfirm: (watermarkedFile: File) => void;
+  watermarkText?: string;
 }
 
 export interface WatermarkCanvasProps {
@@ -322,14 +356,23 @@ export interface WatermarkCanvasProps {
 export interface PipelineProgressModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  progress?: number;
-  currentStep?: string;
-  error?: string;
+  progress: number;
+  currentStage: string;
+  isProcessing: boolean;
+  error: string | null;
+  result: any | null;
 }
 
 export interface BatchProcessingSkeletonProps {
   isGenerating: boolean;
-  itemCount?: number;
+  progress: {
+    completed: number;
+    total: number;
+    currentAspectRatio?: string;
+    isProcessing?: boolean;
+    isFinalizing?: boolean;
+  };
+  className?: string;
 }
 
 // Story Telling Props
@@ -375,7 +418,7 @@ export interface StoryTellingModalProps {
 // Individual Prompt Viewer Props
 export interface IndividualPromptViewerProps {
   post: SocialMediaPost | null;
-  isOpen: boolean;
+  isVisible: boolean;
   onClose: () => void;
 }
 
