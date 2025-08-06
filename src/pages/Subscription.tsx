@@ -36,6 +36,30 @@ const Subscription: React.FC = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Free Plan Highlight Card */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 font-bold text-lg">FREE</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-green-800">Start with 5 Free Credits</h3>
+                  <p className="text-green-600 text-sm">Try our AI generation tools at no cost</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-800">$0</div>
+                <div className="text-green-600 text-sm">/month</div>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-4 text-sm text-green-700">
+              <span>✓ 5 Credits per month</span>
+              <span>✓ Image Generation</span>
+              <span>✓ Text Generation</span>
+            </div>
+          </div>
+
           {isMobile ? (
             <PlanCarousel 
               tiers={tiers}
