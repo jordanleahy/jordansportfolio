@@ -71,8 +71,18 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                         {tier.max_image_generations} AI Images
                       </span>
                     </div>
-                    
-                    
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-accent" />
+                      <span className="text-sm text-foreground">
+                        {tier.max_dalle_images} DALL-E 3 Images
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-accent" />
+                      <span className="text-sm text-foreground">
+                        {tier.max_text_generations} Text Generations
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-accent" />
                       <span className="text-sm text-foreground">Priority Support</span>
