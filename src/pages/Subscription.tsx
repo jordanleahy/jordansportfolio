@@ -33,9 +33,6 @@ const Subscription: React.FC = () => {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">Subscription</h1>
-          <p className="text-muted-foreground">
-            Manage your subscription and monitor your AI usage
-          </p>
         </div>
 
         <div className="space-y-6">
