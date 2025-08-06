@@ -40,6 +40,7 @@ export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps
             description: theme.first_post.description
           } : undefined}
           onDelete={onDeleteCategory}
+          isShimmer={theme.id.startsWith('pending-')}
         />
       ))}
     </div>

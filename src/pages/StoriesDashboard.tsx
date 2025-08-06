@@ -40,6 +40,7 @@ export default function StoriesDashboard() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
+  const [pendingTheme, setPendingTheme] = useState<{ theme_name: string; description: string } | null>(null);
   const { toast } = useToast();
 
   // Simplified state management
@@ -142,7 +143,30 @@ export default function StoriesDashboard() {
       return;
     }
 
+    
     setIsGeneratingTheme(true);
+    
+    // Create a pending shimmer theme for optimistic UI
+    const shimmerTheme: ThemeWithPosts = {
+      id: 'pending-' + Date.now(),
+      theme_name: customThemeDescription.slice(0, 50) + (customThemeDescription.length > 50 ? '...' : ''),
+      description: customThemeDescription,
+      category: customThemeDescription.slice(0, 50),
+      post_count: 0,
+      first_post: {
+        id: 'pending',
+        title: 'Generating theme...',
+        description: customThemeDescription
+      }
+    };
+    
+    setPendingTheme({
+      theme_name: shimmerTheme.theme_name,
+      description: customThemeDescription
+    });
+    
+    // Add shimmer theme to the beginning of the list
+    setAvailableThemes(prev => [shimmerTheme, ...prev]);
     
     try {
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
@@ -165,10 +189,23 @@ export default function StoriesDashboard() {
         description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`,
       });
 
+      // Remove the pending shimmer theme and refresh the list
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      
+      // Refresh themes from server
+      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+      setAvailableThemes(refreshedThemes);
+
       setCustomThemeDescription('');
 
     } catch (error: any) {
       console.error('Theme generation error:', error);
+      
+      // Remove the pending shimmer theme on error
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",
