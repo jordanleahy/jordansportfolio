@@ -16,7 +16,7 @@ import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
-import { ThemeWithPosts } from '@/types/theme';
+import { ThemeWithPosts, PendingTheme } from '@/types/theme';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -27,7 +27,7 @@ export default function StoriesDashboard() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
-  const [pendingTheme, setPendingTheme] = useState<{ theme_name: string; description: string } | null>(null);
+  const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const { toast } = useToast();
 
   // Simplified state management
