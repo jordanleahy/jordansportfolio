@@ -4,22 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
-
 interface PlanCarouselProps {
   tiers: SubscriptionTier[];
   currentTier?: string | null;
   onSelectPlan: (tier: SubscriptionTier) => void;
   isLoading?: boolean;
 }
-
 export const PlanCarousel: React.FC<PlanCarouselProps> = ({
   tiers,
   currentTier,
   onSelectPlan,
-  isLoading = false,
+  isLoading = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'left' && currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
@@ -27,61 +24,31 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
       setCurrentIndex(currentIndex + 1);
     }
   };
-
   const isCurrentPlan = (tierId: string) => currentTier === tierId;
   const isPopular = (tier: SubscriptionTier) => tier.name === 'Premium';
-
-  return (
-    <div className="w-full space-y-4">
+  return <div className="w-full space-y-4">
       {/* Carousel Header */}
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-lg font-semibold text-foreground">Choose Your Plan</h2>
-        <div className="flex gap-1">
-          {tiers.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`h-2 w-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-primary' : 'bg-muted'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
+      
 
       {/* Carousel Container */}
       <div className="relative overflow-hidden">
-        <div 
-          className="flex transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        >
-          {tiers.map((tier, index) => (
-            <div key={tier.id} className="w-full flex-shrink-0 px-1">
-              <Card 
-                className={`relative border-2 transition-all duration-200 ${
-                  isCurrentPlan(tier.id) 
-                    ? 'border-accent bg-accent/5' 
-                    : isPopular(tier)
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-card hover:border-accent/50'
-                }`}
-              >
-                {isPopular(tier) && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+        <div className="flex transition-transform duration-300 ease-out" style={{
+        transform: `translateX(-${currentIndex * 100}%)`
+      }}>
+          {tiers.map((tier, index) => <div key={tier.id} className="w-full flex-shrink-0 px-1">
+              <Card className={`relative border-2 transition-all duration-200 ${isCurrentPlan(tier.id) ? 'border-accent bg-accent/5' : isPopular(tier) ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-accent/50'}`}>
+                {isPopular(tier) && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground font-medium px-3">
                       <Star className="h-3 w-3 mr-1" />
                       Most Popular
                     </Badge>
-                  </div>
-                )}
+                  </div>}
 
-                {isCurrentPlan(tier.id) && (
-                  <div className="absolute -top-3 right-4">
+                {isCurrentPlan(tier.id) && <div className="absolute -top-3 right-4">
                     <Badge variant="secondary" className="font-medium">
                       Current Plan
                     </Badge>
-                  </div>
-                )}
+                  </div>}
 
                 <CardHeader className="pb-4">
                   <div className="space-y-2">
@@ -104,18 +71,8 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                         {tier.max_image_generations} AI Images
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      <span className="text-sm text-foreground">
-                        {tier.max_dalle_images} DALL-E 3 Images
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      <span className="text-sm text-foreground">
-                        {tier.max_text_generations} Text Generations
-                      </span>
-                    </div>
+                    
+                    
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-accent" />
                       <span className="text-sm text-foreground">Priority Support</span>
@@ -123,54 +80,19 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                   </div>
 
                   {/* CTA Button */}
-                  <Button
-                    onClick={() => onSelectPlan(tier)}
-                    disabled={isLoading || isCurrentPlan(tier.id)}
-                    className={`w-full h-11 font-medium ${
-                      isCurrentPlan(tier.id)
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                        : isPopular(tier)
-                        ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                        : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'
-                    }`}
-                  >
-                    {isCurrentPlan(tier.id) ? (
-                      'Current Plan'
-                    ) : (
-                      <div className="flex items-center gap-2">
+                  <Button onClick={() => onSelectPlan(tier)} disabled={isLoading || isCurrentPlan(tier.id)} className={`w-full h-11 font-medium ${isCurrentPlan(tier.id) ? 'bg-muted text-muted-foreground cursor-not-allowed' : isPopular(tier) ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}`}>
+                    {isCurrentPlan(tier.id) ? 'Current Plan' : <div className="flex items-center gap-2">
                         Choose {tier.name}
                         <ArrowRight className="h-4 w-4" />
-                      </div>
-                    )}
+                      </div>}
                   </Button>
                 </CardContent>
               </Card>
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
 
       {/* Swipe Navigation */}
-      <div className="flex justify-center gap-4 pt-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSwipe('left')}
-          disabled={currentIndex === 0}
-          className="h-8 px-3"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSwipe('right')}
-          disabled={currentIndex === tiers.length - 1}
-          className="h-8 px-3"
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
+      
+    </div>;
 };
