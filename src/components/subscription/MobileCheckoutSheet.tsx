@@ -31,9 +31,9 @@ export const MobileCheckoutSheet: React.FC<MobileCheckoutSheetProps> = ({
   };
 
   const features = [
-    `${tier.max_image_generations} AI Image generations`,
-    `${tier.max_dalle_images} DALL-E 3 images`,
-    `${tier.max_text_generations} Text generations`,
+    `${tier.max_image_generations} Credits per month`,
+    'Image Generation (Any model)',
+    'Text Generation (Any model)',
     'Priority support',
     'Advanced features access',
   ];

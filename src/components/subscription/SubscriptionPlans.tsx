@@ -127,7 +127,7 @@ export const SubscriptionPlans: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Zap className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {tier.max_dalle_images} DALL-E 3 premium images
+                        {tier.max_image_generations} Credits per month
                       </span>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ export const SubscriptionPlans: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Type className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {tier.max_text_generations} text generations
+                        All AI models included
                       </span>
                     </div>
                   </div>

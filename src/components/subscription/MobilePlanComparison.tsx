@@ -13,9 +13,9 @@ interface MobilePlanComparisonProps {
 }
 
 const featureComparison = [
-  { label: 'AI Image Generations', key: 'max_image_generations' },
-  { label: 'DALL-E 3 Images', key: 'max_dalle_images' },
-  { label: 'Text Generations', key: 'max_text_generations' },
+  { label: 'Credits per Month', key: 'max_image_generations' },
+  { label: 'Image Generation', key: 'image_generation' },
+  { label: 'Text Generation', key: 'text_generation' },
   { label: 'Priority Support', key: 'priority_support' },
   { label: 'Advanced Features', key: 'advanced_features' },
   { label: 'API Access', key: 'api_access' },
@@ -36,10 +36,10 @@ export const MobilePlanComparison: React.FC<MobilePlanComparisonProps> = ({
     switch (featureKey) {
       case 'max_image_generations':
         return tier.max_image_generations;
-      case 'max_dalle_images':
-        return tier.max_dalle_images;
-      case 'max_text_generations':
-        return tier.max_text_generations;
+      case 'image_generation':
+        return true; // All plans include image generation
+      case 'text_generation':
+        return true; // All plans include text generation
       case 'priority_support':
         return tier.name !== 'Free';
       case 'advanced_features':

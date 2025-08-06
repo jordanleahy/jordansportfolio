@@ -97,10 +97,10 @@ export const QuickSubscribeModal: React.FC<QuickSubscribeModalProps> = ({
               </div>
               <div>
                 <div className="font-medium text-foreground">
-                  {tier.max_dalle_images} DALL-E 3 Images
+                  {tier.max_image_generations} Credits
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Premium quality AI-generated images
+                  Use for any AI generation (images, text, etc.)
                 </div>
               </div>
             </div>
@@ -111,10 +111,10 @@ export const QuickSubscribeModal: React.FC<QuickSubscribeModalProps> = ({
               </div>
               <div>
                 <div className="font-medium text-foreground">
-                  {tier.max_text_generations} Text Generations
+                  Unlimited Features
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Advanced AI text capabilities
+                  Access to all AI models and capabilities
                 </div>
               </div>
             </div>
