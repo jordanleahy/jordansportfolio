@@ -44,13 +44,22 @@ export default function ThemeDetail() {
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
 
-  const handleDeleteTheme = async (themeToDelete: string) => {
+  const handleDeleteTheme = async () => {
+    if (!themeData?.id) {
+      toast({
+        title: "Error",
+        description: "Theme ID not found. Cannot delete theme.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      console.log('Deleting theme:', themeToDelete);
-      await optimizedSocialMediaService.deleteTheme(themeToDelete);
+      console.log('Deleting theme with ID:', themeData.id);
+      await optimizedSocialMediaService.deleteTheme(themeData.id);
       toast({
         title: "Theme Deleted",
-        description: `All posts in the "${themeToDelete}" theme have been deleted.`,
+        description: `All posts in the "${decodedTheme}" theme have been deleted.`,
       });
       
       // Navigate back to dashboard after deletion
@@ -118,7 +127,7 @@ export default function ThemeDetail() {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleDeleteTheme(decodedTheme)}
+                  onClick={handleDeleteTheme}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   Delete Theme
