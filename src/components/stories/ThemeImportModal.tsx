@@ -12,11 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 
-interface ThemeImportModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onImportComplete?: () => void;
-}
+import { ThemeImportModalProps } from '@/types/stories';
 
 type ProcessingState = 'idle' | 'processing' | 'success' | 'error';
 

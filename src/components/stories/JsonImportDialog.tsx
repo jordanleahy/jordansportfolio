@@ -10,9 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
-interface JsonImportDialogProps {
-  onImportComplete: () => void;
-}
+import { JsonImportDialogProps } from '@/types/stories';
 
 interface ImportData {
   category: string;

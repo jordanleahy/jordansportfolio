@@ -22,22 +22,14 @@ import { SystemPromptViewer } from "./SystemPromptViewer";
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
-interface PostsTableOptimizedProps {
-  posts: SocialMediaPost[];
-  onPostsChange: () => void;
-  isAdmin?: boolean;
-  category?: string;
-  selectedThemeId?: string;
-  onThemeChange?: (themeId: string) => void;
-}
+import { PostsTableProps } from '@/types/stories';
+
 export const PostsTable = ({
   posts,
-  onPostsChange,
-  isAdmin = false,
-  category,
-  selectedThemeId,
-  onThemeChange,
-}: PostsTableOptimizedProps) => {
+  onPostUpdate,
+  onPostDelete,
+  showBulkActions = false,
+}: PostsTableProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels

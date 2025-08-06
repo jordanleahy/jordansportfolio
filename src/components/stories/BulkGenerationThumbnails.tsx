@@ -3,10 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 
-interface BulkGenerationThumbnailsProps {
-  showThumbnails: boolean;
-  className?: string;
-}
+import { BulkGenerationThumbnailsProps } from '@/types/stories';
 
 export const BulkGenerationThumbnails: React.FC<BulkGenerationThumbnailsProps> = ({
   showThumbnails,
