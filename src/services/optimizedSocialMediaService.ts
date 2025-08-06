@@ -209,7 +209,7 @@ export class OptimizedSocialMediaService {
 
   async getAvailableThemes(): Promise<Array<{
     id: string;
-    name: string;
+    theme_name: string;
     description: string | null;
     category: string;
     post_count: number;
