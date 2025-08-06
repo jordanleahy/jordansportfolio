@@ -234,7 +234,6 @@ export interface SingleAspectRatioSelectorProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
   getUploadType: (postId: string) => AspectRatioKey | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }

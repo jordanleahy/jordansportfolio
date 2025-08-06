@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageIcon, Loader2, Upload, Sparkles } from 'lucide-react';
+import { ImageIcon, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,7 +18,6 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   post,
   isUploading,
   getUploadType,
-  onFileSelect,
   onGenerateImage,
   onPostsChange,
 }) => {
@@ -67,22 +66,6 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         align="end" 
         className="w-48 bg-background border border-border shadow-lg z-50"
       >
-        <DropdownMenuLabel className="text-sm font-medium">
-          Upload
-        </DropdownMenuLabel>
-        {aspectRatioOptions.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => onFileSelect(post.id, option.value)}
-            className="cursor-pointer text-sm"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {option.label}
-          </DropdownMenuItem>
-        ))}
-        
-        <DropdownMenuSeparator />
-        
         <DropdownMenuLabel className="text-sm font-medium">
           Generate
         </DropdownMenuLabel>
