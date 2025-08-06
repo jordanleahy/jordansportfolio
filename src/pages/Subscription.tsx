@@ -40,18 +40,11 @@ const Subscription: React.FC = () => {
 
         <div className="space-y-6">
           {isMobile ? (
-            <div className="space-y-6">
-              <PlanCarousel 
-                tiers={tiers}
-                currentTier={status?.subscription?.tier?.id}
-                onSelectPlan={handleSelectPlan}
-              />
-              <MobilePlanComparison 
-                tiers={tiers}
-                currentTier={status?.subscription?.tier?.id}
-                onSelectPlan={handleSelectPlan}
-              />
-            </div>
+            <PlanCarousel 
+              tiers={tiers}
+              currentTier={status?.subscription?.tier?.id}
+              onSelectPlan={handleSelectPlan}
+            />
           ) : (
             <SubscriptionPlans />
           )}
