@@ -36,3 +36,10 @@ export interface PendingTheme {
   theme_name: string;
   description: string;
 }
+
+export interface ThemeDescriptionInput {
+  value: string;
+  maxLength?: number;
+  minLength?: number;
+  required?: boolean;
+}
