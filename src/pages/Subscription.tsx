@@ -69,7 +69,16 @@ const Subscription: React.FC = () => {
         <div className="space-y-6">
           {/* Free Plan Card */}
           <div className="max-w-sm mx-auto">
-            <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+            <div className="bg-card border border-border rounded-lg p-6 shadow-sm relative">
+              {/* Subscription Status Badge */}
+              {user && status?.subscription && (
+                <div className="absolute top-3 right-3">
+                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-full">
+                    {status.subscription.tier?.name || 'Current Plan'}
+                  </span>
+                </div>
+              )}
+              
               <h3 className="text-xl font-bold text-foreground mb-4">Free Plan</h3>
               
               <div className="mb-6">
