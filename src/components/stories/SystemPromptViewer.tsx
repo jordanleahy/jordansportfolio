@@ -18,16 +18,7 @@ import { ColorThemeSelector } from './ColorThemeSelector';
 import { ColorThemeManager } from './ColorThemeManager';
 import { ColorTheme } from '@/types/colorTheme';
 import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
-
-interface SystemPromptViewerProps {
-  category: string;
-  theme?: string;
-  isVisible: boolean;
-  onClose: () => void;
-  selectedThemeId?: string;
-  themes?: ColorTheme[];
-  onThemeChange?: (themeId: string) => void;
-}
+import type { SystemPromptViewerProps } from '@/types/stories/ui';
 
 export const SystemPromptViewer = ({
   category,

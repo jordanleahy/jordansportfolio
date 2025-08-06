@@ -9,14 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
-
-interface QuickSubscribeModalProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  tier: SubscriptionTier;
-  onSubscribe: (tierId: string) => Promise<void>;
-  isLoading?: boolean;
-}
+import type { QuickSubscribeModalProps } from '@/types/stories/ui';
 
 export const QuickSubscribeModal: React.FC<QuickSubscribeModalProps> = ({
   isOpen,

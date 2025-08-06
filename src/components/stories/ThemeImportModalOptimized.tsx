@@ -7,13 +7,7 @@ import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/useDebounce';
-interface ThemeImportModalOptimizedProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onImportComplete?: () => void;
-  onOptimisticStart?: (categoryName: string) => void;
-  onOptimisticComplete?: (success: boolean, categoryName?: string) => void;
-}
+import type { ThemeImportModalOptimizedProps } from '@/types/stories/ui';
 export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps> = ({
   open,
   onOpenChange,

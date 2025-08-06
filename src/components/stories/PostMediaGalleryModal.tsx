@@ -4,19 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
-
-interface PostMediaGalleryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  post: SocialMediaPost;
-}
-
-interface MediaItem {
-  url: string;
-  type: 'image' | 'video';
-  aspectRatio: string;
-  label: string;
-}
+import type { PostMediaGalleryModalProps, MediaItem } from '@/types/stories/ui';
 
 export const PostMediaGalleryModal = ({
   isOpen,

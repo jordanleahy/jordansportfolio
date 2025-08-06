@@ -4,13 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
-
-interface PlanCarouselProps {
-  tiers: SubscriptionTier[];
-  currentTier?: string | null;
-  onSelectPlan: (tier: SubscriptionTier) => void;
-  isLoading?: boolean;
-}
+import type { PlanCarouselProps } from '@/types/stories/ui';
 
 export const PlanCarousel: React.FC<PlanCarouselProps> = ({
   tiers,

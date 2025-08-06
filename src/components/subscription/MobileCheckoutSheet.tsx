@@ -10,14 +10,7 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
-
-interface MobileCheckoutSheetProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  tier: SubscriptionTier;
-  onSubscribe: (tierId: string) => Promise<void>;
-  isLoading?: boolean;
-}
+import type { MobileCheckoutSheetProps } from '@/types/stories/ui';
 
 export const MobileCheckoutSheet: React.FC<MobileCheckoutSheetProps> = ({
   isOpen,

@@ -12,14 +12,7 @@ import {
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
-interface SingleAspectRatioSelectorProps {
-  post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
-  onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
-  onPostsChange?: (posts: SocialMediaPost[]) => void;
-}
+import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,

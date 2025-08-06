@@ -4,20 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, MessageSquare, Book, Briefcase } from 'lucide-react';
-
-interface StoryTellingSetupPageProps {
-  storyType: 'childrens_story' | 'convincing_story';
-  setStoryType: (type: 'childrens_story' | 'convincing_story') => void;
-  post: {
-    id: string;
-    title: string;
-    description: string;
-    theme?: string;
-    category?: string;
-  };
-  onGenerateScript: () => void;
-  isGenerating: boolean;
-}
+import type { StoryTellingSetupPageProps } from '@/types/stories/ui';
 
 const StoryTellingSetupPage: React.FC<StoryTellingSetupPageProps> = ({
   storyType,

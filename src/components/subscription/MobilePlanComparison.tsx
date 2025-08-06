@@ -4,13 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
-
-interface MobilePlanComparisonProps {
-  tiers: SubscriptionTier[];
-  currentTier?: string | null;
-  onSelectPlan: (tier: SubscriptionTier) => void;
-  isLoading?: boolean;
-}
+import type { MobilePlanComparisonProps } from '@/types/stories/ui';
 
 const featureComparison = [
   { label: 'Credits per Month', key: 'max_image_generations' },

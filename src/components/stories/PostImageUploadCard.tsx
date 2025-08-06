@@ -15,17 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { SocialMediaPost } from '@/types/socialMedia';
-
-interface PostImageUploadCardProps {
-  post: SocialMediaPost;
-  type: '16_9' | '9_16' | '3_4' | '4_3';
-  label: string;
-  imageUrl?: string;
-  isUploading: boolean;
-  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
-  onImageDelete?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
-}
+import type { PostImageUploadCardProps } from '@/types/stories/ui';
 
 export const PostImageUploadCard = ({ 
   post,

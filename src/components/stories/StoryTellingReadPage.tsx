@@ -4,19 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ArrowLeft, Save, Loader2, Globe, Check } from 'lucide-react';
 import { useTranslateScript } from '@/hooks/useStoryTelling';
-
-interface StoryTellingReadPageProps {
-  storyType: 'childrens_story' | 'convincing_story';
-  generatedScript: string;
-  post: {
-    title: string;
-    theme?: string;
-    category?: string;
-  };
-  onBack: () => void;
-  onSave: () => void;
-  isSaving: boolean;
-}
+import type { StoryTellingReadPageProps } from '@/types/stories/ui';
 
 const StoryTellingReadPage: React.FC<StoryTellingReadPageProps> = ({
   storyType,

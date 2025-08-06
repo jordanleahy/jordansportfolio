@@ -12,18 +12,7 @@ import {
 } from '@/hooks/useStoryTelling';
 import StoryTellingSetupPage from './StoryTellingSetupPage';
 import StoryTellingReadPage from './StoryTellingReadPage';
-
-interface StoryTellingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  post: {
-    id: string;
-    title: string;
-    description: string;
-    theme?: string;
-    category?: string;
-  };
-}
+import type { StoryTellingModalProps } from '@/types/stories/ui';
 
 type StoryType = 'childrens_story' | 'convincing_story';
 type ModalPage = 'setup' | 'read';

@@ -1,11 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-
-interface WatermarkCanvasProps {
-  file: File;
-  watermarkText: string;
-  onWatermarked: (watermarkedFile: File) => void;
-  onError: (error: string) => void;
-}
+import type { WatermarkCanvasProps } from '@/types/stories/ui';
 
 export const WatermarkCanvas: React.FC<WatermarkCanvasProps> = ({
   file,

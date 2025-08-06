@@ -2,16 +2,7 @@ import React from 'react';
 import { Crown, ArrowRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface MobileSubscriptionBarProps {
-  isVisible: boolean;
-  onUpgrade: () => void;
-  onDismiss: () => void;
-  currentUsage?: {
-    percentage: number;
-    feature: string;
-  };
-}
+import type { MobileSubscriptionBarProps } from '@/types/stories/ui';
 
 export const MobileSubscriptionBar: React.FC<MobileSubscriptionBarProps> = ({
   isVisible,

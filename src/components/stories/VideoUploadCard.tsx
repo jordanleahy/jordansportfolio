@@ -4,14 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X, Upload } from 'lucide-react';
 import { uploadVideoToStorage, isVideoFile, getSupportedVideoFormats } from '@/utils/videoUpload';
 import { useToast } from '@/hooks/use-toast';
-
-interface VideoUploadCardProps {
-  title: string;
-  aspectRatio: string;
-  videoUrl?: string;
-  onVideoUpload: (url: string) => void;
-  onVideoRemove: () => void;
-}
+import type { VideoUploadCardProps } from '@/types/stories/ui';
 
 const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
   title,

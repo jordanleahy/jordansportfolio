@@ -2,21 +2,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Loader2 } from 'lucide-react';
 import { CONTENT_STATUS } from '@/constants/agentConstants';
-
-interface BlogStatus {
-  exists: boolean;
-  status?: string; // Using string to match database values
-  id?: string;
-  slug?: string;
-  isLoading: boolean;
-  error?: string;
-}
-
-interface BlogStatusBadgeProps {
-  postId: string;
-  className?: string;
-  blogStatus?: BlogStatus;
-}
+import type { BlogStatusBadgeProps, BlogStatus } from '@/types/stories/ui';
 
 export const BlogStatusBadge = ({ postId, className, blogStatus }: BlogStatusBadgeProps) => {
   // Default to loading state if no blogStatus provided
