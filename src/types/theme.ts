@@ -31,3 +31,8 @@ export interface ThemeWithPosts {
     image_url?: string;
   } | null;
 }
+
+export interface PendingTheme {
+  theme_name: string;
+  description: string;
+}
