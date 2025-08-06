@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +52,7 @@ const Navigation = () => {
   ] : [
     // Public items
     { href: "/", label: "Home", icon: Home },
+    { href: "/storyship", label: "Story Ship", icon: Sparkles },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/companies", label: "Companies", icon: Heart },
@@ -300,6 +301,18 @@ const Navigation = () => {
                         >
                           <Home className="mr-2 h-4 w-4" />
                           Home
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/storyship"
+                          className={cn(navLinkStyles, isActive("/storyship") && "bg-accent text-accent-foreground")}
+                        >
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Story Ship
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>

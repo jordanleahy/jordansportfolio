@@ -56,6 +56,7 @@ const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
+const StoryShip = lazy(() => import("./pages/StoryShip"));
 
 
 function App() {
@@ -91,6 +92,14 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route 
+                  path="/storyship" 
+                  element={
+                    <Suspense fallback={<CalendarSkeletonLoader />}>
+                      <StoryShip />
+                    </Suspense>
+                  } 
+                />
                 {/* Redirect old calendar routes to stories */}
                 <Route path="/calendar" element={<Navigate to="/stories" replace />} />
                 <Route path="/calendar/category/:category" element={<Navigate to="/stories/theme/:category" replace />} />
