@@ -34,7 +34,6 @@ export interface PostCardProps {
   onDelete: (postId: string) => void;
   onGeneratePrompt: (post: SocialMediaPost) => void;
   onGenerateVoiceover?: (post: SocialMediaPost) => void;
-  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
@@ -70,7 +69,6 @@ export interface PostsTableViewProps {
   onCreateBlogPost: (post: SocialMediaPost) => void;
   onGenerateVoiceoverScript: (post: SocialMediaPost) => void;
   onGenerateImagePrompt: (post: SocialMediaPost) => void;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey, post: SocialMediaPost) => void;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPreviewImage: (url: string, alt: string) => void;
   onPostsChange: () => void;
@@ -221,7 +219,6 @@ export interface BulkImageGenerationButtonProps {
   post: SocialMediaPost;
   isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
   getUploadType: (postId: string) => AspectRatioKey | null;
-  onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => void;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 
@@ -297,7 +294,6 @@ export interface PostImageUploadCardProps {
   label: string;
   imageUrl?: string;
   isUploading: boolean;
-  onFileSelect: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', post: SocialMediaPost) => void;
   onImageDelete?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
 }
