@@ -23,7 +23,6 @@ export const PostImageUploadCard = ({
   label,
   imageUrl,
   isUploading,
-  onFileSelect,
   onImageDelete,
   onImageGenerated
 }: PostImageUploadCardProps) => {
@@ -168,18 +167,6 @@ export const PostImageUploadCard = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
-            <DropdownMenuLabel>Upload Image</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => onFileSelect(post.id, type, post)}
-              disabled={isUploading || isGenerating}
-              className="cursor-pointer"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Choose File
-              {isUploading && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
-            </DropdownMenuItem>
-            
-            <DropdownMenuSeparator />
             <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={handleGenerateImage}

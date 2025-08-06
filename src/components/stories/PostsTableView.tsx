@@ -51,7 +51,6 @@ export const PostsTableView = memo(({
   onCreateBlogPost,
   onGenerateVoiceoverScript,
   onGenerateImagePrompt,
-  onFileSelect,
   onGenerateImage,
   onPreviewImage,
   onPostsChange,
@@ -228,7 +227,6 @@ export const PostsTableView = memo(({
             post,
             isUploading,
             getUploadType,
-            onFileSelect: (postId: string, aspectRatio: AspectRatioKey) => onFileSelect(postId, aspectRatio, post),
             onGenerateImage,
             onPostsChange
           };

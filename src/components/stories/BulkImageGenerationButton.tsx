@@ -13,7 +13,6 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   post,
   isUploading,
   getUploadType,
-  onFileSelect,
   onPostsChange,
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();

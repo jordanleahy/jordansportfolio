@@ -31,7 +31,6 @@ const PostCardComponent = ({
   onDelete,
   onGeneratePrompt,
   onGenerateVoiceover,
-  onFileSelect,
   onVideoUpload,
   onVideoRemove,
   onImageDelete,
@@ -392,7 +391,6 @@ const PostCardComponent = ({
                 post={post}
                 isUploading={isUploading}
                 getUploadType={getUploadType}
-                onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
                 onPostsChange={onPostsChange}
               />
               <Button
@@ -428,7 +426,6 @@ const PostCardComponent = ({
                 label="Landscape (16:9)"
                 imageUrl={post.image_16_9_url || undefined}
                 isUploading={uploadingStates[`${post.id}_16_9`] || false}
-                onFileSelect={onFileSelect}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -438,7 +435,6 @@ const PostCardComponent = ({
                 label="Portrait (9:16)"
                 imageUrl={post.image_9_16_url || undefined}
                 isUploading={uploadingStates[`${post.id}_9_16`] || false}
-                onFileSelect={onFileSelect}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -448,7 +444,6 @@ const PostCardComponent = ({
                 label="Social (3:4)"
                 imageUrl={post.image_3_4_url || undefined}
                 isUploading={uploadingStates[`${post.id}_3_4`] || false}
-                onFileSelect={onFileSelect}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -458,7 +453,6 @@ const PostCardComponent = ({
                 label="Standard (4:3)"
                 imageUrl={post.image_4_3_url || undefined}
                 isUploading={uploadingStates[`${post.id}_4_3`] || false}
-                onFileSelect={onFileSelect}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
