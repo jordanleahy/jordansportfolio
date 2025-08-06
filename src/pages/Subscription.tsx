@@ -39,7 +39,7 @@ const Subscription: React.FC = () => {
         </div>
 
         <Tabs defaultValue="usage" className="space-y-6">
-          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="usage" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               {isMobile ? 'Usage' : 'Usage & Billing'}
@@ -48,12 +48,6 @@ const Subscription: React.FC = () => {
               <CreditCard className="h-4 w-4" />
               {isMobile ? 'Plans' : 'Plans & Pricing'}
             </TabsTrigger>
-            {!isMobile && (
-              <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Settings
-              </TabsTrigger>
-            )}
           </TabsList>
 
           <TabsContent value="usage">
@@ -79,20 +73,6 @@ const Subscription: React.FC = () => {
             )}
           </TabsContent>
 
-          {!isMobile && (
-            <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subscription Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Subscription settings and preferences will be available here.
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
         </Tabs>
       </div>
     </PageLayout>
