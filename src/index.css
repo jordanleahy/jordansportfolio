@@ -156,19 +156,6 @@
     transform: translateX(100%);
     opacity: 0;
   }
-
-  .animate-scroll {
-    animation: scroll var(--animation-duration, 40s) linear infinite var(--animation-direction, forwards);
-  }
-
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-50% - 0.5rem));
-    }
-  }
 }
 
 .animate-slide-out-right {
