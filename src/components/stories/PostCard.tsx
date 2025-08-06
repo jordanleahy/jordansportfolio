@@ -389,8 +389,6 @@ const PostCardComponent = ({
             <div className="grid grid-cols-3 gap-2">
               <BulkImageGenerationButton
                 post={post}
-                isUploading={isUploading}
-                getUploadType={getUploadType}
                 onPostsChange={onPostsChange}
               />
               <Button

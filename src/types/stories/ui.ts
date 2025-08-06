@@ -215,8 +215,6 @@ export interface SystemPromptViewerProps {
 // Image Generation Props
 export interface BulkImageGenerationButtonProps {
   post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }
 

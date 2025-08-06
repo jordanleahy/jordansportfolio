@@ -11,15 +11,12 @@ import type { BulkImageGenerationButtonProps } from '@/types/stories/ui';
 
 export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps> = ({
   post,
-  isUploading,
-  getUploadType,
   onPostsChange,
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating, setBulkProcessing } = useProcessingStates();
   
   const isCurrentlyGenerating = isGenerating(post.id);
-  const isCurrentlyUploading = isUploading(post.id);
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
@@ -65,7 +62,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     <>
       <Button
         onClick={handleGenerateAllImages}
-        disabled={isCurrentlyGenerating || isCurrentlyUploading}
+        disabled={isCurrentlyGenerating}
         variant="outline"
         size="sm"
         className="h-8 flex-1"
