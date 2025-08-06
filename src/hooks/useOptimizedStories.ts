@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useUnifiedRealtime } from './useUnifiedRealtime';
 import { QUERY_KEYS, QUERY_CONFIG, getThemeQueryKeys } from '@/constants/queryKeys';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -100,25 +99,9 @@ export function useOptimizedStories(user: any) {
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
 
-  // Unified realtime connection
-  const { connectionStatus, isConnected } = useUnifiedRealtime({
-    enabled: !!user?.id,
-    userId: user?.id,
-    onPostUpdate: (post: SocialMediaPost) => {
-      // Use optimistic updates instead of invalidations
-      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
-        if (!oldThemes) return oldThemes;
-        // Optimistically update theme data if needed
-        return oldThemes;
-      });
-      
-      // Background refetch instead of immediate invalidation
-      queryClient.refetchQueries({ 
-        queryKey: QUERY_KEYS.postsByCategory(post.category),
-        type: 'active' 
-      });
-    }
-  });
+  // Connection status is managed at app level via StoriesDashboard
+  const connectionStatus = 'connected'; // Remove duplicate realtime subscription
+  const isConnected = true;
 
   // Available themes query
   const { 

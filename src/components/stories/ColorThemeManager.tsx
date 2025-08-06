@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Copy, Edit, Palette, Plus } from 'lucide-react';
 import { useColorThemes, useCreateColorTheme, useUpdateColorTheme, useDeleteColorTheme } from '@/hooks/useColorThemes';
-import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { CreateColorTheme, ColorTheme, VISUAL_STYLES } from '@/types/colorTheme';
 import { useToast } from '@/hooks/use-toast';
@@ -33,14 +32,7 @@ export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger, i
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Listen for real-time color theme changes
-  useUnifiedRealtime({
-    enabled: true,
-    userId: user?.id,
-    onThemeUpdate: (theme) => {
-      // Theme updated in real-time
-    }
-  });
+  // Real-time theme updates handled at app level
 
   const [formData, setFormData] = useState<CreateColorTheme>({
     name: '',
