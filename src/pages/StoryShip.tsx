@@ -9,13 +9,33 @@ import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/components/layout/AppLayout";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { useAuth } from "@/contexts/AuthContext";
-import { Sparkles, Zap, Target, ArrowRight, BookOpen, Lightbulb, Users, TrendingUp, Clock, Star, CheckCircle, Play } from "lucide-react";
+import { Sparkles, Zap, Target, ArrowRight, BookOpen, Lightbulb, Users, TrendingUp, Clock, Star, CheckCircle } from "lucide-react";
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 const StoryShip = () => {
   const {
     user
   } = useAuth();
   const navigate = useNavigate();
   const [demoInput, setDemoInput] = useState("");
+
+  const words = [
+    {
+      text: "Every",
+    },
+    {
+      text: "thought",
+    },
+    {
+      text: "is",
+    },
+    {
+      text: "a",
+    },
+    {
+      text: "story.",
+      className: "text-primary dark:text-primary",
+    },
+  ];
 
   // Generate SEO metadata for Story Ship landing page
   const storyShipSEO = generateSEOMetadata({
@@ -139,34 +159,19 @@ const StoryShip = () => {
                   <Sparkles className="w-5 h-5 mr-2" />
                   Story Ship
                 </Badge>
-                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent leading-tight">
-                  Transform Every Thought Into Compelling Stories
-                </h1>
+                <TypewriterEffectSmooth words={words} />
                 <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-                  Every thought is a story waiting to be told. Turn your ideas into engaging themes with AI-powered content generation.
+                  Every thought can be visual. Every thought can be convincing. Turn your ideas into engaging themes with AI-powered content generation.
                 </p>
               </div>
 
-              {/* Interactive Demo */}
-              <div className="max-w-2xl mx-auto space-y-6">
-                <Card className="border-2 border-primary/20 shadow-xl bg-card/80 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Play className="w-5 h-5 text-primary" />
-                      Try It Now - What's Your Story?
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Textarea placeholder="Type any thought... 'A world where dreams become reality' or 'The last bookstore on Earth' or 'AI companions for lonely humans'" value={demoInput} onChange={e => setDemoInput(e.target.value)} className="min-h-[120px] text-lg resize-none" />
-                    <Button onClick={handleDemoSubmit} className="w-full text-lg py-6" disabled={!demoInput.trim()}>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Generate My Story Theme
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                
+              {/* Call to Action */}
+              <div className="space-y-6">
+                <Button size="lg" onClick={handleGetStarted} className="text-lg px-8 py-6">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {user ? "Open Stories Dashboard" : "Start Creating Free"}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
               </div>
             </div>
           </div>
