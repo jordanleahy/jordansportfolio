@@ -23,6 +23,7 @@ import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { PostsTableProps } from '@/types/stories';
+import type { AspectRatioKey, AspectRatio } from '@/types/bulkImageGeneration';
 
 export const PostsTable = ({
   posts,
@@ -95,18 +96,41 @@ export const PostsTable = ({
     getUploadType: unifiedGetUploadType
   } = useProcessingStates();
 
+  // Helper to convert between aspect ratio formats
+  const convertAspectRatio = (aspectRatio: AspectRatioKey): AspectRatio => {
+    const map: Record<AspectRatioKey, AspectRatio> = {
+      '16_9': '16:9',
+      '9_16': '9:16',
+      '4_3': '4:3',
+      '3_4': '3:4'
+    };
+    return map[aspectRatio];
+  };
+
+  const convertAspectRatioBack = (aspectRatio: AspectRatio): AspectRatioKey => {
+    const map: Record<AspectRatio, AspectRatioKey> = {
+      '16:9': '16_9',
+      '9:16': '9_16',
+      '4:3': '4_3',
+      '3:4': '3_4'
+    };
+    return map[aspectRatio];
+  };
+
   // Combine original upload states with unified processing states
-  const isUploading = (postId: string, aspectRatio?: any) => {
+  const isUploading = (postId: string, aspectRatio?: AspectRatioKey) => {
     const originalState = originalIsUploading(postId, aspectRatio);
-    const unifiedState = unifiedIsUploading(postId, aspectRatio);
+    const unifiedState = aspectRatio ? unifiedIsUploading(postId, convertAspectRatio(aspectRatio)) : false;
     const result = originalState || unifiedState;
     return result;
   };
-  const getUploadType = (postId: string): any => {
+  
+  const getUploadType = (postId: string): AspectRatioKey | null => {
     const originalType = originalGetUploadType(postId);
+    if (originalType) return originalType;
+    
     const unifiedType = unifiedGetUploadType(postId);
-    const result = originalType || unifiedType;
-    return result;
+    return unifiedType ? convertAspectRatioBack(unifiedType) : null;
   };
 
   // Resize functionality

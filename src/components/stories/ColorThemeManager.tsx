@@ -113,10 +113,10 @@ export const ColorThemeManager: React.FC<ColorThemeManagerProps> = ({ trigger, i
         title: "Theme duplicated",
         description: `Successfully created "${newName}"`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error duplicating theme",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Failed to duplicate theme",
         variant: "destructive"
       });
     }

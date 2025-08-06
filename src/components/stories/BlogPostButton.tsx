@@ -63,11 +63,11 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
           }
         }, 1000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error with blog post:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to process blog post. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to process blog post. Please try again.",
         variant: "destructive",
       });
     } finally {
