@@ -6,7 +6,7 @@ import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
-import { Copy, Trash2, ImageIcon, Upload, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -37,9 +37,9 @@ const PostCardComponent = ({
   onImageGenerated,
   onStatusChange,
   onPostsChange,
-  uploadingStates,
+  processingStates,
   completingPosts,
-  isUploading: isUploadingProp,
+  isGenerating: isGeneratingProp,
   isAdmin = false
 }: PostCardProps) => {
   const { toast } = useToast();
@@ -66,19 +66,19 @@ const PostCardComponent = ({
     return text.length > limit ? text.substring(0, limit) + '...' : text;
   };
 
-  const isUploading = isUploadingProp || ((postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
+  const isGenerating = isGeneratingProp || ((postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => {
     if (aspectRatio) {
-      return uploadingStates[`${postId}_${aspectRatio}`] || false;
+      return processingStates[`${postId}_${aspectRatio}`] || false;
     }
-    return Object.keys(uploadingStates).some(key => key.startsWith(`${postId}_`));
+    return Object.keys(processingStates).some(key => key.startsWith(`${postId}_`));
   });
 
-  const getUploadType = (postId: string): '16_9' | '9_16' | '3_4' | '4_3' | null => {
-    const uploadKey = Object.keys(uploadingStates).find(key => 
-      key.startsWith(`${postId}_`) && uploadingStates[key]
+  const getProcessingType = (postId: string): '16_9' | '9_16' | '3_4' | '4_3' | null => {
+    const processingKey = Object.keys(processingStates).find(key => 
+      key.startsWith(`${postId}_`) && processingStates[key]
     );
-    if (uploadKey) {
-      const parts = uploadKey.split('_');
+    if (processingKey) {
+      const parts = processingKey.split('_');
       return parts.slice(1).join('_') as '16_9' | '9_16' | '3_4' | '4_3';
     }
     return null;
@@ -207,7 +207,7 @@ const PostCardComponent = ({
             className="w-full h-full"
             fallbackIcon={<ImageIcon className="h-8 w-8 text-primary/40" />}
           />
-        ) : isUploading(post.id, '16_9') ? (
+        ) : isGenerating(post.id, '16_9') ? (
           <SimpleShimmer aspectRatio="16/9" className="w-full h-full" />
         ) : post.image_16_9_url ? (
           <img
@@ -331,7 +331,7 @@ const PostCardComponent = ({
             size="sm"
             className="mt-2 w-full"
             onClick={handleHeroImageGenerate}
-            disabled={isGeneratingHero || isUploading(post.id, '16_9')}
+            disabled={isGeneratingHero || isGenerating(post.id, '16_9')}
           >
             {isGeneratingHero ? (
               <div className="flex items-center gap-2">
@@ -396,7 +396,7 @@ const PostCardComponent = ({
                 size="sm"
                 onClick={() => setShowPhotos(!showPhotos)}
                 className="flex-1"
-                title={showPhotos ? "Hide photo uploads" : "Show photo uploads"}
+                title={showPhotos ? "Hide image generation" : "Show image generation"}
               >
                 <ImageIcon className="h-4 w-4" />
               </Button>
@@ -416,14 +416,14 @@ const PostCardComponent = ({
         {/* Photos Section */}
         {showPhotos && (
           <div id="photos-section" className="border-t pt-4">
-            <h4 className="text-sm font-medium mb-3">Photo Uploads</h4>
+            <h4 className="text-sm font-medium mb-3">Image Generation</h4>
             <div className="grid grid-cols-2 gap-3">
               <PostImageUploadCard
                 post={post}
                 type="16_9"
                 label="Landscape (16:9)"
                 imageUrl={post.image_16_9_url || undefined}
-                isUploading={uploadingStates[`${post.id}_16_9`] || false}
+                isUploading={processingStates[`${post.id}_16_9`] || false}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -432,7 +432,7 @@ const PostCardComponent = ({
                 type="9_16"
                 label="Portrait (9:16)"
                 imageUrl={post.image_9_16_url || undefined}
-                isUploading={uploadingStates[`${post.id}_9_16`] || false}
+                isUploading={processingStates[`${post.id}_9_16`] || false}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -441,7 +441,7 @@ const PostCardComponent = ({
                 type="3_4"
                 label="Social (3:4)"
                 imageUrl={post.image_3_4_url || undefined}
-                isUploading={uploadingStates[`${post.id}_3_4`] || false}
+                isUploading={processingStates[`${post.id}_3_4`] || false}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -450,7 +450,7 @@ const PostCardComponent = ({
                 type="4_3"
                 label="Standard (4:3)"
                 imageUrl={post.image_4_3_url || undefined}
-                isUploading={uploadingStates[`${post.id}_4_3`] || false}
+                isUploading={processingStates[`${post.id}_4_3`] || false}
                 onImageDelete={onImageDelete}
                 onImageGenerated={onImageGenerated}
               />
@@ -639,6 +639,6 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
     
     prevProps.post.day === nextProps.post.day &&
     prevProps.draftIndex === nextProps.draftIndex &&
-    JSON.stringify(prevProps.uploadingStates) === JSON.stringify(nextProps.uploadingStates)
+    JSON.stringify(prevProps.processingStates) === JSON.stringify(nextProps.processingStates)
   );
 });

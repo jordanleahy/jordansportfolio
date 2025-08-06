@@ -40,11 +40,11 @@ export interface PostCardProps {
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   onPostsChange?: () => void;
-  uploadingStates: {
+  processingStates: {
     [key: string]: boolean;
   };
   completingPosts?: Set<string>;
-  isUploading: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => boolean;
+  isGenerating: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => boolean;
   isAdmin?: boolean;
 }
 
