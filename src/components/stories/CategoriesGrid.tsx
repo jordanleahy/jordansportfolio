@@ -1,10 +1,5 @@
 import { CategoryCard } from "./CategoryCard";
-import { ThemeWithPosts } from "@/types/theme";
-
-interface CategoriesGridProps {
-  themes: ThemeWithPosts[];
-  onDeleteCategory: (category: string) => void;
-}
+import { CategoriesGridProps } from "@/types/stories";
 
 export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps) => {
   if (themes.length === 0) {

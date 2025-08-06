@@ -7,22 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
 import { useEffect, useState } from "react";
 
-interface ThemeCardProps {
-  theme: string;
-  themeDescription?: string | null;
-  category: string;
-  postCount: number;
-  imageUrl?: string;
-  onClick?: () => void;
-  isShimmer?: boolean;
-  firstPostData?: {
-    title: string;
-    description: string;
-  };
-  onDelete?: (category: string) => void;
-}
+import { CategoryCardProps } from '@/types/stories';
 
-export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: ThemeCardProps) => {
+export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: CategoryCardProps) => {
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   

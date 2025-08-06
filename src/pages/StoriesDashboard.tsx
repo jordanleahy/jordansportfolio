@@ -16,7 +16,8 @@ import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
-import { ThemeWithPosts, PendingTheme } from '@/types/theme';
+import { ThemeWithPosts, PendingTheme } from '@/types/stories';
+import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -68,15 +69,16 @@ export default function StoriesDashboard() {
   }, [user?.id]);
 
   // Simplified realtime handlers
-  const handlePostInsert = (newPost: any) => {
+  const handlePostInsert = (newPost: SocialMediaPost) => {
     toast({
       title: "New Post Created!",
       description: `"${newPost.title}" added to ${newPost.category}`,
     });
   };
 
-  const handlePostUpdate = (update: any) => {
+  const handlePostUpdate = (post: SocialMediaPost) => {
     // Handle post updates if needed
+    console.log('Post updated:', post);
   };
 
 

@@ -4,12 +4,9 @@ import { useToast } from '@/hooks/use-toast';
 import { ThemeValidationService } from '@/services/themeValidationService';
 import { supabase } from '@/integrations/supabase/client';
 import { triggerSystemPromptGeneration } from '@/utils/systemPromptTrigger';
-import type { ProcessingState, ProcessingResult, ThemeImportData, ImportProgress } from '@/types/themeImportStrict';
+import type { ProcessingState, ProcessingResult, ThemeImportData, ImportProgress, UseThemeImportOptions } from '@/types/stories/import';
 
-interface UseThemeImportOptions {
-  onImportComplete?: () => void;
-  onStateChange?: (state: ProcessingState) => void;
-}
+// UseThemeImportOptions now imported from types/stories/import
 
 export const useThemeImport = (options: UseThemeImportOptions = {}) => {
   const [state, setState] = useState<ProcessingState>({ type: 'idle' });

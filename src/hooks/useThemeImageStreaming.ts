@@ -1,20 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { EDGE_FUNCTION_NAMES } from '@/constants/edgeFunctionConstants';
-
-interface StreamingProgress {
-  stage: string;
-  progress: number;
-  partialImage?: string;
-  imageUrl?: string;
-  prompt?: string;
-  isPartial?: boolean;
-}
-
-interface UseThemeImageStreamingProps {
-  category: string;
-  enabled?: boolean;
-}
+import { StreamingProgress, UseThemeImageStreamingProps, UseThemeImageStreamingReturn } from '@/types/stories';
 
 export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeImageStreamingProps) => {
   const [streamingProgress, setStreamingProgress] = useState<StreamingProgress | null>(null);
@@ -71,7 +58,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
             setIsGenerating(false);
             setHasTimedOut(false);
             setStreamingProgress({
-              stage: 'complete',
+              stage: 'completed',
               progress: 100,
               imageUrl: theme_image_4_3_url
             });
@@ -93,7 +80,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
     };
   }, [category, enabled]);
 
-  const startStreaming = async (postData: { title: string; description: string }) => {
+  const startStreaming = async (firstPostData?: { title: string; description: string }) => {
     if (!category) return;
 
     setIsGenerating(true);
@@ -121,7 +108,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       }
 
       const theme = posts[0].themes?.theme_name || category;
-      const themeDescription = posts[0].themes?.description || postData.description;
+      const themeDescription = posts[0].themes?.description || firstPostData?.description || 'No description available';
 
       // Set generating status in database
       await supabase
