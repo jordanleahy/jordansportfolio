@@ -3,22 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Eye, NotebookPen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { SocialMediaPost } from '@/types/socialMedia';
-
-interface BlogStatus {
-  exists: boolean;
-  status?: 'draft' | 'published';
-  id?: string;
-  slug?: string;
-  isLoading: boolean;
-  error?: string;
-}
-
-interface BlogPostButtonForRowProps {
-  post: SocialMediaPost;
-  creatingBlogIds: Set<string>;
-  onCreateBlogPost: (post: SocialMediaPost) => void;
-  blogStatus?: BlogStatus;
-}
+import type { BlogPostButtonForRowProps, BlogStatus } from '@/types/stories/ui';
 
 export const BlogPostButtonForRow: React.FC<BlogPostButtonForRowProps> = ({
   post,

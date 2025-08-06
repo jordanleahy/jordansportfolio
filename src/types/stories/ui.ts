@@ -258,7 +258,7 @@ export interface BlogStatus {
 export interface BlogPostButtonForRowProps {
   post: SocialMediaPost;
   creatingBlogIds: Set<string>;
-  onCreateBlogPost: (postId: string) => void;
+  onCreateBlogPost: (post: SocialMediaPost) => void;
   blogStatus?: BlogStatus;
 }
 

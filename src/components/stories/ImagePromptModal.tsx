@@ -2,16 +2,7 @@ import React from 'react';
 import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generator-modal';
 import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
 import { getCategoryLabel } from '@/constants/categoryConstants';
-
-interface ImagePromptModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  postId: string;
-  cachedPrompt?: string | null;
-  category?: string;
-}
+import type { ImagePromptModalProps } from '@/types/stories/ui';
 
 const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Landscape (16:9)", value: "16:9" },

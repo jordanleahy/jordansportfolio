@@ -2,15 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface ImagePreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  imageUrl: string;
-  imageAlt: string;
-  title?: string;
-  aspectRatio?: string;
-}
+import type { ImagePreviewModalProps } from '@/types/stories/ui';
 
 export const ImagePreviewModal = ({
   isOpen,
