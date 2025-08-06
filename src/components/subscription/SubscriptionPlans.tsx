@@ -84,7 +84,7 @@ export const SubscriptionPlans: React.FC = () => {
       
 
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        {tiers.map((tier, index) => <Card key={tier.id} className={`relative ${currentTierId === tier.id ? 'ring-2 ring-primary' : ''} ${index === 0 ? 'border-primary' : ''}`}>
+        {tiers.filter(tier => tier.price_cents > 0).map((tier, index) => <Card key={tier.id} className={`relative ${currentTierId === tier.id ? 'ring-2 ring-primary' : ''} ${index === 0 ? 'border-primary' : ''}`}>
             {index === 0 && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground px-3 py-1">
                   <Crown className="h-3 w-3 mr-1" />

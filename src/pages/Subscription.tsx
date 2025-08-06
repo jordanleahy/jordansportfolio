@@ -111,7 +111,7 @@ const Subscription: React.FC = () => {
 
           {isMobile ? (
             <PlanCarousel 
-              tiers={tiers}
+              tiers={tiers?.filter(tier => tier.price_cents > 0) || []}
               currentTier={status?.subscription?.tier?.id}
               onSelectPlan={handleSelectPlan}
             />
