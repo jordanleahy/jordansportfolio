@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/components/layout/AppLayout";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { useAuth } from "@/contexts/AuthContext";
-import { Sparkles, Zap, Target, ArrowRight, BookOpen, Lightbulb, Users, TrendingUp, Clock, Star, CheckCircle, Play } from "lucide-react";
+import { Sparkles, Zap, Target, ArrowRight, BookOpen, Lightbulb, Users, TrendingUp, Clock, Star, CheckCircle, Play, Heart, Stethoscope, Brain, GraduationCap, FileText, Microscope } from "lucide-react";
+
 const StoryShip = () => {
   const {
     user
@@ -19,12 +20,13 @@ const StoryShip = () => {
 
   // Generate SEO metadata for Story Ship landing page
   const storyShipSEO = generateSEOMetadata({
-    title: "Story Ship - Transform Every Thought Into Compelling Stories",
-    description: "Turn your ideas into engaging story themes with AI-powered content generation. Every thought is a story waiting to be told.",
+    title: "Story Ship - Create Engaging Medical Education Content",
+    description: "Transform medical concepts into compelling educational stories and content. AI-powered medical storytelling for healthcare professionals and educators.",
     image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
     url: "/storyship",
     type: "website"
   });
+  
   const handleGetStarted = () => {
     if (user) {
       navigate('/stories');
@@ -32,6 +34,7 @@ const StoryShip = () => {
       navigate('/auth');
     }
   };
+  
   const handleDemoSubmit = () => {
     if (demoInput.trim()) {
       if (user) {
@@ -50,67 +53,71 @@ const StoryShip = () => {
       }
     }
   };
+  
   const features = [{
-    icon: Sparkles,
-    title: "AI-Powered Theme Generation",
-    description: "Transform any idea into a complete story theme with detailed descriptions, characters, and plot points using advanced AI.",
-    highlight: "Generate 30+ posts per theme"
+    icon: Brain,
+    title: "Medical Concept Transformation",
+    description: "Convert complex medical concepts into engaging educational narratives with patient stories, case studies, and visual explanations.",
+    highlight: "30+ educational posts per topic"
   }, {
-    icon: Target,
-    title: "Smart Story Organization",
-    description: "Automatically categorize and organize your stories by theme, genre, or topic for easy management and discovery.",
-    highlight: "Visual theme dashboard"
+    icon: Stethoscope,
+    title: "Clinical Case Stories",
+    description: "Automatically generate patient case studies and clinical scenarios organized by specialty, difficulty, and learning objectives.",
+    highlight: "Evidence-based scenarios"
   }, {
     icon: Zap,
-    title: "Instant Content Creation",
-    description: "Go from a single thought to a full story collection in seconds. Perfect for content creators, writers, and storytellers.",
+    title: "Instant Medical Content",
+    description: "Transform medical topics into digestible educational content in seconds. Perfect for medical educators and healthcare professionals.",
     highlight: "30-second generation"
   }, {
-    icon: BookOpen,
-    title: "Visual Storytelling",
-    description: "Each story comes with AI-generated imagery in multiple formats (16:9, 9:16, 3:4, 4:3) optimized for different platforms.",
-    highlight: "4 aspect ratios included"
+    icon: Microscope,
+    title: "Visual Medical Storytelling",
+    description: "Each medical story includes AI-generated medical illustrations, diagrams, and imagery optimized for educational platforms.",
+    highlight: "Medical-grade visuals"
   }, {
-    icon: Clock,
-    title: "Real-Time Creation",
-    description: "Watch your stories come to life in real-time as our AI generates content, images, and organizes everything seamlessly.",
-    highlight: "Live generation process"
+    icon: GraduationCap,
+    title: "Learning-Focused Content",
+    description: "Content designed with educational principles, including learning objectives, assessment questions, and knowledge checks.",
+    highlight: "Pedagogically sound"
   }, {
-    icon: TrendingUp,
-    title: "Content at Scale",
-    description: "Create unlimited story themes and posts. Scale your content creation without sacrificing quality or creativity.",
-    highlight: "Unlimited generation"
+    icon: FileText,
+    title: "Multi-Format Output",
+    description: "Generate content for lectures, patient education materials, social media, and continuing education programs simultaneously.",
+    highlight: "Multiple formats"
   }];
+  
   const useCases = [{
-    title: "Content Creators",
-    description: "Generate endless story ideas for social media, blogs, and video content",
-    icon: Users
+    title: "Medical Educators",
+    description: "Create engaging case studies and educational content for medical students and residents",
+    icon: GraduationCap
   }, {
-    title: "Writers & Authors",
-    description: "Overcome writer's block with AI-generated themes and story starters",
-    icon: BookOpen
+    title: "Healthcare Professionals",
+    description: "Develop patient education materials and clinical training scenarios",
+    icon: Stethoscope
   }, {
-    title: "Marketing Teams",
-    description: "Create compelling brand stories and campaign narratives",
-    icon: Target
+    title: "Medical Researchers",
+    description: "Transform research findings into accessible educational narratives",
+    icon: Microscope
   }, {
-    title: "Educators",
-    description: "Develop engaging stories for teaching and educational content",
-    icon: Lightbulb
+    title: "Healthcare Organizations",
+    description: "Create consistent educational content for staff training and patient communication",
+    icon: Heart
   }];
+  
   const steps = [{
     step: "1",
-    title: "Share Your Thought",
-    description: "Type any idea, concept, or thought you want to transform into a story"
+    title: "Input Medical Concept",
+    description: "Enter any medical topic, condition, or educational objective you want to transform into engaging content"
   }, {
     step: "2",
-    title: "AI Magic Happens",
-    description: "Our AI analyzes your input and generates a complete story theme with detailed content"
+    title: "AI Medical Processing",
+    description: "Our AI analyzes your input using medical knowledge to generate educationally sound content and case studies"
   }, {
     step: "3",
-    title: "Get Your Stories",
-    description: "Receive 30+ story posts with images, descriptions, and organized themes ready to use"
+    title: "Get Educational Content",
+    description: "Receive 30+ medical education posts with visuals, case studies, and learning materials ready for use"
   }];
+  
   return <>
       <Helmet>
         <title>{storyShipSEO.title}</title>
@@ -136,12 +143,12 @@ const StoryShip = () => {
               {/* Brand & Tagline */}
               <div className="space-y-4">
                 <Badge className="px-6 py-2 text-lg font-semibold bg-primary/10 text-primary border-primary/20">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Story Ship
+                  <Heart className="w-5 h-5 mr-2" />
+                  Medical Story Ship
                 </Badge>
-                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent leading-tight">Every thought is a story</h1>
+                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent leading-tight">Every medical concept is a story</h1>
                 <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-                  Every thought is a story waiting to be told. Turn your ideas into engaging themes with AI-powered content generation.
+                  Transform complex medical concepts into engaging educational stories. AI-powered content creation for healthcare professionals and medical educators.
                 </p>
               </div>
 
@@ -152,10 +159,10 @@ const StoryShip = () => {
                     
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <Textarea placeholder="Type any thought... 'A world where dreams become reality' or 'The last bookstore on Earth' or 'AI companions for lonely humans'" value={demoInput} onChange={e => setDemoInput(e.target.value)} className="min-h-[120px] text-lg resize-none" />
+                    <Textarea placeholder="Enter a medical concept... 'Diabetes Type 2 pathophysiology' or 'Cardiac catheterization procedure' or 'Pediatric asthma management'" value={demoInput} onChange={e => setDemoInput(e.target.value)} className="min-h-[120px] text-lg resize-none" />
                     <Button onClick={handleDemoSubmit} className="w-full text-lg py-6" disabled={!demoInput.trim()}>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Generate My Story Theme
+                      <Heart className="w-5 h-5 mr-2" />
+                      Generate Medical Education Content
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </CardContent>
@@ -172,10 +179,10 @@ const StoryShip = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Powerful Features for Story Creation
+                Powerful Features for Medical Education
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Everything you need to transform thoughts into compelling stories, complete with AI-generated content and visual assets.
+                Everything you need to transform medical concepts into compelling educational content, complete with AI-generated visuals and case studies.
               </p>
             </div>
 
@@ -207,10 +214,10 @@ const StoryShip = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                How Story Ship Works
+                How Medical Story Ship Works
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                From thought to story in three simple steps. Our AI handles the complexity while you focus on creativity.
+                From medical concept to educational content in three simple steps. Our AI handles the complexity while you focus on teaching.
               </p>
             </div>
 
@@ -236,10 +243,10 @@ const StoryShip = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Perfect for Every Storyteller
+                Perfect for Medical Education
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Whether you're creating content, writing books, or building brands, Story Ship adapts to your storytelling needs.
+                Whether you're teaching medical students, training residents, or educating patients, Medical Story Ship adapts to your educational needs.
               </p>
             </div>
 
@@ -267,14 +274,14 @@ const StoryShip = () => {
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
               <h2 className="text-4xl md:text-5xl font-bold">
-                Ready to Transform Your Thoughts into Stories?
+                Ready to Transform Medical Education?
               </h2>
               
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" onClick={() => navigate('/auth')} className="text-lg px-8 py-6 text-primary">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  {user ? "Open Stories Dashboard" : "Start Creating Free"}
+                  <Heart className="w-5 h-5 mr-2" />
+                  {user ? "Open Education Dashboard" : "Start Creating Medical Content"}
                 </Button>
                 <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
                   
@@ -288,11 +295,11 @@ const StoryShip = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  Unlimited story themes
+                  Evidence-based content
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  AI-generated visuals
+                  Medical-grade visuals
                 </div>
               </div>
             </div>
@@ -301,4 +308,5 @@ const StoryShip = () => {
       </AppLayout>
     </>;
 };
+
 export default StoryShip;
