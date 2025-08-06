@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
-export type ProcessingOperation = 'upload' | 'generate' | 'bulk_generate';
+export type ProcessingOperation = 'generate' | 'bulk_generate';
 
 interface ProcessingState {
   operation: ProcessingOperation;
@@ -44,15 +44,9 @@ export const useProcessingStates = () => {
 
   const setBulkProcessing = useCallback((
     postId: string,
-    isActive: boolean,
-    aspectRatios: AspectRatio[] = ['16:9', '4:3', '9:16', '3:4']
+    isActive: boolean
   ) => {
-    // Set individual aspect ratio states for shimmer effects
-    aspectRatios.forEach(aspectRatio => {
-      setProcessing(postId, 'upload', isActive, aspectRatio);
-    });
-    
-    // Also set bulk generate state
+    // Set bulk generate state
     setProcessing(postId, 'bulk_generate', isActive);
   }, [setProcessing]);
 
@@ -88,12 +82,6 @@ export const useProcessingStates = () => {
     return result;
   }, [processingStates, createKey]);
 
-  const isUploading = useCallback((
-    postId: string,
-    aspectRatio?: AspectRatio
-  ): boolean => {
-    return isProcessing(postId, 'upload', aspectRatio);
-  }, [isProcessing]);
 
   const isGenerating = useCallback((
     postId: string
@@ -101,16 +89,6 @@ export const useProcessingStates = () => {
     return isProcessing(postId, 'generate') || isProcessing(postId, 'bulk_generate');
   }, [isProcessing]);
 
-  const getUploadType = useCallback((
-    postId: string
-  ): AspectRatio | null => {
-    const uploadStates = Array.from(processingStates.entries())
-      .filter(([key, state]) => 
-        key.startsWith(`${postId}_upload_`) && state.isActive && state.aspectRatio
-      );
-    
-    return uploadStates[0]?.[1]?.aspectRatio || null;
-  }, [processingStates]);
 
   const clearProcessing = useCallback((postId: string) => {
     setProcessingStates(prev => {
@@ -125,9 +103,7 @@ export const useProcessingStates = () => {
     setProcessing,
     setBulkProcessing,
     isProcessing,
-    isUploading,
     isGenerating,
-    getUploadType,
     clearProcessing,
   };
 };

@@ -16,14 +16,9 @@ import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,
-  isUploading,
-  getUploadType,
   onGenerateImage,
   onPostsChange,
 }) => {
-  
-  const postIsUploading = isUploading(post.id);
-  const uploadType = getUploadType(post.id);
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -51,15 +46,10 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         <Button
           variant="ghost"
           size="sm"
-          disabled={postIsUploading}
           title="Image actions"
           className="h-8 w-8 p-0"
         >
-          {postIsUploading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <ImageIcon className="h-4 w-4" />
-          )}
+          <ImageIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
@@ -70,19 +60,13 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           Generate
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
-          const isGeneratingThis = isUploading(post.id, option.value);
           return (
             <DropdownMenuItem
               key={`generate-${option.value}`}
               onClick={() => handleGenerateImage(option.value)}
-              disabled={postIsUploading || isGeneratingThis}
               className="cursor-pointer text-sm"
             >
-              {isGeneratingThis ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
-              )}
+              <Sparkles className="mr-2 h-4 w-4" />
               {option.label}
             </DropdownMenuItem>
           );

@@ -61,8 +61,6 @@ export interface PostsTableViewProps {
   posts: SocialMediaPost[];
   activeTab: 'draft' | 'published';
   creatingBlogIds: Set<string>;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   onCopyContent: (post: SocialMediaPost) => void;
   onDeletePost: (postId: string) => void;
@@ -229,8 +227,6 @@ export interface BulkGenerationThumbnailsProps {
 
 export interface SingleAspectRatioSelectorProps {
   post: SocialMediaPost;
-  isUploading: (postId: string, aspectRatio?: AspectRatioKey) => boolean;
-  getUploadType: (postId: string) => AspectRatioKey | null;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
 }

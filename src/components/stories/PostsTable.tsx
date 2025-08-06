@@ -81,19 +81,14 @@ export const PostsTable = ({
     await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
   };
   const {
-    uploadingPosts,
-    handleFileSelect,
-    handleGenerateImage,
-    isUploading: originalIsUploading,
-    getUploadType: originalGetUploadType
+    handleGenerateImage
   } = useImageManager({
     onPostsChange
   });
 
   // Use unified processing states
   const {
-    isUploading: unifiedIsUploading,
-    getUploadType: unifiedGetUploadType
+    isGenerating
   } = useProcessingStates();
 
   // Helper to convert between aspect ratio formats
@@ -117,21 +112,6 @@ export const PostsTable = ({
     return map[aspectRatio];
   };
 
-  // Combine original upload states with unified processing states
-  const isUploading = (postId: string, aspectRatio?: AspectRatioKey) => {
-    const originalState = originalIsUploading(postId, aspectRatio);
-    const unifiedState = aspectRatio ? unifiedIsUploading(postId, convertAspectRatio(aspectRatio)) : false;
-    const result = originalState || unifiedState;
-    return result;
-  };
-  
-  const getUploadType = (postId: string): AspectRatioKey | null => {
-    const originalType = originalGetUploadType(postId);
-    if (originalType) return originalType;
-    
-    const unifiedType = unifiedGetUploadType(postId);
-    return unifiedType ? convertAspectRatioBack(unifiedType) : null;
-  };
 
   // Resize functionality
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -211,13 +191,6 @@ export const PostsTable = ({
     }
   };
 
-  // Convert nested uploading states to flat format for PostCard
-  const flatUploadingStates = Object.entries(uploadingPosts).reduce((acc, [postId, aspectRatios]) => {
-    Object.entries(aspectRatios).forEach(([aspectRatio, isUploading]) => {
-      acc[`${postId}_${aspectRatio}`] = isUploading;
-    });
-    return acc;
-  }, {} as Record<string, boolean>);
 
 
   // Filter posts by status
@@ -276,7 +249,7 @@ export const PostsTable = ({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} completingPosts={new Set()} isUploading={isUploading} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={{}} completingPosts={new Set()} isUploading={() => false} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -289,7 +262,7 @@ export const PostsTable = ({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={flatUploadingStates} completingPosts={new Set()} isUploading={isUploading} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} uploadingStates={{}} completingPosts={new Set()} isUploading={() => false} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -335,7 +308,7 @@ export const PostsTable = ({
                       <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
                     </div>
                   ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
                   )}
                 </TabsContent>
 
@@ -346,7 +319,7 @@ export const PostsTable = ({
                       <div className="text-sm">No posts have been published in this theme yet.</div>
                     </div>
                   ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} isUploading={isUploading} getUploadType={getUploadType} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
                   )}
                 </TabsContent>
               </Tabs>

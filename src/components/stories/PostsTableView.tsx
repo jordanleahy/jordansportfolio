@@ -43,8 +43,6 @@ export const PostsTableView = memo(({
   posts,
   activeTab,
   creatingBlogIds,
-  isUploading,
-  getUploadType,
   onStatusChange,
   onCopyContent,
   onDeletePost,
@@ -225,8 +223,6 @@ export const PostsTableView = memo(({
 
           const selectorProps = {
             post,
-            isUploading,
-            getUploadType,
             onGenerateImage,
             onPostsChange
           };
@@ -275,11 +271,7 @@ export const PostsTableView = memo(({
             <TableCell className="w-40">
               <div className="grid grid-cols-2 gap-2">
                 {/* Top row: 16:9 and 4:3 */}
-                {isUploading(post.id, '16_9') ? (
-                  <div className="w-16 h-9 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_16_9_url ? (
+                {post.image_16_9_url ? (
                   <div className="w-16 h-9 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_16_9_url}
@@ -292,11 +284,7 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-16 h-9"></div>}
 
-                {isUploading(post.id, '4_3') ? (
-                  <div className="w-16 h-12 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_4_3_url ? (
+                {post.image_4_3_url ? (
                   <div className="w-16 h-12 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_4_3_url}
@@ -310,11 +298,7 @@ export const PostsTableView = memo(({
                 ) : <div className="w-16 h-12"></div>}
 
                 {/* Bottom row: 9:16 and 3:4 */}
-                {isUploading(post.id, '9_16') ? (
-                  <div className="w-9 h-16 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_9_16_url ? (
+                {post.image_9_16_url ? (
                   <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_9_16_url}
@@ -327,11 +311,7 @@ export const PostsTableView = memo(({
                   </div>
                 ) : <div className="w-9 h-16"></div>}
 
-                {isUploading(post.id, '3_4') ? (
-                  <div className="w-12 h-16 relative flex-shrink-0">
-                    <Skeleton className="w-full h-full rounded border" />
-                  </div>
-                ) : post.image_3_4_url ? (
+                {post.image_3_4_url ? (
                   <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_3_4_url}
