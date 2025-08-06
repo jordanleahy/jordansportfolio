@@ -1,7 +1,7 @@
 export interface Theme {
   id: string;
   user_id: string;
-  name: string;
+  theme_name: string;
   description?: string;
   category: string;
   created_at: string;
@@ -9,7 +9,7 @@ export interface Theme {
 }
 
 export interface CreateTheme {
-  name: string;
+  theme_name: string;
   description?: string;
   category: string;
 }

@@ -120,7 +120,7 @@ serve(async (req) => {
         .from('themes')
         .select('id')
         .eq('user_id', user.id)
-        .eq('name', aiResult.cleanedData.theme)
+        .eq('theme_name', aiResult.cleanedData.theme)
         .eq('category', aiResult.cleanedData.category)
         .single();
 
@@ -153,7 +153,7 @@ serve(async (req) => {
         .from('themes')
         .insert({
           user_id: user.id,
-          name: aiResult.cleanedData.theme,
+          theme_name: aiResult.cleanedData.theme,
           description: aiResult.cleanedData.theme_description || null,
           category: aiResult.cleanedData.category
         })

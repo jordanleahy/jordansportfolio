@@ -55,7 +55,7 @@ export const useThemeByName = (themeName: string, enabled = true) => {
       const { data, error } = await supabase
         .from('themes')
         .select('*')
-        .eq('name', themeName)
+        .eq('theme_name', themeName)
         .single();
       
       if (error) throw error;

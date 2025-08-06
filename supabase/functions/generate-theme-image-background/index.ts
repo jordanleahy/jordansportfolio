@@ -38,7 +38,7 @@ serve(async (req) => {
     const { data: themeData, error: themeError } = await supabase
       .from('themes')
       .select('id')
-      .eq('name', theme)
+      .eq('theme_name', theme)
       .eq('user_id', userId)
       .maybeSingle();
 
@@ -112,7 +112,7 @@ serve(async (req) => {
         const { data: themeData } = await supabase
           .from('themes')
           .select('id')
-          .eq('name', requestData.theme)
+          .eq('theme_name', requestData.theme)
           .eq('user_id', requestData.userId)
           .maybeSingle();
 

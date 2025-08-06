@@ -86,9 +86,9 @@ export default function OptimizedCalendar() {
       
       // If the deleted theme was active, switch to the first available one
         if (activeTab === category && availableThemes.length > 1) {
-          const remainingThemes = availableThemes.filter(t => t.name !== category);
-          if (remainingThemes.length > 0) {
-            changeTab(remainingThemes[0].name);
+           const remainingThemes = availableThemes.filter(t => t.name !== category);
+           if (remainingThemes.length > 0) {
+             changeTab(remainingThemes[0].name);
           }
         }
       

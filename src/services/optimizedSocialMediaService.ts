@@ -276,7 +276,7 @@ export class OptimizedSocialMediaService {
       
       return {
         id: theme.id,
-        name: theme.name,
+        name: theme.theme_name,
         description: theme.description,
         category: theme.category,
         post_count: posts.length,

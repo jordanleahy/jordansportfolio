@@ -98,7 +98,7 @@ export class ThemeService {
     const { data, error } = await supabase
       .from('themes')
       .update({
-        name: theme.name,
+        theme_name: theme.theme_name,
         description: theme.description,
         category: theme.category,
       })
@@ -126,7 +126,7 @@ export class ThemeService {
     this.invalidateAllCaches();
   }
 
-  async findOrCreateTheme(name: string, category: string, description?: string): Promise<Theme> {
+  async findOrCreateTheme(theme_name: string, category: string, description?: string): Promise<Theme> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
@@ -135,7 +135,7 @@ export class ThemeService {
       .from('themes')
       .select('*')
       .eq('user_id', user.id)
-      .eq('name', name)
+      .eq('theme_name', theme_name)
       .eq('category', category)
       .maybeSingle();
 
@@ -144,7 +144,7 @@ export class ThemeService {
     }
 
     // Create new theme if not found
-    return this.createTheme({ name, category, description });
+    return this.createTheme({ theme_name, category, description });
   }
 
   private invalidateCache(category?: string, userId?: string) {

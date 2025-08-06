@@ -71,7 +71,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     const { data: existingTheme, error: themeSelectError } = await supabase
       .from('themes')
       .select('id')
-      .eq('name', themeData.theme)
+      .eq('theme_name', themeData.theme)
       .eq('category', themeData.category)
       .eq('user_id', userId)
       .maybeSingle();
@@ -87,7 +87,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         .from('themes')
         .insert({
           user_id: userId,
-          name: themeData.theme,
+          theme_name: themeData.theme,
           description: themeData.theme_description,
           category: themeData.category
         })
