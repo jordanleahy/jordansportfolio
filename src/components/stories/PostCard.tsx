@@ -364,45 +364,48 @@ const PostCardComponent = ({
           </Button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-2">
-          <div className={`grid gap-2 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            {isAdmin && <BlogPostButton post={post} />}
-            {isAdmin && (
+        {/* Admin Action Buttons - Always visible when admin */}
+        {isAdmin && (
+          <div className="space-y-3 border-t pt-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Admin Actions</h4>
+            
+            {/* Primary Admin Actions */}
+            <div className="grid grid-cols-3 gap-2">
+              <BlogPostButton post={post} />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onGeneratePrompt(post)}
                 className="flex-1"
+                title="Generate Prompt"
               >
                 <Lightbulb className="h-4 w-4" />
               </Button>
-            )}
-            {isAdmin && onGenerateVoiceover ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  onGenerateVoiceover(post);
-                }}
-                className="flex-1"
-                title="Generate Voiceover Script"
-              >
-                <Mic className="h-4 w-4" />
-              </Button>
-            ) : isAdmin ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-              >
-                <BookOpen className="h-4 w-4" />
-              </Button>
-            ) : null}
-          </div>
-          
-          <div className="flex gap-2">
-            {isAdmin && (
+              {onGenerateVoiceover ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onGenerateVoiceover(post)}
+                  className="flex-1"
+                  title="Generate Voiceover Script"
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  disabled
+                  title="Voiceover not available"
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            
+            {/* Secondary Admin Actions */}
+            <div className="grid grid-cols-3 gap-2">
               <BulkImageGenerationButton
                 post={post}
                 isUploading={isUploading}
@@ -410,30 +413,29 @@ const PostCardComponent = ({
                 onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
                 onPostsChange={onPostsChange}
               />
-            )}
-            {isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowPhotos(!showPhotos)}
-                className="h-8 flex-1"
-                title={showPhotos ? "Hide photos" : "Show photos"}
+                className="flex-1"
+                title={showPhotos ? "Hide photo uploads" : "Show photo uploads"}
               >
                 <ImageIcon className="h-4 w-4" />
+                <span className="sr-only">{showPhotos ? "Hide" : "Show"} Photos</span>
               </Button>
-            )}
-            {isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowVideos(!showVideos)}
-                className="h-8 flex-1"
+                className="flex-1"
+                title={showVideos ? "Hide video uploads" : "Show video uploads"}
               >
                 <Video className="h-4 w-4" />
+                <span className="sr-only">{showVideos ? "Hide" : "Show"} Videos</span>
               </Button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Photos Section */}
         {showPhotos && (
