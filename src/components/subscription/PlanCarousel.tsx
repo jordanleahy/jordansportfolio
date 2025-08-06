@@ -20,13 +20,6 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (direction === 'left' && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    } else if (direction === 'right' && currentIndex < tiers.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
 
   const isCurrentPlan = (tierId: string) => currentTier === tierId;
   const isPopular = (tier: SubscriptionTier) => tier.name === 'Premium';
@@ -150,27 +143,6 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
         </div>
       </div>
 
-      {/* Swipe Navigation */}
-      <div className="flex justify-center gap-4 pt-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSwipe('left')}
-          disabled={currentIndex === 0}
-          className="h-8 px-3"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSwipe('right')}
-          disabled={currentIndex === tiers.length - 1}
-          className="h-8 px-3"
-        >
-          Next
-        </Button>
-      </div>
     </div>
   );
 };
