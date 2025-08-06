@@ -132,7 +132,7 @@ export function useOptimizedStories(user: any) {
       if (availableThemes.length > 0) {
         const urlTab = searchParams.get('tab');
         
-        let selectedTab = availableThemes[0].name; // Use name property
+        let selectedTab = availableThemes[0].name; // Use name property from service mapping
         
         if (urlTab) {
           const matchingTheme = availableThemes.find(t => t.name === urlTab);
