@@ -21,7 +21,7 @@ const StoryShip = () => {
   // Generate SEO metadata for Story Ship landing page
   const storyShipSEO = generateSEOMetadata({
     title: "Story Ship - Create Engaging Medical Education Content",
-    description: "Transform medical concepts into compelling educational stories and content. AI-powered medical storytelling for healthcare professionals and educators.",
+    description: "Transform medical concepts into compelling educational stories and content. Advanced medical storytelling for healthcare professionals and educators.",
     image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
     url: "/storyship",
     type: "website"
@@ -72,7 +72,7 @@ const StoryShip = () => {
   }, {
     icon: Microscope,
     title: "Visual Medical Storytelling",
-    description: "Each medical story includes AI-generated medical illustrations, diagrams, and imagery optimized for educational platforms.",
+    description: "Each medical story includes professionally generated medical illustrations, diagrams, and imagery optimized for educational platforms.",
     highlight: "Medical-grade visuals"
   }, {
     icon: GraduationCap,
@@ -110,8 +110,8 @@ const StoryShip = () => {
     description: "Enter any medical topic, condition, or educational objective you want to transform into engaging content"
   }, {
     step: "2",
-    title: "AI Medical Processing",
-    description: "Our AI analyzes your input using medical knowledge to generate educationally sound content and case studies"
+    title: "Intelligent Medical Processing",
+    description: "Our system analyzes your input using medical knowledge to generate educationally sound content and case studies"
   }, {
     step: "3",
     title: "Get Educational Content",
@@ -148,7 +148,7 @@ const StoryShip = () => {
                 </Badge>
                 <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent leading-tight">Every medical concept is a story</h1>
                 <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-                  Transform complex medical concepts into engaging educational stories. AI-powered content creation for healthcare professionals and medical educators.
+                  Transform complex medical concepts into engaging educational stories. Advanced content creation for healthcare professionals and medical educators.
                 </p>
               </div>
 
@@ -182,7 +182,7 @@ const StoryShip = () => {
                 Powerful Features for Medical Education
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Everything you need to transform medical concepts into compelling educational content, complete with AI-generated visuals and case studies.
+                Everything you need to transform medical concepts into compelling educational content, complete with professional visuals and case studies.
               </p>
             </div>
 
@@ -217,7 +217,7 @@ const StoryShip = () => {
                 How Medical Story Ship Works
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                From medical concept to educational content in three simple steps. Our AI handles the complexity while you focus on teaching.
+                From medical concept to educational content in three simple steps. Our system handles the complexity while you focus on teaching.
               </p>
             </div>
 
