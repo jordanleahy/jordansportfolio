@@ -132,7 +132,7 @@ export default function StoriesDashboard() {
     }
   };
 
-  const handleGenerateCustomTheme = async () => {
+  const handleGenerateTheme = async () => {
     if (!customThemeDescription.trim()) {
       toast({
         title: "Description Required",
@@ -212,7 +212,7 @@ export default function StoriesDashboard() {
         <div className="container mx-auto px-4 mb-8">
           <div className="flex justify-center gap-4 max-w-md mx-auto">
             <Button
-              onClick={handleGenerateCustomTheme}
+              onClick={handleGenerateTheme}
               disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
               className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
             >
