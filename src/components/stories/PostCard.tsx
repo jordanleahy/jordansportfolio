@@ -364,15 +364,13 @@ const PostCardComponent = ({
           </Button>
         </div>
 
-        {/* Admin Action Buttons - Always visible when admin */}
+        {/* Admin Action Buttons */}
         {isAdmin && (
           <div className="space-y-3 border-t pt-4">
             <h4 className="text-sm font-medium text-muted-foreground">Admin Actions</h4>
             
-            {/* Primary Admin Actions */}
             <div className="grid grid-cols-3 gap-2">
               <BlogPostButton post={post} />
-              
               <Button
                 variant="outline"
                 size="sm"
@@ -382,7 +380,6 @@ const PostCardComponent = ({
               >
                 <Lightbulb className="h-4 w-4" />
               </Button>
-              
               {onGenerateVoiceover ? (
                 <Button
                   variant="outline"
@@ -406,7 +403,6 @@ const PostCardComponent = ({
               )}
             </div>
             
-            {/* Secondary Admin Actions */}
             <div className="grid grid-cols-3 gap-2">
               <BulkImageGenerationButton
                 post={post}
@@ -415,31 +411,23 @@ const PostCardComponent = ({
                 onFileSelect={(postId, aspectRatio) => onFileSelect(postId, aspectRatio, post)}
                 onPostsChange={onPostsChange}
               />
-              
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowPhotos(!showPhotos)}
                 className="flex-1"
                 title={showPhotos ? "Hide photo uploads" : "Show photo uploads"}
-                aria-expanded={showPhotos}
-                aria-controls="photos-section"
               >
                 <ImageIcon className="h-4 w-4" />
-                <span className="sr-only">{showPhotos ? "Hide" : "Show"} Photos</span>
               </Button>
-              
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowVideos(!showVideos)}
                 className="flex-1"
                 title={showVideos ? "Hide video uploads" : "Show video uploads"}
-                aria-expanded={showVideos}
-                aria-controls="videos-section"
               >
                 <Video className="h-4 w-4" />
-                <span className="sr-only">{showVideos ? "Hide" : "Show"} Videos</span>
               </Button>
             </div>
           </div>
