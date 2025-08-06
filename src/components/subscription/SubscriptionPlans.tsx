@@ -7,57 +7,61 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/utils/costCalculator';
 import { Zap, Image, Type, Check, Crown } from 'lucide-react';
 import { toast } from 'sonner';
-
 export const SubscriptionPlans: React.FC = () => {
-  const { data: tiers, isLoading: tiersLoading } = useSubscriptionTiers();
-  const { data: status, refetch: refetchStatus } = useSubscriptionStatus();
-
+  const {
+    data: tiers,
+    isLoading: tiersLoading
+  } = useSubscriptionTiers();
+  const {
+    data: status,
+    refetch: refetchStatus
+  } = useSubscriptionStatus();
   const handleSubscribe = async (tierId: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
-        body: { tier_id: tierId }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('create-subscription', {
+        body: {
+          tier_id: tierId
+        }
       });
-
       if (error) {
         throw error;
       }
 
       // Open Stripe checkout in a new tab
       window.open(data.url, '_blank');
-      
+
       // Refresh status after a delay to check for updates
       setTimeout(() => {
         refetchStatus();
       }, 2000);
-
     } catch (error) {
       console.error('Subscription error:', error);
       toast.error('Failed to create subscription. Please try again.');
     }
   };
-
   const handleManageBilling = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('manage-subscription');
-
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('manage-subscription');
       if (error) {
         throw error;
       }
 
       // Open customer portal in a new tab
       window.open(data.url, '_blank');
-
     } catch (error) {
       console.error('Billing management error:', error);
       toast.error('Failed to open billing portal. Please try again.');
     }
   };
-
   if (tiersLoading) {
-    return (
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i}>
+    return <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => <Card key={i}>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="h-6 bg-muted rounded animate-pulse" />
@@ -65,53 +69,32 @@ export const SubscriptionPlans: React.FC = () => {
                 <div className="h-20 bg-muted rounded animate-pulse" />
               </div>
             </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+          </Card>)}
+      </div>;
   }
-
   if (!tiers || tiers.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardContent className="p-6 text-center">
           <p className="text-muted-foreground">No subscription plans available</p>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   const currentTierId = status?.subscription?.tier_id;
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold">Choose Your Plan</h2>
-        <p className="text-muted-foreground mt-2">
-          Unlock powerful AI features with our affordable subscription plans
-        </p>
-      </div>
+  return <div className="space-y-6">
+      
 
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        {tiers.map((tier, index) => (
-          <Card 
-            key={tier.id} 
-            className={`relative ${currentTierId === tier.id ? 'ring-2 ring-primary' : ''} ${index === 0 ? 'border-primary' : ''}`}
-          >
-            {index === 0 && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+        {tiers.map((tier, index) => <Card key={tier.id} className={`relative ${currentTierId === tier.id ? 'ring-2 ring-primary' : ''} ${index === 0 ? 'border-primary' : ''}`}>
+            {index === 0 && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground px-3 py-1">
                   <Crown className="h-3 w-3 mr-1" />
                   Most Popular
                 </Badge>
-              </div>
-            )}
+              </div>}
             
-            {currentTierId === tier.id && (
-              <div className="absolute -top-3 right-4">
+            {currentTierId === tier.id && <div className="absolute -top-3 right-4">
                 <Badge variant="secondary">Current Plan</Badge>
-              </div>
-            )}
+              </div>}
 
             <CardHeader className="text-center pb-4">
               <CardTitle className="text-xl">{tier.name}</CardTitle>
@@ -178,43 +161,25 @@ export const SubscriptionPlans: React.FC = () => {
 
                 {/* Action Button */}
                 <div className="pt-4">
-                  {currentTierId === tier.id ? (
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={handleManageBilling}
-                    >
+                  {currentTierId === tier.id ? <Button variant="outline" className="w-full" onClick={handleManageBilling}>
                       Manage Billing
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full"
-                      onClick={() => handleSubscribe(tier.id)}
-                      variant={index === 0 ? "default" : "outline"}
-                    >
+                    </Button> : <Button className="w-full" onClick={() => handleSubscribe(tier.id)} variant={index === 0 ? "default" : "outline"}>
                       Subscribe Now
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
 
                 {/* Value Proposition */}
-                {index === 0 && (
-                  <div className="pt-2 text-center">
-                    <p className="text-xs text-muted-foreground">
-                      Best value • 400%+ profit margin for you
-                    </p>
-                  </div>
-                )}
+                {index === 0 && <div className="pt-2 text-center">
+                    
+                  </div>}
               </div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
       {/* FAQ or additional info */}
       <div className="text-center text-sm text-muted-foreground">
-        <p>All plans include access to our full feature set. Upgrade or downgrade anytime.</p>
+        
       </div>
-    </div>
-  );
+    </div>;
 };
