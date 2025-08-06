@@ -36,27 +36,34 @@ const Subscription: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Free Plan Highlight Card */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-bold text-lg">FREE</span>
+          {/* Free Plan Card */}
+          <div className="max-w-sm mx-auto">
+            <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h3 className="text-xl font-bold text-foreground mb-4">Free Plan</h3>
+              
+              <div className="mb-6">
+                <span className="text-3xl font-bold text-foreground">$0</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 text-accent">✓</div>
+                  <span className="text-foreground">5 Credits</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-green-800">Start with 5 Free Credits</h3>
-                  <p className="text-green-600 text-sm">Try our AI generation tools at no cost</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 text-accent">✓</div>
+                  <span className="text-foreground">Image Generation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 text-accent">✓</div>
+                  <span className="text-foreground">Text Generation</span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-green-800">$0</div>
-                <div className="text-green-600 text-sm">/month</div>
-              </div>
-            </div>
-            <div className="mt-4 flex gap-4 text-sm text-green-700">
-              <span>✓ 5 Credits per month</span>
-              <span>✓ Image Generation</span>
-              <span>✓ Text Generation</span>
+
+              <button className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
+                Choose Free Plan →
+              </button>
             </div>
           </div>
 
