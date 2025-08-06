@@ -272,7 +272,7 @@ const StoryShip = () => {
               
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" onClick={handleGetStarted} className="text-lg px-8 py-6 text-primary">
+                <Button size="lg" variant="secondary" onClick={() => navigate('/auth')} className="text-lg px-8 py-6 text-primary">
                   <Sparkles className="w-5 h-5 mr-2" />
                   {user ? "Open Stories Dashboard" : "Start Creating Free"}
                 </Button>
