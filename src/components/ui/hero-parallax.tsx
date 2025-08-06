@@ -10,12 +10,14 @@ import {
 
 export const HeroParallax = ({
   products,
+  children,
 }: {
   products: {
     title: string;
     link: string;
     thumbnail: string;
   }[];
+  children?: React.ReactNode;
 }) => {
   const firstRow = products.slice(0, 5);
   const secondRow = products.slice(5, 10);
@@ -98,6 +100,7 @@ export const HeroParallax = ({
           ))}
         </motion.div>
       </motion.div>
+      {children}
     </div>
   );
 };
