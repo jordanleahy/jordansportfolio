@@ -9,23 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import AppLayout from "@/components/layout/AppLayout";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  Sparkles, 
-  Zap, 
-  Target, 
-  ArrowRight, 
-  BookOpen, 
-  Lightbulb, 
-  Users, 
-  TrendingUp,
-  Clock,
-  Star,
-  CheckCircle,
-  Play
-} from "lucide-react";
-
+import { Sparkles, Zap, Target, ArrowRight, BookOpen, Lightbulb, Users, TrendingUp, Clock, Star, CheckCircle, Play } from "lucide-react";
 const StoryShip = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [demoInput, setDemoInput] = useState("");
 
@@ -37,7 +25,6 @@ const StoryShip = () => {
     url: "/storyship",
     type: "website"
   });
-
   const handleGetStarted = () => {
     if (user) {
       navigate('/stories');
@@ -45,99 +32,86 @@ const StoryShip = () => {
       navigate('/auth');
     }
   };
-
   const handleDemoSubmit = () => {
     if (demoInput.trim()) {
       if (user) {
-        navigate('/stories', { state: { demoTheme: demoInput } });
+        navigate('/stories', {
+          state: {
+            demoTheme: demoInput
+          }
+        });
       } else {
-        navigate('/auth', { state: { returnTo: '/stories', demoTheme: demoInput } });
+        navigate('/auth', {
+          state: {
+            returnTo: '/stories',
+            demoTheme: demoInput
+          }
+        });
       }
     }
   };
-
-  const features = [
-    {
-      icon: Sparkles,
-      title: "AI-Powered Theme Generation",
-      description: "Transform any idea into a complete story theme with detailed descriptions, characters, and plot points using advanced AI.",
-      highlight: "Generate 30+ posts per theme"
-    },
-    {
-      icon: Target,
-      title: "Smart Story Organization",
-      description: "Automatically categorize and organize your stories by theme, genre, or topic for easy management and discovery.",
-      highlight: "Visual theme dashboard"
-    },
-    {
-      icon: Zap,
-      title: "Instant Content Creation",
-      description: "Go from a single thought to a full story collection in seconds. Perfect for content creators, writers, and storytellers.",
-      highlight: "30-second generation"
-    },
-    {
-      icon: BookOpen,
-      title: "Visual Storytelling",
-      description: "Each story comes with AI-generated imagery in multiple formats (16:9, 9:16, 3:4, 4:3) optimized for different platforms.",
-      highlight: "4 aspect ratios included"
-    },
-    {
-      icon: Clock,
-      title: "Real-Time Creation",
-      description: "Watch your stories come to life in real-time as our AI generates content, images, and organizes everything seamlessly.",
-      highlight: "Live generation process"
-    },
-    {
-      icon: TrendingUp,
-      title: "Content at Scale",
-      description: "Create unlimited story themes and posts. Scale your content creation without sacrificing quality or creativity.",
-      highlight: "Unlimited generation"
-    }
-  ];
-
-  const useCases = [
-    {
-      title: "Content Creators",
-      description: "Generate endless story ideas for social media, blogs, and video content",
-      icon: Users
-    },
-    {
-      title: "Writers & Authors",
-      description: "Overcome writer's block with AI-generated themes and story starters",
-      icon: BookOpen
-    },
-    {
-      title: "Marketing Teams",
-      description: "Create compelling brand stories and campaign narratives",
-      icon: Target
-    },
-    {
-      title: "Educators",
-      description: "Develop engaging stories for teaching and educational content",
-      icon: Lightbulb
-    }
-  ];
-
-  const steps = [
-    {
-      step: "1",
-      title: "Share Your Thought",
-      description: "Type any idea, concept, or thought you want to transform into a story"
-    },
-    {
-      step: "2",
-      title: "AI Magic Happens",
-      description: "Our AI analyzes your input and generates a complete story theme with detailed content"
-    },
-    {
-      step: "3",
-      title: "Get Your Stories",
-      description: "Receive 30+ story posts with images, descriptions, and organized themes ready to use"
-    }
-  ];
-
-  return (
-    <>
+  const features = [{
+    icon: Sparkles,
+    title: "AI-Powered Theme Generation",
+    description: "Transform any idea into a complete story theme with detailed descriptions, characters, and plot points using advanced AI.",
+    highlight: "Generate 30+ posts per theme"
+  }, {
+    icon: Target,
+    title: "Smart Story Organization",
+    description: "Automatically categorize and organize your stories by theme, genre, or topic for easy management and discovery.",
+    highlight: "Visual theme dashboard"
+  }, {
+    icon: Zap,
+    title: "Instant Content Creation",
+    description: "Go from a single thought to a full story collection in seconds. Perfect for content creators, writers, and storytellers.",
+    highlight: "30-second generation"
+  }, {
+    icon: BookOpen,
+    title: "Visual Storytelling",
+    description: "Each story comes with AI-generated imagery in multiple formats (16:9, 9:16, 3:4, 4:3) optimized for different platforms.",
+    highlight: "4 aspect ratios included"
+  }, {
+    icon: Clock,
+    title: "Real-Time Creation",
+    description: "Watch your stories come to life in real-time as our AI generates content, images, and organizes everything seamlessly.",
+    highlight: "Live generation process"
+  }, {
+    icon: TrendingUp,
+    title: "Content at Scale",
+    description: "Create unlimited story themes and posts. Scale your content creation without sacrificing quality or creativity.",
+    highlight: "Unlimited generation"
+  }];
+  const useCases = [{
+    title: "Content Creators",
+    description: "Generate endless story ideas for social media, blogs, and video content",
+    icon: Users
+  }, {
+    title: "Writers & Authors",
+    description: "Overcome writer's block with AI-generated themes and story starters",
+    icon: BookOpen
+  }, {
+    title: "Marketing Teams",
+    description: "Create compelling brand stories and campaign narratives",
+    icon: Target
+  }, {
+    title: "Educators",
+    description: "Develop engaging stories for teaching and educational content",
+    icon: Lightbulb
+  }];
+  const steps = [{
+    step: "1",
+    title: "Share Your Thought",
+    description: "Type any idea, concept, or thought you want to transform into a story"
+  }, {
+    step: "2",
+    title: "AI Magic Happens",
+    description: "Our AI analyzes your input and generates a complete story theme with detailed content"
+  }, {
+    step: "3",
+    title: "Get Your Stories",
+    description: "Receive 30+ story posts with images, descriptions, and organized themes ready to use"
+  }];
+  return <>
       <Helmet>
         <title>{storyShipSEO.title}</title>
         <meta name="description" content={storyShipSEO.description} />
@@ -183,17 +157,8 @@ const StoryShip = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <Textarea
-                      placeholder="Type any thought... 'A world where dreams become reality' or 'The last bookstore on Earth' or 'AI companions for lonely humans'"
-                      value={demoInput}
-                      onChange={(e) => setDemoInput(e.target.value)}
-                      className="min-h-[120px] text-lg resize-none"
-                    />
-                    <Button 
-                      onClick={handleDemoSubmit}
-                      className="w-full text-lg py-6"
-                      disabled={!demoInput.trim()}
-                    >
+                    <Textarea placeholder="Type any thought... 'A world where dreams become reality' or 'The last bookstore on Earth' or 'AI companions for lonely humans'" value={demoInput} onChange={e => setDemoInput(e.target.value)} className="min-h-[120px] text-lg resize-none" />
+                    <Button onClick={handleDemoSubmit} className="w-full text-lg py-6" disabled={!demoInput.trim()}>
                       <Sparkles className="w-5 h-5 mr-2" />
                       Generate My Story Theme
                       <ArrowRight className="w-5 h-5 ml-2" />
@@ -201,26 +166,7 @@ const StoryShip = () => {
                   </CardContent>
                 </Card>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    size="lg" 
-                    onClick={handleGetStarted}
-                    className="text-lg px-8 py-6"
-                  >
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    {user ? "Go to Stories Dashboard" : "Get Started Free"}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    asChild
-                    className="text-lg px-8 py-6"
-                  >
-                    <Link to="#features">
-                      Learn More
-                    </Link>
-                  </Button>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -239,8 +185,7 @@ const StoryShip = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/20">
+              {features.map((feature, index) => <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/20">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
@@ -257,8 +202,7 @@ const StoryShip = () => {
                   <CardContent>
                     <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </section>
@@ -277,20 +221,16 @@ const StoryShip = () => {
 
             <div className="max-w-4xl mx-auto">
               <div className="grid md:grid-cols-3 gap-8">
-                {steps.map((step, index) => (
-                  <div key={index} className="text-center space-y-4">
+                {steps.map((step, index) => <div key={index} className="text-center space-y-4">
                     <div className="relative">
                       <div className="w-16 h-16 mx-auto bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">
                         {step.step}
                       </div>
-                      {index < steps.length - 1 && (
-                        <ArrowRight className="hidden md:block absolute top-8 left-full transform -translate-y-1/2 translate-x-4 w-6 h-6 text-primary/50" />
-                      )}
+                      {index < steps.length - 1 && <ArrowRight className="hidden md:block absolute top-8 left-full transform -translate-y-1/2 translate-x-4 w-6 h-6 text-primary/50" />}
                     </div>
                     <h3 className="text-xl font-semibold">{step.title}</h3>
                     <p className="text-muted-foreground">{step.description}</p>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
           </div>
@@ -309,8 +249,7 @@ const StoryShip = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {useCases.map((useCase, index) => (
-                <Card key={index} className="text-center p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              {useCases.map((useCase, index) => <Card key={index} className="text-center p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   <div className="space-y-4">
                     <div className="w-12 h-12 mx-auto bg-primary/10 rounded-lg flex items-center justify-center">
                       <useCase.icon className="w-6 h-6 text-primary" />
@@ -318,8 +257,7 @@ const StoryShip = () => {
                     <h3 className="text-lg font-semibold">{useCase.title}</h3>
                     <p className="text-sm text-muted-foreground">{useCase.description}</p>
                   </div>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </section>
@@ -358,9 +296,7 @@ const StoryShip = () => {
               <Card className="border-2 border-primary/20 bg-card/80 backdrop-blur-sm">
                 <CardContent className="p-8 text-center space-y-4">
                   <div className="flex justify-center mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
                   </div>
                   <blockquote className="text-lg italic">
                     "Story Ship transformed my content creation process. What used to take hours now takes minutes, and the quality is incredible."
@@ -384,21 +320,11 @@ const StoryShip = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  onClick={handleGetStarted}
-                  className="text-lg px-8 py-6 text-primary"
-                >
+                <Button size="lg" variant="secondary" onClick={handleGetStarted} className="text-lg px-8 py-6 text-primary">
                   <Sparkles className="w-5 h-5 mr-2" />
                   {user ? "Open Stories Dashboard" : "Start Creating Free"}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  asChild
-                  className="text-lg px-8 py-6 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
-                >
+                <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
                   <Link to="/blog">
                     <BookOpen className="w-5 h-5 mr-2" />
                     Read Success Stories
@@ -424,8 +350,6 @@ const StoryShip = () => {
           </div>
         </section>
       </AppLayout>
-    </>
-  );
+    </>;
 };
-
 export default StoryShip;
