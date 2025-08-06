@@ -1,21 +1,8 @@
 import { CategoryCard } from "./CategoryCard";
-
-interface Theme {
-  id: string;
-  theme_name: string;
-  description: string | null;
-  category: string;
-  post_count: number;
-  first_post: {
-    id: string;
-    title: string;
-    description: string;
-    image_url?: string;
-  } | null;
-}
+import { ThemeWithPosts } from "@/types/theme";
 
 interface CategoriesGridProps {
-  themes: Theme[];
+  themes: ThemeWithPosts[];
   onDeleteCategory: (category: string) => void;
 }
 

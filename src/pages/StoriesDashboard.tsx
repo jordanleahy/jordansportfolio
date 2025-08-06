@@ -16,23 +16,10 @@ import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
+import { ThemeWithPosts } from '@/types/theme';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
-
-type ThemeWithPosts = {
-  id: string;
-  theme_name: string;
-  description: string | null;
-  category: string;
-  post_count: number;
-  first_post: {
-    id: string;
-    title: string;
-    description: string;
-    image_url?: string;
-  } | null;
-};
 
 export default function StoriesDashboard() {
   const { user, loading, isAdmin, roleLoading } = useAuth();

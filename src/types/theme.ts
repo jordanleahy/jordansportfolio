@@ -17,3 +17,17 @@ export interface CreateTheme {
 export interface UpdateTheme extends Partial<CreateTheme> {
   id: string;
 }
+
+export interface ThemeWithPosts {
+  id: string;
+  theme_name: string;
+  description: string | null;
+  category: string;
+  post_count: number;
+  first_post: {
+    id: string;
+    title: string;
+    description: string;
+    image_url?: string;
+  } | null;
+}
