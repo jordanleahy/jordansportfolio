@@ -149,10 +149,7 @@ const StoryShip = () => {
               <div className="max-w-2xl mx-auto space-y-6">
                 <Card className="border-2 border-primary/20 shadow-xl bg-card/80 backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Play className="w-5 h-5 text-primary" />
-                      Try It Now - What's Your Story?
-                    </CardTitle>
+                    
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <Textarea placeholder="Type any thought... 'A world where dreams become reality' or 'The last bookstore on Earth' or 'AI companions for lonely humans'" value={demoInput} onChange={e => setDemoInput(e.target.value)} className="min-h-[120px] text-lg resize-none" />
