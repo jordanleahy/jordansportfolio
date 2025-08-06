@@ -223,11 +223,9 @@ function App() {
                 <Route 
                   path="/subscription" 
                   element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <Subscription />
-                      </Suspense>
-                    </ProtectedRoute>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <Subscription />
+                    </Suspense>
                   } 
                 />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />

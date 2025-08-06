@@ -40,7 +40,15 @@ export const useSubscriptionStatus = () => {
     queryKey: ['subscription-status'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) {
+        // Return default values for unauthenticated users
+        return {
+          subscription: null,
+          usage: null,
+          hasActiveSubscription: false,
+          isWithinLimits: null
+        };
+      }
 
       // Get user subscription with tier details
       const { data: subscription, error: subError } = await supabase

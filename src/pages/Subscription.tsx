@@ -11,18 +11,33 @@ import { PlanCarousel } from '@/components/subscription/PlanCarousel';
 import { MobilePlanComparison } from '@/components/subscription/MobilePlanComparison';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Subscription: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: status } = useSubscriptionStatus();
   const { data: tiers = [] } = useSubscriptionTiers();
   const isMobile = useIsMobile();
 
   const handleSelectPlan = (tier: any) => {
-    // Navigate to mobile checkout or trigger subscription
+    if (!user) {
+      // Redirect non-authenticated users to auth page
+      navigate('/auth');
+      return;
+    }
+    // Navigate to mobile checkout or trigger subscription for authenticated users
     console.log('Selected plan:', tier);
   };
 
   const handleSelectFreePlan = async () => {
+    if (!user) {
+      // Redirect non-authenticated users to auth page
+      navigate('/auth');
+      return;
+    }
+    
     if (!tiers || tiers.length === 0) return;
     
     const freePlan = tiers.find(tier => tier.name === 'Free Plan' && tier.price_cents === 0);
@@ -41,7 +56,14 @@ const Subscription: React.FC = () => {
       <div className="container mx-auto py-8 px-4 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Subscription</h1>
+          <h1 className="text-3xl font-bold">
+            {user ? 'Manage Subscription' : 'Choose Your Plan'}
+          </h1>
+          {!user && (
+            <p className="text-muted-foreground mt-2">
+              Select a plan to get started with our AI content platform
+            </p>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -73,7 +95,7 @@ const Subscription: React.FC = () => {
               <button 
                 onClick={handleSelectFreePlan}
                 className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
-                Choose Free Plan →
+                {user ? 'Choose Free Plan' : 'Get Started Free'} →
               </button>
             </div>
           </div>
