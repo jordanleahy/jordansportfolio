@@ -2,25 +2,10 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UsageDashboard } from '@/components/subscription/UsageDashboard';
-import { SubscriptionPlans } from '@/components/subscription/SubscriptionPlans';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, BarChart3, Settings, Smartphone } from 'lucide-react';
-import { PlanCarousel } from '@/components/subscription/PlanCarousel';
-import { MobilePlanComparison } from '@/components/subscription/MobilePlanComparison';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
 
 const Subscription: React.FC = () => {
   const { data: status } = useSubscriptionStatus();
-  const { data: tiers = [] } = useSubscriptionTiers();
-  const isMobile = useIsMobile();
-
-  const handleSelectPlan = (tier: any) => {
-    // Navigate to mobile checkout or trigger subscription
-    console.log('Selected plan:', tier);
-  };
 
   return (
     <PageLayout>
@@ -38,62 +23,36 @@ const Subscription: React.FC = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="usage" className="space-y-6">
-          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
-            <TabsTrigger value="usage" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              {isMobile ? 'Usage' : 'Usage & Billing'}
-            </TabsTrigger>
-            <TabsTrigger value="plans" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              {isMobile ? 'Plans' : 'Plans & Pricing'}
-            </TabsTrigger>
-            {!isMobile && (
-              <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Settings
-              </TabsTrigger>
-            )}
-          </TabsList>
-
-          <TabsContent value="usage">
-            <UsageDashboard />
-          </TabsContent>
-
-          <TabsContent value="plans">
-            {isMobile ? (
-              <div className="space-y-6">
-                <PlanCarousel 
-                  tiers={tiers}
-                  currentTier={status?.subscription?.tier?.id}
-                  onSelectPlan={handleSelectPlan}
-                />
-                <MobilePlanComparison 
-                  tiers={tiers}
-                  currentTier={status?.subscription?.tier?.id}
-                  onSelectPlan={handleSelectPlan}
-                />
+        {/* Simple Subscription Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Subscription</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {status?.subscription ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold">{status.subscription.tier?.name || 'Current Plan'}</h3>
+                  <p className="text-muted-foreground">
+                    ${((status.subscription.tier?.price_cents || 0) / 100).toFixed(2)}/month
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Status: {status.subscription.status}
+                  </p>
+                </div>
               </div>
             ) : (
-              <SubscriptionPlans />
+              <div>
+                <h3 className="font-semibold">No Active Subscription</h3>
+                <p className="text-muted-foreground">
+                  Subscribe to unlock AI features
+                </p>
+              </div>
             )}
-          </TabsContent>
-
-          {!isMobile && (
-            <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subscription Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Subscription settings and preferences will be available here.
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-        </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </PageLayout>
   );
