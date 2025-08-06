@@ -22,6 +22,15 @@ const Subscription: React.FC = () => {
     console.log('Selected plan:', tier);
   };
 
+  const handleSelectFreePlan = async () => {
+    if (!tiers || tiers.length === 0) return;
+    
+    const freePlan = tiers.find(tier => tier.name === 'Free Plan' && tier.price_cents === 0);
+    if (freePlan) {
+      handleSelectPlan(freePlan);
+    }
+  };
+
   return (
     <PageLayout>
       <Helmet>
@@ -61,7 +70,9 @@ const Subscription: React.FC = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
+              <button 
+                onClick={handleSelectFreePlan}
+                className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
                 Choose Free Plan →
               </button>
             </div>
