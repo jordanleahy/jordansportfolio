@@ -264,48 +264,7 @@ const StoryShip = () => {
 
         {/* Social Proof Section */}
         <section className="py-24 bg-gradient-to-b from-background to-primary/5">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Join Thousands of Storytellers
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Creative professionals worldwide trust Story Ship to transform their ideas into compelling narratives.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center space-y-4">
-                <div className="text-4xl font-bold text-primary">50,000+</div>
-                <div className="text-lg font-semibold">Stories Generated</div>
-                <div className="text-muted-foreground">Unique story themes created by our AI</div>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="text-4xl font-bold text-primary">98%</div>
-                <div className="text-lg font-semibold">Satisfaction Rate</div>
-                <div className="text-muted-foreground">Users love their generated content</div>
-              </div>
-              <div className="text-center space-y-4">
-                <div className="text-4xl font-bold text-primary">30s</div>
-                <div className="text-lg font-semibold">Average Generation Time</div>
-                <div className="text-muted-foreground">From idea to complete story theme</div>
-              </div>
-            </div>
-
-            <div className="mt-16 max-w-2xl mx-auto">
-              <Card className="border-2 border-primary/20 bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="flex justify-center mb-4">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
-                  </div>
-                  <blockquote className="text-lg italic">
-                    "Story Ship transformed my content creation process. What used to take hours now takes minutes, and the quality is incredible."
-                  </blockquote>
-                  <cite className="text-muted-foreground">- Sarah Chen, Content Creator</cite>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          
         </section>
 
         {/* CTA Section */}
@@ -325,10 +284,7 @@ const StoryShip = () => {
                   {user ? "Open Stories Dashboard" : "Start Creating Free"}
                 </Button>
                 <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-                  <Link to="/blog">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Read Success Stories
-                  </Link>
+                  
                 </Button>
               </div>
 
