@@ -29,7 +29,7 @@ const Subscription: React.FC = () => {
         <meta name="description" content="Manage your subscription and monitor usage" />
       </Helmet>
 
-      <div className="space-y-6">
+      <div className="container mx-auto py-8 px-4 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">Subscription</h1>
