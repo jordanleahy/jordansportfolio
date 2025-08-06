@@ -52,7 +52,7 @@ const Navigation = () => {
   ] : [
     // Public items
     { href: "/", label: "Home", icon: Home },
-    { href: "/storyship", label: "Story Ship", icon: Sparkles },
+    
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/companies", label: "Companies", icon: Heart },
@@ -305,17 +305,6 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/storyship"
-                          className={cn(navLinkStyles, isActive("/storyship") && "bg-accent text-accent-foreground")}
-                        >
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          Story Ship
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
 
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
