@@ -269,9 +269,7 @@ const StoryShip = () => {
               <h2 className="text-4xl md:text-5xl font-bold">
                 Ready to Transform Your Thoughts into Stories?
               </h2>
-              <p className="text-xl opacity-90">
-                Join thousands of creators who've discovered the power of AI-assisted storytelling. Start your journey today.
-              </p>
+              
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" onClick={handleGetStarted} className="text-lg px-8 py-6 text-primary">
