@@ -22,7 +22,7 @@ const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImpo
 
 type ThemeWithPosts = {
   id: string;
-  name: string;
+  theme_name: string;
   description: string | null;
   category: string;
   post_count: number;

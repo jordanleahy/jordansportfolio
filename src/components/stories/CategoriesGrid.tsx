@@ -2,7 +2,7 @@ import { CategoryCard } from "./CategoryCard";
 
 interface Theme {
   id: string;
-  name: string;
+  theme_name: string;
   description: string | null;
   category: string;
   post_count: number;
@@ -29,8 +29,8 @@ export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps
       {/* Theme cards */}
       {themes.map((theme) => (
         <CategoryCard
-          key={theme.name}
-          theme={theme.name}
+          key={theme.theme_name}
+          theme={theme.theme_name}
           themeDescription={theme.description}
           category={theme.category}
           postCount={theme.post_count}

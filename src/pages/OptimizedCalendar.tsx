@@ -86,10 +86,10 @@ export default function OptimizedCalendar() {
       
       // If the deleted theme was active, switch to the first available one
         if (activeTab === category && availableThemes.length > 1) {
-           const remainingThemes = availableThemes.filter(t => t.name !== category);
-           if (remainingThemes.length > 0) {
-             changeTab(remainingThemes[0].name);
-          }
+         const remainingThemes = availableThemes.filter(t => t.theme_name !== category);
+         if (remainingThemes.length > 0) {
+           changeTab(remainingThemes[0].theme_name);
+        }
         }
       
       // Force refresh the page to reload data
@@ -230,27 +230,27 @@ export default function OptimizedCalendar() {
               <TabsList className="inline-flex w-full h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
                 {availableThemes.map((theme) => (
                   <TabsTrigger 
-                    key={theme.name} 
-                    value={theme.name} 
+                    key={theme.theme_name} 
+                    value={theme.theme_name} 
                     className="capitalize whitespace-nowrap px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-sm"
                   >
-                    {theme.name}
+                    {theme.theme_name}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </div>
 
             {availableThemes.map((theme) => (
-              <TabsContent key={theme.name} value={theme.name} className="space-y-8">
+              <TabsContent key={theme.theme_name} value={theme.theme_name} className="space-y-8">
                 <Suspense fallback={<CalendarSkeletonLoader />}>
                   {/* Color Theme Consistency Checker */}
-                  <ColorThemeConsistencyChecker category={theme.name} />
+                  <ColorThemeConsistencyChecker category={theme.theme_name} />
                   
                    <PostsTable 
                      posts={activeTabPosts}
-                     onPostsChange={() => loadCategoryPosts(theme.name)}
+                     onPostsChange={() => loadCategoryPosts(theme.theme_name)}
                      isAdmin={isAdmin}
-                     category={theme.name}
+                     category={theme.theme_name}
                      selectedThemeId={selectedThemeId}
                      onThemeChange={setSelectedThemeId}
                    />
