@@ -243,7 +243,7 @@ export class OptimizedSocialMediaService {
       .from('themes')
       .select(`
         id,
-        name,
+        theme_name,
         description,
         category,
         created_at,
