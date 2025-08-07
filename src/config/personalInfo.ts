@@ -1,8 +1,8 @@
 export const personalInfo = {
   name: "Jordan Leahy",
-  website: "jordanwilliamleahy.com",
-  email: "jordan@jordanwilliamleahy.com",
-  phone: "+1 (555) 123-4567",
+  website: "jordanwleahy.com",
+  email: "jordanwilliamleahy@gmail.com",
+  phone: "+1 (917) 446-0887",
   linkedIn: "linkedin.com/in/jordanleahy",
   github: "github.com/jordanleahy"
 } as const;
