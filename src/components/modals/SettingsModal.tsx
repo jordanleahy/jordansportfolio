@@ -16,6 +16,7 @@ import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { AccountForm } from '@/components/forms/AccountForm';
 
 export const SettingsModal: React.FC = () => {
   const { isSettingsOpen, closeSettings } = useModal();
@@ -190,21 +191,7 @@ export const SettingsModal: React.FC = () => {
                 <div className="max-w-2xl">
                   <Card>
                     <CardContent className="p-6">
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">Name</label>
-                          <div className="text-sm text-muted-foreground">
-                            {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Not set'}
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">Email</label>
-                          <div className="text-sm text-muted-foreground">
-                            {user?.email || 'Not set'}
-                          </div>
-                        </div>
-                      </div>
+                      <AccountForm user={user} />
                     </CardContent>
                   </Card>
                 </div>
