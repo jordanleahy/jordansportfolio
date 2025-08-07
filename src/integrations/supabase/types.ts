@@ -2485,6 +2485,57 @@ export type Database = {
         }
         Relationships: []
       }
+      work_reports_optimized: {
+        Row: {
+          categories_summary: Json | null
+          created_at: string | null
+          has_creative: boolean | null
+          has_productivity: boolean | null
+          has_technical: boolean | null
+          highlights: Json | null
+          highlights_count: number | null
+          id: string | null
+          metrics: Json | null
+          mood_score: number | null
+          productivity_score: number | null
+          summary_date: string | null
+          summary_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          categories_summary?: Json | null
+          created_at?: string | null
+          has_creative?: never
+          has_productivity?: never
+          has_technical?: never
+          highlights?: Json | null
+          highlights_count?: never
+          id?: string | null
+          metrics?: Json | null
+          mood_score?: number | null
+          productivity_score?: number | null
+          summary_date?: string | null
+          summary_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          categories_summary?: Json | null
+          created_at?: string | null
+          has_creative?: never
+          has_productivity?: never
+          has_technical?: never
+          highlights?: Json | null
+          highlights_count?: never
+          id?: string | null
+          metrics?: Json | null
+          mood_score?: number | null
+          productivity_score?: number | null
+          summary_date?: string | null
+          summary_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_coding_ai_data_for_user: {
