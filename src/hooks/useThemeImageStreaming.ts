@@ -33,7 +33,8 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
           
           const { theme_image_generation_status, theme_image_4_3_url } = payload.new as any;
           
-          if (theme_image_generation_status === 'generating') {
+          // Only set generating if we don't already have an image URL
+          if (theme_image_generation_status === 'generating' && !theme_image_4_3_url) {
             setIsGenerating(true);
             setError(null);
             setHasTimedOut(false);
@@ -70,6 +71,14 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
             }
             setIsGenerating(false);
             setError('Image generation failed. You can retry or use the theme without an image.');
+          } else if (theme_image_4_3_url) {
+            // If we have an image URL, ensure we're not generating
+            setIsGenerating(false);
+            setStreamingProgress({
+              stage: 'completed',
+              progress: 100,
+              imageUrl: theme_image_4_3_url
+            });
           }
         }
       )
