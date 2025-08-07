@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreloading } from "@/hooks/useRoutePreloading";
+import { useModal } from "@/contexts/ModalContext";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -18,6 +19,7 @@ const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { handleMouseEnter, handleFocus } = useNavigationPreloading();
+  const { openSettings } = useModal();
 
   // Simplified active state logic
   const isActive = (path: string) => {
@@ -37,7 +39,7 @@ const Navigation = () => {
   const mobileMenuItems = user ? [
     // Authenticated user items
     { href: "/stories", label: "Stories", icon: BookOpen },
-    { href: "/settings", label: "Settings", icon: User, userInfo: true },
+    { href: "settings", label: "Settings", icon: User, userInfo: true, isModal: true },
     // Admin-only items
     ...(isAdmin ? [
       { href: "/investors", label: "Investors", icon: TrendingUp },
@@ -317,11 +319,9 @@ const Navigation = () => {
                             </Tooltip>
                           </div>
                           
-                          <DropdownMenuItem asChild>
-                            <Link to="/settings" className="flex items-center w-full">
-                              <Settings className="mr-2 h-4 w-4" />
-                              Settings
-                            </Link>
+                          <DropdownMenuItem onClick={openSettings}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
@@ -598,11 +598,14 @@ const Navigation = () => {
                       if (item.userInfo && user) {
                         return (
                           <SheetClose key={item.href} asChild>
-                            <Link
-                              to={item.href}
+                            <button
+                              onClick={() => {
+                                if (item.isModal) {
+                                  openSettings();
+                                }
+                              }}
                               className={cn(
-                                "flex flex-col gap-2 py-3 px-4 text-base font-medium rounded-lg bg-accent/20 border border-accent/30 transition-all duration-200 hover:bg-accent/30 hover:scale-[1.02] active:scale-[0.98]",
-                                itemIsActive && "bg-accent text-accent-foreground font-semibold shadow-sm"
+                                "flex flex-col gap-2 py-3 px-4 text-base font-medium rounded-lg bg-accent/20 border border-accent/30 transition-all duration-200 hover:bg-accent/30 hover:scale-[1.02] active:scale-[0.98] w-full text-left"
                               )}
                               style={{ 
                                 animationDelay: `${index * 50}ms`,
@@ -612,11 +615,8 @@ const Navigation = () => {
                               <div className="flex items-center gap-3">
                                 <Icon className="h-5 w-5 text-primary" />
                                 <span className="font-semibold text-primary">{item.label}</span>
-                                {itemIsActive && (
-                                  <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                )}
                               </div>
-                            </Link>
+                            </button>
                           </SheetClose>
                         );
                       }

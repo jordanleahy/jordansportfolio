@@ -55,7 +55,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
-const Settings = lazy(() => import("./pages/Settings"));
+
 const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const StoryShip = lazy(() => import("./pages/StoryShip"));
@@ -135,16 +135,6 @@ function App() {
                     <ProtectedRoute>
                       <Suspense fallback={<CalendarSkeletonLoader />}>
                         <PostDetail />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/settings" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <Settings />
                       </Suspense>
                     </ProtectedRoute>
                   } 

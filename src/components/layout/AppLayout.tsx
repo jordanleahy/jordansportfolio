@@ -1,6 +1,8 @@
 
 import React from 'react';
 import Navigation from '@/components/Navigation';
+import { ModalProvider } from '@/contexts/ModalContext';
+import { SettingsModal } from '@/components/modals/SettingsModal';
 
 
 interface AppLayoutProps {
@@ -13,13 +15,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   showNavigation = true 
 }) => {
   return (
-    <div className="min-h-screen bg-background">
-      {showNavigation && <Navigation />}
-      
-      <main className="relative">
-        {children}
-      </main>
-    </div>
+    <ModalProvider>
+      <div className="min-h-screen bg-background">
+        {showNavigation && <Navigation />}
+        
+        <main className="relative">
+          {children}
+        </main>
+        
+        <SettingsModal />
+      </div>
+    </ModalProvider>
   );
 };
 
