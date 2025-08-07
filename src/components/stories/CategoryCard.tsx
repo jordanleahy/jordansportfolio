@@ -28,16 +28,19 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       isGenerating,
       streamingProgress: !!streamingProgress,
       category,
-      theme
+      theme,
+      error,
+      hasTimedOut
     });
     
-    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress) {
+    // Only attempt streaming if we have valid data and no ongoing processes or recent failures
+    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress && !error && !hasTimedOut && theme && category) {
       console.log('🚀 Starting streaming for theme:', theme);
       startStreaming(firstPostData);
     } else {
       console.log('❌ NOT starting streaming - conditions not met');
     }
-  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, category, startStreaming]);
+  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, error, hasTimedOut, theme, category, startStreaming]);
 
   // Update image URL when streaming completes or imageUrl prop changes
   useEffect(() => {
