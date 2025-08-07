@@ -411,25 +411,21 @@ export default function StoriesDashboard() {
           <meta name="description" content="Every Thought is a Visual Journey" />
           <link rel="canonical" href="/stories" />
         </Helmet>
-        <div className="min-h-[70vh] flex items-center justify-center px-6 text-center">
-          <article>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Story Ship</h1>
-            <p className="mt-3 text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
-            <div className="mt-6 flex justify-center">
-              <Input
-                placeholder="Describe your theme..."
-                className="max-w-md"
-                value={customThemeDescription}
-                onChange={(e) => setCustomThemeDescription(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && customThemeDescription.trim()) {
-                    try { localStorage.setItem('stories_hero_seen','1'); } catch {}
-                    setShowHero(false);
-                  }
-                }}
-              />
-            </div>
-          </article>
+        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center gap-6">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Story Ship</h1>
+          <p className="text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
+          <Input
+            placeholder="Describe your theme..."
+            className="max-w-md"
+            value={customThemeDescription}
+            onChange={(e) => setCustomThemeDescription(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && customThemeDescription.trim()) {
+                try { localStorage.setItem('stories_hero_seen','1'); } catch {}
+                setShowHero(false);
+              }
+            }}
+          />
         </div>
       </PageLayout>
     );
