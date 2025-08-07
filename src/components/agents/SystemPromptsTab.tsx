@@ -305,7 +305,7 @@ export const SystemPromptsTab = ({
             <div className="text-sm text-muted-foreground">Loading system prompts...</div>
           ) : databasePrompts.length > 0 ? (
             databasePrompts.map((dbPrompt) => (
-              <div key={dbPrompt.id} className="border rounded-lg p-4 h-screen flex flex-col">
+              <div key={dbPrompt.id} className="border rounded-lg p-4 flex flex-col">
                 <span className="text-sm font-medium mb-2 block">{dbPrompt.name}</span>
                 <Badge variant="outline" className="mb-2">
                   {getCategoryLabel(dbPrompt.category)}
