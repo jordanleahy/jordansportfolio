@@ -50,6 +50,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
           last_name: lastName,
           full_name: `${firstName} ${lastName}`.trim(),
           email: user.email,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
         });
 
       if (profileError) throw profileError;
