@@ -6,9 +6,11 @@
  * generation. Enforces both daily and monthly limits, preventing users from exceeding 
  * either limit and automatically resetting daily counters each day.
  * 
- * INPUTS:
- * - usage_type: string ('gpt_image_generation') - Type of service being requested
- * - amount: number (optional, default: 1) - Number of units being requested
+ * LOGIC:
+ * - HARD daily limit (e.g., 1 image per day) - NO catch-up if user skips days
+ * - Monthly cap (e.g., 30 images total) - billing cycle limit
+ * - Daily limit resets at midnight, monthly resets on billing cycle
+ * - Both limits must be respected - daily is ALWAYS enforced regardless of monthly remaining
  * 
  * OUTPUTS:
  * - Success: { allowed: boolean, remaining: number, limit: number, usage_type: string, message?: string }
@@ -27,9 +29,10 @@
  * 2. Retrieve user's active subscription and tier limits (daily + monthly)
  * 3. Get or create current billing period usage record with daily tracking
  * 4. Reset daily counters if new day detected
- * 5. Check if requested amount would exceed EITHER daily OR monthly limits
- * 6. If allowed, increment both daily and monthly usage counters
- * 7. If denied, return remaining allowance and which limit was hit
+ * 5. Check DAILY limit first (HARD rule) - if exceeded, deny regardless of monthly remaining
+ * 6. Check MONTHLY limit second - if exceeded, deny even if daily allowance remains
+ * 7. If both limits allow, increment both daily and monthly usage counters
+ * 8. If denied, return specific message about which limit was hit
  */
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -189,14 +192,18 @@ serve(async (req) => {
     const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
     const dailyRemaining = Math.max(0, dailyLimit - currentDailyUsed);
 
-    // Check if either limit would be exceeded
-    const monthlyAllowed = currentMonthlyUsed + amount <= monthlyLimit;
+    // HARD RULE: Check daily limit FIRST - no exceptions
     const dailyAllowed = currentDailyUsed + amount <= dailyLimit;
-    const allowed = monthlyAllowed && dailyAllowed;
+    
+    // Only check monthly if daily allows (daily is HARD rule)
+    const monthlyAllowed = currentMonthlyUsed + amount <= monthlyLimit;
+    
+    // Both limits must pass - daily is NON-NEGOTIABLE
+    const allowed = dailyAllowed && monthlyAllowed;
 
     console.log(`GPT Image usage check for user ${userId}:`);
-    console.log(`  Daily: ${currentDailyUsed}/${dailyLimit}, requesting: ${amount}, allowed: ${dailyAllowed}`);
-    console.log(`  Monthly: ${currentMonthlyUsed}/${monthlyLimit}, requesting: ${amount}, allowed: ${monthlyAllowed}`);
+    console.log(`  Daily HARD LIMIT: ${currentDailyUsed}/${dailyLimit}, requesting: ${amount}, allowed: ${dailyAllowed}`);
+    console.log(`  Monthly Limit: ${currentMonthlyUsed}/${monthlyLimit}, requesting: ${amount}, allowed: ${monthlyAllowed}`);
     console.log(`  Overall allowed: ${allowed}`);
 
     // If allowed, increment both daily and monthly usage
@@ -216,26 +223,28 @@ serve(async (req) => {
       }
     }
 
-    // Determine which limit is more restrictive for messaging
-    const restrictiveLimit = dailyRemaining < monthlyRemaining ? 'daily' : 'monthly';
-    const restrictiveRemaining = Math.min(dailyRemaining, monthlyRemaining);
-    const restrictiveLimitValue = restrictiveLimit === 'daily' ? dailyLimit : monthlyLimit;
-
+    // Priority messaging: Daily limit is ALWAYS the primary concern
     let message: string | undefined;
     if (!allowed) {
-      if (!dailyAllowed && !monthlyAllowed) {
-        message = `Both daily and monthly limits exceeded. ${dailyRemaining} images remaining today, ${monthlyRemaining} remaining this month.`;
-      } else if (!dailyAllowed) {
-        message = `Daily limit exceeded. ${dailyRemaining} images remaining today (resets at midnight).`;
+      if (!dailyAllowed) {
+        // Daily limit hit - this is the HARD rule
+        message = `Daily limit reached! You can generate ${dailyLimit} image${dailyLimit === 1 ? '' : 's'} per day. Come back tomorrow (resets at midnight).`;
       } else if (!monthlyAllowed) {
-        message = `Monthly limit exceeded. ${monthlyRemaining} images remaining this billing cycle.`;
+        // Monthly limit hit but daily still available
+        const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
+        message = `Monthly limit reached! You've used ${currentMonthlyUsed}/${monthlyLimit} images this billing cycle. ${monthlyRemaining} remaining.`;
       }
     }
+
+    // For remaining count, prioritize the more restrictive limit
+    const dailyRemaining = Math.max(0, dailyLimit - currentDailyUsed);
+    const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
+    const restrictiveRemaining = Math.min(dailyRemaining, monthlyRemaining);
 
     const response: UsageCheckResponse = {
       allowed,
       remaining: allowed ? restrictiveRemaining - amount : restrictiveRemaining,
-      limit: restrictiveLimitValue,
+      limit: dailyLimit, // Always show daily limit since it's the hard rule
       usage_type,
       message
     };
