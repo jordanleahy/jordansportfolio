@@ -100,18 +100,23 @@ serve(async (req) => {
     }
 
     const agent = agents[0];
-    console.log('Using agent:', agent.id, 'with', agent.system_prompts?.length || 0, 'prompts');
+    console.log('Using agent:', agent.id);
 
-    // Find the appropriate system prompt for the story type
-    const systemPrompts = agent.system_prompts || [];
-    const relevantPrompt = systemPrompts.find((prompt: any) => prompt.category === story_type);
+    // Get the appropriate system prompt for the story type from the system_prompts table
+    const { data: systemPromptData, error: promptError } = await supabaseClient
+      .from('system_prompts')
+      .select('prompt_text')
+      .eq('agent_id', agent.id)
+      .eq('category', story_type)
+      .eq('is_active', true)
+      .single();
 
-    if (!relevantPrompt) {
-      console.error('No system prompt found for story type:', story_type);
+    if (promptError || !systemPromptData) {
+      console.error('No system prompt found for story type:', story_type, promptError);
       throw new Error(`No system prompt configured for story type: ${story_type}`);
     }
 
-    console.log('Using system prompt for category:', relevantPrompt.category);
+    console.log('Using system prompt for category:', story_type);
 
     // Prepare the content for OpenAI
     const userPrompt = `
@@ -135,7 +140,7 @@ Please transform this content into an engaging ${story_type === 'childrens_story
       body: JSON.stringify({
         model: agent.model_version || 'gpt-4.1-2025-04-14',
         messages: [
-          { role: 'system', content: relevantPrompt.prompt },
+          { role: 'system', content: systemPromptData.prompt_text },
           { role: 'user', content: userPrompt }
         ],
         temperature: agent.temperature || 0.7,

@@ -80,7 +80,7 @@ serve(async (req) => {
         // Get Daily Work Summary Agent for this user
         const { data: agent } = await supabase
           .from('openai_agents')
-          .select('*')
+          .select('id')
           .eq('user_id', userId)
           .eq('name', 'Daily Work Summary Agent')
           .eq('status', 'active')
@@ -107,11 +107,16 @@ serve(async (req) => {
           category = 'creative'
         }
 
-        // Get system prompt for the category
-        const systemPrompts = agent.system_prompts as any[] || []
-        const categoryPrompt = systemPrompts.find(p => p.category === category)
+        // Get system prompt for the category from the system_prompts table
+        const { data: systemPromptData } = await supabase
+          .from('system_prompts')
+          .select('prompt_text')
+          .eq('agent_id', agent.id)
+          .eq('category', category)
+          .eq('is_active', true)
+          .single()
         
-          if (!categoryPrompt) {
+          if (!systemPromptData) {
             console.log(`⚠️ No system prompt found for category ${category}`)
             return { userId, success: false, error: `No system prompt found for category ${category}` }
           }

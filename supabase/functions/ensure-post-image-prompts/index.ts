@@ -66,11 +66,11 @@ serve(async (req) => {
 
     console.log(`📊 FOUND ${posts.length} POSTS: Need image prompt generation`);
 
-    // Step 2: Get the Visual Prompt Generator agent with system prompt for this category
+    // Step 2: Get the Visual Prompt Generator agent
     console.log('🔍 STEP 2: Finding Visual Prompt Generator agent');
     const { data: visualAgent, error: agentError } = await supabase
       .from('openai_agents')
-      .select('id, system_prompts')
+      .select('id')
       .eq('user_id', userId)
       .eq('name', 'Visual Prompt Generator') // Note: matches VISUAL_PROMPT_GENERATOR constant from agent_constants
       .single();
@@ -80,16 +80,21 @@ serve(async (req) => {
       throw new Error('Visual Prompt Generator agent not found');
     }
 
-    // Find the system prompt for this category
-    const systemPrompts = visualAgent.system_prompts || [];
-    const categoryPrompt = systemPrompts.find((p: any) => p.category === category);
+    // Get the system prompt for this category from the system_prompts table
+    const { data: systemPromptData, error: promptError } = await supabase
+      .from('system_prompts')
+      .select('prompt_text')
+      .eq('agent_id', visualAgent.id)
+      .eq('category', category)
+      .eq('is_active', true)
+      .single();
 
-    if (!categoryPrompt) {
-      console.error(`❌ ERROR: No system prompt found for category: ${category}`);
+    if (promptError || !systemPromptData) {
+      console.error(`❌ ERROR: No system prompt found for category: ${category}`, promptError);
       throw new Error(`No system prompt found for category: ${category}`);
     }
 
-    console.log(`✅ SYSTEM PROMPT FOUND: Category: ${category}, Prompt length: ${categoryPrompt.prompt.length}`);
+    console.log(`✅ SYSTEM PROMPT FOUND: Category: ${category}, Prompt length: ${systemPromptData.prompt_text.length}`);
 
     // Step 3: Generate image prompts for each post
     let successCount = 0;
@@ -114,7 +119,7 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: categoryPrompt.prompt
+                content: systemPromptData.prompt_text
               },
               {
                 role: 'user',
