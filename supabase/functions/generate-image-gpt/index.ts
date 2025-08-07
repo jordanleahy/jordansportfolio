@@ -262,32 +262,6 @@ serve(async (req) => {
         correlationId,
         openAIRequestId,
       });
-
-      // Record generation event for admin analytics (no URL yet)
-      try {
-        await supabase.from('images').insert({
-          user_id: userId,
-          user_email: null,
-          image_url: null,
-          image_size: size,
-          image_quality: 'high',
-          aspect_ratio,
-          model_used: 'gpt-image-1',
-          image_prompt: prompt,
-          tokens_used: null,
-          estimated_cost: estimatedCost,
-          function_name: 'generate-image-gpt',
-          request_type: 'image_generation',
-          openai_request_id: openAIRequestId,
-          response_time_ms: responseTime,
-          seed_value: finalSeed,
-          storage_bucket: null,
-          stage: 'generated_only',
-          success: true,
-        } as any);
-      } catch (_) {
-        // non-critical
-      }
     }
     
     console.log('🎨 IMAGE_GENERATION: Successfully generated image');

@@ -82,22 +82,11 @@ export const SettingsModal: React.FC = () => {
               
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Account</h3>
-                <div className="flex items-start gap-2 px-3 py-2">
-                  <User className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div className="space-y-1">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Name: </span>
-                      <span className="text-foreground">
-                        {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Your name'}
-                      </span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Email: </span>
-                      <span className="text-foreground break-all">
-                        {user?.email || 'you@example.com'}
-                      </span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-foreground">
+                    {user?.user_metadata?.full_name || 'jordan leahy'}
+                  </span>
                 </div>
               </div>
             </div>
