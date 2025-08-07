@@ -137,14 +137,28 @@ serve(async (req) => {
       }
 
       if (existingTheme) {
-        console.log('⚠️ DUPLICATE THEME DETECTED');
+        console.log('✅ DUPLICATE DETECTED - RETURNING EXISTING THEME');
+        
+        // Get post count for existing theme
+        const { data: existingPosts, error: postsError } = await supabase
+          .from('social_media_posts')
+          .select('id')
+          .eq('theme_id', existingTheme.id);
+        
+        const postCount = existingPosts?.length || 0;
+        
+        // Return success with existing theme data
         return new Response(
           JSON.stringify({ 
-            success: false, 
-            errors: ['A theme with this category and name already exists.'],
-            idempotencyKey
+            success: true,
+            insertedCount: postCount,
+            data: aiResult.cleanedData,
+            themeId: existingTheme.id,
+            idempotencyKey,
+            message: `Theme already exists. Found ${postCount} existing posts.`,
+            duplicate: true
           }),
-          { status: 400, headers: corsHeaders }
+          { status: 200, headers: corsHeaders }
         );
       }
 
@@ -162,6 +176,44 @@ serve(async (req) => {
 
       if (themeError) {
         console.error('💥 THEME CREATION ERROR:', themeError);
+        
+        // Handle unique constraint violation gracefully
+        if (themeError.code === '23505' && themeError.message.includes('themes_user_theme_name_category_unique')) {
+          console.log('🔄 RACE CONDITION DETECTED - Looking up existing theme');
+          
+          // Query for the existing theme that was created by another request
+          const { data: raceTheme, error: raceError } = await supabase
+            .from('themes')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('theme_name', aiResult.cleanedData.theme)
+            .eq('category', aiResult.cleanedData.category)
+            .single();
+          
+          if (raceTheme) {
+            // Get post count for race condition theme
+            const { data: racePosts } = await supabase
+              .from('social_media_posts')
+              .select('id')
+              .eq('theme_id', raceTheme.id);
+            
+            const postCount = racePosts?.length || 0;
+            
+            return new Response(
+              JSON.stringify({ 
+                success: true,
+                insertedCount: postCount,
+                data: aiResult.cleanedData,
+                themeId: raceTheme.id,
+                idempotencyKey,
+                message: `Theme created by concurrent request. Found ${postCount} existing posts.`,
+                duplicate: true
+              }),
+              { status: 200, headers: corsHeaders }
+            );
+          }
+        }
+        
         return new Response(
           JSON.stringify({ 
             success: false, 

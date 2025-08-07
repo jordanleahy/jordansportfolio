@@ -12,6 +12,7 @@ interface UseStreamlinedThemeImportOptions {
 
 export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOptions = {}) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pendingSubmissions, setPendingSubmissions] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -20,7 +21,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       rawJson: string; 
       categoryName: string;
       idempotencyKey: string;
-    }): Promise<ProcessingResult & { categoryName: string }> => {
+    }): Promise<ProcessingResult & { categoryName: string; duplicate?: boolean }> => {
       console.log('🚀 FRONTEND: Starting streamlined theme import');
       console.log('📋 IMPORT DETAILS:', {
         categoryName,
@@ -80,9 +81,22 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         queryClient.invalidateQueries({ queryKey: ['available-categories'] });
         queryClient.invalidateQueries({ queryKey: ['system-prompts'] });
         
+        // Clear pending submission
+        setPendingSubmissions(prev => {
+          const updated = new Set(prev);
+          updated.delete(result.idempotencyKey);
+          return updated;
+        });
+        
+        const isDuplicate = result.duplicate || false;
+        const title = isDuplicate ? "Theme already exists ✅" : "Theme imported successfully! 🎉";
+        const description = isDuplicate 
+          ? `Found existing theme with ${result.insertedCount || 0} posts`
+          : `${result.insertedCount || 0} posts imported`;
+        
         toast({
-          title: "Theme imported successfully! 🎉",
-          description: `${result.insertedCount || 0} posts imported`,
+          title,
+          description,
         });
 
         options.onOptimisticComplete?.(true, result.categoryName);
@@ -100,6 +114,13 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     },
     onError: (error, variables) => {
       setIsProcessing(false);
+      
+      // Clear pending submission
+      setPendingSubmissions(prev => {
+        const updated = new Set(prev);
+        updated.delete(variables.idempotencyKey);
+        return updated;
+      });
       
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
@@ -141,6 +162,17 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     // Generate idempotency key if not provided (UUID + timestamp for uniqueness)
     const idempotencyKey = providedIdempotencyKey || `${crypto.randomUUID()}-${Date.now()}`;
 
+    // Check for duplicate submission
+    if (pendingSubmissions.has(idempotencyKey)) {
+      console.log('⚠️ DUPLICATE SUBMISSION BLOCKED:', idempotencyKey);
+      toast({
+        title: "Submission in progress",
+        description: "This request is already being processed",
+        variant: "default"
+      });
+      return;
+    }
+
     // Extract category name for optimistic UI
     let categoryName = 'New Theme';
     try {
@@ -151,6 +183,9 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       console.log('⚠️ CATEGORY EXTRACTION FAILED:', parseError.message);
       // Use default if parsing fails
     }
+
+    // Add to pending submissions
+    setPendingSubmissions(prev => new Set(prev).add(idempotencyKey));
 
     console.log('🚀 STARTING MUTATION:', { 
       categoryName, 
@@ -165,7 +200,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
 
   return {
     submitRawData,
-    isProcessing,
+    isProcessing: isProcessing || pendingSubmissions.size > 0,
     mutation: submitMutation
   };
 };
