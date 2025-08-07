@@ -9,49 +9,67 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
     queryFn: async () => {
       console.log('Fetching API usage data with filters:', filters);
       
-      let query = supabase
+      // First get the usage data
+      let usageQuery = supabase
         .from('api_usage_tracking')
-        .select(`
-          *,
-          user_email:user_id,
-          user_name:user_id
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       // Apply filters
       if (filters.startDate) {
-        query = query.gte('created_at', filters.startDate);
+        usageQuery = usageQuery.gte('created_at', filters.startDate);
       }
       if (filters.endDate) {
-        query = query.lte('created_at', filters.endDate);
+        usageQuery = usageQuery.lte('created_at', filters.endDate);
       }
       if (filters.userId) {
-        query = query.eq('user_id', filters.userId);
+        usageQuery = usageQuery.eq('user_id', filters.userId);
       }
       if (filters.functionName) {
-        query = query.eq('function_name', filters.functionName);
+        usageQuery = usageQuery.eq('function_name', filters.functionName);
       }
       if (filters.requestType) {
-        query = query.eq('request_type', filters.requestType);
+        usageQuery = usageQuery.eq('request_type', filters.requestType);
       }
       if (filters.success !== undefined) {
-        query = query.eq('success', filters.success);
+        usageQuery = usageQuery.eq('success', filters.success);
       }
 
       // Apply pagination
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      query = query.range(from, to);
+      usageQuery = usageQuery.range(from, to);
 
-      const { data, error, count } = await query;
+      const { data, error, count } = await usageQuery;
 
       if (error) {
         console.error('Error fetching API usage data:', error);
         throw error;
       }
 
+      // Get unique user IDs to fetch profiles
+      const userIds = [...new Set((data || []).map(record => record.user_id))];
+      
+      // Fetch user profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, email, full_name')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+      }
+
+      // Create a map for quick profile lookup
+      const profileMap = (profiles || []).reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>);
+
       // Transform data to match our interface
-      const transformedData: ApiUsageRecord[] = (data || []).map(record => ({
+      const transformedData: ApiUsageRecord[] = (data || []).map(record => {
+        const userProfile = profileMap[record.user_id];
+        return {
         id: record.id,
         user_id: record.user_id,
         function_name: record.function_name,
@@ -71,9 +89,10 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
         total_tokens: record.total_tokens || undefined,
         response_time_ms: record.response_time_ms || undefined,
         created_at: record.created_at,
-        user_email: `user-${record.user_id?.slice(0, 8)}@example.com`, // Mock for now
-        user_name: `User ${record.user_id?.slice(0, 8)}`, // Mock for now
-      }));
+        user_email: userProfile?.email || 'Unknown',
+        user_name: userProfile?.full_name || 'Unknown User'
+        };
+      });
 
       return {
         data: transformedData,
@@ -154,14 +173,29 @@ export const useUsageSummary = () => {
         return acc;
       }, {});
 
+      // Get user profiles for top users
+      const topUserIds = Object.keys(userCosts);
+      const { data: userProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, email, full_name')
+        .in('user_id', topUserIds);
+
+      const userProfileMap = (userProfiles || []).reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, any>);
+
       const topUsers = Object.entries(userCosts)
-        .map(([userId, stats]: [string, any]) => ({
-          user_id: userId,
-          user_email: `user-${userId.slice(0, 8)}@example.com`,
-          user_name: `User ${userId.slice(0, 8)}`,
-          total_cost: stats.cost,
-          total_requests: stats.requests,
-        }))
+        .map(([userId, stats]: [string, any]) => {
+          const profile = userProfileMap[userId];
+          return {
+            user_id: userId,
+            user_email: profile?.email || 'Unknown',
+            user_name: profile?.full_name || 'Unknown User',
+            total_cost: stats.cost,
+            total_requests: stats.requests,
+          };
+        })
         .sort((a, b) => b.total_cost - a.total_cost)
         .slice(0, 3);
 
