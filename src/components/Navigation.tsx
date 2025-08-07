@@ -4,6 +4,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity, Sparkles } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,6 +93,7 @@ const Navigation = () => {
   };
 
   return (
+    <TooltipProvider>
     <header className="sticky top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
@@ -288,19 +290,31 @@ const Navigation = () => {
                             </div>
                             
                             {/* Credits Section */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">Credits</span>
-                                <span className="text-sm text-muted-foreground">2,503.3 left ›</span>
-                              </div>
-                              <div className="w-full bg-muted rounded-full h-2">
-                                <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                <span className="text-xs text-muted-foreground">Using monthly credits</span>
-                              </div>
-                            </div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="space-y-2 cursor-pointer">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">Credits</span>
+                                    <span className="text-sm text-muted-foreground">2,503.3 left ›</span>
+                                  </div>
+                                  <div className="w-full bg-muted rounded-full h-2">
+                                    <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                    <span className="text-xs text-muted-foreground">Using monthly credits</span>
+                                  </div>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="bg-background border shadow-lg">
+                                <div className="flex items-center gap-2 p-1">
+                                  <span className="text-sm font-medium">2,503.3/7,500 Monthly credits</span>
+                                </div>
+                                <div className="w-24 bg-muted rounded-full h-1 mt-1">
+                                  <div className="bg-primary h-1 rounded-full" style={{ width: '33%' }}></div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                           
                           <DropdownMenuItem asChild>
@@ -665,6 +679,7 @@ const Navigation = () => {
         </div>
       </div>
     </header>
+    </TooltipProvider>
   );
 };
 
