@@ -52,7 +52,7 @@ export interface ModelPricing {
 // Default configuration
 export const DEFAULT_IMAGE_CONFIG: ImageGenerationConfig = {
   defaultModel: 'gpt-image-1',
-  availableModels: ['gpt-image-1', 'dall-e-3', 'dall-e-2'],
+  availableModels: ['gpt-image-1'],
   
   defaultQuality: 'high',
   defaultOutputFormat: 'png',
@@ -85,19 +85,6 @@ export const DEFAULT_IMAGE_CONFIG: ImageGenerationConfig = {
         '1024x1792': 2.0,
       },
     },
-    'dall-e-3': {
-      baseCost: 0.040,
-      qualityMultipliers: {
-        high: 2.0, // HD quality
-        medium: 1.0, // Standard quality
-        low: 1.0,
-        auto: 1.0,
-      },
-      sizeMultipliers: {
-        '1024x1024': 1.0,
-        '1024x1792': 2.0,
-        '1792x1024': 2.0,
-      },
     },
   },
   
