@@ -104,9 +104,10 @@ Deno.serve(async (req) => {
     const errors: string[] = [];
 
     try {
-      // Fetch OpenAI usage data - using the newer usage API endpoint
-      console.log(`Fetching usage data from ${startTimestamp} to ${endTimestamp}`);
-      const usageUrl = `https://api.openai.com/v1/usage?start_time=${startTimestamp}&end_time=${endTimestamp}&bucket_width=1h`;
+      // Fetch OpenAI usage data - using the correct date parameter
+      const dateString = syncDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      console.log(`Fetching usage data for date: ${dateString}`);
+      const usageUrl = `https://api.openai.com/v1/usage?date=${dateString}`;
       console.log('Usage URL:', usageUrl);
       
       const usageResponse = await fetch(usageUrl, {
