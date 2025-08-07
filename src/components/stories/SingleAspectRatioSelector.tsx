@@ -18,6 +18,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   post,
   onGenerateImage,
   onPostsChange,
+  isProcessing,
 }) => {
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
@@ -40,6 +41,9 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     }
   };
 
+  // Check if any aspect ratio is being generated for this post
+  const isGenerating = isProcessing?.(post.id, 'generate');
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,8 +52,13 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           size="sm"
           title="Image actions"
           className="h-8 w-8 p-0"
+          disabled={isGenerating}
         >
-          <ImageIcon className="h-4 w-4" />
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ImageIcon className="h-4 w-4" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
@@ -57,17 +66,24 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         className="w-48 bg-background border border-border shadow-lg z-50"
       >
         <DropdownMenuLabel className="text-sm font-medium">
-          Generate
+          {isGenerating ? 'Generating...' : 'Generate'}
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
+          const isGeneratingAspectRatio = isProcessing?.(post.id, 'generate', option.value);
           return (
             <DropdownMenuItem
               key={`generate-${option.value}`}
               onClick={() => handleGenerateImage(option.value)}
               className="cursor-pointer text-sm"
+              disabled={isGenerating}
             >
-              <Sparkles className="mr-2 h-4 w-4" />
+              {isGeneratingAspectRatio ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
               {option.label}
+              {isGeneratingAspectRatio && <span className="ml-auto text-xs text-muted-foreground">Generating...</span>}
             </DropdownMenuItem>
           );
         })}

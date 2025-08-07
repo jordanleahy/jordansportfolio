@@ -88,7 +88,8 @@ export const PostsTable = ({
 
   // Use unified processing states
   const {
-    isGenerating
+    isGenerating,
+    isProcessing: isProcessingBase
   } = useProcessingStates();
 
   // Helper to convert between aspect ratio formats
@@ -102,15 +103,15 @@ export const PostsTable = ({
     return map[aspectRatio];
   };
 
-  const convertAspectRatioBack = (aspectRatio: AspectRatio): AspectRatioKey => {
-    const map: Record<AspectRatio, AspectRatioKey> = {
-      '16:9': '16_9',
-      '9:16': '9_16',
-      '4:3': '4_3',
-      '3:4': '3_4'
-    };
-    return map[aspectRatio];
-  };
+  // Create a wrapper function to handle aspect ratio type conversion
+  const isProcessing = useCallback((postId: string, operation?: 'generate' | 'bulk_generate', aspectRatio?: AspectRatioKey) => {
+    if (aspectRatio) {
+      // Convert AspectRatioKey to AspectRatio for the base function
+      const convertedAspectRatio = convertAspectRatio(aspectRatio);
+      return isProcessingBase(postId, operation, convertedAspectRatio);
+    }
+    return isProcessingBase(postId, operation);
+  }, [isProcessingBase]);
 
 
   // Resize functionality
@@ -308,7 +309,7 @@ export const PostsTable = ({
                       <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
                     </div>
                   ) : (
-                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} isProcessing={isProcessing} />
                   )}
                 </TabsContent>
 
@@ -319,7 +320,7 @@ export const PostsTable = ({
                       <div className="text-sm">No posts have been published in this theme yet.</div>
                     </div>
                   ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} isProcessing={isProcessing} />
                   )}
                 </TabsContent>
               </Tabs>

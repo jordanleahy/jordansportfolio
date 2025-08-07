@@ -56,7 +56,8 @@ export const PostsTableView = memo(({
   animatingRows = new Set(),
   completingRows = new Set(),
   getRowAnimationClass = () => '',
-  blogStatuses = {}
+  blogStatuses = {},
+  isProcessing
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
@@ -224,7 +225,8 @@ export const PostsTableView = memo(({
           const selectorProps = {
             post,
             onGenerateImage,
-            onPostsChange
+            onPostsChange,
+            isProcessing
           };
 
           return (
@@ -282,6 +284,10 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
+                ) : isProcessing?.(post.id, 'generate', '16_9') ? (
+                  <div className="w-16 h-9 relative overflow-hidden rounded border flex-shrink-0">
+                    <Skeleton className="w-full h-full" />
+                  </div>
                 ) : <div className="w-16 h-9"></div>}
 
                 {post.image_4_3_url ? (
@@ -294,6 +300,10 @@ export const PostsTableView = memo(({
                       onClick={() => onPreviewImage(post.image_4_3_url!, `${post.title} - 4:3 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
+                  </div>
+                ) : isProcessing?.(post.id, 'generate', '4_3') ? (
+                  <div className="w-16 h-12 relative overflow-hidden rounded border flex-shrink-0">
+                    <Skeleton className="w-full h-full" />
                   </div>
                 ) : <div className="w-16 h-12"></div>}
 
@@ -309,6 +319,10 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
                   </div>
+                ) : isProcessing?.(post.id, 'generate', '9_16') ? (
+                  <div className="w-9 h-16 relative overflow-hidden rounded border flex-shrink-0">
+                    <Skeleton className="w-full h-full" />
+                  </div>
                 ) : <div className="w-9 h-16"></div>}
 
                 {post.image_3_4_url ? (
@@ -321,6 +335,10 @@ export const PostsTableView = memo(({
                       onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
                     />
                     <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
+                  </div>
+                ) : isProcessing?.(post.id, 'generate', '3_4') ? (
+                  <div className="w-12 h-16 relative overflow-hidden rounded border flex-shrink-0">
+                    <Skeleton className="w-full h-full" />
                   </div>
                 ) : <div className="w-12 h-16"></div>}
               </div>

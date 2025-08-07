@@ -75,6 +75,7 @@ export interface PostsTableViewProps {
   completingRows?: Set<string>;
   getRowAnimationClass?: (postId: string) => string;
   blogStatuses?: Record<string, BlogStatus>;
+  isProcessing?: (postId: string, operation?: 'generate' | 'bulk_generate', aspectRatio?: AspectRatioKey) => boolean;
 }
 
 export interface UploadState {
@@ -227,6 +228,7 @@ export interface SingleAspectRatioSelectorProps {
   post: SocialMediaPost;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
+  isProcessing?: (postId: string, operation?: 'generate' | 'bulk_generate', aspectRatio?: AspectRatioKey) => boolean;
 }
 
 // Blog and Status Props
