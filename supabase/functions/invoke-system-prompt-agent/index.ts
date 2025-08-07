@@ -164,13 +164,16 @@ serve(async (req) => {
     console.log('Found System Prompt Generator agent:', agent.id);
 
     // Get the system prompt for this agent from the system_prompts table
+    // Use order by to get the most recent one and handle multiple records gracefully
     const { data: systemPromptData, error: systemPromptError } = await supabase
       .from('system_prompts')
       .select('prompt_text')
       .eq('agent_id', agent.id)
       .eq('category', SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION)
       .eq('is_active', true)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     
     if (systemPromptError || !systemPromptData) {
       console.error('❌ SYSTEM PROMPT NOT FOUND:', {

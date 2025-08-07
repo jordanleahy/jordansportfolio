@@ -111,8 +111,8 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       theme_id: themeId,
       category: themeData.category,
       user_id: userId,
-      status: 'draft',
-      theme_image_generation_status: 'pending'
+      status: 'draft' as const,
+      theme_image_generation_status: 'pending' as const
     }));
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
