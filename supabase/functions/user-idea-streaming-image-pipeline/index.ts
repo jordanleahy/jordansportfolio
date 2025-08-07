@@ -414,6 +414,7 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
                 theme: themeData.theme,
                 category: themeData.category,
                 userId: userId,
+                themeId: themeId, // Pass the theme ID for more reliable lookup
                 firstPostTitle: firstPost.title,
                 firstPostDescription: firstPost.description
               };

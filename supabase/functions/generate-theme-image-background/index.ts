@@ -61,31 +61,58 @@ serve(async (req) => {
 
     // Parse request body and store it for error handling
     requestData = await req.json();
-    const { theme, category, userId, firstPostTitle, firstPostDescription } = requestData;
+    const { theme, category, userId, firstPostTitle, firstPostDescription, themeId: providedThemeId } = requestData;
 
     console.log(`🚀 Starting background image generation for theme: ${theme}`);
-    console.log(`📋 Request data: { theme: "${theme}", category: "${category}", userId: "${userId}" }`);
+    console.log(`📋 Request data: { theme: "${theme}", category: "${category}", userId: "${userId}", themeId: "${providedThemeId}" }`);
 
     // Validate required parameters
     if (!theme || !category || !userId) {
       throw new Error('Missing required parameters: theme, category, or userId');
     }
 
-    // Get theme ID first
-    console.log('🔍 Looking up theme ID for theme:', theme);
-    const { data: themeData, error: themeError } = await supabase
-      .from('themes')
-      .select('id')
-      .eq('theme_name', theme)
-      .eq('user_id', userId)
-      .maybeSingle();
+    let themeId = providedThemeId;
 
-    if (themeError || !themeData) {
-      throw new Error(`Theme not found: ${theme}`);
+    // Get theme ID if not provided
+    if (!themeId) {
+      console.log('🔍 Looking up theme ID for theme:', theme);
+      const { data: themeData, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', theme)
+        .eq('user_id', userId)
+        .eq('category', category)
+        .maybeSingle();
+
+      if (themeError) {
+        console.error('❌ Theme lookup error:', themeError);
+        throw new Error(`Theme lookup failed: ${themeError.message}`);
+      }
+
+      if (!themeData) {
+        // Try searching with just theme name and user (in case category doesn't match exactly)
+        console.log('🔄 Retrying theme lookup without category filter...');
+        const { data: fallbackThemeData, error: fallbackError } = await supabase
+          .from('themes')
+          .select('id, category')
+          .eq('theme_name', theme)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (fallbackError || !fallbackThemeData) {
+          console.error('❌ Theme not found even with fallback search:', { theme, userId, category });
+          throw new Error(`Theme not found: ${theme} for user ${userId}`);
+        }
+
+        themeId = fallbackThemeData.id;
+        console.log(`✅ Found theme via fallback with category: ${fallbackThemeData.category}`);
+      } else {
+        themeId = themeData.id;
+        console.log('✅ Found theme ID:', themeId);
+      }
+    } else {
+      console.log('✅ Using provided theme ID:', themeId);
     }
-
-    const themeId = themeData.id;
-    console.log('✅ Found theme ID:', themeId);
 
     // Set status to generating
     await updateThemeImageStatus(supabase, 'generating', themeId, userId);
@@ -147,15 +174,21 @@ serve(async (req) => {
         const supabase = createClient(supabaseUrl, supabaseKey);
         
         // Look up theme ID for error handling
-        const { data: themeData } = await supabase
-          .from('themes')
-          .select('id')
-          .eq('theme_name', requestData.theme)
-          .eq('user_id', requestData.userId)
-          .maybeSingle();
+        let themeIdForError = requestData.themeId;
+        
+        if (!themeIdForError) {
+          const { data: themeData } = await supabase
+            .from('themes')
+            .select('id')
+            .eq('theme_name', requestData.theme)
+            .eq('user_id', requestData.userId)
+            .maybeSingle();
+            
+          themeIdForError = themeData?.id;
+        }
 
-        if (themeData) {
-          await updateThemeImageStatus(supabase, 'failed', themeData.id, requestData.userId);
+        if (themeIdForError) {
+          await updateThemeImageStatus(supabase, 'failed', themeIdForError, requestData.userId);
           console.log('✅ Updated theme status to failed');
         }
       }
