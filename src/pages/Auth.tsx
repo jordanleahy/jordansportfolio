@@ -17,7 +17,9 @@ const Auth = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    firstName: "",
+    lastName: ""
   });
   const {
     toast
@@ -85,7 +87,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.email || !formData.password || !formData.confirmPassword || !formData.firstName || !formData.lastName) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -111,7 +113,12 @@ const Auth = () => {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            full_name: `${formData.firstName} ${formData.lastName}`
+          }
         }
       });
 
@@ -197,6 +204,32 @@ const Auth = () => {
 
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-firstName">First Name</Label>
+                      <Input 
+                        id="signup-firstName" 
+                        name="firstName" 
+                        type="text" 
+                        placeholder="Enter your first name" 
+                        value={formData.firstName} 
+                        onChange={handleInputChange} 
+                        required 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-lastName">Last Name</Label>
+                      <Input 
+                        id="signup-lastName" 
+                        name="lastName" 
+                        type="text" 
+                        placeholder="Enter your last name" 
+                        value={formData.lastName} 
+                        onChange={handleInputChange} 
+                        required 
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input 
