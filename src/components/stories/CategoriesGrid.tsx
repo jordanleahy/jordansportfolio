@@ -1,7 +1,13 @@
 import { CategoryCard } from "./CategoryCard";
 import { CategoriesGridProps } from "@/types/stories";
 
-export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps) => {
+export const CategoriesGrid = ({ 
+  themes, 
+  onDeleteCategory, 
+  selectedThemes,
+  onThemeSelect,
+  isSelectionMode
+}: CategoriesGridProps) => {
   if (themes.length === 0) {
     return null;
   }
@@ -23,6 +29,9 @@ export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps
           } : undefined}
           onDelete={onDeleteCategory}
           isShimmer={theme.id.startsWith('pending-')}
+          isSelected={selectedThemes?.has(theme.id)}
+          onSelect={() => onThemeSelect?.(theme.id)}
+          isSelectionMode={isSelectionMode}
         />
       ))}
     </div>

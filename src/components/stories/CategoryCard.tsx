@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StreamingShimmer } from "@/components/ui/streaming-shimmer";
 import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +10,7 @@ import { useEffect, useState, useRef } from "react";
 
 import { CategoryCardProps } from '@/types/stories';
 
-export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: CategoryCardProps) => {
+export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode }: CategoryCardProps) => {
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   const imageGenerationAttempted = useRef(false);
@@ -61,10 +62,21 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   
   const handleClick = () => {
     if (isShimmer) return; // Prevent clicks on shimmer cards
+    if (isSelectionMode && onSelect) {
+      onSelect();
+      return;
+    }
     if (onClick) {
       onClick();
     } else {
       navigate(`/stories/theme/${encodeURIComponent(theme)}`);
+    }
+  };
+
+  const handleCheckboxChange = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSelect) {
+      onSelect();
     }
   };
 
@@ -96,7 +108,9 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   }
 
   return (
-    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden" onClick={handleClick}>
+    <Card className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden ${
+      isSelected ? 'ring-2 ring-primary border-primary/50' : ''
+    } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} onClick={handleClick}>
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         {/* Display current or streaming image */}
@@ -145,8 +159,19 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         )}
         
-        {/* Badge positioned over image */}
-        <div className="absolute top-3 right-3">
+        {/* Selection checkbox and badge */}
+        <div className="absolute top-3 right-3 flex gap-2">
+          {isSelectionMode && (
+            <div 
+              className="bg-white/90 rounded-md p-1 shadow-sm"
+              onClick={handleCheckboxChange}
+            >
+              <Checkbox 
+                checked={isSelected || false}
+                className="h-4 w-4"
+              />
+            </div>
+          )}
           <Badge variant="secondary" className="bg-white/90 text-primary hover:bg-white">
             {postCount}
           </Badge>

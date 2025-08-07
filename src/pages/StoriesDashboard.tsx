@@ -7,7 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Users } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
@@ -17,6 +17,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 import { ThemesSkeleton } from '@/components/stories/ThemesSkeleton';
+import { BulkActionsToolbar } from '@/components/stories/BulkActionsToolbar';
+import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteConfirmationDialog';
 import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -34,6 +36,18 @@ export default function StoriesDashboard() {
 
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
+
+  // Bulk selection state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [deleteProgress, setDeleteProgress] = useState<{
+    completed: number;
+    total: number;
+    current?: string;
+    errors?: string[];
+  } | null>(null);
 
   // Hook for theme import functionality
   const {
@@ -131,6 +145,144 @@ export default function StoriesDashboard() {
         description: error.message || "Failed to delete category",
         variant: "destructive"
       });
+    }
+  };
+
+  // Bulk selection handlers
+  const handleToggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedThemes(new Set());
+  };
+
+  const handleThemeSelect = (themeId: string) => {
+    const newSelected = new Set(selectedThemes);
+    if (newSelected.has(themeId)) {
+      newSelected.delete(themeId);
+    } else {
+      newSelected.add(themeId);
+    }
+    setSelectedThemes(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    const allThemeIds = availableThemes
+      .filter(theme => !theme.id.startsWith('pending-'))
+      .map(theme => theme.id);
+    setSelectedThemes(new Set(allThemeIds));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedThemes(new Set());
+  };
+
+  const handleClearSelection = () => {
+    setSelectedThemes(new Set());
+    setIsSelectionMode(false);
+  };
+
+  const getSelectedThemes = () => {
+    return availableThemes.filter(theme => selectedThemes.has(theme.id));
+  };
+
+  const handleBulkDelete = async () => {
+    const themesToDelete = getSelectedThemes();
+    setIsDeletingBulk(true);
+    setDeleteProgress({
+      completed: 0,
+      total: themesToDelete.length,
+      errors: []
+    });
+
+    try {
+      // Process in batches of 5 for safety
+      const batchSize = 5;
+      const batches = [];
+      for (let i = 0; i < themesToDelete.length; i += batchSize) {
+        batches.push(themesToDelete.slice(i, i + batchSize));
+      }
+
+      let completed = 0;
+      const errors: string[] = [];
+
+      for (const batch of batches) {
+        const themeIds = batch.map(t => t.id);
+        const categories = batch.map(t => t.category);
+
+        setDeleteProgress(prev => prev ? {
+          ...prev,
+          current: batch.map(t => t.theme_name).join(', ')
+        } : null);
+
+        try {
+          const { data, error } = await supabase.functions.invoke('bulk-delete-themes', {
+            body: { themeIds, categories }
+          });
+
+          if (error) throw error;
+
+          if (data?.results) {
+            const failedInBatch = data.results.filter((r: any) => !r.success);
+            if (failedInBatch.length > 0) {
+              failedInBatch.forEach((failed: any) => {
+                errors.push(`${failed.category}: ${failed.error}`);
+              });
+            }
+          }
+
+          completed += batch.length;
+          setDeleteProgress(prev => prev ? {
+            ...prev,
+            completed,
+            errors
+          } : null);
+
+        } catch (error) {
+          console.error('Batch delete error:', error);
+          batch.forEach(theme => {
+            errors.push(`${theme.theme_name}: ${error.message}`);
+          });
+          completed += batch.length;
+          setDeleteProgress(prev => prev ? {
+            ...prev,
+            completed,
+            errors
+          } : null);
+        }
+
+        // Small delay between batches
+        if (batches.indexOf(batch) < batches.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      // Wait a moment to show completion
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Refresh themes list
+      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+      setAvailableThemes(refreshedThemes);
+      
+      setSelectedThemes(new Set());
+      setIsSelectionMode(false);
+      setShowDeleteDialog(false);
+
+      const successCount = completed - errors.length;
+      toast({
+        title: "Bulk Delete Complete",
+        description: `Successfully deleted ${successCount} themes${errors.length > 0 ? ` (${errors.length} errors)` : ''}`,
+        variant: errors.length > 0 ? "destructive" : "default"
+      });
+
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      toast({
+        title: "Bulk Delete Failed",
+        description: error.message || "Failed to delete themes",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingBulk(false);
+      setDeleteProgress(null);
     }
   };
 
@@ -247,7 +399,7 @@ export default function StoriesDashboard() {
 
         {/* Action Buttons Section */}
         <div className="container mx-auto px-4 mb-8">
-          <div className="flex justify-center gap-4 max-w-md mx-auto">
+          <div className="flex justify-center gap-4 max-w-2xl mx-auto">
             <Button
               onClick={handleGenerateCustomTheme}
               disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
@@ -266,6 +418,16 @@ export default function StoriesDashboard() {
               )}
             </Button>
 
+            <Button
+              onClick={handleToggleSelectionMode}
+              variant={isSelectionMode ? "default" : "outline"}
+              className="flex-1"
+              disabled={availableThemes.length === 0}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              {isSelectionMode ? 'Exit Selection' : 'Bulk Actions'}
+            </Button>
+
             {isAdmin && (
               roleLoading ? (
                 <Skeleton className="flex-1 h-10" />
@@ -279,7 +441,6 @@ export default function StoriesDashboard() {
                 </Button>
               )
             )}
-
           </div>
         </div>
 
@@ -294,6 +455,18 @@ export default function StoriesDashboard() {
             />
           </Suspense>
         )}
+
+        {/* Bulk Actions Toolbar */}
+        <BulkActionsToolbar
+          selectedCount={selectedThemes.size}
+          totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
+          onDeleteSelected={() => setShowDeleteDialog(true)}
+          onClearSelection={handleClearSelection}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
+          isDeleting={isDeletingBulk}
+        />
 
         {/* Enhanced Themes Grid with Loading States */}
         {isLoadingThemes ? (
@@ -314,8 +487,21 @@ export default function StoriesDashboard() {
           <CategoriesGrid 
             themes={availableThemes}
             onDeleteCategory={handleDeleteCategory}
+            selectedThemes={selectedThemes}
+            onThemeSelect={handleThemeSelect}
+            isSelectionMode={isSelectionMode}
           />
         )}
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <BulkDeleteConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          selectedThemes={getSelectedThemes()}
+          onConfirm={handleBulkDelete}
+          isDeleting={isDeletingBulk}
+          progress={deleteProgress}
+        />
       </div>
     </PageLayout>
   );

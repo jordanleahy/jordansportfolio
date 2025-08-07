@@ -10,6 +10,9 @@ import type { ColorTheme } from '@/types/colorTheme';
 export interface CategoriesGridProps {
   themes: ThemeWithPosts[];
   onDeleteCategory: (category: string) => void;
+  selectedThemes?: Set<string>;
+  onThemeSelect?: (themeId: string) => void;
+  isSelectionMode?: boolean;
 }
 
 export interface CategoryCardProps {
@@ -25,6 +28,9 @@ export interface CategoryCardProps {
   onClick?: () => void;
   onDelete?: (category: string) => void;
   isShimmer?: boolean;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  isSelectionMode?: boolean;
 }
 
 export interface PostCardProps {
