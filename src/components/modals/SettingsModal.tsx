@@ -115,14 +115,6 @@ export const SettingsModal: React.FC = () => {
                       <span className="text-sm text-muted-foreground">per month</span>
                     </div>
                     
-<Button 
-                      variant="secondary" 
-                      className="w-full bg-primary/10 text-primary hover:bg-primary/20"
-                      onClick={startStarterCheckout}
-                    >
-                      Upgrade
-                    </Button>
-                    
                     <div className="space-y-3 pt-2">
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-muted-foreground" />
