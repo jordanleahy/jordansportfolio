@@ -22,6 +22,12 @@ const Navigation = () => {
   const { handleMouseEnter, handleFocus } = useNavigationPreloading();
   const { openSettings } = useModal();
 
+  // Subscription credits
+  const { data: subData, isLoading: subLoading } = useSubscriptionStatus();
+  const totalCredits = subData?.subscription?.tier?.max_gpt_images || 0;
+  const usedCredits = subData?.usage?.gpt_images_used || 0;
+  const remainingCredits = Math.max(totalCredits - usedCredits, 0);
+  const percentUsed = totalCredits ? Math.min((usedCredits / totalCredits) * 100, 100) : 0;
   // Simplified active state logic
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/" && !location.hash;
@@ -298,10 +304,10 @@ const Navigation = () => {
                                 <div className="space-y-2 cursor-pointer">
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium">Credits</span>
-                                    <span className="text-sm text-muted-foreground">2,503.3 left ›</span>
+                                    <span className="text-sm text-muted-foreground">{remainingCredits.toLocaleString()} left ›</span>
                                   </div>
                                   <div className="w-full bg-muted rounded-full h-2">
-                                    <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
+                                    <div className="bg-primary h-2 rounded-full" style={{ width: `${percentUsed}%` }}></div>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -311,10 +317,10 @@ const Navigation = () => {
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="bg-background border shadow-lg">
                                 <div className="flex items-center gap-2 p-1">
-                                  <span className="text-sm font-medium">2,503.3/7,500 Monthly credits</span>
+                                  <span className="text-sm font-medium">{usedCredits.toLocaleString()}/{totalCredits.toLocaleString()} Monthly credits</span>
                                 </div>
                                 <div className="w-24 bg-muted rounded-full h-1 mt-1">
-                                  <div className="bg-primary h-1 rounded-full" style={{ width: '33%' }}></div>
+                                  <div className="bg-primary h-1 rounded-full" style={{ width: `${percentUsed}%` }}></div>
                                 </div>
                               </TooltipContent>
                             </Tooltip>

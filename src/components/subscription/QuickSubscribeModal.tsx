@@ -76,7 +76,7 @@ export const QuickSubscribeModal: React.FC<QuickSubscribeModalProps> = ({
               </div>
                <div>
                  <div className="font-medium text-foreground">
-                   {tier.max_gpt_images} GPT Image Generations
+                   {tier.max_gpt_images} Credits
                  </div>
                  <div className="text-sm text-muted-foreground">
                    Create stunning visuals with premium GPT-image-1

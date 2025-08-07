@@ -7,7 +7,7 @@ import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
 import type { MobilePlanComparisonProps } from '@/types/stories/ui';
 
 const featureComparison = [
-  { label: 'GPT Images per Month', key: 'max_gpt_images' },
+  { label: 'Credits per Month', key: 'max_gpt_images' },
   { label: 'Premium GPT-image-1', key: 'gpt_image_1' },
   { label: 'High Quality Generation', key: 'high_quality' },
   { label: 'Priority Support', key: 'priority_support' },
