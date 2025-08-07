@@ -96,25 +96,8 @@ export const StreamingShimmer = ({
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (error) {
-    return (
-      <div className={cn(
-        "w-full h-full relative overflow-hidden bg-gradient-to-br from-destructive/10 via-destructive/5 to-muted/20",
-        "flex items-center justify-center",
-        className
-      )}>
-        <div className="flex flex-col items-center justify-center text-center p-4">
-          <ImageIcon className="h-8 w-8 text-destructive/60 mb-2" />
-          <div className="text-xs text-destructive">
-            Generation failed
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show shimmer immediately if no image is available or if generating
-  const shouldShowShimmer = !currentImage || isGenerating;
+  // Show shimmer if no image is available, generating, or has error
+  const shouldShowShimmer = !currentImage || isGenerating || error;
 
   return (
     <div className={cn(
@@ -158,7 +141,7 @@ export const StreamingShimmer = ({
         </div>
       )}
 
-      {/* Fallback icon when no image and not generating */}
+      {/* Fallback icon when no image and not generating/error */}
       {!currentImage && !isGenerating && !error && (
         <div className="absolute inset-0 flex items-center justify-center">
           {fallbackIcon || <ImageIcon className="h-12 w-12 text-primary/40" />}
