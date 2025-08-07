@@ -150,16 +150,11 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
 export function enhanceOpenAIRequestBody(body: any, correlationId?: string): any {
   const correlation = correlationId || generateCorrelationId();
   
-  // Add user metadata to OpenAI request for better attribution
+  // Add user tracking without metadata (metadata requires store parameter)
   return {
     ...body,
     user: correlation, // OpenAI user field for tracking
-    metadata: {
-      ...body.metadata,
-      correlation_id: correlation,
-      source: 'supabase-edge-function',
-      timestamp: new Date().toISOString(),
-    }
+    // Remove metadata as it requires 'store' parameter to be enabled
   };
 }
 

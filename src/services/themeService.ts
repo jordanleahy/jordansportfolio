@@ -77,6 +77,43 @@ export class ThemeService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Check for similar categories before creating
+    console.log('🔍 Checking for similar categories to:', theme.category);
+    try {
+      const similarityResponse = await supabase.functions.invoke('check-category-similarity', {
+        body: { 
+          category: theme.category, 
+          userId: user.id 
+        }
+      });
+
+      if (similarityResponse.data?.hasSimilar) {
+        const similarCategories = similarityResponse.data.similarCategories;
+        const topSimilar = similarCategories[0];
+        
+        console.warn('🚨 Similar category found:', {
+          new: theme.category,
+          existing: topSimilar.category,
+          similarity: topSimilar.similarity,
+          theme_name: topSimilar.theme_name
+        });
+
+        // Throw error with detailed information about the similar category
+        throw new Error(
+          `A similar theme already exists: "${topSimilar.theme_name}" with category "${topSimilar.category}". ` +
+          `Similarity: ${Math.round(topSimilar.similarity * 100)}%. ` +
+          `Please use the existing theme or choose a more distinct category name.`
+        );
+      }
+    } catch (error) {
+      // If it's our similarity error, re-throw it
+      if (error instanceof Error && error.message.includes('similar theme already exists')) {
+        throw error;
+      }
+      // If it's a service error, log but continue (don't block theme creation)
+      console.warn('⚠️ Similarity check failed, proceeding with creation:', error);
+    }
+
     const { data, error } = await supabase
       .from('themes')
       .insert({
@@ -130,7 +167,7 @@ export class ThemeService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Try to find existing theme
+    // Try to find existing theme by exact match first
     const { data: existingTheme } = await supabase
       .from('themes')
       .select('*')
@@ -143,7 +180,44 @@ export class ThemeService {
       return existingTheme as Theme;
     }
 
-    // Create new theme if not found
+    // Check for similar categories before creating new theme
+    console.log('🔍 Checking for similar categories to:', category);
+    try {
+      const similarityResponse = await supabase.functions.invoke('check-category-similarity', {
+        body: { 
+          category: category, 
+          userId: user.id 
+        }
+      });
+
+      if (similarityResponse.data?.hasSimilar) {
+        const similarCategories = similarityResponse.data.similarCategories;
+        const topSimilar = similarCategories[0];
+        
+        console.warn('🚨 Similar category found, returning existing theme:', {
+          new: category,
+          existing: topSimilar.category,
+          similarity: topSimilar.similarity,
+          theme_name: topSimilar.theme_name
+        });
+
+        // Return the existing similar theme instead of creating a new one
+        const { data: similarTheme } = await supabase
+          .from('themes')
+          .select('*')
+          .eq('id', topSimilar.id)
+          .single();
+
+        if (similarTheme) {
+          return similarTheme as Theme;
+        }
+      }
+    } catch (error) {
+      // If similarity check fails, log but continue with creation
+      console.warn('⚠️ Similarity check failed, proceeding with creation:', error);
+    }
+
+    // Create new theme if no similar one found
     return this.createTheme({ theme_name, category, description });
   }
 
