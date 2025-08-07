@@ -119,7 +119,7 @@ serve(async (req) => {
     console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '', `(correlation: ${correlationId})`);
 
     // OpenAI request body without metadata (not supported by image generation API)
-    const requestBody = {
+    const openAIRequestBody = {
       model: 'gpt-image-1',
       prompt: prompt,
       size: size,
@@ -140,7 +140,7 @@ serve(async (req) => {
         'X-Correlation-ID': correlationId,
         'X-Request-Source': 'supabase-edge-function',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(openAIRequestBody),
     });
     
     const responseTime = Date.now() - requestStartTime;
