@@ -7,13 +7,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Trash2, ExternalLink, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryPromptEditor } from './CategoryPromptEditor';
-import { GenerateSystemPromptButton } from './GenerateSystemPromptButton';
 import { useSystemPromptCache } from '@/hooks/useSystemPromptCache';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { DEFAULT_CATEGORIES, VISUAL_PROMPT_CATEGORIES, getCategoryLabel } from '@/constants/categoryConstants';
 interface SystemPromptsTabProps {
   agentId?: string;
+  agentName?: string;
   systemPrompts: any[];
   supportedCategories: string[];
   onChange: (prompts: any[], categories: string[]) => void;
@@ -229,13 +229,6 @@ export const SystemPromptsTab = ({
                         {hasPrompt && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
                       </div>
                       
-                      {!hasPrompt && agentId && <GenerateSystemPromptButton agentId={agentId} category={category} onSuccess={() => {
-                  fetchDatabasePrompts();
-                  // Update supported categories to include the new category
-                  if (!supportedCategories.includes(category)) {
-                    onChange(systemPrompts, [...supportedCategories, category]);
-                  }
-                }} />}
                     </div>;
             })}
               </div>
@@ -259,9 +252,6 @@ export const SystemPromptsTab = ({
                       <Copy className="h-4 w-4" />
                       Copy Prompt
                     </Button>
-                    {agentId && <GenerateSystemPromptButton agentId={agentId} category={dbPrompt.category} onSuccess={() => {
-                fetchDatabasePrompts();
-              }} />}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
