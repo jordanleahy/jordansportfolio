@@ -14,7 +14,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 // Similarity threshold (0-1, where 1 is identical)
-const SIMILARITY_THRESHOLD = 0.75;
+const SIMILARITY_THRESHOLD = 0.50;
 
 // Common category synonyms and variations
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
