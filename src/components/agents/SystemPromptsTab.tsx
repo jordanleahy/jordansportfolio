@@ -311,7 +311,7 @@ export const SystemPromptsTab = ({
                   <Badge variant="outline">
                     {getCategoryLabel(dbPrompt.category)}
                   </Badge>
-                  <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
+                  
                 </div>
                 
                 <CategoryPromptEditor
