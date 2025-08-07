@@ -118,27 +118,35 @@ serve(async (req) => {
 
     console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '', `(correlation: ${correlationId})`);
 
-    // Enhanced OpenAI request with correlation tracking
-    const requestBody = enhanceOpenAIRequestBody({
+    // OpenAI request body without metadata (not supported by image generation API)
+    const requestBody = {
       model: 'gpt-image-1',
       prompt: prompt,
       size: size,
       quality: 'high',
       output_format: 'png',
       n: 1,
+      user: correlationId, // Only include user field for tracking
       ...(finalSeed && { seed: finalSeed })
-    }, correlationId);
+    };
 
-    const { response, openAIRequestId, responseTime } = await makeOpenAIRequest({
-      url: 'https://api.openai.com/v1/images/generations',
+    // Make direct fetch call to avoid metadata issues
+    const requestStartTime = Date.now();
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
+        'X-Correlation-ID': correlationId,
+        'X-Request-Source': 'supabase-edge-function',
       },
       body: JSON.stringify(requestBody),
-      correlationId,
     });
+    
+    const responseTime = Date.now() - requestStartTime;
+    const openAIRequestId = response.headers.get('x-request-id') || 
+                           response.headers.get('request-id') || 
+                           correlationId;
 
     if (!response.ok) {
       console.error('🎨 IMAGE_GENERATION: OpenAI API error - Status:', response.status, 'StatusText:', response.statusText);
