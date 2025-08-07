@@ -800,6 +800,60 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_work_summaries: {
+        Row: {
+          categories_summary: Json
+          challenges: Json
+          created_at: string
+          generated_summary: string
+          highlights: Json
+          id: string
+          insights: Json
+          metrics: Json
+          mood_score: number | null
+          productivity_score: number | null
+          recommendations: Json
+          summary_date: string
+          summary_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categories_summary?: Json
+          challenges?: Json
+          created_at?: string
+          generated_summary: string
+          highlights?: Json
+          id?: string
+          insights?: Json
+          metrics?: Json
+          mood_score?: number | null
+          productivity_score?: number | null
+          recommendations?: Json
+          summary_date: string
+          summary_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          categories_summary?: Json
+          challenges?: Json
+          created_at?: string
+          generated_summary?: string
+          highlights?: Json
+          id?: string
+          insights?: Json
+          metrics?: Json
+          mood_score?: number | null
+          productivity_score?: number | null
+          recommendations?: Json
+          summary_date?: string
+          summary_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           capacity: number | null
@@ -2585,6 +2639,10 @@ export type Database = {
         Returns: undefined
       }
       insert_cover_letter_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      insert_daily_work_summary_agent: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
