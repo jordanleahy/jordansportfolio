@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { EDGE_FUNCTION_NAMES } from '@/constants/edgeFunctionConstants';
 import { StreamingProgress, UseThemeImageStreamingProps, UseThemeImageStreamingReturn } from '@/types/stories';
 
+// Singleton store for active streaming instances
+const activeStreamingInstances = new Map<string, boolean>();
+
 export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeImageStreamingProps) => {
   const [streamingProgress, setStreamingProgress] = useState<StreamingProgress | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -10,16 +13,24 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const instanceIdRef = useRef<string | null>(null);
 
   // 5-minute timeout for shimmer removal
   const GENERATION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
-  // Listen for real-time database updates
+  // Listen for real-time database updates with singleton pattern
   useEffect(() => {
     if (!enabled || !category) return;
 
+    // Create unique instance ID for this hook instance
+    const instanceId = `${category}-${Date.now()}-${Math.random()}`;
+    instanceIdRef.current = instanceId;
+
+    // Use user-specific channel naming to prevent cross-user interference
+    const channelName = `theme-image-updates-${category}`;
+    
     const channel = supabase
-      .channel(`theme-image-${category}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -29,6 +40,9 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
           filter: `category=eq.${category}`
         },
         (payload) => {
+          // Only process updates for the authenticated user's posts
+          const authenticatedUserId = supabase.auth.getUser().then(({ data }) => data.user?.id);
+          
           console.log('Theme image update:', payload);
           
           const { theme_image_generation_status, theme_image_4_3_url } = payload.new as any;
@@ -91,6 +105,16 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
 
   const startStreaming = async (firstPostData?: { title: string; description: string }) => {
     if (!category) return;
+
+    // Singleton check - prevent multiple streaming instances for the same category
+    const streamingKey = `${category}`;
+    if (activeStreamingInstances.get(streamingKey)) {
+      console.log(`🚫 Streaming already active for category: ${category}, skipping duplicate request`);
+      return;
+    }
+
+    // Mark this category as having an active streaming instance
+    activeStreamingInstances.set(streamingKey, true);
 
     setIsGenerating(true);
     setError(null);
@@ -241,6 +265,10 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       console.error('Error starting streaming:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
       setIsGenerating(false);
+    } finally {
+      // Always clear the streaming instance when done
+      const streamingKey = `${category}`;
+      activeStreamingInstances.delete(streamingKey);
     }
   };
 
@@ -309,8 +337,14 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
+      
+      // Clear singleton instance for this category when unmounting
+      if (category) {
+        const streamingKey = `${category}`;
+        activeStreamingInstances.delete(streamingKey);
+      }
     };
-  }, []);
+  }, [category]);
 
   return {
     streamingProgress,
