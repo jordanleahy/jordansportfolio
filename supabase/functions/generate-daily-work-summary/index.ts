@@ -44,22 +44,30 @@ serve(async (req) => {
     const results = []
     const today = new Date().toISOString().split('T')[0]
 
-    for (const userId of uniqueUserIds) {
-      try {
-        console.log(`📊 Processing user: ${userId}`)
+    // Process users in parallel batches for better performance
+    const BATCH_SIZE = 10
+    const userBatches = []
+    for (let i = 0; i < uniqueUserIds.length; i += BATCH_SIZE) {
+      userBatches.push(uniqueUserIds.slice(i, i + BATCH_SIZE))
+    }
 
-        // Check if summary already exists for today
-        const { data: existingSummary } = await supabase
-          .from('daily_work_summaries')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('date', today)
-          .single()
+    for (const batch of userBatches) {
+      const batchPromises = batch.map(async (userId) => {
+        try {
+          console.log(`📊 Processing user: ${userId}`)
 
-        if (existingSummary) {
-          console.log(`✅ Summary already exists for user ${userId} on ${today}`)
-          continue
-        }
+          // Check if summary already exists for today
+          const { data: existingSummary } = await supabase
+            .from('daily_work_summaries')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('summary_date', today)
+            .single()
+
+          if (existingSummary) {
+            console.log(`✅ Summary already exists for user ${userId} on ${today}`)
+            return { userId, success: true, message: 'Summary already exists' }
+          }
 
         // Get user's activity data for the day
         const { data: posts } = await supabase
@@ -78,10 +86,10 @@ serve(async (req) => {
           .eq('status', 'active')
           .single()
 
-        if (!agent) {
-          console.log(`⚠️ No Daily Work Summary Agent found for user ${userId}`)
-          continue
-        }
+          if (!agent) {
+            console.log(`⚠️ No Daily Work Summary Agent found for user ${userId}`)
+            return { userId, success: false, error: 'No Daily Work Summary Agent found' }
+          }
 
         // Generate summary based on activity
         const activityData = {
@@ -103,10 +111,10 @@ serve(async (req) => {
         const systemPrompts = agent.system_prompts as any[] || []
         const categoryPrompt = systemPrompts.find(p => p.category === category)
         
-        if (!categoryPrompt) {
-          console.log(`⚠️ No system prompt found for category ${category}`)
-          continue
-        }
+          if (!categoryPrompt) {
+            console.log(`⚠️ No system prompt found for category ${category}`)
+            return { userId, success: false, error: `No system prompt found for category ${category}` }
+          }
 
         // Generate mock summary data (in real implementation, this would call OpenAI)
         const mockSummary = {
@@ -132,31 +140,60 @@ serve(async (req) => {
           ]
         }
 
-        // Insert daily work summary
-        const { data: newSummary, error: insertError } = await supabase
-          .from('daily_work_summaries')
-          .insert({
-            user_id: userId,
-            date: today,
-            category: category,
-            activity_data: activityData,
-            summary_data: mockSummary,
-            status: 'completed'
-          })
-          .select()
-          .single()
+          // Insert daily work summary with proper column names
+          const { data: newSummary, error: insertError } = await supabase
+            .from('daily_work_summaries')
+            .insert({
+              user_id: userId,
+              summary_date: today,
+              metrics: mockSummary.metrics,
+              highlights: mockSummary.highlights,
+              insights: mockSummary.insights,
+              recommendations: mockSummary.recommendations,
+              categories_summary: {
+                [category]: {
+                  tasks: [`Created ${activityData.posts_created} content pieces`],
+                  timeSpent: `${Math.floor(Math.random() * 4) + 2}h`,
+                  insights: mockSummary.insights
+                }
+              },
+              productivity_score: mockSummary.metrics.productivity_score,
+              generated_summary: `Daily work summary for ${today}: Completed ${activityData.posts_created} content pieces across ${activityData.content_areas.length} areas with strong productivity focus.`,
+              summary_type: category
+            })
+            .select()
+            .single()
 
-        if (insertError) {
-          console.error(`❌ Error inserting summary for user ${userId}:`, insertError)
-          results.push({ userId, success: false, error: insertError.message })
-        } else {
-          console.log(`✅ Created daily summary for user ${userId}`)
-          results.push({ userId, success: true, summaryId: newSummary.id })
+          if (insertError) {
+            console.error(`❌ Error inserting summary for user ${userId}:`, insertError)
+            return { userId, success: false, error: insertError.message }
+          } else {
+            console.log(`✅ Created daily summary for user ${userId}`)
+            return { userId, success: true, summaryId: newSummary.id }
+          }
+
+        } catch (userError) {
+          console.error(`❌ Error processing user ${userId}:`, userError)
+          return { userId, success: false, error: userError.message }
         }
+      })
 
-      } catch (userError) {
-        console.error(`❌ Error processing user ${userId}:`, userError)
-        results.push({ userId, success: false, error: userError.message })
+      // Wait for the current batch to complete before processing the next
+      const batchResults = await Promise.allSettled(batchPromises)
+      
+      // Add results from this batch
+      batchResults.forEach(result => {
+        if (result.status === 'fulfilled') {
+          results.push(result.value)
+        } else {
+          console.error('Batch promise rejected:', result.reason)
+          results.push({ userId: 'unknown', success: false, error: result.reason?.message || 'Unknown error' })
+        }
+      })
+
+      // Add a small delay between batches to prevent overwhelming the database
+      if (userBatches.indexOf(batch) < userBatches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
     }
 

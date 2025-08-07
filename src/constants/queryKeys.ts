@@ -8,12 +8,19 @@ export const QUERY_CONFIG = {
   THEMES_STALE_TIME: 30 * 60 * 1000, // 30 minutes - themes don't change frequently
   POSTS_STALE_TIME: 5 * 60 * 1000,   // 5 minutes - posts change more often
   DEFAULT_STALE_TIME: 2 * 60 * 1000,  // 2 minutes default
+  WORK_SUMMARIES_STALE_TIME: 5 * 60 * 1000,  // 5 minutes - summaries don't change often
+  WORK_SUMMARIES_GC_TIME: 10 * 60 * 1000,    // 10 minutes - keep in cache longer
 } as const;
 
 export const QUERY_KEYS = {
   // Core data queries
   themes: ['themes'] as const,
   posts: ['posts'] as const,
+  
+  // Work summaries queries
+  workSummaries: ['work-summaries'] as const,
+  workSummary: (date: string) => ['work-summary', date] as const,
+  workSummariesPaginated: (page: number, limit: number) => ['work-summaries', 'paginated', page, limit] as const,
   
   // Parameterized queries
   postsByCategory: (category: string) => ['posts', category] as const,
