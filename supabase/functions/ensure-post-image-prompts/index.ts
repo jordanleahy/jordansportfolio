@@ -1,3 +1,4 @@
+
 /**
  * EDGE FUNCTION: Ensure Post Image Prompts
  * 
@@ -75,7 +76,7 @@ serve(async (req) => {
     console.log('🔍 STEP 1: Fetching posts without image prompts');
     const { data: posts, error: postsError } = await supabase
       .from('social_media_posts')
-      .select('id, title, description, category, theme')
+      .select('id, title, description, category')
       .eq('category', category)
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
@@ -161,7 +162,6 @@ serve(async (req) => {
 Title: ${post.title}
 Description: ${post.description}
 Category: ${post.category}
-Theme: ${post.theme || 'Not specified'}
 
 Please generate a detailed, professional image prompt that will create an appropriate visual for this content. Include the aspect ratio naturally in the description (use 16:9 landscape format).`
               }

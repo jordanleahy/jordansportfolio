@@ -69,15 +69,6 @@ export const useIndividualPromptCache = (postId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Optimistic update
-      const optimisticData: IndividualPromptData = {
-        prompt: newPrompt,
-        lastUpdated: new Date().toISOString(),
-        version: (query.data?.version || 0) + 1
-      };
-      
-      queryClient.setQueryData(QUERY_KEYS.individualPrompt(postId), optimisticData);
-
       // Update the social_media_posts table
       const { error: updateError } = await supabase
         .from('social_media_posts')
@@ -93,10 +84,12 @@ export const useIndividualPromptCache = (postId: string) => {
       return { newPrompt, userId: user.id };
     },
     onSuccess: async () => {
-      // Use background refetching instead of invalidation
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
+      // Invalidate and refetch the individual prompt query
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+      
+      // Also invalidate all post queries to keep them in sync
       getAllPostQueryKeys().forEach(key => {
-        queryClient.refetchQueries({ queryKey: key, type: 'active' });
+        queryClient.invalidateQueries({ queryKey: key });
       });
       
       toast({
@@ -105,9 +98,6 @@ export const useIndividualPromptCache = (postId: string) => {
       });
     },
     onError: (error) => {
-      // Revert optimistic update
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
-      
       toast({
         title: "Error",
         description: "Failed to update individual prompt",
@@ -127,11 +117,12 @@ export const useIndividualPromptCache = (postId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Call the generate-image-prompt-dynamic function
       const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: { 
           title, 
           description, 
-          category: category || 'cdi',
+          category: category || 'gpt-5-launch',
           aspect_ratio: aspectRatio || '16:9'
         }
       });
@@ -142,7 +133,7 @@ export const useIndividualPromptCache = (postId: string) => {
       const { error: updateError } = await supabase
         .from('social_media_posts')
         .update({ 
-          generated_image_prompt: data.prompt,
+          generated_image_prompt: data.generatedPrompt,
           updated_at: new Date().toISOString()
         })
         .eq('id', postId)
@@ -153,20 +144,23 @@ export const useIndividualPromptCache = (postId: string) => {
       return data;
     },
     onSuccess: async () => {
-      queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
+      // Invalidate and refetch the individual prompt query
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+      
+      // Also invalidate all post queries to keep them in sync
       getAllPostQueryKeys().forEach(key => {
-        queryClient.refetchQueries({ queryKey: key, type: 'active' });
+        queryClient.invalidateQueries({ queryKey: key });
       });
       
       toast({
         title: "Success",
-        description: "Individual prompt regenerated successfully",
+        description: "Individual prompt generated successfully",
       });
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to regenerate individual prompt",
+        description: "Failed to generate individual prompt",
         variant: "destructive",
       });
       console.error('Regenerate error:', error);
@@ -174,9 +168,9 @@ export const useIndividualPromptCache = (postId: string) => {
   });
 
   const invalidateCache = useCallback(async () => {
-    queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId), type: 'active' });
+    await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
     getAllPostQueryKeys().forEach(key => {
-      queryClient.refetchQueries({ queryKey: key, type: 'active' });
+      queryClient.invalidateQueries({ queryKey: key });
     });
   }, [postId, queryClient]);
 
