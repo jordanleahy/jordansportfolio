@@ -116,7 +116,6 @@ serve(async (req) => {
             currency: "usd",
             product_data: {
               name: tier.name,
-              description: `${tier.max_image_generations} AI images + ${tier.max_dalle_images} DALL-E images + ${tier.max_text_generations} text generations per month`,
             },
             unit_amount: tier.price_cents,
             recurring: { interval: tier.billing_interval },
