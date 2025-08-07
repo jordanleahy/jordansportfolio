@@ -416,7 +416,7 @@ export default function StoriesDashboard() {
           <p className="text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
           <Input
             placeholder="Describe your theme..."
-            className="max-w-md"
+            className="w-full max-w-3xl h-16 px-6 text-lg bg-muted/50 border-2 rounded-2xl placeholder:text-muted-foreground/70"
             value={customThemeDescription}
             onChange={(e) => setCustomThemeDescription(e.target.value)}
             onKeyDown={(e) => {
