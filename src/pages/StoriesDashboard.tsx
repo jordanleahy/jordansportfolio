@@ -411,21 +411,37 @@ export default function StoriesDashboard() {
           <meta name="description" content="Every Thought is a Visual Journey" />
           <link rel="canonical" href="/stories" />
         </Helmet>
-        <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center gap-6">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Story Ship</h1>
-          <p className="text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
-          <Input
-            placeholder="Describe your theme..."
-            className="w-full max-w-3xl h-32 px-6 text-lg bg-muted/50 border-2 rounded-2xl placeholder:text-muted-foreground/70"
-            value={customThemeDescription}
-            onChange={(e) => setCustomThemeDescription(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && customThemeDescription.trim()) {
-                try { localStorage.setItem('stories_hero_seen','1'); } catch {}
-                setShowHero(false);
-              }
-            }}
-          />
+        <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center gap-8 relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+          
+          {/* Content */}
+          <div className="relative z-10 space-y-6">
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Story Ship
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground font-light">
+                Every Thought is a Visual Journey
+              </p>
+            </div>
+            
+            <div className="w-full max-w-4xl mx-auto">
+              <Input
+                placeholder="Describe your theme..."
+                className="w-full h-32 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border shadow-lg"
+                value={customThemeDescription}
+                onChange={(e) => setCustomThemeDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customThemeDescription.trim()) {
+                    try { localStorage.setItem('stories_hero_seen','1'); } catch {}
+                    setShowHero(false);
+                  }
+                }}
+              />
+            </div>
+          </div>
         </div>
       </PageLayout>
     );
