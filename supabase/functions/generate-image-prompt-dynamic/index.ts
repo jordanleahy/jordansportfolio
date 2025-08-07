@@ -102,16 +102,17 @@ Color Theme Instructions:
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
     }
 
-    // Enhanced OpenAI request with correlation tracking
-    const requestBody = enhanceOpenAIRequestBody({
+    // OpenAI request with proper format
+    const requestBody = {
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
       temperature: 0.7,
-      max_tokens: 500
-    }, correlationId);
+      max_tokens: 500,
+      user: correlationId // Only include user field for tracking
+    };
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
       url: 'https://api.openai.com/v1/chat/completions',
