@@ -34,6 +34,7 @@ import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
+import WorkReportPage from "./pages/WorkReportPage";
 
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
@@ -228,6 +229,7 @@ function App() {
                     </Suspense>
                   } 
                 />
+                <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
