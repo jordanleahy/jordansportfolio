@@ -326,6 +326,58 @@ Composition optimized for ${ratio} aspect ratio format.`;
         // API usage tracking failed
       }
 
+      // Insert per-image records for admin analytics (success + failures)
+      try {
+        const successRows = successfulResults.map((r) => {
+          const cfg = ASPECT_RATIOS.find(a => a.ratio === r.aspectRatio)!;
+          return {
+            user_id: user.id,
+            user_email: user.email,
+            image_url: r.url,
+            image_size: `${cfg.width}x${cfg.height}`,
+            image_quality: 'high',
+            aspect_ratio: r.aspectRatio,
+            model_used: 'gpt-image-1',
+            image_prompt: masterPrompt,
+            tokens_used: r.tokens,
+            estimated_cost: r.cost,
+            function_name: 'generate-all-images-optimized',
+            request_type: 'image_generation',
+            post_id: postId,
+            storage_bucket: 'social-media-images',
+            stage: 'uploaded',
+            success: true,
+          } as any;
+        });
+
+        const failureRows = failedResults.map((r) => ({
+          user_id: user.id,
+          user_email: user.email,
+          image_url: null,
+          image_size: null,
+          image_quality: 'high',
+          aspect_ratio: r.aspectRatio,
+          model_used: 'gpt-image-1',
+          image_prompt: masterPrompt,
+          tokens_used: 0,
+          estimated_cost: 0,
+          function_name: 'generate-all-images-optimized',
+          request_type: 'image_generation',
+          post_id: postId,
+          storage_bucket: 'social-media-images',
+          stage: 'uploaded',
+          success: false,
+          error_message: r.error || 'Unknown error'
+        } as any));
+
+        const rows = [...successRows, ...failureRows];
+        if (rows.length > 0) {
+          await supabase.from('images').insert(rows);
+        }
+      } catch (e) {
+        // Non-critical: image rows insert failed
+      }
+
       // Trigger background processing
       if (successfulResults.length > 0) {
         try {
