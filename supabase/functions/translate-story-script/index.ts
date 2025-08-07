@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,13 +15,28 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let userId: string | null = null;
+  const correlationId = generateCorrelationId();
+  let success = false;
+  let estimatedCost = 0;
+  let tokensUsed = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let errorMessage: string | undefined;
+  let requestMetadata: any = {};
+  let openAIRequestId: string | undefined;
+
   try {
     const { script_text, target_language, story_type } = await req.json();
+    
+    requestMetadata = { script_length: script_text?.length || 0, target_language, story_type, correlationId };
     
     console.log('Request data:', {
       script_length: script_text?.length || 0,
       target_language,
-      story_type
+      story_type,
+      correlationId
     });
 
     if (!script_text) {
@@ -76,28 +92,35 @@ ${script_text}`;
 
     console.log('Sending request to OpenAI...');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Enhanced OpenAI request with correlation tracking
+    const requestBody = enhanceOpenAIRequestBody({
+      model: 'gpt-4.1-2025-04-14',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 3000,
+    }, correlationId);
+
+    const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 3000,
-      }),
+      body: JSON.stringify(requestBody),
+      correlationId,
     });
+
+    openAIRequestId = responseOpenAIRequestId;
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -111,20 +134,83 @@ ${script_text}`;
     const data = await response.json();
     const translatedScript = data.choices[0].message.content;
 
+    // Extract usage data for cost calculation
+    const usageData = extractUsageFromOpenAIResponse(data);
+    promptTokens = usageData.promptTokens || 0;
+    completionTokens = usageData.completionTokens || 0;
+    tokensUsed = usageData.totalTokens || 0;
+    estimatedCost = usageData.estimatedCost;
+
+    success = true;
+
     console.log(`Translation completed, length: ${translatedScript.length}`);
+
+    // Track API usage with enhanced attribution if we have userId
+    if (userId) {
+      const responseTime = Date.now() - startTime;
+      await trackOpenAIUsage({
+        userId,
+        functionName: 'translate-story-script',
+        model: 'gpt-4.1-2025-04-14',
+        requestType: 'text_generation',
+        success,
+        estimatedCost,
+        tokensUsed,
+        promptTokens,
+        completionTokens,
+        responseTimeMs: responseTime,
+        metadata: requestMetadata,
+        correlationId,
+        openAIRequestId,
+      });
+    }
 
     return new Response(JSON.stringify({ 
       translated_script: translatedScript,
       target_language,
-      word_count: translatedScript.split(' ').length
+      word_count: translatedScript.split(' ').length,
+      correlationId,
+      usage: {
+        prompt_tokens: promptTokens,
+        completion_tokens: completionTokens,
+        total_tokens: tokensUsed,
+        estimated_cost: estimatedCost
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('Error in translate story script function:', error);
+    errorMessage = error.message || 'Internal server error';
+    
+    // Track failed API usage with enhanced attribution if we have userId
+    if (userId) {
+      try {
+        const responseTime = Date.now() - startTime;
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'translate-story-script',
+          model: 'gpt-4.1-2025-04-14',
+          requestType: 'text_generation',
+          success: false,
+          estimatedCost: 0,
+          tokensUsed: 0,
+          promptTokens: 0,
+          completionTokens: 0,
+          responseTimeMs: responseTime,
+          errorMessage,
+          metadata: requestMetadata,
+          correlationId,
+          openAIRequestId,
+        });
+      } catch (trackingError) {
+        console.error('Failed to track error usage:', trackingError);
+      }
+    }
+
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

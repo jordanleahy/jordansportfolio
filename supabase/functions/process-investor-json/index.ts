@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,13 +33,31 @@ serve(async (req) => {
   }
 
   const startTime = Date.now();
+  let userId: string | null = null;
+  const correlationId = generateCorrelationId();
   let success = false;
+  let estimatedCost = 0;
+  let tokensUsed = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let errorMessage: string | undefined;
+  let requestMetadata: any = {};
+  let openAIRequestId: string | undefined;
 
   try {
     const { rawJson } = await req.json();
-    console.log('Processing raw investor JSON...');
+    requestMetadata = { correlationId, dataType: typeof rawJson };
+    console.log('Processing raw investor JSON...', { correlationId });
 
-    const result = await processInvestorJsonWithAI(rawJson, startTime);
+    // Get user from auth header
+    const authHeader = req.headers.get('authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    const result = await processInvestorJsonWithAI(rawJson, startTime, userId, correlationId, requestMetadata);
     success = result.success;
 
     if (success) {
@@ -92,7 +111,7 @@ async function trackAgentUsage(startTime: number, success: boolean) {
   }
 }
 
-async function processInvestorJsonWithAI(rawJson: string, startTime: number): Promise<ProcessingResult> {
+async function processInvestorJsonWithAI(rawJson: string, startTime: number, userId?: string, correlationId?: string, requestMetadata?: any): Promise<ProcessingResult> {
   const fixes: string[] = [];
   const warnings: string[] = [];
   const errors: string[] = [];
@@ -100,7 +119,7 @@ async function processInvestorJsonWithAI(rawJson: string, startTime: number): Pr
   try {
     console.log('Using AI for intelligent investor JSON processing...');
     
-    const result = await aiProcessInvestorData(rawJson);
+    const result = await aiProcessInvestorData(rawJson, userId, correlationId, requestMetadata);
     
     if (!result.success) {
       throw new Error(result.error || 'AI processing failed');
@@ -140,7 +159,7 @@ async function processInvestorJsonWithAI(rawJson: string, startTime: number): Pr
 }
 
 // AI intelligent processing for investor data
-async function aiProcessInvestorData(rawJson: string): Promise<{
+async function aiProcessInvestorData(rawJson: string, userId?: string, correlationId?: string, requestMetadata?: any): Promise<{
   success: boolean;
   data?: any;
   fixes?: string[];
@@ -200,25 +219,32 @@ RAW DATA TO PROCESS:
 ${rawJson}`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Enhanced OpenAI request with correlation tracking
+    const requestBody = enhanceOpenAIRequestBody({
+      model: 'gpt-4o-mini',
+      messages: [
+        { 
+          role: 'system', 
+          content: 'You are an expert data processor specializing in investment firm data. Extract and clean investor data according to the schema. Return only valid JSON.' 
+        },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.1,
+      max_tokens: 4000
+    }, correlationId);
+
+    const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert data processor specializing in investment firm data. Extract and clean investor data according to the schema. Return only valid JSON.' 
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.1,
-        max_tokens: 4000
-      }),
+      body: JSON.stringify(requestBody),
+      correlationId,
     });
+
+    const openAIRequestId = responseOpenAIRequestId;
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
@@ -233,6 +259,26 @@ ${rawJson}`;
     // Add slug generation
     if (parsedData.firm_name) {
       parsedData.slug = generateSlug(parsedData.firm_name);
+    }
+    
+    // Track API usage with enhanced attribution if we have userId
+    if (userId) {
+      const usageData = extractUsageFromOpenAIResponse(data);
+      await trackOpenAIUsage({
+        userId,
+        functionName: 'process-investor-json',
+        model: 'gpt-4o-mini',
+        requestType: 'text_generation',
+        success: true,
+        estimatedCost: usageData.estimatedCost,
+        tokensUsed: usageData.totalTokens || 0,
+        promptTokens: usageData.promptTokens || 0,
+        completionTokens: usageData.completionTokens || 0,
+        responseTimeMs: responseTime,
+        metadata: requestMetadata,
+        correlationId,
+        openAIRequestId,
+      });
     }
     
     return {

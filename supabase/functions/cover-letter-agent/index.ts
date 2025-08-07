@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +13,18 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const startTime = Date.now();
+  let userId: string | null = null;
+  const correlationId = generateCorrelationId();
+  let success = false;
+  let estimatedCost = 0;
+  let tokensUsed = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let errorMessage: string | undefined;
+  let requestMetadata: any = {};
+  let openAIRequestId: string | undefined;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -28,11 +41,14 @@ serve(async (req) => {
       jobDescription,
       companyName,
       roleType, // 'product_manager' or 'product_designer'
-      userId,
+      userId: requestUserId,
       additionalContext = ''
     } = await req.json();
 
-    console.log('Generating cover letter for:', { companyName, roleType, userId });
+    userId = requestUserId;
+    requestMetadata = { companyName, roleType, correlationId };
+
+    console.log('Generating cover letter for:', { companyName, roleType, userId: userId?.slice(0, 8), correlationId });
 
     // Verify user has admin role (frontend authentication ensures userId is valid)
 
@@ -138,22 +154,29 @@ Return the response as a JSON object with this structure:
 
     console.log('Making OpenAI API call...');
 
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Enhanced OpenAI request with correlation tracking
+    const requestBody = enhanceOpenAIRequestBody({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt.prompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    }, correlationId);
+
+    const { response: openaiResponse, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt.prompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
+      body: JSON.stringify(requestBody),
+      correlationId,
     });
+
+    openAIRequestId = responseOpenAIRequestId;
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
@@ -163,6 +186,15 @@ Return the response as a JSON object with this structure:
 
     const openaiData = await openaiResponse.json();
     const generatedContent = openaiData.choices[0].message.content;
+
+    // Extract usage data for cost calculation
+    const usageData = extractUsageFromOpenAIResponse(openaiData);
+    promptTokens = usageData.promptTokens || 0;
+    completionTokens = usageData.completionTokens || 0;
+    tokensUsed = usageData.totalTokens || 0;
+    estimatedCost = usageData.estimatedCost;
+
+    success = true;
 
     console.log('Generated content:', generatedContent);
 
@@ -188,11 +220,36 @@ Return the response as a JSON object with this structure:
       };
     }
 
+    // Track API usage with enhanced attribution
+    const responseTime = Date.now() - startTime;
+    await trackOpenAIUsage({
+      userId,
+      functionName: 'cover-letter-agent',
+      model: 'gpt-4o-mini',
+      requestType: 'text_generation',
+      success,
+      estimatedCost,
+      tokensUsed,
+      promptTokens,
+      completionTokens,
+      responseTimeMs: responseTime,
+      metadata: requestMetadata,
+      correlationId,
+      openAIRequestId,
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
         coverLetter: coverLetterData,
-        caseStudiesUsed: caseStudies.length
+        caseStudiesUsed: caseStudies.length,
+        correlationId,
+        usage: {
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          total_tokens: tokensUsed,
+          estimated_cost: estimatedCost
+        }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -201,10 +258,37 @@ Return the response as a JSON object with this structure:
 
   } catch (error) {
     console.error('Error in cover-letter-agent function:', error);
+    errorMessage = error.message || 'An unexpected error occurred';
+    
+    // Track failed API usage with enhanced attribution
+    if (userId) {
+      try {
+        const responseTime = Date.now() - startTime;
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'cover-letter-agent',
+          model: 'gpt-4o-mini',
+          requestType: 'text_generation',
+          success: false,
+          estimatedCost: 0,
+          tokensUsed: 0,
+          promptTokens: 0,
+          completionTokens: 0,
+          responseTimeMs: responseTime,
+          errorMessage,
+          metadata: requestMetadata,
+          correlationId,
+          openAIRequestId,
+        });
+      } catch (trackingError) {
+        console.error('Failed to track error usage:', trackingError);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An unexpected error occurred'
+        error: errorMessage
       }),
       {
         status: 500,

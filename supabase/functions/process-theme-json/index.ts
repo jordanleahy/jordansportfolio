@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +25,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let userId: string | null = null;
+  const correlationId = generateCorrelationId();
+  let success = false;
+  let estimatedCost = 0;
+  let tokensUsed = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let errorMessage: string | undefined;
+  let requestMetadata: any = {};
+  let openAIRequestId: string | undefined;
+
   try {
     console.log('📦 Parsing request body...');
     const requestBody = await req.json();
@@ -32,9 +45,10 @@ serve(async (req) => {
     console.log('📋 Raw JSON preview:', JSON.stringify(requestBody.rawJson, null, 2).substring(0, 500));
     
     const { rawJson } = requestBody;
-    console.log('🔄 Processing theme JSON data...');
+    requestMetadata = { correlationId, dataType: typeof rawJson };
+    console.log('🔄 Processing theme JSON data...', { correlationId });
 
-    const result = await processThemeJsonWithAI(rawJson);
+    const result = await processThemeJsonWithAI(rawJson, userId, correlationId, requestMetadata);
     console.log('✅ Processing completed:', result);
     
     return new Response(JSON.stringify(result), {
@@ -60,7 +74,7 @@ serve(async (req) => {
   }
 });
 
-async function processThemeJsonWithAI(rawData: any): Promise<ProcessingResult> {
+async function processThemeJsonWithAI(rawData: any, userId?: string, correlationId?: string, requestMetadata?: any): Promise<ProcessingResult> {
   console.log('🤖 Starting AI processing pipeline');
   console.log('📊 Input data type:', typeof rawData);
   console.log('📋 Input data structure:', JSON.stringify(rawData, null, 2).substring(0, 300));
@@ -71,7 +85,7 @@ async function processThemeJsonWithAI(rawData: any): Promise<ProcessingResult> {
 
   try {
     console.log('🔄 Calling AI processing...');
-    const aiProcessedData = await aiProcessThemeData(rawData);
+    const aiProcessedData = await aiProcessThemeData(rawData, userId, correlationId, requestMetadata);
     console.log('✅ AI processing completed');
     console.log('📊 AI result type:', typeof aiProcessedData);
     console.log('📋 AI result preview:', JSON.stringify(aiProcessedData, null, 2).substring(0, 300));
@@ -111,7 +125,7 @@ async function processThemeJsonWithAI(rawData: any): Promise<ProcessingResult> {
   }
 }
 
-async function aiProcessThemeData(rawData: any) {
+async function aiProcessThemeData(rawData: any, userId?: string, correlationId?: string, requestMetadata?: any) {
   console.log('🔐 Checking OpenAI API key...');
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
@@ -172,14 +186,21 @@ Return only the cleaned JSON:`;
     
     console.log('📤 Sending request to OpenAI...');
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Enhanced OpenAI request with correlation tracking
+    const enhancedRequestBody = enhanceOpenAIRequestBody(requestBody, correlationId);
+
+    const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(enhancedRequestBody),
+      correlationId,
     });
+
+    const openAIRequestId = responseOpenAIRequestId;
 
     console.log('📥 OpenAI response status:', response.status);
     console.log('📋 OpenAI response headers:', Object.fromEntries(response.headers.entries()));
@@ -209,6 +230,26 @@ Return only the cleaned JSON:`;
       console.log('✅ JSON parsed successfully');
       console.log('📊 Processed data type:', typeof processedData);
       console.log('📋 Processed data keys:', Object.keys(processedData));
+      
+      // Track API usage with enhanced attribution if we have userId
+      if (userId) {
+        const usageData = extractUsageFromOpenAIResponse(result);
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'process-theme-json',
+          model: 'gpt-4o-mini',
+          requestType: 'text_generation',
+          success: true,
+          estimatedCost: usageData.estimatedCost,
+          tokensUsed: usageData.totalTokens || 0,
+          promptTokens: usageData.promptTokens || 0,
+          completionTokens: usageData.completionTokens || 0,
+          responseTimeMs: responseTime,
+          metadata: requestMetadata,
+          correlationId,
+          openAIRequestId,
+        });
+      }
       
       return processedData;
     } catch (parseError) {
