@@ -306,38 +306,14 @@ export const SystemPromptsTab = ({
           ) : databasePrompts.length > 0 ? (
             databasePrompts.map((dbPrompt) => (
               <div key={dbPrompt.id} className="border rounded-lg p-4 h-screen flex flex-col">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{dbPrompt.name}</span>
-                      <Badge variant="outline">
-                        {getCategoryLabel(dbPrompt.category)}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
+                <div className="space-y-1 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{dbPrompt.name}</span>
+                    <Badge variant="outline">
+                      {getCategoryLabel(dbPrompt.category)}
+                    </Badge>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        window.open(`/stories?category=${dbPrompt.category}`, '_blank');
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopyPrompt(dbPrompt.prompt_text || '')}
-                      disabled={!dbPrompt.prompt_text?.trim()}
-                      className="gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy Prompt
-                    </Button>
-                  </div>
+                  <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
                 </div>
                 
                 <CategoryPromptEditor
