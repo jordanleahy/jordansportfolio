@@ -3,83 +3,48 @@ import { useParams, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Clock, FileText, TrendingUp, Target, Lightbulb, Code, Palette } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, FileText, TrendingUp, Target, Lightbulb, Code, Palette, Loader2 } from 'lucide-react';
+import { useDailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
+import { format, parseISO } from 'date-fns';
 
-// Mock detailed data for a specific day
-const mockDetailedReport = {
-  '2024-01-08': {
-    date: '2024-01-08',
-    displayDate: 'Today, January 8, 2024',
-    summary: {
-      totalTasks: 12,
-      completedTasks: 8,
-      timeSpent: '6.5 hours',
-      completionRate: 67,
-      focusTime: '4.2 hours',
-      breakTime: '2.3 hours'
-    },
-    categories: {
-      technical: {
-        icon: Code,
-        color: 'bg-blue-100 text-blue-600',
-        tasks: [
-          'Refactored React components for better performance',
-          'Fixed memory leaks in data visualization',
-          'Implemented new API endpoints for user management',
-          'Optimized database queries for faster load times'
-        ],
-        timeSpent: '3.5 hours',
-        insights: ['Performance improvements increased page load speed by 40%', 'Memory optimization reduced crashes by 60%']
-      },
-      creative: {
-        icon: Palette,
-        color: 'bg-purple-100 text-purple-600',
-        tasks: [
-          'Designed new user onboarding flow',
-          'Created wireframes for mobile app',
-          'Updated brand guidelines documentation'
-        ],
-        timeSpent: '2.0 hours',
-        insights: ['New onboarding flow shows 25% better user retention', 'Mobile wireframes approved by stakeholders']
-      },
-      productivity: {
-        icon: TrendingUp,
-        color: 'bg-green-100 text-green-600',
-        tasks: [
-          'Automated daily reporting process',
-          'Set up CI/CD pipeline improvements',
-          'Organized project documentation'
-        ],
-        timeSpent: '1.0 hours',
-        insights: ['Automation saves 2 hours per day', 'Documentation organization improves team efficiency']
-      },
-      insights: {
-        icon: Lightbulb,
-        color: 'bg-orange-100 text-orange-600',
-        tasks: [
-          'Analyzed user behavior patterns',
-          'Identified performance bottlenecks',
-          'Researched new technology trends'
-        ],
-        timeSpent: '1.0 hours',
-        insights: ['User analysis reveals 3 key improvement areas', 'New tech trends suggest architecture updates']
-      }
-    },
-    keyMetrics: [
-      { label: 'Code Commits', value: '15', change: '+3 from yesterday' },
-      { label: 'Issues Resolved', value: '8', change: '+2 from yesterday' },
-      { label: 'Features Completed', value: '3', change: '+1 from yesterday' },
-      { label: 'Team Collaborations', value: '6', change: 'Same as yesterday' }
-    ],
-    reflection: 'Today was highly productive with significant progress on both technical and creative fronts. The React refactoring will have long-term benefits for maintainability. The new onboarding design received positive feedback and is ready for development. Focus time was good, though could benefit from longer uninterrupted blocks tomorrow.'
+const getCategoryIcon = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'technical': return Code;
+    case 'creative': return Palette;
+    case 'productivity': return TrendingUp;
+    case 'insights': return Lightbulb;
+    default: return FileText;
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'technical': return 'bg-blue-100 text-blue-600';
+    case 'creative': return 'bg-purple-100 text-purple-600';
+    case 'productivity': return 'bg-green-100 text-green-600';
+    case 'insights': return 'bg-orange-100 text-orange-600';
+    default: return 'bg-gray-100 text-gray-600';
   }
 };
 
 const WorkReportDetailPage: React.FC = () => {
   const { date } = useParams<{ date: string }>();
-  const report = date ? mockDetailedReport[date as keyof typeof mockDetailedReport] : null;
+  const { data: summary, isLoading, error } = useDailyWorkSummary(date || '');
 
-  if (!report) {
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto py-8">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin mr-2" />
+            <span>Loading work report...</span>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error || !summary) {
     return (
       <PageLayout>
         <div className="container mx-auto py-8">
@@ -100,6 +65,11 @@ const WorkReportDetailPage: React.FC = () => {
     );
   }
 
+  const displayDate = format(parseISO(summary.summary_date), 'EEEE, MMMM d, yyyy');
+  const completionRate = summary.metrics.totalTasks && summary.metrics.completedTasks 
+    ? Math.round((summary.metrics.completedTasks / summary.metrics.totalTasks) * 100)
+    : 0;
+
   return (
     <PageLayout>
       <div className="container mx-auto py-8">
@@ -113,7 +83,7 @@ const WorkReportDetailPage: React.FC = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold">{report.displayDate}</h1>
+              <h1 className="text-3xl font-bold">{displayDate}</h1>
               <p className="text-muted-foreground">Detailed work summary and insights</p>
             </div>
           </div>
@@ -131,7 +101,9 @@ const WorkReportDetailPage: React.FC = () => {
                 <FileText className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Tasks</p>
-                  <p className="text-xl font-bold">{report.summary.completedTasks}/{report.summary.totalTasks}</p>
+                  <p className="text-xl font-bold">
+                    {summary.metrics.completedTasks || 0}/{summary.metrics.totalTasks || 0}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -142,7 +114,7 @@ const WorkReportDetailPage: React.FC = () => {
                 <Clock className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm text-muted-foreground">Total Time</p>
-                  <p className="text-xl font-bold">{report.summary.timeSpent}</p>
+                  <p className="text-xl font-bold">{summary.metrics.timeSpent || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>
@@ -153,7 +125,7 @@ const WorkReportDetailPage: React.FC = () => {
                 <TrendingUp className="h-5 w-5 text-blue-600" />
                 <div>
                   <p className="text-sm text-muted-foreground">Completion</p>
-                  <p className="text-xl font-bold">{report.summary.completionRate}%</p>
+                  <p className="text-xl font-bold">{completionRate}%</p>
                 </div>
               </div>
             </CardContent>
@@ -163,76 +135,61 @@ const WorkReportDetailPage: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Target className="h-5 w-5 text-purple-600" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Focus Time</p>
-                  <p className="text-xl font-bold">{report.summary.focusTime}</p>
+                  <p className="text-sm text-muted-foreground">Productivity</p>
+                  <p className="text-xl font-bold">{summary.productivity_score ? `${summary.productivity_score}/10` : 'N/A'}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Key Metrics */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5" />
-              Key Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {report.keyMetrics.map((metric, index) => (
-                <div key={index} className="text-center">
-                  <p className="text-2xl font-bold text-primary">{metric.value}</p>
-                  <p className="text-sm text-muted-foreground">{metric.label}</p>
-                  <p className="text-xs text-green-600">{metric.change}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Category Details */}
         <div className="grid gap-6 mb-8">
-          {Object.entries(report.categories).map(([categoryName, category]) => {
-            const IconComponent = category.icon;
+          {Object.entries(summary.categories_summary || {}).map(([categoryName, categoryData]: [string, any]) => {
+            const IconComponent = getCategoryIcon(categoryName);
+            const colorClass = getCategoryColor(categoryName);
+            
             return (
               <Card key={categoryName}>
                 <CardHeader>
                   <CardTitle className="flex items-center capitalize">
-                    <div className={`p-2 rounded-lg mr-3 ${category.color}`}>
+                    <div className={`p-2 rounded-lg mr-3 ${colorClass}`}>
                       <IconComponent className="h-5 w-5" />
                     </div>
                     {categoryName} Work
                     <span className="ml-auto text-sm font-normal text-muted-foreground">
-                      {category.timeSpent}
+                      {categoryData?.timeSpent || 'N/A'}
                     </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Tasks Completed:</h4>
-                      <ul className="space-y-1">
-                        {category.tasks.map((task, index) => (
-                          <li key={index} className="flex items-start text-sm">
-                            <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                            {task}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Key Insights:</h4>
-                      <ul className="space-y-1">
-                        {category.insights.map((insight, index) => (
-                          <li key={index} className="flex items-start text-sm text-muted-foreground">
-                            <Lightbulb className="h-4 w-4 mt-0.5 mr-2 flex-shrink-0 text-orange-500" />
-                            {insight}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {categoryData?.tasks && categoryData.tasks.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Tasks Completed:</h4>
+                        <ul className="space-y-1">
+                          {categoryData.tasks.map((task: string, index: number) => (
+                            <li key={index} className="flex items-start text-sm">
+                              <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                              {task}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {categoryData?.insights && categoryData.insights.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Key Insights:</h4>
+                        <ul className="space-y-1">
+                          {categoryData.insights.map((insight: string, index: number) => (
+                            <li key={index} className="flex items-start text-sm text-muted-foreground">
+                              <Lightbulb className="h-4 w-4 mt-0.5 mr-2 flex-shrink-0 text-orange-500" />
+                              {insight}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -240,20 +197,67 @@ const WorkReportDetailPage: React.FC = () => {
           })}
         </div>
 
-        {/* Daily Reflection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Lightbulb className="mr-2 h-5 w-5" />
-              Daily Reflection
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground leading-relaxed">
-              {report.reflection}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Highlights and Insights */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {summary.highlights && summary.highlights.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="mr-2 h-5 w-5" />
+                  Daily Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {summary.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start text-sm">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {summary.insights && summary.insights.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Lightbulb className="mr-2 h-5 w-5" />
+                  Key Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {summary.insights.map((insight, index) => (
+                    <li key={index} className="flex items-start text-sm">
+                      <Lightbulb className="h-4 w-4 mt-0.5 mr-2 flex-shrink-0 text-orange-500" />
+                      {insight}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Generated Summary */}
+        {summary.generated_summary && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                AI-Generated Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {summary.generated_summary}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </PageLayout>
   );
