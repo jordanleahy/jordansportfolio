@@ -1,3 +1,34 @@
+/**
+ * EDGE FUNCTION: Generate Custom Theme
+ * 
+ * PURPOSE:
+ * Creates complete social media content themes from user descriptions using AI.
+ * Generates structured theme data including category classification, theme naming,
+ * and exactly 10 sequential daily posts with professional content for social media calendars.
+ * 
+ * INPUTS:
+ * - description: string - User's theme description or content idea
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, themeData: object, message: string }
+ * - Error: { success: false, error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for theme and content generation)
+ * 
+ * USAGE:
+ * Called from: Theme creation workflows, content planning tools, social media calendar generation
+ * Authentication: Not required - public content generation endpoint
+ * 
+ * FLOW:
+ * 1. Validate description input and OpenAI API availability
+ * 2. Apply detailed system prompt requiring exact JSON structure with 10 posts
+ * 3. Generate complete theme using OpenAI with specific formatting requirements
+ * 4. Parse and validate generated JSON for required fields and post count
+ * 5. Verify each post has day, title, and description fields
+ * 6. Return structured theme data ready for import into content management systems
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 

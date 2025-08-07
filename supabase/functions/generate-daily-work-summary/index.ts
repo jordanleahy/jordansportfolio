@@ -1,3 +1,37 @@
+/**
+ * EDGE FUNCTION: Generate Daily Work Summary
+ * 
+ * PURPOSE:
+ * Automatically generates daily work summaries for all active users based on their social media
+ * content creation activity. Creates personalized productivity insights, metrics, and recommendations
+ * using AI analysis of daily work patterns and content output.
+ * 
+ * INPUTS:
+ * - No direct inputs (triggered as scheduled function or manual execution)
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, message: string, results: { total: number, successful: number, failed: number }, details: array }
+ * - Error: { success: false, error: string }
+ * 
+ * DEPENDENCIES:
+ * - Supabase Database (social_media_posts, openai_agents, system_prompts, daily_work_summaries tables)
+ * - Daily Work Summary Agent (database function: insert_daily_work_summary_agent)
+ * 
+ * USAGE:
+ * Called from: Scheduled cron jobs, manual admin triggers, daily automation workflows
+ * Authentication: Service role access for cross-user operations
+ * 
+ * FLOW:
+ * 1. Fetch all users with content creation activity
+ * 2. Process users in batches to prevent database overload
+ * 3. For each user, check if today's summary already exists
+ * 4. Analyze user's daily activity (posts created, categories, engagement)
+ * 5. Find user's Daily Work Summary Agent and appropriate system prompt
+ * 6. Generate summary data (highlights, metrics, insights, recommendations)
+ * 7. Insert structured summary into daily_work_summaries table
+ * 8. Return batch processing results with success/failure counts
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 

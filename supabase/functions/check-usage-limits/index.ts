@@ -1,3 +1,36 @@
+/**
+ * EDGE FUNCTION: Check Usage Limits
+ * 
+ * PURPOSE:
+ * Validates and tracks user usage limits against their subscription tier for various services 
+ * like image generation, DALL-E images, and text generation. Prevents users from exceeding 
+ * their monthly allowances and increments usage counters when requests are approved.
+ * 
+ * INPUTS:
+ * - usage_type: string ('image_generation' | 'dalle_image' | 'text_generation') - Type of service being requested
+ * - amount: number (optional, default: 1) - Number of units being requested
+ * 
+ * OUTPUTS:
+ * - Success: { allowed: boolean, remaining: number, limit: number, usage_type: string, message?: string }
+ * - Error: { error: string, allowed: false, remaining: 0, limit: 0, usage_type: 'unknown' }
+ * 
+ * DEPENDENCIES:
+ * - Supabase Database (user_subscriptions, subscription_tiers, user_usage_tracking tables)
+ * - User Authentication (Bearer token required)
+ * 
+ * USAGE:
+ * Called from: Frontend components before making generation requests (stories, images, etc.)
+ * Authentication: Required - uses Bearer token to identify user
+ * 
+ * FLOW:
+ * 1. Authenticate user from Bearer token
+ * 2. Retrieve user's active subscription and tier limits
+ * 3. Get or create current billing period usage record
+ * 4. Check if requested amount would exceed tier limits
+ * 5. If allowed, increment usage counter and return approval
+ * 6. If denied, return remaining allowance and limits
+ */
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 

@@ -1,3 +1,35 @@
+/**
+ * EDGE FUNCTION: Generate Content
+ * 
+ * PURPOSE:
+ * General-purpose content generation using OpenAI's GPT models with type-specific system prompts.
+ * Supports various content types including image prompts and important content with caching
+ * capabilities for authenticated users. Serves as a flexible content creation endpoint.
+ * 
+ * INPUTS:
+ * - prompt: string - Content generation request or prompt text
+ * - type: string (optional, default: 'general') - Content type ('image_prompt', 'important', 'general')
+ * 
+ * OUTPUTS:
+ * - Success: { generatedText: string }
+ * - Error: { error: string, details: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for content generation)
+ * - Supabase Database (cached_prompts table for storage)
+ * 
+ * USAGE:
+ * Called from: Legacy content workflows, general-purpose content tools, multi-type generation
+ * Authentication: Optional - caching and enhanced features available for authenticated users
+ * 
+ * FLOW:
+ * 1. Parse prompt and optional content type from request
+ * 2. Select appropriate system prompt based on type (image_prompt gets specialized prompt)
+ * 3. Generate content using OpenAI with type-specific context
+ * 4. Cache generated content for important types (if user authenticated)
+ * 5. Return generated text ready for immediate use or further processing
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 

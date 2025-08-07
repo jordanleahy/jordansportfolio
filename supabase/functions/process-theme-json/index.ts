@@ -1,3 +1,36 @@
+/**
+ * EDGE FUNCTION: Process Theme JSON
+ * 
+ * PURPOSE:
+ * Cleans, validates, and enhances raw theme JSON data using OpenAI for intelligent processing.
+ * Fixes JSON syntax errors, validates theme structure, generates missing fields, and ensures
+ * data integrity for social media content calendar imports with comprehensive error reporting.
+ * 
+ * INPUTS:
+ * - rawJson: any - Raw theme data that may have formatting issues or missing fields
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, cleanedData: object, fixes: array, warnings: array, errors: array }
+ * - Error: { success: false, fixes: array, warnings: array, errors: array }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for intelligent data cleaning and validation)
+ * - OpenAI Attribution System (usage tracking and cost calculation)
+ * 
+ * USAGE:
+ * Called from: Data import workflows, theme processing pipelines, content validation systems
+ * Authentication: Optional - enhanced tracking and attribution available for authenticated users
+ * 
+ * FLOW:
+ * 1. Parse incoming raw JSON data with comprehensive logging
+ * 2. Apply AI-powered cleaning using OpenAI to fix syntax and structural issues
+ * 3. Generate missing required fields (day numbers, status, etc.)
+ * 4. Validate theme structure against expected schema (category, theme, posts array)
+ * 5. Apply business rules (30 post limit, required fields validation)
+ * 6. Track API usage and costs for monitoring
+ * 7. Return detailed processing results with fixes, warnings, and errors
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';

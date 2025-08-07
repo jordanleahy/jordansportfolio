@@ -1,3 +1,39 @@
+/**
+ * EDGE FUNCTION: Process Uploaded Images
+ * 
+ * PURPOSE:
+ * Downloads external images and processes them for storage in Supabase Storage with watermarking.
+ * Handles the complete image processing pipeline for social media posts by downloading from external URLs,
+ * applying optional watermarks, uploading to managed storage, and updating database records.
+ * 
+ * INPUTS:
+ * - imageUrl: string - External image URL to download and process
+ * - postId: string - Social media post ID to associate with processed image
+ * - aspectRatio: string - Target aspect ratio for image processing and filename
+ * - watermarkText: string (optional, default: 'www.jordanleahy.com') - Watermark text overlay
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, processedImageUrl: string, message: string }
+ * - Error: { success: false, error: string }
+ * 
+ * DEPENDENCIES:
+ * - Supabase Storage (social-media-images bucket for file storage)
+ * - Supabase Database (social_media_posts table for status and URL tracking)
+ * 
+ * USAGE:
+ * Called from: Image upload workflows, social media content processing, external image integration
+ * Authentication: Service role access for storage operations and database updates
+ * 
+ * FLOW:
+ * 1. Update post status to 'processing' with aspect ratio specific field
+ * 2. Download original image from provided external URL
+ * 3. Process image (currently re-uploads as-is, TODO: implement server-side processing)
+ * 4. Generate unique filename with watermark prefix and timestamp
+ * 5. Upload processed image to Supabase Storage bucket
+ * 6. Update social media post with processed image URL and 'complete' status
+ * 7. Handle errors by updating status to 'failed' for proper error tracking
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';

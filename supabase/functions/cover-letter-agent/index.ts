@@ -1,3 +1,41 @@
+/**
+ * EDGE FUNCTION: Cover Letter Agent
+ * 
+ * PURPOSE:
+ * Generates personalized cover letters for job applications using AI, specifically designed
+ * for Product Manager and Product Designer roles. Leverages user's resume data and case studies
+ * to create compelling, data-accurate cover letters with role-specific messaging.
+ * 
+ * INPUTS:
+ * - jobDescription: string - Full job posting description
+ * - companyName: string - Target company name
+ * - roleType: string ('product_manager' | 'product_designer') - Position type for prompt selection
+ * - userId: string - User identifier for data retrieval
+ * - additionalContext: string (optional) - Extra context or requirements
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, coverLetter: object, caseStudiesUsed: number, correlationId: string, usage: object }
+ * - Error: { success: false, error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for text generation)
+ * - Supabase Database (user_roles, job_applications, case_studies, openai_agents, system_prompts tables)
+ * - OpenAI Attribution System (usage tracking and cost calculation)
+ * 
+ * USAGE:
+ * Called from: Job application components and portfolio generation workflows
+ * Authentication: Required - Admin role verification enforced
+ * 
+ * FLOW:
+ * 1. Verify user has admin privileges for cover letter generation
+ * 2. Retrieve user's latest resume and published case studies
+ * 3. Get appropriate system prompt based on role type (Product Manager vs Product Designer)
+ * 4. Call OpenAI API with strict data accuracy instructions
+ * 5. Parse response into structured JSON format (opening_hook, key_achievements, etc.)
+ * 6. Track API usage and costs for monitoring
+ * 7. Return structured cover letter data for frontend rendering
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';

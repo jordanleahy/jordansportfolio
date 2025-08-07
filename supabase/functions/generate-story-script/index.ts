@@ -1,3 +1,38 @@
+/**
+ * EDGE FUNCTION: Generate Story Script
+ * 
+ * PURPOSE:
+ * Transforms social media post content into engaging voice-optimized story scripts using AI.
+ * Supports two modes: Children's Stories for family content and Convincing Stories for 
+ * professional presentations. Automatically creates or uses existing Story Telling Agent.
+ * 
+ * INPUTS:
+ * - post_content: string - Source content to transform into story script
+ * - story_type: string ('childrens_story' | 'convincing_story') - Story style for appropriate prompt selection
+ * - post_title: string (optional) - Title for context
+ * 
+ * OUTPUTS:
+ * - Success: { script: string, story_type: string, agent_id: string }
+ * - Error: { error: string, details: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4.1-2025-04-14 or agent-specified model for script generation)
+ * - Supabase Database (openai_agents, system_prompts tables)
+ * - Database Function (insert_story_telling_agent for agent creation)
+ * 
+ * USAGE:
+ * Called from: Story creation workflows, voice recording preparation, content transformation
+ * Authentication: Required - uses user context for agent management and script generation
+ * 
+ * FLOW:
+ * 1. Authenticate user and validate story type (childrens_story or convincing_story)
+ * 2. Find or create user's Story Telling Agent using database function
+ * 3. Retrieve story-type-specific system prompt from system_prompts table
+ * 4. Transform content using OpenAI with voice-optimized storytelling prompts
+ * 5. Return generated script with voice delivery cues and formatting
+ * 6. Support for both family-friendly and professional narrative styles
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';

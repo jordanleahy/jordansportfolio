@@ -1,3 +1,37 @@
+/**
+ * EDGE FUNCTION: Translate Story Script
+ * 
+ * PURPOSE:
+ * Translates story scripts to target languages while preserving narrative flow, emotional tone,
+ * and voice delivery cues. Supports children's stories and professional narratives with 
+ * language-specific cultural adaptation and storytelling optimization.
+ * 
+ * INPUTS:
+ * - script_text: string - Original story script to translate
+ * - target_language: string - Target language ('german', 'spanish', 'chinese', 'swedish')
+ * - story_type: string (optional) - Story context ('childrens_story' | 'convincing_story')
+ * 
+ * OUTPUTS:
+ * - Success: { translated_script: string, target_language: string, word_count: number, correlationId: string, usage: object }
+ * - Error: { error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4.1-2025-04-14 for high-quality translation)
+ * - OpenAI Attribution System (usage tracking and cost calculation)
+ * 
+ * USAGE:
+ * Called from: Multi-language content workflows, global story distribution, localization pipelines
+ * Authentication: Optional - enhanced tracking available for authenticated users
+ * 
+ * FLOW:
+ * 1. Validate script text and target language requirements
+ * 2. Apply language-specific translation instructions and cultural context
+ * 3. Preserve story type context (children's warmth vs professional authority)
+ * 4. Translate using OpenAI while maintaining voice delivery cues and formatting
+ * 5. Track API usage and costs for monitoring
+ * 6. Return translated script with preserved structure and estimated word count
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';

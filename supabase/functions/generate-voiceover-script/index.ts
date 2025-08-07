@@ -1,3 +1,39 @@
+/**
+ * EDGE FUNCTION: Generate Voiceover Script
+ * 
+ * PURPOSE:
+ * Converts text content into teleprompter-style voiceover scripts optimized for voice recording.
+ * Supports multiple tones (engaging, professional, casual) and generates scripts with estimated
+ * duration, word counts, and voice delivery optimization for content creators.
+ * 
+ * INPUTS:
+ * - source_text: string - Original text content to transform
+ * - content_type: string (optional) - Type of content for context
+ * - tone: string (default: 'engaging') - Delivery tone for script style
+ * - style: string (default: 'teleprompter') - Script formatting style
+ * 
+ * OUTPUTS:
+ * - Success: { script: string, word_count: number, estimated_duration_seconds: number, tone: string, style: string, correlationId: string, usage: object }
+ * - Error: { error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o for high-quality script generation)
+ * - Supabase Database (openai_agents, system_prompts tables)
+ * - OpenAI Attribution System (usage tracking and cost calculation)
+ * 
+ * USAGE:
+ * Called from: Video production workflows, podcast preparation, content creator tools
+ * Authentication: Optional - enhanced features and tracking available for authenticated users
+ * 
+ * FLOW:
+ * 1. Validate source text and retrieve Voiceover Script Generator agent
+ * 2. Get tone-specific system prompt or fallback to available prompts
+ * 3. Transform content using OpenAI with teleprompter optimization
+ * 4. Calculate word count and estimated reading duration (150 WPM)
+ * 5. Track API usage and costs for monitoring
+ * 6. Return optimized script with delivery metrics
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';

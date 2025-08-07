@@ -1,3 +1,36 @@
+/**
+ * EDGE FUNCTION: Ensure Post Image Prompts
+ * 
+ * PURPOSE:
+ * Automatically generates image prompts for social media posts that are missing them.
+ * Batch processes posts by category using the Visual Prompt Generator agent and category-specific
+ * system prompts to create professional, consistent image generation prompts.
+ * 
+ * INPUTS:
+ * - category: string - Category of posts to process (e.g., 'coding ai', 'healthcare', 'contracts')
+ * - userId: string - User ID to filter posts and find appropriate agent
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, category: string, totalPosts: number, successCount: number, errorCount: number, results: array }
+ * - Error: { error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for prompt generation)
+ * - Supabase Database (social_media_posts, openai_agents, system_prompts tables)
+ * 
+ * USAGE:
+ * Called from: Content management workflows, bulk processing operations
+ * Authentication: Service role access for batch operations
+ * 
+ * FLOW:
+ * 1. Fetch all posts in specified category that lack image prompts
+ * 2. Find user's Visual Prompt Generator agent
+ * 3. Retrieve category-specific system prompt from system_prompts table
+ * 4. For each post, generate detailed image prompt using OpenAI
+ * 5. Update posts with generated prompts and timestamp
+ * 6. Return processing summary with success/error counts and details
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';

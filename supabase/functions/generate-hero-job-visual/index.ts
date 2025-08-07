@@ -1,3 +1,37 @@
+/**
+ * EDGE FUNCTION: Generate Hero Job Visual
+ * 
+ * PURPOSE:
+ * Creates dramatic, movie poster-style image prompts for job posting visuals in 9:16 vertical format.
+ * Designed to make job opportunities look prestigious and exciting, emphasizing company branding
+ * and role prestige through cinematic visual storytelling without human figures.
+ * 
+ * INPUTS:
+ * - jobTitle: string - Position title (e.g., "Senior Product Manager")
+ * - companyName: string - Hiring company name for prominent display
+ * - jobDescription: string (optional) - Role details for context
+ * 
+ * OUTPUTS:
+ * - Success: { generatedPrompt: string, companyName: string, jobTitle: string, style: 'hero' }
+ * - Error: { error: string, details: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4.1-2025-04-14 for sophisticated prompt generation)
+ * - Supabase Database (cached_prompts table for storage)
+ * 
+ * USAGE:
+ * Called from: Job posting creation workflows, HR content generation, social media job campaigns
+ * Authentication: Optional - caching only available for authenticated users
+ * 
+ * FLOW:
+ * 1. Validate required job title and company name inputs
+ * 2. Apply specialized hero-style visual prompt system with cinematic guidelines
+ * 3. Generate dramatic 9:16 vertical image prompt using OpenAI
+ * 4. Store generated prompt in cache for reuse (if user authenticated)
+ * 5. Return complete prompt optimized for AI image generation
+ * 6. Emphasize bold typography, dramatic lighting, and premium aesthetic
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 

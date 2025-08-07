@@ -1,3 +1,40 @@
+/**
+ * EDGE FUNCTION: Generate Image Prompt Dynamic
+ * 
+ * PURPOSE:
+ * Generates category-specific image prompts for social media content using AI and category-specific
+ * system prompts. Supports color theme integration and provides comprehensive usage tracking
+ * for cost monitoring and optimization.
+ * 
+ * INPUTS:
+ * - title: string - Content title for context
+ * - description: string - Content description for prompt generation
+ * - category: string - Content category (maps to specific Visual Prompt Generator prompts)
+ * - colorTheme: object (optional) - Brand colors and visual style guidelines
+ * 
+ * OUTPUTS:
+ * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
+ * - Error: { error: string }
+ * 
+ * DEPENDENCIES:
+ * - OpenAI API (GPT-4o-mini for prompt generation)
+ * - Supabase Database (system_prompts, cached_prompts tables)
+ * - OpenAI Attribution System (usage tracking and cost calculation)
+ * 
+ * USAGE:
+ * Called from: Content creation workflows, image generation pipelines, social media management
+ * Authentication: Optional - enhanced features and caching available for authenticated users
+ * 
+ * FLOW:
+ * 1. Validate required title, description, and category inputs
+ * 2. Retrieve category-specific system prompt from system_prompts table
+ * 3. Integrate color theme instructions if provided for brand consistency
+ * 4. Generate detailed image prompt using OpenAI with Visual Prompt Generator
+ * 5. Cache generated prompt for future reuse (if user authenticated)
+ * 6. Track API usage, costs, and performance metrics
+ * 7. Return optimized prompt ready for AI image generation
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';

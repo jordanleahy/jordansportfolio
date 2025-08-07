@@ -1,3 +1,37 @@
+/**
+ * EDGE FUNCTION: Create Subscription
+ * 
+ * PURPOSE:
+ * Creates Stripe checkout sessions for subscription purchases, handling customer creation/retrieval,
+ * subscription tier validation, and post-checkout welcome email automation. Integrates billing
+ * system with user management and onboarding workflows.
+ * 
+ * INPUTS:
+ * - tier_id: string - UUID of the subscription tier being purchased
+ * 
+ * OUTPUTS:
+ * - Success: { url: string, session_id: string } - Stripe checkout session URL and ID
+ * - Error: { error: string }
+ * 
+ * DEPENDENCIES:
+ * - Stripe API (customer management, checkout session creation)
+ * - Supabase Database (subscription_tiers table)
+ * - User Authentication (Bearer token required)
+ * - send-welcome-email Edge Function (post-checkout automation)
+ * 
+ * USAGE:
+ * Called from: Subscription purchase flows, pricing pages, upgrade components
+ * Authentication: Required - uses Bearer token to identify user
+ * 
+ * FLOW:
+ * 1. Authenticate user and validate subscription tier
+ * 2. Check if Stripe customer exists, create if new user
+ * 3. Create Stripe checkout session with tier pricing and metadata
+ * 4. Configure success/cancel URLs for post-checkout flow
+ * 5. Trigger welcome email function (non-blocking)
+ * 6. Return checkout session URL for frontend redirect
+ */
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";

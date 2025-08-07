@@ -1,3 +1,41 @@
+/**
+ * EDGE FUNCTION: Generate Theme Image Background
+ * 
+ * PURPOSE:
+ * Creates cohesive background images for social media themes using AI image generation.
+ * Generates visual identities that represent the theme's content and tone by analyzing
+ * theme context and first post content to create representative background visuals.
+ * 
+ * INPUTS:
+ * - theme: string - Theme name for visual context and database lookup
+ * - category: string - Content category for style guidance and visual direction
+ * - userId: string - User ID for database operations and permissions
+ * - firstPostTitle: string (optional) - Override first post title for context
+ * - firstPostDescription: string (optional) - Override first post description for inspiration
+ * 
+ * OUTPUTS:
+ * - Success: { success: true, imageUrl: string, theme: string, message: string }
+ * - Error: { error: string, details: string }
+ * 
+ * DEPENDENCIES:
+ * - Supabase Database (themes, social_media_posts tables)
+ * - AI Image Generation Pipeline (generateImagePrompt, generateThemeImage shared utilities)
+ * - Shared Utils (updateThemeImageStatus for status tracking)
+ * 
+ * USAGE:
+ * Called from: Theme creation workflows, visual branding generation, social media theme setup
+ * Authentication: Service role access for database operations and image generation
+ * 
+ * FLOW:
+ * 1. Validate theme, category, and userId parameters
+ * 2. Look up theme ID and update status to 'generating'
+ * 3. Retrieve first post details if not provided for visual context
+ * 4. Generate appropriate image prompt using theme and post information
+ * 5. Create and upload background image using AI generation pipeline
+ * 6. Update theme with generated image URL and mark as 'complete'
+ * 7. Handle errors by updating theme status to 'failed' with proper cleanup
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 import { ImageRequest, SupabaseClient } from '../_shared/types.ts';
