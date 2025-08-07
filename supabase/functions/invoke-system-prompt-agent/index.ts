@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 // Constants - Centralized to match src/constants/
 const AGENT_NAMES = {
@@ -91,9 +92,15 @@ serve(async (req) => {
     return new Response(null, { headers: CORS_HEADERS });
   }
 
+  const startTime = Date.now();
+  const correlationId = generateCorrelationId();
+  let userId: string | null = null;
+  let openAIRequestId: string | undefined;
+
   try {
     const requestBody = await req.json();
     const { category, theme, description, sample_posts, user_id } = requestBody;
+    userId = user_id;
     
     // Input validation - theme is now primary, category secondary
     if (!theme || !user_id) {
@@ -109,7 +116,7 @@ serve(async (req) => {
     // Allow any category for system prompt generation
     // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
     
-    console.log('Processing request for theme:', theme, 'category:', category, 'user_id:', user_id);
+    console.log('Processing request for theme:', theme, 'category:', category, 'user_id:', user_id, 'correlation:', correlationId);
 
     if (!openAIApiKey) {
       return new Response(JSON.stringify({ 
@@ -198,24 +205,30 @@ ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join(
 
 Please generate a detailed, professional system prompt following the established template format with theme-specific visual frameworks, the provided color palette, and content analysis guidelines. Focus primarily on "${actualTheme}" with "${contextCategory}" context. Include the color palette in the standard format with the exact hex values provided above.`;
 
-    console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
+    console.log('Calling OpenAI with system prompt length:', systemPrompt.length, 'correlation:', correlationId);
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Enhanced OpenAI request with correlation tracking
+    const requestBodyForOpenAI = enhanceOpenAIRequestBody({
+      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: OPENAI_CONFIG.DEFAULT_TEMPERATURE,
+    }, correlationId);
+
+    const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: OPENAI_CONFIG.DEFAULT_TEMPERATURE,
-      }),
+      body: JSON.stringify(requestBodyForOpenAI),
+      correlationId,
     });
+
+    openAIRequestId = responseOpenAIRequestId;
 
     if (!response.ok) {
       const errorData = await response.text();

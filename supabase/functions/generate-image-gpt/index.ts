@@ -1,31 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, calculateImageGenerationCost } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// Helper function to track API usage
-async function trackApiUsage(supabase: any, userId: string, functionName: string, modelUsed: string, requestType: string, success: boolean, estimatedCost: number, imageSize?: string, imageQuality?: string, responseTimeMs?: number, errorMessage?: string, metadata?: any) {
-  try {
-    await supabase.from('api_usage_tracking').insert({
-      user_id: userId,
-      function_name: functionName,
-      model_used: modelUsed,
-      request_type: requestType,
-      image_size: imageSize,
-      image_quality: imageQuality,
-      estimated_cost: estimatedCost,
-      success,
-      error_message: errorMessage,
-      request_metadata: metadata || {},
-      response_time_ms: responseTimeMs,
-    });
-  } catch (error) {
-    console.error('❌ Failed to track API usage:', error);
-  }
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,6 +14,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let userId: string | null = null;
+  const correlationId = generateCorrelationId();
 
   try {
     console.log('🔍 DEBUG: Function started, parsing request body...');
@@ -93,7 +74,8 @@ serve(async (req) => {
 
     const size = sizeMap[aspectRatio] || '1536x1024';
     console.log('📐 ASPECT_RATIO: Final size for OpenAI:', size, '(from aspect ratio:', aspectRatio + ')');
-    const estimatedCost = 0.040; // GPT-Image-1 standard pricing
+    console.log('🔗 CORRELATION: Request ID:', correlationId);
+    const estimatedCost = calculateImageGenerationCost(size, 'high');
     
     // Disable seeds for CDI category
     const isCDICategory = category === 'cdi';
@@ -134,23 +116,28 @@ serve(async (req) => {
       finalSeed = rawSeed % 4294967295; // Ensure it's within valid range for OpenAI
     }
 
-    console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '');
+    console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '', `(correlation: ${correlationId})`);
 
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
+    // Enhanced OpenAI request with correlation tracking
+    const requestBody = enhanceOpenAIRequestBody({
+      model: 'gpt-image-1',
+      prompt: prompt,
+      size: size,
+      quality: 'high',
+      output_format: 'png',
+      n: 1,
+      ...(finalSeed && { seed: finalSeed })
+    }, correlationId);
+
+    const { response, openAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/images/generations',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-image-1',
-        prompt: prompt,
-        size: size,
-        quality: 'high',
-        output_format: 'png',
-        n: 1,
-        ...(finalSeed && { seed: finalSeed })
-      }),
+      body: JSON.stringify(requestBody),
+      correlationId,
     });
 
     if (!response.ok) {
@@ -180,9 +167,23 @@ serve(async (req) => {
         }, null, 2)
       });
       
-      // Track failed usage
+      // Track failed usage with enhanced attribution
       if (userId) {
-        await trackApiUsage(supabase, userId, 'generate-image-gpt', 'gpt-image-1', 'image_generation', false, 0, size, 'high', Date.now() - startTime, errorData.error?.message, { prompt: prompt.substring(0, 200), aspectRatio });
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'generate-image-gpt',
+          model: 'gpt-image-1',
+          requestType: 'image_generation',
+          success: false,
+          estimatedCost: 0,
+          imageSize: size,
+          imageQuality: 'high',
+          responseTimeMs: responseTime,
+          errorMessage: errorData.error?.message,
+          metadata: { prompt: prompt.substring(0, 200), aspectRatio },
+          correlationId,
+          openAIRequestId,
+        });
       }
       
       return new Response(
@@ -202,9 +203,23 @@ serve(async (req) => {
       const textResponse = await response.text();
       console.error('🎨 IMAGE_GENERATION: Raw success response:', textResponse.substring(0, 500));
       
-      // Track failed usage for JSON parsing error
+      // Track failed usage for JSON parsing error with enhanced attribution
       if (userId) {
-        await trackApiUsage(supabase, userId, 'generate-image-gpt', 'gpt-image-1', 'image_generation', false, 0, size, 'high', Date.now() - startTime, `JSON parsing error: ${jsonError.message}`, { prompt: prompt.substring(0, 200), aspectRatio });
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'generate-image-gpt',
+          model: 'gpt-image-1',
+          requestType: 'image_generation',
+          success: false,
+          estimatedCost: 0,
+          imageSize: size,
+          imageQuality: 'high',
+          responseTimeMs: responseTime,
+          errorMessage: `JSON parsing error: ${jsonError.message}`,
+          metadata: { prompt: prompt.substring(0, 200), aspectRatio },
+          correlationId,
+          openAIRequestId,
+        });
       }
       
       return new Response(
@@ -223,9 +238,22 @@ serve(async (req) => {
 
     const base64Image = data.data[0].b64_json;
     
-    // Track successful usage
+    // Track successful usage with enhanced attribution
     if (userId) {
-      await trackApiUsage(supabase, userId, 'generate-image-gpt', 'gpt-image-1', 'image_generation', true, estimatedCost, size, 'high', Date.now() - startTime, undefined, { prompt: prompt.substring(0, 200), aspectRatio });
+      await trackOpenAIUsage({
+        userId,
+        functionName: 'generate-image-gpt',
+        model: 'gpt-image-1',
+        requestType: 'image_generation',
+        success: true,
+        estimatedCost,
+        imageSize: size,
+        imageQuality: 'high',
+        responseTimeMs: responseTime,
+        metadata: { prompt: prompt.substring(0, 200), aspectRatio, seed: finalSeed },
+        correlationId,
+        openAIRequestId,
+      });
     }
     
     console.log('🎨 IMAGE_GENERATION: Successfully generated image');
@@ -244,14 +272,23 @@ serve(async (req) => {
   } catch (error) {
     console.error('🎨 IMAGE_GENERATION: Error:', error);
     
-    // Track error usage
+    // Track error usage with enhanced attribution
     if (userId) {
       try {
-        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        await trackApiUsage(supabase, userId, 'generate-image-gpt', 'gpt-image-1', 'image_generation', false, 0, '1024x1024', 'high', Date.now() - startTime, error.message, {});
+        await trackOpenAIUsage({
+          userId,
+          functionName: 'generate-image-gpt',
+          model: 'gpt-image-1',
+          requestType: 'image_generation',
+          success: false,
+          estimatedCost: 0,
+          imageSize: '1024x1024',
+          imageQuality: 'high',
+          responseTimeMs: Date.now() - startTime,
+          errorMessage: error.message,
+          metadata: {},
+          correlationId,
+        });
       } catch (trackingError) {
         console.error('Failed to track error usage:', trackingError);
       }
