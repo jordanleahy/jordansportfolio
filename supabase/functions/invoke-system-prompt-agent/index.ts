@@ -344,7 +344,7 @@ Please generate a detailed, professional system prompt following the established
         if (targetAgentError || !targetAgent) {
           console.error('❌ TARGET AGENT NOT FOUND:', {
             target_agent_name: targetAgentName,
-            category: actualCategory,
+            category: contextCategory,
             error: targetAgentError
           });
         } else {
@@ -423,7 +423,7 @@ Please generate a detailed, professional system prompt following the established
           }
         }
       } else {
-        console.log(`⚠️  NO TARGET AGENT: Failed to determine target agent for category "${actualCategory}"`);
+        console.log(`⚠️  NO TARGET AGENT: Failed to determine target agent for category "${contextCategory}"`);
       }
 
       // 🔄 Step 3: Update the generator agent's last_run timestamp
