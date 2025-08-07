@@ -11,7 +11,7 @@ export const CategoriesGrid = ({ themes, onDeleteCategory }: CategoriesGridProps
       {/* Theme cards */}
       {themes.map((theme) => (
         <CategoryCard
-          key={theme.theme_name}
+          key={theme.id}
           theme={theme.theme_name}
           themeDescription={theme.description}
           category={theme.category}
