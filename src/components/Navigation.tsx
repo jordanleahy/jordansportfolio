@@ -12,6 +12,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreloading } from "@/hooks/useRoutePreloading";
 import { useModal } from "@/contexts/ModalContext";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
