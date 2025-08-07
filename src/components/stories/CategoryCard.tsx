@@ -5,19 +5,25 @@ import { StreamingShimmer } from "@/components/ui/streaming-shimmer";
 import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { CategoryCardProps } from '@/types/stories';
 
 export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete }: CategoryCardProps) => {
   const navigate = useNavigate();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
+  const imageGenerationAttempted = useRef(false);
   
   // Use streaming hook for real-time image generation (enabled for both shimmer and regular cards)
   const { streamingProgress, isGenerating, error, hasTimedOut, startStreaming, retryGeneration } = useThemeImageStreaming({
     category,
     enabled: !!firstPostData // Enable for both shimmer and regular cards
   });
+
+  // Reset generation attempt tracking when theme changes
+  useEffect(() => {
+    imageGenerationAttempted.current = false;
+  }, [theme, category]);
 
   // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
   useEffect(() => {
@@ -30,17 +36,19 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       category,
       theme,
       error,
-      hasTimedOut
+      hasTimedOut,
+      attemptedGeneration: imageGenerationAttempted.current
     });
     
-    // Only attempt streaming if we have valid data and no ongoing processes or recent failures
-    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress && !error && !hasTimedOut && theme && category) {
+    // Only attempt streaming if we have valid data, no ongoing processes, no recent failures, and haven't attempted yet
+    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress && !error && !hasTimedOut && theme && category && !imageGenerationAttempted.current) {
       console.log('🚀 Starting streaming for theme:', theme);
+      imageGenerationAttempted.current = true;
       startStreaming(firstPostData);
     } else {
       console.log('❌ NOT starting streaming - conditions not met');
     }
-  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, error, hasTimedOut, theme, category, startStreaming]);
+  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, error, hasTimedOut, theme, category]);
 
   // Update image URL when streaming completes or imageUrl prop changes
   useEffect(() => {

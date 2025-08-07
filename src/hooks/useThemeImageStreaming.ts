@@ -158,16 +158,19 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         eventSourceRef.current.close();
       }
 
-      // Use the correct function for theme image generation
-      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/${EDGE_FUNCTION_NAMES.USER_IDEA_STREAMING_IMAGE_PIPELINE}`, {
+      // Use the correct function for theme image generation (NOT the full theme pipeline)
+      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/${EDGE_FUNCTION_NAMES.GENERATE_THEME_IMAGE_BACKGROUND}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          description: themeDescription,
-          stream: true
+          theme: theme,
+          category: category,
+          userId: session.user.id,
+          firstPostTitle: firstPostData?.title,
+          firstPostDescription: firstPostData?.description
         })
       });
 
