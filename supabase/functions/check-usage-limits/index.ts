@@ -1,10 +1,10 @@
 /**
- * EDGE FUNCTION: Check Usage Limits - GPT Image Only
+ * EDGE FUNCTION: Check Usage Limits - GPT Image with Daily/Monthly Limits
  * 
  * PURPOSE:
  * Validates and tracks user usage limits against their subscription tier for GPT-image-1 
- * generation only. Prevents users from exceeding their monthly allowances and increments 
- * usage counters when requests are approved.
+ * generation. Enforces both daily and monthly limits, preventing users from exceeding 
+ * either limit and automatically resetting daily counters each day.
  * 
  * INPUTS:
  * - usage_type: string ('gpt_image_generation') - Type of service being requested
@@ -24,11 +24,12 @@
  * 
  * FLOW:
  * 1. Authenticate user from Bearer token
- * 2. Retrieve user's active subscription and tier limits
- * 3. Get or create current billing period usage record
- * 4. Check if requested amount would exceed tier limits
- * 5. If allowed, increment usage counter and return approval
- * 6. If denied, return remaining allowance and limits
+ * 2. Retrieve user's active subscription and tier limits (daily + monthly)
+ * 3. Get or create current billing period usage record with daily tracking
+ * 4. Reset daily counters if new day detected
+ * 5. Check if requested amount would exceed EITHER daily OR monthly limits
+ * 6. If allowed, increment both daily and monthly usage counters
+ * 7. If denied, return remaining allowance and which limit was hit
  */
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -112,8 +113,9 @@ serve(async (req) => {
       });
     }
 
-    // Get current billing period
+    // Get current billing period and today's date
     const now = new Date();
+    const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
@@ -137,6 +139,8 @@ serve(async (req) => {
           image_generations_used: 0,
           dalle_images_used: 0,
           text_generations_used: 0,
+          daily_usage_date: today,
+          gpt_images_used_today: 0,
         })
         .select()
         .single();
@@ -149,21 +153,59 @@ serve(async (req) => {
       throw usageError;
     }
 
+    // Reset daily counters if it's a new day
+    const needsDailyReset = usage.daily_usage_date !== today;
+    if (needsDailyReset) {
+      console.log(`Resetting daily usage for user ${userId}, was: ${usage.daily_usage_date}, now: ${today}`);
+      const { data: resetUsage, error: resetError } = await supabaseClient
+        .from('user_usage_tracking')
+        .update({
+          daily_usage_date: today,
+          gpt_images_used_today: 0,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', usage.id)
+        .select()
+        .single();
+
+      if (resetError) {
+        console.error('Error resetting daily usage:', resetError);
+        throw resetError;
+      }
+      usage = resetUsage;
+    }
+
     const tier = subscription.tier as any;
-    const currentUsed = usage.gpt_images_used || 0;
-    const limit = tier.max_gpt_images || 0;
+    
+    // Get limits from tier (with fallbacks for backward compatibility)
+    const monthlyLimit = tier.max_gpt_images_monthly || tier.max_gpt_images || 0;
+    const dailyLimit = tier.max_gpt_images_daily || monthlyLimit; // If no daily limit, use monthly as fallback
+    
+    // Get current usage
+    const currentMonthlyUsed = usage.gpt_images_used || 0;
+    const currentDailyUsed = usage.gpt_images_used_today || 0;
 
-    const remaining = Math.max(0, limit - currentUsed);
-    const allowed = currentUsed + amount <= limit;
+    // Calculate remaining for both limits
+    const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
+    const dailyRemaining = Math.max(0, dailyLimit - currentDailyUsed);
 
-    console.log(`GPT Image usage check: current: ${currentUsed}, limit: ${limit}, requesting: ${amount}, allowed: ${allowed}`);
+    // Check if either limit would be exceeded
+    const monthlyAllowed = currentMonthlyUsed + amount <= monthlyLimit;
+    const dailyAllowed = currentDailyUsed + amount <= dailyLimit;
+    const allowed = monthlyAllowed && dailyAllowed;
 
-    // If allowed, increment the usage
+    console.log(`GPT Image usage check for user ${userId}:`);
+    console.log(`  Daily: ${currentDailyUsed}/${dailyLimit}, requesting: ${amount}, allowed: ${dailyAllowed}`);
+    console.log(`  Monthly: ${currentMonthlyUsed}/${monthlyLimit}, requesting: ${amount}, allowed: ${monthlyAllowed}`);
+    console.log(`  Overall allowed: ${allowed}`);
+
+    // If allowed, increment both daily and monthly usage
     if (allowed) {
       const { error: updateError } = await supabaseClient
         .from('user_usage_tracking')
         .update({
-          gpt_images_used: currentUsed + amount,
+          gpt_images_used: currentMonthlyUsed + amount,
+          gpt_images_used_today: currentDailyUsed + amount,
           updated_at: new Date().toISOString(),
         })
         .eq('id', usage.id);
@@ -174,12 +216,28 @@ serve(async (req) => {
       }
     }
 
+    // Determine which limit is more restrictive for messaging
+    const restrictiveLimit = dailyRemaining < monthlyRemaining ? 'daily' : 'monthly';
+    const restrictiveRemaining = Math.min(dailyRemaining, monthlyRemaining);
+    const restrictiveLimitValue = restrictiveLimit === 'daily' ? dailyLimit : monthlyLimit;
+
+    let message: string | undefined;
+    if (!allowed) {
+      if (!dailyAllowed && !monthlyAllowed) {
+        message = `Both daily and monthly limits exceeded. ${dailyRemaining} images remaining today, ${monthlyRemaining} remaining this month.`;
+      } else if (!dailyAllowed) {
+        message = `Daily limit exceeded. ${dailyRemaining} images remaining today (resets at midnight).`;
+      } else if (!monthlyAllowed) {
+        message = `Monthly limit exceeded. ${monthlyRemaining} images remaining this billing cycle.`;
+      }
+    }
+
     const response: UsageCheckResponse = {
       allowed,
-      remaining: allowed ? remaining - amount : remaining,
-      limit,
+      remaining: allowed ? restrictiveRemaining - amount : restrictiveRemaining,
+      limit: restrictiveLimitValue,
       usage_type,
-      message: allowed ? undefined : `GPT Image generation limit exceeded. ${remaining} images remaining this billing cycle.`
+      message
     };
 
     return new Response(JSON.stringify(response), {
