@@ -104,40 +104,41 @@ Deno.serve(async (req) => {
     const errors: string[] = [];
 
     try {
-      // Fetch OpenAI usage data for completions
+      // Fetch OpenAI usage data - using the newer usage API endpoint
       console.log(`Fetching usage data from ${startTimestamp} to ${endTimestamp}`);
-      const completionsUrl = `https://api.openai.com/v1/organization/usage/completions?start_time=${startTimestamp}&end_time=${endTimestamp}`;
-      console.log('Completions URL:', completionsUrl);
+      const usageUrl = `https://api.openai.com/v1/usage?start_time=${startTimestamp}&end_time=${endTimestamp}&bucket_width=1h`;
+      console.log('Usage URL:', usageUrl);
       
-      const completionsResponse = await fetch(completionsUrl, {
+      const usageResponse = await fetch(usageUrl, {
         headers: {
           'Authorization': `Bearer ${openaiApiKey}`,
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('Completions response status:', completionsResponse.status);
-      console.log('Completions response headers:', Object.fromEntries(completionsResponse.headers.entries()));
+      console.log('Usage response status:', usageResponse.status);
+      console.log('Usage response headers:', Object.fromEntries(usageResponse.headers.entries()));
 
-      if (!completionsResponse.ok) {
-        const errorText = await completionsResponse.text();
+      if (!usageResponse.ok) {
+        const errorText = await usageResponse.text();
         console.error('OpenAI API error response:', errorText);
-        throw new Error(`OpenAI completions API error: ${completionsResponse.status} - ${errorText}`);
+        throw new Error(`OpenAI usage API error: ${usageResponse.status} - ${errorText}`);
       }
 
-      const completionsData: OpenAIUsageResponse = await completionsResponse.json();
-      console.log(`Fetched ${completionsData.data.length} completion usage records`);
+      const usageData = await usageResponse.json();
+      console.log(`Fetched usage data:`, JSON.stringify(usageData, null, 2));
 
-      // Fetch OpenAI cost data
-      const costsResponse = await fetch(
-        `https://api.openai.com/v1/organization/costs?start_time=${startTimestamp}&end_time=${endTimestamp}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${openaiApiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // Fetch OpenAI costs data
+      console.log('Fetching costs data...');
+      const costsUrl = `https://api.openai.com/v1/costs?start_time=${startTimestamp}&end_time=${endTimestamp}&bucket_width=1h`;
+      console.log('Costs URL:', costsUrl);
+
+      const costsResponse = await fetch(costsUrl, {
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!costsResponse.ok) {
         throw new Error(`OpenAI costs API error: ${costsResponse.status}`);
@@ -154,39 +155,40 @@ Deno.serve(async (req) => {
       }, {} as Record<string, number>);
 
       // Process usage data and sync with our database
-      for (const usage of completionsData.data) {
-        try {
-          const costKey = `${usage.timestamp}_${usage.operation}`;
-          const actualCost = costMap[costKey] || 0;
+      for (const bucket of usageData.data || []) {
+        for (const result of bucket.results || []) {
+          try {
+          const costKey = `${bucket.start_time}_general`;
+          const actualCost = 0; // Will be calculated from cost data
 
           // Try to find matching records in our database to update
           const { data: existingRecords, error: selectError } = await supabase
             .from('api_usage_tracking')
             .select('id, estimated_cost')
-            .gte('created_at', new Date(usage.timestamp * 1000).toISOString())
-            .lte('created_at', new Date((usage.timestamp + 3600) * 1000).toISOString()) // 1 hour window
+            .gte('created_at', new Date(bucket.start_time * 1000).toISOString())
+            .lte('created_at', new Date(bucket.end_time * 1000).toISOString())
             .eq('openai_synced', false);
 
           if (selectError) {
             console.error('Error selecting existing records:', selectError);
-            errors.push(`Failed to select records for timestamp ${usage.timestamp}`);
+            errors.push(`Failed to select records for timestamp ${bucket.start_time}`);
             continue;
           }
 
           // Update existing records with OpenAI data
           if (existingRecords && existingRecords.length > 0) {
-            for (const record of existingRecords.slice(0, usage.n_requests)) {
+            for (const record of existingRecords.slice(0, result.num_model_requests || 1)) {
               const { error: updateError } = await supabase
                 .from('api_usage_tracking')
                 .update({
-                  openai_request_id: usage.snapshot_id,
+                  openai_request_id: `bucket_${bucket.start_time}`,
                   openai_synced: true,
-                  actual_cost: actualCost / usage.n_requests, // Distribute cost across requests
-                  openai_timestamp: new Date(usage.timestamp * 1000).toISOString(),
+                  actual_cost: actualCost / (result.num_model_requests || 1),
+                  openai_timestamp: new Date(bucket.start_time * 1000).toISOString(),
                   sync_status: 'synced',
-                  total_tokens: usage.n_context_tokens_total + usage.n_generated_tokens_total,
-                  prompt_tokens: usage.n_context_tokens_total,
-                  completion_tokens: usage.n_generated_tokens_total,
+                  total_tokens: (result.input_tokens || 0) + (result.output_tokens || 0),
+                  prompt_tokens: result.input_tokens || 0,
+                  completion_tokens: result.output_tokens || 0,
                 })
                 .eq('id', record.id);
 
@@ -195,7 +197,7 @@ Deno.serve(async (req) => {
                 errors.push(`Failed to update record ${record.id}`);
               } else {
                 totalRecordsSynced++;
-                totalCostSynced += actualCost / usage.n_requests;
+                totalCostSynced += actualCost / (result.num_model_requests || 1);
               }
             }
           } else {
@@ -205,25 +207,25 @@ Deno.serve(async (req) => {
               .insert({
                 user_id: null, // Will need better attribution in production
                 function_name: 'openai-direct-api',
-                model_used: usage.operation || 'unknown',
+                model_used: result.model || 'unknown',
                 request_type: 'text_generation',
                 estimated_cost: actualCost,
                 actual_cost: actualCost,
                 success: true,
-                tokens_used: usage.n_context_tokens_total + usage.n_generated_tokens_total,
-                prompt_tokens: usage.n_context_tokens_total,
-                completion_tokens: usage.n_generated_tokens_total,
-                total_tokens: usage.n_context_tokens_total + usage.n_generated_tokens_total,
-                created_at: new Date(usage.timestamp * 1000).toISOString(),
-                openai_request_id: usage.snapshot_id,
+                tokens_used: (result.input_tokens || 0) + (result.output_tokens || 0),
+                prompt_tokens: result.input_tokens || 0,
+                completion_tokens: result.output_tokens || 0,
+                total_tokens: (result.input_tokens || 0) + (result.output_tokens || 0),
+                created_at: new Date(bucket.start_time * 1000).toISOString(),
+                openai_request_id: `bucket_${bucket.start_time}`,
                 openai_synced: true,
-                openai_timestamp: new Date(usage.timestamp * 1000).toISOString(),
+                openai_timestamp: new Date(bucket.start_time * 1000).toISOString(),
                 sync_status: 'synced',
               });
 
             if (insertError) {
               console.error('Error inserting new record:', insertError);
-              errors.push(`Failed to insert record for timestamp ${usage.timestamp}`);
+              errors.push(`Failed to insert record for timestamp ${bucket.start_time}`);
             } else {
               totalRecordsSynced++;
               totalCostSynced += actualCost;
@@ -233,6 +235,7 @@ Deno.serve(async (req) => {
           console.error('Error processing usage record:', error);
           errors.push(`Failed to process usage record: ${error.message}`);
         }
+      }
       }
 
       // Log sync operation
