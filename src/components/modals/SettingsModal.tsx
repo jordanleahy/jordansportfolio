@@ -58,16 +58,8 @@ export const SettingsModal: React.FC = () => {
 
           {/* Main Content */}
           <div className="flex-1 p-8 overflow-y-auto">
-            <div className="flex items-center justify-between mb-8">
+            <div className="mb-8">
               <h1 className="text-2xl font-bold text-foreground">Plans & Billing</h1>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={closeSettings}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
