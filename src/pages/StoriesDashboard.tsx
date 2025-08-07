@@ -7,6 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Loader2, Sparkles, Users } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
@@ -415,9 +416,18 @@ export default function StoriesDashboard() {
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Story Ship</h1>
             <p className="mt-3 text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
             <div className="mt-6 flex justify-center">
-              <Button onClick={() => { try { localStorage.setItem('stories_hero_seen','1'); } catch {}; setShowHero(false); }}>
-                Get started
-              </Button>
+              <Input
+                placeholder="Describe your theme..."
+                className="max-w-md"
+                value={customThemeDescription}
+                onChange={(e) => setCustomThemeDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customThemeDescription.trim()) {
+                    try { localStorage.setItem('stories_hero_seen','1'); } catch {}
+                    setShowHero(false);
+                  }
+                }}
+              />
             </div>
           </article>
         </div>
