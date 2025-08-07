@@ -125,16 +125,23 @@ Please incorporate these colors and visual style into the image prompt to ensure
       apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'MISSING'
     });
 
-    const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
-      url: 'https://api.openai.com/v1/chat/completions',
+    // Make direct fetch call to avoid any potential issues with makeOpenAIRequest
+    const requestStartTime = Date.now();
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
+        'X-Correlation-ID': correlationId,
+        'X-Request-Source': 'supabase-edge-function',
       },
       body: JSON.stringify(requestBody),
-      correlationId,
     });
+    
+    const responseTime = Date.now() - requestStartTime;
+    const responseOpenAIRequestId = response.headers.get('x-request-id') || 
+                                   response.headers.get('request-id') || 
+                                   correlationId;
 
     console.log('📥 OpenAI Response Details:', {
       status: response.status,
