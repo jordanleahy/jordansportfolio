@@ -139,7 +139,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
 
     // OpenAI request with proper format
     const requestBody = {
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -250,7 +250,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
             title,
             description,
             agent: 'Visual Prompt Generator',
-            model: 'gpt-4o-mini',
+            model: 'gpt-4.1-2025-04-14',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
             estimated_cost: estimatedCost
@@ -274,7 +274,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
       await trackOpenAIUsage({
         userId,
         functionName: 'generate-image-prompt-dynamic',
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -314,7 +314,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
         await trackOpenAIUsage({
           userId,
           functionName: 'generate-image-prompt-dynamic',
-          model: 'gpt-4o-mini',
+          model: 'gpt-4.1-2025-04-14',
           requestType: 'text_generation',
           success: false,
           estimatedCost: 0,
