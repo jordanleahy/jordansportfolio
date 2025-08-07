@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,7 @@ import { BulkActionsToolbar } from '@/components/stories/BulkActionsToolbar';
 import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteConfirmationDialog';
 import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
+import { Helmet } from 'react-helmet-async';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -36,6 +37,7 @@ export default function StoriesDashboard() {
 
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
+  const [showHero, setShowHero] = useState(false);
 
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -93,6 +95,24 @@ export default function StoriesDashboard() {
     };
     loadThemes();
   }, [user?.id]);
+
+  // First-visit hero visibility
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem('stories_hero_seen');
+      setShowHero(!seen);
+    } catch {
+      setShowHero(true);
+    }
+  }, []);
+
+  // Auto-hide hero when content exists
+  useEffect(() => {
+    if (availableThemes.length > 0) {
+      try { localStorage.setItem('stories_hero_seen', '1'); } catch {}
+      setShowHero(false);
+    }
+  }, [availableThemes.length]);
 
   // Simplified realtime handlers
   const handlePostInsert = (newPost: SocialMediaPost) => {
@@ -381,8 +401,37 @@ export default function StoriesDashboard() {
     return <Navigate to="/auth" replace />;
   }
 
+  // Show first-visit hero when no content exists
+  if (showHero && availableThemes.length === 0) {
+    return (
+      <PageLayout>
+        <Helmet>
+          <title>Story Ship — Every Thought is a Visual Journey</title>
+          <meta name="description" content="Every Thought is a Visual Journey" />
+          <link rel="canonical" href="/stories" />
+        </Helmet>
+        <div className="min-h-[70vh] flex items-center justify-center px-6 text-center">
+          <article>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Story Ship</h1>
+            <p className="mt-3 text-lg md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
+            <div className="mt-6 flex justify-center">
+              <Button onClick={() => { try { localStorage.setItem('stories_hero_seen','1'); } catch {}; setShowHero(false); }}>
+                Get started
+              </Button>
+            </div>
+          </article>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
+      <Helmet>
+        <title>Story Ship — Every Thought is a Visual Journey</title>
+        <meta name="description" content="Every Thought is a Visual Journey" />
+        <link rel="canonical" href="/stories" />
+      </Helmet>
       <div className="container mx-auto py-8 px-4">
         {/* Hero Header Section */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8 min-h-[200px] max-h-[40vh] flex">
