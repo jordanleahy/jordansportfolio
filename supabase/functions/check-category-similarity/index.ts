@@ -52,6 +52,12 @@ async function calculateSemanticSimilarity(category1: string, category2: string)
   }
 
   try {
+    console.log(`Calculating semantic similarity between "${category1}" and "${category2}"`);
+    
+    // Create an AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
     // Use OpenAI embeddings to calculate semantic similarity
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
@@ -63,10 +69,13 @@ async function calculateSemanticSimilarity(category1: string, category2: string)
         model: 'text-embedding-3-small',
         input: [category1, category2],
       }),
+      signal: controller.signal, // Add timeout signal
     });
 
+    clearTimeout(timeoutId); // Clear timeout if request completes
+
     if (!response.ok) {
-      console.log('OpenAI embeddings failed, using basic similarity');
+      console.log(`OpenAI embeddings failed with status ${response.status}, using basic similarity`);
       return basicSimilarity(category1, category2);
     }
 
@@ -78,9 +87,17 @@ async function calculateSemanticSimilarity(category1: string, category2: string)
     const magnitude1 = Math.sqrt(embedding1.reduce((sum: number, a: number) => sum + a * a, 0));
     const magnitude2 = Math.sqrt(embedding2.reduce((sum: number, a: number) => sum + a * a, 0));
     
-    return dotProduct / (magnitude1 * magnitude2);
+    const similarity = dotProduct / (magnitude1 * magnitude2);
+    console.log(`Semantic similarity calculated: ${similarity}`);
+    return similarity;
+    
   } catch (error) {
-    console.log('Error calculating semantic similarity, using basic similarity:', error);
+    // Handle timeout and other errors
+    if (error.name === 'AbortError') {
+      console.log('OpenAI embeddings request timed out (5s), using basic similarity');
+    } else {
+      console.log('Error calculating semantic similarity, using basic similarity:', error.message);
+    }
     return basicSimilarity(category1, category2);
   }
 }

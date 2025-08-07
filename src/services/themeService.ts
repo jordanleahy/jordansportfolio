@@ -77,17 +77,24 @@ export class ThemeService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Check for similar categories before creating
+    // Check for similar categories before creating with timeout
     console.log('🔍 Checking for similar categories to:', theme.category);
     try {
-      const similarityResponse = await supabase.functions.invoke('check-category-similarity', {
+      // Add timeout to the similarity check (8 seconds total - allows for 5s OpenAI + processing)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Similarity check timeout')), 8000)
+      );
+
+      const similarityPromise = supabase.functions.invoke('check-category-similarity', {
         body: { 
           category: theme.category, 
           userId: user.id 
         }
       });
 
-      if (similarityResponse.data?.hasSimilar) {
+      const similarityResponse = await Promise.race([similarityPromise, timeoutPromise]) as any;
+
+      if (similarityResponse?.data?.hasSimilar) {
         const similarCategories = similarityResponse.data.similarCategories;
         const topSimilar = similarCategories[0];
         
@@ -105,13 +112,32 @@ export class ThemeService {
           `Please use the existing theme or choose a more distinct category name.`
         );
       }
+
+      console.log('✅ No similar categories found, proceeding with creation');
+      
     } catch (error) {
       // If it's our similarity error, re-throw it
       if (error instanceof Error && error.message.includes('similar theme already exists')) {
         throw error;
       }
-      // If it's a service error, log but continue (don't block theme creation)
-      console.warn('⚠️ Similarity check failed, proceeding with creation:', error);
+      
+      // If it's a timeout or service error, log but continue (don't block theme creation)
+      console.warn('⚠️ Similarity check failed/timed out, proceeding with creation:', error.message);
+      
+      // For network timeouts, we add an extra database-level check as fallback
+      const { data: exactMatch } = await supabase
+        .from('themes')
+        .select('id, theme_name, category')
+        .eq('user_id', user.id)
+        .eq('category', theme.category)
+        .maybeSingle();
+
+      if (exactMatch) {
+        throw new Error(
+          `A theme with category "${theme.category}" already exists: "${exactMatch.theme_name}". ` +
+          `Please use the existing theme or choose a different category name.`
+        );
+      }
     }
 
     const { data, error } = await supabase
