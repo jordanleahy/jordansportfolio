@@ -58,11 +58,11 @@ export const DEFAULT_IMAGE_CONFIG: ImageGenerationConfig = {
   defaultOutputFormat: 'png',
   
   aspectRatioConfigs: [
-    { ratio: '16:9', key: '16_9', width: 1792, height: 1024, label: 'Landscape (16:9)', enabled: true },
-    { ratio: '9:16', key: '9_16', width: 1024, height: 1792, label: 'Portrait (9:16)', enabled: true },
-    { ratio: '4:3', key: '4_3', width: 1536, height: 1024, label: 'Standard (4:3)', enabled: true },
-    { ratio: '3:4', key: '3_4', width: 1024, height: 1536, label: 'Social (3:4)', enabled: true },
-    { ratio: '1:1', key: '1_1', width: 1024, height: 1024, label: 'Square (1:1)', enabled: false },
+    { ratio: '16:9', key: '16_9', width: 1792, height: 1024, label: 'Landscape (16:9)', enabled: false },
+    { ratio: '9:16', key: '9_16', width: 1024, height: 1792, label: 'Portrait (9:16)', enabled: false },
+    { ratio: '4:3', key: '4_3', width: 1536, height: 1024, label: 'Standard (4:3)', enabled: false },
+    { ratio: '3:4', key: '3_4', width: 1024, height: 1536, label: 'Social (3:4)', enabled: false },
+    { ratio: '1:1', key: '1_1', width: 1024, height: 1024, label: 'Square (1:1)', enabled: true },
   ],
   
   maxImagesPerRequest: 10,
