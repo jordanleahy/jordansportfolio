@@ -9,7 +9,20 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const generateTheme = async (description: string): Promise<ThemeData> => {
-  console.log('🎯 Generating theme for description:', description);
+  console.log('🎯 THEME GENERATION START');
+  console.log('📝 Raw description received:', JSON.stringify(description));
+  console.log('📏 Description length:', description?.length);
+  console.log('🔍 Description details:', {
+    hasNewlines: description.includes('\n'),
+    hasCarriageReturns: description.includes('\r'),
+    trimmed: description.trim(),
+    firstChar: description.charCodeAt(0),
+    lastChar: description.charCodeAt(description.length - 1)
+  });
+
+  // Clean the description
+  const cleanDescription = description.trim().replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ');
+  console.log('🧹 Cleaned description:', cleanDescription);
 
   const systemPrompt = `You are a professional social media content strategist. Convert user descriptions into structured theme JSON for social media calendar generation.
 
@@ -35,31 +48,72 @@ JSON STRUCTURE REQUIRED:
   ]
 }`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Generate a social media theme for: ${description}` }
-      ],
-      temperature: 0.7,
-      max_tokens: 3000,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const generatedContent = data.choices[0].message.content.trim();
+  console.log('🤖 Calling OpenAI API...');
+  console.log('🔑 OpenAI API key available:', !!openaiApiKey);
   
-  return JSON.parse(generatedContent);
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Generate a social media theme for: ${cleanDescription}` }
+        ],
+        temperature: 0.7,
+        max_tokens: 3000,
+      }),
+    });
+
+    console.log('📡 OpenAI Response status:', response.status);
+    console.log('📡 OpenAI Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('📦 OpenAI Response data structure:', {
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      hasMessage: !!data.choices?.[0]?.message,
+      hasContent: !!data.choices?.[0]?.message?.content
+    });
+
+    const generatedContent = data.choices[0].message.content.trim();
+    console.log('📝 Generated content length:', generatedContent.length);
+    console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
+    
+    try {
+      const parsedData = JSON.parse(generatedContent);
+      console.log('✅ JSON parsing successful');
+      console.log('📊 Parsed data structure:', {
+        hasCategory: !!parsedData.category,
+        hasTheme: !!parsedData.theme,
+        hasDescription: !!parsedData.theme_description,
+        hasPosts: !!parsedData.posts,
+        postsCount: parsedData.posts?.length,
+        category: parsedData.category,
+        theme: parsedData.theme
+      });
+      
+      return parsedData;
+    } catch (parseError) {
+      console.error('❌ JSON parsing failed:', parseError);
+      console.error('📝 Raw content that failed to parse:', generatedContent);
+      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
+    }
+
+  } catch (fetchError) {
+    console.error('❌ OpenAI API fetch error:', fetchError);
+    throw new Error(`OpenAI API request failed: ${fetchError.message}`);
+  }
 };
 
 const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
