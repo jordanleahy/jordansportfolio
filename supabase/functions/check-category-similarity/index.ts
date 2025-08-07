@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { createLogger, timeOperation } from '../_shared/advanced-logger.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,18 +46,27 @@ function findCategorySynonym(category: string): string {
   return normalized;
 }
 
-async function calculateSemanticSimilarity(category1: string, category2: string): Promise<number> {
+async function calculateSemanticSimilarity(category1: string, category2: string, logger: any): Promise<number> {
   if (!openAIApiKey) {
-    console.log('OpenAI API key not available, using basic similarity');
+    logger.warn('OpenAI API key not available, falling back to basic similarity');
     return basicSimilarity(category1, category2);
   }
 
   try {
-    console.log(`Calculating semantic similarity between "${category1}" and "${category2}"`);
+    logger.info(`Calculating semantic similarity`, {
+      category1,
+      category2,
+      method: 'openai_embeddings'
+    });
     
     // Create an AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      logger.warn('OpenAI embeddings request timed out', { timeout: '5000ms' });
+    }, 5000); // 5 second timeout
+
+    logger.startTiming('openai_embeddings');
 
     // Use OpenAI embeddings to calculate semantic similarity
     const response = await fetch('https://api.openai.com/v1/embeddings', {
@@ -73,9 +83,14 @@ async function calculateSemanticSimilarity(category1: string, category2: string)
     });
 
     clearTimeout(timeoutId); // Clear timeout if request completes
+    const duration = logger.endTiming('openai_embeddings');
 
     if (!response.ok) {
-      console.log(`OpenAI embeddings failed with status ${response.status}, using basic similarity`);
+      logger.error(`OpenAI embeddings API error`, null, {
+        status: response.status,
+        statusText: response.statusText,
+        duration: `${duration}ms`
+      });
       return basicSimilarity(category1, category2);
     }
 
@@ -88,15 +103,29 @@ async function calculateSemanticSimilarity(category1: string, category2: string)
     const magnitude2 = Math.sqrt(embedding2.reduce((sum: number, a: number) => sum + a * a, 0));
     
     const similarity = dotProduct / (magnitude1 * magnitude2);
-    console.log(`Semantic similarity calculated: ${similarity}`);
+    
+    logger.success(`Semantic similarity calculated successfully`, {
+      category1,
+      category2,
+      similarity: similarity.toFixed(4),
+      method: 'openai_embeddings',
+      duration: `${duration}ms`
+    });
+    
     return similarity;
     
   } catch (error) {
     // Handle timeout and other errors
     if (error.name === 'AbortError') {
-      console.log('OpenAI embeddings request timed out (5s), using basic similarity');
+      logger.warn('OpenAI embeddings request aborted due to timeout', {
+        timeout: '5000ms',
+        fallbackMethod: 'basic_similarity'
+      });
     } else {
-      console.log('Error calculating semantic similarity, using basic similarity:', error.message);
+      logger.error('Error calculating semantic similarity', error, {
+        fallbackMethod: 'basic_similarity',
+        errorType: error.name
+      });
     }
     return basicSimilarity(category1, category2);
   }
@@ -144,17 +173,30 @@ function levenshteinDistance(str1: string, str2: string): number {
 }
 
 serve(async (req) => {
-  console.log('check-category-similarity function called');
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const logger = createLogger({
+    functionName: 'check-category-similarity',
+    correlationId: req.headers.get('x-correlation-id') || undefined
+  });
+
+  logger.logFunctionStart('check-category-similarity');
+
   try {
-    const { category, userId } = await req.json();
+    const requestBody = await req.json();
+    const { category, userId } = requestBody;
+    
+    logger.logUserAction('category_similarity_check', { category, userId });
     
     if (!category || !userId) {
+      logger.error('Missing required fields', null, { 
+        providedFields: Object.keys(requestBody),
+        requiredFields: ['category', 'userId']
+      });
+      
       return new Response(JSON.stringify({
         success: false,
         error: 'Missing required fields: category and userId'
@@ -164,20 +206,29 @@ serve(async (req) => {
       });
     }
 
-    console.log('Checking similarity for category:', category, 'user:', userId);
+    logger.info('Processing similarity check', {
+      category,
+      userId: userId.slice(0, 8) + '...',
+      threshold: SIMILARITY_THRESHOLD
+    });
 
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Get existing categories for this user
-    const { data: existingThemes, error } = await supabase
-      .from('themes')
-      .select('id, theme_name, category, description, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    logger.startTiming('database_fetch');
+    const { data: existingThemes, error } = await timeOperation(
+      logger,
+      'fetch_existing_themes',
+      () => supabase
+        .from('themes')
+        .select('id, theme_name, category, description, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+    );
 
     if (error) {
-      console.error('Error fetching existing themes:', error);
+      logger.logDatabaseOperation('SELECT', 'themes', null, error);
       return new Response(JSON.stringify({
         success: false,
         error: 'Failed to fetch existing themes'
@@ -187,13 +238,26 @@ serve(async (req) => {
       });
     }
 
+    logger.logDatabaseOperation('SELECT', 'themes', existingThemes);
+    logger.info('Found existing themes', {
+      count: existingThemes?.length || 0,
+      categories: existingThemes?.map(t => t.category) || []
+    });
+
     const similarCategories = [];
     
     // Check similarity with existing categories
+    logger.startTiming('similarity_analysis');
     for (const theme of existingThemes || []) {
-      const similarity = await calculateSemanticSimilarity(category, theme.category);
+      const similarity = await calculateSemanticSimilarity(category, theme.category, logger);
       
-      console.log(`Similarity between "${category}" and "${theme.category}": ${similarity}`);
+      logger.debug(`Similarity check result`, {
+        newCategory: category,
+        existingCategory: theme.category,
+        similarity: similarity.toFixed(4),
+        threshold: SIMILARITY_THRESHOLD,
+        isAboveThreshold: similarity >= SIMILARITY_THRESHOLD
+      });
       
       if (similarity >= SIMILARITY_THRESHOLD) {
         similarCategories.push({
@@ -205,27 +269,47 @@ serve(async (req) => {
         });
       }
     }
+    logger.endTiming('similarity_analysis');
 
     // Sort by similarity (highest first)
     similarCategories.sort((a, b) => b.similarity - a.similarity);
 
-    console.log(`Found ${similarCategories.length} similar categories for "${category}"`);
+    logger.success('Similarity analysis completed', {
+      newCategory: category,
+      totalExistingCategories: existingThemes?.length || 0,
+      similarCategoriesFound: similarCategories.length,
+      threshold: SIMILARITY_THRESHOLD,
+      topSimilarCategory: similarCategories[0] ? {
+        category: similarCategories[0].category,
+        similarity: similarCategories[0].similarity.toFixed(4)
+      } : null
+    });
 
-    return new Response(JSON.stringify({
+    const response = {
       success: true,
       hasSimilar: similarCategories.length > 0,
       similarCategories: similarCategories,
       threshold: SIMILARITY_THRESHOLD,
-      checkedCategory: category
-    }), {
+      checkedCategory: category,
+      analysis: {
+        totalChecked: existingThemes?.length || 0,
+        similarFound: similarCategories.length,
+        processingTime: logger.getContext()
+      }
+    };
+
+    logger.logFunctionEnd('check-category-similarity', response);
+
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in check-category-similarity:', error);
+    logger.logFunctionEnd('check-category-similarity', null, error);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
+      details: error.message
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
