@@ -21,10 +21,10 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
 
   // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
   useEffect(() => {
-    if (firstPostData && !currentImageUrl && !isGenerating && !streamingProgress) {
+    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress) {
       startStreaming(firstPostData);
     }
-  }, [firstPostData, currentImageUrl, isGenerating, streamingProgress, category, startStreaming]);
+  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, category, startStreaming]);
 
   // Update image URL when streaming completes or imageUrl prop changes
   useEffect(() => {
