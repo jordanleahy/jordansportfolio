@@ -50,6 +50,60 @@ async function trackApiUsage(
   }
 }
 
+// Cost computation helpers
+function parseImageSizePx(size?: string): number {
+  if (!size) return 1024;
+  const [w, h] = size.split('x').map((v) => parseInt(v, 10));
+  if (isNaN(w) || isNaN(h)) return 1024;
+  return Math.max(w, h);
+}
+
+function computeImageGenerationCost(size?: string, quality: string = 'standard'): number {
+  const px = parseImageSizePx(size);
+  // Pricing approximations per image in USD
+  // Standard: 512=$0.016, 1024=$0.040, 2048=$0.080
+  // High:     512=$0.040, 1024=$0.080, 2048=$0.160
+  const standard = px >= 2048 ? 0.08 : px >= 1024 ? 0.04 : 0.016;
+  const high = px >= 2048 ? 0.16 : px >= 1024 ? 0.08 : 0.04;
+  return (quality === 'high' || quality === 'hd') ? high : standard;
+}
+
+const TEXT_PRICING: Record<string, { input: number; output: number }> = {
+  'gpt-4o-mini': { input: 0.15, output: 0.60 }, // per 1M tokens
+  'gpt-4o': { input: 5, output: 15 },
+  'o4-mini-2025-04-16': { input: 1, output: 3 },
+  'gpt-4.1-2025-04-14': { input: 5, output: 15 },
+  default: { input: 1.5, output: 6 },
+};
+
+function computeTextCost(record: any): number {
+  const rates = TEXT_PRICING[record?.model_used] || TEXT_PRICING.default;
+  const prompt = Number(record?.prompt_tokens ?? 0);
+  const completion = Number(record?.completion_tokens ?? 0);
+  const inputCost = (prompt / 1_000_000) * rates.input;
+  const outputCost = (completion / 1_000_000) * rates.output;
+  const total = inputCost + outputCost;
+  return Number.isFinite(total) ? Number(total.toFixed(6)) : 0;
+}
+
+function computeActualCost(record: any, imageCostByUsageId: Map<string, number>): number {
+  try {
+    if (record?.request_type === 'image_generation') {
+      const mapped = imageCostByUsageId.get(record.id);
+      if (typeof mapped === 'number') return Number(mapped.toFixed(6));
+      const computed = computeImageGenerationCost(record?.image_size, record?.image_quality || 'standard');
+      return Number(computed.toFixed(6));
+    }
+    if (record?.request_type === 'text_generation' || record?.request_type === 'image_prompt') {
+      const computed = computeTextCost(record);
+      if (computed > 0) return computed;
+    }
+    return Number((record?.estimated_cost || 0).toFixed(6));
+  } catch (_e) {
+    return Number((record?.estimated_cost || 0).toFixed(6));
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -123,6 +177,29 @@ Deno.serve(async (req) => {
       }
 
       console.log(`Found ${unsyncedRecords?.length || 0} unsynced records for date range`);
+      
+      // Preload related image costs for efficient lookups
+      const { data: relatedImages, error: imagesError } = await supabase
+        .from('images')
+        .select('api_usage_tracking_id, actual_cost, estimated_cost, created_at')
+        .gte('created_at', new Date(startTimestamp * 1000).toISOString())
+        .lte('created_at', new Date(endTimestamp * 1000).toISOString());
+      
+      if (imagesError) {
+        console.warn('Could not preload related images for cost reconciliation:', imagesError);
+      }
+      
+      const imageCostByUsageId = new Map<string, number>();
+      (relatedImages || []).forEach((img: any) => {
+        const key = img.api_usage_tracking_id;
+        if (!key) return;
+        const cost = typeof img.actual_cost === 'number' ? img.actual_cost
+                    : typeof img.estimated_cost === 'number' ? img.estimated_cost
+                    : undefined;
+        if (typeof cost === 'number') {
+          imageCostByUsageId.set(key, Number(cost));
+        }
+      });
 
       if (!unsyncedRecords || unsyncedRecords.length === 0) {
         console.log('No unsynced records found for the specified date range');
@@ -132,12 +209,15 @@ Deno.serve(async (req) => {
         // Mark all unsynced records as synced and calculate totals
         for (const record of unsyncedRecords) {
           try {
+            // Reconcile actual cost
+            const actualCost = computeActualCost(record, imageCostByUsageId);
+
             const { error: updateError } = await supabase
               .from('api_usage_tracking')
               .update({
                 openai_synced: true,
                 sync_status: 'synced',
-                actual_cost: record.estimated_cost, // Use estimated cost as actual cost
+                actual_cost: actualCost,
                 sync_attempted_at: new Date().toISOString(),
               })
               .eq('id', record.id);
@@ -147,8 +227,8 @@ Deno.serve(async (req) => {
               errors.push(`Failed to update record ${record.id}: ${updateError.message}`);
             } else {
               totalRecordsSynced++;
-              totalCostSynced += record.estimated_cost || 0;
-              console.log(`Synced record ${record.id}: ${record.function_name}, cost: $${record.estimated_cost}`);
+              totalCostSynced += actualCost || 0;
+              console.log(`Synced record ${record.id}: ${record.function_name}, actual cost: $${actualCost}, est: $${record.estimated_cost}`);
             }
           } catch (error) {
             console.error('Error processing record:', error);
