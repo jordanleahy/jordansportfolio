@@ -65,9 +65,27 @@ JSON STRUCTURE REQUIRED:
 const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
   console.log('💾 Importing theme to database:', themeData.category);
   console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
+  console.log('🔍 DETAILED: Database connection info:', {
+    supabaseUrl: supabaseUrl?.substring(0, 30) + '...',
+    hasServiceKey: !!supabaseServiceKey,
+    userIdLength: userId?.length,
+    themeDataStructure: {
+      hasTheme: !!themeData.theme,
+      hasCategory: !!themeData.category,
+      hasDescription: !!themeData.theme_description,
+      postsCount: themeData.posts?.length || 0,
+      firstPostStructure: themeData.posts?.[0] ? Object.keys(themeData.posts[0]) : []
+    }
+  });
   
   try {
     // First, create or find the theme
+    console.log('🔍 Checking for existing theme with:', {
+      theme_name: themeData.theme,
+      category: themeData.category,
+      user_id: userId
+    });
+    
     const { data: existingTheme, error: themeSelectError } = await supabase
       .from('themes')
       .select('id')
@@ -75,6 +93,11 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       .eq('category', themeData.category)
       .eq('user_id', userId)
       .maybeSingle();
+    
+    if (themeSelectError) {
+      console.error('❌ Theme selection error:', themeSelectError);
+      throw new Error(`Theme selection failed: ${themeSelectError.message}`);
+    }
 
     let themeId: string;
 
@@ -117,12 +140,24 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
     console.log('📝 Sample post data:', JSON.stringify(postsToInsert[0], null, 2));
+    console.log('🔍 BEFORE INSERT: Supabase client info:', {
+      hasClient: !!supabase,
+      clientType: typeof supabase,
+      isService: !!supabaseServiceKey
+    });
 
     // Use the service role client to bypass RLS
+    console.log('🔍 ATTEMPTING INSERT: Starting database insert operation...');
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert(postsToInsert)
       .select('id, category, theme_id, title');
+    
+    console.log('🔍 AFTER INSERT: Insert operation completed', {
+      hasData: !!data,
+      hasError: !!error,
+      dataLength: data?.length || 0
+    });
 
     if (error) {
       console.error('❌ Database insert error:', JSON.stringify(error, null, 2));
@@ -219,6 +254,13 @@ serve(async (req) => {
 
 console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
     console.log('🔧 Using updated pipeline v2.0 with proper theme table integration');
+    console.log('🔍 PIPELINE DEBUG: Environment check:', {
+      hasOpenAIKey: !!openaiApiKey,
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      userIdProvided: !!userId,
+      descriptionLength: description?.length || 0
+    });
 
     if (stream) {
       const streamResponse = new ReadableStream({
