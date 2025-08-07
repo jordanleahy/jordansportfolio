@@ -2618,17 +2618,6 @@ export type Database = {
           },
         ]
       }
-      user_roles_with_email: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          role: Database["public"]["Enums"]["app_role"] | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       add_coding_ai_data_for_user: {
