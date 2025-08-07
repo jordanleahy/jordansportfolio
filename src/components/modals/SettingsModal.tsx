@@ -82,95 +82,134 @@ export const SettingsModal: React.FC = () => {
               
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Account</h3>
-                <div className="flex items-center gap-2 px-3 py-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-foreground">
-                    {user?.user_metadata?.full_name || 'jordan leahy'}
-                  </span>
-                </div>
+                <button
+                  onClick={() => setActiveSection('account')}
+                  className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-sm ${
+                    activeSection === 'account' 
+                      ? 'bg-background text-foreground font-medium' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  }`}
+                >
+                  <User className="h-4 w-4" />
+                  Account
+                </button>
               </div>
             </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1 p-8 overflow-y-auto">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground">Plans & Billing</h1>
-            </div>
+            {activeSection === 'billing' && (
+              <>
+                <div className="mb-8">
+                  <h1 className="text-2xl font-bold text-foreground">Plans & Billing</h1>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
-              {/* Free Plan */}
-              <Card className="relative">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-foreground">Free</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Exploring what is possible with Story Ship
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-foreground">$0</span>
-                      <span className="text-sm text-muted-foreground">per month</span>
-                    </div>
-                    
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground">
-                          1 daily image (upt to 30/month)
-                        </span>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
+                  {/* Free Plan */}
+                  <Card className="relative">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-foreground">Free</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Exploring what is possible with Story Ship
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold text-foreground">$0</span>
+                          <span className="text-sm text-muted-foreground">per month</span>
+                        </div>
+                        
+                        <div className="space-y-3 pt-2">
+                          <div className="flex items-center gap-2">
+                            <Check className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-foreground">
+                              1 daily image (upt to 30/month)
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              {/* Starter Plan */}
-              <Card className="relative">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-foreground">Starter</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Designed for those ready to start shipping stories today,
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-foreground">$25</span>
-                      <span className="text-sm text-muted-foreground">per month</span>
-                    </div>
-                    
-<Button className="w-full" onClick={startStarterCheckout}>
-                      Subscribe Now
-                    </Button>
-                    
-                    <div className="space-y-3 pt-2">
-                      <p className="text-sm font-medium text-foreground">Everything in Free, plus:</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-muted-foreground" />
-                          <div className="flex items-center gap-2 flex-1">
-                            <span className="text-sm text-foreground">100 monthly images</span>
-                            <Info className="h-4 w-4 text-muted-foreground" />
+                  {/* Starter Plan */}
+                  <Card className="relative">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-foreground">Starter</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Designed for those ready to start shipping stories today,
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold text-foreground">$25</span>
+                          <span className="text-sm text-muted-foreground">per month</span>
+                        </div>
+                        
+        <Button className="w-full" onClick={startStarterCheckout}>
+                          Subscribe Now
+                        </Button>
+                        
+                        <div className="space-y-3 pt-2">
+                          <p className="text-sm font-medium text-foreground">Everything in Free, plus:</p>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Check className="h-4 w-4 text-muted-foreground" />
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="text-sm text-foreground">100 monthly images</span>
+                                <Info className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Check className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-foreground">
+                                1 daily credit (upt to 30/month)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
+            {activeSection === 'account' && (
+              <>
+                <div className="mb-8">
+                  <h1 className="text-2xl font-bold text-foreground">Account</h1>
+                </div>
+
+                <div className="max-w-2xl">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-foreground">Name</label>
+                          <div className="text-sm text-muted-foreground">
+                            {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Not set'}
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-foreground">
-                            1 daily credit (upt to 30/month)
-                          </span>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-foreground">Email</label>
+                          <div className="text-sm text-muted-foreground">
+                            {user?.email || 'Not set'}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>
