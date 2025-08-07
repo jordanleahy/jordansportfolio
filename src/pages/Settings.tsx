@@ -25,6 +25,7 @@ import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
+import { SMTPConfigForm } from '@/components/settings/SMTPConfigForm';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -124,10 +125,14 @@ const Settings: React.FC = () => {
             </div>
 
             <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
                 <TabsTrigger value="profile" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Profile
+                </TabsTrigger>
+                <TabsTrigger value="smtp" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
                 </TabsTrigger>
                 {!isMobile && (
                   <TabsTrigger value="security" className="flex items-center gap-2">
@@ -229,7 +234,10 @@ const Settings: React.FC = () => {
                 </Card>
               </TabsContent>
 
-
+              {/* SMTP Configuration Tab */}
+              <TabsContent value="smtp" className="space-y-6">
+                <SMTPConfigForm />
+              </TabsContent>
 
               {/* Security Tab - Desktop only */}
               {!isMobile && (

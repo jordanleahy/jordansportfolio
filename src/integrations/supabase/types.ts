@@ -1764,6 +1764,48 @@ export type Database = {
           },
         ]
       }
+      smtp_configurations: {
+        Row: {
+          created_at: string | null
+          host: string
+          id: string
+          is_active: boolean | null
+          port: number
+          provider: string
+          sender_email: string
+          sender_name: string
+          updated_at: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          host: string
+          id?: string
+          is_active?: boolean | null
+          port: number
+          provider?: string
+          sender_email: string
+          sender_name: string
+          updated_at?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          host?: string
+          id?: string
+          is_active?: boolean | null
+          port?: number
+          provider?: string
+          sender_email?: string
+          sender_name?: string
+          updated_at?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
       social_media_posts: {
         Row: {
           category: string
