@@ -113,6 +113,9 @@ export const StreamingShimmer = ({
     );
   }
 
+  // Show shimmer immediately if no image is available or if generating
+  const shouldShowShimmer = !currentImage || isGenerating;
+
   return (
     <div className={cn(
       "w-full h-full relative overflow-hidden",
@@ -123,7 +126,7 @@ export const StreamingShimmer = ({
         "absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10",
         "before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite]",
         "before:bg-gradient-to-r before:from-transparent before:via-foreground/20 before:to-transparent",
-        currentImage ? "opacity-30" : "opacity-100"
+        shouldShowShimmer ? "opacity-100" : "opacity-30"
       )} />
 
       {/* Streaming image with progressive enhancement */}
