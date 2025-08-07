@@ -63,6 +63,10 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
+    console.log('OpenAI API Key exists:', !!openaiApiKey);
+    console.log('OpenAI API Key length:', openaiApiKey?.length);
+    console.log('OpenAI API Key starts with sk-:', openaiApiKey?.startsWith('sk-'));
+
     if (!openaiApiKey) {
       const errorMsg = 'OPENAI_API_KEY environment variable is required';
       console.error(errorMsg);
@@ -101,18 +105,24 @@ Deno.serve(async (req) => {
 
     try {
       // Fetch OpenAI usage data for completions
-      const completionsResponse = await fetch(
-        `https://api.openai.com/v1/organization/usage/completions?start_time=${startTimestamp}&end_time=${endTimestamp}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${openaiApiKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      console.log(`Fetching usage data from ${startTimestamp} to ${endTimestamp}`);
+      const completionsUrl = `https://api.openai.com/v1/organization/usage/completions?start_time=${startTimestamp}&end_time=${endTimestamp}`;
+      console.log('Completions URL:', completionsUrl);
+      
+      const completionsResponse = await fetch(completionsUrl, {
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Completions response status:', completionsResponse.status);
+      console.log('Completions response headers:', Object.fromEntries(completionsResponse.headers.entries()));
 
       if (!completionsResponse.ok) {
-        throw new Error(`OpenAI completions API error: ${completionsResponse.status}`);
+        const errorText = await completionsResponse.text();
+        console.error('OpenAI API error response:', errorText);
+        throw new Error(`OpenAI completions API error: ${completionsResponse.status} - ${errorText}`);
       }
 
       const completionsData: OpenAIUsageResponse = await completionsResponse.json();
