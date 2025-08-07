@@ -306,13 +306,10 @@ export const SystemPromptsTab = ({
           ) : databasePrompts.length > 0 ? (
             databasePrompts.map((dbPrompt) => (
               <div key={dbPrompt.id} className="border rounded-lg p-4 h-screen flex flex-col">
-                <div className="space-y-1 mb-2">
-                  <span className="text-sm font-medium">{dbPrompt.name}</span>
-                  <Badge variant="outline">
-                    {getCategoryLabel(dbPrompt.category)}
-                  </Badge>
-                  
-                </div>
+                <span className="text-sm font-medium mb-2 block">{dbPrompt.name}</span>
+                <Badge variant="outline" className="mb-2">
+                  {getCategoryLabel(dbPrompt.category)}
+                </Badge>
                 
                 <CategoryPromptEditor
                   prompt={dbPrompt.prompt_text || ''}
