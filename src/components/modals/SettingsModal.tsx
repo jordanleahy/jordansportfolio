@@ -12,11 +12,47 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
+import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export const SettingsModal: React.FC = () => {
   const { isSettingsOpen, closeSettings } = useModal();
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('billing');
+  const { data: tiers } = useSubscriptionTiers();
+  const navigate = useNavigate();
+
+  const startStarterCheckout = async () => {
+    if (!user) {
+      closeSettings();
+      navigate('/auth');
+      return;
+    }
+    const starter = tiers?.find((t) => t.name?.toLowerCase() === 'starter');
+    if (!starter) {
+      // Fallback: take user to plans page to choose
+      closeSettings();
+      navigate('/subscription');
+      return;
+    }
+    try {
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: { tier_id: starter.id },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        closeSettings();
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      toast.error('Could not start checkout. Please try again.');
+    }
+  };
 
   return (
     <Dialog open={isSettingsOpen} onOpenChange={closeSettings}>
@@ -79,9 +115,10 @@ export const SettingsModal: React.FC = () => {
                       <span className="text-sm text-muted-foreground">per month</span>
                     </div>
                     
-                    <Button 
+<Button 
                       variant="secondary" 
                       className="w-full bg-primary/10 text-primary hover:bg-primary/20"
+                      onClick={startStarterCheckout}
                     >
                       Upgrade
                     </Button>
@@ -114,7 +151,7 @@ export const SettingsModal: React.FC = () => {
                       <span className="text-sm text-muted-foreground">per month</span>
                     </div>
                     
-                    <Button className="w-full">
+<Button className="w-full" onClick={startStarterCheckout}>
                       Subscribe Now
                     </Button>
                     
