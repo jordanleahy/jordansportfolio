@@ -21,8 +21,21 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
 
   // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
   useEffect(() => {
+    console.log('CategoryCard useEffect debug:', {
+      firstPostData: !!firstPostData,
+      currentImageUrl,
+      imageUrl,
+      isGenerating,
+      streamingProgress: !!streamingProgress,
+      category,
+      theme
+    });
+    
     if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress) {
+      console.log('🚀 Starting streaming for theme:', theme);
       startStreaming(firstPostData);
+    } else {
+      console.log('❌ NOT starting streaming - conditions not met');
     }
   }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, category, startStreaming]);
 
