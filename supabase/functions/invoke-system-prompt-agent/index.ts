@@ -366,44 +366,11 @@ Please generate a detailed, professional system prompt following the established
             routing_logic: 'theme_based'
           });
 
-          // Add the new prompt to the target agent's system_prompts array with theme focus
-          const existingPrompts = targetAgent.system_prompts || [];
-          const newPromptObj = {
-            category: contextCategory,
-            theme: actualTheme,
-            prompt: generatedPrompt
-          };
-
-          // Check if a prompt for this theme already exists (or category fallback)
-          const existingIndex = existingPrompts.findIndex((p: any) => 
-            (p.theme === actualTheme) || (p.category === contextCategory && !p.theme)
-          );
-          let updatedPrompts;
-          
-          if (existingIndex >= 0) {
-            // Replace existing prompt with theme-based version
-            updatedPrompts = [...existingPrompts];
-            updatedPrompts[existingIndex] = newPromptObj;
-            console.log(`🔄 REPLACING: Existing prompt for theme "${actualTheme}" in ${targetAgent.name}`);
-          } else {
-            // Add new theme-based prompt
-            updatedPrompts = [...existingPrompts, newPromptObj];
-            console.log(`➕ ADDING: New prompt for theme "${actualTheme}" to ${targetAgent.name}`);
-          }
-
-          // Update target agent's supported categories (keep for backward compatibility)
-          const existingCategories = targetAgent.supported_categories || [];
-          const updatedCategories = existingCategories.includes(contextCategory) 
-            ? existingCategories 
-            : [...existingCategories, contextCategory];
-
-          // Update the target agent with the new prompt
+          // Update the target agent's last_run timestamp only
           const currentTimestamp = new Date().toISOString();
           const { error: targetUpdateError } = await supabase
             .from('openai_agents')
             .update({ 
-              system_prompts: updatedPrompts,
-              supported_categories: updatedCategories,
               last_run: currentTimestamp,
               updated_at: currentTimestamp
             })
@@ -412,10 +379,10 @@ Please generate a detailed, professional system prompt following the established
           if (targetUpdateError) {
             console.error('❌ TARGET AGENT UPDATE ERROR:', targetUpdateError);
           } else {
-            console.log('✅ TARGET AGENT UPDATED: Successfully added prompt to target agent');
+            console.log('✅ TARGET AGENT UPDATED: Successfully updated target agent timestamps');
           }
 
-          // Also update the system_prompts table record to reflect the correct target agent
+          // Update the system_prompts table record to reflect the correct target agent
           const { error: promptUpdateError } = await supabase
             .from('system_prompts')
             .update({
