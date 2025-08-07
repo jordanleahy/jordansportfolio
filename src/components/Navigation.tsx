@@ -273,8 +273,36 @@ const Navigation = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           align="end" 
-                          className="w-56 bg-background/95 backdrop-blur-sm border shadow-lg z-50"
+                          className="w-80 bg-background/95 backdrop-blur-sm border shadow-lg z-50"
                         >
+                          {/* User Info Section */}
+                          <div className="px-4 py-3 border-b">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                                J
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">jordan's Lovable</div>
+                                <div className="text-xs text-muted-foreground">jordanwilliamleahy@gmail.com</div>
+                              </div>
+                            </div>
+                            
+                            {/* Credits Section */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">Credits</span>
+                                <span className="text-sm text-muted-foreground">2,503.3 left ›</span>
+                              </div>
+                              <div className="w-full bg-muted rounded-full h-2">
+                                <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                <span className="text-xs text-muted-foreground">Using monthly credits</span>
+                              </div>
+                            </div>
+                          </div>
+                          
                           <DropdownMenuItem asChild>
                             <Link to="/settings" className="flex items-center w-full">
                               <Settings className="mr-2 h-4 w-4" />
