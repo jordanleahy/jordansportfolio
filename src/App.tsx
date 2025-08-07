@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
 import WorkReportPage from "./pages/WorkReportPage";
+import WorkReportDetailPage from "./pages/WorkReportDetailPage";
 
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
@@ -230,6 +231,7 @@ function App() {
                   } 
                 />
                 <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
+                <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
