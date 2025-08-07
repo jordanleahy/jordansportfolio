@@ -1058,6 +1058,93 @@ export type Database = {
         }
         Relationships: []
       }
+      images: {
+        Row: {
+          actual_cost: number | null
+          api_usage_tracking_id: string | null
+          aspect_ratio: string | null
+          created_at: string
+          error_message: string | null
+          estimated_cost: number | null
+          file_size_bytes: number | null
+          function_name: string | null
+          id: string
+          image_prompt: string | null
+          image_quality: string | null
+          image_size: string | null
+          image_url: string | null
+          model_used: string | null
+          openai_request_id: string | null
+          post_id: string | null
+          request_type: string | null
+          response_time_ms: number | null
+          seed_value: number | null
+          stage: string | null
+          storage_bucket: string | null
+          success: boolean | null
+          tokens_used: number | null
+          updated_at: string
+          user_email: string | null
+          user_id: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          api_usage_tracking_id?: string | null
+          aspect_ratio?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost?: number | null
+          file_size_bytes?: number | null
+          function_name?: string | null
+          id?: string
+          image_prompt?: string | null
+          image_quality?: string | null
+          image_size?: string | null
+          image_url?: string | null
+          model_used?: string | null
+          openai_request_id?: string | null
+          post_id?: string | null
+          request_type?: string | null
+          response_time_ms?: number | null
+          seed_value?: number | null
+          stage?: string | null
+          storage_bucket?: string | null
+          success?: boolean | null
+          tokens_used?: number | null
+          updated_at?: string
+          user_email?: string | null
+          user_id: string
+        }
+        Update: {
+          actual_cost?: number | null
+          api_usage_tracking_id?: string | null
+          aspect_ratio?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost?: number | null
+          file_size_bytes?: number | null
+          function_name?: string | null
+          id?: string
+          image_prompt?: string | null
+          image_quality?: string | null
+          image_size?: string | null
+          image_url?: string | null
+          model_used?: string | null
+          openai_request_id?: string | null
+          post_id?: string | null
+          request_type?: string | null
+          response_time_ms?: number | null
+          seed_value?: number | null
+          stage?: string | null
+          storage_bucket?: string | null
+          success?: boolean | null
+          tokens_used?: number | null
+          updated_at?: string
+          user_email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       investors: {
         Row: {
           address: string | null
@@ -2576,6 +2663,31 @@ export type Database = {
       }
     }
     Views: {
+      admin_image_insights: {
+        Row: {
+          actual_cost: number | null
+          aspect_ratio: string | null
+          created_at: string | null
+          error_message: string | null
+          estimated_cost: number | null
+          function_name: string | null
+          id: string | null
+          image_quality: string | null
+          image_size: string | null
+          image_url: string | null
+          model_used: string | null
+          openai_request_id: string | null
+          post_id: string | null
+          request_type: string | null
+          response_time_ms: number | null
+          stage: string | null
+          success: boolean | null
+          tokens_used: number | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       mv_offerings_enriched: {
         Row: {
           accessionnumber: string | null
