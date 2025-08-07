@@ -115,7 +115,7 @@ export const SubscriptionPlans: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Image className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {tier.max_image_generations} AI image generations
+                        {tier.max_gpt_images} GPT image generations
                       </span>
                     </div>
                   </div>
@@ -127,7 +127,7 @@ export const SubscriptionPlans: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Zap className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {tier.max_image_generations} Credits per month
+                        Premium GPT-image-1 model
                       </span>
                     </div>
                   </div>

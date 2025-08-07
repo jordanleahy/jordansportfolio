@@ -1,49 +1,13 @@
-// OpenAI API pricing constants (USD)
+// GPT-image-1 API pricing constants (USD)
 const PRICING = {
-  'gpt-4o-mini': {
-    input: 0.000150 / 1000, // $0.000150 per 1K tokens
-    output: 0.000600 / 1000, // $0.000600 per 1K tokens
-  },
-  'dall-e-3': {
-    standard: {
-      '1024x1024': 0.040,
-      '1024x1792': 0.080,
-      '1792x1024': 0.080,
-    },
-    hd: {
-      '1024x1024': 0.080,
-      '1024x1792': 0.120,
-      '1792x1024': 0.120,
-    },
+  'gpt-image-1': {
+    base_cost: 0.052, // $0.052 per image regardless of size/quality
   },
 } as const;
 
-export const calculateTextGenerationCost = (
-  model: string,
-  promptTokens: number,
-  completionTokens: number
-): number => {
-  if (model === 'gpt-4o-mini') {
-    const inputCost = promptTokens * PRICING['gpt-4o-mini'].input;
-    const outputCost = completionTokens * PRICING['gpt-4o-mini'].output;
-    return inputCost + outputCost;
-  }
-  return 0;
-};
-
-export const calculateImageGenerationCost = (
-  size: string,
-  quality: string = 'standard'
-): number => {
-  const qualityKey = quality === 'hd' ? 'hd' : 'standard';
-  const pricing = PRICING['dall-e-3'][qualityKey];
-  
-  if (size in pricing) {
-    return pricing[size as keyof typeof pricing];
-  }
-  
-  // Default to 1024x1024 if size not found
-  return pricing['1024x1024'];
+export const calculateGptImageGenerationCost = (): number => {
+  // GPT-image-1 has a flat rate regardless of size or quality
+  return PRICING['gpt-image-1'].base_cost;
 };
 
 export const formatCurrency = (amount: number): string => {
@@ -86,19 +50,14 @@ export const getCostColorClass = (cost: number): string => {
 
 export const getModelDisplayName = (model: string): string => {
   const modelNames = {
-    'gpt-4o-mini': 'GPT-4o Mini',
-    'dall-e-3': 'DALL-E 3',
-    'gpt-image-1': 'GPT Image',
+    'gpt-image-1': 'GPT Image Generator',
   };
   return modelNames[model as keyof typeof modelNames] || model;
 };
 
 export const getFunctionDisplayName = (functionName: string): string => {
   const functionNames = {
-    'generate-image-prompt-dynamic': 'Image Prompt Generation',
-    'generate-image-gpt': 'Image Generation',
-    'generate-blog-content': 'Blog Content',
-    'generate-comparison-pages': 'Comparison Pages',
+    'generate-image-gpt': 'GPT Image Generation',
   };
   return functionNames[functionName as keyof typeof functionNames] || functionName;
 };

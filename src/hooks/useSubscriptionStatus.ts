@@ -6,9 +6,7 @@ export interface SubscriptionTier {
   name: string;
   price_cents: number;
   billing_interval: string;
-  max_image_generations: number;
-  max_dalle_images: number;
-  max_text_generations: number;
+  max_gpt_images: number;
   stripe_price_id: string;
   is_active: boolean;
 }
@@ -30,9 +28,7 @@ export interface UserUsage {
   user_id: string;
   billing_period_start: string;
   billing_period_end: string;
-  image_generations_used: number;
-  dalle_images_used: number;
-  text_generations_used: number;
+  gpt_images_used: number;
 }
 
 export const useSubscriptionStatus = () => {
@@ -85,9 +81,7 @@ export const useSubscriptionStatus = () => {
         usage: usage as UserUsage | null,
         hasActiveSubscription: subscription?.status === 'active',
         isWithinLimits: subscription && usage ? {
-          imageGenerations: usage.image_generations_used < (subscription.tier as any).max_image_generations,
-          dalleImages: usage.dalle_images_used < (subscription.tier as any).max_dalle_images,
-          textGenerations: usage.text_generations_used < (subscription.tier as any).max_text_generations,
+          gptImages: (usage.gpt_images_used || 0) < ((subscription.tier as any).max_gpt_images || 0),
         } : null
       };
     },

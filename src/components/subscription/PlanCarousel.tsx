@@ -85,20 +85,20 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                 <CardContent className="space-y-4">
                   {/* Key Features */}
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      <span className="text-sm text-foreground">
-                        {tier.max_image_generations} Credits
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      <span className="text-sm text-foreground">Image Generation</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      <span className="text-sm text-foreground">Text Generation</span>
-                    </div>
+                     <div className="flex items-center gap-2">
+                       <Check className="h-4 w-4 text-accent" />
+                       <span className="text-sm text-foreground">
+                         {tier.max_gpt_images} GPT Images
+                       </span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Check className="h-4 w-4 text-accent" />
+                       <span className="text-sm text-foreground">Premium GPT-image-1</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Check className="h-4 w-4 text-accent" />
+                       <span className="text-sm text-foreground">High Quality Generation</span>
+                     </div>
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-accent" />
                       <span className="text-sm text-foreground">Priority Support</span>

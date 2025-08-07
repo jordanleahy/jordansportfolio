@@ -7,9 +7,9 @@ import { SubscriptionTier } from '@/hooks/useSubscriptionStatus';
 import type { MobilePlanComparisonProps } from '@/types/stories/ui';
 
 const featureComparison = [
-  { label: 'Credits per Month', key: 'max_image_generations' },
-  { label: 'Image Generation', key: 'image_generation' },
-  { label: 'Text Generation', key: 'text_generation' },
+  { label: 'GPT Images per Month', key: 'max_gpt_images' },
+  { label: 'Premium GPT-image-1', key: 'gpt_image_1' },
+  { label: 'High Quality Generation', key: 'high_quality' },
   { label: 'Priority Support', key: 'priority_support' },
   { label: 'Advanced Features', key: 'advanced_features' },
   { label: 'API Access', key: 'api_access' },
@@ -28,12 +28,12 @@ export const MobilePlanComparison: React.FC<MobilePlanComparisonProps> = ({
 
   const getFeatureValue = (tier: SubscriptionTier, featureKey: string) => {
     switch (featureKey) {
-      case 'max_image_generations':
-        return tier.max_image_generations;
-      case 'image_generation':
-        return true; // All plans include image generation
-      case 'text_generation':
-        return true; // All plans include text generation
+      case 'max_gpt_images':
+        return tier.max_gpt_images;
+      case 'gpt_image_1':
+        return true; // All plans include GPT-image-1
+      case 'high_quality':
+        return true; // All plans include high quality generation
       case 'priority_support':
         return tier.name !== 'Free';
       case 'advanced_features':

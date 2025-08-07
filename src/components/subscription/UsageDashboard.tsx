@@ -59,9 +59,7 @@ export const UsageDashboard: React.FC = () => {
 
   const tier = subscription?.tier as any;
   const currentUsage = usage || {
-    image_generations_used: 0,
-    dalle_images_used: 0,
-    text_generations_used: 0,
+    gpt_images_used: 0,
   };
 
   const getUsagePercentage = (used: number, limit: number) => {
@@ -100,86 +98,30 @@ export const UsageDashboard: React.FC = () => {
       </Card>
 
       {/* Usage Metrics */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* AI Image Generations */}
+      <div className="grid gap-4 md:grid-cols-1">
+        {/* GPT Image Generations */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Image className="h-4 w-4" />
-              AI Image Generation
+              GPT Image Generations
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>{currentUsage.image_generations_used} used</span>
-                <span>{tier?.max_image_generations} total</span>
+                <span>{currentUsage.gpt_images_used || 0} used</span>
+                <span>{tier?.max_gpt_images || 0} total</span>
               </div>
               <Progress 
-                value={getUsagePercentage(currentUsage.image_generations_used, tier?.max_image_generations)} 
+                value={getUsagePercentage(currentUsage.gpt_images_used || 0, tier?.max_gpt_images || 0)} 
                 className="h-2"
               />
               <Badge 
-                variant={getUsagePercentage(currentUsage.image_generations_used, tier?.max_image_generations) >= 90 ? 'destructive' : 'secondary'}
+                variant={getUsagePercentage(currentUsage.gpt_images_used || 0, tier?.max_gpt_images || 0) >= 90 ? 'destructive' : 'secondary'}
                 className="text-xs"
               >
-                {Math.round(getUsagePercentage(currentUsage.image_generations_used, tier?.max_image_generations))}% used
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* DALL-E Images */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Image className="h-4 w-4" />
-              DALL-E 3 Images
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>{currentUsage.dalle_images_used} used</span>
-                <span>{tier?.max_dalle_images} total</span>
-              </div>
-              <Progress 
-                value={getUsagePercentage(currentUsage.dalle_images_used, tier?.max_dalle_images)} 
-                className="h-2"
-              />
-              <Badge 
-                variant={getUsagePercentage(currentUsage.dalle_images_used, tier?.max_dalle_images) >= 90 ? 'destructive' : 'secondary'}
-                className="text-xs"
-              >
-                {Math.round(getUsagePercentage(currentUsage.dalle_images_used, tier?.max_dalle_images))}% used
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Text Generations */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Type className="h-4 w-4" />
-              Text Generation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>{currentUsage.text_generations_used} used</span>
-                <span>{tier?.max_text_generations} total</span>
-              </div>
-              <Progress 
-                value={getUsagePercentage(currentUsage.text_generations_used, tier?.max_text_generations)} 
-                className="h-2"
-              />
-              <Badge 
-                variant={getUsagePercentage(currentUsage.text_generations_used, tier?.max_text_generations) >= 90 ? 'destructive' : 'secondary'}
-                className="text-xs"
-              >
-                {Math.round(getUsagePercentage(currentUsage.text_generations_used, tier?.max_text_generations))}% used
+                {Math.round(getUsagePercentage(currentUsage.gpt_images_used || 0, tier?.max_gpt_images || 0))}% used
               </Badge>
             </div>
           </CardContent>

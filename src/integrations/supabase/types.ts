@@ -1962,6 +1962,7 @@ export type Database = {
           id: string
           is_active: boolean
           max_dalle_images: number | null
+          max_gpt_images: number | null
           max_image_generations: number | null
           max_text_generations: number | null
           name: string
@@ -1975,6 +1976,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_dalle_images?: number | null
+          max_gpt_images?: number | null
           max_image_generations?: number | null
           max_text_generations?: number | null
           name: string
@@ -1988,6 +1990,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_dalle_images?: number | null
+          max_gpt_images?: number | null
           max_image_generations?: number | null
           max_text_generations?: number | null
           name?: string
@@ -2205,6 +2208,7 @@ export type Database = {
           billing_period_start: string
           created_at: string
           dalle_images_used: number
+          gpt_images_used: number | null
           id: string
           image_generations_used: number
           text_generations_used: number
@@ -2216,6 +2220,7 @@ export type Database = {
           billing_period_start: string
           created_at?: string
           dalle_images_used?: number
+          gpt_images_used?: number | null
           id?: string
           image_generations_used?: number
           text_generations_used?: number
@@ -2227,6 +2232,7 @@ export type Database = {
           billing_period_start?: string
           created_at?: string
           dalle_images_used?: number
+          gpt_images_used?: number | null
           id?: string
           image_generations_used?: number
           text_generations_used?: number

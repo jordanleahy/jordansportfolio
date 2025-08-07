@@ -74,28 +74,28 @@ export const QuickSubscribeModal: React.FC<QuickSubscribeModalProps> = ({
               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
                 <Zap className="h-4 w-4 text-accent-foreground" />
               </div>
-              <div>
-                <div className="font-medium text-foreground">
-                  {tier.max_image_generations} AI Image Generations
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Create stunning visuals with AI
-                </div>
-              </div>
-            </div>
+               <div>
+                 <div className="font-medium text-foreground">
+                   {tier.max_gpt_images} GPT Image Generations
+                 </div>
+                 <div className="text-sm text-muted-foreground">
+                   Create stunning visuals with premium GPT-image-1
+                 </div>
+               </div>
+             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
-                <Star className="h-4 w-4 text-accent-foreground" />
-              </div>
-              <div>
-                <div className="font-medium text-foreground">
-                  {tier.max_image_generations} Credits
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Use for any AI generation (images, text, etc.)
-                </div>
-              </div>
+             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+               <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                 <Star className="h-4 w-4 text-accent-foreground" />
+               </div>
+               <div>
+                 <div className="font-medium text-foreground">
+                   Premium Quality
+                 </div>
+                 <div className="text-sm text-muted-foreground">
+                   High-quality image generation with GPT-image-1
+                 </div>
+               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
