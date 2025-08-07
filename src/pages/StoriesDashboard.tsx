@@ -144,26 +144,27 @@ export default function StoriesDashboard() {
       return;
     }
 
-    
+    const themeDescription = customThemeDescription.trim();
+    setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
     
     // Create a pending shimmer theme for optimistic UI
     const shimmerTheme: ThemeWithPosts = {
       id: 'pending-' + Date.now(),
-      theme_name: customThemeDescription.slice(0, 50) + (customThemeDescription.length > 50 ? '...' : ''),
-      description: customThemeDescription,
-      category: customThemeDescription.slice(0, 50),
+      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
+      description: themeDescription,
+      category: themeDescription.slice(0, 50),
       post_count: 0,
       first_post: {
         id: 'pending',
         title: 'Generating theme...',
-        description: customThemeDescription
+        description: themeDescription
       }
     };
     
     setPendingTheme({
       theme_name: shimmerTheme.theme_name,
-      description: customThemeDescription
+      description: themeDescription
     });
     
     // Add shimmer theme to the beginning of the list
@@ -172,7 +173,7 @@ export default function StoriesDashboard() {
     try {
       const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: { 
-          description: customThemeDescription.trim(),
+          description: themeDescription,
           stream: false
         }
       });
@@ -197,8 +198,6 @@ export default function StoriesDashboard() {
       // Refresh themes from server
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
       setAvailableThemes(refreshedThemes);
-
-      setCustomThemeDescription('');
 
     } catch (error: any) {
       console.error('Theme generation error:', error);
