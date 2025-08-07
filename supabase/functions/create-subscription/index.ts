@@ -134,20 +134,9 @@ serve(async (req) => {
 
     console.log(`Created checkout session ${session.id} for user ${user.id}, tier ${tier_id}`);
 
-    // Send welcome email after successful checkout session creation
-    try {
-      await supabaseClient.functions.invoke('send-welcome-email', {
-        body: {
-          userEmail: user.email,
-          userName: user.user_metadata?.name || user.email?.split('@')[0],
-          planName: tier.name
-        }
-      });
-      console.log('Welcome email queued for user:', user.email);
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
-      // Don't fail the subscription if email fails
-    }
+    // Email sending is intentionally disabled here to avoid sending before payment succeeds.
+    // Consider sending a welcome/receipt email from a success callback or a verification step.
+
 
     return new Response(JSON.stringify({ 
       url: session.url,
