@@ -163,11 +163,21 @@ serve(async (req) => {
 
     console.log('Found System Prompt Generator agent:', agent.id);
 
-    // Get the system prompt for this agent
-    const systemPrompts = agent.system_prompts || [];
-    const systemPromptObj = systemPrompts.find((p: any) => p.category === SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION);
+    // Get the system prompt for this agent from the system_prompts table
+    const { data: systemPromptData, error: systemPromptError } = await supabase
+      .from('system_prompts')
+      .select('prompt_text')
+      .eq('agent_id', agent.id)
+      .eq('category', SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION)
+      .eq('is_active', true)
+      .single();
     
-    if (!systemPromptObj) {
+    if (systemPromptError || !systemPromptData) {
+      console.error('❌ SYSTEM PROMPT NOT FOUND:', {
+        agent_id: agent.id,
+        category: SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION,
+        error: systemPromptError
+      });
       return new Response(JSON.stringify({ 
         success: false, 
         error: ERROR_MESSAGES.SYSTEM_PROMPT_NOT_FOUND 
@@ -177,7 +187,7 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = systemPromptObj.prompt;
+    const systemPrompt = systemPromptData.prompt_text;
 
     // Theme is now primary focus, category provides context
     const actualTheme = theme;
