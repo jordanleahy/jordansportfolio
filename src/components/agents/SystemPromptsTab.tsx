@@ -307,12 +307,10 @@ export const SystemPromptsTab = ({
             databasePrompts.map((dbPrompt) => (
               <div key={dbPrompt.id} className="border rounded-lg p-4 h-screen flex flex-col">
                 <div className="space-y-1 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{dbPrompt.name}</span>
-                    <Badge variant="outline">
-                      {getCategoryLabel(dbPrompt.category)}
-                    </Badge>
-                  </div>
+                  <span className="text-sm font-medium">{dbPrompt.name}</span>
+                  <Badge variant="outline">
+                    {getCategoryLabel(dbPrompt.category)}
+                  </Badge>
                   <p className="text-xs text-muted-foreground">{dbPrompt.description}</p>
                 </div>
                 
