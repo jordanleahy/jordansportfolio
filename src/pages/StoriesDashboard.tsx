@@ -65,6 +65,9 @@ export default function StoriesDashboard() {
           setThemesError(null);
           const themes = await optimizedSocialMediaService.getAvailableThemes();
           setAvailableThemes(themes);
+          
+          // Clear textarea on page load to prevent accidental re-submission on refresh
+          setCustomThemeDescription('');
         } catch (error) {
           console.error('Failed to fetch themes:', error);
           setThemesError(error.message || 'Failed to load themes');
