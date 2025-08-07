@@ -83,9 +83,8 @@ export const DEFAULT_IMAGE_CONFIG: ImageGenerationConfig = {
         '1024x1536': 1.5,
         '1792x1024': 2.0,
         '1024x1792': 2.0,
-      },
-    },
-    },
+      }
+    }
   },
   
   requestTimeoutMs: 60000, // 60 seconds
