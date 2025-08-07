@@ -215,8 +215,14 @@ serve(async (req) => {
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Get existing categories for this user
+    // Get existing categories for this user from the last 10 minutes only
     logger.startTiming('database_fetch');
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    logger.info('Checking for duplicates within time window', {
+      timeWindow: '10 minutes',
+      cutoffTime: tenMinutesAgo
+    });
+    
     const { data: existingThemes, error } = await timeOperation(
       logger,
       'fetch_existing_themes',
@@ -224,6 +230,7 @@ serve(async (req) => {
         .from('themes')
         .select('id, theme_name, category, description, created_at')
         .eq('user_id', userId)
+        .gte('created_at', tenMinutesAgo)
         .order('created_at', { ascending: false })
     );
 
