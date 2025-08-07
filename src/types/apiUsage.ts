@@ -18,6 +18,24 @@ export interface ApiUsageRecord {
   created_at: string;
   user_email?: string;
   user_name?: string;
+  // OpenAI sync fields
+  openai_request_id?: string;
+  openai_synced?: boolean;
+  actual_cost?: number;
+  openai_timestamp?: string;
+  sync_status?: 'pending' | 'synced' | 'failed';
+}
+
+export interface OpenAIUsageSyncLog {
+  id: string;
+  sync_date: string;
+  records_synced: number;
+  total_cost_synced: number;
+  sync_status: 'success' | 'partial_success' | 'failed';
+  error_details?: Record<string, any>;
+  sync_type: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UsageSummary {

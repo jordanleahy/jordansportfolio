@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Download, 
   RefreshCw, 
@@ -14,7 +15,8 @@ import {
   Calendar,
   BarChart3,
   DollarSign,
-  Activity
+  Activity,
+  Settings
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
@@ -23,6 +25,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { UsageSummaryCards } from "@/components/admin/UsageSummaryCards";
 import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
 import { UsageDetailModal } from "@/components/admin/UsageDetailModal";
+import { OpenAIUsageSync } from "@/components/admin/OpenAIUsageSync";
 import { 
   useApiUsageData, 
   useUsageSummary, 
@@ -121,164 +124,185 @@ export default function ApiUsage() {
         <UsageSummaryCards summary={summary} />
       )}
 
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5" />
-                <span>Usage History</span>
-              </CardTitle>
-              <CardDescription>
-                Detailed view of all API requests and their costs
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-          </div>
-        </CardHeader>
-        
-        {showFilters && (
-          <CardContent className="border-t pt-6">
-            <div className="grid gap-4 md:grid-cols-4">
-              {/* Search */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Search</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users, functions..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-9"
-                  />
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="usage" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="usage" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Usage Analytics
+          </TabsTrigger>
+          <TabsTrigger value="sync" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            OpenAI Sync
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="usage" className="space-y-6">
+          {/* Filters and Search */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Activity className="h-5 w-5" />
+                    <span>Usage History</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Detailed view of all API requests and their costs
+                  </CardDescription>
                 </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
               </div>
+            </CardHeader>
+            
+            {showFilters && (
+              <CardContent className="border-t pt-6">
+                <div className="grid gap-4 md:grid-cols-4">
+                  {/* Search */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Search</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users, functions..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
 
-              {/* Date Range */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Date Range</label>
-                <Select onValueChange={handleDateRangeSelect}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">Last 7 days</SelectItem>
-                    <SelectItem value="month">Last 30 days</SelectItem>
-                    <SelectItem value="all">All time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  {/* Date Range */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Date Range</label>
+                    <Select onValueChange={handleDateRangeSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">Last 7 days</SelectItem>
+                        <SelectItem value="month">Last 30 days</SelectItem>
+                        <SelectItem value="all">All time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {/* Function Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Function</label>
-                <Select value={filters.functionName || ''} onValueChange={(value) => updateFilter('functionName', value || undefined)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All functions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All functions</SelectItem>
-                    <SelectItem value="generate-image-prompt-dynamic">Image Prompt</SelectItem>
-                    <SelectItem value="generate-image-gpt">Image Generation</SelectItem>
-                    <SelectItem value="generate-blog-content">Blog Content</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  {/* Function Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Function</label>
+                    <Select value={filters.functionName || ''} onValueChange={(value) => updateFilter('functionName', value || undefined)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All functions" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All functions</SelectItem>
+                        <SelectItem value="generate-image-prompt-dynamic">Image Prompt</SelectItem>
+                        <SelectItem value="generate-image-gpt">Image Generation</SelectItem>
+                        <SelectItem value="generate-blog-content">Blog Content</SelectItem>
+                        <SelectItem value="sync-openai-usage">OpenAI Sync</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              {/* Status Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select value={filters.success?.toString() || ''} onValueChange={(value) => updateFilter('success', value === '' ? undefined : value === 'true')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All statuses</SelectItem>
-                    <SelectItem value="true">Success only</SelectItem>
-                    <SelectItem value="false">Failed only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Active Filters */}
-            <div className="flex items-center space-x-2 mt-4">
-              {Object.entries(filters).some(([_, value]) => value !== undefined) && (
-                <>
-                  <span className="text-sm text-muted-foreground">Active filters:</span>
-                  {filters.functionName && (
-                    <Badge variant="secondary">Function: {filters.functionName}</Badge>
-                  )}
-                  {filters.success !== undefined && (
-                    <Badge variant="secondary">Status: {filters.success ? 'Success' : 'Failed'}</Badge>
-                  )}
-                  {(filters.startDate || filters.endDate) && (
-                    <Badge variant="secondary">Date Range</Badge>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear all
-                  </Button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Usage Table */}
-      <Card>
-        <CardContent className="p-6">
-          {usageData && (
-            <>
-              <ApiUsageTable
-                data={usageData.data}
-                onViewDetails={setSelectedRecord}
-                isLoading={usageLoading}
-              />
-              
-              {/* Pagination */}
-              {usageData.totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
-                  <p className="text-sm text-muted-foreground">
-                    Showing {((currentPage - 1) * usageData.pageSize) + 1} to{' '}
-                    {Math.min(currentPage * usageData.pageSize, usageData.total)} of{' '}
-                    {usageData.total} results
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <span className="text-sm">
-                      Page {currentPage} of {usageData.totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === usageData.totalPages}
-                    >
-                      Next
-                    </Button>
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Status</label>
+                    <Select value={filters.success?.toString() || ''} onValueChange={(value) => updateFilter('success', value === '' ? undefined : value === 'true')}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All statuses</SelectItem>
+                        <SelectItem value="true">Success only</SelectItem>
+                        <SelectItem value="false">Failed only</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+
+                {/* Active Filters */}
+                <div className="flex items-center space-x-2 mt-4">
+                  {Object.entries(filters).some(([_, value]) => value !== undefined) && (
+                    <>
+                      <span className="text-sm text-muted-foreground">Active filters:</span>
+                      {filters.functionName && (
+                        <Badge variant="secondary">Function: {filters.functionName}</Badge>
+                      )}
+                      {filters.success !== undefined && (
+                        <Badge variant="secondary">Status: {filters.success ? 'Success' : 'Failed'}</Badge>
+                      )}
+                      {(filters.startDate || filters.endDate) && (
+                        <Badge variant="secondary">Date Range</Badge>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={clearFilters}>
+                        Clear all
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Usage Table */}
+          <Card>
+            <CardContent className="p-6">
+              {usageData && (
+                <>
+                  <ApiUsageTable
+                    data={usageData.data}
+                    onViewDetails={setSelectedRecord}
+                    isLoading={usageLoading}
+                  />
+                  
+                  {/* Pagination */}
+                  {usageData.totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-6">
+                      <p className="text-sm text-muted-foreground">
+                        Showing {((currentPage - 1) * usageData.pageSize) + 1} to{' '}
+                        {Math.min(currentPage * usageData.pageSize, usageData.total)} of{' '}
+                        {usageData.total} results
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm">
+                          Page {currentPage} of {usageData.totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={currentPage === usageData.totalPages}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sync">
+          <OpenAIUsageSync />
+        </TabsContent>
+      </Tabs>
 
       {/* Detail Modal */}
       <UsageDetailModal
