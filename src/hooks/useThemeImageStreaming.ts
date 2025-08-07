@@ -104,7 +104,10 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
         .limit(1);
 
       if (postsError || !posts || posts.length === 0) {
-        throw new Error('No posts found for this category');
+        console.warn(`No posts found for category: ${category}. Theme generation may not have completed yet.`);
+        setError('No posts found for this category. Please try generating a theme first.');
+        setIsGenerating(false);
+        return;
       }
 
       const theme = posts[0].themes?.theme_name || category;
