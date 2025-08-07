@@ -67,7 +67,7 @@ export const CategoryPromptEditor = ({
       <div>
         <div className="border border-input rounded-md overflow-hidden">
           <OptimizedMonacoEditor
-            height="400px"
+            height="600px"
             language="markdown"
             value={localPrompt}
             onChange={(value) => handlePromptChange(value || '')}
