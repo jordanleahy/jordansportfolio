@@ -17,27 +17,44 @@ export const OpenAIUsageSync = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch sync logs - temporarily disabled until migration is executed
+  // Fetch sync logs
   const { data: syncLogs, isLoading: logsLoading } = useQuery({
     queryKey: ['openai-sync-logs'],
     queryFn: async () => {
-      // Return empty array until migration is executed
-      return [] as OpenAIUsageSyncLog[];
+      const { data, error } = await supabase
+        .from('openai_usage_sync_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data as OpenAIUsageSyncLog[];
     },
   });
 
-  // Get sync status summary - temporarily disabled until migration is executed
+  // Get sync status summary
   const { data: syncSummary } = useQuery({
     queryKey: ['sync-summary'],
     queryFn: async () => {
-      // Return mock data until migration is executed
+      const { data, error } = await supabase
+        .from('api_usage_tracking')
+        .select('openai_synced, actual_cost, estimated_cost');
+      
+      if (error) throw error;
+      
+      const syncedCount = data?.filter(row => row.openai_synced === true).length || 0;
+      const pendingCount = data?.filter(row => row.openai_synced === false || row.openai_synced === null).length || 0;
+      const totalActualCost = data?.filter(row => row.actual_cost).reduce((sum, row) => sum + (row.actual_cost || 0), 0) || 0;
+      const totalEstimatedCost = data?.reduce((sum, row) => sum + (row.estimated_cost || 0), 0) || 0;
+      const variance = totalActualCost - totalEstimatedCost;
+      
       return {
-        syncedCount: 0,
-        pendingCount: 0,
-        totalActualCost: 0,
-        totalEstimatedCost: 0,
-        variance: 0,
-        totalRecords: 0,
+        syncedCount,
+        pendingCount,
+        totalActualCost,
+        totalEstimatedCost,
+        variance,
+        totalRecords: data?.length || 0,
       };
     },
   });

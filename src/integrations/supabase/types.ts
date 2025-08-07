@@ -91,6 +91,7 @@ export type Database = {
       }
       api_usage_tracking: {
         Row: {
+          actual_cost: number | null
           completion_tokens: number | null
           created_at: string
           error_message: string | null
@@ -100,17 +101,23 @@ export type Database = {
           image_quality: string | null
           image_size: string | null
           model_used: string
+          openai_request_id: string | null
+          openai_synced: boolean | null
           prompt_tokens: number | null
           request_metadata: Json | null
           request_type: string
           response_time_ms: number | null
           success: boolean
+          sync_attempted_at: string | null
+          sync_error_message: string | null
+          sync_status: string | null
           tokens_used: number | null
           total_tokens: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          actual_cost?: number | null
           completion_tokens?: number | null
           created_at?: string
           error_message?: string | null
@@ -120,17 +127,23 @@ export type Database = {
           image_quality?: string | null
           image_size?: string | null
           model_used: string
+          openai_request_id?: string | null
+          openai_synced?: boolean | null
           prompt_tokens?: number | null
           request_metadata?: Json | null
           request_type: string
           response_time_ms?: number | null
           success?: boolean
+          sync_attempted_at?: string | null
+          sync_error_message?: string | null
+          sync_status?: string | null
           tokens_used?: number | null
           total_tokens?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          actual_cost?: number | null
           completion_tokens?: number | null
           created_at?: string
           error_message?: string | null
@@ -140,11 +153,16 @@ export type Database = {
           image_quality?: string | null
           image_size?: string | null
           model_used?: string
+          openai_request_id?: string | null
+          openai_synced?: boolean | null
           prompt_tokens?: number | null
           request_metadata?: Json | null
           request_type?: string
           response_time_ms?: number | null
           success?: boolean
+          sync_attempted_at?: string | null
+          sync_error_message?: string | null
+          sync_status?: string | null
           tokens_used?: number | null
           total_tokens?: number | null
           updated_at?: string
@@ -1485,6 +1503,45 @@ export type Database = {
           trigger?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      openai_usage_sync_logs: {
+        Row: {
+          created_at: string | null
+          error_details: Json | null
+          id: string
+          records_failed: number | null
+          records_synced: number | null
+          sync_date: string
+          sync_status: string
+          sync_type: string
+          total_cost_synced: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          records_failed?: number | null
+          records_synced?: number | null
+          sync_date: string
+          sync_status?: string
+          sync_type?: string
+          total_cost_synced?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          records_failed?: number | null
+          records_synced?: number | null
+          sync_date?: string
+          sync_status?: string
+          sync_type?: string
+          total_cost_synced?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
