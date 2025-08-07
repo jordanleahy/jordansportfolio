@@ -248,55 +248,6 @@ export const SystemPromptsTab = ({
           </div>
         </div>
 
-        {/* Visual Prompt Generator Categories - Hidden for System Prompt Generator */}
-        {agentName !== 'System Prompt Generator' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Visual Prompt Generator Categories</h4>
-              <p className="text-xs text-muted-foreground">
-                {Object.values(groupedCategories).flat().length} total categories available
-              </p>
-            </div>
-            
-            {Object.entries(groupedCategories).map(([domain, categories]) => (
-              <div key={domain} className="space-y-2">
-                <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {domain}
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {categories.map((category) => {
-                    const hasPrompt = databasePrompts.some(p => p.category === category) || 
-                                     systemPrompts.some(p => p.category === category);
-                    
-                    return (
-                      <div
-                        key={category}
-                        className={`flex items-center justify-between p-3 rounded-lg border ${
-                          hasPrompt 
-                            ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
-                            : 'bg-muted/30 border-dashed'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={hasPrompt ? "default" : "outline"}
-                            className="text-xs"
-                          >
-                            {getCategoryLabel(category)}
-                          </Badge>
-                          {hasPrompt && (
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          )}
-                        </div>
-                        
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Database System Prompts */}
         <div className="space-y-4">
