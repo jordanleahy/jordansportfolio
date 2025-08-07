@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
 
       // Log sync operation
       const { error: logError } = await supabase
-        .from('openai_usage_sync_log')
+        .from('openai_usage_sync_logs')
         .insert({
           sync_date: syncDate.toISOString().split('T')[0],
           records_synced: totalRecordsSynced,
@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
 
       // Log failed sync
       await supabase
-        .from('openai_usage_sync_log')
+        .from('openai_usage_sync_logs')
         .insert({
           sync_date: syncDate.toISOString().split('T')[0],
           records_synced: 0,
