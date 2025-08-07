@@ -288,11 +288,7 @@ export const SystemPromptsTab = ({
                 />
               </div>
             ))
-          ) : (
-            <div className="text-sm text-muted-foreground italic p-4 border-2 border-dashed rounded-md">
-              No system prompts found in database. Use the "Generate Rich Prompt" button to create CDI template prompts.
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* Legacy System Prompts from Agent Configuration */}
