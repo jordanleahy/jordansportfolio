@@ -2062,6 +2062,45 @@ export type Database = {
           },
         ]
       }
+      theme_submissions: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          idempotency_key: string
+          status: string
+          theme_id: string | null
+          theme_name: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key: string
+          status?: string
+          theme_id?: string | null
+          theme_name: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string
+          status?: string
+          theme_id?: string | null
+          theme_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       themes: {
         Row: {
           category: string
@@ -2571,6 +2610,10 @@ export type Database = {
         }[]
       }
       cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      cleanup_old_submissions: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
