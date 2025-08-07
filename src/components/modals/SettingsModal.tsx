@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -20,6 +21,10 @@ export const SettingsModal: React.FC = () => {
   return (
     <Dialog open={isSettingsOpen} onOpenChange={closeSettings}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden p-0">
+        <VisuallyHidden>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>Manage your account settings and subscription plans</DialogDescription>
+        </VisuallyHidden>
         <div className="flex h-[80vh]">
           {/* Sidebar */}
           <div className="w-64 bg-muted/30 border-r border-border p-6">
