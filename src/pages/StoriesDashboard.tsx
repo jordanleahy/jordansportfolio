@@ -427,10 +427,10 @@ export default function StoriesDashboard() {
               </p>
             </div>
             
-            <div className="w-full max-w-4xl mx-auto">
+            <div className="w-full max-w-6xl mx-auto">
               <Input
                 placeholder="Describe your theme..."
-                className="w-full h-32 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border shadow-lg"
+                className="w-full h-20 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
                 value={customThemeDescription}
                 onChange={(e) => setCustomThemeDescription(e.target.value)}
                 onKeyDown={(e) => {
