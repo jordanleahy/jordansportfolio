@@ -13,6 +13,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Subscription: React.FC = () => {
   const { user } = useAuth();
@@ -21,14 +23,36 @@ const Subscription: React.FC = () => {
   const { data: tiers = [] } = useSubscriptionTiers();
   const isMobile = useIsMobile();
 
-  const handleSelectPlan = (tier: any) => {
+  const handleSelectPlan = async (tier: any) => {
     if (!user) {
       // Redirect non-authenticated users to auth page
       navigate('/auth');
       return;
     }
-    // Navigate to mobile checkout or trigger subscription for authenticated users
-    console.log('Selected plan:', tier);
+
+    try {
+      if (tier?.price_cents === 0) {
+        toast.success('Free plan selected. You can start using the app.');
+        navigate('/dashboard');
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: { tier_id: tier.id },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err) {
+      console.error('Subscription error:', err);
+      toast.error('Could not start checkout. Please try again.');
+    }
   };
 
   const handleSelectFreePlan = async () => {
@@ -40,9 +64,10 @@ const Subscription: React.FC = () => {
     
     if (!tiers || tiers.length === 0) return;
     
-    const freePlan = tiers.find(tier => tier.name === 'Free Plan' && tier.price_cents === 0);
+    const freePlan = tiers.find(t => t.name === 'Free Plan' && t.price_cents === 0);
     if (freePlan) {
-      handleSelectPlan(freePlan);
+      toast.success('Free plan selected. You can start using the app.');
+      navigate('/dashboard');
     }
   };
 
