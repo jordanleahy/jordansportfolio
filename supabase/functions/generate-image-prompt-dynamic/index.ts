@@ -74,30 +74,8 @@ serve(async (req) => {
       console.log('✅ Found prompt in system_prompts table for category:', category);
       categoryPrompt = { prompt: systemPromptData.prompt_text, category: systemPromptData.category };
     } else {
-      console.log('🔍 No prompt found in system_prompts table, checking legacy openai_agents.system_prompts for category:', category);
-      
-      // Fallback to legacy system: Get agent and find category prompt
-      const { data: agentData, error: agentError } = await supabase
-        .from('openai_agents')
-        .select('system_prompts, supported_categories')
-        .eq('name', 'Visual Prompt Generator')
-        .single();
-
-      if (agentError) {
-        throw new Error(`Agent not found: ${agentError.message}`);
-      }
-
-      // Find category prompt in legacy format
-      categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === category);
-      
-      if (!categoryPrompt) {
-        // Fallback to healthcare prompt for unsupported categories
-        categoryPrompt = agentData.system_prompts?.find((prompt: any) => prompt.category === 'healthcare');
-        
-        if (!categoryPrompt) {
-          throw new Error(`Category '${category}' not supported and no healthcare fallback found. Available: ${agentData.supported_categories?.join(', ')}`);
-        }
-      }
+      console.log('🔍 No prompt found in system_prompts table, removing legacy fallback');
+      throw new Error(`No system prompt found for category '${category}' in system_prompts table`);
     }
 
     // Build user message with color theme information

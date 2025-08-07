@@ -276,41 +276,6 @@ export const AgentDetail = () => {
                   </CardContent>
                 </Card>
 
-                {/* System Prompts */}
-                {(agent as any).system_prompts && Array.isArray((agent as any).system_prompts) && (agent as any).system_prompts.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                        <FileText className="h-4 w-4 md:h-5 md:w-5" />
-                        System Prompts ({(agent as any).system_prompts.length})
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {(agent as any).system_prompts.slice(0, 3).map((prompt: any, index: number) => (
-                          <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium text-sm capitalize">
-                                {prompt.category?.replace(/_/g, ' ') || `Prompt ${index + 1}`}
-                              </h4>
-                              <Badge variant="outline" className="text-xs">
-                                {prompt.prompt?.length > 0 ? 'Active' : 'Draft'}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {prompt.prompt?.substring(0, 150)}...
-                            </p>
-                          </div>
-                        ))}
-                        {(agent as any).system_prompts.length > 3 && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            +{(agent as any).system_prompts.length - 3} more prompts
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </>
             )}
 

@@ -80,10 +80,10 @@ serve(async (req) => {
         .eq('user_id', userId)
         .eq('status', 'published'),
 
-      // Get the Cover Letter Generator agent for system prompts
+      // Get the Cover Letter Generator agent
       supabase
         .from('openai_agents')
-        .select('system_prompts')
+        .select('id')
         .eq('user_id', userId)
         .eq('name', 'Cover Letter Generator')
         .single()
@@ -93,14 +93,20 @@ serve(async (req) => {
     const caseStudies = caseStudiesResult.data || [];
     const agent = agentResult.data;
 
-    if (!agent?.system_prompts) {
-      throw new Error('Cover Letter Generator agent not found or missing system prompts');
+    if (!agent) {
+      throw new Error('Cover Letter Generator agent not found');
     }
 
-    // Find the appropriate system prompt for the role type
-    const systemPrompt = agent.system_prompts.find((prompt: any) => prompt.category === roleType);
+    // Get the system prompt for the role type from the system_prompts table
+    const { data: systemPromptData, error: promptError } = await supabase
+      .from('system_prompts')
+      .select('prompt_text')
+      .eq('agent_id', agent.id)
+      .eq('category', roleType)
+      .eq('is_active', true)
+      .single();
     
-    if (!systemPrompt) {
+    if (promptError || !systemPromptData) {
       throw new Error(`System prompt not found for role type: ${roleType}`);
     }
 
@@ -158,7 +164,7 @@ Return the response as a JSON object with this structure:
     const requestBody = enhanceOpenAIRequestBody({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: systemPrompt.prompt },
+        { role: 'system', content: systemPromptData.prompt_text },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,

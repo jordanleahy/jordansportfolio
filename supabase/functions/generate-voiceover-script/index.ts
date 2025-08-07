@@ -54,7 +54,7 @@ serve(async (req) => {
     // Get the Voiceover Script Generator agent
     const { data: agent, error: agentError } = await supabase
       .from('openai_agents')
-      .select('system_prompts, supported_categories')
+      .select('id')
       .eq('name', 'Voiceover Script Generator')
       .single();
 
@@ -63,19 +63,31 @@ serve(async (req) => {
       throw new Error('Voiceover Script Generator agent not found');
     }
 
-    // Find the appropriate system prompt based on tone
-    const systemPrompts = agent.system_prompts as Array<{category: string, prompt: string}>;
-    console.log('Available system prompts:', systemPrompts?.map(p => p.category));
+    // Get the system prompt for the tone from the system_prompts table
+    const { data: systemPromptData, error: promptError } = await supabase
+      .from('system_prompts')
+      .select('prompt_text, category')
+      .eq('agent_id', agent.id)
+      .eq('category', tone)
+      .eq('is_active', true)
+      .single();
     
-    let selectedPrompt = systemPrompts?.find(p => p.category === tone);
+    let selectedPrompt = systemPromptData;
     
-    if (!selectedPrompt) {
-      console.error('Tone not supported:', tone, 'Available categories:', agent.supported_categories);
-      // Try to use first available prompt as fallback
-      const fallbackPrompt = systemPrompts?.[0];
-      if (fallbackPrompt) {
-        console.log('Using fallback prompt:', fallbackPrompt.category, 'instead of:', tone);
-        selectedPrompt = fallbackPrompt;
+    if (promptError || !selectedPrompt) {
+      console.error('Tone not supported:', tone);
+      // Try to get any available prompt as fallback
+      const { data: fallbackData } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, category')
+        .eq('agent_id', agent.id)
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+      
+      if (fallbackData) {
+        console.log('Using fallback prompt:', fallbackData.category, 'instead of:', tone);
+        selectedPrompt = fallbackData;
       } else {
         throw new Error(`No system prompts available. Agent may not be properly configured.`);
       }
@@ -94,7 +106,7 @@ Please transform this content into a teleprompter-style voiceover script optimiz
     const requestBody = enhanceOpenAIRequestBody({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: selectedPrompt.prompt },
+        { role: 'system', content: selectedPrompt.prompt_text },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
