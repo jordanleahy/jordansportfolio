@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, calculateImageGenerationCost } from '../_shared/openai-attribution.ts';
+import { trackOpenAIUsage, generateCorrelationId, calculateImageGenerationCost } from '../_shared/openai-attribution.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,9 +18,9 @@ serve(async (req) => {
 
   try {
     console.log('🔍 DEBUG: Function started, parsing request body...');
-    let requestBody;
+    let incomingRequestBody;
     try {
-      requestBody = await req.json();
+      incomingRequestBody = await req.json();
       console.log('🔍 DEBUG: Request body parsed successfully');
     } catch (parseError) {
       console.error('❌ DEBUG: JSON parsing failed:', parseError);
@@ -30,7 +30,7 @@ serve(async (req) => {
       );
     }
     
-    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = requestBody;
+    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = incomingRequestBody;
 
     console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'seedContext exists:', !!seedContext);
     console.log('📐 ASPECT_RATIO: Received aspect ratio:', aspectRatio);
