@@ -100,27 +100,16 @@ serve(async (req) => {
 
     console.log(`📊 FOUND ${posts.length} POSTS: Need image prompt generation`);
 
-    // Step 2: Get the Visual Prompt Generator agent
-    console.log('🔍 STEP 2: Finding Visual Prompt Generator agent');
-    const { data: visualAgent, error: agentError } = await supabase
-      .from('openai_agents')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('name', 'Visual Prompt Generator') // Note: matches VISUAL_PROMPT_GENERATOR constant from agent_constants
-      .single();
-
-    if (agentError || !visualAgent) {
-      console.error('❌ ERROR: Visual Prompt Generator not found:', agentError);
-      throw new Error('Visual Prompt Generator agent not found');
-    }
-
-    // Get the system prompt for this category from the system_prompts table
+    // Step 2: Get the system prompt for this category (most recent active for this user)
+    console.log('🔍 STEP 2: Fetching system prompt for category');
     const { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
       .select('prompt_text')
-      .eq('agent_id', visualAgent.id)
+      .eq('user_id', userId)
       .eq('category', category)
       .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (promptError || !systemPromptData) {
