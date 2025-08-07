@@ -624,6 +624,7 @@ export const AgentEdit = () => {
             {activeTab === 'prompts' && (
               <SystemPromptsTab
                 agentId={agent?.id}
+                agentName={agent?.name}
                 systemPrompts={[]}
                 supportedCategories={agent?.supported_categories || []}
                 onChange={(prompts, categories) => {
