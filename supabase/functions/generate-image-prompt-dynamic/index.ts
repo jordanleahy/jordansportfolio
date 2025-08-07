@@ -114,6 +114,17 @@ Please incorporate these colors and visual style into the image prompt to ensure
       user: correlationId // Only include user field for tracking
     };
 
+    console.log('🔍 OpenAI Request Details:', {
+      url: 'https://api.openai.com/v1/chat/completions',
+      model: requestBody.model,
+      messageCount: requestBody.messages.length,
+      systemPromptLength: categoryPrompt.prompt?.length || 0,
+      userMessageLength: userMessage?.length || 0,
+      correlationId,
+      hasApiKey: !!openAIApiKey,
+      apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'MISSING'
+    });
+
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
       url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
@@ -125,13 +136,45 @@ Please incorporate these colors and visual style into the image prompt to ensure
       correlationId,
     });
 
+    console.log('📥 OpenAI Response Details:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      openAIRequestId: responseOpenAIRequestId,
+      responseTime,
+      correlationId
+    });
+
     openAIRequestId = responseOpenAIRequestId;
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      // Get the actual error response body
+      let errorBody: any = {};
+      try {
+        errorBody = await response.json();
+        console.log('❌ OpenAI Error Response Body:', errorBody);
+      } catch (parseError) {
+        console.log('❌ Failed to parse OpenAI error response:', parseError);
+        try {
+          const errorText = await response.text();
+          console.log('❌ OpenAI Error Response Text:', errorText);
+        } catch (textError) {
+          console.log('❌ Failed to get OpenAI error text:', textError);
+        }
+      }
+      
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorBody)}`);
     }
 
     const openAIData = await response.json();
+    console.log('✅ OpenAI Success Response:', {
+      hasChoices: !!openAIData.choices,
+      choicesLength: openAIData.choices?.length || 0,
+      hasUsage: !!openAIData.usage,
+      model: openAIData.model,
+      correlationId
+    });
+    
     const generatedText = openAIData.choices?.[0]?.message?.content;
 
     if (!generatedText) {
