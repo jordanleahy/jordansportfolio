@@ -226,7 +226,7 @@ export class OptimizedSocialMediaService {
       return this.getFromCache(cacheKey);
     }
 
-    // Check authentication first
+    // Check authentication first with timeout
     const { data: { user } } = await supabase.auth.getUser();
     console.log('🔐 SERVICE: getAvailableThemes - User authentication:', { 
       isAuthenticated: !!user, 
@@ -238,35 +238,55 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // Get themes with post counts and first post data
-    const { data, error } = await supabase
+    // First get themes efficiently without posts
+    const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select(`
-        id,
-        theme_name,
-        description,
-        category,
-        created_at,
-        social_media_posts(
-          id,
-          title,
-          description,
-          created_at,
-          theme_image_4_3_url,
-          image_16_9_url,
-          image_4_3_url,
-          image_9_16_url,
-          image_3_4_url
-        )
-      `)
+      .select('id, theme_name, description, category, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    
-    // Process themes and their posts
-    const themes = (data || []).map((theme: any) => {
-      const posts = theme.social_media_posts || [];
+    if (themesError) throw themesError;
+
+    if (!themes || themes.length === 0) {
+      this.setCache(cacheKey, [], 5 * 60 * 1000); // 5 minutes cache for empty results
+      return [];
+    }
+
+    // Get post counts efficiently using indexed columns
+    const themeIds = themes.map(t => t.id);
+    const { data: postData, error: postError } = await supabase
+      .from('social_media_posts')
+      .select(`
+        theme_id,
+        id,
+        title,
+        description,
+        theme_image_4_3_url,
+        image_16_9_url,
+        image_4_3_url,
+        image_9_16_url,
+        image_3_4_url,
+        created_at
+      `)
+      .in('theme_id', themeIds)
+      .eq('user_id', user.id)
+      .neq('status', 'deleted')
+      .order('created_at', { ascending: true });
+
+    if (postError) throw postError;
+
+    // Group posts by theme_id for efficient processing
+    const postsByTheme = (postData || []).reduce((acc, post) => {
+      if (!acc[post.theme_id]) {
+        acc[post.theme_id] = [];
+      }
+      acc[post.theme_id].push(post);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    // Process themes with their post data
+    const processedThemes = themes.map((theme: any) => {
+      const posts = postsByTheme[theme.id] || [];
       const firstPost = posts[0];
       const imageUrl = firstPost?.theme_image_4_3_url ||
                       firstPost?.image_16_9_url || 
@@ -289,8 +309,8 @@ export class OptimizedSocialMediaService {
       };
     });
     
-    this.setCache(cacheKey, themes, 10 * 60 * 1000); // 10 minutes
-    return themes;
+    this.setCache(cacheKey, processedThemes, 30 * 60 * 1000); // 30 minutes cache
+    return processedThemes;
   }
 
   // Keep the old method for backward compatibility

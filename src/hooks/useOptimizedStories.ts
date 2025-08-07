@@ -78,7 +78,7 @@ export const useThemeDetailsByName = (themeName: string, enabled = true) => {
   };
 };
 
-// Optimized available themes hook
+// Optimized available themes hook with better error handling
 export const useAvailableThemes = (enabled = true) => {
   return useQuery({
     queryKey: QUERY_KEYS.themes,
@@ -87,9 +87,13 @@ export const useAvailableThemes = (enabled = true) => {
       const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
       return optimizedSocialMediaService.getAvailableThemes();
     },
-    staleTime: QUERY_CONFIG.THEMES_STALE_TIME, // Increased to 30 minutes
+    staleTime: QUERY_CONFIG.THEMES_STALE_TIME, // 30 minutes cache
+    gcTime: 60 * 60 * 1000, // 1 hour garbage collection
     refetchOnWindowFocus: false, // Background refetching only
     refetchOnMount: false, // Use cached data on mount
+    retry: 3, // Retry failed requests
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    enabled,
   });
 };
 

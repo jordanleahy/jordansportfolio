@@ -16,6 +16,7 @@ import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
+import { ThemesSkeleton } from '@/components/stories/ThemesSkeleton';
 import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -52,16 +53,24 @@ export default function StoriesDashboard() {
     }
   });
 
-  // Initial load
+  // Enhanced initial load with loading states and error handling
+  const [isLoadingThemes, setIsLoadingThemes] = useState(true);
+  const [themesError, setThemesError] = useState<string | null>(null);
+
   React.useEffect(() => {
     const loadThemes = async () => {
       if (user?.id) {
         try {
+          setIsLoadingThemes(true);
+          setThemesError(null);
           const themes = await optimizedSocialMediaService.getAvailableThemes();
           setAvailableThemes(themes);
         } catch (error) {
           console.error('Failed to fetch themes:', error);
+          setThemesError(error.message || 'Failed to load themes');
           setAvailableThemes([]);
+        } finally {
+          setIsLoadingThemes(false);
         }
       }
     };
@@ -284,11 +293,27 @@ export default function StoriesDashboard() {
           </Suspense>
         )}
 
-        {/* Themes Grid */}
-        <CategoriesGrid 
-          themes={availableThemes}
-          onDeleteCategory={handleDeleteCategory}
-        />
+        {/* Enhanced Themes Grid with Loading States */}
+        {isLoadingThemes ? (
+          <ThemesSkeleton />
+        ) : themesError ? (
+          <div className="text-center py-8">
+            <div className="text-muted-foreground mb-4">
+              ⚠️ Failed to load themes: {themesError}
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <CategoriesGrid 
+            themes={availableThemes}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        )}
       </div>
     </PageLayout>
   );
