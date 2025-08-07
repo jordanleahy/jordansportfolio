@@ -227,12 +227,19 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
 
 // Helper function to fetch fresh prompt data from new system_prompts table with theme priority
 async function fetchFreshPrompt(theme: string, userId: string, category?: string): Promise<SystemPromptData | null> {
-  const { data, error } = await supabase
+  // First try to find by theme and specific category (if provided)
+  let query = supabase
     .from('system_prompts')
     .select('prompt_text, agent_name, updated_at, version, theme, theme_description')
     .eq('user_id', userId)
-    .eq('theme', theme)
-    .eq('category', category || 'general')
+    .eq('theme', theme);
+  
+  // If category is provided, filter by it; otherwise find any theme match
+  if (category) {
+    query = query.eq('category', category);
+  }
+  
+  const { data, error } = await query
     .order('updated_at', { ascending: false })
     .limit(1)
     .single();
