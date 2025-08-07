@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Users, Plus, Mic, ArrowUp } from 'lucide-react';
+import { Loader2, Sparkles, Users } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
@@ -428,45 +428,18 @@ export default function StoriesDashboard() {
             </div>
             
             <div className="w-full max-w-7xl mx-auto">
-              <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-3xl px-4 py-3 h-16">
-                {/* Plus Button */}
-                <button className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-white transition-colors">
-                  <Plus className="w-5 h-5" />
-                </button>
-                
-                {/* Input */}
-                <Input
-                  placeholder="Describe your theme..."
-                  className="flex-1 bg-transparent border-0 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 h-auto"
-                  value={customThemeDescription}
-                  onChange={(e) => setCustomThemeDescription(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && customThemeDescription.trim()) {
-                      try { localStorage.setItem('stories_hero_seen','1'); } catch {}
-                      setShowHero(false);
-                    }
-                  }}
-                />
-                
-                {/* Right Side Icons */}
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-white transition-colors">
-                    <Mic className="w-5 h-5" />
-                  </button>
-                  
-                  <button 
-                    className="flex items-center justify-center w-8 h-8 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
-                    onClick={() => {
-                      if (customThemeDescription.trim()) {
-                        try { localStorage.setItem('stories_hero_seen','1'); } catch {}
-                        setShowHero(false);
-                      }
-                    }}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              <Input
+                placeholder="Describe your theme..."
+                className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
+                value={customThemeDescription}
+                onChange={(e) => setCustomThemeDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customThemeDescription.trim()) {
+                    try { localStorage.setItem('stories_hero_seen','1'); } catch {}
+                    setShowHero(false);
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
