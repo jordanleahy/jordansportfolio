@@ -15,6 +15,21 @@ import { ArrowLeft, Menu } from "lucide-react";
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
   auth?: { email_confirmed_at: string | null; last_sign_in_at: string | null } | null;
+  subscription?: {
+    id: string;
+    status: string | null;
+    current_period_start: string | null;
+    current_period_end: string | null;
+    stripe_subscription_id: string | null;
+    stripe_customer_id: string | null;
+    tier?: {
+      id: string;
+      name: string;
+      price_cents: number | null;
+      billing_interval: string | null;
+      max_gpt_images: number | null;
+    } | null;
+  } | null;
   range: { from: string; to: string };
   totals: { images: number; cost: number };
   periods?: {
@@ -215,6 +230,43 @@ export default function AdminUserDetail() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Subscription */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Subscription</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span>Plan</span>
+                <span className="text-muted-foreground">{data?.subscription?.tier?.name || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Status</span>
+                <Badge variant={data?.subscription?.status === 'active' ? 'default' : 'secondary'}>
+                  {data?.subscription?.status || '—'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Current Period</span>
+                <span className="text-muted-foreground">
+                  {data?.subscription?.current_period_start
+                    ? `${new Date(data.subscription.current_period_start).toLocaleDateString()} — ${data?.subscription?.current_period_end ? new Date(data.subscription.current_period_end).toLocaleDateString() : '—'}`
+                    : (isLoading ? '…' : '—')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Price</span>
+                <span className="text-muted-foreground">
+                  {data?.subscription?.tier?.price_cents != null
+                    ? `$${((data.subscription.tier.price_cents || 0) / 100).toFixed(2)}/${data.subscription.tier.billing_interval || 'month'}`
+                    : '—'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="mb-6">
           <CardHeader>

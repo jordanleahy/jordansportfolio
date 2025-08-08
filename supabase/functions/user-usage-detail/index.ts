@@ -63,6 +63,14 @@ serve(async (req: Request) => {
       .maybeSingle();
     if (profileErr) throw profileErr;
 
+    // Fetch subscription (with tier)
+    const { data: subscription, error: subErr } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('id, status, current_period_start, current_period_end, stripe_subscription_id, stripe_customer_id, tier:subscription_tiers(id, name, price_cents, billing_interval, max_gpt_images)')
+      .eq('user_id', body.userId)
+      .maybeSingle();
+    if (subErr) throw subErr;
+
     // Fetch image generation usage within range from api_usage_tracking
     const { data: usageRows, error: usageErr } = await supabaseAdmin
       .from('api_usage_tracking')
@@ -159,6 +167,7 @@ serve(async (req: Request) => {
         email_confirmed_at: authData?.user?.email_confirmed_at ?? null,
         last_sign_in_at: authData?.user?.last_sign_in_at ?? null,
       },
+      subscription,
       range: { from: dateFrom.toISOString(), to: dateTo.toISOString() },
       totals: { images: totalImages, cost: Number(totalCost.toFixed(4)) },
       periods,
