@@ -1,6 +1,6 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,8 +18,11 @@ interface UsageDetailResponse {
   recent: any[];
 }
 
+const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 export default function AdminUserDetail() {
   const { id } = useParams<{ id: string }>();
+  const validId = !!id && UUID_RE.test(id);
   const [range, setRange] = useState<'7' | '30' | '90'>('30');
 
   const { from, to } = useMemo(() => {
@@ -38,10 +41,38 @@ export default function AdminUserDetail() {
       if (error) throw error;
       return data as UsageDetailResponse;
     },
-    enabled: !!id
+    enabled: validId
   });
 
   const title = data?.user?.full_name ? `${data.user.full_name} - Usage` : 'User Usage';
+
+  if (!validId) {
+    return (
+      <PageLayout>
+        <Helmet>
+          <title>User Usage</title>
+          <meta name="description" content="Admin user usage detail with daily image and cost breakdown." />
+          <link rel="canonical" href={`/admin/users`} />
+        </Helmet>
+        <main className="container mx-auto px-4 py-8">
+          <header className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">User</h1>
+              <p className="text-muted-foreground">Invalid or missing user id.</p>
+            </div>
+          </header>
+          <Card>
+            <CardContent>
+              <p className="text-muted-foreground">Please go back to the Users list and select a user.</p>
+              <div className="mt-4">
+                <Link to="/admin/users" className="underline">Back to Users</Link>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -126,6 +157,11 @@ export default function AdminUserDetail() {
                   {isLoading && (
                     <TableRow>
                       <TableCell colSpan={5}>Loading…</TableCell>
+                    </TableRow>
+                  )}
+                  {!isLoading && (!data || data.recent.length === 0) && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-muted-foreground">No recent items.</TableCell>
                     </TableRow>
                   )}
                   {data?.recent?.map((r) => (
