@@ -49,6 +49,8 @@ import { ComparisonForm } from "./pages/admin/ComparisonForm";
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
 const SubscriptionAnalytics = lazy(() => import("./pages/admin/SubscriptionAnalytics"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminUserDetail = lazy(() => import("./pages/admin/UserDetail"));
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -225,6 +227,28 @@ function App() {
                 <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
                 <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
+
+                {/* Admin Users */}
+                <Route 
+                  path="/admin/users" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <AdminUsers />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/users/:id" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <AdminUserDetail />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

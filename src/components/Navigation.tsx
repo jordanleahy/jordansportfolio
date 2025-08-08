@@ -63,12 +63,10 @@ const Navigation = () => {
   ] : [
     // Public items
     { href: "/", label: "Home", icon: Home },
-    
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
     { href: "/companies", label: "Companies", icon: Heart },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
-    
     { href: "/#about", label: "About", icon: User },
   ];
 
@@ -209,9 +207,21 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                     {/* Admin-only navigation items */}
+                    {/* Admin-only navigation items */}
                     {isAdmin && (
                       <>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin/users"
+                              className={cn(navLinkStyles, isActive("/admin/users") && "bg-accent text-accent-foreground")}
+                            >
+                              <User className="mr-2 h-4 w-4" />
+                              Users
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+
                         <NavigationMenuItem>
                           <NavigationMenuLink asChild>
                             <Link
@@ -224,30 +234,29 @@ const Navigation = () => {
                           </NavigationMenuLink>
                         </NavigationMenuItem>
 
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin/api-usage"
+                              className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
+                            >
+                              <Activity className="mr-2 h-4 w-4" />
+                              API Usage
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
 
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/admin/api-usage"
-                               className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
-                             >
-                               <Activity className="mr-2 h-4 w-4" />
-                               API Usage
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
-
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/jobs"
-                               className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
-                             >
-                               <FileText className="mr-2 h-4 w-4" />
-                               Jobs
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/jobs"
+                              className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Jobs
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
 
                         <NavigationMenuItem>
                           <NavigationMenuLink asChild>
@@ -261,29 +270,29 @@ const Navigation = () => {
                           </NavigationMenuLink>
                         </NavigationMenuItem>
 
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/admin-blog"
-                               className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
-                             >
-                               <BookOpen className="mr-2 h-4 w-4" />
-                               Blog Admin
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin-blog"
+                              className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
+                            >
+                              <BookOpen className="mr-2 h-4 w-4" />
+                              Blog Admin
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
 
-                         <NavigationMenuItem>
-                           <NavigationMenuLink asChild>
-                             <Link
-                               to="/admin/seeds"
-                               className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
-                             >
-                               <Settings className="mr-2 h-4 w-4" />
-                               Seed Management
-                             </Link>
-                           </NavigationMenuLink>
-                         </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/admin/seeds"
+                              className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              Seed Management
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
                       </>
                     )}
 
