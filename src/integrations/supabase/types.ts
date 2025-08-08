@@ -2424,54 +2424,6 @@ export type Database = {
           },
         ]
       }
-      user_usage_tracking: {
-        Row: {
-          billing_period_end: string
-          billing_period_start: string
-          created_at: string
-          daily_usage_date: string | null
-          dalle_images_used: number
-          gpt_images_used: number | null
-          gpt_images_used_today: number | null
-          id: string
-          image_generations_used: number
-          text_generations_used: number
-          updated_at: string
-          user_email: string | null
-          user_id: string
-        }
-        Insert: {
-          billing_period_end: string
-          billing_period_start: string
-          created_at?: string
-          daily_usage_date?: string | null
-          dalle_images_used?: number
-          gpt_images_used?: number | null
-          gpt_images_used_today?: number | null
-          id?: string
-          image_generations_used?: number
-          text_generations_used?: number
-          updated_at?: string
-          user_email?: string | null
-          user_id: string
-        }
-        Update: {
-          billing_period_end?: string
-          billing_period_start?: string
-          created_at?: string
-          daily_usage_date?: string | null
-          dalle_images_used?: number
-          gpt_images_used?: number | null
-          gpt_images_used_today?: number | null
-          id?: string
-          image_generations_used?: number
-          text_generations_used?: number
-          updated_at?: string
-          user_email?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       vendor_jobs: {
         Row: {
           created_at: string
