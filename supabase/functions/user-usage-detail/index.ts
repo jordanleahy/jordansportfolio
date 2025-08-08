@@ -63,29 +63,34 @@ serve(async (req: Request) => {
       .maybeSingle();
     if (profileErr) throw profileErr;
 
-    // Fetch images within range
-    const { data: images, error: imgErr } = await supabaseAdmin
-      .from('images')
-      .select('id, created_at, estimated_cost, image_url, image_size, image_quality, aspect_ratio, model_used, request_type, function_name, success')
+    // Fetch usage within range from api_usage_tracking
+    const { data: usageRows, error: usageErr } = await supabaseAdmin
+      .from('api_usage_tracking')
+      .select('id, created_at, estimated_cost, request_type, function_name, success, user_id')
       .eq('user_id', body.userId)
       .gte('created_at', dateFrom.toISOString())
       .lte('created_at', dateTo.toISOString());
-    if (imgErr) throw imgErr;
+    if (usageErr) throw usageErr;
+
+    // Filter to image generation operations
+    const imageEvents = (usageRows || []).filter((row: any) =>
+      row.request_type === 'image_generation' || String(row.function_name || '').includes('image')
+    );
 
     // Build daily aggregates
     const byDay = new Map<string, { images: number; cost: number }>();
     let totalImages = 0;
     let totalCost = 0;
 
-    for (const row of images || []) {
+    for (const row of imageEvents || []) {
       const d = new Date(row.created_at);
       const key = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString().slice(0,10);
       if (!byDay.has(key)) byDay.set(key, { images: 0, cost: 0 });
       const e = byDay.get(key)!;
       e.images += 1;
-      e.cost += Number(row.estimated_cost || 0);
+      e.cost += Number((row as any).estimated_cost || 0);
       totalImages += 1;
-      totalCost += Number(row.estimated_cost || 0);
+      totalCost += Number((row as any).estimated_cost || 0);
     }
 
     // Sort daily data
@@ -94,7 +99,7 @@ serve(async (req: Request) => {
       .map(([date, v]) => ({ date, images: v.images, cost: Number(v.cost.toFixed(4)) }));
 
     // Recent items
-    const recent = (images || [])
+    const recent = (imageEvents || [])
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 10);
 

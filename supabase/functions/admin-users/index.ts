@@ -56,20 +56,23 @@ serve(async (req: Request) => {
     if (profilesError) throw profilesError;
 
     // Aggregate image usage per user
-    const { data: imageAgg, error: aggError } = await supabaseAdmin
-      .from('images')
-      .select('user_id, estimated_cost')
+    const { data: usageRows, error: aggError } = await supabaseAdmin
+      .from('api_usage_tracking')
+      .select('user_id, estimated_cost, request_type, function_name, created_at')
       .order('user_id');
 
     if (aggError) throw aggError;
 
     const usageMap = new Map<string, { totalImages: number; totalCost: number }>();
-    for (const row of imageAgg || []) {
-      const uid = row.user_id as string;
+    for (const row of usageRows || []) {
+      const isImageOp = (row as any).request_type === 'image_generation'
+        || String((row as any).function_name || '').includes('image');
+      if (!isImageOp) continue;
+      const uid = (row as any).user_id as string;
       if (!usageMap.has(uid)) usageMap.set(uid, { totalImages: 0, totalCost: 0 });
       const entry = usageMap.get(uid)!;
       entry.totalImages += 1;
-      entry.totalCost += Number(row.estimated_cost || 0);
+      entry.totalCost += Number((row as any).estimated_cost || 0);
     }
 
     const result = (profiles || []).map((p) => ({

@@ -26,7 +26,9 @@ export default function AdminUsers() {
       const { data, error } = await supabase.functions.invoke('admin-users');
       if (error) throw error;
       return data as { users: AdminUserRow[] };
-    }
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
   });
 
   return (

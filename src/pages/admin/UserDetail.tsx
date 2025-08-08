@@ -41,7 +41,9 @@ export default function AdminUserDetail() {
       if (error) throw error;
       return data as UsageDetailResponse;
     },
-    enabled: validId
+    enabled: validId,
+    refetchOnWindowFocus: false,
+    staleTime: 30_000,
   });
 
   const title = data?.user?.full_name ? `${data.user.full_name} - Usage` : 'User Usage';
