@@ -160,7 +160,9 @@ Please incorporate these colors and visual style into the image prompt to ensure
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: 500,
+      reasoning: { effort: 'low' },
+      response_format: { type: 'text' },
+      max_completion_tokens: 1024,
       user: correlationId // Only include user field for tracking
     };
 
