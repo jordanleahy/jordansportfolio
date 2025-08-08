@@ -464,7 +464,7 @@ export default function StoriesDashboard() {
               placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
               value={customThemeDescription}
               onChange={(e) => setCustomThemeDescription(e.target.value)}
-              className="w-full max-w-3xl resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10"
+              className="w-full max-w-3xl h-[80px] resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10"
               disabled={isGeneratingTheme || isProcessing}
             />
           </div>
