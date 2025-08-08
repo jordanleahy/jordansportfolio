@@ -88,12 +88,12 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
 };
 
 const getAspectRatioSize = (aspectRatio: string): string => {
-  // DALL-E 3 only supports these specific sizes
+  // GPT-Image-1 supported sizes
   const sizeMap: Record<string, string> = {
-    '16:9': '1792x1024',  // Landscape
-    '9:16': '1024x1792',  // Portrait
+    '16:9': '1536x1024',  // Landscape
+    '9:16': '1024x1536',  // Portrait
     '4:3': '1024x1024',   // Square (closest to 4:3)
-    '3:4': '1024x1792',   // Portrait (closest to 3:4)
+    '3:4': '1024x1536',   // Portrait (closest to 3:4)
     '1:1': '1024x1024'    // Square
   };
   return sizeMap[aspectRatio] || '1024x1024';
@@ -460,7 +460,7 @@ serve(async (req) => {
             });
 
             // Track successful API usage
-            await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);
+            await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', true, 0.04, userId);
 
             controller.close();
             
@@ -495,7 +495,7 @@ serve(async (req) => {
             }
             
             // Track failed API usage
-            await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', false, 0, userId, error.message);
+            await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', false, 0, userId, error.message);
             
             const errorMessage = JSON.stringify({
               type: 'error',
@@ -527,11 +527,11 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'dall-e-3',
+          model: 'gpt-image-1',
           prompt: prompt,
           size: imageSize,
-          quality: 'hd',
-          response_format: 'b64_json',
+          quality: 'high',
+          output_format: 'png',
           n: 1
         }),
       });
@@ -594,7 +594,7 @@ serve(async (req) => {
         }
       }
 
-      await trackApiUsage(supabase, 'streaming-image-pipeline', 'dall-e-3', true, 0.04, userId);
+      await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', true, 0.04, userId);
 
       return new Response(JSON.stringify({
         success: true,

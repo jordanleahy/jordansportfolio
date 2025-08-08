@@ -129,12 +129,12 @@ export const generateThemeImage = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'dall-e-3',
+        model: 'gpt-image-1',
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'hd',
-        response_format: 'b64_json'
+        quality: 'high',
+        output_format: 'png'
       }),
     });
 
