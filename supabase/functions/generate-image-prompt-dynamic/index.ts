@@ -195,6 +195,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
         system_len: (categoryPrompt.prompt?.length || 0),
         user_len: (userMessage?.length || 0)
       },
+      request_keys: Object.keys(requestBody),
       correlationId
     });
 
