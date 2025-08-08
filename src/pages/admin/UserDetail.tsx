@@ -12,6 +12,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Menu } from "lucide-react";
 import { toast } from "sonner";
+import { useSubscriptionTiers } from "@/hooks/useSubscriptionStatus";
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
@@ -48,7 +49,8 @@ export default function AdminUserDetail() {
   const { id } = useParams<{ id: string }>();
   const validId = !!id && UUID_RE.test(id);
   const [range, setRange] = useState<'7' | '30' | '90'>('30');
-  const [selectedTierId, setSelectedTierId] = useState<string>('8ff79eb0-74dc-4fc2-bc4e-d1d660b9f292');
+  const [selectedTierName, setSelectedTierName] = useState<string>("");
+  const { data: tiers = [] } = useSubscriptionTiers();
 
   const { from, to } = useMemo(() => {
     const to = new Date();
@@ -149,20 +151,29 @@ export default function AdminUserDetail() {
           <CardContent>
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
               <div className="flex-1">
-                <label className="block text-sm mb-1">Tier ID</label>
-                <input
-                  value={selectedTierId}
-                  onChange={(e) => setSelectedTierId(e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2"
-                  placeholder="Subscription Tier UUID"
-                />
+                <label className="block text-sm mb-1">Tier</label>
+                <Select defaultValue={data?.subscription?.tier?.name || undefined} onValueChange={(v) => setSelectedTierName(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiers?.map((t: any) => (
+                      <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <Button
                 onClick={async () => {
                   try {
                     if (!id) return;
+                    const tierNameToUse = selectedTierName || data?.subscription?.tier?.name;
+                    if (!tierNameToUse) {
+                      toast.error('Please select a tier');
+                      return;
+                    }
                     const { data: resp, error } = await supabase.functions.invoke('admin-set-subscription', {
-                      body: { userId: id, tierId: selectedTierId }
+                      body: { userId: id, tierName: tierNameToUse }
                     });
                     if (error) throw error;
                     toast.success('Subscription assigned');

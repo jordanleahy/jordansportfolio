@@ -8,7 +8,8 @@ const corsHeaders = {
 
 type SetSubscriptionRequest = {
   userId: string;
-  tierId: string;
+  tierId?: string;
+  tierName?: string;
 };
 
 serve(async (req: Request) => {
@@ -16,8 +17,8 @@ serve(async (req: Request) => {
 
   try {
     const body = (await req.json()) as SetSubscriptionRequest;
-    if (!body?.userId || !body?.tierId) {
-      return new Response(JSON.stringify({ error: "userId and tierId are required" }), {
+    if (!body?.userId || (!body?.tierId && !body?.tierName)) {
+      return new Response(JSON.stringify({ error: "userId and tierId or tierName are required" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -53,12 +54,18 @@ serve(async (req: Request) => {
       });
     }
 
-    // Verify tier exists and get billing interval and limits
-    const { data: tier, error: tierErr } = await supabaseAdmin
+    // Verify tier exists and get billing interval and limits (by ID or Name)
+    let tierQuery = supabaseAdmin
       .from('subscription_tiers')
-      .select('id, name, billing_interval, max_gpt_images, price_cents')
-      .eq('id', body.tierId)
-      .maybeSingle();
+      .select('id, name, billing_interval, max_gpt_images, price_cents');
+
+    if (body.tierId) {
+      tierQuery = tierQuery.eq('id', body.tierId);
+    } else if (body.tierName) {
+      tierQuery = tierQuery.eq('name', body.tierName);
+    }
+
+    const { data: tier, error: tierErr } = await tierQuery.maybeSingle();
     if (tierErr) throw tierErr;
     if (!tier) throw new Error('Tier not found');
 
@@ -80,7 +87,7 @@ serve(async (req: Request) => {
       .from('user_subscriptions')
       .upsert({
         user_id: body.userId,
-        tier_id: body.tierId,
+        tier_id: tier.id,
         status: 'active',
         current_period_start: periodStart,
         current_period_end: periodEnd,
