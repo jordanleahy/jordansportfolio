@@ -180,9 +180,12 @@ serve(async (req) => {
 
     const tier = subscription.tier as any;
     
-    // Get limits from tier (with fallbacks for backward compatibility)
-    const monthlyLimit = tier.max_gpt_images_monthly || tier.max_gpt_images || 0;
-    const dailyLimit = tier.max_gpt_images_daily || monthlyLimit; // If no daily limit, use monthly as fallback
+    // Daily-focused limits: free tier = 5 per day, monthly = daysInMonth * daily
+    const isFreeTier = (tier?.price_cents ?? 0) === 0;
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const freeDailyLimit = 5;
+    const dailyLimit = isFreeTier ? freeDailyLimit : (tier.max_gpt_images_daily || tier.max_gpt_images || 0);
+    const monthlyLimit = isFreeTier ? freeDailyLimit * daysInMonth : (tier.max_gpt_images_monthly || tier.max_gpt_images || 0);
     
     // Get current usage
     const currentMonthlyUsed = usage.gpt_images_used || 0;

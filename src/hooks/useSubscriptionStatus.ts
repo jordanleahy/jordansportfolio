@@ -65,7 +65,7 @@ export const useSubscriptionStatus = () => {
       const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-      // Fetch per-day usage rows for the month to support "1 per day" logic
+      // Fetch per-day usage rows for the month to support daily logic
       const { data: dailyUsageRows, error: dailyErr } = await supabase
         .from('user_usage_tracking')
         .select('daily_usage_date, gpt_images_used_today')
@@ -74,18 +74,21 @@ export const useSubscriptionStatus = () => {
         .lte('daily_usage_date', periodEnd.toISOString().slice(0, 10));
       if (dailyErr && dailyErr.code !== 'PGRST116') throw dailyErr;
 
-      // Days used = count of distinct dates in month where at least one free image was generated
+      // Days used in month (for legacy views) and today's usage for daily cap
       const daysUsed = (dailyUsageRows || [])
         .filter(r => (r as any).gpt_images_used_today && (r as any).gpt_images_used_today > 0)
         .reduce((set, r) => set.add((r as any).daily_usage_date), new Set<string>()).size;
+      const todayStr = now.toISOString().slice(0, 10);
+      const imagesUsedToday = (dailyUsageRows || []).find(r => (r as any).daily_usage_date === todayStr)?.gpt_images_used_today || 0;
 
-      // Determine tier: if free (price 0 or no subscription), cap is 30 per month; otherwise use tier limit
+      // Determine tier: if free (price 0 or no subscription), cap is 5 per day; otherwise use tier limit
       const isFreeTier = !subscription || (subscription as any)?.tier?.price_cents === 0;
-      const totalCredits = isFreeTier ? 30 : ((subscription as any)?.tier?.max_gpt_images || 0);
+      const totalCredits = isFreeTier ? 5 : ((subscription as any)?.tier?.max_gpt_images || 0);
 
-      // Compose usage object compatible with existing UI (gpt_images_used represents days used for free tier)
+      // Compose usage object compatible with existing UI
       const usage = {
-        gpt_images_used: isFreeTier ? daysUsed : daysUsed, // keep same metric; UI shows remaining based on totalCredits
+        // For free tier, show how many images used today (daily-focused)
+        gpt_images_used: isFreeTier ? imagesUsedToday : daysUsed,
         billing_period_start: periodStart.toISOString(),
         billing_period_end: periodEnd.toISOString(),
         user_id: user.id,
@@ -110,7 +113,7 @@ export const useSubscriptionStatus = () => {
               id: 'free-tier',
               name: 'Free Plan',
               price_cents: 0,
-              billing_interval: 'month',
+              billing_interval: 'day',
               max_gpt_images: totalCredits,
               stripe_price_id: '',
               is_active: true
@@ -120,7 +123,7 @@ export const useSubscriptionStatus = () => {
         subscription: computedSubscription,
         usage: usage,
         hasActiveSubscription: true,
-        isWithinLimits: { gptImages: daysUsed < totalCredits }
+        isWithinLimits: { gptImages: (isFreeTier ? imagesUsedToday : daysUsed) < totalCredits }
       };
     },
     enabled: true,
