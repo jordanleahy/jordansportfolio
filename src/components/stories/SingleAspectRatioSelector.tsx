@@ -8,11 +8,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+ } from '@/components/ui/dropdown-menu';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useToast } from '@/hooks/use-toast';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,
@@ -20,6 +22,11 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   onPostsChange,
   isProcessing,
 }) => {
+  const { toast } = useToast();
+  const { data: subData } = useSubscriptionStatus();
+  
+  // Check if user has remaining credits
+  const hasCredits = subData ? (subData.subscription?.tier?.max_gpt_images || 0) - (subData.usage?.gpt_images_used || 0) > 0 : true;
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -27,6 +34,15 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   }));
 
   const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
+    if (!hasCredits) {
+      toast({
+        title: "No credits remaining",
+        description: "You've used all your daily image generation credits. Credits reset at midnight.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const response = await onGenerateImage(
       post.id,
       aspectRatio,
@@ -74,8 +90,9 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
             <DropdownMenuItem
               key={`generate-${option.value}`}
               onClick={() => handleGenerateImage(option.value)}
-              className="cursor-pointer text-sm"
-              disabled={isGenerating}
+              className={`cursor-pointer text-sm ${!hasCredits ? 'opacity-50' : ''}`}
+              disabled={isGenerating || !hasCredits}
+              title={!hasCredits ? "No credits remaining" : `Generate ${option.label} image`}
             >
               {isGeneratingAspectRatio ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
