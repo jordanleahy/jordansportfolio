@@ -118,29 +118,33 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
 
 export const useUsageSummary = () => {
   return useQuery({
-    queryKey: ['usage-summary-aggregated'],
+    queryKey: ['usage-summary-live'],
     queryFn: async () => {
       const now = new Date();
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const monthStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const weekStr = weekStart.toISOString().split('T')[0];
-      const monthStr = monthStart.toISOString().split('T')[0];
 
-      // Helper to fetch and reduce aggregates
-      const fetchRange = async (startDate: string) => {
-        const { data, error } = await supabase
-          .from('api_usage_daily_aggregates')
-          .select('date, user_id, function_name, total_requests, total_success, total_tokens, total_estimated_cost')
-          .gte('date', startDate)
-          .order('date', { ascending: true });
+      // Helper to fetch and reduce live tracking data
+      const fetchRange = async (startDate: Date, endDate?: Date) => {
+        let query = supabase
+          .from('api_usage_tracking')
+          .select('*')
+          .gte('created_at', startDate.toISOString());
+        
+        if (endDate) {
+          query = query.lte('created_at', endDate.toISOString());
+        }
+        
+        const { data, error } = await query;
         if (error) throw error;
+        
         const totals = (data || []).reduce(
           (acc, r) => {
-            acc.totalCost += Number(r.total_estimated_cost || 0);
-            acc.totalRequests += Number(r.total_requests || 0);
-            acc.totalTokens += Number(r.total_tokens || 0);
-            acc.successes += Number(r.total_success || 0);
+            acc.totalCost += Number(r.estimated_cost || 0);
+            acc.totalRequests += 1;
+            acc.totalTokens += Number(r.total_tokens || r.tokens_used || 0);
+            if (r.success) acc.successes += 1;
             return acc;
           },
           { totalCost: 0, totalRequests: 0, totalTokens: 0, successes: 0 }
@@ -149,29 +153,40 @@ export const useUsageSummary = () => {
         return { ...totals, successRate, rows: data || [] };
       };
 
-      const todayAgg = await fetchRange(todayStr);
-      const weekAgg = await fetchRange(weekStr);
-      const monthAgg = await fetchRange(monthStr);
+      // Get today's end time for precise today calculation
+      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+      
+      const todayAgg = await fetchRange(todayStart, todayEnd);
+      const weekAgg = await fetchRange(weekStart);
+      const monthAgg = await fetchRange(monthStart);
 
-      // Top users and functions from month rows
+      // Top users and functions from month data
       const userMap = new Map<string, { cost: number; requests: number }>();
       const funcMap = new Map<string, { cost: number; requests: number }>();
+      
       for (const r of monthAgg.rows) {
-        const uid = (r as any).user_id || '(unknown)';
-        const fm = (r as any).function_name || '(unknown)';
-        const cost = Number((r as any).total_estimated_cost || 0);
-        const reqs = Number((r as any).total_requests || 0);
+        const uid = r.user_id || '(unknown)';
+        const fm = r.function_name || '(unknown)';
+        const cost = Number(r.estimated_cost || 0);
+        const reqs = 1;
+        
         const u = userMap.get(uid) || { cost: 0, requests: 0 };
         u.cost += cost; u.requests += reqs; userMap.set(uid, u);
+        
         const f = funcMap.get(fm) || { cost: 0, requests: 0 };
         f.cost += cost; f.requests += reqs; funcMap.set(fm, f);
       }
 
-      const topUsersIds = Array.from(userMap.keys());
+      // Get user profiles for top users
+      const topUsersIds = Array.from(userMap.keys()).filter(id => id !== '(unknown)');
       const { data: profiles } = topUsersIds.length > 0
         ? await supabase.from('profiles').select('user_id, email, full_name').in('user_id', topUsersIds)
-        : { data: [] as any[] } as any;
-      const profileMap = (profiles || []).reduce((acc, p) => { acc[p.user_id] = p; return acc; }, {} as Record<string, any>);
+        : { data: [] as any[] };
+      
+      const profileMap = (profiles || []).reduce((acc, p) => { 
+        acc[p.user_id] = p; 
+        return acc; 
+      }, {} as Record<string, any>);
 
       const top_users = Array.from(userMap.entries())
         .map(([user_id, v]) => ({
@@ -185,8 +200,13 @@ export const useUsageSummary = () => {
         .slice(0, 3);
 
       const top_functions = Array.from(funcMap.entries())
-        .map(([function_name, v]) => ({ function_name, total_cost: v.cost, total_requests: v.requests }))
-        .sort((a, b) => b.total_cost - a.total_cost);
+        .map(([function_name, v]) => ({ 
+          function_name, 
+          total_cost: v.cost, 
+          total_requests: v.requests 
+        }))
+        .sort((a, b) => b.total_cost - a.total_cost)
+        .slice(0, 5);
 
       const summary: UsageSummary = {
         total_cost_today: todayAgg.totalCost,

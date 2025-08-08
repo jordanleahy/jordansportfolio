@@ -30,31 +30,29 @@ export function useAggregatedChartData(filters: UsageFilters = {}): { data?: Usa
       const { data, error } = await query;
       if (error) throw error;
 
-      // If no aggregates yet, fallback to computing from tracking table directly
-      let rows = data as any[];
-      if (!rows || rows.length === 0) {
-        let evq = (supabase as any)
-          .from("api_usage_tracking")
-          .select("created_at, request_type, function_name, model_used, estimated_cost, success")
-          .gte("created_at", `${startStr}T00:00:00.000Z`)
-          .lte("created_at", `${endStr}T23:59:59.999Z`)
-          .order("created_at", { ascending: true });
-        if (filters.userId) evq = evq.eq("user_id", filters.userId);
-        if (filters.functionName) evq = evq.eq("function_name", filters.functionName);
-        if (filters.requestType) evq = evq.eq("request_type", filters.requestType);
-        const { data: evs, error: evErr } = await evq;
-        if (evErr) throw evErr;
-        // Transform events to pseudo-aggregate rows for the reduction below
-        rows = (evs || []).map((e: any) => ({
-          date: toDateString(new Date(e.created_at)),
-          request_type: e.request_type,
-          function_name: e.function_name,
-          model_used: e.model_used,
-          total_requests: 1,
-          total_success: e.success ? 1 : 0,
-          total_estimated_cost: Number(e.estimated_cost || 0),
-        }));
-      }
+      // Always use tracking table for live data
+      let evq = (supabase as any)
+        .from("api_usage_tracking")
+        .select("created_at, request_type, function_name, model_used, estimated_cost, success")
+        .gte("created_at", `${startStr}T00:00:00.000Z`)
+        .lte("created_at", `${endStr}T23:59:59.999Z`)
+        .order("created_at", { ascending: true });
+      if (filters.userId) evq = evq.eq("user_id", filters.userId);
+      if (filters.functionName) evq = evq.eq("function_name", filters.functionName);
+      if (filters.requestType) evq = evq.eq("request_type", filters.requestType);
+      const { data: evs, error: evErr } = await evq;
+      if (evErr) throw evErr;
+      
+      // Transform tracking data to aggregate format for chart processing
+      const rows = (evs || []).map((e: any) => ({
+        date: toDateString(new Date(e.created_at)),
+        request_type: e.request_type,
+        function_name: e.function_name,
+        model_used: e.model_used,
+        total_requests: 1,
+        total_success: e.success ? 1 : 0,
+        total_estimated_cost: Number(e.estimated_cost || 0),
+      }));
 
       // Initialize map for each day in range to ensure contiguous dates
       const dailyMap = new Map<string, {
