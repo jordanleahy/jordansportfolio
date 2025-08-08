@@ -207,8 +207,8 @@ export function extractUsageFromOpenAIResponse(response: any): {
   const totalTokens = usage.total_tokens || promptTokens + completionTokens;
 
   // Calculate cost based on model (simplified - should be model-specific)
-  const inputCost = promptTokens * (0.000150 / 1000); // GPT-4o-mini input cost
-  const outputCost = completionTokens * (0.000600 / 1000); // GPT-4o-mini output cost
+  const inputCost = promptTokens * (0.000150 / 1000); // gpt-5-mini input cost (per 1k tokens)
+  const outputCost = completionTokens * (0.000600 / 1000); // gpt-5-mini output cost (per 1k tokens)
   const estimatedCost = inputCost + outputCost;
 
   return {

@@ -200,7 +200,7 @@ Return the response as a JSON object with this structure:
 
     // Enhanced OpenAI request with correlation tracking
     const requestBody = enhanceOpenAIRequestBody({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages: [
         { role: 'system', content: systemPromptData.prompt_text },
         { role: 'user', content: userPrompt }
@@ -269,7 +269,7 @@ Return the response as a JSON object with this structure:
     await trackOpenAIUsage({
       userId,
       functionName: 'cover-letter-agent',
-      model: 'gpt-4o-mini',
+       model: 'gpt-5-mini',
       requestType: 'text_generation',
       success,
       estimatedCost,
@@ -311,7 +311,7 @@ Return the response as a JSON object with this structure:
         await trackOpenAIUsage({
           userId,
           functionName: 'cover-letter-agent',
-          model: 'gpt-4o-mini',
+          model: 'gpt-5-mini',
           requestType: 'text_generation',
           success: false,
           estimatedCost: 0,

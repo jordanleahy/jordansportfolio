@@ -201,8 +201,8 @@ Return only the cleaned JSON:`;
   console.log('📋 Prompt length:', prompt.length);
 
   try {
-    const requestBody = {
-      model: 'gpt-4o-mini',
+     const requestBody = {
+      model: 'gpt-5-mini',
       messages: [
         {
           role: 'system',
@@ -270,7 +270,7 @@ Return only the cleaned JSON:`;
         await trackOpenAIUsage({
           userId,
           functionName: 'process-theme-json',
-          model: 'gpt-4o-mini',
+          model: 'gpt-5-mini',
           requestType: 'text_generation',
           success: true,
           estimatedCost: usageData.estimatedCost,

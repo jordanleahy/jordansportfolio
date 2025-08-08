@@ -69,6 +69,7 @@ function computeImageGenerationCost(size?: string, quality: string = 'standard')
 }
 
 const TEXT_PRICING: Record<string, { input: number; output: number }> = {
+  'gpt-5-mini': { input: 0.15, output: 0.60 }, // per 1M tokens (placeholder, align with billing)
   'gpt-4o-mini': { input: 0.15, output: 0.60 }, // per 1M tokens
   'gpt-4o': { input: 5, output: 15 },
   'o4-mini-2025-04-16': { input: 1, output: 3 },

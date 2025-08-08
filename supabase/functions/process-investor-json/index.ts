@@ -71,10 +71,10 @@ serve(async (req) => {
     console.error('Error in process-investor-json function:', error);
     await trackAgentUsage(startTime, false);
     
-    return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({ 
       success: false,
       errors: [error.message],
-      modelUsed: 'gpt-4o-mini',
+      modelUsed: 'gpt-5-mini',
       processingTimeMs: Date.now() - startTime
     }), {
       status: 500,
@@ -101,7 +101,7 @@ async function trackAgentUsage(startTime: number, success: boolean) {
           metrics: {
             latencyMs: processingTime,
             errorRate: success ? 0 : 1,
-            modelUsed: 'gpt-4o-mini'
+            modelUsed: 'gpt-5-mini'
           }
         })
         .eq('id', agent.id);
@@ -138,7 +138,7 @@ async function processInvestorJsonWithAI(rawJson: string, startTime: number, use
       fixes: result.fixes || [],
       warnings,
       errors,
-      modelUsed: 'gpt-4o-mini',
+       modelUsed: 'gpt-5-mini',
       processingTimeMs: processingTime
     };
 
@@ -152,7 +152,7 @@ async function processInvestorJsonWithAI(rawJson: string, startTime: number, use
       fixes,
       warnings,
       errors,
-      modelUsed: 'gpt-4o-mini',
+       modelUsed: 'gpt-5-mini',
       processingTimeMs: Date.now() - startTime
     };
   }
@@ -221,7 +221,7 @@ ${rawJson}`;
   try {
     // Enhanced OpenAI request with correlation tracking
     const requestBody = enhanceOpenAIRequestBody({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages: [
         { 
           role: 'system', 
@@ -267,7 +267,7 @@ ${rawJson}`;
       await trackOpenAIUsage({
         userId,
         functionName: 'process-investor-json',
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         requestType: 'text_generation',
         success: true,
         estimatedCost: usageData.estimatedCost,

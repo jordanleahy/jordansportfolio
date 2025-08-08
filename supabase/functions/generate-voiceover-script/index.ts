@@ -140,7 +140,7 @@ Please transform this content into a teleprompter-style voiceover script optimiz
 
     // Enhanced OpenAI request with correlation tracking
     const requestBody = enhanceOpenAIRequestBody({
-      model: 'gpt-4o',
+      model: 'gpt-5-mini',
       messages: [
         { role: 'system', content: selectedPrompt.prompt_text },
         { role: 'user', content: userPrompt }
@@ -192,7 +192,7 @@ Please transform this content into a teleprompter-style voiceover script optimiz
       await trackOpenAIUsage({
         userId,
         functionName: 'generate-voiceover-script',
-        model: 'gpt-4o',
+         model: 'gpt-5-mini',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -236,7 +236,7 @@ Please transform this content into a teleprompter-style voiceover script optimiz
         await trackOpenAIUsage({
           userId,
           functionName: 'generate-voiceover-script',
-          model: 'gpt-4o',
+          model: 'gpt-5-mini',
           requestType: 'text_generation',
           success: false,
           estimatedCost: 0,

@@ -90,7 +90,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: systemContent },
           { role: 'user', content: finalPrompt }
@@ -129,7 +129,7 @@ serve(async (req) => {
             original_prompt: prompt,
             content_type: type,
             agent: 'General Content Generator',
-            model: 'gpt-4o-mini',
+            model: 'gpt-5-mini',
             generated_at: new Date().toISOString()
           },
           hit_count: 1,

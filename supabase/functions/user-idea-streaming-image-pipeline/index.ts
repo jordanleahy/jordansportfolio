@@ -59,7 +59,7 @@ JSON STRUCTURE REQUIRED:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${cleanDescription}` }

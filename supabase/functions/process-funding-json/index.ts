@@ -67,10 +67,10 @@ serve(async (req) => {
     console.error('Error in process-funding-json function:', error);
     await trackAgentUsage(startTime, false);
     
-    return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({ 
       success: false,
       errors: [error.message],
-      modelUsed: 'gpt-4o-mini',
+      modelUsed: 'gpt-5-mini',
       processingTimeMs: Date.now() - startTime
     }), {
       status: 500,
@@ -97,7 +97,7 @@ async function trackAgentUsage(startTime: number, success: boolean) {
           metrics: {
             latencyMs: processingTime,
             errorRate: success ? 0 : 1,
-            modelUsed: 'gpt-4o-mini'
+            modelUsed: 'gpt-5-mini'
           }
         })
         .eq('id', agent.id);
@@ -114,7 +114,7 @@ async function processFundingJsonWithAI(rawJson: string, startTime: number): Pro
   const errors: string[] = [];
 
   try {
-    console.log('Using GPT-4o-mini for specialized funding data processing...');
+    console.log('Using gpt-5-mini for specialized funding data processing...');
     
     const result = await aiProcessFundingData(rawJson);
     
@@ -153,7 +153,7 @@ async function processFundingJsonWithAI(rawJson: string, startTime: number): Pro
       fixes: result.fixes || [],
       warnings,
       errors,
-      modelUsed: 'gpt-4o-mini',
+       modelUsed: 'gpt-5-mini',
       processingTimeMs: processingTime
     };
 
@@ -167,7 +167,7 @@ async function processFundingJsonWithAI(rawJson: string, startTime: number): Pro
       fixes,
       warnings,
       errors,
-      modelUsed: 'gpt-4o-mini',
+       modelUsed: 'gpt-5-mini',
       processingTimeMs: Date.now() - startTime
     };
   }
@@ -286,7 +286,7 @@ ${rawJson}`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         messages: [
           { 
             role: 'system', 
