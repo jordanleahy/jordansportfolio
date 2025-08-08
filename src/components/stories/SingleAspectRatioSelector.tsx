@@ -66,14 +66,14 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         <Button
           variant="ghost"
           size="sm"
-          title="Image actions"
-          className="h-8 w-8 p-0"
-          disabled={isGenerating}
+          title={!hasCredits ? "No credits remaining" : "Image actions"}
+          className={`h-8 w-8 p-0 ${!hasCredits ? 'opacity-50' : ''}`}
+          disabled={isGenerating || !hasCredits}
         >
           {isGenerating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <ImageIcon className="h-4 w-4" />
+            <ImageIcon className={`h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
           )}
         </Button>
       </DropdownMenuTrigger>
