@@ -37,8 +37,8 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
    const { handleMouseEnter, handleFocus } = useNavigationPreloading();
    const { openSettings } = useModal();
  
-   // Usage summary (unified)
-   const { data: usageData, isLoading: usageLoading, totalCredits, usedCredits, remainingCredits, percentUsed } = useUsageSummary();
+  // Usage summary (unified) - always call hook to maintain consistent hook order
+  const { data: usageData, isLoading: usageLoading, totalCredits, usedCredits, remainingCredits, percentUsed } = useUsageSummary();
   // Simplified active state logic
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/" && !location.hash;

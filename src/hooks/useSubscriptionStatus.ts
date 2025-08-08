@@ -66,19 +66,19 @@ export const useSubscriptionStatus = () => {
       const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-      // Fetch per-day usage rows for the month (legacy monthly views)
-      const { data: dailyUsageRows, error: dailyErr } = await supabase
-        .from('user_usage_tracking')
-        .select('daily_usage_date, gpt_images_used_today')
+      // Get current month's usage count from api_usage_tracking
+      const { count: monthlyUsage, error: usageErr } = await supabase
+        .from('api_usage_tracking')
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .gte('daily_usage_date', periodStart.toISOString().slice(0, 10))
-        .lte('daily_usage_date', periodEnd.toISOString().slice(0, 10));
-      if (dailyErr && dailyErr.code !== 'PGRST116') throw dailyErr;
+        .eq('success', true)
+        .in('request_type', ['image_generation', 'gpt_image_generation'])
+        .gte('created_at', periodStart.toISOString())
+        .lte('created_at', periodEnd.toISOString());
+      if (usageErr && usageErr.code !== 'PGRST116') throw usageErr;
 
-      // Days used in month for paid tiers (legacy)
-      const daysUsed = (dailyUsageRows || [])
-        .filter(r => (r as any).gpt_images_used_today && (r as any).gpt_images_used_today > 0)
-        .reduce((set, r) => set.add((r as any).daily_usage_date), new Set<string>()).size;
+      // Monthly usage count for all tiers
+      const monthlyImageUsage = monthlyUsage || 0;
 
       // Accurate daily usage for free tier: count successful image generations today from api_usage_tracking
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -112,8 +112,8 @@ export const useSubscriptionStatus = () => {
 
       // Compose usage object compatible with existing UI
       const usage = {
-        // For free tier, show how many images used today (daily-focused)
-        gpt_images_used: isFreeTier ? imagesUsedToday : daysUsed,
+        // For free tier, show how many images used today; for paid tiers, show monthly usage
+        gpt_images_used: isFreeTier ? imagesUsedToday : monthlyImageUsage,
         billing_period_start: periodStart.toISOString(),
         billing_period_end: periodEnd.toISOString(),
         user_id: user.id,
@@ -148,7 +148,7 @@ export const useSubscriptionStatus = () => {
         subscription: computedSubscription,
         usage: usage,
         hasActiveSubscription: true,
-        isWithinLimits: { gptImages: (isFreeTier ? imagesUsedToday : daysUsed) < totalCredits }
+        isWithinLimits: { gptImages: (isFreeTier ? imagesUsedToday : monthlyImageUsage) < totalCredits }
       };
     },
     enabled: true,
