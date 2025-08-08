@@ -458,7 +458,7 @@ export default function StoriesDashboard() {
         <Section id="hero" className="min-h-[88vh] py-0 flex flex-col items-center justify-center">
           {/* Hero Header Section */}
           <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-6 min-h-[40vh] flex items-center justify-center">
-            <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
+            <div className="absolute top-0 left-0 right-0 h-[200px] bg-grid-small-black/[0.02] bg-grid-pattern" />
             <Textarea
               id="theme-description"
               placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
