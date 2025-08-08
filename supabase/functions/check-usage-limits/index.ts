@@ -91,7 +91,61 @@ serve(async (req) => {
       throw new Error(`Invalid usage type: ${usage_type}. Only 'gpt_image_generation' is supported.`);
     }
 
-    // Get user subscription
+    // Ensure admin users are auto-assigned to the hidden Admin tier
+    let isAdminUser = false;
+    try {
+      const { data: roleRow } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+      isAdminUser = roleRow?.role === 'admin';
+    } catch (_e) {
+      // ignore if user_roles doesn't exist
+      isAdminUser = false;
+    }
+
+    if (isAdminUser) {
+      // Find Admin tier (created via migration), fallback to dynamic limits if missing
+      const { data: adminTier } = await supabaseClient
+        .from('subscription_tiers')
+        .select('*')
+        .eq('name', 'Admin')
+        .limit(1)
+        .single();
+
+      // Upsert user_subscriptions to point to Admin tier
+      if (adminTier?.id) {
+        const { data: existingSub } = await supabaseClient
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        if (existingSub) {
+          await supabaseClient
+            .from('user_subscriptions')
+            .update({
+              tier_id: adminTier.id,
+              status: 'active',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingSub.id);
+        } else {
+          await supabaseClient
+            .from('user_subscriptions')
+            .insert({
+              user_id: userId,
+              tier_id: adminTier.id,
+              status: 'active',
+              current_period_start: new Date().toISOString(),
+              current_period_end: null,
+            });
+        }
+      }
+    }
+
+    // Get user subscription (after potential admin auto-assignment)
     const { data: subscription, error: subError } = await supabaseClient
       .from('user_subscriptions')
       .select(`
@@ -179,13 +233,27 @@ serve(async (req) => {
     }
 
     const tier = subscription.tier as any;
-    
-    // Daily-focused limits: free tier = 5 per day, monthly = daysInMonth * daily
-    const isFreeTier = (tier?.price_cents ?? 0) === 0;
+
+    // Determine limits with special handling:
+    // - If tier provides explicit daily/monthly, use them
+    // - Otherwise, if price is 0 (Free), use free defaults
+    // - Admin tier should rely on explicit values (set to high limits)
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const freeDailyLimit = 5;
-    const dailyLimit = isFreeTier ? freeDailyLimit : (tier.max_gpt_images_daily || tier.max_gpt_images || 0);
-    const monthlyLimit = isFreeTier ? freeDailyLimit * daysInMonth : (tier.max_gpt_images_monthly || tier.max_gpt_images || 0);
+
+    const hasExplicitDaily = typeof tier?.max_gpt_images_daily === 'number' && tier.max_gpt_images_daily !== null;
+    const hasExplicitMonthly = typeof tier?.max_gpt_images_monthly === 'number' && tier.max_gpt_images_monthly !== null;
+
+    const isFreePriced = (tier?.price_cents ?? 0) === 0;
+    const isAdminTier = (tier?.name ?? '').toLowerCase() === 'admin';
+
+    const dailyLimit = hasExplicitDaily
+      ? tier.max_gpt_images_daily
+      : (isFreePriced && !isAdminTier ? freeDailyLimit : (tier?.max_gpt_images || 0));
+
+    const monthlyLimit = hasExplicitMonthly
+      ? tier.max_gpt_images_monthly
+      : (isFreePriced && !isAdminTier ? freeDailyLimit * daysInMonth : (tier?.max_gpt_images || 0));
     
     // Get current usage
     const currentMonthlyUsed = usage.gpt_images_used || 0;
