@@ -228,9 +228,7 @@ ${rawJson}`;
           content: 'You are an expert data processor specializing in investment firm data. Extract and clean investor data according to the schema. Return only valid JSON.' 
         },
         { role: 'user', content: prompt }
-      ],
-      temperature: 1,
-      max_completion_tokens: 4000
+      ]
     }, correlationId);
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({

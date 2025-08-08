@@ -101,15 +101,11 @@ Create a detailed image generation prompt for this ${theme} theme content.`;
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }
-    ],
-    temperature: 1,
-    max_completion_tokens: 500
+    ]
   };
 
   logger.info('OpenAI chat request prepared', {
     model: requestBody.model,
-    temperature: requestBody.temperature,
-    max_completion_tokens: requestBody.max_completion_tokens,
     systemPromptLength: systemPrompt.length,
     userPromptLength: userPrompt.length,
     correlationId
@@ -138,8 +134,8 @@ Create a detailed image generation prompt for this ${theme} theme content.`;
         processingTimeMs: processingTime,
         requestModel: requestBody.model,
         requestParams: {
-          temperature: requestBody.temperature,
-          max_completion_tokens: requestBody.max_completion_tokens
+          model: requestBody.model,
+          messages: requestBody.messages
         }
       });
       throw new Error(`OpenAI API error: ${response.status} - ${errorBody}`);

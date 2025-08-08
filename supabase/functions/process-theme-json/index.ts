@@ -212,9 +212,7 @@ Return only the cleaned JSON:`;
           role: 'user',
           content: prompt
         }
-      ],
-      temperature: 1,
-      max_completion_tokens: 3000,
+      ]
     };
     
     console.log('📤 Sending request to OpenAI...');

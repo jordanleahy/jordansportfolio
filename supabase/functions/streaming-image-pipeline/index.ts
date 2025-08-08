@@ -77,9 +77,7 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
-      ],
-      temperature: 1,
-      max_completion_tokens: 500
+      ]
     }),
   });
 

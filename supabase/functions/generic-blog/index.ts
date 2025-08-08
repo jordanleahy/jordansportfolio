@@ -113,9 +113,8 @@ Requirements:
             content: 'You are an expert healthcare content strategist with deep knowledge of clinical documentation, medical coding, and healthcare operations. Transform social media posts into comprehensive, accurate healthcare blog posts. Focus on expanding existing content with specific healthcare insights rather than generic text. Always respond with valid JSON only.' 
           },
           { role: 'user', content: prompt }
-        ],
-        temperature: 1,
-        max_completion_tokens: 2000,
+        ]
+      }),
       }),
     });
 

@@ -402,9 +402,7 @@ Return only valid JSON:`;
           role: 'user',
           content: prompt
         }
-      ],
-      temperature: 1,
-      max_completion_tokens: 2000,
+      ]
     }),
   });
 

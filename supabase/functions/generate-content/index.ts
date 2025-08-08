@@ -94,9 +94,7 @@ serve(async (req) => {
         messages: [
           { role: 'system', content: systemContent },
           { role: 'user', content: finalPrompt }
-        ],
-        temperature: 1,
-        max_completion_tokens: 2000,
+        ]
       }),
     });
 

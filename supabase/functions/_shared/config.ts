@@ -12,24 +12,8 @@ export const OPENAI_CONFIG = {
     LEGACY_GPT4O: 'gpt-4o',
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
   },
-  TEMPERATURE: {
-    DETERMINISTIC: 1,
-    FOCUSED: 1,
-    LOW_CREATIVE: 1,
-    BALANCED: 1,
-    HIGH_CREATIVE: 1,
-    CREATIVE: 1,
-  },
-  MAX_COMPLETION_TOKENS: {
-    SHORT_RESPONSE: 500,
-    MEDIUM_RESPONSE: 2000,
-    LONG_RESPONSE: 2500,
-    COMPREHENSIVE: 4000,
-  },
   // Default model for theme generation
   DEFAULT_THEME_MODEL: 'gpt-5-mini',
-  DEFAULT_THEME_TEMPERATURE: 1,
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 3000,
 } as const;
 
 // Image Generation Configuration
