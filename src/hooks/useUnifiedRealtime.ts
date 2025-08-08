@@ -77,6 +77,17 @@ export const useUnifiedRealtime = ({
         case 'vendors':
           handleVendorUpdate(eventType, data);
           break;
+        case 'api_usage_tracking': {
+          if (eventType === 'INSERT') {
+            const rec = data.new as any;
+            const rt = rec?.request_type;
+            if (rec?.success && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
+              // Successful image generation – invalidate credits cache
+              queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+            }
+          }
+          break;
+        }
       }
     };
 

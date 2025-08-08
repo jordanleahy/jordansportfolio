@@ -65,7 +65,7 @@ export const useSubscriptionStatus = () => {
       const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-      // Fetch per-day usage rows for the month to support daily logic
+      // Fetch per-day usage rows for the month (legacy monthly views)
       const { data: dailyUsageRows, error: dailyErr } = await supabase
         .from('user_usage_tracking')
         .select('daily_usage_date, gpt_images_used_today')
@@ -74,12 +74,36 @@ export const useSubscriptionStatus = () => {
         .lte('daily_usage_date', periodEnd.toISOString().slice(0, 10));
       if (dailyErr && dailyErr.code !== 'PGRST116') throw dailyErr;
 
-      // Days used in month (for legacy views) and today's usage for daily cap
+      // Days used in month for paid tiers (legacy)
       const daysUsed = (dailyUsageRows || [])
         .filter(r => (r as any).gpt_images_used_today && (r as any).gpt_images_used_today > 0)
         .reduce((set, r) => set.add((r as any).daily_usage_date), new Set<string>()).size;
-      const todayStr = now.toISOString().slice(0, 10);
-      const imagesUsedToday = (dailyUsageRows || []).find(r => (r as any).daily_usage_date === todayStr)?.gpt_images_used_today || 0;
+
+      // Accurate daily usage for free tier: count successful image generations today from api_usage_tracking
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+      const { count: successCount, error: usageCountErr } = await (supabase as any)
+        .from('api_usage_tracking')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('success', true)
+        .in('request_type', ['image_generation', 'gpt_image_generation'])
+        .gte('created_at', todayStart.toISOString())
+        .lte('created_at', todayEnd.toISOString());
+      let imagesUsedToday = 0;
+      if (usageCountErr) {
+        // Fallback to images table (RLS allows user to view own records)
+        const { count: imgCount } = await (supabase as any)
+          .from('images')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('success', true)
+          .gte('created_at', todayStart.toISOString())
+          .lte('created_at', todayEnd.toISOString());
+        imagesUsedToday = imgCount || 0;
+      } else {
+        imagesUsedToday = successCount || 0;
+      }
 
       // Determine tier: if free (price 0 or no subscription), cap is 5 per day; otherwise use tier limit
       const isFreeTier = !subscription || (subscription as any)?.tier?.price_cents === 0;
