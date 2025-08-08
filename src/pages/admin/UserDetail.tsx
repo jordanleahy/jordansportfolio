@@ -51,6 +51,7 @@ export default function AdminUserDetail() {
   const [range, setRange] = useState<'7' | '30' | '90'>('30');
   const [selectedTierName, setSelectedTierName] = useState<string>("");
   const { data: tiers = [] } = useSubscriptionTiers();
+  const [saving, setSaving] = useState(false);
 
   const { from, to } = useMemo(() => {
     const to = new Date();
@@ -122,6 +123,7 @@ export default function AdminUserDetail() {
           <div className="flex items-center gap-2">
             <Menu className="h-5 w-5 text-muted-foreground" />
             <h1 className="text-2xl font-bold">{data?.user?.full_name || 'User'}</h1>
+            {saving && <span className="text-xs text-muted-foreground">Saving…</span>}
           </div>
         </div>
 
