@@ -455,7 +455,7 @@ export default function StoriesDashboard() {
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
-        <Section id="hero" className="min-h-[88vh] py-0 flex flex-col items-center justify-center">
+        <Section id="hero" className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 flex flex-col items-center justify-center">
           {/* ChatGPT-like input */}
           <div className="w-full max-w-3xl mx-auto">
             <div className="flex items-end gap-3 rounded-3xl border bg-background shadow-sm p-3 focus-within:ring-2 focus-within:ring-primary/30">
@@ -531,7 +531,7 @@ export default function StoriesDashboard() {
         </Section>
 
         {/* Cards Section for Theme/Category cards */}
-        <Section aria-labelledby="cards-heading" id="cards" className="mb-12" fluid>
+        <Section aria-labelledby="cards-heading" id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
           <header className="mb-6">
             <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">
               Themes
