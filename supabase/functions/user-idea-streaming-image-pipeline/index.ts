@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { UserIdeaRequest, ThemeData, ThemePost, SupabaseClient } from '../_shared/types.ts';
 import { streamingCorsHeaders, updateThemeImageStatus, sendStreamEvent } from '../_shared/utils.ts';
+import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -63,13 +64,13 @@ JSON STRUCTURE REQUIRED:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
         ],
-        temperature: 1,
-        max_completion_tokens: 1500,
+        temperature: OPENAI_CONFIG.DEFAULT_THEME_TEMPERATURE,
+        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
         response_format: { type: 'json_object' }
       }),
     });
@@ -88,8 +89,20 @@ JSON STRUCTURE REQUIRED:
       hasChoices: !!data.choices,
       choicesLength: data.choices?.length,
       hasMessage: !!data.choices?.[0]?.message,
-      hasContent: !!data.choices?.[0]?.message?.content
+      hasContent: !!data.choices?.[0]?.message?.content,
+      usage: data.usage
     });
+
+    // Log token usage details
+    if (data.usage) {
+      console.log('🎯 Token usage:', {
+        promptTokens: data.usage.prompt_tokens,
+        completionTokens: data.usage.completion_tokens,
+        totalTokens: data.usage.total_tokens,
+        maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        hitLimit: data.usage.completion_tokens >= OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS
+      });
+    }
 
     const generatedContent = data.choices[0].message.content.trim();
     console.log('📝 Generated content length:', generatedContent.length);
