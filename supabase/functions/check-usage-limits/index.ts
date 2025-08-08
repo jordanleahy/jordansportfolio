@@ -170,67 +170,13 @@ serve(async (req) => {
       });
     }
 
-    // Get current billing period and today's date
+    // Get current usage directly from api_usage_tracking table
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    // Get or create current usage record
-    let { data: usage, error: usageError } = await supabaseClient
-      .from('user_usage_tracking')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('billing_period_start', periodStart.toISOString().split('T')[0])
-      .single();
-
-    if (usageError && usageError.code === 'PGRST116') {
-      // Create new usage record for this billing period
-      const { data: newUsage, error: createError } = await supabaseClient
-        .from('user_usage_tracking')
-        .insert({
-          user_id: userId,
-          billing_period_start: periodStart.toISOString(),
-          billing_period_end: periodEnd.toISOString(),
-          gpt_images_used: 0,
-          image_generations_used: 0,
-          dalle_images_used: 0,
-          text_generations_used: 0,
-          daily_usage_date: today,
-          gpt_images_used_today: 0,
-        })
-        .select()
-        .single();
-
-      if (createError) {
-        throw createError;
-      }
-      usage = newUsage;
-    } else if (usageError) {
-      throw usageError;
-    }
-
-    // Reset daily counters if it's a new day
-    const needsDailyReset = usage.daily_usage_date !== today;
-    if (needsDailyReset) {
-      console.log(`Resetting daily usage for user ${userId}, was: ${usage.daily_usage_date}, now: ${today}`);
-      const { data: resetUsage, error: resetError } = await supabaseClient
-        .from('user_usage_tracking')
-        .update({
-          daily_usage_date: today,
-          gpt_images_used_today: 0,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', usage.id)
-        .select()
-        .single();
-
-      if (resetError) {
-        console.error('Error resetting daily usage:', resetError);
-        throw resetError;
-      }
-      usage = resetUsage;
-    }
+    
+    // Get subscription billing period
+    const billingStart = subscription.current_period_start ? new Date(subscription.current_period_start) : new Date(now.getFullYear(), now.getMonth(), 1);
+    const billingEnd = subscription.current_period_end ? new Date(subscription.current_period_end) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     const tier = subscription.tier as any;
 
@@ -255,9 +201,34 @@ serve(async (req) => {
       ? tier.max_gpt_images_monthly
       : (isFreePriced && !isAdminTier ? freeDailyLimit * daysInMonth : (tier?.max_gpt_images || 0));
     
-    // Get current usage
-    const currentMonthlyUsed = usage.gpt_images_used || 0;
-    const currentDailyUsed = usage.gpt_images_used_today || 0;
+    // Count current usage from api_usage_tracking
+    // Monthly usage: count successful image generations within billing period
+    const { count: monthlyCount, error: monthlyError } = await supabaseClient
+      .from('api_usage_tracking')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('request_type', 'image_generation')
+      .eq('success', true)
+      .gte('created_at', billingStart.toISOString())
+      .lte('created_at', billingEnd.toISOString());
+    
+    if (monthlyError) throw monthlyError;
+    const currentMonthlyUsed = monthlyCount || 0;
+
+    // Daily usage: count successful image generations for today
+    const startOfDay = `${today}T00:00:00.000Z`;
+    const endOfDay = `${today}T23:59:59.999Z`;
+    const { count: dailyCount, error: dailyError } = await supabaseClient
+      .from('api_usage_tracking')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('request_type', 'image_generation')
+      .eq('success', true)
+      .gte('created_at', startOfDay)
+      .lte('created_at', endOfDay);
+    
+    if (dailyError) throw dailyError;
+    const currentDailyUsed = dailyCount || 0;
 
     // Calculate remaining for both limits
     const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
@@ -277,22 +248,8 @@ serve(async (req) => {
     console.log(`  Monthly Limit: ${currentMonthlyUsed}/${monthlyLimit}, requesting: ${amount}, allowed: ${monthlyAllowed}`);
     console.log(`  Overall allowed: ${allowed}`);
 
-    // If allowed, increment both daily and monthly usage
-    if (allowed) {
-      const { error: updateError } = await supabaseClient
-        .from('user_usage_tracking')
-        .update({
-          gpt_images_used: currentMonthlyUsed + amount,
-          gpt_images_used_today: currentDailyUsed + amount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', usage.id);
-
-      if (updateError) {
-        console.error('Error updating GPT image usage:', updateError);
-        throw updateError;
-      }
-    }
+    // Usage is now tracked automatically in api_usage_tracking by the image generation functions
+    // No need to manually increment counters here - the tracking happens during actual usage
 
     // Priority messaging: Daily limit is ALWAYS the primary concern
     let message: string | undefined;

@@ -91,38 +91,40 @@ serve(async (req) => {
     }
 
 
-    // Compute usage
+    // Compute usage from api_usage_tracking table
     const today = new Date();
     const yyyyMmDd = today.toISOString().slice(0, 10);
 
-    // Monthly usage: sum rows where now is within billing period
+    // Monthly usage: count successful image generations within billing period
     let monthlyUsed = 0;
     let dailyUsed = 0;
 
-    const { data: monthlyRows, error: monthlyErr } = await supabase
-      .from("user_usage_tracking")
-      .select("gpt_images_used,billing_period_start,billing_period_end")
-      .eq("user_id", user.id);
-    if (monthlyErr) throw monthlyErr;
-
-    for (const row of monthlyRows ?? []) {
-      const start = row.billing_period_start ? new Date(row.billing_period_start) : null;
-      const end = row.billing_period_end ? new Date(row.billing_period_end) : null;
-      if (start && end && start <= today && today <= end) {
-        monthlyUsed += Number(row.gpt_images_used || 0);
-      }
+    if (periodStart && periodEnd) {
+      const { count: monthlyCount, error: monthlyErr } = await supabase
+        .from("api_usage_tracking")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("request_type", "image_generation")
+        .eq("success", true)
+        .gte("created_at", periodStart)
+        .lte("created_at", periodEnd);
+      if (monthlyErr) throw monthlyErr;
+      monthlyUsed = monthlyCount || 0;
     }
 
-    // Daily usage: sum rows for today
-    const { data: dailyRows, error: dailyErr } = await supabase
-      .from("user_usage_tracking")
-      .select("gpt_images_used_today,daily_usage_date")
+    // Daily usage: count successful image generations for today
+    const startOfDay = `${yyyyMmDd}T00:00:00.000Z`;
+    const endOfDay = `${yyyyMmDd}T23:59:59.999Z`;
+    const { count: dailyCount, error: dailyErr } = await supabase
+      .from("api_usage_tracking")
+      .select("*", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .eq("daily_usage_date", yyyyMmDd);
+      .eq("request_type", "image_generation")
+      .eq("success", true)
+      .gte("created_at", startOfDay)
+      .lte("created_at", endOfDay);
     if (dailyErr) throw dailyErr;
-    for (const row of dailyRows ?? []) {
-      dailyUsed += Number(row.gpt_images_used_today || 0);
-    }
+    dailyUsed = dailyCount || 0;
 
     // Apply limits and compute remaining
     const monthlyRemaining = Math.max(monthlyLimit - monthlyUsed, 0);
