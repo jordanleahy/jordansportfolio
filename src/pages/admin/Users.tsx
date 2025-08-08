@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { UsageOverview } from "@/components/admin/UsageOverview";
 
 interface AdminUserRow {
   user_id: string;
@@ -39,6 +40,9 @@ export default function AdminUsers() {
         <link rel="canonical" href="/admin/users" />
       </Helmet>
       <main className="container mx-auto px-4 py-8">
+        {/* Usage Overview Dashboard */}
+        <UsageOverview />
+        
         <header className="mb-6">
           <h1 className="text-3xl font-bold">Users</h1>
           <p className="text-muted-foreground">All users with usage and cost overview.</p>
