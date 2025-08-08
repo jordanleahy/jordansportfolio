@@ -92,19 +92,7 @@ export const useSubscriptionStatus = () => {
         .gte('created_at', todayStart.toISOString())
         .lte('created_at', todayEnd.toISOString());
       let imagesUsedToday = 0;
-      if (usageCountErr) {
-        // Fallback to images table (RLS allows user to view own records)
-        const { count: imgCount } = await (supabase as any)
-          .from('images')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('success', true)
-          .gte('created_at', todayStart.toISOString())
-          .lte('created_at', todayEnd.toISOString());
-        imagesUsedToday = imgCount || 0;
-      } else {
-        imagesUsedToday = successCount || 0;
-      }
+      imagesUsedToday = successCount || 0;
 
       // Determine tier: if free (price 0 or no subscription), cap is 5 per day; otherwise use tier limit
       const isFreeTier = !subscription || (subscription as any)?.tier?.price_cents === 0;

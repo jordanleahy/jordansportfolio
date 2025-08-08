@@ -183,32 +183,9 @@ Deno.serve(async (req) => {
 
       console.log(`Found ${unsyncedRecords?.length || 0} unsynced records for date range`);
       
-      // Preload related image costs for efficient lookups
-      let imagesQuery = supabase
-        .from('images')
-        .select('api_usage_tracking_id, actual_cost, estimated_cost, created_at');
-      if (syncType !== 'all') {
-        imagesQuery = imagesQuery
-          .gte('created_at', new Date(startTimestamp * 1000).toISOString())
-          .lte('created_at', new Date(endTimestamp * 1000).toISOString());
-      }
-      const { data: relatedImages, error: imagesError } = await imagesQuery;
-      
-      if (imagesError) {
-        console.warn('Could not preload related images for cost reconciliation:', imagesError);
-      }
-      
+      // Image cost reconciliation map is no longer preloaded from the images table
+      // We compute costs directly from api_usage_tracking records
       const imageCostByUsageId = new Map<string, number>();
-      (relatedImages || []).forEach((img: any) => {
-        const key = img.api_usage_tracking_id;
-        if (!key) return;
-        const cost = typeof img.actual_cost === 'number' ? img.actual_cost
-                    : typeof img.estimated_cost === 'number' ? img.estimated_cost
-                    : undefined;
-        if (typeof cost === 'number') {
-          imageCostByUsageId.set(key, Number(cost));
-        }
-      });
 
       if (!unsyncedRecords || unsyncedRecords.length === 0) {
         console.log('No unsynced records found for the specified date range');
