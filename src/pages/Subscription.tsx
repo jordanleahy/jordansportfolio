@@ -2,7 +2,6 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UsageDashboard } from '@/components/subscription/UsageDashboard';
 import { SubscriptionPlans } from '@/components/subscription/SubscriptionPlans';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

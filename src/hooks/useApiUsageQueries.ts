@@ -116,9 +116,9 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
   });
 };
 
-export const useUsageSummary = () => {
+export const useAdminUsageSummary = () => {
   return useQuery({
-    queryKey: ['usage-summary-live'],
+    queryKey: ['admin-usage-summary-live'],
     queryFn: async () => {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());

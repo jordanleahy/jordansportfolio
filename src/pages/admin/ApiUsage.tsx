@@ -30,7 +30,7 @@ import { OpenAIUsageSync } from "@/components/admin/OpenAIUsageSync";
 import { UsageCharts } from "@/components/admin/UsageCharts";
 import { 
   useApiUsageData, 
-  useUsageSummary, 
+  useAdminUsageSummary, 
   useUsageFilters 
 } from "@/hooks/useApiUsageQueries";
 import { ApiUsageRecord } from "@/types/apiUsage";
@@ -49,7 +49,7 @@ export default function ApiUsage() {
     filters, 
     currentPage
   );
-  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useUsageSummary();
+  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useAdminUsageSummary();
 
   const handleRefresh = async () => {
     try {

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 
 export interface SubscriptionTier {
   id: string;
@@ -33,7 +34,7 @@ export interface UserUsage {
 
 export const useSubscriptionStatus = () => {
   return useQuery({
-    queryKey: ['subscription-status'],
+    queryKey: QUERY_KEYS.subscriptionStatus,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {

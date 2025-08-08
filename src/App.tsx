@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { UsageRealtimeProvider } from "@/components/usage/UsageRealtimeProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy, useState } from "react";
@@ -95,7 +96,8 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <Routes>
+              <UsageRealtimeProvider>
+                <Routes>
                 <Route path="/" element={<Index />} />
                 <Route 
                   path="/storyship" 
@@ -250,7 +252,8 @@ function App() {
                   } 
                 />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
+                </Routes>
+              </UsageRealtimeProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
