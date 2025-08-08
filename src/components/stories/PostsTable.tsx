@@ -38,6 +38,7 @@ export const PostsTable = ({
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
+  const [isBulk169, setIsBulk169] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -192,6 +193,30 @@ export const PostsTable = ({
     }
   };
 
+  // Handle bulk 16:9 generation for current category/theme (only missing images)
+  const handleBulkGenerate169 = async () => {
+    try {
+      if (!category) {
+        toast.error('Category not found');
+        return;
+      }
+      setIsBulk169(true);
+      const { supabase } = await import('@/integrations/supabase/client');
+      toast.info('Starting 16:9 generation for missing posts...');
+      const { data, error } = await supabase.functions.invoke('bulk-generate-16-9', {
+        body: { category, themeId: selectedThemeId }
+      });
+      if (error) throw error;
+      const summary = (data as any)?.summary || data;
+      toast.success(`Generated ${summary?.successCount ?? 0}/${summary?.processed ?? 0} images`);
+      onPostsChange();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to start 16:9 generation');
+    } finally {
+      setIsBulk169(false);
+    }
+  };
 
 
   // Filter posts by status
@@ -293,6 +318,17 @@ export const PostsTable = ({
               
                   {category && userIsAdmin && (
                     <div className="flex items-center gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleBulkGenerate169}
+                        disabled={isBulk169}
+                        className="gap-1 text-xs sm:text-sm"
+                        aria-label="Generate all 16:9 images for this theme"
+                        title="Generate 16:9 for posts missing images"
+                      >
+                        16:9
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="hidden sm:inline">Category Prompt</span>
