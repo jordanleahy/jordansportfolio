@@ -80,6 +80,38 @@ export async function trackOpenAIUsage(options: OpenAIAttributionOptions): Promi
     };
 
     await supabase.from('api_usage_tracking').insert(trackingData);
+
+    // Also write to the new unified api_usage_events table for future-proof analytics
+    const eventData = {
+      user_id: options.userId,
+      provider: 'openai',
+      service: options.requestType === 'image_generation' ? 'images' : (options.requestType === 'image_prompt' ? 'prompts' : 'chat'),
+      function_name: options.functionName,
+      model_used: options.model,
+      request_type: options.requestType,
+      tokens_used: options.tokensUsed,
+      prompt_tokens: options.promptTokens,
+      completion_tokens: options.completionTokens,
+      total_tokens: (typeof options.tokensUsed === 'number')
+        ? options.tokensUsed
+        : (typeof options.promptTokens === 'number' && typeof options.completionTokens === 'number'
+          ? options.promptTokens + options.completionTokens
+          : undefined),
+      image_size: options.imageSize,
+      image_quality: options.imageQuality,
+      estimated_cost: options.estimatedCost,
+      actual_cost: options.actualCost,
+      success: options.success,
+      error_message: options.errorMessage,
+      http_status: options.metadata?.http_status ?? null,
+      response_time_ms: options.responseTimeMs,
+      correlation_id: correlationId,
+      openai_request_id: options.openAIRequestId,
+      request_metadata: enhancedMetadata,
+    } as const;
+
+    await supabase.from('api_usage_events').insert(eventData);
+
     
     console.log('✅ Enhanced OpenAI usage tracked:', {
       correlation_id: correlationId,
