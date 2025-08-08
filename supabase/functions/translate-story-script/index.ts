@@ -140,7 +140,7 @@ ${script_text}`;
         }
       ],
       temperature: 0.3,
-      max_completion_tokens: 3000,
+      max_tokens: 3000,
     }, correlationId);
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({

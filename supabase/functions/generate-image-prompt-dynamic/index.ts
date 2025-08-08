@@ -144,7 +144,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: 500,
+      max_tokens: 500,
       user: correlationId // Only include user field for tracking
     };
 
@@ -218,7 +218,13 @@ Please incorporate these colors and visual style into the image prompt to ensure
     
     const generatedText = openAIData.choices?.[0]?.message?.content;
 
-    if (!generatedText) {
+    if (!generatedText || typeof generatedText !== 'string' || generatedText.trim() === '') {
+      console.log('❌ Missing generated text. choices[0] snapshot:', {
+        choice0: openAIData.choices?.[0],
+        model: openAIData.model,
+        usage: openAIData.usage,
+        correlationId,
+      });
       throw new Error('No generated text received from OpenAI');
     }
 

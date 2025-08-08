@@ -404,7 +404,7 @@ Return only valid JSON:`;
         }
       ],
       temperature: 0,
-      max_completion_tokens: 2000,
+      max_tokens: 2000,
     }),
   });
 
