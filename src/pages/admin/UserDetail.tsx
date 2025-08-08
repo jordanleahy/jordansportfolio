@@ -202,6 +202,14 @@ export default function AdminUserDetail() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
+                  <span>Full Name</span>
+                  <span className="text-muted-foreground">{data?.user?.full_name || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Email</span>
+                  <span className="text-muted-foreground break-all">{data?.user?.email || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span>User ID</span>
                   <span className="text-muted-foreground">{data?.user?.user_id || '—'}</span>
                 </div>
