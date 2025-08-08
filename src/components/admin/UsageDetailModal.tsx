@@ -158,9 +158,16 @@ export const UsageDetailModal = ({ record, open, onOpenChange }: UsageDetailModa
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Cost</span>
                 </div>
-                <p className={`text-lg font-bold ${getCostColorClass(record.estimated_cost)}`}>
-                  {formatCurrency(record.estimated_cost)}
-                </p>
+                <div className="ml-6 space-y-1">
+                  <p className={`text-lg font-bold ${getCostColorClass(record.estimated_cost)}`}>
+                    Estimated: {formatCurrency(record.estimated_cost)}
+                  </p>
+                  {record.actual_cost !== undefined && (
+                    <p className="text-sm text-muted-foreground">
+                      Actual: {formatCurrency(record.actual_cost)}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {record.response_time_ms && (
@@ -236,6 +243,18 @@ export const UsageDetailModal = ({ record, open, onOpenChange }: UsageDetailModa
                   <span className="text-muted-foreground">Request Type:</span>
                   <span className="font-mono text-xs">{record.request_type}</span>
                 </div>
+                {record.openai_request_id && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">OpenAI Request ID:</span>
+                    <span className="font-mono text-xs">{record.openai_request_id}</span>
+                  </div>
+                )}
+                {record.request_metadata && (record.request_metadata as any).correlation_id && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Correlation ID:</span>
+                    <span className="font-mono text-xs">{(record.request_metadata as any).correlation_id}</span>
+                  </div>
+                )}
                 {record.tokens_used && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tokens Used:</span>

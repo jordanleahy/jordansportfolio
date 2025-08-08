@@ -60,8 +60,104 @@ export default function ApiUsage() {
     }
   };
 
-  const handleExport = () => {
-    toast.info("Export functionality will be implemented soon");
+  const handleExport = async () => {
+    try {
+      toast.info("Preparing export...");
+      const maxRows = 5000;
+      const pageSize = 1000;
+      let all: any[] = [];
+      let from = 0;
+
+      const startDate = filters.startDate ? `${filters.startDate}T00:00:00.000Z` : undefined;
+      const endDate = filters.endDate ? `${filters.endDate}T23:59:59.999Z` : undefined;
+
+      // Try unified events first
+      while (all.length < maxRows) {
+        let q: any = (supabase as any)
+          .from('api_usage_events')
+          .select('*')
+          .order('created_at', { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (startDate) q = q.gte('created_at', startDate);
+        if (endDate) q = q.lte('created_at', endDate);
+        if (filters.userId) q = q.eq('user_id', filters.userId);
+        if (filters.functionName) q = q.eq('function_name', filters.functionName);
+        if (filters.requestType) q = q.eq('request_type', filters.requestType);
+        if (filters.success !== undefined) q = q.eq('success', filters.success);
+
+        const { data, error } = await q;
+        if (error) break;
+        const batch = data || [];
+        all = all.concat(batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+      }
+
+      // Fallback to legacy if empty
+      if (all.length === 0) {
+        from = 0;
+        while (all.length < maxRows) {
+          let q = supabase
+            .from('api_usage_tracking')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .range(from, from + pageSize - 1);
+          if (startDate) q = q.gte('created_at', startDate);
+          if (endDate) q = q.lte('created_at', endDate);
+          if (filters.userId) q = q.eq('user_id', filters.userId);
+          if (filters.functionName) q = q.eq('function_name', filters.functionName);
+          if (filters.requestType) q = q.eq('request_type', filters.requestType);
+          if (filters.success !== undefined) q = q.eq('success', filters.success);
+
+          const { data, error } = await q;
+          if (error) throw error;
+          const batch = data || [];
+          all = all.concat(batch);
+          if (batch.length < pageSize) break;
+          from += pageSize;
+        }
+      }
+
+      const cols = [
+        'created_at','user_id','user_email','function_name','model_used','request_type','prompt_tokens','completion_tokens','total_tokens','image_size','image_quality','estimated_cost','actual_cost','success','response_time_ms','openai_request_id','correlation_id'
+      ];
+      const header = cols.join(',');
+      const lines = all.map((r: any) => {
+        const vals = [
+          r.created_at,
+          r.user_id,
+          r.user_email || '',
+          r.function_name,
+          r.model_used || '',
+          r.request_type || '',
+          r.prompt_tokens ?? '',
+          r.completion_tokens ?? '',
+          r.total_tokens ?? '',
+          r.image_size || '',
+          r.image_quality || '',
+          r.estimated_cost ?? '',
+          r.actual_cost ?? '',
+          r.success ?? '',
+          r.response_time_ms ?? '',
+          r.openai_request_id || '',
+          r.correlation_id || (r.request_metadata?.correlation_id ?? ''),
+        ];
+        return vals.map(v => typeof v === 'string' ? '"' + v.replace(/"/g, '""') + '"' : String(v)).join(',');
+      });
+
+      const csv = [header, ...lines].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `api-usage-export-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${all.length} rows`);
+    } catch (e: any) {
+      console.error('Export failed:', e);
+      toast.error('Export failed');
+    }
   };
 
   const handleSearch = (value: string) => {

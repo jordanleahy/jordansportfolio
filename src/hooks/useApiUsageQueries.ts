@@ -107,6 +107,7 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
         image_size: record.image_size || undefined,
         image_quality: record.image_quality || undefined,
         estimated_cost: Number(record.estimated_cost),
+        actual_cost: record.actual_cost !== undefined && record.actual_cost !== null ? Number(record.actual_cost) : undefined,
         success: record.success,
         error_message: record.error_message || undefined,
         request_metadata: (typeof record.request_metadata === 'object' && record.request_metadata !== null) 
@@ -118,7 +119,11 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
         response_time_ms: record.response_time_ms || undefined,
         created_at: record.created_at,
         user_email: userProfile?.email || 'Unknown',
-        user_name: userProfile?.full_name || 'Unknown User'
+        user_name: userProfile?.full_name || 'Unknown User',
+        openai_request_id: (record as any).openai_request_id || undefined,
+        sync_status: (record as any).sync_status || undefined,
+        openai_synced: (record as any).openai_synced || undefined,
+        openai_timestamp: (record as any).openai_timestamp || undefined,
         };
       });
 
