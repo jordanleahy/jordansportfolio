@@ -173,7 +173,7 @@ Please transform this content into an engaging ${story_type === 'childrens_story
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: agent.model_version || 'gpt-4.1-2025-04-14',
+        model: agent.model_version || 'gpt-5-mini',
         messages: [
           { role: 'system', content: systemPromptData.prompt_text },
           { role: 'user', content: userPrompt }

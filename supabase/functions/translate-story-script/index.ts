@@ -128,7 +128,7 @@ ${script_text}`;
 
     // Enhanced OpenAI request with correlation tracking
     const requestBody = enhanceOpenAIRequestBody({
-      model: 'gpt-4.1-2025-04-14',
+      model: 'gpt-5-mini',
       messages: [
         {
           role: 'system',
@@ -185,7 +185,7 @@ ${script_text}`;
       await trackOpenAIUsage({
         userId,
         functionName: 'translate-story-script',
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-mini',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -225,7 +225,7 @@ ${script_text}`;
         await trackOpenAIUsage({
           userId,
           functionName: 'translate-story-script',
-          model: 'gpt-4.1-2025-04-14',
+          model: 'gpt-5-mini',
           requestType: 'text_generation',
           success: false,
           estimatedCost: 0,

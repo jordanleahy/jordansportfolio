@@ -3,7 +3,7 @@
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MODELS: {
-    FLAGSHIP: 'gpt-4.1-2025-04-14',
+    FLAGSHIP: 'gpt-5-mini',
     FAST: 'gpt-4o-mini',
     REASONING: 'o3-2025-04-16',
     REASONING_FAST: 'o4-mini-2025-04-16',
@@ -27,7 +27,7 @@ export const OPENAI_CONFIG = {
     COMPREHENSIVE: 4000,
   },
   // Default model for theme generation
-  DEFAULT_THEME_MODEL: 'gpt-4.1-2025-04-14',
+  DEFAULT_THEME_MODEL: 'gpt-5-mini',
   DEFAULT_THEME_TEMPERATURE: 0.7,
   DEFAULT_THEME_MAX_TOKENS: 3000,
 } as const;

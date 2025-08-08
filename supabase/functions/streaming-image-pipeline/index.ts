@@ -73,7 +73,7 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -215,7 +215,7 @@ serve(async (req) => {
             const imageSize = getAspectRatioSize(aspectRatio);
             
             const requestBody = {
-              model: 'gpt-4.1-mini',
+              model: 'gpt-5-mini',
               input: prompt,
               stream: true,
               tools: [{ 

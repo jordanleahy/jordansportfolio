@@ -160,7 +160,7 @@ Job Description: ${jobDescription || 'Not provided'}`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-mini',
         messages: [
           { 
             role: 'system', 
@@ -213,7 +213,7 @@ Focus on making this feel like THE career opportunity of a lifetime, with the co
             jobTitle,
             jobDescription: jobDescription || 'Not provided',
             agent: 'Hero Job Visual Generator',
-            model: 'gpt-4.1-2025-04-14',
+            model: 'gpt-5-mini',
             generated_at: new Date().toISOString(),
             style: 'hero',
             aspectRatio: '9:16'

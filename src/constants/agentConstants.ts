@@ -23,7 +23,7 @@ export const SYSTEM_PROMPT_CATEGORIES = {
 // OpenAI Model Versions (Latest)
 export const OPENAI_MODELS = {
   // Latest flagship model
-  FLAGSHIP: 'gpt-4.1-2025-04-14',
+  FLAGSHIP: 'gpt-5-mini',
   // Reasoning models
   REASONING: 'o3-2025-04-16', 
   REASONING_FAST: 'o4-mini-2025-04-16',
@@ -46,7 +46,7 @@ export const DEFAULT_MODELS = {
 export const MODEL_OPTIONS = [
   {
     value: OPENAI_MODELS.FLAGSHIP,
-    label: 'gpt-4.1-2025-04-14 (Flagship)',
+    label: 'gpt-5-mini (Flagship)',
     description: 'Most capable flagship model',
     recommended: true
   },
