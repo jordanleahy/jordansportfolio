@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Menu } from "lucide-react";
+import { toast } from "sonner";
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
@@ -47,6 +48,7 @@ export default function AdminUserDetail() {
   const { id } = useParams<{ id: string }>();
   const validId = !!id && UUID_RE.test(id);
   const [range, setRange] = useState<'7' | '30' | '90'>('30');
+  const [selectedTierId, setSelectedTierId] = useState<string>('8ff79eb0-74dc-4fc2-bc4e-d1d660b9f292');
 
   const { from, to } = useMemo(() => {
     const to = new Date();
@@ -55,7 +57,7 @@ export default function AdminUserDetail() {
     return { from: from.toISOString(), to: to.toISOString() };
   }, [range]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-user-detail', id, range],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('user-usage-detail', {
@@ -139,6 +141,43 @@ export default function AdminUserDetail() {
           </div>
         </header>
 
+        {/* Admin: Assign Subscription Tier */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Admin: Assign Subscription Tier</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
+              <div className="flex-1">
+                <label className="block text-sm mb-1">Tier ID</label>
+                <input
+                  value={selectedTierId}
+                  onChange={(e) => setSelectedTierId(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2"
+                  placeholder="Subscription Tier UUID"
+                />
+              </div>
+              <Button
+                onClick={async () => {
+                  try {
+                    if (!id) return;
+                    const { data: resp, error } = await supabase.functions.invoke('admin-set-subscription', {
+                      body: { userId: id, tierId: selectedTierId }
+                    });
+                    if (error) throw error;
+                    toast.success('Subscription assigned');
+                    refetch();
+                  } catch (err: any) {
+                    console.error(err);
+                    toast.error(err?.message || 'Failed to assign subscription');
+                  }
+                }}
+              >
+                Assign Tier
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
@@ -262,6 +301,16 @@ export default function AdminUserDetail() {
                   {data?.subscription?.tier?.price_cents != null
                     ? `$${((data.subscription.tier.price_cents || 0) / 100).toFixed(2)}/${data.subscription.tier.billing_interval || 'month'}`
                     : '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Images Limit</span>
+                <span className="text-muted-foreground">{data?.subscription?.tier?.max_gpt_images ?? '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Monthly Usage</span>
+                <span className="text-muted-foreground">
+                  {data?.periods ? `${data.periods.month.images} / ${data?.subscription?.tier?.max_gpt_images ?? '—'}` : (isLoading ? '…' : '—')}
                 </span>
               </div>
             </div>
