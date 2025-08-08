@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 
 interface FilterSidebarProps {
   filters: {
-    industries: string[];
+    industries?: string[];
     fullySold?: boolean;
     amountRanges?: string[];
     maxRaisedRanges?: string[];
@@ -53,9 +53,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   }];
 
   const handleIndustryToggle = (industry: string) => {
-    const updatedIndustries = filters.industries.includes(industry) 
-      ? filters.industries.filter(i => i !== industry) 
-      : [...filters.industries, industry];
+    const currentIndustries = filters.industries || [];
+    const updatedIndustries = currentIndustries.includes(industry) 
+      ? currentIndustries.filter(i => i !== industry) 
+      : [...currentIndustries, industry];
     onFiltersChange({
       ...filters,
       industries: updatedIndustries
@@ -104,7 +105,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     onFiltersChange(resetFilters);
   };
 
-  const hasActiveFilters = filters.industries.length > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
+  const hasActiveFilters = (filters.industries?.length || 0) > 0 || (filters.amountRanges?.length || 0) > 0 || (filters.maxRaisedRanges?.length || 0) > 0 || (filters.states?.length || 0) > 0;
 
   return (
     <Card className="flex flex-col h-full relative z-10 bg-transparent border-0">
@@ -117,7 +118,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
               <div key={industry} className="flex items-center space-x-2">
                 <Checkbox 
                   id={industry} 
-                  checked={filters.industries.includes(industry)} 
+                  checked={filters.industries?.includes(industry) || false} 
                   onCheckedChange={() => handleIndustryToggle(industry)} 
                 />
                 <Label htmlFor={industry} className="text-sm font-normal cursor-pointer flex-1">
@@ -128,9 +129,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
           
           {/* Selected Industries */}
-          {filters.industries.length > 0 && (
+          {(filters.industries?.length || 0) > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {filters.industries.map(industry => (
+              {filters.industries?.map(industry => (
                 <Badge 
                   key={industry} 
                   variant="secondary" 
@@ -266,7 +267,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <>
             <Separator />
             <p className="text-xs text-muted-foreground text-center">
-              {filters.industries.length} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} amount sold, {filters.states?.length || 0} states selected
+              {filters.industries?.length || 0} industries, {filters.amountRanges?.length || 0} amounts, {filters.maxRaisedRanges?.length || 0} amount sold, {filters.states?.length || 0} states selected
             </p>
           </>
         )}
