@@ -106,7 +106,7 @@ Requirements:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
@@ -114,8 +114,6 @@ Requirements:
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 1,
-        max_completion_tokens: 2000,
       }),
     });
 
