@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Loader2, Sparkles, Users } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useThemeImport } from '@/hooks/useThemeImport';
@@ -454,23 +455,22 @@ export default function StoriesDashboard() {
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
-      <div className="container mx-auto py-8 px-4">
-        {/* Hero Header Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8 min-h-[200px] max-h-[40vh] flex">
-          <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
-          <Textarea
-            id="theme-description"
-            placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-            value={customThemeDescription}
-            onChange={(e) => setCustomThemeDescription(e.target.value)}
-            className="w-[700px] flex-1 resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10 relative"
-            disabled={isGeneratingTheme || isProcessing}
-          />
-        </div>
+        <Section id="hero" className="py-8">
+          {/* Hero Header Section */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8 min-h-[200px] max-h-[40vh] flex">
+            <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
+            <Textarea
+              id="theme-description"
+              placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+              value={customThemeDescription}
+              onChange={(e) => setCustomThemeDescription(e.target.value)}
+              className="w-[700px] flex-1 resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10 relative"
+              disabled={isGeneratingTheme || isProcessing}
+            />
+          </div>
 
-        {/* Action Buttons Section */}
-        <div className="container mx-auto px-4 mb-8">
-          <div className="flex justify-center gap-4 max-w-2xl mx-auto">
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4 max-w-2xl mx-auto mb-8">
             <Button
               onClick={handleGenerateCustomTheme}
               disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
@@ -505,22 +505,22 @@ export default function StoriesDashboard() {
               )
             )}
           </div>
-        </div>
 
-        {isAdmin && (
-          <Suspense fallback={<div>Loading...</div>}>
-            <ThemeImportModal 
-              open={importModalOpen} 
-              onOpenChange={setImportModalOpen} 
-              onImportComplete={() => {
-                // Theme import completed
-              }}
-            />
-          </Suspense>
-        )}
+          {isAdmin && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ThemeImportModal 
+                open={importModalOpen} 
+                onOpenChange={setImportModalOpen} 
+                onImportComplete={() => {
+                  // Theme import completed
+                }}
+              />
+            </Suspense>
+          )}
+        </Section>
 
         {/* Cards Section for Theme/Category cards */}
-        <section aria-labelledby="cards-heading" className="container mx-auto px-4 mb-12">
+        <Section aria-labelledby="cards-heading" id="cards" className="mb-12">
           <header className="mb-6">
             <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">
               Themes
@@ -566,7 +566,7 @@ export default function StoriesDashboard() {
               isSelectionMode={isSelectionMode}
             />
           )}
-        </section>
+        </Section>
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog
@@ -577,7 +577,6 @@ export default function StoriesDashboard() {
           isDeleting={isDeletingBulk}
           progress={deleteProgress}
         />
-      </div>
     </PageLayout>
   );
 }
