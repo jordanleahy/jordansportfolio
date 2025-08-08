@@ -36,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
           <p><strong>🎯 Your Plan Includes:</strong></p>
           <ul style="margin: 12px 0 0 20px;">
             <li><strong>100 AI Image Generations</strong> per month</li>
-            <li><strong>10 DALL-E 3 Images</strong> per month</li>
+            <li><strong>10 High-Quality Image Generations</strong> per month</li>
             <li><strong>Unlimited Text Generations</strong></li>
             <li><strong>Priority Support</strong> & updates</li>
             <li><strong>Advanced Analytics</strong> dashboard</li>
@@ -49,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
         <ul style="margin-left: 20px; margin-bottom: 16px;">
           <li>Check your usage dashboard to monitor your monthly limits</li>
           <li>Explore our AI image generation tools</li>
-          <li>Try our DALL-E 3 integration for premium images</li>
+          <li>Try our AI image generation for premium images</li>
           <li>Contact support anytime if you need help</li>
         </ul>
         
