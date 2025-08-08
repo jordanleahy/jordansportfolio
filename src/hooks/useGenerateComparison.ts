@@ -29,7 +29,7 @@ export const useGenerateComparison = () => {
       await createAgent.mutateAsync({
         name: 'GenerateComparisonPages',
         purpose: 'Generates healthcare company comparisons using vendor data in the style of SmarterDX vs Iodine',
-        model_version: 'gpt-4o',
+        model_version: 'gpt-5-mini',
         trigger: 'manual',
         input_source: 'Vendor database records',
         output_target: 'Comparison form fields',
