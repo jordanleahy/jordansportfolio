@@ -17,6 +17,10 @@ export const QUERY_KEYS = {
   themes: ['themes'] as const,
   posts: ['posts'] as const,
   
+  // Usage and subscription queries
+  usageSummary: ['usage-summary'] as const,
+  subscriptionStatus: ['subscription-status'] as const,
+  
   // Work summaries queries
   workSummaries: ['work-summaries'] as const,
   workSummary: (date: string) => ['work-summary', date] as const,

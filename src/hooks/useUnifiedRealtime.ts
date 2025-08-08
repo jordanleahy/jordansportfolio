@@ -16,6 +16,7 @@ export interface UseUnifiedRealtimeOptions {
   onSystemPromptUpdate?: (prompt: any) => void;
   onAgentUpdate?: (agent: any) => void;
   onVendorUpdate?: (vendor: any) => void;
+  onApiUsageUpdate?: () => void;
 }
 
 export const useUnifiedRealtime = ({
@@ -27,6 +28,7 @@ export const useUnifiedRealtime = ({
   onSystemPromptUpdate,
   onAgentUpdate,
   onVendorUpdate,
+  onApiUsageUpdate,
 }: UseUnifiedRealtimeOptions = {}) => {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
@@ -82,8 +84,10 @@ export const useUnifiedRealtime = ({
             const rec = data.new as any;
             const rt = rec?.request_type;
             if (rec?.success && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
-              // Successful image generation – invalidate credits cache
-              queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+              // Successful image generation – invalidate usage summary and subscription status
+              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.usageSummary });
+              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.subscriptionStatus });
+              onApiUsageUpdate?.();
             }
           } else if (eventType === 'UPDATE') {
             const n = data.new as any;
@@ -91,7 +95,9 @@ export const useUnifiedRealtime = ({
             const rt = n?.request_type;
             const successFlippedTrue = !!n?.success && !o?.success;
             if (successFlippedTrue && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
-              queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.usageSummary });
+              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.subscriptionStatus });
+              onApiUsageUpdate?.();
             }
           }
           break;

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 
 export interface UsageLimits {
   daily: { limit: number; used: number; remaining: number };
@@ -17,7 +18,7 @@ export interface UsageSummaryData {
 
 export const useUsageSummary = () => {
   const query = useQuery<UsageSummaryData>({
-    queryKey: ["usage-summary"],
+    queryKey: QUERY_KEYS.usageSummary,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-usage-summary", {
         body: {},
