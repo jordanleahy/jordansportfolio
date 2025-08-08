@@ -49,31 +49,70 @@ serve(async (req) => {
   try {
     console.log('🕰️ Daily work summary generation started at:', new Date().toISOString());
 
-    // Initialize Supabase client
+    // Initialize Supabase client with proper authentication
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Get all users who have activity data
-    const { data: activeUsers, error: usersError } = await supabase
-      .from('social_media_posts')
-      .select('user_id')
-      .neq('user_id', null)
-      .limit(100)
-
-    if (usersError) {
-      console.error('❌ Error fetching active users:', usersError)
-      throw usersError
+    // Get user ID from JWT token for single-user operation
+    const authHeader = req.headers.get('Authorization')
+    let targetUserId = null
+    
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1]
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+        if (user && !authError) {
+          targetUserId = user.id
+          console.log(`🔐 Authenticated user request for: ${targetUserId}`)
+        }
+      } catch (authError) {
+        console.error('❌ Auth token validation failed:', authError)
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Invalid authentication token'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        })
+      }
     }
 
-    if (!activeUsers || activeUsers.length === 0) {
-      console.log('ℹ️ No active users found')
-      return new Response('No active users found', { status: 200, headers: corsHeaders })
-    }
+    // Determine which users to process
+    let uniqueUserIds = []
+    
+    if (targetUserId) {
+      // Single user mode (UI-triggered)
+      uniqueUserIds = [targetUserId]
+      console.log(`👤 Processing single user summary for: ${targetUserId}`)
+    } else {
+      // Batch mode (scheduled/admin)
+      const { data: activeUsers, error: usersError } = await supabase
+        .from('social_media_posts')
+        .select('user_id')
+        .neq('user_id', null)
+        .limit(100)
 
-    // Get unique user IDs
-    const uniqueUserIds = [...new Set(activeUsers.map(u => u.user_id))]
-    console.log(`👥 Processing daily summaries for ${uniqueUserIds.length} users`)
+      if (usersError) {
+        console.error('❌ Error fetching active users:', usersError)
+        throw usersError
+      }
+
+      if (!activeUsers || activeUsers.length === 0) {
+        console.log('ℹ️ No active users found')
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'No active users found',
+          results: { total: 0, successful: 0, failed: 0 }
+        }), { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
+      uniqueUserIds = [...new Set(activeUsers.map(u => u.user_id))]
+      console.log(`👥 Processing daily summaries for ${uniqueUserIds.length} users`)
+    }
 
     const results = []
     const today = new Date().toISOString().split('T')[0]

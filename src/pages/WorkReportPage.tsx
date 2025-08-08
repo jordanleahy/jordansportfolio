@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Plus, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
-import { useDailyWorkSummariesAll } from '@/hooks/useDailyWorkSummaries';
+import { useDailyWorkSummaries, useDailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
 import { WorkReportCard } from '@/components/work-report/WorkReportCard';
 import { WorkReportSkeleton } from '@/components/performance/WorkReportSkeleton';
 import { subDays, format } from 'date-fns';
@@ -22,16 +23,40 @@ const WorkReportPage: React.FC = () => {
     return undefined;
   }, [dateFilter]);
 
-  const { data: summaries, isLoading, error, refetch } = useDailyWorkSummariesAll();
+  // Check if today's summary exists
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { data: todaySummary } = useDailyWorkSummary(today);
+  
+  // Use paginated hook with date filtering
+  const { data: summaries, isLoading, error, refetch } = useDailyWorkSummaries({
+    limit: 50,
+    dateFrom: dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined
+  });
 
   const handleGenerateSummary = async () => {
+    if (todaySummary) {
+      toast.info('A summary for today already exists!');
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-daily-work-summary');
       
       if (error) {
         console.error('Error generating summary:', error);
-        toast.error('Failed to generate summary. Please try again.');
+        if (error.message?.includes('No posts found')) {
+          toast.error('No activity found for today. Create some content first!');
+        } else if (error.message?.includes('No Daily Work Summary Agent')) {
+          toast.error('Daily Work Summary Agent not found. Please contact support.');
+        } else {
+          toast.error(`Failed to generate summary: ${error.message}`);
+        }
+        return;
+      }
+      
+      if (data?.success === false) {
+        toast.error(data.error || 'Failed to generate summary');
         return;
       }
       
@@ -46,11 +71,8 @@ const WorkReportPage: React.FC = () => {
     }
   };
 
-  // Filter summaries based on date range
-  const filteredSummaries = useMemo(() => {
-    if (!summaries || !dateFrom) return summaries;
-    return summaries.filter(summary => summary.summary_date >= dateFrom);
-  }, [summaries, dateFrom]);
+  // Summaries are already filtered by the hook, no need for client-side filtering
+  const filteredSummaries = summaries || [];
 
   if (isLoading) {
     return (
@@ -90,15 +112,25 @@ const WorkReportPage: React.FC = () => {
   }
 
   return (
-    <PageLayout>
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Daily Work Summary</h1>
-            <p className="text-muted-foreground">
-              Track and review your daily work insights and productivity
-            </p>
-          </div>
+    <>
+      <Helmet>
+        <title>Daily Work Reports - Jordan Leahy</title>
+        <meta 
+          name="description" 
+          content="Track your daily productivity, achievements, and insights with AI-powered work summaries. Monitor your progress and optimize your workflow." 
+        />
+        <link rel="canonical" href="https://jordanleahy.com/work-report" />
+      </Helmet>
+      
+      <PageLayout>
+        <div className="container mx-auto py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Daily Work Summary</h1>
+              <p className="text-muted-foreground">
+                Track and review your daily work insights and productivity
+              </p>
+            </div>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -112,14 +144,16 @@ const WorkReportPage: React.FC = () => {
             <Button 
               size="sm" 
               onClick={handleGenerateSummary}
-              disabled={isGenerating}
+              disabled={isGenerating || !!todaySummary}
+              title={todaySummary ? 'Summary for today already exists' : undefined}
             >
               {isGenerating ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Plus className="mr-2 h-4 w-4" />
               )}
-              {isGenerating ? 'Generating...' : 'Generate Today\'s Summary'}
+              {isGenerating ? 'Generating...' : 
+               todaySummary ? 'Today\'s Summary Exists' : 'Generate Today\'s Summary'}
             </Button>
           </div>
         </div>
@@ -166,17 +200,24 @@ const WorkReportPage: React.FC = () => {
                     ? `No reports found for the selected time period. Try expanding your date range.`
                     : 'Start tracking your daily work by generating your first summary.'
                   }
+                  {todaySummary && (
+                    <span className="block mt-2 text-sm text-muted-foreground">
+                      Today's summary already exists. Check the list above!
+                    </span>
+                  )}
                 </p>
                 <Button 
                   onClick={handleGenerateSummary}
-                  disabled={isGenerating}
+                  disabled={isGenerating || !!todaySummary}
+                  title={todaySummary ? 'Summary for today already exists' : undefined}
                 >
                   {isGenerating ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Plus className="mr-2 h-4 w-4" />
                   )}
-                  {isGenerating ? 'Generating...' : 'Generate Today\'s Summary'}
+                  {isGenerating ? 'Generating...' : 
+                   todaySummary ? 'Today\'s Summary Exists' : 'Generate Today\'s Summary'}
                 </Button>
               </div>
             </CardContent>
@@ -190,6 +231,7 @@ const WorkReportPage: React.FC = () => {
         )}
       </div>
     </PageLayout>
+    </>
   );
 };
 
