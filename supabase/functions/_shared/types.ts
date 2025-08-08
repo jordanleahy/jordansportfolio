@@ -28,7 +28,7 @@ export interface OpenAIConfig {
     readonly HIGH_CREATIVE: number;
     readonly CREATIVE: number;
   };
-  readonly MAX_TOKENS: {
+  readonly MAX_COMPLETION_TOKENS: {
     readonly SHORT_RESPONSE: number;
     readonly MEDIUM_RESPONSE: number;
     readonly LONG_RESPONSE: number;
@@ -36,7 +36,7 @@ export interface OpenAIConfig {
   };
   readonly DEFAULT_THEME_MODEL: string;
   readonly DEFAULT_THEME_TEMPERATURE: number;
-  readonly DEFAULT_THEME_MAX_TOKENS: number;
+  readonly DEFAULT_THEME_MAX_COMPLETION_TOKENS: number;
 }
 
 export interface ImageConfig {
