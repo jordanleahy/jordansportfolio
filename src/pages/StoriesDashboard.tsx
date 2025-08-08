@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Users } from 'lucide-react';
+import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
@@ -456,52 +456,66 @@ export default function StoriesDashboard() {
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" className="min-h-[88vh] py-0 flex flex-col items-center justify-center">
-          {/* Hero Header Section */}
-          <Textarea
-            id="theme-description"
-            placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-            value={customThemeDescription}
-            onChange={(e) => setCustomThemeDescription(e.target.value)}
-            className="w-full max-w-3xl h-[80px] resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10 mb-6"
-            disabled={isGeneratingTheme || isProcessing}
-          />
+          {/* ChatGPT-like input */}
+          <div className="w-full max-w-3xl mx-auto">
+            <div className="flex items-end gap-3 rounded-3xl border bg-background shadow-sm p-3 focus-within:ring-2 focus-within:ring-primary/30">
+              <MessageSquareText className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
+              <Textarea
+                id="theme-description"
+                aria-label="Describe your theme"
+                placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                value={customThemeDescription}
+                onChange={(e) => setCustomThemeDescription(e.target.value.slice(0, 1000))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!isGeneratingTheme && !isProcessing && customThemeDescription.trim()) {
+                      handleGenerateCustomTheme();
+                    }
+                  }
+                }}
+                onInput={(e) => {
+                  const el = e.currentTarget as HTMLTextAreaElement;
+                  el.style.height = 'auto';
+                  const max = 180; // ~4 rows
+                  el.style.height = Math.min(el.scrollHeight, max) + 'px';
+                }}
+                className="flex-1 resize-none h-[56px] max-h-[180px] border-0 rounded-2xl bg-transparent px-3 py-3 focus-visible:ring-0"
+                disabled={isGeneratingTheme || isProcessing}
+              />
+              <Button
+                type="button"
+                size="icon"
+                onClick={handleGenerateCustomTheme}
+                disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
+                className="rounded-full"
+                aria-label="Generate theme"
+              >
+                {isGeneratingTheme || isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-2">
+              <span>Press Enter to submit • Shift+Enter for a new line</span>
+              <span>{customThemeDescription.length}/1000</span>
+            </div>
+          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-4 max-w-2xl mx-auto mb-8">
-            <Button
-              onClick={handleGenerateCustomTheme}
-              disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
-              className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-            >
-              {isGeneratingTheme || isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isGeneratingTheme ? 'Generating...' : 'Importing...'}
-                </>
+          {/* Admin import (separate from input) */}
+          {isAdmin && (
+            <div className="mt-4">
+              {roleLoading ? (
+                <Skeleton className="h-10 w-48" />
               ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Submit
-                </>
-              )}
-            </Button>
-
-            {/* Bulk Actions button hidden per user request */}
-
-            {isAdmin && (
-              roleLoading ? (
-                <Skeleton className="flex-1 h-10" />
-              ) : (
-                <Button
-                  onClick={() => setImportModalOpen(true)}
-                  variant="outline"
-                  className="flex-1"
-                >
+                <Button onClick={() => setImportModalOpen(true)} variant="outline">
                   Import Themes
                 </Button>
-              )
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {isAdmin && (
             <Suspense fallback={<div>Loading...</div>}>
