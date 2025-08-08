@@ -46,11 +46,12 @@ const Navigation = () => {
   const mobileMenuItems = user ? [
     // Authenticated user items
     { href: "/stories", label: "Stories", icon: BookOpen },
-    { href: "/work-report", label: "Work Reports", icon: ChartBar },
+    
     { href: "settings", label: "Settings", icon: User, userInfo: true, isModal: true },
     // Admin-only items
     ...(isAdmin ? [
       
+      { href: "/work-report", label: "Work Reports", icon: ChartBar },
       { href: "/investors", label: "Investors", icon: TrendingUp },
       { href: "/comparisons", label: "Battlecards", icon: GitCompare },
       { href: "/vendors", label: "Vendors", icon: Building2 },
@@ -194,17 +195,19 @@ const Navigation = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/work-report"
-                          className={cn(navLinkStyles, isActive("/work-report") && "bg-accent text-accent-foreground")}
-                        >
-                          <ChartBar className="mr-2 h-4 w-4" />
-                          Work Reports
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                    {isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/work-report"
+                            className={cn(navLinkStyles, isActive("/work-report") && "bg-accent text-accent-foreground")}
+                          >
+                            <ChartBar className="mr-2 h-4 w-4" />
+                            Work Reports
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
                     {/* Admin-only navigation items */}
                     {isAdmin && (
