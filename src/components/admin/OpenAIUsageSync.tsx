@@ -13,7 +13,7 @@ import { formatCurrency } from '@/lib/utils';
 
 export const OpenAIUsageSync = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [syncType, setSyncType] = useState('daily');
+  const [syncType, setSyncType] = useState('all');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -139,6 +139,7 @@ export const OpenAIUsageSync = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All dates</SelectItem>
                 <SelectItem value="daily">Daily</SelectItem>
                 <SelectItem value="weekly">Weekly</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>

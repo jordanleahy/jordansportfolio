@@ -163,12 +163,16 @@ Deno.serve(async (req) => {
       console.log('Syncing internal OpenAI usage data...');
 
       // Get our unsynced records from the database
-      const { data: unsyncedRecords, error: selectError } = await supabase
+      let usageQuery = supabase
         .from('api_usage_tracking')
         .select('*')
-        .eq('openai_synced', false)
-        .gte('created_at', new Date(startTimestamp * 1000).toISOString())
-        .lte('created_at', new Date(endTimestamp * 1000).toISOString())
+        .eq('openai_synced', false);
+      if (syncType !== 'all') {
+        usageQuery = usageQuery
+          .gte('created_at', new Date(startTimestamp * 1000).toISOString())
+          .lte('created_at', new Date(endTimestamp * 1000).toISOString());
+      }
+      const { data: unsyncedRecords, error: selectError } = await usageQuery
         .order('created_at', { ascending: true });
 
       if (selectError) {
@@ -179,11 +183,15 @@ Deno.serve(async (req) => {
       console.log(`Found ${unsyncedRecords?.length || 0} unsynced records for date range`);
       
       // Preload related image costs for efficient lookups
-      const { data: relatedImages, error: imagesError } = await supabase
+      let imagesQuery = supabase
         .from('images')
-        .select('api_usage_tracking_id, actual_cost, estimated_cost, created_at')
-        .gte('created_at', new Date(startTimestamp * 1000).toISOString())
-        .lte('created_at', new Date(endTimestamp * 1000).toISOString());
+        .select('api_usage_tracking_id, actual_cost, estimated_cost, created_at');
+      if (syncType !== 'all') {
+        imagesQuery = imagesQuery
+          .gte('created_at', new Date(startTimestamp * 1000).toISOString())
+          .lte('created_at', new Date(endTimestamp * 1000).toISOString());
+      }
+      const { data: relatedImages, error: imagesError } = await imagesQuery;
       
       if (imagesError) {
         console.warn('Could not preload related images for cost reconciliation:', imagesError);
