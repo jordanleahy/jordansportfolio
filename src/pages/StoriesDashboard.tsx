@@ -457,7 +457,7 @@ export default function StoriesDashboard() {
       </Helmet>
         <Section id="hero" className="min-h-[88vh] py-0 flex flex-col items-center justify-center">
           {/* Hero Header Section */}
-          <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-6 min-h-[40vh] flex items-center justify-center">
+          <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-2xl bg-background border mb-6 min-h-[40vh] flex items-center justify-center">
             <div className="absolute top-0 left-0 right-0 h-[200px] bg-grid-small-black/[0.02] bg-grid-pattern" />
             <Textarea
               id="theme-description"
