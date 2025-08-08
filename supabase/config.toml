@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.user-usage-detail]
 verify_jwt = true
+
+[functions.get-usage-summary]
+verify_jwt = true

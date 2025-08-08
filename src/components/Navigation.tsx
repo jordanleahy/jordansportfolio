@@ -12,22 +12,18 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreloading } from "@/hooks/useRoutePreloading";
 import { useModal } from "@/contexts/ModalContext";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
-
-const Navigation = () => {
-  const { user, signOut } = useAuth();
-  const { isAdmin } = useUserRole();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { handleMouseEnter, handleFocus } = useNavigationPreloading();
-  const { openSettings } = useModal();
-
-  // Subscription credits
-  const { data: subData, isLoading: subLoading } = useSubscriptionStatus();
-  const totalCredits = subData?.subscription?.tier?.max_gpt_images || 0;
-  const usedCredits = subData?.usage?.gpt_images_used || 0;
-  const remainingCredits = Math.max(totalCredits - usedCredits, 0);
-  const percentUsed = totalCredits ? Math.min((usedCredits / totalCredits) * 100, 100) : 0;
+import { useUsageSummary } from "@/hooks/useUsageSummary";
+ 
+ const Navigation = () => {
+   const { user, signOut } = useAuth();
+   const { isAdmin } = useUserRole();
+   const navigate = useNavigate();
+   const location = useLocation();
+   const { handleMouseEnter, handleFocus } = useNavigationPreloading();
+   const { openSettings } = useModal();
+ 
+   // Usage summary (unified)
+   const { data: usageData, isLoading: usageLoading, totalCredits, usedCredits, remainingCredits, percentUsed } = useUsageSummary();
   // Simplified active state logic
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/" && !location.hash;
@@ -325,7 +321,7 @@ const Navigation = () => {
                               </div>
                             </div>
                             
-                            {/* Credits Section */}
+                            {/* Usage Section */}
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <div className="space-y-2 cursor-pointer">
@@ -336,10 +332,10 @@ const Navigation = () => {
                                   <div className="w-full bg-muted rounded-full h-2">
                                     <div className="bg-primary h-2 rounded-full" style={{ width: `${percentUsed}%` }}></div>
                                   </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                      <span className="text-xs text-muted-foreground">Using plan credits</span>
-                                    </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                    <span className="text-xs text-muted-foreground">{usageData?.isAdmin ? 'Admin override' : 'Using plan credits'}</span>
+                                  </div>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="bg-background border shadow-lg">
