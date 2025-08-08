@@ -185,6 +185,10 @@ Please incorporate these colors and visual style into the image prompt to ensure
     logger.info('OpenAI chat request prepared', {
       model: requestBody.model,
       parameters: {
+        has_max_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_tokens'),
+        has_max_completion_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_completion_tokens'),
+        max_tokens: (requestBody as any).max_tokens,
+        max_completion_tokens: (requestBody as any).max_completion_tokens,
         user_set: !!(requestBody as any).user
       },
       message_summary: {

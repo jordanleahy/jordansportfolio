@@ -138,7 +138,9 @@ ${script_text}`;
           role: 'user',
           content: userPrompt
         }
-      ]
+      ],
+      temperature: 1,
+      max_completion_tokens: 3000,
     }, correlationId);
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({

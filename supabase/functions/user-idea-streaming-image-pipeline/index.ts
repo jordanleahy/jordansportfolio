@@ -69,6 +69,8 @@ JSON STRUCTURE REQUIRED:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
         ],
+        temperature: OPENAI_CONFIG.DEFAULT_THEME_TEMPERATURE,
+        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
         response_format: { type: 'json_object' }
       }),
     });
@@ -96,7 +98,9 @@ JSON STRUCTURE REQUIRED:
       console.log('🎯 Token usage:', {
         promptTokens: data.usage.prompt_tokens,
         completionTokens: data.usage.completion_tokens,
-        totalTokens: data.usage.total_tokens
+        totalTokens: data.usage.total_tokens,
+        maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        hitLimit: data.usage.completion_tokens >= OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS
       });
     }
 

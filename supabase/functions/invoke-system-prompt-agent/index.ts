@@ -17,7 +17,10 @@ const SYSTEM_PROMPT_CATEGORIES = {
 } as const;
 
 const OPENAI_CONFIG = {
+  DEFAULT_TEMPERATURE: 1,
   DEFAULT_MODEL: 'gpt-5-mini',
+  MAX_COMPLETION_TOKENS: 4000,
+  TIMEOUT_MS: 30000,
 } as const;
 
 const HTTP_STATUS = {
@@ -223,7 +226,9 @@ Please generate a detailed, professional system prompt following the established
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
-      ]
+      ],
+      temperature: OPENAI_CONFIG.DEFAULT_TEMPERATURE,
+      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
     }, correlationId);
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({

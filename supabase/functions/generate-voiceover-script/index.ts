@@ -144,7 +144,9 @@ Please transform this content into a teleprompter-style voiceover script optimiz
       messages: [
         { role: 'system', content: selectedPrompt.prompt_text },
         { role: 'user', content: userPrompt }
-      ]
+      ],
+      temperature: 1,
+      max_completion_tokens: 2000,
     }, correlationId);
 
     const { response: openaiResponse, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
