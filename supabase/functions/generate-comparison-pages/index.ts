@@ -224,7 +224,7 @@ CRITICAL: Return ONLY the structured JSON object for database insertion. No mark
           { role: 'user', content: finalPrompt }
         ],
         temperature: 0.1,
-        max_tokens: 2500,
+        max_completion_tokens: 2500,
       }),
     });
 

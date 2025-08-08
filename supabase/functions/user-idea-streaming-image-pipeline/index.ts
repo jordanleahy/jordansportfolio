@@ -65,7 +65,7 @@ JSON STRUCTURE REQUIRED:
           { role: 'user', content: `Generate a social media theme for: ${cleanDescription}` }
         ],
         temperature: 0.7,
-        max_tokens: 3000,
+        max_completion_tokens: 3000,
       }),
     });
 

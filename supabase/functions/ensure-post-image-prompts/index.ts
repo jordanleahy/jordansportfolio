@@ -156,7 +156,7 @@ Please generate a detailed, professional image prompt that will create an approp
               }
             ],
             temperature: 0.7,
-            max_tokens: 800,
+            max_completion_tokens: 800,
           }),
         });
 

@@ -145,7 +145,7 @@ Please incorporate these colors and visual style into the image prompt to ensure
         { role: 'user', content: userMessage }
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_completion_tokens: 500,
       user: correlationId // Only include user field for tracking
     };
 

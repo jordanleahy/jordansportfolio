@@ -214,7 +214,7 @@ Return only the cleaned JSON:`;
         }
       ],
       temperature: 0.1,
-      max_tokens: 3000,
+      max_completion_tokens: 3000,
     };
     
     console.log('📤 Sending request to OpenAI...');
