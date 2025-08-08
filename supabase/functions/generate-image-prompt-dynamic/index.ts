@@ -148,6 +148,13 @@ Color Theme Instructions:
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
     }
 
+    // Add strict output instructions to minimize reasoning
+    userMessage += `
+\nOutput Instructions:
+- Respond with ONLY the final image prompt as plain text, no preface or analysis.
+- Do not include any hidden thoughts or chain-of-thought.
+- Keep output within ~350 tokens.`;
+
     // OpenAI request with proper format
     logger.debug('Prompt previews', {
       systemPreview: (categoryPrompt.prompt || '').slice(0, 400),
@@ -160,8 +167,6 @@ Please incorporate these colors and visual style into the image prompt to ensure
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      reasoning: { effort: 'low' },
-      response_format: { type: 'text' },
       max_completion_tokens: 1024,
       user: correlationId // Only include user field for tracking
     };
