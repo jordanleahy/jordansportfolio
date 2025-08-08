@@ -17,7 +17,7 @@
  * - Error: { error: string, allowed: false, remaining: 0, limit: 0, usage_type: 'unknown' }
  * 
  * DEPENDENCIES:
- * - Supabase Database (user_subscriptions, subscription_tiers, user_usage_tracking tables)
+ * - Supabase Database (user_subscriptions, subscription_tiers, api_usage_tracking tables)
  * - User Authentication (Bearer token required)
  * 
  * USAGE:
