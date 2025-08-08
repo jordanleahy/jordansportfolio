@@ -85,6 +85,14 @@ export const useUnifiedRealtime = ({
               // Successful image generation – invalidate credits cache
               queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
             }
+          } else if (eventType === 'UPDATE') {
+            const n = data.new as any;
+            const o = data.old as any;
+            const rt = n?.request_type;
+            const successFlippedTrue = !!n?.success && !o?.success;
+            if (successFlippedTrue && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
+              queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+            }
           }
           break;
         }

@@ -261,6 +261,20 @@ export class UnifiedRealtimeManager {
         this.handleDebouncedUpdate('api_usage_tracking', payload);
       }
     );
+
+    // Also listen to updates (success can flip from false -> true later)
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'api_usage_tracking',
+        filter: `user_id=eq.${userId}`
+      },
+      (payload) => {
+        this.handleDebouncedUpdate('api_usage_tracking', payload);
+      }
+    );
   }
 
   private handleDebouncedUpdate(table: string, payload: any): void {
