@@ -1,4 +1,19 @@
 
+/**
+ * DEVELOPER NOTES - Navigation Component
+ * 
+ * Main navigation component with real-time usage updates
+ * - Uses useUsageSummary hook for live credit tracking
+ * - Integrates with UsageRealtimeProvider for real-time updates
+ * - Displays usage progress in user dropdown with tooltips
+ * - Supports both admin and regular user views
+ * 
+ * Real-time Updates:
+ * - Automatically updates when image generation completes
+ * - Uses centralized QUERY_KEYS.usageSummary for cache management
+ * - Connected to api_usage_tracking table changes via websockets
+ */
+
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";

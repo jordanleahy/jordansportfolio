@@ -1,3 +1,18 @@
+/**
+ * DEVELOPER NOTES - UsageRealtimeProvider
+ * 
+ * Lightweight provider for real-time usage updates
+ * - Subscribes to api_usage_tracking table changes via UnifiedRealtimeManager
+ * - Invalidates QUERY_KEYS.usageSummary cache when usage changes
+ * - Only triggers on successful image generations to reduce unnecessary updates
+ * - Should be wrapped around components that display usage data
+ * 
+ * Integration:
+ * - Added to App.tsx for global coverage
+ * - Works with Navigation, UsageDashboard, and other usage components
+ * - Uses onApiUsageUpdate callback from useUnifiedRealtime hook
+ */
+
 import React from "react";
 import { useUnifiedRealtime } from "@/hooks/useUnifiedRealtime";
 import { useAuth } from "@/contexts/AuthContext";
