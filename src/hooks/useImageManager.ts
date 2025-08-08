@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { useDebouncedCallback } from 'use-debounce';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
+import type { AspectRatio } from '@/types/bulkImageGeneration';
+import { useProcessingStates } from '@/hooks/useProcessingStates';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
@@ -13,6 +15,7 @@ interface UseImageManagerReturn {
 }
 
 export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
+  const { setProcessing } = useProcessingStates();
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
@@ -38,8 +41,11 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
     category?: string
   ) => {
     try {
+      // Start shimmer immediately for this aspect ratio
+      const visualAspect = aspectRatio.replace('_', ':') as AspectRatio;
+      setProcessing(postId, 'generate', true, visualAspect);
 
-      // Update status to uploading
+      // Update status to uploading (DB)
       const statusField = `image_${aspectRatio}_status`;
       console.log(`🎨 IMAGE_GEN: Starting generation for post ${postId}, ratio ${aspectRatio}, setting status to 'uploading'`);
       await supabase
@@ -165,6 +171,9 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     } finally {
+      // Clear shimmer state
+      const visualAspect = aspectRatio.replace('_', ':') as AspectRatio;
+      setProcessing(postId, 'generate', false, visualAspect);
       // No upload state to clear since we removed file upload functionality
     }
   };
