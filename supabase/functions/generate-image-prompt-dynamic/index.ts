@@ -149,6 +149,11 @@ Please incorporate these colors and visual style into the image prompt to ensure
     }
 
     // OpenAI request with proper format
+    logger.debug('Prompt previews', {
+      systemPreview: (categoryPrompt.prompt || '').slice(0, 400),
+      userPreview: (userMessage || '').slice(0, 400)
+    });
+
     const requestBody = {
       model: 'gpt-5-mini',
       messages: [
