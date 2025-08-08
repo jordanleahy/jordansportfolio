@@ -75,8 +75,7 @@ serve(async (req: Request) => {
     let monthlyData = null;
     const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const currentMonthString = currentMonth.toISOString().split('T')[0];
-    
-    if (subscription?.tier?.name && ['starter', 'admin'].includes(subscription.tier.name)) {
+    if (subscription?.tier?.name && ['starter', 'admin'].includes(subscription.tier.name.toLowerCase())) {
       const { data: aggregate } = await supabaseAdmin
         .from('api_usage_monthly_aggregates')
         .select('*')
@@ -84,10 +83,10 @@ serve(async (req: Request) => {
         .eq('month_year', currentMonthString)
         .single();
       
-      if (aggregate) {
-        monthlyData = aggregate;
-        console.log(`Using aggregated monthly data for user ${body.userId}`);
-      }
+        if (aggregate) {
+          monthlyData = aggregate;
+          console.log(`Using aggregated monthly data for user ${body.userId}`);
+        }
     }
 
     // Get current month usage (use aggregated data if available for totals)

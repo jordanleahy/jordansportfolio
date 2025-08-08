@@ -86,7 +86,8 @@ serve(async (req) => {
     // Fetch tier limits
     if (subscription?.tier_id && subscription?.subscription_tiers) {
       const tier = subscription.subscription_tiers as any;
-      tierName = tier.name || 'free';
+      tierName = (tier.name || 'free');
+      const tierNameLower = tierName.toLowerCase();
       
       const tierMonthly = (tier?.max_gpt_images_monthly ?? tier?.max_gpt_images ?? 0) as number;
       const tierDaily = (tier?.max_gpt_images_daily ?? Math.ceil((tierMonthly as number) * 0.1)) as number;
@@ -107,7 +108,7 @@ serve(async (req) => {
     let monthlyUsed = 0;
 
     // For starter/admin users, try to get from monthly aggregates first
-    if (['starter', 'admin'].includes(tierName)) {
+    if (['starter', 'admin'].includes(tierName.toLowerCase())) {
       const { data: monthlyAggregate, error: aggregateError } = await supabase
         .from('api_usage_monthly_aggregates')
         .select('image_generations')
