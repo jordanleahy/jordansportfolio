@@ -20,9 +20,13 @@ const generateTheme = async (description: string): Promise<ThemeData> => {
     lastChar: description.charCodeAt(description.length - 1)
   });
 
-  // Clean the description
+  // Clean and clamp the description
   const cleanDescription = description.trim().replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ');
+  const truncatedDescription = cleanDescription.length > 1500 ? cleanDescription.slice(0, 1500) : cleanDescription;
   console.log('🧹 Cleaned description:', cleanDescription);
+  if (cleanDescription.length !== truncatedDescription.length) {
+    console.log(`✂️ Description truncated from ${cleanDescription.length} to ${truncatedDescription.length} chars`);
+  }
 
   const systemPrompt = `You are a professional social media content strategist. Convert user descriptions into structured theme JSON for social media calendar generation.
 
@@ -59,13 +63,14 @@ JSON STRUCTURE REQUIRED:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate a social media theme for: ${cleanDescription}` }
+          { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
         ],
-        temperature: 0.7,
-        max_tokens: 3000,
+        temperature: 0.4,
+        max_completion_tokens: 1500,
+        response_format: { type: 'json_object' }
       }),
     });
 
@@ -90,25 +95,48 @@ JSON STRUCTURE REQUIRED:
     console.log('📝 Generated content length:', generatedContent.length);
     console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
     
-    try {
-      const parsedData = JSON.parse(generatedContent);
-      console.log('✅ JSON parsing successful');
-      console.log('📊 Parsed data structure:', {
-        hasCategory: !!parsedData.category,
-        hasTheme: !!parsedData.theme,
-        hasDescription: !!parsedData.theme_description,
-        hasPosts: !!parsedData.posts,
-        postsCount: parsedData.posts?.length,
-        category: parsedData.category,
-        theme: parsedData.theme
-      });
-      
-      return parsedData;
-    } catch (parseError) {
-      console.error('❌ JSON parsing failed:', parseError);
-      console.error('📝 Raw content that failed to parse:', generatedContent);
-      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
+    // Robust JSON parsing with fallbacks
+    const stripCodeFences = (text: string) => {
+      return text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```$/i, '')
+        .trim();
+    };
+    const tryParse = (text: string) => {
+      try { return JSON.parse(text); } catch { return null; }
+    };
+
+    let parsedData = tryParse(generatedContent);
+    if (!parsedData) {
+      const unfenced = stripCodeFences(generatedContent);
+      parsedData = tryParse(unfenced);
     }
+    if (!parsedData) {
+      const first = generatedContent.indexOf('{');
+      const last = generatedContent.lastIndexOf('}');
+      if (first !== -1 && last !== -1 && last > first) {
+        parsedData = tryParse(generatedContent.substring(first, last + 1));
+      }
+    }
+
+    if (!parsedData) {
+      console.error('❌ JSON parsing failed. Content preview:', generatedContent.substring(0, 500));
+      throw new Error('Failed to parse OpenAI response as JSON');
+    }
+
+    console.log('✅ JSON parsing successful');
+    console.log('📊 Parsed data structure:', {
+      hasCategory: !!parsedData.category,
+      hasTheme: !!parsedData.theme,
+      hasDescription: !!parsedData.theme_description,
+      hasPosts: !!parsedData.posts,
+      postsCount: parsedData.posts?.length,
+      category: parsedData.category,
+      theme: parsedData.theme
+    });
+    
+    return parsedData;
 
   } catch (fetchError) {
     console.error('❌ OpenAI API fetch error:', fetchError);
@@ -545,7 +573,7 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
       success: false,
       error: error.message
     }), {
-      status: 500,
+      status: 200,
       headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
     });
   }
