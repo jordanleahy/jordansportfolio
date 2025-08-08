@@ -13,7 +13,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
@@ -23,10 +23,9 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   isProcessing,
 }) => {
   const { toast } = useToast();
-  const { data: subData } = useSubscriptionStatus();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   
-  // Check if user has remaining credits
-  const hasCredits = subData ? (subData.subscription?.tier?.max_gpt_images || 0) - (subData.usage?.gpt_images_used || 0) > 0 : true;
+  const creditStatus = getCreditStatus();
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -34,13 +33,20 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   }));
 
   const handleGenerateImage = async (aspectRatio: AspectRatioKey) => {
-    if (!hasCredits) {
+    // Check credits before proceeding
+    if (!creditStatus.hasCredits) {
       toast({
         title: "No credits remaining",
-        description: "You've used all your daily image generation credits. Credits reset at midnight.",
+        description: getBlockingMessage(creditStatus),
         variant: "destructive"
       });
       return;
+    }
+
+    // Enforce usage limits
+    const usageCheck = await enforceUsage('gpt_image_generation', 1);
+    if (!usageCheck.allowed) {
+      return; // Toast already shown by enforceUsage
     }
     
     const response = await onGenerateImage(
@@ -66,14 +72,14 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         <Button
           variant="ghost"
           size="sm"
-          title={!hasCredits ? "No credits remaining" : "Image actions"}
-          className={`h-8 w-8 p-0 ${!hasCredits ? 'opacity-50' : ''}`}
-          disabled={isGenerating || !hasCredits}
+          title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Image actions"}
+          className={`h-8 w-8 p-0 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+          disabled={isGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
         >
           {isGenerating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <ImageIcon className={`h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
+            <ImageIcon className={`h-4 w-4 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`} />
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -90,9 +96,9 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
             <DropdownMenuItem
               key={`generate-${option.value}`}
               onClick={() => handleGenerateImage(option.value)}
-              className={`cursor-pointer text-sm ${!hasCredits ? 'opacity-50' : ''}`}
-              disabled={isGenerating || !hasCredits}
-              title={!hasCredits ? "No credits remaining" : `Generate ${option.label} image`}
+              className={`cursor-pointer text-sm ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+              disabled={isGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
+              title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : `Generate ${option.label} image`}
             >
               {isGeneratingAspectRatio ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

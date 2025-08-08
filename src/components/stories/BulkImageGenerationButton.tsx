@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStates } from '@/hooks/useProcessingStates';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 import type { BulkImageGenerationButtonProps } from '@/types/stories/ui';
@@ -17,24 +17,30 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
   const { isGenerating, setBulkProcessing } = useProcessingStates();
-  const { data: subData } = useSubscriptionStatus();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   
-  // Check if user has remaining credits
-  const hasCredits = subData ? (subData.subscription?.tier?.max_gpt_images || 0) - (subData.usage?.gpt_images_used || 0) > 0 : true;
+  const creditStatus = getCreditStatus();
   
   const isCurrentlyGenerating = isGenerating(post.id);
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
     
-    if (!hasCredits) {
+    // Check credits before proceeding
+    if (!creditStatus.hasCredits) {
       toast({
         title: "No credits remaining",
-        description: "You've used all your daily image generation credits. Credits reset at midnight.",
+        description: getBlockingMessage(creditStatus),
         variant: "destructive"
       });
       return;
+    }
+
+    // Enforce usage limits (will show toast if limit exceeded)
+    const usageCheck = await enforceUsage('gpt_image_generation', 4); // 4 images for bulk generation
+    if (!usageCheck.allowed) {
+      return; // Toast already shown by enforceUsage
     }
     
     try {
@@ -78,16 +84,16 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     <>
       <Button
         onClick={handleGenerateAllImages}
-        disabled={isCurrentlyGenerating || !hasCredits}
+        disabled={isCurrentlyGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
         variant="outline"
         size="sm"
-        className={`h-8 flex-1 ${!hasCredits ? 'opacity-50' : ''}`}
-        title={!hasCredits ? "No credits remaining" : "Generate All Images with AI"}
+        className={`h-8 flex-1 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+        title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Generate All Images with AI"}
       >
         {isCurrentlyGenerating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          <Sparkles className={`h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
+          <Sparkles className={`h-4 w-4 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`} />
         )}
       </Button>
       

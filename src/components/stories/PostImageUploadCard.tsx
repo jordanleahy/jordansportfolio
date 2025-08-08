@@ -14,6 +14,7 @@ import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostImageUploadCardProps } from '@/types/stories/ui';
 
@@ -29,6 +30,9 @@ export const PostImageUploadCard = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
   const { toast: toastHook } = useToast();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
+  
+  const creditStatus = getCreditStatus();
 
   const aspectRatioMap = {
     '16_9': '16:9',
@@ -40,6 +44,16 @@ export const PostImageUploadCard = ({
   const aspectRatio = aspectRatioMap[type];
 
   const handleGenerateImage = async () => {
+    // Check credits before proceeding
+    if (!creditStatus.hasCredits) {
+      toastHook({
+        title: "No credits remaining",
+        description: getBlockingMessage(creditStatus),
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!post.title || !post.description) {
       toastHook({
         title: "Generation failed",
@@ -47,6 +61,12 @@ export const PostImageUploadCard = ({
         variant: "destructive",
       });
       return;
+    }
+
+    // Enforce usage limits
+    const usageCheck = await enforceUsage('gpt_image_generation', 1);
+    if (!usageCheck.allowed) {
+      return; // Toast already shown by enforceUsage
     }
 
     try {
@@ -170,8 +190,9 @@ export const PostImageUploadCard = ({
             <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={handleGenerateImage}
-              disabled={isGenerating || isUploading}
-              className="cursor-pointer"
+              disabled={isGenerating || isUploading || !creditStatus.hasCredits || creditStatus.isLoading}
+              className={`cursor-pointer ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+              title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Generate with AI"}
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Generate ({aspectRatio})

@@ -16,7 +16,7 @@ import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 
 import type { ImageUploadCardProps } from '@/types/stories/ui';
 
@@ -33,10 +33,9 @@ export const ImageUploadCard = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
   const { toast: toastHook } = useToast();
-  const { data: subData } = useSubscriptionStatus();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   
-  // Check if user has remaining credits
-  const hasCredits = subData ? (subData.subscription?.tier?.max_gpt_images || 0) - (subData.usage?.gpt_images_used || 0) > 0 : true;
+  const creditStatus = getCreditStatus();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -71,10 +70,11 @@ export const ImageUploadCard = ({
   };
 
   const handleGenerateImage = async () => {
-    if (!hasCredits) {
+    // Check credits before proceeding
+    if (!creditStatus.hasCredits) {
       toastHook({
         title: "No credits remaining",
-        description: "You've used all your daily image generation credits. Credits reset at midnight.",
+        description: getBlockingMessage(creditStatus),
         variant: "destructive"
       });
       return;
@@ -87,6 +87,12 @@ export const ImageUploadCard = ({
         variant: "destructive",
       });
       return;
+    }
+
+    // Enforce usage limits
+    const usageCheck = await enforceUsage('gpt_image_generation', 1);
+    if (!usageCheck.allowed) {
+      return; // Toast already shown by enforceUsage
     }
 
     try {
@@ -257,14 +263,14 @@ export const ImageUploadCard = ({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      disabled={isGenerating || !hasCredits}
-                      onClick={handleGenerateImage}
-                      className={`cursor-pointer ${!hasCredits ? 'opacity-50' : ''}`}
-                      title={!hasCredits ? "No credits remaining" : "Generate with AI"}
-                    >
-                      <Sparkles className={`mr-2 h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
-                      Generate ({aspectRatio})
+                     <DropdownMenuItem
+                       disabled={isGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
+                       onClick={handleGenerateImage}
+                       className={`cursor-pointer ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+                       title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Generate with AI"}
+                     >
+                       <Sparkles className={`mr-2 h-4 w-4 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`} />
+                       Generate ({aspectRatio})
                       {isGenerating && (
                         <span className="ml-auto text-xs text-muted-foreground">
                           {generationStep === 'prompt' && 'Prompt...'}
