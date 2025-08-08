@@ -519,42 +519,54 @@ export default function StoriesDashboard() {
           </Suspense>
         )}
 
-        {/* Bulk Actions Toolbar */}
-        <BulkActionsToolbar
-          selectedCount={selectedThemes.size}
-          totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
-          onDeleteSelected={() => setShowDeleteDialog(true)}
-          onClearSelection={handleClearSelection}
-          onSelectAll={handleSelectAll}
-          onDeselectAll={handleDeselectAll}
-          allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
-          isDeleting={isDeletingBulk}
-        />
+        {/* Cards Section for Theme/Category cards */}
+        <section aria-labelledby="cards-heading" className="container mx-auto px-4 mb-12">
+          <header className="mb-6">
+            <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">
+              Themes
+            </h2>
+            <p className="text-muted-foreground">
+              Browse and manage your generated themes.
+            </p>
+          </header>
 
-        {/* Enhanced Themes Grid with Loading States */}
-        {isLoadingThemes ? (
-          <ThemesSkeleton />
-        ) : themesError ? (
-          <div className="text-center py-8">
-            <div className="text-muted-foreground mb-4">
-              ⚠️ Failed to load themes: {themesError}
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </Button>
-          </div>
-        ) : (
-          <CategoriesGrid 
-            themes={availableThemes}
-            onDeleteCategory={handleDeleteCategory}
-            selectedThemes={selectedThemes}
-            onThemeSelect={handleThemeSelect}
-            isSelectionMode={isSelectionMode}
+          {/* Bulk Actions Toolbar */}
+          <BulkActionsToolbar
+            selectedCount={selectedThemes.size}
+            totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
+            onDeleteSelected={() => setShowDeleteDialog(true)}
+            onClearSelection={handleClearSelection}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
+            isDeleting={isDeletingBulk}
           />
-        )}
+
+          {/* Enhanced Themes Grid with Loading States */}
+          {isLoadingThemes ? (
+            <ThemesSkeleton />
+          ) : themesError ? (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground mb-4">
+                ⚠️ Failed to load themes: {themesError}
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <CategoriesGrid 
+              themes={availableThemes}
+              onDeleteCategory={handleDeleteCategory}
+              selectedThemes={selectedThemes}
+              onThemeSelect={handleThemeSelect}
+              isSelectionMode={isSelectionMode}
+            />
+          )}
+        </section>
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog
