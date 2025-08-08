@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useUsageSummary } from '@/hooks/useUsageSummary';
 import { Zap, Image, Calendar } from 'lucide-react';
  
- export const UsageDashboard: React.FC = () => {
-   const { data, isLoading, error, totalCredits, usedCredits, percentUsed } = useUsageSummary();
+export const UsageDashboard: React.FC = () => {
+  const { data, isLoading, error, totalCredits, usedCredits, percentUsed, subscriptionTier } = useUsageSummary();
 
   if (isLoading) {
     return (
@@ -45,6 +45,9 @@ import { Zap, Image, Calendar } from 'lucide-react';
               <Zap className="h-5 w-5" />
               Monthly Usage
             </span>
+            <Badge variant="outline" className="text-xs">
+              {subscriptionTier}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

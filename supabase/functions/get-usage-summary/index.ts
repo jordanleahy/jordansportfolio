@@ -9,6 +9,7 @@ const corsHeaders = {
 interface UsageSummaryResponse {
   isAdmin: boolean;
   adminOverride?: { monthlyLimit: number; dailyLimit: number } | null;
+  subscriptionTier: string;
   limits: {
     daily: { limit: number; used: number; remaining: number };
     monthly: { limit: number; used: number; remaining: number };
@@ -176,6 +177,7 @@ serve(async (req) => {
     const payload: UsageSummaryResponse = {
       isAdmin,
       adminOverride: null,
+      subscriptionTier: tierName,
       limits: {
         daily: { limit: dailyLimit, used: dailyUsed, remaining: dailyRemaining },
         monthly: { limit: totalCredits, used: usedCredits, remaining: remainingCredits },

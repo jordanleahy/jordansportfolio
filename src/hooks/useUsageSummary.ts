@@ -10,6 +10,7 @@ export interface UsageLimits {
 export interface UsageSummaryData {
   isAdmin: boolean;
   adminOverride?: { monthlyLimit: number; dailyLimit: number } | null;
+  subscriptionTier: string;
   limits: UsageLimits;
   totals: { totalCredits: number; usedCredits: number; remainingCredits: number; percentUsed: number };
   period?: { start: string | null; end: string | null };
@@ -36,5 +37,6 @@ export const useUsageSummary = () => {
     usedCredits: query.data?.totals.usedCredits ?? 0,
     remainingCredits: query.data?.totals.remainingCredits ?? 0,
     percentUsed: query.data?.totals.percentUsed ?? 0,
+    subscriptionTier: query.data?.subscriptionTier ?? 'free',
   };
 };

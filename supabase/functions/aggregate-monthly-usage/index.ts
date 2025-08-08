@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    const { userId } = await req.json().catch(() => ({}));
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -24,7 +26,7 @@ serve(async (req) => {
       }
     );
 
-    console.log('Starting monthly usage aggregation...');
+    console.log(`Starting monthly usage aggregation for user: ${userId || 'all users'}...`);
 
     // Get the target month (previous day's month to handle timezone edge cases)
     const targetDate = new Date();
@@ -34,11 +36,11 @@ serve(async (req) => {
 
     console.log(`Processing aggregations for month: ${targetMonthString}`);
 
-    // Call the refresh function to update aggregates for all eligible users
+    // Call the refresh function to update aggregates
     const { data: refreshResult, error: refreshError } = await supabaseAdmin
       .rpc('refresh_monthly_aggregates', {
         target_month: targetMonthString,
-        target_user_id: null // Process all users
+        target_user_id: userId || null
       });
 
     if (refreshError) {
@@ -58,7 +60,7 @@ serve(async (req) => {
       const { data: currentRefreshResult, error: currentRefreshError } = await supabaseAdmin
         .rpc('refresh_monthly_aggregates', {
           target_month: currentMonthString,
-          target_user_id: null
+          target_user_id: userId || null
         });
 
       if (currentRefreshError) {
@@ -72,7 +74,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Monthly aggregation completed successfully',
+        message: `Monthly aggregation completed successfully for ${userId ? '1 user' : refreshResult + ' users'}`,
         processedUsers: refreshResult,
         targetMonth: targetMonthString
       }),

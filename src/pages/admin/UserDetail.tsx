@@ -188,6 +188,29 @@ export default function AdminUserDetail() {
               >
                 Assign Tier
               </Button>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    if (!id) return;
+                    setSaving(true);
+                    const { data: resp, error } = await supabase.functions.invoke('aggregate-monthly-usage', {
+                      body: { userId: id }
+                    });
+                    if (error) throw error;
+                    toast.success('Aggregates refreshed');
+                    refetch();
+                  } catch (err: any) {
+                    console.error(err);
+                    toast.error(err?.message || 'Failed to refresh aggregates');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+              >
+                {saving ? 'Refreshing...' : 'Refresh Aggregates'}
+              </Button>
             </div>
           </CardContent>
         </Card>
