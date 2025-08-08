@@ -8,39 +8,62 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
     queryKey: ['api-usage', filters, page, pageSize],
     queryFn: async () => {
       console.log('Fetching API usage data with filters:', filters);
-      
-      // First get the usage data
-      let usageQuery = supabase
-        .from('api_usage_tracking')
-        .select('*')
+      // Prefer unified events table; fallback to legacy tracking
+      // Build base query for events
+      let eventsQuery: any = (supabase as any)
+        .from('api_usage_events')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false });
 
-      // Apply filters
+      // Apply filters to events
       if (filters.startDate) {
-        usageQuery = usageQuery.gte('created_at', filters.startDate);
+        eventsQuery = eventsQuery.gte('created_at', filters.startDate);
       }
       if (filters.endDate) {
-        usageQuery = usageQuery.lte('created_at', filters.endDate);
+        eventsQuery = eventsQuery.lte('created_at', filters.endDate);
       }
       if (filters.userId) {
-        usageQuery = usageQuery.eq('user_id', filters.userId);
+        eventsQuery = eventsQuery.eq('user_id', filters.userId);
       }
       if (filters.functionName) {
-        usageQuery = usageQuery.eq('function_name', filters.functionName);
+        eventsQuery = eventsQuery.eq('function_name', filters.functionName);
       }
       if (filters.requestType) {
-        usageQuery = usageQuery.eq('request_type', filters.requestType);
+        eventsQuery = eventsQuery.eq('request_type', filters.requestType);
       }
       if (filters.success !== undefined) {
-        usageQuery = usageQuery.eq('success', filters.success);
+        eventsQuery = eventsQuery.eq('success', filters.success);
       }
 
-      // Apply pagination
+      // Pagination
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      usageQuery = usageQuery.range(from, to);
+      eventsQuery = eventsQuery.range(from, to);
 
-      const { data, error, count } = await usageQuery;
+      let { data, error, count } = await eventsQuery;
+
+      // Fallback to legacy table on error or if table empty
+      if (error) {
+        console.warn('Events query failed, falling back to api_usage_tracking:', error?.message);
+      }
+      if (error || !data) {
+        let usageQuery = supabase
+          .from('api_usage_tracking')
+          .select('*', { count: 'exact' })
+          .order('created_at', { ascending: false });
+        if (filters.startDate) usageQuery = usageQuery.gte('created_at', filters.startDate);
+        if (filters.endDate) usageQuery = usageQuery.lte('created_at', filters.endDate);
+        if (filters.userId) usageQuery = usageQuery.eq('user_id', filters.userId);
+        if (filters.functionName) usageQuery = usageQuery.eq('function_name', filters.functionName);
+        if (filters.requestType) usageQuery = usageQuery.eq('request_type', filters.requestType);
+        if (filters.success !== undefined) usageQuery = usageQuery.eq('success', filters.success);
+        usageQuery = usageQuery.range(from, to);
+        const res = await usageQuery;
+        data = res.data as any;
+        count = res.count as any;
+        if (res.error) throw res.error;
+      }
+
 
       if (error) {
         console.error('Error fetching API usage data:', error);
@@ -48,16 +71,21 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
       }
 
       // Get unique user IDs to fetch profiles
-      const userIds = [...new Set((data || []).map(record => record.user_id))];
+      const userIds = Array.from(new Set((data || []).map((record: any) => record.user_id).filter((v: any) => !!v))) as string[];
       
       // Fetch user profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, email, full_name')
-        .in('user_id', userIds);
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
+      let profiles: any[] | null = null;
+      if (userIds.length > 0) {
+        const { data: pData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, email, full_name')
+          .in('user_id', userIds as any);
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+        }
+        profiles = pData as any[] | null;
+      } else {
+        profiles = [];
       }
 
       // Create a map for quick profile lookup
