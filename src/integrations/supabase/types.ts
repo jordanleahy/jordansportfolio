@@ -1910,6 +1910,8 @@ export type Database = {
           general_video_url: string | null
           generated_image_prompt: string | null
           id: string
+          image_1_1_status: string | null
+          image_1_1_url: string | null
           image_16_9_gif_url: string | null
           image_16_9_status: string | null
           image_16_9_url: string | null
@@ -1943,6 +1945,8 @@ export type Database = {
           general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
+          image_1_1_status?: string | null
+          image_1_1_url?: string | null
           image_16_9_gif_url?: string | null
           image_16_9_status?: string | null
           image_16_9_url?: string | null
@@ -1976,6 +1980,8 @@ export type Database = {
           general_video_url?: string | null
           generated_image_prompt?: string | null
           id?: string
+          image_1_1_status?: string | null
+          image_1_1_url?: string | null
           image_16_9_gif_url?: string | null
           image_16_9_status?: string | null
           image_16_9_url?: string | null
