@@ -33,20 +33,22 @@ export function UsageOverview() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-8 bg-muted rounded mb-2"></div>
-              <div className="h-12 bg-muted rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-8 bg-muted rounded mb-2"></div>
+                <div className="h-12 bg-muted rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !data.totals || !data.periods) {
     return (
       <Card className="mb-8">
         <CardContent className="p-6">
@@ -66,7 +68,7 @@ export function UsageOverview() {
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totals.images.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{data.totals?.images?.toLocaleString() || 0}</div>
             <p className="text-xs text-muted-foreground">
               All-time generations
             </p>
@@ -79,7 +81,7 @@ export function UsageOverview() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${data.totals.cost.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${(data.totals?.cost || 0).toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               All-time spending
             </p>
@@ -92,7 +94,7 @@ export function UsageOverview() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totals.users}</div>
+            <div className="text-2xl font-bold">{data.totals?.users || 0}</div>
             <p className="text-xs text-muted-foreground">
               Users with generations
             </p>
@@ -105,9 +107,9 @@ export function UsageOverview() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.periods.month.images}</div>
+            <div className="text-2xl font-bold">{data.periods?.month?.images || 0}</div>
             <p className="text-xs text-muted-foreground">
-              ${data.periods.month.cost.toFixed(2)} spent
+              ${(data.periods?.month?.cost || 0).toFixed(2)} spent
             </p>
           </CardContent>
         </Card>
@@ -123,22 +125,22 @@ export function UsageOverview() {
             <div className="flex justify-between items-center">
               <span>This Week</span>
               <div className="text-right">
-                <Badge variant="secondary">{data.periods.week.images}</Badge>
-                <p className="text-sm text-muted-foreground">${data.periods.week.cost.toFixed(2)}</p>
+                <Badge variant="secondary">{data.periods?.week?.images || 0}</Badge>
+                <p className="text-sm text-muted-foreground">${(data.periods?.week?.cost || 0).toFixed(2)}</p>
               </div>
             </div>
             <div className="flex justify-between items-center">
               <span>This Month</span>
               <div className="text-right">
-                <Badge variant="secondary">{data.periods.month.images}</Badge>
-                <p className="text-sm text-muted-foreground">${data.periods.month.cost.toFixed(2)}</p>
+                <Badge variant="secondary">{data.periods?.month?.images || 0}</Badge>
+                <p className="text-sm text-muted-foreground">${(data.periods?.month?.cost || 0).toFixed(2)}</p>
               </div>
             </div>
             <div className="flex justify-between items-center">
               <span>All Time</span>
               <div className="text-right">
-                <Badge>{data.periods.allTime.images}</Badge>
-                <p className="text-sm text-muted-foreground">${data.periods.allTime.cost.toFixed(2)}</p>
+                <Badge>{data.periods?.allTime?.images || 0}</Badge>
+                <p className="text-sm text-muted-foreground">${(data.periods?.allTime?.cost || 0).toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
@@ -150,9 +152,9 @@ export function UsageOverview() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={data.daily}>
+              <LineChart data={data.daily || []}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
+                <XAxis
                   dataKey="date" 
                   fontSize={12}
                   tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
