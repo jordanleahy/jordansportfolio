@@ -33,6 +33,7 @@ import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import UserDashboard from "./pages/UserDashboard";
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
 import WorkReportPage from "./pages/WorkReportPage";
 import WorkReportDetailPage from "./pages/WorkReportDetailPage";
@@ -142,6 +143,7 @@ function App() {
                 <Route path="/portfolio" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
                 <Route path="/sec" element={<AdminRoute><SEC /></AdminRoute>} />
                 <Route path="/sec/data-dictionary" element={<AdminRoute><DataDictionary /></AdminRoute>} />
                 <Route path="/blog" element={<Blog />} />
