@@ -33,7 +33,7 @@ const Subscription: React.FC = () => {
     try {
       if (tier?.price_cents === 0) {
         toast.success('Free plan selected. You can start using the app.');
-        navigate('/dashboard');
+        navigate('/stories');
         return;
       }
 
@@ -67,7 +67,7 @@ const Subscription: React.FC = () => {
     const freePlan = tiers.find(t => t.name === 'Free Plan' && t.price_cents === 0);
     if (freePlan) {
       toast.success('Free plan selected. You can start using the app.');
-      navigate('/dashboard');
+      navigate('/stories');
     }
   };
 

@@ -49,7 +49,7 @@ const Navigation = () => {
     { href: "settings", label: "Settings", icon: User, userInfo: true, isModal: true },
     // Admin-only items
     ...(isAdmin ? [
-      { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
+      
       { href: "/investors", label: "Investors", icon: TrendingUp },
       { href: "/comparisons", label: "Battlecards", icon: GitCompare },
       { href: "/vendors", label: "Vendors", icon: Building2 },
@@ -118,20 +118,6 @@ const Navigation = () => {
                 {user ? (
                   // Authenticated user navigation
                   <>
-                    {/* Dashboard - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/dashboard"
-                            className={cn(navLinkStyles, isActive("/dashboard") && "bg-accent text-accent-foreground")}
-                          >
-                            <BarChart3 className="mr-2 h-4 w-4" />
-                            Dashboard
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
 
                     {/* SEC - Admin Only */}
                     {isAdmin && (
