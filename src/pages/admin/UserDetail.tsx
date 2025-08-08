@@ -210,6 +210,12 @@ export default function AdminUserDetail() {
                   <span className="text-muted-foreground break-all">{data?.user?.email || '—'}</span>
                 </div>
                 <div className="flex items-center justify-between">
+                  <span>Member Since</span>
+                  <span className="text-muted-foreground">
+                    {data?.user?.created_at ? new Date(data.user.created_at).toLocaleDateString() : (isLoading ? '…' : '—')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span>User ID</span>
                   <span className="text-muted-foreground">{data?.user?.user_id || '—'}</span>
                 </div>
