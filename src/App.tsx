@@ -143,7 +143,7 @@ function App() {
                 <Route path="/portfolio" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<AdminRoute><UserDashboard /></AdminRoute>} />
                 <Route path="/sec" element={<AdminRoute><SEC /></AdminRoute>} />
                 <Route path="/sec/data-dictionary" element={<AdminRoute><DataDictionary /></AdminRoute>} />
                 <Route path="/blog" element={<Blog />} />
