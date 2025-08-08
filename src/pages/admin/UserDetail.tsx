@@ -109,43 +109,6 @@ export default function AdminUserDetail() {
           </div>
         </header>
 
-        {/* User overview cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Full Name</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{data?.user?.full_name || '—'}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Email</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold break-all">{data?.user?.email || '—'}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Member Since</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {data?.user?.created_at ? new Date(data.user.created_at).toLocaleDateString() : (isLoading ? '…' : '—')}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Images (All Time)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{data?.periods ? data.periods.all.images : (isLoading ? '…' : 0)}</div>
-            </CardContent>
-          </Card>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
