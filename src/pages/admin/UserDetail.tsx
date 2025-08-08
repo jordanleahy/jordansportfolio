@@ -12,8 +12,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
+  auth?: { email_confirmed_at: string | null; last_sign_in_at: string | null } | null;
   range: { from: string; to: string };
   totals: { images: number; cost: number };
+  periods?: {
+    week: { images: number; cost: number };
+    month: { images: number; cost: number };
+    all: { images: number; cost: number };
+  };
   daily: { date: string; images: number; cost: number }[];
   recent: any[];
 }
@@ -103,6 +109,44 @@ export default function AdminUserDetail() {
           </div>
         </header>
 
+        {/* User overview cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Full Name</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{data?.user?.full_name || '—'}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Email</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold break-all">{data?.user?.email || '—'}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Member Since</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {data?.user?.created_at ? new Date(data.user.created_at).toLocaleDateString() : (isLoading ? '…' : '—')}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Total Images (All Time)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{data?.periods ? data.periods.all.images : (isLoading ? '…' : 0)}</div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardHeader>
@@ -118,6 +162,64 @@ export default function AdminUserDetail() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">${data ? data.totals.cost.toFixed(2) : (isLoading ? '…' : '0.00')}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Image stats and account info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Image Generation Statistics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>This Week</span>
+                  <Badge variant="secondary">{data?.periods ? data.periods.week.images : (isLoading ? '…' : 0)}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>This Month</span>
+                  <Badge variant="secondary">{data?.periods ? data.periods.month.images : (isLoading ? '…' : 0)}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>All Time</span>
+                  <Badge>{data?.periods ? data.periods.all.images : (isLoading ? '…' : 0)}</Badge>
+                </div>
+                <hr className="my-2" />
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Estimated Total Cost</span>
+                  <Badge variant="outline">${data?.periods ? data.periods.all.cost.toFixed(2) : (isLoading ? '…' : '0.00')}</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>User ID</span>
+                  <span className="text-muted-foreground">{data?.user?.user_id || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Email Verified</span>
+                  {data?.auth?.email_confirmed_at ? (
+                    <Badge>Verified</Badge>
+                  ) : (
+                    <Badge variant="secondary">Unverified</Badge>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Last Sign In</span>
+                  <span className="text-muted-foreground">
+                    {data?.auth?.last_sign_in_at ? new Date(data.auth.last_sign_in_at).toLocaleString() : (isLoading ? '…' : '—')}
+                  </span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

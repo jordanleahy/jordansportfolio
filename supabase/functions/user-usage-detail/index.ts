@@ -103,10 +103,67 @@ serve(async (req: Request) => {
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 10);
 
+    // Fetch auth info (email verification and last sign in)
+    const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(body.userId);
+    if (authErr) {
+      console.warn('Failed to fetch auth user:', authErr);
+    }
+
+    // Compute period aggregates: week, month, all-time
+    const now = dateTo;
+    const weekFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const computeAgg = (rows: any[]) => {
+      let images = 0;
+      let cost = 0;
+      for (const r of rows || []) {
+        const isImage = r.request_type === 'image_generation' || String(r.function_name || '').includes('image');
+        if (!isImage) continue;
+        images += 1;
+        cost += Number((r as any).estimated_cost || 0);
+      }
+      return { images, cost: Number(cost.toFixed(4)) };
+    };
+
+    const [weekResp, monthResp, allResp] = await Promise.all([
+      supabaseAdmin
+        .from('api_usage_tracking')
+        .select('estimated_cost, request_type, function_name, created_at')
+        .eq('user_id', body.userId)
+        .gte('created_at', weekFrom.toISOString())
+        .lte('created_at', now.toISOString()),
+      supabaseAdmin
+        .from('api_usage_tracking')
+        .select('estimated_cost, request_type, function_name, created_at')
+        .eq('user_id', body.userId)
+        .gte('created_at', monthFrom.toISOString())
+        .lte('created_at', now.toISOString()),
+      supabaseAdmin
+        .from('api_usage_tracking')
+        .select('estimated_cost, request_type, function_name, created_at')
+        .eq('user_id', body.userId),
+    ]);
+
+    if (weekResp.error) throw weekResp.error;
+    if (monthResp.error) throw monthResp.error;
+    if (allResp.error) throw allResp.error;
+
+    const periods = {
+      week: computeAgg(weekResp.data as any[]),
+      month: computeAgg(monthResp.data as any[]),
+      all: computeAgg(allResp.data as any[]),
+    };
+
     return new Response(JSON.stringify({
       user: profile,
+      auth: {
+        email_confirmed_at: authData?.user?.email_confirmed_at ?? null,
+        last_sign_in_at: authData?.user?.last_sign_in_at ?? null,
+      },
       range: { from: dateFrom.toISOString(), to: dateTo.toISOString() },
       totals: { images: totalImages, cost: Number(totalCost.toFixed(4)) },
+      periods,
       daily: days,
       recent,
     }), {
