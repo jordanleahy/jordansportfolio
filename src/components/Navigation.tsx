@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity, Sparkles } from "lucide-react";
+import { Menu, Database, FileText, Rocket, LogIn, X, Home, Target, User, Settings, BarChart3, Building2, Calendar, BookOpen, LogOut, Heart, TrendingUp, GitCompare, Activity, Sparkles, ChartBar } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -46,6 +46,7 @@ const Navigation = () => {
   const mobileMenuItems = user ? [
     // Authenticated user items
     { href: "/stories", label: "Stories", icon: BookOpen },
+    { href: "/work-report", label: "Work Reports", icon: ChartBar },
     { href: "settings", label: "Settings", icon: User, userInfo: true, isModal: true },
     // Admin-only items
     ...(isAdmin ? [
@@ -189,6 +190,18 @@ const Navigation = () => {
                         >
                           <BookOpen className="mr-2 h-4 w-4" />
                           Stories
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/work-report"
+                          className={cn(navLinkStyles, isActive("/work-report") && "bg-accent text-accent-foreground")}
+                        >
+                          <ChartBar className="mr-2 h-4 w-4" />
+                          Work Reports
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
