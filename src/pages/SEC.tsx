@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { CompanyModal } from "@/components/sec/CompanyModal";
 import { AddVendorModal } from "@/components/vendors/AddVendorModal";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
+import type { OfferingFilters } from "@/types/sec";
 
 
 const SEC = () => {
@@ -25,15 +26,14 @@ const SEC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Initialize filters from URL params
-  const [filters, setFilters] = useState(() => {
+  const [filters, setFilters] = useState<OfferingFilters>(() => {
     const hasUrlParams = searchParams.toString();
     const urlFilters = {
-      industries: searchParams.get('industries')?.split(',').filter(Boolean) || (hasUrlParams ? [] : ['Other Technology']),
-      
+      industries: searchParams.get('industries')?.split(',').filter(Boolean) || [],
       fullySold: searchParams.get('fullySold') === 'true',
       amountRanges: searchParams.get('amountRanges')?.split(',').filter(Boolean) || [],
       maxRaisedRanges: searchParams.get('maxRaisedRanges')?.split(',').filter(Boolean) || [],
-      states: searchParams.get('states')?.split(',').filter(Boolean) || (hasUrlParams ? [] : ['NY']),
+      states: searchParams.get('states')?.split(',').filter(Boolean) || [],
       useDefaultFilters: !hasUrlParams // Default view if no params
     };
     return urlFilters;
@@ -41,7 +41,7 @@ const SEC = () => {
   
   const [isDefaultView, setIsDefaultView] = useState(!searchParams.toString());
 
-  const handleFiltersChange = (newFilters: any) => {
+  const handleFiltersChange = (newFilters: OfferingFilters) => {
     const updatedFilters = { ...newFilters, useDefaultFilters: false };
     setFilters(updatedFilters);
     setIsDefaultView(false);
@@ -60,12 +60,11 @@ const SEC = () => {
 
   const handleResetToDefault = () => {
     const defaultFilters = {
-      industries: ['Other Technology'],
-      
+      industries: [],
       fullySold: false,
       amountRanges: [],
       maxRaisedRanges: [],
-      states: ['NY'],
+      states: [],
       useDefaultFilters: true
     };
     setFilters(defaultFilters);
@@ -108,7 +107,7 @@ const SEC = () => {
                 {isDefaultView && (
                   <div className="flex items-center gap-2 mt-3">
                     <Badge variant="secondary" className="text-sm">
-                      Default View: US Tech Companies (Fully Raised)
+                      Default View: US Tech Companies
                     </Badge>
                   </div>
                 )}
