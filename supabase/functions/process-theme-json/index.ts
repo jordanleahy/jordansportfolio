@@ -213,7 +213,6 @@ Return only the cleaned JSON:`;
           content: prompt
         }
       ],
-      temperature: 1,
       max_completion_tokens: 3000,
     };
     

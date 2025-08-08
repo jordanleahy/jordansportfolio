@@ -69,7 +69,6 @@ JSON STRUCTURE REQUIRED:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
         ],
-        temperature: OPENAI_CONFIG.DEFAULT_THEME_TEMPERATURE,
         max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
         response_format: { type: 'json_object' }
       }),

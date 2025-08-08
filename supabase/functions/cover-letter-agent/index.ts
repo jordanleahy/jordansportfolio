@@ -205,7 +205,6 @@ Return the response as a JSON object with this structure:
         { role: 'system', content: systemPromptData.prompt_text },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 1,
       max_completion_tokens: 2000,
     }, correlationId);
 

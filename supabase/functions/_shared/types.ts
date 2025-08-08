@@ -20,14 +20,6 @@ export interface OpenAIConfig {
     readonly LEGACY_GPT4O: string;
     readonly LEGACY_GPT4O_MINI: string;
   };
-  readonly TEMPERATURE: {
-    readonly DETERMINISTIC: number;
-    readonly FOCUSED: number;
-    readonly LOW_CREATIVE: number;
-    readonly BALANCED: number;
-    readonly HIGH_CREATIVE: number;
-    readonly CREATIVE: number;
-  };
   readonly MAX_COMPLETION_TOKENS: {
     readonly SHORT_RESPONSE: number;
     readonly MEDIUM_RESPONSE: number;
@@ -35,7 +27,6 @@ export interface OpenAIConfig {
     readonly COMPREHENSIVE: number;
   };
   readonly DEFAULT_THEME_MODEL: string;
-  readonly DEFAULT_THEME_TEMPERATURE: number;
   readonly DEFAULT_THEME_MAX_COMPLETION_TOKENS: number;
 }
 

@@ -139,7 +139,6 @@ ${script_text}`;
           content: userPrompt
         }
       ],
-      temperature: 1,
       max_completion_tokens: 3000,
     }, correlationId);
 
