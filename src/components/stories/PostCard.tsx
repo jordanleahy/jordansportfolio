@@ -20,7 +20,7 @@ import { BlogStatusBadge } from './BlogStatusBadge';
 import { useColorTheme } from '@/hooks/useColorThemes';
 import { supabase } from '@/integrations/supabase/client';
 import StoryTellingModal from './StoryTellingModal';
-import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 import type { PostCardProps } from '@/types/stories/ui';
@@ -47,7 +47,8 @@ const PostCardComponent = ({
   const navigate = useNavigate();
   
   const { data: colorTheme } = useColorTheme(post.color_theme_id || '');
-  const { data: subData } = useSubscriptionStatus();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
+  const creditStatus = getCreditStatus();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -57,8 +58,6 @@ const PostCardComponent = ({
   const [generationStep, setGenerationStep] = useState('');
   const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
   
-  // Check if user has remaining credits
-  const hasCredits = subData ? (subData.subscription?.tier?.max_gpt_images || 0) - (subData.usage?.gpt_images_used || 0) > 0 : true;
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-500/20 text-green-700 border-green-500/20';
@@ -90,11 +89,13 @@ const PostCardComponent = ({
   };
 
   const handleHeroImageGenerate = async () => {
-    if (!hasCredits) {
+    // Enforce usage before starting generation
+    const enforcement = await enforceUsage('gpt_image_generation', 1);
+    if (!enforcement.allowed) {
       toast({
-        title: "No credits remaining",
-        description: "You've used all your daily image generation credits. Credits reset at midnight.",
-        variant: "destructive"
+        title: 'Limit reached',
+        description: getBlockingMessage(creditStatus) || enforcement.message || 'Usage limit exceeded.',
+        variant: 'destructive'
       });
       return;
     }
@@ -345,8 +346,8 @@ const PostCardComponent = ({
             size="sm"
             className="mt-2 w-full"
             onClick={handleHeroImageGenerate}
-            disabled={isGeneratingHero || isGenerating(post.id, '16_9') || !hasCredits}
-            title={!hasCredits ? "No credits remaining" : undefined}
+            disabled={isGeneratingHero || isGenerating(post.id, '16_9') || creditStatus.isLoading || !creditStatus.hasCredits}
+            title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : creditStatus.isLoading ? "Checking credits..." : undefined}
           >
             {isGeneratingHero ? (
               <div className="flex items-center gap-2">
@@ -355,7 +356,7 @@ const PostCardComponent = ({
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <ImageIcon className={`h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
+                <ImageIcon className={`h-4 w-4 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-50' : ''}`} />
                 Generate
               </div>
             )}
@@ -411,10 +412,10 @@ const PostCardComponent = ({
                 size="sm"
                 onClick={() => setShowPhotos(!showPhotos)}
                 className="flex-1"
-                title={!hasCredits ? "No credits remaining" : (showPhotos ? "Hide image generation" : "Show image generation")}
-                disabled={!hasCredits}
+                title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : creditStatus.isLoading ? "Checking credits..." : (showPhotos ? "Hide image generation" : "Show image generation")}
+                disabled={creditStatus.isLoading || !creditStatus.hasCredits}
               >
-                <ImageIcon className={`h-4 w-4 ${!hasCredits ? 'opacity-50' : ''}`} />
+                <ImageIcon className={`h-4 w-4 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-50' : ''}`} />
               </Button>
               <Button
                 variant="outline"
