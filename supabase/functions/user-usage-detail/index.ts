@@ -121,7 +121,7 @@ serve(async (req: Request) => {
         const isImage = r.request_type === 'image_generation' || String(r.function_name || '').includes('image');
         if (!isImage) continue;
         images += 1;
-        cost += Number((r as any).estimated_cost || 0);
+        cost += Number(r.estimated_cost || 0);
       }
       return { images, cost: Number(cost.toFixed(4)) };
     };
@@ -131,14 +131,12 @@ serve(async (req: Request) => {
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
         .eq('user_id', body.userId)
-        .gte('created_at', weekFrom.toISOString())
-        .lte('created_at', now.toISOString()),
+        .gte('created_at', weekFrom.toISOString()),
       supabaseAdmin
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
         .eq('user_id', body.userId)
-        .gte('created_at', monthFrom.toISOString())
-        .lte('created_at', now.toISOString()),
+        .gte('created_at', monthFrom.toISOString()),
       supabaseAdmin
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
