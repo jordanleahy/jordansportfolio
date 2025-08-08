@@ -489,15 +489,7 @@ export default function StoriesDashboard() {
               )}
             </Button>
 
-            <Button
-              onClick={handleToggleSelectionMode}
-              variant={isSelectionMode ? "default" : "outline"}
-              className="flex-1"
-              disabled={availableThemes.length === 0}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              {isSelectionMode ? 'Exit Selection' : 'Bulk Actions'}
-            </Button>
+            {/* Bulk Actions button hidden per user request */}
 
             {isAdmin && (
               roleLoading ? (
