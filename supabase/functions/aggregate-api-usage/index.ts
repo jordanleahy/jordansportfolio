@@ -71,7 +71,7 @@ serve(async (req) => {
 
     while (true) {
       const { data, error } = await supabase
-        .from('api_usage_events')
+        .from('api_usage_tracking')
         .select('*')
         .gte('created_at', fromISO)
         .lte('created_at', toISO)
