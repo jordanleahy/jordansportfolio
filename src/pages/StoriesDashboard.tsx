@@ -455,16 +455,16 @@ export default function StoriesDashboard() {
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
-        <Section id="hero" className="py-8">
+        <Section id="hero" className="min-h-[88vh] py-0 flex flex-col items-center justify-center">
           {/* Hero Header Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-8 min-h-[200px] max-h-[40vh] flex">
+          <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-background to-secondary/5 border mb-6 min-h-[40vh] flex items-center justify-center">
             <div className="absolute inset-0 bg-grid-small-black/[0.02] bg-grid-pattern" />
             <Textarea
               id="theme-description"
               placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
               value={customThemeDescription}
               onChange={(e) => setCustomThemeDescription(e.target.value)}
-              className="w-[700px] flex-1 resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10 relative"
+              className="w-full max-w-3xl resize-none border-0 rounded-2xl bg-transparent p-6 focus-visible:ring-0 z-10"
               disabled={isGeneratingTheme || isProcessing}
             />
           </div>
