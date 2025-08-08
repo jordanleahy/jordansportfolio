@@ -178,7 +178,7 @@ Please transform this content into an engaging ${story_type === 'childrens_story
           { role: 'system', content: systemPromptData.prompt_text },
           { role: 'user', content: userPrompt }
         ],
-        temperature: agent.temperature || 0.7,
+        temperature: 1,
         max_tokens: agent.max_tokens || 2000,
       }),
     });

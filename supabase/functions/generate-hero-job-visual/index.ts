@@ -179,7 +179,7 @@ Please create a complete, ready-to-use prompt for generating a 9:16 vertical her
 Focus on making this feel like THE career opportunity of a lifetime, with the company name as the hero and the role as an epic adventure waiting to begin. Do not include any human figures or people in the illustration.`
           }
         ],
-        temperature: 0.8,
+        temperature: 1,
         max_tokens: 2500,
       }),
     });

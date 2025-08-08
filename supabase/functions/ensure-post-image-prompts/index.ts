@@ -155,7 +155,7 @@ Category: ${post.category}
 Please generate a detailed, professional image prompt that will create an appropriate visual for this content. Include the aspect ratio naturally in the description (use 16:9 landscape format).`
               }
             ],
-            temperature: 0.7,
+            temperature: 1,
             max_tokens: 800,
           }),
         });

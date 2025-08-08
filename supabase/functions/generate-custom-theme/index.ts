@@ -106,7 +106,7 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${description}` }
         ],
-        temperature: 0.7,
+        temperature: 1,
         max_tokens: 3000,
       }),
     });

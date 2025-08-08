@@ -93,7 +93,7 @@ Create a detailed image generation prompt for this ${theme} theme content.`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.1,
+      temperature: 1,
       max_tokens: 500
      }),
   });

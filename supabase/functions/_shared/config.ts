@@ -13,12 +13,12 @@ export const OPENAI_CONFIG = {
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
   },
   TEMPERATURE: {
-    DETERMINISTIC: 0.0,
-    FOCUSED: 0.1,
-    LOW_CREATIVE: 0.3,
-    BALANCED: 0.7,
-    HIGH_CREATIVE: 0.8,
-    CREATIVE: 0.9,
+    DETERMINISTIC: 1,
+    FOCUSED: 1,
+    LOW_CREATIVE: 1,
+    BALANCED: 1,
+    HIGH_CREATIVE: 1,
+    CREATIVE: 1,
   },
   MAX_TOKENS: {
     SHORT_RESPONSE: 500,
@@ -28,7 +28,7 @@ export const OPENAI_CONFIG = {
   },
   // Default model for theme generation
   DEFAULT_THEME_MODEL: 'gpt-5-mini',
-  DEFAULT_THEME_TEMPERATURE: 0.7,
+  DEFAULT_THEME_TEMPERATURE: 1,
   DEFAULT_THEME_MAX_TOKENS: 3000,
 } as const;
 

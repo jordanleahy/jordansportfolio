@@ -68,7 +68,7 @@ JSON STRUCTURE REQUIRED:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
         ],
-        temperature: 0.4,
+        temperature: 1,
         max_completion_tokens: 1500,
         response_format: { type: 'json_object' }
       }),

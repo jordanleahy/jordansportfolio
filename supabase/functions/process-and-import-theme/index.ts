@@ -403,7 +403,7 @@ Return only valid JSON:`;
           content: prompt
         }
       ],
-      temperature: 0,
+      temperature: 1,
       max_tokens: 2000,
     }),
   });

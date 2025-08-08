@@ -24,7 +24,7 @@ export const EDGE_FUNCTION_NAMES = {
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MAX_TOKENS: 4000,
-  DEFAULT_TEMPERATURE: 0.1,
+  DEFAULT_TEMPERATURE: 1,
   DEFAULT_MODEL: 'gpt-5-mini', // Updated to latest flagship model
   TIMEOUT_MS: 30000,
 } as const;

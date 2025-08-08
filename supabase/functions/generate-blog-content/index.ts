@@ -143,7 +143,7 @@ Focus on providing genuine value, specific examples, and actionable insights tha
             content: blogPrompt
           }
         ],
-        temperature: 0.3,
+        temperature: 1,
         max_tokens: 4000,
       }),
     });
