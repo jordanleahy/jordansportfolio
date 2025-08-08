@@ -63,19 +63,18 @@ serve(async (req: Request) => {
       .maybeSingle();
     if (profileErr) throw profileErr;
 
-    // Fetch usage within range from api_usage_tracking
+    // Fetch image generation usage within range from api_usage_tracking
     const { data: usageRows, error: usageErr } = await supabaseAdmin
       .from('api_usage_tracking')
       .select('id, created_at, estimated_cost, request_type, function_name, success, user_id')
       .eq('user_id', body.userId)
+      .eq('request_type', 'image_generation')
       .gte('created_at', dateFrom.toISOString())
       .lte('created_at', dateTo.toISOString());
     if (usageErr) throw usageErr;
 
-    // Filter to image generation operations
-    const imageEvents = (usageRows || []).filter((row: any) =>
-      row.request_type === 'image_generation' || String(row.function_name || '').includes('image')
-    );
+    // Use all image generation events
+    const imageEvents = usageRows || [];
 
     // Build daily aggregates
     const byDay = new Map<string, { images: number; cost: number }>();
@@ -118,8 +117,6 @@ serve(async (req: Request) => {
       let images = 0;
       let cost = 0;
       for (const r of rows || []) {
-        const isImage = r.request_type === 'image_generation' || String(r.function_name || '').includes('image');
-        if (!isImage) continue;
         images += 1;
         cost += Number(r.estimated_cost || 0);
       }
@@ -131,16 +128,19 @@ serve(async (req: Request) => {
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
         .eq('user_id', body.userId)
+        .eq('request_type', 'image_generation')
         .gte('created_at', weekFrom.toISOString()),
       supabaseAdmin
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
         .eq('user_id', body.userId)
+        .eq('request_type', 'image_generation')
         .gte('created_at', monthFrom.toISOString()),
       supabaseAdmin
         .from('api_usage_tracking')
         .select('estimated_cost, request_type, function_name, created_at')
-        .eq('user_id', body.userId),
+        .eq('user_id', body.userId)
+        .eq('request_type', 'image_generation'),
     ]);
 
     if (weekResp.error) throw weekResp.error;
