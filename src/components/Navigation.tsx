@@ -330,8 +330,8 @@ const Navigation = () => {
                               <TooltipTrigger asChild>
                                 <div className="space-y-2 cursor-pointer">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium">Credits</span>
-                                    <span className="text-sm text-muted-foreground">{remainingCredits.toLocaleString()} left ›</span>
+                                    <span className="text-sm font-medium">Monthly Usage</span>
+                                    <span className="text-sm text-muted-foreground">{usedCredits.toLocaleString()} / {totalCredits.toLocaleString()}</span>
                                   </div>
                                   <div className="w-full bg-muted rounded-full h-2">
                                     <div className="bg-primary h-2 rounded-full" style={{ width: `${percentUsed}%` }}></div>
@@ -344,7 +344,7 @@ const Navigation = () => {
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="bg-background border shadow-lg">
                                 <div className="flex items-center gap-2 p-1">
-                                  <span className="text-sm font-medium">{usedCredits.toLocaleString()}/{totalCredits.toLocaleString()} credits</span>
+                                  <span className="text-sm font-medium">Monthly Usage {usedCredits.toLocaleString()} / {totalCredits.toLocaleString()}</span>
                                 </div>
                                 <div className="w-24 bg-muted rounded-full h-1 mt-1">
                                   <div className="bg-primary h-1 rounded-full" style={{ width: `${percentUsed}%` }}></div>
