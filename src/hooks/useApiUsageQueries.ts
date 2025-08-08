@@ -8,10 +8,9 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
     queryKey: ['api-usage', filters, page, pageSize],
     queryFn: async () => {
       console.log('Fetching API usage data with filters:', filters);
-      // Prefer unified events table; fallback to legacy tracking
-      // Build base query for events
+      // Query api_usage_tracking directly
       let eventsQuery: any = (supabase as any)
-        .from('api_usage_events')
+        .from('api_usage_tracking')
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false });
 
@@ -42,27 +41,6 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
 
       let { data, error, count } = await eventsQuery;
 
-      // Fallback to legacy table on error or if table empty
-      if (error) {
-        console.warn('Events query failed, falling back to api_usage_tracking:', error?.message);
-      }
-      if (error || !data) {
-        let usageQuery = supabase
-          .from('api_usage_tracking')
-          .select('*', { count: 'exact' })
-          .order('created_at', { ascending: false });
-        if (filters.startDate) usageQuery = usageQuery.gte('created_at', filters.startDate);
-        if (filters.endDate) usageQuery = usageQuery.lte('created_at', filters.endDate);
-        if (filters.userId) usageQuery = usageQuery.eq('user_id', filters.userId);
-        if (filters.functionName) usageQuery = usageQuery.eq('function_name', filters.functionName);
-        if (filters.requestType) usageQuery = usageQuery.eq('request_type', filters.requestType);
-        if (filters.success !== undefined) usageQuery = usageQuery.eq('success', filters.success);
-        usageQuery = usageQuery.range(from, to);
-        const res = await usageQuery;
-        data = res.data as any;
-        count = res.count as any;
-        if (res.error) throw res.error;
-      }
 
 
       if (error) {

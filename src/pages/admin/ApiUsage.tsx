@@ -71,10 +71,10 @@ export default function ApiUsage() {
       const startDate = filters.startDate ? `${filters.startDate}T00:00:00.000Z` : undefined;
       const endDate = filters.endDate ? `${filters.endDate}T23:59:59.999Z` : undefined;
 
-      // Try unified events first
+      // Export from api_usage_tracking table
       while (all.length < maxRows) {
         let q: any = (supabase as any)
-          .from('api_usage_events')
+          .from('api_usage_tracking')
           .select('*')
           .order('created_at', { ascending: true })
           .range(from, from + pageSize - 1);
@@ -86,36 +86,11 @@ export default function ApiUsage() {
         if (filters.success !== undefined) q = q.eq('success', filters.success);
 
         const { data, error } = await q;
-        if (error) break;
+        if (error) throw error;
         const batch = data || [];
         all = all.concat(batch);
         if (batch.length < pageSize) break;
         from += pageSize;
-      }
-
-      // Fallback to legacy if empty
-      if (all.length === 0) {
-        from = 0;
-        while (all.length < maxRows) {
-          let q = supabase
-            .from('api_usage_tracking')
-            .select('*')
-            .order('created_at', { ascending: true })
-            .range(from, from + pageSize - 1);
-          if (startDate) q = q.gte('created_at', startDate);
-          if (endDate) q = q.lte('created_at', endDate);
-          if (filters.userId) q = q.eq('user_id', filters.userId);
-          if (filters.functionName) q = q.eq('function_name', filters.functionName);
-          if (filters.requestType) q = q.eq('request_type', filters.requestType);
-          if (filters.success !== undefined) q = q.eq('success', filters.success);
-
-          const { data, error } = await q;
-          if (error) throw error;
-          const batch = data || [];
-          all = all.concat(batch);
-          if (batch.length < pageSize) break;
-          from += pageSize;
-        }
       }
 
       const cols = [

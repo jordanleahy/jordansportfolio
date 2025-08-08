@@ -30,11 +30,11 @@ export function useAggregatedChartData(filters: UsageFilters = {}): { data?: Usa
       const { data, error } = await query;
       if (error) throw error;
 
-      // If no aggregates yet, fallback to computing from events directly
+      // If no aggregates yet, fallback to computing from tracking table directly
       let rows = data as any[];
       if (!rows || rows.length === 0) {
         let evq = (supabase as any)
-          .from("api_usage_events")
+          .from("api_usage_tracking")
           .select("created_at, request_type, function_name, model_used, estimated_cost, success")
           .gte("created_at", `${startStr}T00:00:00.000Z`)
           .lte("created_at", `${endStr}T23:59:59.999Z`)
