@@ -26,6 +26,7 @@ import { UsageSummaryCards } from "@/components/admin/UsageSummaryCards";
 import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
 import { UsageDetailModal } from "@/components/admin/UsageDetailModal";
 import { OpenAIUsageSync } from "@/components/admin/OpenAIUsageSync";
+import { UsageCharts } from "@/components/admin/UsageCharts";
 import { 
   useApiUsageData, 
   useUsageSummary, 
@@ -121,7 +122,10 @@ export default function ApiUsage() {
 
       {/* Summary Cards */}
       {summary && !summaryLoading && (
-        <UsageSummaryCards summary={summary} />
+        <>
+          <UsageSummaryCards summary={summary} />
+          <UsageCharts />
+        </>
       )}
 
       {/* Main Content Tabs */}
