@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Menu } from "lucide-react";
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
@@ -90,9 +92,22 @@ export default function AdminUserDetail() {
         <link rel="canonical" href={`/admin/users/${id}`} />
       </Helmet>
       <main className="container mx-auto px-4 py-8">
+        {/* Header with Navigation */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/users" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Users
+            </Link>
+          </Button>
+          <div className="flex items-center gap-2">
+            <Menu className="h-5 w-5 text-muted-foreground" />
+            <h1 className="text-2xl font-bold">{data?.user?.full_name || 'User'}</h1>
+          </div>
+        </div>
+
         <header className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{data?.user?.full_name || 'User'} </h1>
             <p className="text-muted-foreground">{data?.user?.email}</p>
           </div>
           <div className="w-40">
