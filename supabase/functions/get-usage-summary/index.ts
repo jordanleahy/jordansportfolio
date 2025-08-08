@@ -45,70 +45,51 @@ serve(async (req) => {
       });
     }
 
-    // Check admin role via RPC if available
-    let isAdmin = false;
-    try {
-      const { data: hasRole, error: roleErr } = await supabase.rpc("has_role", {
-        user_id: user.id,
-        role: "admin",
-      });
-      if (!roleErr && hasRole === true) isAdmin = true;
-    } catch (_) {
-      // Fallback: not admin
-    }
-
-    // Admin override
-    const ADMIN_MONTHLY_LIMIT = 10000;
-    const ADMIN_DAILY_LIMIT = 10000;
+    // Admin roles are handled via subscription tiers; no explicit override
+    const isAdmin = false;
+    // No admin override constants; limits come from subscription tiers
 
     // Fetch active subscription (if not admin)
     let periodStart: string | null = null;
     let periodEnd: string | null = null;
-    let monthlyLimit = ADMIN_MONTHLY_LIMIT;
-    let dailyLimit = ADMIN_DAILY_LIMIT;
+    let monthlyLimit = 0;
+    let dailyLimit = 0;
 
-    if (!isAdmin) {
-      const nowIso = new Date().toISOString();
-      const { data: subscription, error: subErr } = await supabase
-        .from("user_subscriptions")
-        .select("tier_id,current_period_start,current_period_end,status")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .lte("current_period_start", nowIso)
-        .gte("current_period_end", nowIso)
+    // Fetch active subscription for all users
+    const nowIso = new Date().toISOString();
+    const { data: subscription, error: subErr } = await supabase
+      .from("user_subscriptions")
+      .select("tier_id,current_period_start,current_period_end,status")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .lte("current_period_start", nowIso)
+      .gte("current_period_end", nowIso)
+      .maybeSingle();
+
+    if (subErr) throw subErr;
+
+    periodStart = subscription?.current_period_start ?? null;
+    periodEnd = subscription?.current_period_end ?? null;
+
+    // Fetch tier limits
+    if (subscription?.tier_id) {
+      const { data: tier, error: tierErr } = await supabase
+        .from("subscription_tiers")
+        .select("max_gpt_images, max_gpt_images_daily, max_gpt_images_monthly")
+        .eq("id", subscription.tier_id)
         .maybeSingle();
+      if (tierErr) throw tierErr;
 
-      if (subErr) throw subErr;
-
-      periodStart = subscription?.current_period_start ?? null;
-      periodEnd = subscription?.current_period_end ?? null;
-
-      // Fetch tier limits
-      if (subscription?.tier_id) {
-        const { data: tier, error: tierErr } = await supabase
-          .from("subscription_tiers")
-          .select("max_gpt_images, max_gpt_images_daily, max_gpt_images_monthly")
-          .eq("id", subscription.tier_id)
-          .maybeSingle();
-        if (tierErr) throw tierErr;
-
-        const tierMonthly = (tier?.max_gpt_images_monthly ?? tier?.max_gpt_images ?? 0) as number;
-        const tierDaily = (tier?.max_gpt_images_daily ?? Math.ceil(tierMonthly * 0.1)) as number;
-        monthlyLimit = tierMonthly;
-        dailyLimit = tierDaily;
-      } else {
-        // No active tier: zero limits
-        monthlyLimit = 0;
-        dailyLimit = 0;
-      }
+      const tierMonthly = (tier?.max_gpt_images_monthly ?? tier?.max_gpt_images ?? 0) as number;
+      const tierDaily = (tier?.max_gpt_images_daily ?? Math.ceil((tierMonthly as number) * 0.1)) as number;
+      monthlyLimit = tierMonthly;
+      dailyLimit = tierDaily;
     } else {
-      // For admins, set fake period to current month
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      periodStart = start.toISOString();
-      periodEnd = end.toISOString();
+      // No active tier: zero limits
+      monthlyLimit = 0;
+      dailyLimit = 0;
     }
+
 
     // Compute usage
     const today = new Date();
@@ -144,18 +125,18 @@ serve(async (req) => {
     }
 
     // Apply limits and compute remaining
-    const monthlyRemaining = Math.max((isAdmin ? ADMIN_MONTHLY_LIMIT : monthlyLimit) - monthlyUsed, 0);
-    const dailyRemaining = Math.max((isAdmin ? ADMIN_DAILY_LIMIT : dailyLimit) - dailyUsed, 0);
-    const totalCredits = isAdmin ? ADMIN_MONTHLY_LIMIT : monthlyLimit;
+    const monthlyRemaining = Math.max(monthlyLimit - monthlyUsed, 0);
+    const dailyRemaining = Math.max(dailyLimit - dailyUsed, 0);
+    const totalCredits = monthlyLimit;
     const usedCredits = monthlyUsed;
     const remainingCredits = Math.max(totalCredits - usedCredits, 0);
     const percentUsed = totalCredits > 0 ? Math.min((usedCredits / totalCredits) * 100, 100) : 0;
 
     const payload: UsageSummaryResponse = {
       isAdmin,
-      adminOverride: isAdmin ? { monthlyLimit: ADMIN_MONTHLY_LIMIT, dailyLimit: ADMIN_DAILY_LIMIT } : null,
+      adminOverride: null,
       limits: {
-        daily: { limit: isAdmin ? ADMIN_DAILY_LIMIT : dailyLimit, used: dailyUsed, remaining: dailyRemaining },
+        daily: { limit: dailyLimit, used: dailyUsed, remaining: dailyRemaining },
         monthly: { limit: totalCredits, used: usedCredits, remaining: remainingCredits },
       },
       totals: { totalCredits, usedCredits, remainingCredits, percentUsed },
