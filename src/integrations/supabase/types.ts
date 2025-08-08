@@ -89,6 +89,81 @@ export type Database = {
           },
         ]
       }
+      api_usage_daily_aggregates: {
+        Row: {
+          agg_key: string
+          avg_latency_ms: number | null
+          created_at: string
+          date: string
+          function_name: string | null
+          id: string
+          model_used: string | null
+          p95_latency_ms: number | null
+          provider: string
+          request_type: string | null
+          service: string | null
+          success_rate: number
+          total_actual_cost: number | null
+          total_completion_tokens: number
+          total_errors: number
+          total_estimated_cost: number
+          total_prompt_tokens: number
+          total_requests: number
+          total_success: number
+          total_tokens: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agg_key: string
+          avg_latency_ms?: number | null
+          created_at?: string
+          date: string
+          function_name?: string | null
+          id?: string
+          model_used?: string | null
+          p95_latency_ms?: number | null
+          provider?: string
+          request_type?: string | null
+          service?: string | null
+          success_rate?: number
+          total_actual_cost?: number | null
+          total_completion_tokens?: number
+          total_errors?: number
+          total_estimated_cost?: number
+          total_prompt_tokens?: number
+          total_requests?: number
+          total_success?: number
+          total_tokens?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agg_key?: string
+          avg_latency_ms?: number | null
+          created_at?: string
+          date?: string
+          function_name?: string | null
+          id?: string
+          model_used?: string | null
+          p95_latency_ms?: number | null
+          provider?: string
+          request_type?: string | null
+          service?: string | null
+          success_rate?: number
+          total_actual_cost?: number | null
+          total_completion_tokens?: number
+          total_errors?: number
+          total_estimated_cost?: number
+          total_prompt_tokens?: number
+          total_requests?: number
+          total_success?: number
+          total_tokens?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       api_usage_tracking: {
         Row: {
           actual_cost: number | null
