@@ -3,18 +3,22 @@ import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, FileText, Plus, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon, FileText, Plus, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { useDailyWorkSummaries, useDailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
 import { WorkReportCard } from '@/components/work-report/WorkReportCard';
 import { WorkReportSkeleton } from '@/components/performance/WorkReportSkeleton';
 import { subDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const WorkReportPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days'>('30days');
   const [showFilters, setShowFilters] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Calculate date range for filtering
   const dateFrom = useMemo(() => {
@@ -23,9 +27,9 @@ const WorkReportPage: React.FC = () => {
     return undefined;
   }, [dateFilter]);
 
-  // Check if today's summary exists
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const { data: todaySummary } = useDailyWorkSummary(today);
+  // Check if selected date's summary exists
+  const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
+  const { data: selectedDateSummary } = useDailyWorkSummary(selectedDateString);
   
   // Use paginated hook with date filtering
   const { data: summaries, isLoading, error, refetch } = useDailyWorkSummaries({
@@ -34,19 +38,21 @@ const WorkReportPage: React.FC = () => {
   });
 
   const handleGenerateSummary = async () => {
-    if (todaySummary) {
-      toast.info('A summary for today already exists!');
+    if (selectedDateSummary) {
+      toast.info(`A summary for ${format(selectedDate, 'MMM d, yyyy')} already exists!`);
       return;
     }
 
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-daily-work-summary');
+      const { data, error } = await supabase.functions.invoke('generate-daily-work-summary', {
+        body: { date: selectedDateString }
+      });
       
       if (error) {
         console.error('Error generating summary:', error);
         if (error.message?.includes('No posts found')) {
-          toast.error('No activity found for today. Create some content first!');
+          toast.error(`No activity found for ${format(selectedDate, 'MMM d, yyyy')}. Create some content first!`);
         } else if (error.message?.includes('No Daily Work Summary Agent')) {
           toast.error('Daily Work Summary Agent not found. Please contact support.');
         } else {
@@ -60,7 +66,7 @@ const WorkReportPage: React.FC = () => {
         return;
       }
       
-      toast.success('Daily work summary generated successfully!');
+      toast.success(`Daily work summary for ${format(selectedDate, 'MMM d, yyyy')} generated successfully!`);
       // Refetch the summaries to show the new one
       refetch();
     } catch (error) {
@@ -141,20 +147,47 @@ const WorkReportPage: React.FC = () => {
               Filter
               {showFilters ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />}
             </Button>
-            <Button 
-              size="sm" 
-              onClick={handleGenerateSummary}
-              disabled={isGenerating || !!todaySummary}
-              title={todaySummary ? 'Summary for today already exists' : undefined}
-            >
-              {isGenerating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              {isGenerating ? 'Generating...' : 
-               todaySummary ? 'Today\'s Summary Exists' : 'Generate Today\'s Summary'}
-            </Button>
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button 
+                size="sm" 
+                onClick={handleGenerateSummary}
+                disabled={isGenerating || !!selectedDateSummary}
+                title={selectedDateSummary ? `Summary for ${format(selectedDate, 'MMM d, yyyy')} already exists` : undefined}
+              >
+                {isGenerating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
+                {isGenerating ? 'Generating...' : 
+                 selectedDateSummary ? `Summary Exists` : 'Generate Summary'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -200,25 +233,46 @@ const WorkReportPage: React.FC = () => {
                     ? `No reports found for the selected time period. Try expanding your date range.`
                     : 'Start tracking your daily work by generating your first summary.'
                   }
-                  {todaySummary && (
-                    <span className="block mt-2 text-sm text-muted-foreground">
-                      Today's summary already exists. Check the list above!
-                    </span>
-                  )}
                 </p>
-                <Button 
-                  onClick={handleGenerateSummary}
-                  disabled={isGenerating || !!todaySummary}
-                  title={todaySummary ? 'Summary for today already exists' : undefined}
-                >
-                  {isGenerating ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Plus className="mr-2 h-4 w-4" />
-                  )}
-                  {isGenerating ? 'Generating...' : 
-                   todaySummary ? 'Today\'s Summary Exists' : 'Generate Today\'s Summary'}
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "MMM d, yyyy") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => date && setSelectedDate(date)}
+                        disabled={(date) => date > new Date()}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Button 
+                    onClick={handleGenerateSummary}
+                    disabled={isGenerating || !!selectedDateSummary}
+                    title={selectedDateSummary ? `Summary for ${format(selectedDate, 'MMM d, yyyy')} already exists` : undefined}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="mr-2 h-4 w-4" />
+                    )}
+                    {isGenerating ? 'Generating...' : 
+                     selectedDateSummary ? 'Summary Exists' : 'Generate Summary'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

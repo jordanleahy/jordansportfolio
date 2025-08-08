@@ -114,8 +114,12 @@ serve(async (req) => {
       console.log(`👥 Processing daily summaries for ${uniqueUserIds.length} users`)
     }
 
+    // Get the date from request body or default to today
+    const requestBody = await req.json().catch(() => ({}));
+    const targetDate = requestBody.date || new Date().toISOString().split('T')[0];
+    const summaryDate = targetDate; // YYYY-MM-DD format
+    
     const results = []
-    const today = new Date().toISOString().split('T')[0]
 
     // Process users in parallel batches for better performance
     const BATCH_SIZE = 10
@@ -129,26 +133,28 @@ serve(async (req) => {
         try {
           console.log(`📊 Processing user: ${userId}`)
 
-          // Check if summary already exists for today
+          // Check if summary already exists for the target date
           const { data: existingSummary } = await supabase
             .from('daily_work_summaries')
             .select('id')
             .eq('user_id', userId)
-            .eq('summary_date', today)
+            .eq('summary_date', summaryDate)
             .single()
 
           if (existingSummary) {
-            console.log(`✅ Summary already exists for user ${userId} on ${today}`)
+            console.log(`✅ Summary already exists for user ${userId} on ${summaryDate}`)
             return { userId, success: true, message: 'Summary already exists' }
           }
 
-        // Get user's activity data for the day
+        // Get user's activity data for the selected date
+        const targetDateStart = `${summaryDate}T00:00:00Z`
+        const targetDateEnd = `${summaryDate}T23:59:59Z`
         const { data: posts } = await supabase
           .from('social_media_posts')
           .select('*')
           .eq('user_id', userId)
-          .gte('created_at', `${today}T00:00:00Z`)
-          .lt('created_at', `${new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]}T00:00:00Z`)
+          .gte('created_at', targetDateStart)
+          .lte('created_at', targetDateEnd)
 
         // Get Daily Work Summary Agent for this user
         const { data: agent } = await supabase
@@ -166,7 +172,7 @@ serve(async (req) => {
 
         // Generate summary based on activity
         const activityData = {
-          date: today,
+          date: summaryDate,
           posts_created: posts?.length || 0,
           content_areas: posts ? [...new Set(posts.map(p => p.category))].filter(Boolean) : [],
           total_activity_score: posts?.length || 0
@@ -223,7 +229,7 @@ serve(async (req) => {
             .from('daily_work_summaries')
             .insert({
               user_id: userId,
-              summary_date: today,
+              summary_date: summaryDate,
               metrics: mockSummary.metrics,
               highlights: mockSummary.highlights,
               insights: mockSummary.insights,
@@ -236,7 +242,7 @@ serve(async (req) => {
                 }
               },
               productivity_score: mockSummary.metrics.productivity_score,
-              generated_summary: `Daily work summary for ${today}: Completed ${activityData.posts_created} content pieces across ${activityData.content_areas.length} areas with strong productivity focus.`,
+              generated_summary: `Daily work summary for ${summaryDate}: Completed ${activityData.posts_created} content pieces across ${activityData.content_areas.length} areas with strong productivity focus.`,
               summary_type: category
             })
             .select()
