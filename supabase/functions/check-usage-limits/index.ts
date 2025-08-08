@@ -41,6 +41,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 interface UsageCheckRequest {
@@ -57,6 +59,8 @@ interface UsageCheckResponse {
 }
 
 serve(async (req) => {
+  console.log(`[check-usage-limits] Function started, method: ${req.method}`);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -259,14 +263,12 @@ serve(async (req) => {
         message = `Daily limit reached! You can generate ${dailyLimit} image${dailyLimit === 1 ? '' : 's'} per day. Come back tomorrow (resets at midnight).`;
       } else if (!monthlyAllowed) {
         // Monthly limit hit but daily still available
-        const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
-        message = `Monthly limit reached! You've used ${currentMonthlyUsed}/${monthlyLimit} images this billing cycle. ${monthlyRemaining} remaining.`;
+        const monthlyRemainingNow = Math.max(0, monthlyLimit - currentMonthlyUsed);
+        message = `Monthly limit reached! You've used ${currentMonthlyUsed}/${monthlyLimit} images this billing cycle. ${monthlyRemainingNow} remaining.`;
       }
     }
 
     // For remaining count, prioritize the more restrictive limit
-    const dailyRemaining = Math.max(0, dailyLimit - currentDailyUsed);
-    const monthlyRemaining = Math.max(0, monthlyLimit - currentMonthlyUsed);
     const restrictiveRemaining = Math.min(dailyRemaining, monthlyRemaining);
 
     const response: UsageCheckResponse = {

@@ -56,7 +56,15 @@ export const useUsageEnforcement = () => {
       return data;
     } catch (error) {
       console.error('Usage check failed:', error);
-      toast.error('Failed to check usage limits. Please try again.');
+      
+      // Handle specific error types with more helpful messages
+      if (error.name === 'FunctionsFetchError' || error.message?.includes('FunctionsFetchError')) {
+        toast.error('Usage service temporarily unavailable. Please try again in a moment.');
+        console.error('FunctionsFetchError details:', error);
+      } else {
+        toast.error('Failed to check usage limits. Please try again.');
+      }
+      
       return {
         allowed: false,
         remaining: 0,
