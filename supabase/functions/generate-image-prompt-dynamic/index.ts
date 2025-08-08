@@ -38,6 +38,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
+import { createLogger } from '../_shared/advanced-logger.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -55,6 +56,8 @@ serve(async (req) => {
   const startTime = Date.now();
   let userId: string | null = null;
   const correlationId = generateCorrelationId();
+  // Initialize structured logger
+  const logger = createLogger({ functionName: 'generate-image-prompt-dynamic', correlationId });
   let success = false;
   let estimatedCost = 0;
   let tokensUsed = 0;
@@ -78,6 +81,12 @@ serve(async (req) => {
     // Store request metadata with correlation ID
     requestMetadata = { category, title, description, colorTheme, correlationId };
 
+    logger.info('Request payload received', {
+      category,
+      titleLength: title?.length || 0,
+      descriptionLength: description?.length || 0,
+      hasColorTheme: !!colorTheme
+    });
     // Initialize Supabase client
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -91,6 +100,8 @@ serve(async (req) => {
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
     }
+
+    logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
     console.log('🚀 Generating image prompt for:', { category, title, userId: userId?.slice(0, 8), correlationId });
 
@@ -159,6 +170,22 @@ Please incorporate these colors and visual style into the image prompt to ensure
       apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'MISSING'
     });
 
+    logger.info('OpenAI chat request prepared', {
+      model: requestBody.model,
+      parameters: {
+        has_max_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_tokens'),
+        has_max_completion_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_completion_tokens'),
+        max_tokens: (requestBody as any).max_tokens,
+        max_completion_tokens: (requestBody as any).max_completion_tokens,
+        user_set: !!(requestBody as any).user
+      },
+      message_summary: {
+        system_len: (categoryPrompt.prompt?.length || 0),
+        user_len: (userMessage?.length || 0)
+      },
+      correlationId
+    });
+
     // Make direct fetch call to avoid any potential issues with makeOpenAIRequest
     const requestStartTime = Date.now();
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -204,6 +231,14 @@ Please incorporate these colors and visual style into the image prompt to ensure
         }
       }
       
+      logger.error('OpenAI chat API error', {
+        status: response.status,
+        statusText: response.statusText,
+        openAIRequestId: responseOpenAIRequestId,
+        correlationId,
+        errorBody
+      });
+      
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorBody)}`);
     }
 
@@ -224,6 +259,12 @@ Please incorporate these colors and visual style into the image prompt to ensure
         model: openAIData.model,
         usage: openAIData.usage,
         correlationId,
+      });
+      logger.error('Missing generated text from OpenAI chat response', {
+        firstChoice: openAIData.choices?.[0],
+        model: openAIData.model,
+        usage: openAIData.usage,
+        correlationId
       });
       throw new Error('No generated text received from OpenAI');
     }
@@ -338,7 +379,8 @@ Please incorporate these colors and visual style into the image prompt to ensure
     }
 
     return new Response(JSON.stringify({ 
-      error: errorMessage
+      error: errorMessage,
+      correlationId
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
