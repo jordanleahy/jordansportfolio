@@ -336,15 +336,15 @@ const Navigation = () => {
                                   <div className="w-full bg-muted rounded-full h-2">
                                     <div className="bg-primary h-2 rounded-full" style={{ width: `${percentUsed}%` }}></div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                    <span className="text-xs text-muted-foreground">Using daily credits</span>
-                                  </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                      <span className="text-xs text-muted-foreground">Using plan credits</span>
+                                    </div>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="bg-background border shadow-lg">
                                 <div className="flex items-center gap-2 p-1">
-                                  <span className="text-sm font-medium">{usedCredits.toLocaleString()}/{totalCredits.toLocaleString()} Daily credits</span>
+                                  <span className="text-sm font-medium">{usedCredits.toLocaleString()}/{totalCredits.toLocaleString()} credits</span>
                                 </div>
                                 <div className="w-24 bg-muted rounded-full h-1 mt-1">
                                   <div className="bg-primary h-1 rounded-full" style={{ width: `${percentUsed}%` }}></div>
