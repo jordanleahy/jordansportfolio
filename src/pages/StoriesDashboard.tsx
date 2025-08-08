@@ -520,7 +520,7 @@ export default function StoriesDashboard() {
         </Section>
 
         {/* Cards Section for Theme/Category cards */}
-        <Section aria-labelledby="cards-heading" id="cards" className="mb-12">
+        <Section aria-labelledby="cards-heading" id="cards" className="mb-12" fluid>
           <header className="mb-6">
             <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">
               Themes

@@ -4,12 +4,14 @@ import { cn } from '@/lib/utils';
 interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   className?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl';
+  fluid?: boolean;
 }
 
 export const Section: React.FC<SectionProps> = ({
   children,
   className,
   maxWidth = '4xl',
+  fluid = false,
   ...props
 }) => {
   const maxWidthClasses = {
@@ -25,7 +27,7 @@ export const Section: React.FC<SectionProps> = ({
   return (
     <section
       {...props}
-      className={cn('container mx-auto px-4', maxWidthClasses[maxWidth], className)}
+      className={cn(fluid ? 'w-full px-4' : 'container mx-auto px-4', !fluid && maxWidthClasses[maxWidth], className)}
     >
       {children}
     </section>
