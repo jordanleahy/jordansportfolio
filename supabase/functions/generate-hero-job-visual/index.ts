@@ -180,7 +180,7 @@ Focus on making this feel like THE career opportunity of a lifetime, with the co
           }
         ],
         temperature: 1,
-        max_tokens: 2500,
+        max_completion_tokens: 2500,
       }),
     });
 

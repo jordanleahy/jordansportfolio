@@ -20,7 +20,7 @@ export const OPENAI_CONFIG = {
     HIGH_CREATIVE: 1,
     CREATIVE: 1,
   },
-  MAX_TOKENS: {
+  MAX_COMPLETION_TOKENS: {
     SHORT_RESPONSE: 500,
     MEDIUM_RESPONSE: 2000,
     LONG_RESPONSE: 2500,
@@ -29,7 +29,7 @@ export const OPENAI_CONFIG = {
   // Default model for theme generation
   DEFAULT_THEME_MODEL: 'gpt-5-mini',
   DEFAULT_THEME_TEMPERATURE: 1,
-  DEFAULT_THEME_MAX_TOKENS: 3000,
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 3000,
 } as const;
 
 // Image Generation Configuration

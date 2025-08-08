@@ -79,7 +79,7 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
         { role: 'user', content: userPrompt }
       ],
       temperature: 1,
-      max_tokens: 500
+      max_completion_tokens: 500
     }),
   });
 

@@ -1,4 +1,5 @@
 import { SupabaseClient } from './types.ts';
+import { createLogger, AdvancedLogger } from './advanced-logger.ts';
 
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,12 +53,26 @@ export const generateImagePrompt = async (
   theme: string, 
   category: string
 ): Promise<string> => {
+  const correlationId = `img-prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const logger = createLogger({
+    correlationId,
+    functionName: 'generateImagePrompt',
+    operation: 'openai_chat_completion',
+    metadata: { theme, category }
+  });
+
   const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openaiApiKey) {
+    logger.error('OpenAI API key not configured');
     throw new Error('OpenAI API key not configured');
   }
 
-  console.log('🎨 Generating image prompt for theme:', theme);
+  logger.info('Starting image prompt generation', {
+    theme,
+    category,
+    titleLength: title.length,
+    descriptionLength: description.length
+  });
   
   const systemPrompt = `You are an expert at creating detailed, professional image generation prompts for ${theme}-themed AI image generators.
 
@@ -81,29 +96,74 @@ Category: ${category}
 
 Create a detailed image generation prompt for this ${theme} theme content.`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-5-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 1,
-      max_tokens: 500
-     }),
+  const requestBody = {
+    model: 'gpt-5-mini',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    temperature: 1,
+    max_completion_tokens: 500
+  };
+
+  logger.info('OpenAI chat request prepared', {
+    model: requestBody.model,
+    temperature: requestBody.temperature,
+    max_completion_tokens: requestBody.max_completion_tokens,
+    systemPromptLength: systemPrompt.length,
+    userPromptLength: userPrompt.length,
+    correlationId
   });
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
+  const startTime = Date.now();
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const processingTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      logger.error('OpenAI API error response', {
+        status: response.status,
+        statusText: response.statusText,
+        errorBody: errorBody.substring(0, 500),
+        processingTimeMs: processingTime,
+        requestModel: requestBody.model,
+        requestParams: {
+          temperature: requestBody.temperature,
+          max_completion_tokens: requestBody.max_completion_tokens
+        }
+      });
+      throw new Error(`OpenAI API error: ${response.status} - ${errorBody}`);
+    }
+
+    const data = await response.json();
+    
+    logger.success('OpenAI chat completion successful', {
+      processingTimeMs: processingTime,
+      responseLength: data.choices?.[0]?.message?.content?.length || 0,
+      finishReason: data.choices?.[0]?.finish_reason,
+      usage: data.usage
+    });
+
+    return data.choices[0].message.content;
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+    logger.error('OpenAI request failed', {
+      error: error.message,
+      processingTimeMs: processingTime,
+      requestModel: requestBody.model
+    });
+    throw error;
+  }
 };
 
 // Helper function to generate theme image using OpenAI

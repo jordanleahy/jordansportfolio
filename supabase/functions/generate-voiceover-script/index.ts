@@ -146,7 +146,7 @@ Please transform this content into a teleprompter-style voiceover script optimiz
         { role: 'user', content: userPrompt }
       ],
       temperature: 1,
-      max_tokens: 2000,
+      max_completion_tokens: 2000,
     }, correlationId);
 
     const { response: openaiResponse, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({

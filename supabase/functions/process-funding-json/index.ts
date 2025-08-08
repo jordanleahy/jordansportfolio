@@ -295,7 +295,7 @@ ${rawJson}`;
           { role: 'user', content: prompt }
         ],
         temperature: 1,
-        max_tokens: 4000
+        max_completion_tokens: 4000
       }),
     });
 

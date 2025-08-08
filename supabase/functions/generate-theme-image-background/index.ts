@@ -45,6 +45,7 @@ import {
   generateImagePrompt, 
   generateThemeImage 
 } from '../_shared/utils.ts';
+import { createLogger } from '../_shared/advanced-logger.ts';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -53,8 +54,15 @@ serve(async (req) => {
   }
 
   let requestData: ImageRequest | null = null;
+  const correlationId = `bg-img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   try {
+    const logger = createLogger({
+      correlationId,
+      functionName: 'generate-theme-image-background',
+      operation: 'theme_image_generation'
+    });
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -63,11 +71,18 @@ serve(async (req) => {
     requestData = await req.json();
     const { theme, category, userId, firstPostTitle, firstPostDescription, themeId: providedThemeId } = requestData;
 
-    console.log(`🚀 Starting background image generation for theme: ${theme}`);
-    console.log(`📋 Request data: { theme: "${theme}", category: "${category}", userId: "${userId}", themeId: "${providedThemeId}" }`);
+    logger.info('Starting background image generation', {
+      theme,
+      category,
+      userId,
+      providedThemeId,
+      hasFirstPostTitle: !!firstPostTitle,
+      hasFirstPostDescription: !!firstPostDescription
+    });
 
     // Validate required parameters
     if (!theme || !category || !userId) {
+      logger.error('Missing required parameters', { theme, category, userId });
       throw new Error('Missing required parameters: theme, category, or userId');
     }
 

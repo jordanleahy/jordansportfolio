@@ -179,7 +179,7 @@ Please transform this content into an engaging ${story_type === 'childrens_story
           { role: 'user', content: userPrompt }
         ],
         temperature: 1,
-        max_tokens: agent.max_tokens || 2000,
+        max_completion_tokens: agent.max_tokens || 2000,
       }),
     });
 
