@@ -54,12 +54,24 @@ serve(async (req) => {
     let periodEnd: string | null = null;
     let monthlyLimit = 0;
     let dailyLimit = 0;
+    let tierName = 'free';
 
     // Fetch active subscription for all users
     const nowIso = new Date().toISOString();
     const { data: subscription, error: subErr } = await supabase
       .from("user_subscriptions")
-      .select("tier_id,current_period_start,current_period_end,status")
+      .select(`
+        tier_id,
+        current_period_start,
+        current_period_end,
+        status,
+        subscription_tiers (
+          name,
+          max_gpt_images,
+          max_gpt_images_daily,
+          max_gpt_images_monthly
+        )
+      `)
       .eq("user_id", user.id)
       .eq("status", "active")
       .lte("current_period_start", nowIso)
@@ -72,14 +84,10 @@ serve(async (req) => {
     periodEnd = subscription?.current_period_end ?? null;
 
     // Fetch tier limits
-    if (subscription?.tier_id) {
-      const { data: tier, error: tierErr } = await supabase
-        .from("subscription_tiers")
-        .select("max_gpt_images, max_gpt_images_daily, max_gpt_images_monthly")
-        .eq("id", subscription.tier_id)
-        .maybeSingle();
-      if (tierErr) throw tierErr;
-
+    if (subscription?.tier_id && subscription?.subscription_tiers) {
+      const tier = subscription.subscription_tiers as any;
+      tierName = tier.name || 'free';
+      
       const tierMonthly = (tier?.max_gpt_images_monthly ?? tier?.max_gpt_images ?? 0) as number;
       const tierDaily = (tier?.max_gpt_images_daily ?? Math.ceil((tierMonthly as number) * 0.1)) as number;
       monthlyLimit = tierMonthly;
@@ -90,29 +98,59 @@ serve(async (req) => {
       dailyLimit = 0;
     }
 
-
-    // Compute usage from api_usage_tracking table
+    // Compute usage - use aggregated data for starter/admin users
     const today = new Date();
+    const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const currentMonthString = currentMonth.toISOString().split('T')[0];
     const yyyyMmDd = today.toISOString().slice(0, 10);
 
-    // Monthly usage: count successful image generations within billing period
     let monthlyUsed = 0;
-    let dailyUsed = 0;
 
-    if (periodStart && periodEnd) {
-      const { count: monthlyCount, error: monthlyErr } = await supabase
-        .from("api_usage_tracking")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("request_type", "image_generation")
-        .eq("success", true)
-        .gte("created_at", periodStart)
-        .lte("created_at", periodEnd);
-      if (monthlyErr) throw monthlyErr;
-      monthlyUsed = monthlyCount || 0;
+    // For starter/admin users, try to get from monthly aggregates first
+    if (['starter', 'admin'].includes(tierName)) {
+      const { data: monthlyAggregate, error: aggregateError } = await supabase
+        .from('api_usage_monthly_aggregates')
+        .select('image_generations')
+        .eq('user_id', user.id)
+        .eq('month_year', currentMonthString)
+        .single();
+
+      if (!aggregateError && monthlyAggregate) {
+        monthlyUsed = monthlyAggregate.image_generations;
+        console.log(`Using aggregated monthly data: ${monthlyUsed} images for user ${user.id}`);
+      } else {
+        console.log('No aggregated data found, falling back to real-time count');
+        // Fallback to real-time counting
+        if (periodStart && periodEnd) {
+          const { count, error: monthlyErr } = await supabase
+            .from("api_usage_tracking")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .eq("request_type", "image_generation")
+            .eq("success", true)
+            .gte("created_at", periodStart)
+            .lte("created_at", periodEnd);
+          if (monthlyErr) throw monthlyErr;
+          monthlyUsed = count || 0;
+        }
+      }
+    } else {
+      // For free tier users, always use real-time counting
+      if (periodStart && periodEnd) {
+        const { count, error: monthlyErr } = await supabase
+          .from("api_usage_tracking")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("request_type", "image_generation")
+          .eq("success", true)
+          .gte("created_at", periodStart)
+          .lte("created_at", periodEnd);
+        if (monthlyErr) throw monthlyErr;
+        monthlyUsed = count || 0;
+      }
     }
 
-    // Daily usage: count successful image generations for today
+    // Daily usage: count successful image generations for today (always real-time)
     const startOfDay = `${yyyyMmDd}T00:00:00.000Z`;
     const endOfDay = `${yyyyMmDd}T23:59:59.999Z`;
     const { count: dailyCount, error: dailyErr } = await supabase
@@ -124,7 +162,7 @@ serve(async (req) => {
       .gte("created_at", startOfDay)
       .lte("created_at", endOfDay);
     if (dailyErr) throw dailyErr;
-    dailyUsed = dailyCount || 0;
+    const dailyUsed = dailyCount || 0;
 
     // Apply limits and compute remaining
     const monthlyRemaining = Math.max(monthlyLimit - monthlyUsed, 0);

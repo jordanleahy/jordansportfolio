@@ -164,6 +164,54 @@ export type Database = {
         }
         Relationships: []
       }
+      api_usage_monthly_aggregates: {
+        Row: {
+          created_at: string
+          failed_requests: number
+          id: string
+          image_generations: number
+          month_year: string
+          subscription_tier_name: string
+          successful_requests: number
+          text_generations: number
+          total_cost: number
+          total_requests: number
+          total_tokens: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_requests?: number
+          id?: string
+          image_generations?: number
+          month_year: string
+          subscription_tier_name: string
+          successful_requests?: number
+          text_generations?: number
+          total_cost?: number
+          total_requests?: number
+          total_tokens?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_requests?: number
+          id?: string
+          image_generations?: number
+          month_year?: string
+          subscription_tier_name?: string
+          successful_requests?: number
+          text_generations?: number
+          total_cost?: number
+          total_requests?: number
+          total_tokens?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_usage_tracking: {
         Row: {
           actual_cost: number | null
@@ -2766,6 +2814,10 @@ export type Database = {
           avg_hit_count: number
         }[]
       }
+      get_or_create_monthly_aggregate: {
+        Args: { target_user_id: string; target_month: string }
+        Returns: string
+      }
       get_submission_analytics: {
         Args: { p_user_id: string }
         Returns: {
@@ -2862,6 +2914,10 @@ export type Database = {
           p_processing_time_ms?: number
         }
         Returns: string
+      }
+      refresh_monthly_aggregates: {
+        Args: { target_month?: string; target_user_id?: string }
+        Returns: number
       }
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
