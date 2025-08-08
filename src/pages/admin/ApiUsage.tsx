@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { supabase } from "@/integrations/supabase/client";
 
 import { UsageSummaryCards } from "@/components/admin/UsageSummaryCards";
 import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
@@ -39,6 +40,7 @@ export default function ApiUsage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [aggregating, setAggregating] = useState(false);
   
   const { filters, updateFilter, clearFilters } = useUsageFilters();
   
@@ -88,6 +90,22 @@ export default function ApiUsage() {
     }
   };
 
+  const handleRebuildAggregates = async () => {
+    try {
+      setAggregating(true);
+      const dateStr = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase.functions.invoke('aggregate-api-usage', {
+        body: { date: dateStr },
+      });
+      if (error) throw error as any;
+      toast.success('Aggregates rebuilt for ' + dateStr);
+      await refetchSummary();
+    } catch (err: any) {
+      toast.error('Failed to rebuild aggregates');
+    } finally {
+      setAggregating(false);
+    }
+  };
   return (
     <PageLayout>
       <Helmet>
@@ -112,6 +130,10 @@ export default function ApiUsage() {
           <Button variant="outline" onClick={handleRefresh} disabled={usageLoading || summaryLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${(usageLoading || summaryLoading) ? 'animate-spin' : ''}`} />
             Refresh
+          </Button>
+          <Button variant="outline" onClick={handleRebuildAggregates} disabled={aggregating}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${aggregating ? 'animate-spin' : ''}`} />
+            Rebuild Aggregates
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
