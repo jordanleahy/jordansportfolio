@@ -32,9 +32,9 @@
  * 8. Return batch processing results with success/failure counts
  */
 
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -50,10 +50,18 @@ serve(async (req) => {
     console.log('🕰️ Daily work summary generation started at:', new Date().toISOString());
 
     // Initialize Supabase client with proper authentication
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+if (!openAIApiKey) {
+  console.error('OPENAI_API_KEY not configured');
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'OPENAI_API_KEY is not set in Supabase functions secrets.'
+  }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 });
+}
     // Get user ID from JWT token for single-user operation
     const authHeader = req.headers.get('Authorization')
     let targetUserId = null
@@ -206,53 +214,125 @@ serve(async (req) => {
           console.log(`ℹ️ Using basic summary generation (no system prompt found for category ${category})`)
         }
 
-        // Generate mock summary data (in real implementation, this would call OpenAI)
-        const mockSummary = {
-          highlights: [
-            `Created ${activityData.posts_created} content pieces`,
-            `Worked across ${activityData.content_areas.length} different areas`,
-            'Maintained consistent productivity throughout the day'
-          ],
-          metrics: {
-            productivity_score: Math.min(activityData.total_activity_score * 10, 100),
-            focus_time: Math.floor(Math.random() * 8) + 1,
-            completion_rate: Math.floor(Math.random() * 30) + 70
+        // Build a system prompt (use agent prompt if available, otherwise fallback)
+        const baseSystemPrompt = systemPromptData?.prompt_text || `You are an expert daily work analyst. Produce a concise JSON summary for a user's work on a given date. Only return strict JSON; no prose.
+
+Schema:
+{
+  "metrics": {
+    "totalTasks": number,
+    "completedTasks": number,
+    "timeSpent": string | null,
+    "completionRate": number | null,
+    "focusTime": string | null,
+    "breakTime": string | null
+  },
+  "highlights": string[],
+  "insights": string[],
+  "recommendations": string[],
+  "categories_summary": {
+    "technical"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
+    "creative"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
+    "productivity"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
+    "insights"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] }
+  },
+  "productivity_score": number,
+  "generated_summary": string,
+  "summary_type": "technical" | "creative" | "productivity" | "insights"
+}`;
+
+        const inputPayload = {
+          date: summaryDate,
+          category,
+          activity: {
+            total_posts: activityData.posts_created,
+            content_areas: activityData.content_areas,
+            samples: posts.slice(0, 10).map((p: any) => ({
+              title: p.title,
+              description: p.description,
+              category: p.category,
+              created_at: p.created_at
+            }))
+          }
+        };
+
+        // Call OpenAI for structured JSON output
+        const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
           },
-          insights: [
-            'Strong content creation momentum',
-            'Consistent work pattern detected',
-            'Good cross-functional engagement'
-          ],
-          recommendations: [
-            'Continue current productivity rhythm',
-            'Consider scheduling focused deep work blocks',
-            'Maintain variety in content areas'
-          ]
+          body: JSON.stringify({
+            model: 'gpt-4.1-2025-04-14',
+            temperature: 0.3,
+            messages: [
+              { role: 'system', content: baseSystemPrompt },
+              { role: 'user', content: `Generate the JSON summary for:\n${JSON.stringify(inputPayload)}` }
+            ]
+          })
+        });
+
+        if (!aiRes.ok) {
+          console.error('OpenAI request failed', await aiRes.text());
+        }
+        const aiData = await aiRes.json().catch(() => ({} as any));
+        let content: string = aiData?.choices?.[0]?.message?.content || '';
+        if (content.startsWith('```')) {
+          content = content.replace(/```json|```/g, '').trim();
         }
 
-          // Insert daily work summary with proper column names
-          const { data: newSummary, error: insertError } = await supabase
-            .from('daily_work_summaries')
-            .insert({
-              user_id: userId,
-              summary_date: summaryDate,
-              metrics: mockSummary.metrics,
-              highlights: mockSummary.highlights,
-              insights: mockSummary.insights,
-              recommendations: mockSummary.recommendations,
-              categories_summary: {
-                [category]: {
-                  tasks: [`Created ${activityData.posts_created} content pieces`],
-                  timeSpent: `${Math.floor(Math.random() * 4) + 2}h`,
-                  insights: mockSummary.insights
-                }
-              },
-              productivity_score: mockSummary.metrics.productivity_score,
-              generated_summary: `Daily work summary for ${summaryDate}: Completed ${activityData.posts_created} content pieces across ${activityData.content_areas.length} areas with strong productivity focus.`,
-              summary_type: category
-            })
-            .select()
-            .single()
+        let aiJson: any = null;
+        try { aiJson = JSON.parse(content); } catch (_) { aiJson = null; }
+
+        // Fallbacks if model returns unexpected shape
+        const metrics = aiJson?.metrics || {
+          totalTasks: posts.length,
+          completedTasks: posts.length,
+          timeSpent: null,
+          completionRate: null,
+          focusTime: null,
+          breakTime: null,
+        };
+        const highlights = aiJson?.highlights || [
+          `Created ${activityData.posts_created} content pieces`,
+          `Worked across ${activityData.content_areas.length} different areas`,
+        ];
+        const insights = aiJson?.insights || [
+          'Consistent work pattern detected',
+        ];
+        const recommendations = aiJson?.recommendations || [
+          'Schedule focused deep work blocks',
+        ];
+        const categories_summary = aiJson?.categories_summary || {
+          [category]: {
+            tasks: posts.map((p: any) => p.title).filter(Boolean).slice(0, 10),
+            timeSpent: null,
+            insights,
+          }
+        };
+        const productivity_score = aiJson?.productivity_score ?? Math.min((posts.length || 0) * 10, 100);
+        const generated_summary = aiJson?.generated_summary || `Daily work summary for ${summaryDate}: ${posts.length} items across ${activityData.content_areas.length} areas.`;
+        const summary_type = aiJson?.summary_type || category;
+
+        // Insert daily work summary with AI-generated content
+        const { data: newSummary, error: insertError } = await supabase
+          .from('daily_work_summaries')
+          .insert({
+            user_id: userId,
+            summary_date: summaryDate,
+            metrics,
+            highlights,
+            insights,
+            recommendations,
+            categories_summary,
+            productivity_score,
+            generated_summary,
+            summary_type,
+          })
+          .select()
+          .single()
+
 
           if (insertError) {
             console.error(`❌ Error inserting summary for user ${userId}:`, insertError)
