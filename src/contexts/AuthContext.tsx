@@ -39,20 +39,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const fetchUserRole = async (userId: string) => {
     try {
       setRoleLoading(true);
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
 
-      if (error) {
-        console.error('Error fetching user roles:', error);
-        setRole('user'); // Default role
-      } else {
-        const roles = (data || []).map(r => r.role as UserRole);
-        const effectiveRole: UserRole =
-          roles.includes('admin') ? 'admin' :
-          roles.includes('moderator') ? 'moderator' : 'user';
+      // Prefer RPC to bypass potential RLS issues
+      try {
+        const [adminRes, modRes] = await Promise.all([
+          supabase.rpc('has_role', { _user_id: userId, _role: 'admin' }),
+          supabase.rpc('has_role', { _user_id: userId, _role: 'moderator' })
+        ]);
+
+        const isAdminRole = adminRes.data === true;
+        const isModeratorRole = modRes.data === true;
+
+        const effectiveRole: UserRole = isAdminRole
+          ? 'admin'
+          : isModeratorRole
+            ? 'moderator'
+            : 'user';
         setRole(effectiveRole);
+      } catch (rpcErr) {
+        console.error('RPC has_role failed, falling back to table select:', rpcErr);
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Error fetching user roles:', error);
+          setRole('user'); // Default role
+        } else {
+          const roles = (data || []).map(r => r.role as UserRole);
+          const effectiveRole: UserRole =
+            roles.includes('admin') ? 'admin' :
+            roles.includes('moderator') ? 'moderator' : 'user';
+          setRole(effectiveRole);
+        }
       }
     } catch (error) {
       console.error('Error in fetchUserRole:', error);
