@@ -176,6 +176,8 @@ export const PostsTable = ({
         return;
       }
       setIsBulk169(true);
+
+      // Ensure user is authenticated
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -183,22 +185,46 @@ export const PostsTable = ({
         setIsBulk169(false);
         return;
       }
-      toast.info('Starting 16:9 generation for missing posts...');
-      const { data, error } = await supabase.functions.invoke('bulk-generate-16-9', {
-        body: { category, themeId: selectedThemeId }
-      });
-      if (error) throw error;
-      const summary = (data as any)?.summary || data;
-      toast.success(`Generated ${summary?.successCount ?? 0}/${summary?.processed ?? 0} images`);
+
+      // Determine posts to process (missing or failed 16:9 only)
+      const candidates = posts.filter(p =>
+        p.category === category &&
+        (!selectedThemeId || p.theme_id === selectedThemeId) &&
+        (!p.image_16_9_url || p.image_16_9_status === 'failed' || p.image_16_9_status === 'none')
+      );
+
+      if (candidates.length === 0) {
+        toast.info('All posts already have a 16:9 image');
+        return;
+      }
+
+      toast.info(`Starting 16:9 generation for ${candidates.length} post(s)...`);
+
+      // Concurrency-limited client-side batch using existing single-image flow
+      const concurrency = Math.min(3, candidates.length);
+      let successes = 0;
+
+      const queue = [...candidates];
+      const worker = async () => {
+        while (queue.length) {
+          const next = queue.shift();
+          if (!next) break;
+          const res = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
+          if (res.success) successes++;
+        }
+      };
+
+      await Promise.all(Array.from({ length: concurrency }, worker));
+
+      toast.success(`Generated ${successes}/${candidates.length} 16:9 image(s)`);
       onPostsChange();
     } catch (e) {
       console.error(e);
-      toast.error('Failed to start 16:9 generation');
+      toast.error('Failed to run 16:9 generation');
     } finally {
       setIsBulk169(false);
     }
   };
-
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
