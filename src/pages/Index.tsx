@@ -15,12 +15,10 @@ import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
 import RecentBlogsSection from "@/components/RecentBlogsSection";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
-import { UI_FLAGS } from "@/config/uiFlags";
 
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
-const AuroraBackgroundDemo = lazy(() => import("@/components/aurora-background-demo"));
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -115,11 +113,7 @@ const Index = () => {
           </div>
         </div>
       }>
-        {UI_FLAGS.enableAuroraHomeHero ? (
-          <AuroraBackgroundDemo />
-        ) : (
-          <HeroParallaxDemo />
-        )}
+        <HeroParallaxDemo />
       </Suspense>
       
       {/* Portfolio Content - Reordered sections */}
