@@ -535,7 +535,8 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
             } else {
               console.log('✅ Background image generation started');
             }
-        });
+          })
+        );
 
         console.log('🔥 Triggered background image generation for theme:', themeData.theme);
       } catch (bgTriggerError) {
