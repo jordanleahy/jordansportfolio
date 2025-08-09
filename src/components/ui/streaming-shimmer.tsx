@@ -130,9 +130,9 @@ export const StreamingShimmer = ({
     >
       {/* Background shimmer animation */}
       <div className={cn(
-        "absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10",
+        "absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20",
         "before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer",
-        "before:bg-gradient-to-r before:from-transparent before:via-foreground/20 before:to-transparent",
+        "before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent",
         shouldShowShimmer ? "opacity-100" : "opacity-30"
       )} />
 
@@ -153,27 +153,28 @@ export const StreamingShimmer = ({
         />
       )}
 
-      {/* Progress indicators */}
+      {/* Central loading indicator with shimmer and countdown */}
       {isGenerating && showProgress && (variant === 'default' || variant === 'card') && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          {generationStep ? (
-            <GenerationProgress
-              variant="minimal"
-              currentStep={
-                generationStep.includes('prompt') ? 'prompt' :
-                generationStep.includes('image') || generationStep.includes('Generating') ? 'image' :
-                generationStep.includes('upload') || generationStep.includes('Uploading') ? 'upload' : 'prompt'
-              }
-              timeRemaining={timeRemaining}
-            />
-          ) : (
-            <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">
-                {formatTime(timeRemaining)}
-              </span>
-            </div>
-          )}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-background/50 backdrop-blur-sm">
+          {/* Spinner */}
+          <div className="mb-4">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+          </div>
+          
+          {/* Generation text */}
+          <div className="mb-4 text-center">
+            <p className="text-sm font-medium text-foreground mb-1">
+              {generationStep || "Generating image..."}
+            </p>
+          </div>
+
+          {/* Countdown timer */}
+          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50">
+            <Clock className="h-4 w-4 text-primary" />
+            <span className="text-lg font-mono font-semibold text-foreground">
+              {formatTime(timeRemaining)}
+            </span>
+          </div>
         </div>
       )}
       
