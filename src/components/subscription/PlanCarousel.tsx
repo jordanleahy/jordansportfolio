@@ -65,7 +65,7 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                 {isCurrentPlan(tier.id) && (
                   <div className="absolute -top-3 right-4">
                     <Badge variant="secondary" className="font-medium">
-                      Current Plan
+                      {tier.name.toLowerCase().includes('free') || tier.name.toLowerCase().includes('starter') ? 'Your Plan' : 'Current Plan'}
                     </Badge>
                   </div>
                 )}

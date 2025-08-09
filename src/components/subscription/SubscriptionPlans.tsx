@@ -93,7 +93,9 @@ export const SubscriptionPlans: React.FC = () => {
               </div>}
             
             {currentTierId === tier.id && <div className="absolute -top-3 right-4">
-                <Badge variant="secondary">Current Plan</Badge>
+                <Badge variant="secondary">
+                  {tier.name.toLowerCase().includes('free') || tier.name.toLowerCase().includes('starter') ? 'Your Plan' : 'Current Plan'}
+                </Badge>
               </div>}
 
             <CardHeader className="text-center pb-4">

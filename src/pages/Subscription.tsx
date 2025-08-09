@@ -95,10 +95,10 @@ const Subscription: React.FC = () => {
           <div className="max-w-sm mx-auto">
             <div className="bg-card border border-border rounded-lg p-6 shadow-sm relative">
               {/* Subscription Status Badge */}
-              {user && status?.subscription && (
+              {user && status?.subscription && status.subscription.tier?.name.toLowerCase().includes('free') && (
                 <div className="absolute top-3 right-3">
                   <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-full">
-                    {status.subscription.tier?.name || 'Current Plan'}
+                    Your Plan
                   </span>
                 </div>
               )}
