@@ -317,7 +317,7 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                             className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
                           >
                             <User className="mr-2 h-4 w-4" />
-                            Jordan's Story
+                            {user?.user_metadata?.first_name || user?.user_metadata?.full_name || 'User'}'s Story
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
@@ -328,11 +328,11 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                           <div className="px-4 py-3 border-b">
                             <div className="flex items-center gap-3 mb-3">
                               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
-                                J
+                                {(user?.user_metadata?.first_name || user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                               </div>
                               <div className="flex-1">
-                                <div className="font-medium text-sm">jordan's Lovable</div>
-                                <div className="text-xs text-muted-foreground">jordanwilliamleahy@gmail.com</div>
+                                <div className="font-medium text-sm">{user?.user_metadata?.first_name || user?.user_metadata?.full_name || 'User'}'s Lovable</div>
+                                <div className="text-xs text-muted-foreground">{user?.email}</div>
                               </div>
                             </div>
                             
