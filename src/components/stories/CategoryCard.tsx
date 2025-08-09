@@ -83,27 +83,6 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
   }, [imageUrl, firstPostData]);
 
-  // Auto-generate Day 1 image on mount if missing and not already in progress
-  useEffect(() => {
-    if (isShimmer) return;
-    if (imageGenerationAttempted.current) return;
-
-    const status = (firstPostData as any)?.image_4_3_status as string | undefined;
-    const inProgress = status === 'processing' || status === 'uploading';
-    const hasImage = !!(currentImageUrl || (firstPostData as any)?.image_4_3_url);
-
-    // Reflect in-progress state visually
-    if (inProgress && !hasImage) {
-      setIsGeneratingDay1(true);
-    }
-
-    // Trigger generation once per card
-    if (!hasImage && !inProgress && firstPostData) {
-      imageGenerationAttempted.current = true;
-      generateDay1Image();
-    }
-  }, [isShimmer, firstPostData, currentImageUrl]);
-
   // Generate Day 1 image function
   const generateDay1Image = async () => {
     if (!user?.id || !firstPostData) {
@@ -163,6 +142,27 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       });
     }
   };
+  
+  // Auto-generate Day 1 image on mount if missing and not already in progress
+  useEffect(() => {
+    if (isShimmer) return;
+    if (imageGenerationAttempted.current) return;
+
+    const status = (firstPostData as any)?.image_4_3_status as string | undefined;
+    const inProgress = status === 'processing' || status === 'uploading';
+    const hasImage = !!(currentImageUrl || (firstPostData as any)?.image_4_3_url);
+
+    // Reflect in-progress state visually
+    if (inProgress && !hasImage) {
+      setIsGeneratingDay1(true);
+    }
+
+    // Trigger generation once per card
+    if (!hasImage && !inProgress && firstPostData) {
+      imageGenerationAttempted.current = true;
+      generateDay1Image();
+    }
+  }, [isShimmer, firstPostData, currentImageUrl]);
   
   const handleCancelThemeGeneration = async () => {
     if (!user?.id || !onCancelGeneration) return;
