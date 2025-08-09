@@ -174,8 +174,19 @@ export const SettingsModal: React.FC = () => {
                         </div>
                         
                         {isCurrentlyStarter ? (
-                          <Button variant="outline" className="w-full">
-                            Manage Billing
+                          <Button variant="outline" className="w-full" onClick={async () => {
+                            const ok = window.confirm('Downgrade to Free? Your current plan will remain active until the end of this billing period.');
+                            if (!ok) return;
+                            try {
+                              const { data, error } = await supabase.functions.invoke('downgrade-subscription');
+                              if (error) throw error;
+                              toast.success('Downgrade scheduled. Your plan will end at period close.');
+                            } catch (e) {
+                              console.error(e);
+                              toast.error('Could not schedule downgrade. Please try again.');
+                            }
+                          }}>
+                            Downgrade
                           </Button>
                         ) : (
                           <Button className="w-full" onClick={startStarterCheckout}>
