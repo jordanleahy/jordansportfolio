@@ -178,13 +178,16 @@ html, body {
 
   body {
     overflow-x: hidden;
+    overflow-y: scroll; /* Prevent layout shift when overlays open/close */
     max-width: 100vw;
+    scrollbar-gutter: stable; /* Reserve space for scrollbar */
   @apply bg-background text-foreground;
 }
 
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable; /* Reserve gutter to prevent layout shift */
 }
 
 /* Focus states */
