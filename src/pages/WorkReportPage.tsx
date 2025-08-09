@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useDailyWorkSummaries, useDailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
@@ -11,12 +11,14 @@ import { subDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
+import ConfirmRegenerateDialog from '@/components/work-report/ConfirmRegenerateDialog';
 
 const WorkReportPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days'>('30days');
   const [showFilters, setShowFilters] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Calculate date range for filtering
   const dateFrom = useMemo(() => {
@@ -35,18 +37,13 @@ const WorkReportPage: React.FC = () => {
     dateFrom: dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined
   });
 
-  const handleGenerateSummary = async () => {
-    if (selectedDateSummary) {
-      const confirmRegenerate = confirm(`A summary for ${format(selectedDate, 'MMM d, yyyy')} already exists. Do you want to regenerate it?`);
-      if (!confirmRegenerate) return;
-    }
-
+  const performGenerate = useCallback(async (regenerate: boolean) => {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-daily-work-summary', {
-        body: { date: selectedDateString, regenerate: !!selectedDateSummary }
+        body: { date: selectedDateString, regenerate }
       });
-      
+
       if (error) {
         console.error('Error generating summary:', error);
         if (error.message?.includes('No posts found')) {
@@ -58,21 +55,30 @@ const WorkReportPage: React.FC = () => {
         }
         return;
       }
-      
+
       if (data?.success === false) {
         toast.error(data.error || 'Failed to generate summary');
         return;
       }
-      
-      toast.success(`Daily work summary for ${format(selectedDate, 'MMM d, yyyy')} generated successfully!`);
-      // Refetch the summaries to show the new one
+
+      toast.success(`Daily work summary for ${format(selectedDate, 'MMM d, yyyy')} ${regenerate ? 'regenerated' : 'generated'} successfully!`);
+      // Refetch the summaries to show the updated one
       refetch();
     } catch (error) {
       console.error('Error calling generate-daily-work-summary:', error);
       toast.error('Failed to generate summary. Please try again.');
     } finally {
       setIsGenerating(false);
+      setShowConfirm(false);
     }
+  }, [selectedDate, selectedDateString, refetch]);
+
+  const handleGenerateSummary = () => {
+    if (selectedDateSummary) {
+      setShowConfirm(true);
+      return;
+    }
+    void performGenerate(false);
   };
 
   // Summaries are already filtered by the hook, no need for client-side filtering
@@ -163,6 +169,14 @@ const WorkReportPage: React.FC = () => {
           )}
         </div>
       </PageLayout>
+      
+      <ConfirmRegenerateDialog
+        open={showConfirm}
+        onConfirm={() => performGenerate(true)}
+        onCancel={() => setShowConfirm(false)}
+        dateLabel={format(selectedDate, 'MMM d, yyyy')}
+        isGenerating={isGenerating}
+      />
     </>
   );
 };
