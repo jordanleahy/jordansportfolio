@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
-import { useSubscriptionTiers } from '@/hooks/useSubscriptionStatus';
+import { useSubscriptionTiers, useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,8 @@ export const SettingsModal: React.FC = () => {
   const [activeSection, setActiveSection] = useState('billing');
   const { data: tiers } = useSubscriptionTiers();
   const navigate = useNavigate();
+  const { data: subStatus } = useSubscriptionStatus();
+  const isFreeCurrentPlan = subStatus?.hasActiveSubscription === false;
 
   // Derive daily limits from active tiers
   const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
@@ -115,6 +117,11 @@ export const SettingsModal: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
                   {/* Free Plan */}
                   <Card className="relative">
+                    {isFreeCurrentPlan && (
+                      <span className="absolute top-3 right-3 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-medium px-2 py-1">
+                        Your Plan
+                      </span>
+                    )}
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div>
