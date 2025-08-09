@@ -95,7 +95,7 @@ export const API_ENDPOINTS = {
 // Edge Function Names
 export const EDGE_FUNCTIONS = {
   INVOKE_SYSTEM_PROMPT_AGENT: 'invoke-system-prompt-agent',
-  GENERATE_THEME_IMAGE_BACKGROUND: 'generate-theme-image-background',
+  GENERATE_DAY_1_4_3: 'generate-day-1-4-3',
   USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',

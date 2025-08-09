@@ -18,7 +18,7 @@ export const EDGE_FUNCTION_NAMES = {
   COVER_LETTER_AGENT: 'cover-letter-agent',
   STREAMING_IMAGE_PIPELINE: 'streaming-image-pipeline',
   USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
-  GENERATE_THEME_IMAGE_BACKGROUND: 'generate-theme-image-background',
+  GENERATE_DAY_1_4_3: 'generate-day-1-4-3',
 } as const;
 
 // OpenAI API Configuration

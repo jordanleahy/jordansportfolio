@@ -159,7 +159,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       }
 
       // Use the correct function for theme image generation (NOT the full theme pipeline)
-      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/${EDGE_FUNCTION_NAMES.GENERATE_THEME_IMAGE_BACKGROUND}`, {
+      const response = await fetch(`https://wgwmzfbnkovumqcvsxgd.supabase.co/functions/v1/${EDGE_FUNCTION_NAMES.GENERATE_DAY_1_4_3}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +309,7 @@ export const useThemeImageStreaming = ({ category, enabled = true }: UseThemeIma
       const post = posts[0];
 
       // Call background function directly
-      const { error: bgError } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_THEME_IMAGE_BACKGROUND, {
+      const { error: bgError } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_4_3, {
         body: {
           theme: post.themes?.theme_name || category,
           category: category,

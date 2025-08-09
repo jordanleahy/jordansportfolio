@@ -460,7 +460,7 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
               };
 
               // Fire-and-forget background function call
-              supabase.functions.invoke('generate-theme-image-background', {
+              supabase.functions.invoke('generate-day-1-4-3', {
                 body: backgroundRequest
               }).then(({ error: bgError }) => {
                 if (bgError) {
@@ -551,7 +551,7 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
         };
 
         // Fire-and-forget background function call
-        supabase.functions.invoke('generate-theme-image-background', {
+        supabase.functions.invoke('generate-day-1-4-3', {
           body: backgroundRequest
         }).then(({ error: bgError }) => {
           if (bgError) {
