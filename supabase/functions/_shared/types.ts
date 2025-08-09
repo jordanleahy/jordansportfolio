@@ -15,7 +15,6 @@ export interface OpenAIConfig {
     readonly FLAGSHIP: string;
     readonly FAST: string;
     readonly REASONING: string;
-    readonly REASONING_FAST: string;
     readonly VISION: string;
     readonly LEGACY_GPT4O: string;
     readonly LEGACY_GPT4O_MINI: string;
