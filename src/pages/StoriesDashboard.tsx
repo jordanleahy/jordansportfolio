@@ -163,13 +163,24 @@ export default function StoriesDashboard() {
         title: "Category Deleted",
         description: `Successfully deleted "${category}" and all its posts`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete category error:', error);
       toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete category",
         variant: "destructive"
       });
+    }
+  };
+
+  // Force refresh themes from server (bypass in-memory cache)
+  const handleRefreshThemes = async () => {
+    try {
+      const themes = await optimizedSocialMediaService.refreshAvailableThemes();
+      setAvailableThemes(themes);
+      toast({ title: 'Refreshed', description: 'Themes reloaded from server.' });
+    } catch (e: any) {
+      toast({ title: 'Refresh failed', description: e.message || 'Could not refresh themes', variant: 'destructive' });
     }
   };
 
@@ -546,15 +557,16 @@ export default function StoriesDashboard() {
         </Section>
 
         {/* Cards Section for Theme/Category cards */}
-        <Section aria-labelledby="cards-heading" id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
-          <header className="mb-6">
-            <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">
-              Themes
-            </h2>
-            <p className="text-muted-foreground">
-              Browse and manage your generated themes.
-            </p>
-          </header>
+          <Section aria-labelledby="cards-heading" id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
+            <header className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">Themes</h2>
+                <p className="text-muted-foreground">Browse and manage your generated themes.</p>
+              </div>
+              <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
+                Refresh
+              </Button>
+            </header>
 
           {/* Bulk Actions Toolbar */}
           <BulkActionsToolbar

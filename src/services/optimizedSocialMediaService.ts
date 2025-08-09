@@ -348,9 +348,18 @@ export class OptimizedSocialMediaService {
     this.cache.delete(this.getCacheKey(undefined, 'themes')); // themes cache
   }
 
+  // Public helpers to handle stale or ghost UI entries
+  public clearThemesCache() {
+    this.cache.delete(this.getCacheKey(undefined, 'themes'));
+  }
+
+  public async refreshAvailableThemes() {
+    this.clearThemesCache();
+    return this.getAvailableThemes();
+  }
+
   private invalidateAllCaches() {
     this.cache.clear();
   }
 }
-
 export const optimizedSocialMediaService = new OptimizedSocialMediaService();
