@@ -1,5 +1,5 @@
 // PostsTableView - Updated to use standard img tags instead of OptimizedImage
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
@@ -7,8 +7,8 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, ImageIcon } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
@@ -16,14 +16,6 @@ import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
-interface BlogStatus {
-  exists: boolean;
-  status?: 'draft' | 'published';
-  id?: string;
-  slug?: string;
-  isLoading: boolean;
-  error?: string;
-}
 
 import type { PostsTableViewProps } from '@/types/stories/ui';
 
@@ -104,37 +96,41 @@ export const PostsTableView = memo(({
     }
   };
 
-  const sortedPosts = [...posts].sort((a, b) => {
-    let aValue: string | number;
-    let bValue: string | number;
+  const sortedPosts = useMemo(() => {
+    const arr = [...posts];
+    arr.sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
 
-    switch (sortField) {
-      case 'day':
-        aValue = a.day || 0;
-        bValue = b.day || 0;
-        break;
-      case 'title':
-        aValue = a.title.toLowerCase();
-        bValue = b.title.toLowerCase();
-        break;
-      case 'created_at':
-        aValue = new Date(a.created_at).getTime();
-        bValue = new Date(b.created_at).getTime();
-        break;
-      case 'status':
-        aValue = a.status;
-        bValue = b.status;
-        break;
-      default:
-        return 0;
-    }
+      switch (sortField) {
+        case 'day':
+          aValue = a.day || 0;
+          bValue = b.day || 0;
+          break;
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case 'created_at':
+          aValue = new Date(a.created_at).getTime();
+          bValue = new Date(b.created_at).getTime();
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          return 0 as any;
+      }
 
-    if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-    } else {
-      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-    }
-  });
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      } else {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      }
+    });
+    return arr;
+  }, [posts, sortField, sortDirection]);
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <TableHead 

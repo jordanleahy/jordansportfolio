@@ -177,6 +177,12 @@ export const PostsTable = ({
       }
       setIsBulk169(true);
       const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to generate images');
+        setIsBulk169(false);
+        return;
+      }
       toast.info('Starting 16:9 generation for missing posts...');
       const { data, error } = await supabase.functions.invoke('bulk-generate-16-9', {
         body: { category, themeId: selectedThemeId }

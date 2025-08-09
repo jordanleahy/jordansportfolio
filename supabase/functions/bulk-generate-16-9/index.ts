@@ -67,7 +67,8 @@ serve(async (req) => {
       .eq("user_id", userId)
       .eq("category", category)
       .is("image_16_9_url", null)
-      .neq("status", "deleted");
+      .neq("status", "deleted")
+      .or('image_16_9_status.is.null,image_16_9_status.neq.processing');
 
     if (themeId) query = query.eq("theme_id", themeId);
 
@@ -95,6 +96,13 @@ serve(async (req) => {
 
     async function processOne(post: any) {
       try {
+        // Mark as processing
+        await supabase
+          .from("social_media_posts")
+          .update({ image_16_9_status: "processing", updated_at: new Date().toISOString() })
+          .eq("id", post.id)
+          .eq("user_id", userId);
+
         // Step 1: Generate prompt for the post
         const promptPayload = {
           category,
@@ -106,6 +114,7 @@ serve(async (req) => {
 
         const promptResp = await supabase.functions.invoke("generate-image-prompt-dynamic", {
           body: promptPayload,
+          headers: { Authorization: authToken },
         });
         if (promptResp.error) throw promptResp.error;
 
@@ -121,6 +130,7 @@ serve(async (req) => {
         // Step 2: Generate a 16:9 image
         const genResp = await supabase.functions.invoke("generate-image-gpt", {
           body: { prompt, aspectRatio: "16:9" },
+          headers: { Authorization: authToken },
         });
         if (genResp.error) throw genResp.error;
         const genData: any = genResp.data || {};
@@ -146,6 +156,7 @@ serve(async (req) => {
           .upload(filePath, new Blob([bytes], { type: "image/png" }), {
             contentType: "image/png",
             upsert: true,
+            cacheControl: "3600",
           });
         if (uploadError) throw uploadError;
 
@@ -157,7 +168,7 @@ serve(async (req) => {
 
         const { error: updateErr } = await supabase
           .from("social_media_posts")
-          .update({ image_16_9_url: publicUrl, updated_at: new Date().toISOString() })
+          .update({ image_16_9_url: publicUrl, image_16_9_status: "complete", updated_at: new Date().toISOString() })
           .eq("id", post.id)
           .eq("user_id", userId);
         if (updateErr) throw updateErr;
@@ -166,6 +177,15 @@ serve(async (req) => {
       } catch (e) {
         console.error("Failed to process post", post?.id, e);
         failureCount++;
+        try {
+          await supabase
+            .from("social_media_posts")
+            .update({ image_16_9_status: "failed", updated_at: new Date().toISOString() })
+            .eq("id", post.id)
+            .eq("user_id", userId);
+        } catch (_) {
+          // ignore secondary errors
+        }
       }
     }
 
