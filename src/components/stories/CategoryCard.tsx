@@ -10,10 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { EDGE_FUNCTION_NAMES } from "@/constants/edgeFunctionConstants";
 import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useLongPress } from "@/hooks/useLongPress";
+import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
 
 import { CategoryCardProps } from '@/types/stories';
 
-export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode }: CategoryCardProps) => {
+export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode, isGeneratingTheme, onCancelGeneration }: CategoryCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -21,6 +23,9 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   const [isGeneratingDay1, setIsGeneratingDay1] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const imageGenerationAttempted = useRef(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
+  const [isCancelling, setIsCancelling] = useState(false);
   
   // Listen for real-time database updates on the Day 1 post's image_4_3_url
   useEffect(() => {
@@ -133,6 +138,39 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
   };
   
+  const handleCancelThemeGeneration = async () => {
+    if (!user?.id || !onCancelGeneration) return;
+    
+    setIsCancelling(true);
+    try {
+      await onCancelGeneration();
+      toast({
+        title: "Generation Cancelled",
+        description: "Theme generation has been cancelled successfully.",
+      });
+    } catch (error) {
+      console.error('Error cancelling theme generation:', error);
+      toast({
+        title: "Cancellation Failed",
+        description: error instanceof Error ? error.message : "Failed to cancel theme generation",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCancelling(false);
+      setShowContextMenu(false);
+    }
+  };
+
+  const longPressHandlers = useLongPress({
+    threshold: 600,
+    onLongPress: (coordinates) => {
+      if (isShimmer && isGeneratingTheme && !isCancelling) {
+        setMenuCoordinates(coordinates);
+        setShowContextMenu(true);
+      }
+    }
+  });
+
   const handleClick = () => {
     if (isShimmer) return; // Prevent clicks on shimmer cards
     if (isSelectionMode && onSelect) {
@@ -155,28 +193,54 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
 
   if (isShimmer) {
     return (
-      <Card className="group overflow-hidden border-border/50">
-        {/* Shimmer Image Section */}
-        <div className="relative h-48">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
-            <div className="space-y-2 text-center">
-              <Loader2 className="h-8 w-8 text-primary/60 animate-spin mx-auto" />
-              <div className="text-xs text-primary/60">Generating Day 1 image...</div>
+      <>
+        <Card 
+          className="group overflow-hidden border-border/50 select-none" 
+          {...longPressHandlers}
+          style={{ touchAction: 'manipulation' }}
+        >
+          {/* Shimmer Image Section */}
+          <div className="relative h-48">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
+              <div className="space-y-2 text-center">
+                <Loader2 className="h-8 w-8 text-primary/60 animate-spin mx-auto" />
+                <div className="text-xs text-primary/60">
+                  {isCancelling ? "Cancelling..." : "Generating theme..."}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Shimmer Content Section */}
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div>
-              <div className="h-6 bg-muted/50 rounded animate-pulse mb-2" />
-              <div className="h-4 w-2/3 bg-muted/30 rounded animate-pulse" />
+          {/* Shimmer Content Section */}
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <div className="h-6 bg-muted/50 rounded animate-pulse mb-2" />
+                <div className="h-4 w-2/3 bg-muted/30 rounded animate-pulse" />
+              </div>
+              <div className="h-9 bg-muted/30 rounded animate-pulse" />
             </div>
-            <div className="h-9 bg-muted/30 rounded animate-pulse" />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <ContextualActionMenu
+          isOpen={showContextMenu}
+          coordinates={menuCoordinates}
+          onClose={() => setShowContextMenu(false)}
+          actions={[
+            {
+              title: "Cancel Theme Generation",
+              style: "destructive",
+              onPress: handleCancelThemeGeneration
+            },
+            {
+              title: "Keep Generating",
+              style: "cancel",
+              onPress: () => setShowContextMenu(false)
+            }
+          ]}
+        />
+      </>
     );
   }
 

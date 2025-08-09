@@ -13,6 +13,8 @@ export interface CategoriesGridProps {
   selectedThemes?: Set<string>;
   onThemeSelect?: (themeId: string) => void;
   isSelectionMode?: boolean;
+  isGeneratingTheme?: boolean;
+  onCancelGeneration?: () => Promise<void>;
 }
 
 export interface CategoryCardProps {
@@ -31,6 +33,8 @@ export interface CategoryCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
   isSelectionMode?: boolean;
+  isGeneratingTheme?: boolean;
+  onCancelGeneration?: () => Promise<void>;
 }
 
 export interface PostCardProps {

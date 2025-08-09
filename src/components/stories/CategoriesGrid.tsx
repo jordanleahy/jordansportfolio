@@ -6,7 +6,9 @@ export const CategoriesGrid = ({
   onDeleteCategory, 
   selectedThemes,
   onThemeSelect,
-  isSelectionMode
+  isSelectionMode,
+  isGeneratingTheme,
+  onCancelGeneration
 }: CategoriesGridProps) => {
   if (themes.length === 0) {
     return null;
@@ -32,6 +34,8 @@ export const CategoriesGrid = ({
           isSelected={selectedThemes?.has(theme.id)}
           onSelect={() => onThemeSelect?.(theme.id)}
           isSelectionMode={isSelectionMode}
+          isGeneratingTheme={isGeneratingTheme}
+          onCancelGeneration={onCancelGeneration}
         />
       ))}
     </div>

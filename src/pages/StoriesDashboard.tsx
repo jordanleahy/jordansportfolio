@@ -37,6 +37,7 @@ export default function StoriesDashboard() {
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
 
   // Simplified state management
@@ -392,6 +393,38 @@ export default function StoriesDashboard() {
     }
   };
 
+  const cancelThemeGeneration = async () => {
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
+
+    setIsCancelling(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-theme-generation');
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to cancel theme generation');
+      }
+      
+      // Remove pending theme and reset states
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      setIsGeneratingTheme(false);
+      
+      return data;
+    } catch (error) {
+      console.error('Theme cancellation error:', error);
+      throw error;
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   // Use React Query loading pattern instead of local loading state
   if (loading) {
     return (
@@ -557,6 +590,8 @@ export default function StoriesDashboard() {
               selectedThemes={selectedThemes}
               onThemeSelect={handleThemeSelect}
               isSelectionMode={isSelectionMode}
+              isGeneratingTheme={isGeneratingTheme}
+              onCancelGeneration={cancelThemeGeneration}
             />
           )}
         </Section>
