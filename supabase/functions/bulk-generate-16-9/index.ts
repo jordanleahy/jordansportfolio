@@ -17,8 +17,11 @@ function b64ToUint8Array(b64: string): Uint8Array {
   return bytes;
 }
 
-async function getUser(supabase: ReturnType<typeof createClient>) {
-  const { data: { user }, error } = await supabase.auth.getUser();
+async function getUser(authToken: string, supabaseUrl: string, anonKey: string) {
+  const authClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authToken } },
+  });
+  const { data: { user }, error } = await authClient.auth.getUser();
   if (error || !user) throw new Error("Unauthorized");
   return user;
 }
@@ -45,12 +48,13 @@ serve(async (req) => {
       throw new Error("Supabase environment not configured");
     }
 
-    // Create auth client to verify user
-    const authClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
-    });
+    // Get auth token and verify user
+    const authToken = req.headers.get("Authorization") || "";
+    if (!authToken) {
+      throw new Error("Missing authorization header");
+    }
 
-    const user = await getUser(authClient);
+    const user = await getUser(authToken, supabaseUrl, anonKey);
     const userId = user.id;
 
     // Create service role client for database operations
