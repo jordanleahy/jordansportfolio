@@ -42,14 +42,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user roles:', error);
         setRole('user'); // Default role
       } else {
-        setRole(data?.role || 'user');
+        const roles = (data || []).map(r => r.role as UserRole);
+        const effectiveRole: UserRole =
+          roles.includes('admin') ? 'admin' :
+          roles.includes('moderator') ? 'moderator' : 'user';
+        setRole(effectiveRole);
       }
     } catch (error) {
       console.error('Error in fetchUserRole:', error);
