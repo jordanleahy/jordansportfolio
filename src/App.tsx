@@ -228,6 +228,7 @@ function App() {
                   } 
                 />
                 <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+                <Route path="/subscription-status" element={<SubscriptionSuccess />} />
                 <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
                 <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
