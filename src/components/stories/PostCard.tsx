@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
-import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+
 import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
-import { Copy, Trash2, ImageIcon, Loader2, Lightbulb, ChevronDown, ChevronUp, Video, BookOpen, Mic, Sparkles, Share } from 'lucide-react';
+import { Copy, Trash2, ImageIcon, Loader2, Lightbulb, Video, BookOpen, Mic, Share } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { ImagePreviewModal } from './ImagePreviewModal';
+
 import { PostMediaGalleryModal } from './PostMediaGalleryModal';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import { BulkImageGenerationButton } from './BulkImageGenerationButton';
@@ -48,7 +48,7 @@ const PostCardComponent = ({
   const { data: colorTheme } = useColorTheme(post.color_theme_id || '');
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const creditStatus = getCreditStatus();
-  const [isExpanded, setIsExpanded] = useState(false);
+  
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
@@ -642,15 +642,6 @@ const PostCardComponent = ({
           post={post}
         />
 
-        {/* Image Preview Modal */}
-        {previewImage && (
-          <ImagePreviewModal
-            isOpen={true}
-            onClose={() => setPreviewImage(null)}
-            imageUrl={previewImage.url}
-            imageAlt={previewImage.alt}
-          />
-        )}
         
         {/* Story Telling Modal */}
         <StoryTellingModal
@@ -673,6 +664,7 @@ const PostCardComponent = ({
 export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
   // Custom comparison function for better performance
   return (
+    prevProps.isAdmin === nextProps.isAdmin &&
     prevProps.post.id === nextProps.post.id &&
     prevProps.post.title === nextProps.post.title &&
     prevProps.post.description === nextProps.post.description &&
@@ -681,7 +673,6 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
     prevProps.post.image_9_16_url === nextProps.post.image_9_16_url &&
     prevProps.post.image_3_4_url === nextProps.post.image_3_4_url &&
     prevProps.post.image_4_3_url === nextProps.post.image_4_3_url &&
-    
     prevProps.post.day === nextProps.post.day &&
     prevProps.draftIndex === nextProps.draftIndex &&
     JSON.stringify(prevProps.processingStates) === JSON.stringify(nextProps.processingStates)
