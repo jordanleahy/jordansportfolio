@@ -3,62 +3,135 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StreamingShimmer } from "@/components/ui/streaming-shimmer";
-import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2, RotateCcw } from "lucide-react";
+import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useThemeImageStreaming } from "@/hooks/useThemeImageStreaming";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { EDGE_FUNCTION_NAMES } from "@/constants/edgeFunctionConstants";
 import { useEffect, useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 import { CategoryCardProps } from '@/types/stories';
 
 export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode }: CategoryCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
+  const [isGeneratingDay1, setIsGeneratingDay1] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const imageGenerationAttempted = useRef(false);
   
-  // Use streaming hook for real-time image generation (enabled for both shimmer and regular cards)
-  const { streamingProgress, isGenerating, error, hasTimedOut, startStreaming, retryGeneration } = useThemeImageStreaming({
-    category,
-    enabled: !!firstPostData // Enable for both shimmer and regular cards
-  });
+  // Listen for real-time database updates on the Day 1 post's image_4_3_url
+  useEffect(() => {
+    if (!user?.id || !category) return;
+
+    const channel = supabase
+      .channel(`day-1-image-updates-${category}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'social_media_posts',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const updatedPost = payload.new as any;
+          // Check if this is a Day 1 post for our category and has a new image
+          if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.image_4_3_url) {
+            console.log('🎨 Day 1 image updated:', updatedPost.image_4_3_url);
+            setCurrentImageUrl(updatedPost.image_4_3_url);
+            setIsGeneratingDay1(false);
+            setGenerationError(null);
+          }
+          // Handle failed generation
+          if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.image_4_3_status === 'failed') {
+            console.log('❌ Day 1 image generation failed');
+            setIsGeneratingDay1(false);
+            setGenerationError('Failed to generate Day 1 image');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, category]);
 
   // Reset generation attempt tracking when theme changes
   useEffect(() => {
     imageGenerationAttempted.current = false;
+    setGenerationError(null);
   }, [theme, category]);
 
-  // Auto-start streaming when firstPostData becomes available (for both shimmer and regular cards)
+  // Update image URL when imageUrl prop changes
   useEffect(() => {
-    console.log('CategoryCard useEffect debug:', {
-      firstPostData: !!firstPostData,
-      currentImageUrl,
-      imageUrl,
-      isGenerating,
-      streamingProgress: !!streamingProgress,
-      category,
-      theme,
-      error,
-      hasTimedOut,
-      attemptedGeneration: imageGenerationAttempted.current
-    });
-    
-    // Only attempt streaming if we have valid data, no ongoing processes, no recent failures, and haven't attempted yet
-    if (firstPostData && !currentImageUrl && !imageUrl && !isGenerating && !streamingProgress && !error && !hasTimedOut && theme && category && !imageGenerationAttempted.current) {
-      console.log('🚀 Starting streaming for theme:', theme);
-      imageGenerationAttempted.current = true;
-      startStreaming(firstPostData);
-    } else {
-      console.log('❌ NOT starting streaming - conditions not met');
-    }
-  }, [firstPostData, currentImageUrl, imageUrl, isGenerating, streamingProgress, error, hasTimedOut, theme, category]);
-
-  // Update image URL when streaming completes or imageUrl prop changes
-  useEffect(() => {
-    if (streamingProgress?.imageUrl) {
-      setCurrentImageUrl(streamingProgress.imageUrl);
-    } else if (imageUrl) {
+    if (imageUrl) {
       setCurrentImageUrl(imageUrl);
     }
-  }, [streamingProgress?.imageUrl, imageUrl]);
+  }, [imageUrl]);
+
+  // Generate Day 1 image function
+  const generateDay1Image = async () => {
+    if (!user?.id || !firstPostData) {
+      toast({
+        title: "Error",
+        description: "Unable to generate image. Missing user or theme data.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsGeneratingDay1(true);
+      setGenerationError(null);
+
+      console.log('🎨 Calling generate-day-1-4-3 function for theme:', theme);
+      
+      // Find the theme ID by looking for a theme with this name and category
+      const { data: themeData, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', theme)
+        .eq('category', category)
+        .eq('user_id', user.id)
+        .single();
+
+      if (themeError || !themeData) {
+        throw new Error('Theme not found');
+      }
+
+      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_4_3, {
+        body: {
+          themeId: themeData.id,
+          userId: user.id
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: "Success!",
+        description: "Day 1 image generation started. It will appear when ready."
+      });
+
+    } catch (error) {
+      console.error('❌ Day 1 image generation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate Day 1 image';
+      setGenerationError(errorMessage);
+      setIsGeneratingDay1(false);
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    }
+  };
   
   const handleClick = () => {
     if (isShimmer) return; // Prevent clicks on shimmer cards
@@ -83,14 +156,14 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   if (isShimmer) {
     return (
       <Card className="group overflow-hidden border-border/50">
-        {/* Streaming Shimmer Image Section */}
+        {/* Shimmer Image Section */}
         <div className="relative h-48">
-          <StreamingShimmer
-            streamingProgress={streamingProgress}
-            isGenerating={isGenerating}
-            error={error}
-            fallbackIcon={<FolderOpen className="h-12 w-12 text-primary/40" />}
-          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
+            <div className="space-y-2 text-center">
+              <Loader2 className="h-8 w-8 text-primary/60 animate-spin mx-auto" />
+              <div className="text-xs text-primary/60">Generating Day 1 image...</div>
+            </div>
+          </div>
         </div>
 
         {/* Shimmer Content Section */}
@@ -113,14 +186,12 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} onClick={handleClick}>
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
-        {/* Display current or streaming image */}
-        {currentImageUrl || streamingProgress?.partialImage ? (
+        {/* Display current image */}
+        {currentImageUrl ? (
           <img 
-            src={streamingProgress?.partialImage || currentImageUrl} 
-            alt={`${theme} preview`}
-            className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-105 ${
-              streamingProgress?.partialImage ? 'opacity-80' : ''
-            }`}
+            src={currentImageUrl} 
+            alt={`${theme} Day 1 preview`}
+            className="w-full h-full object-cover transition-all duration-200 group-hover:scale-105"
             onError={(e) => {
               // Fallback to gradient background if image fails to load
               const target = e.target as HTMLImageElement;
@@ -131,14 +202,17 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         ) : null}
         
         {/* Generation in progress overlay */}
-        {isGenerating && (
+        {isGeneratingDay1 && (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
-            <Loader2 className="h-6 w-6 text-primary animate-spin" />
+            <div className="space-y-2 text-center">
+              <Loader2 className="h-6 w-6 text-primary animate-spin" />
+              <div className="text-xs text-primary">Generating Day 1 image...</div>
+            </div>
           </div>
         )}
         
         {/* Error state overlay */}
-        {error && !isGenerating && (
+        {generationError && !isGeneratingDay1 && (
           <div className="absolute inset-0 bg-gradient-to-br from-destructive/20 via-destructive/10 to-muted/20 flex flex-col items-center justify-center">
             <ImageIcon className="h-8 w-8 text-destructive/60 mb-2" />
             <div className="text-xs text-destructive text-center px-2">
@@ -147,15 +221,29 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           </div>
         )}
         
-        {/* Fallback gradient background */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center ${
-          currentImageUrl || streamingProgress?.partialImage || isGenerating || error ? 'hidden' : ''
+        {/* Fallback gradient background with generate button */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex flex-col items-center justify-center ${
+          currentImageUrl || isGeneratingDay1 || generationError ? 'hidden' : ''
         }`}>
-          <FolderOpen className="h-12 w-12 text-primary/60" />
+          <FolderOpen className="h-8 w-8 text-primary/60 mb-3" />
+          {firstPostData && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                generateDay1Image();
+              }}
+              variant="outline"
+              size="sm"
+              className="bg-white/90 hover:bg-white text-primary border-primary/20"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              Generate Day 1 Image
+            </Button>
+          )}
         </div>
         
         {/* Overlay for better text readability when we have an image */}
-        {(currentImageUrl || streamingProgress?.partialImage) && !isGenerating && (
+        {currentImageUrl && !isGeneratingDay1 && (
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         )}
         
@@ -199,20 +287,38 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           </div>
         </div>
 
-        {/* Show retry button for failed/timed-out generations */}
-        {(error || hasTimedOut) && !isGenerating && (
+        {/* Show retry button for failed generations or generate button when no image */}
+        {generationError && !isGeneratingDay1 && (
           <div className="flex gap-2 mb-3">
             <Button 
               onClick={(e) => { 
                 e.stopPropagation(); 
-                retryGeneration(); 
+                generateDay1Image(); 
               }}
               variant="outline"
               size="sm"
               className="flex-1 text-xs"
             >
               <RotateCcw className="h-3 w-3 mr-1" />
-              Retry Image
+              Retry Day 1 Image
+            </Button>
+          </div>
+        )}
+
+        {/* Show generate button when no image and no error */}
+        {!currentImageUrl && !generationError && !isGeneratingDay1 && firstPostData && (
+          <div className="flex gap-2 mb-3">
+            <Button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                generateDay1Image(); 
+              }}
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              Generate Day 1 Image
             </Button>
           </div>
         )}
