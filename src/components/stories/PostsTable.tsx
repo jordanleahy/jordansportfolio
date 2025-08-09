@@ -188,8 +188,8 @@ export const PostsTable = ({
       }
 
       // Determine posts to process (missing or not-complete 16:9 only)
-      const inCategory = posts.filter(p => p.category === category);
-      const inTheme = selectedThemeId ? inCategory.filter(p => p.theme_id === selectedThemeId) : inCategory;
+      const inScope = posts; // already scoped by current page (theme or category)
+      const inTheme = selectedThemeId ? inScope.filter(p => p.color_theme_id === selectedThemeId) : inScope;
       const statusDist = inTheme.reduce((acc, p) => {
         const s = (p.image_16_9_status ?? 'none');
         acc[s] = (acc[s] || 0) + 1;
@@ -198,9 +198,9 @@ export const PostsTable = ({
       const withUrl = inTheme.filter(p => !!p.image_16_9_url).length;
       const withoutUrl = inTheme.length - withUrl;
       console.groupCollapsed('[Bulk 16:9] Generate missing only – filter debug');
-      console.info('Filters', { category, selectedThemeId });
-      console.info('Counts', { total: posts.length, inCategory: inCategory.length, inTheme: inTheme.length, withUrl, withoutUrl, statusDist });
-      console.table(inTheme.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
+      console.info('Filters', { category, selectedThemeId, note: 'Using posts array as scope; theme filter = color_theme_id' });
+      console.info('Counts', { total: posts.length, inScope: inScope.length, withUrl, withoutUrl, statusDist });
+      console.table(inTheme.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, color_theme: p.color_theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
       console.groupEnd();
       const candidates = inTheme.filter(p =>
         !p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete'
@@ -261,24 +261,24 @@ export const PostsTable = ({
         return;
       }
 
-      // Determine posts to process (ALL posts in this category, ignoring theme filter)
-      const inCategory = posts.filter(p => p.category === category);
-      const statusDist = inCategory.reduce((acc, p) => {
+      // Determine posts to process (ALL posts visible on this page, ignoring color theme)
+      const inScope = posts;
+      const statusDist = inScope.reduce((acc, p) => {
         const s = (p.image_16_9_status ?? 'none');
         acc[s] = (acc[s] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      const withUrl = inCategory.filter(p => !!p.image_16_9_url).length;
-      const withoutUrl = inCategory.length - withUrl;
+      const withUrl = inScope.filter(p => !!p.image_16_9_url).length;
+      const withoutUrl = inScope.length - withUrl;
       console.groupCollapsed('[Bulk 16:9] Regenerate all – filter debug');
-      console.info('Filters', { category, selectedThemeId, note: 'Theme filter ignored' });
-      console.info('Counts', { total: posts.length, inCategory: inCategory.length, withUrl, withoutUrl, statusDist });
-      console.table(inCategory.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
+      console.info('Filters', { category, selectedThemeId, note: 'Theme filter ignored; using posts array as scope' });
+      console.info('Counts', { total: posts.length, inScope: inScope.length, withUrl, withoutUrl, statusDist });
+      console.table(inScope.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, color_theme: p.color_theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
       console.groupEnd();
-      const candidates = inCategory;
+      const candidates = inScope;
 
       if (candidates.length === 0) {
-        console.warn('[Bulk 16:9] No candidates (regenerate all)', { category, counts: { inCategory: inCategory.length } });
+        console.warn('[Bulk 16:9] No candidates (regenerate all)', { category, counts: { inScope: inScope.length } });
         toast.info('No posts found in this category');
         return;
       }
