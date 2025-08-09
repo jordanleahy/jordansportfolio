@@ -271,11 +271,11 @@ serve(async (req) => {
               timestamp: new Date().toISOString()
             });
             
-            // Generate theme image after system prompt (regardless of prompt result)
-            return generateThemeImageBackground(aiResult.cleanedData.category, user.id);
+            // Generate Day 1 image after system prompt (regardless of prompt result)
+            return generateDay1ImageBackground(createdTheme.id, user.id);
           })
           .then((imageResult) => {
-            console.log('🖼️ THEME IMAGE RESULT:', {
+            console.log('🖼️ DAY 1 IMAGE RESULT:', {
               success: imageResult?.success || false,
               category: aiResult.cleanedData.category,
               themeId: createdTheme.id,
@@ -568,92 +568,44 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
   }
 }
 
-// Background function to trigger theme image generation
-async function generateThemeImageBackground(category: string, userId: string): Promise<{ success: boolean; error?: string }> {
+// Background function to trigger Day 1 image generation
+async function generateDay1ImageBackground(themeId: string, userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log(`🖼️ THEME IMAGE: Starting generation for category: ${category}`);
+    console.log(`🖼️ DAY 1 IMAGE: Starting generation for theme: ${themeId}`);
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Missing Supabase configuration for theme image generation');
+      console.error('Missing Supabase configuration for Day 1 image generation');
       return { success: false, error: 'Missing Supabase configuration' };
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get the first post from this category for the user
-    const { data: firstPost, error: postError } = await supabase
-      .from('social_media_posts')
-      .select('id, title, description, category, theme')
-      .eq('user_id', userId)
-      .eq('category', category)
-      .order('day', { ascending: true })
-      .limit(1)
-      .single();
-
-    if (postError || !firstPost) {
-      console.error('Failed to get first post for theme image:', postError);
-      return { success: false, error: postError?.message || 'No posts found' };
-    }
-
-    console.log(`🎯 THEME IMAGE: Found first post: ${firstPost.title}`);
-
-    // Mark as generating
-    await supabase
-      .from('social_media_posts')
-      .update({ theme_image_generation_status: 'generating' })
-      .eq('id', firstPost.id);
-
-    // Trigger the streaming image pipeline for 4:3 theme image
-    const imageResponse = await fetch(`${supabaseUrl}/functions/v1/streaming-image-pipeline`, {
+    // Call the generate-day-1-4-3 function
+    const imageResponse = await fetch(`${supabaseUrl}/functions/v1/generate-day-1-4-3`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseServiceKey}`,
       },
       body: JSON.stringify({
-        postId: firstPost.id,
-        title: firstPost.title,
-        description: firstPost.description,
-        theme: firstPost.theme, // Add the theme parameter here
-        category: firstPost.category,
-        aspectRatio: '4:3',
-        mode: 'theme',
-        stream: false // Don't stream for background generation
+        themeId: themeId,
+        userId: userId
       }),
     });
 
     if (imageResponse.ok) {
       const result = await imageResponse.json();
-      console.log(`✅ THEME IMAGE: Generated successfully: ${result.imageUrl}`);
-      
-      // Update the post with theme image URL
-      await supabase
-        .from('social_media_posts')
-        .update({
-          theme_image_4_3_url: result.imageUrl,
-          theme_image_generation_status: 'complete'
-        })
-        .eq('id', firstPost.id);
-
+      console.log(`✅ DAY 1 IMAGE: Generated successfully for post: ${result.postId}`);
       return { success: true };
     } else {
       const errorText = await imageResponse.text();
-      console.error('❌ THEME IMAGE: Generation failed:', errorText);
-      
-      // Mark as failed
-      await supabase
-        .from('social_media_posts')
-        .update({ theme_image_generation_status: 'failed' })
-        .eq('id', firstPost.id);
-      
+      console.error('❌ DAY 1 IMAGE: Generation failed:', errorText);
       return { success: false, error: errorText };
     }
 
   } catch (error) {
-    console.error('💥 THEME IMAGE: Error in generation:', error);
+    console.error('💥 DAY 1 IMAGE: Error in generation:', error);
     return { success: false, error: error.message };
   }
 }
