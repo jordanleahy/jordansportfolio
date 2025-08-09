@@ -418,19 +418,3 @@ export interface IndividualPromptViewerProps {
   isVisible: boolean;
   onClose: () => void;
 }
-
-// Streaming Hook Props
-export interface UseThemeImageStreamingProps {
-  category: string;
-  enabled?: boolean;
-}
-
-// Hook Return Types
-export interface UseThemeImageStreamingReturn {
-  streamingProgress: StreamingProgress | null;
-  isGenerating: boolean;
-  error: string | null;
-  hasTimedOut: boolean;
-  startStreaming: (firstPostData?: any) => Promise<void>;
-  retryGeneration: () => Promise<void>;
-}
