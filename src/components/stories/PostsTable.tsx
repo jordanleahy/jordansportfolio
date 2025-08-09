@@ -207,6 +207,7 @@ export const PostsTable = ({
       );
 
       if (candidates.length === 0) {
+        console.warn('[Bulk 16:9] No candidates (generate missing only)', { category, selectedThemeId, reason: 'All posts have image or status complete', counts: { inTheme: inTheme.length } });
         toast.info('All posts already have a 16:9 image');
         return;
       }
@@ -277,6 +278,7 @@ export const PostsTable = ({
       const candidates = inCategory;
 
       if (candidates.length === 0) {
+        console.warn('[Bulk 16:9] No candidates (regenerate all)', { category, counts: { inCategory: inCategory.length } });
         toast.info('No posts found in this category');
         return;
       }
