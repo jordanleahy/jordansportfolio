@@ -39,8 +39,8 @@ const WorkReportPage: React.FC = () => {
 
   const handleGenerateSummary = async () => {
     if (selectedDateSummary) {
-      toast.info(`A summary for ${format(selectedDate, 'MMM d, yyyy')} already exists!`);
-      return;
+      const confirmRegenerate = confirm(`A summary for ${format(selectedDate, 'MMM d, yyyy')} already exists. Do you want to regenerate it?`);
+      if (!confirmRegenerate) return;
     }
 
     setIsGenerating(true);
@@ -175,8 +175,7 @@ const WorkReportPage: React.FC = () => {
               <Button 
                 size="sm" 
                 onClick={handleGenerateSummary}
-                disabled={isGenerating || !!selectedDateSummary}
-                title={selectedDateSummary ? `Summary for ${format(selectedDate, 'MMM d, yyyy')} already exists` : undefined}
+                disabled={isGenerating}
               >
                 {isGenerating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -184,7 +183,7 @@ const WorkReportPage: React.FC = () => {
                   <Plus className="mr-2 h-4 w-4" />
                 )}
                 {isGenerating ? 'Generating...' : 
-                 selectedDateSummary ? `Summary Exists` : 'Generate Summary'}
+                 selectedDateSummary ? `Regenerate Summary` : 'Generate Summary'}
               </Button>
             </div>
           </div>
@@ -259,8 +258,7 @@ const WorkReportPage: React.FC = () => {
                   </Popover>
                   <Button 
                     onClick={handleGenerateSummary}
-                    disabled={isGenerating || !!selectedDateSummary}
-                    title={selectedDateSummary ? `Summary for ${format(selectedDate, 'MMM d, yyyy')} already exists` : undefined}
+                    disabled={isGenerating}
                   >
                     {isGenerating ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -268,7 +266,7 @@ const WorkReportPage: React.FC = () => {
                       <Plus className="mr-2 h-4 w-4" />
                     )}
                     {isGenerating ? 'Generating...' : 
-                     selectedDateSummary ? 'Summary Exists' : 'Generate Summary'}
+                     selectedDateSummary ? 'Regenerate Summary' : 'Generate Summary'}
                   </Button>
                 </div>
               </div>
