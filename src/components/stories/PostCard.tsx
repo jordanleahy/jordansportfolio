@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
 
-import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
+import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { Copy, Trash2, ImageIcon, Loader2, Lightbulb, Video, BookOpen, Mic, Share } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
@@ -242,19 +242,14 @@ const PostCardComponent = ({
       {/* 16:9 Hero Image */}
       <div className="aspect-video rounded-t-lg overflow-hidden">
         {isGeneratingHero ? (
-          <StreamingShimmer 
-            isGenerating={true}
+          <SimpleShimmer 
+            variant="full"
             className="w-full h-full"
-            fallbackIcon={<ImageIcon className="h-8 w-8 text-primary/40" />}
           />
         ) : isGenerating(post.id, '16_9') ? (
-          <StreamingShimmer 
-            aspectRatio="16/9" 
-            variant="card"
-            isGenerating={true}
+          <SimpleShimmer 
+            variant="full"
             className="w-full h-full"
-            generationStep="Generating 16:9 image..."
-            fallbackIcon={<ImageIcon className="h-8 w-8 text-primary/40" />}
           />
         ) : post.image_16_9_url ? (
           <img
