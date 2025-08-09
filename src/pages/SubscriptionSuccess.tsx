@@ -40,17 +40,20 @@ const SubscriptionSuccess: React.FC = () => {
 
   const debugStripeSession = async () => {
     console.log('SessionId from URL:', sessionId);
-    if (!sessionId) {
-      alert('No session_id found in URL. Please provide your session ID.');
-      return;
+    let actualSessionId = sessionId;
+    
+    if (!actualSessionId) {
+      actualSessionId = prompt('Please enter your Stripe session ID (starts with cs_):');
+      if (!actualSessionId) return;
     }
+    
     try {
       const { data, error } = await supabase.functions.invoke('debug-stripe-session', {
-        body: { session_id: sessionId }
+        body: { session_id: actualSessionId }
       });
       if (error) throw error;
       console.log('Debug result:', data);
-      alert(`Price ID: ${data.price_id}\nUpdated Starter tier mapping!`);
+      alert(`Success! Price ID: ${data.price_id}\nUpdated Starter tier mapping!`);
       // Refresh subscription status
       window.location.reload();
     } catch (e) {
