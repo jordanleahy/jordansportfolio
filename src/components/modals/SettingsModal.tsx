@@ -10,6 +10,7 @@ import {
   Info,
   X
 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
 import { useSubscriptionTiers, useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
@@ -30,6 +31,26 @@ export const SettingsModal: React.FC = () => {
   
   const isCurrentlyStarter = currentTier === 'starter';
   const isCurrentlyFree = currentTier === 'free' || !currentTier;
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isDowngrading, setIsDowngrading] = useState(false);
+  const [downgradeScheduled, setDowngradeScheduled] = useState(false);
+
+  const handleDowngrade = async () => {
+    try {
+      setIsDowngrading(true);
+      const { data, error } = await supabase.functions.invoke('downgrade-subscription');
+      if (error) throw error;
+      setDowngradeScheduled(true);
+      toast.success('Downgrade scheduled. Your plan will end at period close.');
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not schedule downgrade. Please try again.');
+    } finally {
+      setIsDowngrading(false);
+      setConfirmOpen(false);
+    }
+  };
 
   // Derive daily limits from active tiers
   const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
@@ -174,19 +195,13 @@ export const SettingsModal: React.FC = () => {
                         </div>
                         
                         {isCurrentlyStarter ? (
-                          <Button variant="outline" className="w-full" onClick={async () => {
-                            const ok = window.confirm('Downgrade to Free? Your current plan will remain active until the end of this billing period.');
-                            if (!ok) return;
-                            try {
-                              const { data, error } = await supabase.functions.invoke('downgrade-subscription');
-                              if (error) throw error;
-                              toast.success('Downgrade scheduled. Your plan will end at period close.');
-                            } catch (e) {
-                              console.error(e);
-                              toast.error('Could not schedule downgrade. Please try again.');
-                            }
-                          }}>
-                            Downgrade
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => setConfirmOpen(true)}
+                            disabled={isDowngrading || downgradeScheduled}
+                          >
+                            {downgradeScheduled ? 'Downgrade Scheduled' : (isDowngrading ? 'Downgrading...' : 'Downgrade')}
                           </Button>
                         ) : (
                           <Button className="w-full" onClick={startStarterCheckout}>
@@ -212,6 +227,23 @@ export const SettingsModal: React.FC = () => {
                     </CardContent>
                   </Card>
                 </div>
+
+                <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Downgrade to Free?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Your current plan will remain active until the end of this billing period. You can re-subscribe anytime.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isDowngrading}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDowngrade} disabled={isDowngrading}>
+                        {isDowngrading ? 'Scheduling…' : 'Confirm Downgrade'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             )}
 
