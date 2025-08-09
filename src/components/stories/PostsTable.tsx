@@ -3,6 +3,7 @@ import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Eye } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
@@ -226,6 +227,66 @@ export const PostsTable = ({
     }
   };
 
+  // Force-regenerate 16:9 images for all matching posts (category/theme)
+  const handleBulkRegenerate169 = async () => {
+    try {
+      if (!category) {
+        toast.error('Category not found');
+        return;
+      }
+      const proceed = window.confirm('This will regenerate and replace 16:9 images for all matching posts. Continue?');
+      if (!proceed) return;
+
+      setIsBulk169(true);
+
+      // Ensure user is authenticated
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to generate images');
+        setIsBulk169(false);
+        return;
+      }
+
+      // Determine posts to process (ALL matching posts regardless of existing image)
+      const candidates = posts.filter(p =>
+        p.category === category &&
+        (!selectedThemeId || p.theme_id === selectedThemeId)
+      );
+
+      if (candidates.length === 0) {
+        toast.info('No posts found for this theme');
+        return;
+      }
+
+      toast.info(`Regenerating 16:9 for ${candidates.length} post(s)...`);
+
+      // Concurrency-limited client-side batch using existing single-image flow
+      const concurrency = Math.min(3, candidates.length);
+      let successes = 0;
+
+      const queue = [...candidates];
+      const worker = async () => {
+        while (queue.length) {
+          const next = queue.shift();
+          if (!next) break;
+          const res = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
+          if (res.success) successes++;
+        }
+      };
+
+      await Promise.all(Array.from({ length: concurrency }, worker));
+
+      toast.success(`Regenerated ${successes}/${candidates.length} 16:9 image(s)`);
+      onPostsChange();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to run 16:9 regeneration');
+    } finally {
+      setIsBulk169(false);
+    }
+  };
+
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
   
@@ -325,17 +386,30 @@ export const PostsTable = ({
               
                   {category && userIsAdmin && (
                     <div className="flex items-center gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleBulkGenerate169}
-                        disabled={isBulk169}
-                        className="gap-1 text-xs sm:text-sm"
-                        aria-label="Generate all 16:9 images for this theme"
-                        title="Generate 16:9 for posts missing images"
-                      >
-                        16:9
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            disabled={isBulk169}
+                            className="gap-1 text-xs sm:text-sm"
+                            aria-label="Bulk 16:9 actions"
+                            title="Bulk 16:9 actions"
+                          >
+                            16:9
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
+                          <DropdownMenuLabel>Bulk 16:9</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
+                            Generate for missing only
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
+                            Regenerate for all
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="hidden sm:inline">Category Prompt</span>
