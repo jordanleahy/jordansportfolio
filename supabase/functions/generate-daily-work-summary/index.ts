@@ -156,7 +156,13 @@ serve(async (req) => {
           .gte('created_at', targetDateStart)
           .lte('created_at', targetDateEnd)
 
-        // Get Daily Work Summary Agent for this user
+        // Check if no activity exists for the date
+        if (!posts || posts.length === 0) {
+          console.log(`ℹ️ No activity found for user ${userId} on ${summaryDate}`)
+          return { userId, success: false, error: `No posts found for ${summaryDate}` }
+        }
+
+        // Try to get Daily Work Summary Agent for this user (optional)
         const { data: agent } = await supabase
           .from('openai_agents')
           .select('id')
@@ -165,10 +171,7 @@ serve(async (req) => {
           .eq('status', 'active')
           .single()
 
-          if (!agent) {
-            console.log(`⚠️ No Daily Work Summary Agent found for user ${userId}`)
-            return { userId, success: false, error: 'No Daily Work Summary Agent found' }
-          }
+        // Agent is optional - we can generate summaries without it
 
         // Generate summary based on activity
         const activityData = {
@@ -186,19 +189,22 @@ serve(async (req) => {
           category = 'creative'
         }
 
-        // Get system prompt for the category from the system_prompts table
-        const { data: systemPromptData } = await supabase
-          .from('system_prompts')
-          .select('prompt_text')
-          .eq('agent_id', agent.id)
-          .eq('category', category)
-          .eq('is_active', true)
-          .single()
+        // Get system prompt for the category (optional - fallback to basic summary if not found)
+        let systemPromptData = null
+        if (agent) {
+          const { data } = await supabase
+            .from('system_prompts')
+            .select('prompt_text')
+            .eq('agent_id', agent.id)
+            .eq('category', category)
+            .eq('is_active', true)
+            .single()
+          systemPromptData = data
+        }
         
-          if (!systemPromptData) {
-            console.log(`⚠️ No system prompt found for category ${category}`)
-            return { userId, success: false, error: `No system prompt found for category ${category}` }
-          }
+        if (!systemPromptData) {
+          console.log(`ℹ️ Using basic summary generation (no system prompt found for category ${category})`)
+        }
 
         // Generate mock summary data (in real implementation, this would call OpenAI)
         const mockSummary = {
