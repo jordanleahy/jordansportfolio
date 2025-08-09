@@ -2132,12 +2132,9 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
-          max_dalle_images: number | null
           max_gpt_images: number | null
           max_gpt_images_daily: number | null
           max_gpt_images_monthly: number | null
-          max_image_generations: number | null
-          max_text_generations: number | null
           name: string
           price_cents: number
           stripe_price_id: string | null
@@ -2148,12 +2145,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          max_dalle_images?: number | null
           max_gpt_images?: number | null
           max_gpt_images_daily?: number | null
           max_gpt_images_monthly?: number | null
-          max_image_generations?: number | null
-          max_text_generations?: number | null
           name: string
           price_cents: number
           stripe_price_id?: string | null
@@ -2164,12 +2158,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          max_dalle_images?: number | null
           max_gpt_images?: number | null
           max_gpt_images_daily?: number | null
           max_gpt_images_monthly?: number | null
-          max_image_generations?: number | null
-          max_text_generations?: number | null
           name?: string
           price_cents?: number
           stripe_price_id?: string | null
