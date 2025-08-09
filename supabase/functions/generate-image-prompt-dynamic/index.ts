@@ -177,7 +177,6 @@ Style Requirements (MANDATORY):
         { role: 'user', content: userMessage }
       ],
       max_completion_tokens: 3000, // Increased from 1024 to allow for both reasoning and content
-      temperature: 0.7, // Lower temperature to reduce reasoning complexity
       user: correlationId // Only include user field for tracking
     };
 
