@@ -24,6 +24,7 @@ import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteCon
 import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { Helmet } from 'react-helmet-async';
+import { UI_FLAGS } from '@/config/uiFlags';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -403,8 +404,11 @@ export default function StoriesDashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  // Show first-visit hero when no content exists
-  if (showHero && availableThemes.length === 0) {
+  // Feature flag controlled below for first-visit hero
+
+
+  // Show first-visit hero when no content exists (feature-flagged)
+  if (UI_FLAGS.enableStoriesFirstVisitHero && showHero && availableThemes.length === 0) {
     return (
       <PageLayout>
         <Helmet>
