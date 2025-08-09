@@ -131,7 +131,7 @@ export const StreamingShimmer = ({
       {/* Background shimmer animation */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10",
-        "before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite]",
+        "before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer",
         "before:bg-gradient-to-r before:from-transparent before:via-foreground/20 before:to-transparent",
         shouldShowShimmer ? "opacity-100" : "opacity-30"
       )} />
