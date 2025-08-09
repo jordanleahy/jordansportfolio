@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Loader2, ImageIcon, Clock } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { GenerationProgress } from "./generation-progress";
 
 interface StreamingProgress {
   stage: string;
@@ -15,6 +16,10 @@ interface StreamingShimmerProps {
   isGenerating?: boolean;
   error?: string | null;
   fallbackIcon?: React.ReactNode;
+  aspectRatio?: string;
+  variant?: 'default' | 'card' | 'thumbnail';
+  showProgress?: boolean;
+  generationStep?: string;
 }
 
 export const StreamingShimmer = ({ 
@@ -22,7 +27,11 @@ export const StreamingShimmer = ({
   streamingProgress,
   isGenerating = false,
   error = null,
-  fallbackIcon
+  fallbackIcon,
+  aspectRatio = "16/9",
+  variant = "default",
+  showProgress = true,
+  generationStep
 }: StreamingShimmerProps) => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [imageOpacity, setImageOpacity] = useState(0);
@@ -99,11 +108,26 @@ export const StreamingShimmer = ({
   // Show shimmer if no image is available, generating, or has error
   const shouldShowShimmer = !currentImage || isGenerating || error;
 
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'card':
+        return "rounded-lg border border-border/50 bg-gradient-to-br from-background via-background/95 to-muted/30";
+      case 'thumbnail':
+        return "rounded border border-border/30 bg-gradient-to-r from-muted/50 to-muted/30";
+      default:
+        return "rounded-lg border border-border/50 bg-gradient-to-br from-background via-background/95 to-muted/30";
+    }
+  };
+
   return (
-    <div className={cn(
-      "w-full h-full relative overflow-hidden",
-      className
-    )}>
+    <div 
+      className={cn(
+        "w-full h-full relative overflow-hidden",
+        getVariantClasses(),
+        className
+      )}
+      style={{ aspectRatio }}
+    >
       {/* Background shimmer animation */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/10",
@@ -129,15 +153,34 @@ export const StreamingShimmer = ({
         />
       )}
 
-      {/* Countdown timer overlay */}
-      {isGenerating && (
+      {/* Progress indicators */}
+      {isGenerating && showProgress && (variant === 'default' || variant === 'card') && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">
-              {formatTime(timeRemaining)}
-            </span>
-          </div>
+          {generationStep ? (
+            <GenerationProgress
+              variant="minimal"
+              currentStep={
+                generationStep.includes('prompt') ? 'prompt' :
+                generationStep.includes('image') || generationStep.includes('Generating') ? 'image' :
+                generationStep.includes('upload') || generationStep.includes('Uploading') ? 'upload' : 'prompt'
+              }
+              timeRemaining={timeRemaining}
+            />
+          ) : (
+            <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">
+                {formatTime(timeRemaining)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Compact progress for thumbnail variant */}
+      {isGenerating && showProgress && variant === 'thumbnail' && (
+        <div className="absolute inset-x-0 bottom-0 bg-primary/20 backdrop-blur-sm">
+          <div className="h-1 bg-primary/40 animate-pulse" />
         </div>
       )}
 

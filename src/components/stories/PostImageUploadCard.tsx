@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
+import { Upload, Sparkles, Loader2, ChevronDown, X, ImageIcon } from 'lucide-react';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -209,7 +210,14 @@ export const PostImageUploadCard = ({
       </div>
       
       {(isUploading || isGenerating) ? (
-        <SimpleShimmer variant="thumbnail" />
+        <StreamingShimmer 
+          aspectRatio={aspectRatio} 
+          variant="card"
+          isGenerating={true}
+          className="w-full h-16"
+          generationStep="Generating image..."
+          fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
+        />
       ) : imageUrl ? (
         <div className="relative">
           <img

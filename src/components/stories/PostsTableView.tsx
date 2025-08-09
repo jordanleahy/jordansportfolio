@@ -7,8 +7,9 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -285,9 +286,14 @@ export const PostsTableView = memo(({
                     <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
                 ) : isProcessing?.(post.id, 'generate', '16_9') ? (
-                  <div className="w-16 h-9 relative overflow-hidden rounded border flex-shrink-0">
-                    <Skeleton className="w-full h-full" />
-                  </div>
+                  <StreamingShimmer
+                    aspectRatio="16/9"
+                    variant="thumbnail"
+                    isGenerating={true}
+                    className="w-16 h-9 flex-shrink-0"
+                    showProgress={false}
+                    fallbackIcon={<ImageIcon className="h-3 w-3 text-primary/40" />}
+                  />
                 ) : <div className="w-16 h-9"></div>}
 
                 {post.image_4_3_url ? (
@@ -302,9 +308,14 @@ export const PostsTableView = memo(({
                     <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
                   </div>
                 ) : isProcessing?.(post.id, 'generate', '4_3') ? (
-                  <div className="w-16 h-12 relative overflow-hidden rounded border flex-shrink-0">
-                    <Skeleton className="w-full h-full" />
-                  </div>
+                  <StreamingShimmer
+                    aspectRatio="4/3"
+                    variant="thumbnail"
+                    isGenerating={true}
+                    className="w-16 h-12 flex-shrink-0"
+                    showProgress={false}
+                    fallbackIcon={<ImageIcon className="h-3 w-3 text-primary/40" />}
+                  />
                 ) : <div className="w-16 h-12"></div>}
 
                 {/* Bottom row: 9:16 and 3:4 */}
@@ -320,9 +331,14 @@ export const PostsTableView = memo(({
                     <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
                   </div>
                 ) : isProcessing?.(post.id, 'generate', '9_16') ? (
-                  <div className="w-9 h-16 relative overflow-hidden rounded border flex-shrink-0">
-                    <Skeleton className="w-full h-full" />
-                  </div>
+                  <StreamingShimmer
+                    aspectRatio="9/16"
+                    variant="thumbnail"
+                    isGenerating={true}
+                    className="w-9 h-16 flex-shrink-0"
+                    showProgress={false}
+                    fallbackIcon={<ImageIcon className="h-3 w-3 text-primary/40" />}
+                  />
                 ) : <div className="w-9 h-16"></div>}
 
                 {post.image_3_4_url ? (
@@ -337,9 +353,14 @@ export const PostsTableView = memo(({
                     <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
                   </div>
                 ) : isProcessing?.(post.id, 'generate', '3_4') ? (
-                  <div className="w-12 h-16 relative overflow-hidden rounded border flex-shrink-0">
-                    <Skeleton className="w-full h-full" />
-                  </div>
+                  <StreamingShimmer
+                    aspectRatio="3/4"
+                    variant="thumbnail"
+                    isGenerating={true}
+                    className="w-12 h-16 flex-shrink-0"
+                    showProgress={false}
+                    fallbackIcon={<ImageIcon className="h-3 w-3 text-primary/40" />}
+                  />
                 ) : <div className="w-12 h-16"></div>}
               </div>
             </TableCell>

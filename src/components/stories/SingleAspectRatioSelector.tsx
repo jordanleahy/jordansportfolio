@@ -92,21 +92,39 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
           const isGeneratingAspectRatio = isProcessing?.(post.id, 'generate', option.value);
+          const aspectRatioConfig = ASPECT_RATIO_CONFIGS.find(config => config.key === option.value);
+          
           return (
             <DropdownMenuItem
               key={`generate-${option.value}`}
               onClick={() => handleGenerateImage(option.value)}
-              className={`cursor-pointer text-sm ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
+              className={`cursor-pointer text-sm ${!creditStatus.hasCredits ? 'opacity-50' : ''} ${isGeneratingAspectRatio ? 'bg-primary/5' : ''}`}
               disabled={isGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
               title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : `Generate ${option.label} image`}
             >
-              {isGeneratingAspectRatio ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
-              )}
-              {option.label}
-              {isGeneratingAspectRatio && <span className="ml-auto text-xs text-muted-foreground">Generating...</span>}
+              <div className="flex items-center w-full">
+                <div className="flex items-center flex-1">
+                  {isGeneratingAspectRatio ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  {option.label}
+                </div>
+                
+                {/* Mini shimmer preview when generating */}
+                {isGeneratingAspectRatio && (
+                  <div className="ml-2 flex items-center gap-2">
+                    <div 
+                      className="w-8 h-6 bg-gradient-to-r from-primary/20 to-primary/10 rounded-sm relative overflow-hidden"
+                      style={{ aspectRatio: aspectRatioConfig?.ratio.replace(':', '/') || '16/9' }}
+                    >
+                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                    </div>
+                    <span className="text-xs text-primary">Generating...</span>
+                  </div>
+                )}
+              </div>
             </DropdownMenuItem>
           );
         })}

@@ -223,7 +223,14 @@ const PostCardComponent = ({
             fallbackIcon={<ImageIcon className="h-8 w-8 text-primary/40" />}
           />
         ) : isGenerating(post.id, '16_9') ? (
-          <SimpleShimmer aspectRatio="16/9" className="w-full h-full" />
+          <StreamingShimmer 
+            aspectRatio="16/9" 
+            variant="card"
+            isGenerating={true}
+            className="w-full h-full"
+            generationStep="Generating 16:9 image..."
+            fallbackIcon={<ImageIcon className="h-8 w-8 text-primary/40" />}
+          />
         ) : post.image_16_9_url ? (
           <img
             src={post.image_16_9_url}
