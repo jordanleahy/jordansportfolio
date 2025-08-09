@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useModal } from '@/contexts/ModalContext';
 import { useSubscriptionTiers, useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useSubscriptionTier } from '@/hooks/useSubscriptionTier';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -25,8 +26,10 @@ export const SettingsModal: React.FC = () => {
   const { data: tiers } = useSubscriptionTiers();
   const navigate = useNavigate();
   const { data: subStatus } = useSubscriptionStatus();
-  const FREE_TIER_ID = '4204f405-c592-48b1-9df8-b89e01f42db4';
-  const isFreeCurrentPlan = subStatus?.subscription?.tier_id === FREE_TIER_ID || subStatus?.hasActiveSubscription === false;
+  const { data: currentTier } = useSubscriptionTier();
+  
+  const isCurrentlyStarter = currentTier === 'starter';
+  const isCurrentlyFree = currentTier === 'free' || !currentTier;
 
   // Derive daily limits from active tiers
   const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
@@ -118,9 +121,9 @@ export const SettingsModal: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
                   {/* Free Plan */}
                   <Card className="relative">
-                    {(subStatus?.subscription?.tier_id === '4204f405-c592-48b1-9df8-b89e01f42db4' || subStatus?.hasActiveSubscription === false) && (
+                    {isCurrentlyFree && (
                       <span className="absolute top-3 right-3 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-medium px-2 py-1">
-                        Your Plan
+                        Current Plan
                       </span>
                     )}
                     <CardContent className="p-6">
@@ -151,6 +154,11 @@ export const SettingsModal: React.FC = () => {
 
                   {/* Starter Plan */}
                   <Card className="relative">
+                    {isCurrentlyStarter && (
+                      <span className="absolute top-3 right-3 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-medium px-2 py-1">
+                        Current Plan
+                      </span>
+                    )}
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div>
@@ -165,9 +173,15 @@ export const SettingsModal: React.FC = () => {
                           <span className="text-sm text-muted-foreground">per month</span>
                         </div>
                         
-        <Button className="w-full" onClick={startStarterCheckout}>
-                          Subscribe Now
-                        </Button>
+                        {isCurrentlyStarter ? (
+                          <Button variant="outline" className="w-full">
+                            Manage Billing
+                          </Button>
+                        ) : (
+                          <Button className="w-full" onClick={startStarterCheckout}>
+                            Subscribe Now
+                          </Button>
+                        )}
                         
                         <div className="space-y-3 pt-2">
                           <p className="text-sm font-medium text-foreground">Everything in Free, plus:</p>
