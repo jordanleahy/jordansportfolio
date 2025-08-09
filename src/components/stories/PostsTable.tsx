@@ -187,11 +187,11 @@ export const PostsTable = ({
         return;
       }
 
-      // Determine posts to process (missing or failed 16:9 only)
+      // Determine posts to process (missing or not-complete 16:9 only)
       const candidates = posts.filter(p =>
         p.category === category &&
         (!selectedThemeId || p.theme_id === selectedThemeId) &&
-        (!p.image_16_9_url || p.image_16_9_status === 'failed' || p.image_16_9_status === 'none')
+        (!p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete')
       );
 
       if (candidates.length === 0) {
