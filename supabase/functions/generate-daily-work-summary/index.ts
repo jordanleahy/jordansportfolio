@@ -226,7 +226,16 @@ if (!openAIApiKey) {
         }
 
         // Build a system prompt (use agent prompt if available, otherwise fallback)
-        const baseSystemPrompt = systemPromptData?.prompt_text || `You are an expert daily work analyst. Produce a concise JSON summary for a user's work on a given date. Only return strict JSON; no prose.
+        const baseSystemPrompt = systemPromptData?.prompt_text || `You are an expert daily work analyst. Generate a comprehensive JSON summary that reflects the depth and quality of professional work completed. Focus on creating detailed, meaningful insights from the provided activity data.
+
+Guidelines:
+- Create 5-8 detailed highlights that showcase significant achievements and work quality
+- Generate 4-6 strategic insights that demonstrate professional expertise and learning
+- Provide 3-5 actionable recommendations for continued growth
+- For each category, list 3-8 specific tasks with rich detail about the work performed
+- Include 2-4 insights per category that show analytical thinking and professional growth
+- Use professional language that reflects the expertise and impact of the work
+- Make insights specific to the content areas and demonstrate understanding of the field
 
 Schema:
 {
