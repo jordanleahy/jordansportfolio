@@ -44,7 +44,7 @@ const WorkReportPage: React.FC = () => {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-daily-work-summary', {
-        body: { date: selectedDateString }
+        body: { date: selectedDateString, regenerate: !!selectedDateSummary }
       });
       
       if (error) {

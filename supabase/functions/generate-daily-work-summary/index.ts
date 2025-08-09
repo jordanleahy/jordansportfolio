@@ -122,9 +122,10 @@ if (!openAIApiKey) {
       console.log(`👥 Processing daily summaries for ${uniqueUserIds.length} users`)
     }
 
-    // Get the date from request body or default to today
+    // Get the date and regenerate flag from request body or defaults
     const requestBody = await req.json().catch(() => ({}));
     const targetDate = requestBody.date || new Date().toISOString().split('T')[0];
+    const regenerate = requestBody.regenerate || false;
     const summaryDate = targetDate; // YYYY-MM-DD format
     
     const results = []
@@ -149,9 +150,19 @@ if (!openAIApiKey) {
             .eq('summary_date', summaryDate)
             .single()
 
-          if (existingSummary) {
+          if (existingSummary && !regenerate) {
             console.log(`✅ Summary already exists for user ${userId} on ${summaryDate}`)
             return { userId, success: true, message: 'Summary already exists' }
+          }
+
+          if (existingSummary && regenerate) {
+            console.log(`🔄 Regenerating existing summary for user ${userId} on ${summaryDate}`)
+            // Delete the existing summary so we can create a new one
+            await supabase
+              .from('daily_work_summaries')
+              .delete()
+              .eq('user_id', userId)
+              .eq('summary_date', summaryDate)
           }
 
         // Get user's activity data for the selected date
@@ -317,8 +328,9 @@ Schema:
             console.error(`❌ Error inserting summary for user ${userId}:`, insertError)
             return { userId, success: false, error: insertError.message }
           } else {
-            console.log(`✅ Created daily summary for user ${userId}`)
-            return { userId, success: true, summaryId: newSummary.id }
+            const action = regenerate ? 'regenerated' : 'created';
+            console.log(`✅ ${action.charAt(0).toUpperCase() + action.slice(1)} daily summary for user ${userId}`)
+            return { userId, success: true, summaryId: newSummary.id, action }
           }
 
         } catch (userError) {
