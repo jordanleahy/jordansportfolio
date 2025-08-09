@@ -181,12 +181,12 @@ if (!openAIApiKey) {
           return { userId, success: false, error: `No posts found for ${summaryDate}` }
         }
 
-        // Try to get Daily Work Summary Agent for this user (optional)
+        // Try to get Engineering Work Report Agent for this user (optional)
         const { data: agent } = await supabase
           .from('openai_agents')
           .select('id')
           .eq('user_id', userId)
-          .eq('name', 'Daily Work Summary Agent')
+          .eq('name', 'Engineering Work Report Agent')
           .eq('status', 'active')
           .single()
 
