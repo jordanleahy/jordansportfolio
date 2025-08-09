@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Input } from '@/components/ui/input';
 import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -25,6 +25,7 @@ import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -459,67 +460,44 @@ export default function StoriesDashboard() {
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
-        <Section id="hero" className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 flex flex-col items-center justify-center">
-          {/* ChatGPT-like input */}
-          <div className="w-full max-w-3xl mx-auto">
-            <div className="flex items-end gap-3 rounded-3xl border bg-background shadow-sm p-3 focus-within:ring-2 focus-within:ring-primary/30">
-              <MessageSquareText className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
-              <Textarea
-                id="theme-description"
-                aria-label="Describe your theme"
-                placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                value={customThemeDescription}
-                onChange={(e) => setCustomThemeDescription(e.target.value.slice(0, 1000))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (!isGeneratingTheme && !isProcessing && customThemeDescription.trim()) {
+        <Section id="hero" className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0">
+          <AuroraBackground className="h-[60vh] md:h-[70vh]">
+            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Story Ship</h1>
+              <p className="text-base md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
+              <div className="w-full max-w-3xl mx-auto">
+                <Input
+                  aria-label="Describe your theme"
+                  placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
+                  value={customThemeDescription}
+                  onChange={(e) => setCustomThemeDescription(e.target.value.slice(0, 1000))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                      e.preventDefault();
                       handleGenerateCustomTheme();
                     }
-                  }
-                }}
-                onInput={(e) => {
-                  const el = e.currentTarget as HTMLTextAreaElement;
-                  el.style.height = 'auto';
-                  const max = 180; // ~4 rows
-                  el.style.height = Math.min(el.scrollHeight, max) + 'px';
-                }}
-                className="flex-1 resize-none h-[56px] max-h-[180px] border-0 rounded-2xl bg-transparent px-3 py-3 focus-visible:ring-0"
-                disabled={isGeneratingTheme || isProcessing}
-              />
-              <Button
-                type="button"
-                size="icon"
-                onClick={handleGenerateCustomTheme}
-                disabled={isGeneratingTheme || isProcessing || !customThemeDescription.trim()}
-                className="rounded-full"
-                aria-label="Generate theme"
-              >
-                {isGeneratingTheme || isProcessing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-2">
-              <span>Press Enter to submit • Shift+Enter for a new line</span>
-              <span>{customThemeDescription.length}/1000</span>
-            </div>
-          </div>
-
-          {/* Admin import (separate from input) */}
-          {isAdmin && (
-            <div className="mt-4">
-              {roleLoading ? (
-                <Skeleton className="h-10 w-48" />
-              ) : (
-                <Button onClick={() => setImportModalOpen(true)} variant="outline">
-                  Import Themes
-                </Button>
+                  }}
+                  disabled={isGeneratingTheme || isProcessing}
+                />
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-2">
+                  <span>Press Enter to submit</span>
+                  <span>{customThemeDescription.length}/1000</span>
+                </div>
+              </div>
+              {isAdmin && (
+                <div className="mt-2">
+                  {roleLoading ? (
+                    <Skeleton className="h-10 w-48" />
+                  ) : (
+                    <Button onClick={() => setImportModalOpen(true)} variant="outline">
+                      Import Themes
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </AuroraBackground>
 
           {isAdmin && (
             <Suspense fallback={<div>Loading...</div>}>

@@ -111,6 +111,10 @@ const config: Config = {
         },
         "shimmer": {
           "100%": { transform: "translateX(100%)" }
+        },
+        "aurora": {
+          "0%": { backgroundPosition: "50% 50%, 50% 50%" },
+          "100%": { backgroundPosition: "350% 50%, 350% 50%" }
         }
       },
       animation: {
@@ -122,7 +126,8 @@ const config: Config = {
         "fade-in": "fade-in-stagger 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "scale-in": "scale-in 0.2s ease-out",
         "shimmer": "shimmer 2s infinite",
-      },
+        "aurora": "aurora 60s linear infinite",
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
