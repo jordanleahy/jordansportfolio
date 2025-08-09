@@ -148,8 +148,17 @@ Color Theme Instructions:
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
     }
 
-    // Add strict output instructions to minimize reasoning
+    // Add strict output instructions and style enforcement
     userMessage += `
+
+Style Requirements (MANDATORY):
+- Generate ONLY vector illustration style prompts
+- Use flat design, clean icons, and geometric shapes
+- Include "vector illustration style" or "flat design style" in your prompt
+- Add "DO NOT use photorealistic style" as a negative prompt
+- Focus on abstract symbols and schematic representations
+- NO real people, photographs, or realistic textures
+
 \nOutput Instructions:
 - Respond with ONLY the final image prompt as plain text, no preface or analysis.
 - Do not include any hidden thoughts or chain-of-thought.
