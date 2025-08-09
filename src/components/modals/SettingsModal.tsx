@@ -25,7 +25,7 @@ export const SettingsModal: React.FC = () => {
   const { data: tiers } = useSubscriptionTiers();
   const navigate = useNavigate();
   const { data: subStatus } = useSubscriptionStatus();
-  const isFreeCurrentPlan = subStatus?.hasActiveSubscription === false;
+  const isFreeCurrentPlan = subStatus?.subscription?.tier?.name?.toLowerCase()?.startsWith('free') || subStatus?.hasActiveSubscription === false;
 
   // Derive daily limits from active tiers
   const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
