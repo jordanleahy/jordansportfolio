@@ -188,10 +188,22 @@ export const PostsTable = ({
       }
 
       // Determine posts to process (missing or not-complete 16:9 only)
-      const candidates = posts.filter(p =>
-        p.category === category &&
-        (!selectedThemeId || p.theme_id === selectedThemeId) &&
-        (!p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete')
+      const inCategory = posts.filter(p => p.category === category);
+      const inTheme = selectedThemeId ? inCategory.filter(p => p.theme_id === selectedThemeId) : inCategory;
+      const statusDist = inTheme.reduce((acc, p) => {
+        const s = (p.image_16_9_status ?? 'none');
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const withUrl = inTheme.filter(p => !!p.image_16_9_url).length;
+      const withoutUrl = inTheme.length - withUrl;
+      console.groupCollapsed('[Bulk 16:9] Generate missing only – filter debug');
+      console.info('Filters', { category, selectedThemeId });
+      console.info('Counts', { total: posts.length, inCategory: inCategory.length, inTheme: inTheme.length, withUrl, withoutUrl, statusDist });
+      console.table(inTheme.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
+      console.groupEnd();
+      const candidates = inTheme.filter(p =>
+        !p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete'
       );
 
       if (candidates.length === 0) {
@@ -249,9 +261,20 @@ export const PostsTable = ({
       }
 
       // Determine posts to process (ALL posts in this category, ignoring theme filter)
-      const candidates = posts.filter(p =>
-        p.category === category
-      );
+      const inCategory = posts.filter(p => p.category === category);
+      const statusDist = inCategory.reduce((acc, p) => {
+        const s = (p.image_16_9_status ?? 'none');
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const withUrl = inCategory.filter(p => !!p.image_16_9_url).length;
+      const withoutUrl = inCategory.length - withUrl;
+      console.groupCollapsed('[Bulk 16:9] Regenerate all – filter debug');
+      console.info('Filters', { category, selectedThemeId, note: 'Theme filter ignored' });
+      console.info('Counts', { total: posts.length, inCategory: inCategory.length, withUrl, withoutUrl, statusDist });
+      console.table(inCategory.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
+      console.groupEnd();
+      const candidates = inCategory;
 
       if (candidates.length === 0) {
         toast.info('No posts found in this category');
