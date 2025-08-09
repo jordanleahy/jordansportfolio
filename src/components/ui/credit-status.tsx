@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { useSubscriptionTier } from '@/hooks/useSubscriptionTier';
 
 interface CreditStatusProps {
   showDetails?: boolean;
@@ -12,9 +13,10 @@ export const CreditStatus: React.FC<CreditStatusProps> = ({
   className = ""
 }) => {
   const { getCreditStatus } = useCreditCheck();
+  const { data: subscriptionTier, isLoading: tierLoading } = useSubscriptionTier();
   const creditStatus = getCreditStatus();
 
-  if (creditStatus.isLoading) {
+  if (creditStatus.isLoading || tierLoading) {
     return (
       <Badge variant="secondary" className={className}>
         Loading...
@@ -46,7 +48,7 @@ export const CreditStatus: React.FC<CreditStatusProps> = ({
     <Badge 
       variant={getVariant()} 
       className={className}
-      title={`Daily: ${creditStatus.dailyUsed}/${creditStatus.dailyLimit} | Monthly: ${creditStatus.monthlyUsed}/${creditStatus.monthlyLimit} | Tier: ${creditStatus.subscriptionTier}`}
+      title={`Daily: ${creditStatus.dailyUsed}/${creditStatus.dailyLimit} | Monthly: ${creditStatus.monthlyUsed}/${creditStatus.monthlyLimit} | Tier: ${subscriptionTier || 'free'}`}
     >
       {getDisplayText()}
     </Badge>
