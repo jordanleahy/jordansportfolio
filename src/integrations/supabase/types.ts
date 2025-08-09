@@ -2885,10 +2885,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      insert_daily_work_summary_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       insert_engineering_work_report_agent: {
         Args: Record<PropertyKey, never>
         Returns: string
