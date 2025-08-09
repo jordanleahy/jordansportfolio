@@ -58,7 +58,6 @@ serve(async (req) => {
     let tierName = 'free';
 
     // Fetch active subscription for all users
-    const nowIso = new Date().toISOString();
     const { data: subscription, error: subErr } = await supabase
       .from("user_subscriptions")
       .select(`
@@ -75,8 +74,6 @@ serve(async (req) => {
       `)
       .eq("user_id", user.id)
       .eq("status", "active")
-      .lte("current_period_start", nowIso)
-      .gte("current_period_end", nowIso)
       .maybeSingle();
 
     if (subErr) throw subErr;
