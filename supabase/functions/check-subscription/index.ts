@@ -43,11 +43,22 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     if (customers.data.length === 0) {
       log("No Stripe customer found. Marking as unsubscribed.");
-      // Clean up or mark inactive
-      await supabaseService
+      // Mark unsubscribed (update if exists, else insert)
+      const { data: existing } = await supabaseService
         .from("user_subscriptions")
-        .update({ status: "canceled", updated_at: new Date().toISOString() })
-        .eq("user_id", user.id);
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing) {
+        await supabaseService
+          .from("user_subscriptions")
+          .update({ status: "canceled", updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+      } else {
+        await supabaseService
+          .from("user_subscriptions")
+          .insert({ user_id: user.id, status: "canceled" });
+      }
       return new Response(JSON.stringify({ subscribed: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -59,10 +70,21 @@ serve(async (req) => {
 
     if (subs.data.length === 0) {
       log("No active Stripe subscription. Marking as unsubscribed.");
-      await supabaseService
+      const { data: existing } = await supabaseService
         .from("user_subscriptions")
-        .update({ status: "canceled", updated_at: new Date().toISOString() })
-        .eq("user_id", user.id);
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing) {
+        await supabaseService
+          .from("user_subscriptions")
+          .update({ status: "canceled", updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+      } else {
+        await supabaseService
+          .from("user_subscriptions")
+          .insert({ user_id: user.id, status: "canceled" });
+      }
       return new Response(JSON.stringify({ subscribed: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -83,19 +105,34 @@ serve(async (req) => {
 
     const matchedTier = tiers?.find((t: any) => t.stripe_price_id === priceId);
 
-    await supabaseService.from("user_subscriptions").upsert(
-      {
-        user_id: user.id,
-        tier_id: matchedTier?.id ?? null,
-        stripe_subscription_id: sub.id,
-        stripe_customer_id: customerId,
-        status: sub.status,
-        current_period_start: periodStart,
-        current_period_end: periodEnd,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" }
-    );
+    // Update existing row if present; otherwise insert a new one
+    const { data: existingActive } = await supabaseService
+      .from("user_subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const payload = {
+      user_id: user.id,
+      tier_id: matchedTier?.id ?? null,
+      stripe_subscription_id: sub.id,
+      stripe_customer_id: customerId,
+      status: sub.status,
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
+      updated_at: new Date().toISOString(),
+    } as const;
+
+    if (existingActive) {
+      await supabaseService
+        .from("user_subscriptions")
+        .update(payload)
+        .eq("id", existingActive.id);
+    } else {
+      await supabaseService
+        .from("user_subscriptions")
+        .insert(payload);
+    }
 
     log("Subscription synced", { tier_id: matchedTier?.id, status: sub.status });
 
