@@ -43,12 +43,15 @@ serve(async (req) => {
       throw new Error("Supabase environment not configured");
     }
 
-    // Create client with service role for DB/storage, but keep Authorization header for user context
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    // Create client with anon key for auth, then service role for operations
+    const authClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") || "", {
       global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
     });
 
-    const user = await getUser(supabase);
+    const user = await getUser(authClient);
+    
+    // Create service role client for database operations
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
     const userId = user.id;
 
     // Fetch posts for this user, category (+ optional theme) missing 16:9
