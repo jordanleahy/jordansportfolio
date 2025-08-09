@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +11,22 @@ const SubscriptionSuccess: React.FC = () => {
   const [params] = useSearchParams();
   const sessionId = params.get('session_id') || undefined;
   const navigate = useNavigate();
-  const { data } = useSubscriptionStatus();
+  const { data, isLoading } = useSubscriptionStatus();
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    // After returning from Stripe, sync subscription into DB
+    (async () => {
+      try {
+        setSyncing(true);
+        await supabase.functions.invoke('check-subscription');
+      } catch (e) {
+        console.error('check-subscription error', e);
+      } finally {
+        setSyncing(false);
+      }
+    })();
+  }, []);
 
   const handleManageBilling = async () => {
     try {
@@ -38,9 +53,11 @@ const SubscriptionSuccess: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-foreground">Subscription successful</h1>
           <p className="text-muted-foreground">
-            {data?.subscription?.tier?.name
-              ? `You are now on the ${data.subscription.tier.name} plan.`
-              : 'Your subscription is now active.'}
+            {syncing || isLoading
+              ? 'Finalizing your account...'
+              : data?.subscription?.tier?.name
+                ? `You are now on the ${data.subscription.tier.name} plan.`
+                : 'Your subscription is now active.'}
           </p>
           {sessionId && (
             <p className="text-xs text-muted-foreground">Session ID: {sessionId}</p>
