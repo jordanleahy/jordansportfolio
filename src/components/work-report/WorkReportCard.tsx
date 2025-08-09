@@ -6,13 +6,28 @@ import { Link } from 'react-router-dom';
 import { DailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 interface WorkReportCardProps {
   summary: DailyWorkSummary;
   isLoading?: boolean;
 }
 
-
+// Helper to theme category badges consistently with detail page
+const getCategoryColor = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'technical': return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'creative': return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'productivity': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'insights': return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'bugs': return 'bg-red-50 text-red-700 border-red-200';
+    case 'deployments': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    case 'decisions': return 'bg-sky-50 text-sky-700 border-sky-200';
+    case 'next actions':
+    case 'next_actions': return 'bg-teal-50 text-teal-700 border-teal-200';
+    default: return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+};
 const formatDisplayDate = (dateString: string) => {
   const date = parseISO(dateString);
   const today = new Date();
@@ -32,6 +47,12 @@ export const WorkReportCard: React.FC<WorkReportCardProps> = memo(({ summary, is
   const displayDate = formatDisplayDate(summary.summary_date);
   const categories = Object.keys(summary.categories_summary || {});
   const highlightCount = summary.highlights?.length || 0;
+  const { tasksCount, insightsCount } = React.useMemo(() => {
+    const values = Object.values(summary.categories_summary || {}) as any[];
+    const t = values.reduce((acc, v) => acc + ((v?.tasks?.length) || 0), 0);
+    const i = values.reduce((acc, v) => acc + ((v?.insights?.length) || 0), 0);
+    return { tasksCount: t, insightsCount: i };
+  }, [summary.categories_summary]);
 
   return (
     <Card className={`transition-shadow ${isLoading ? 'animate-pulse' : 'hover:shadow-lg'}`}>
@@ -74,11 +95,16 @@ export const WorkReportCard: React.FC<WorkReportCardProps> = memo(({ summary, is
               <p className="text-sm text-muted-foreground mb-2">Categories:</p>
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
-                  <span key={category} className="px-3 py-1 bg-muted rounded-full text-sm capitalize">
+                  <Badge key={category} variant="secondary" className={`capitalize border ${getCategoryColor(category)}`}>
                     {category}
-                  </span>
+                  </Badge>
                 ))}
               </div>
+              {(tasksCount > 0 || insightsCount > 0) && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Summary: {tasksCount} tasks · {insightsCount} insights
+                </p>
+              )}
             </div>
 
             <div>

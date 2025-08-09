@@ -68,6 +68,10 @@ const WorkReportDetailPage: React.FC = () => {
   }
 
   const displayDate = format(parseISO(summary.summary_date), 'EEEE, MMMM d, yyyy');
+  const decisionsList: string[] = Array.isArray((summary as any).categories_summary?.decisions?.tasks)
+    ? (summary as any).categories_summary.decisions.tasks
+    : (Array.isArray((summary as any).categories_summary?.decisions) ? (summary as any).categories_summary.decisions : []);
+
 
   return (
     <>
@@ -218,6 +222,57 @@ const WorkReportDetailPage: React.FC = () => {
                       <div key={index} className="flex items-start p-3 bg-amber-50/50 rounded-lg border border-amber-100">
                         <Lightbulb className="h-4 w-4 mt-1 mr-3 flex-shrink-0 text-amber-500" />
                         <span className="text-sm lg:text-base leading-relaxed">{insight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Next Actions and Decisions (Engineering-oriented) */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            {summary.recommendations && summary.recommendations.length > 0 && (
+              <Card className="border-l-4 border-l-teal-500 hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-teal-50 to-teal-50/50">
+                  <CardTitle className="flex items-center text-teal-700">
+                    <Target className="mr-2 h-5 w-5" />
+                    Next Actions
+                    <Badge variant="secondary" className="ml-auto">
+                      {summary.recommendations.length}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 lg:p-6">
+                  <div className="space-y-3">
+                    {summary.recommendations.map((rec, index) => (
+                      <div key={index} className="flex items-start p-3 bg-teal-50/50 rounded-lg border border-teal-100">
+                        <div className="w-2 h-2 bg-teal-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-sm lg:text-base leading-relaxed">{rec}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {decisionsList && decisionsList.length > 0 && (
+              <Card className="border-l-4 border-l-sky-500 hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-sky-50 to-sky-50/50">
+                  <CardTitle className="flex items-center text-sky-700">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Decisions
+                    <Badge variant="secondary" className="ml-auto">
+                      {decisionsList.length}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 lg:p-6">
+                  <div className="space-y-3">
+                    {decisionsList.map((item, index) => (
+                      <div key={index} className="flex items-start p-3 bg-sky-50/50 rounded-lg border border-sky-100">
+                        <div className="w-2 h-2 bg-sky-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-sm lg:text-base leading-relaxed">{item}</span>
                       </div>
                     ))}
                   </div>
