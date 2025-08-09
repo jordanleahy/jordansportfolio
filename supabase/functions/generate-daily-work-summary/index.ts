@@ -286,14 +286,6 @@ Schema:
         try { aiJson = JSON.parse(content); } catch (_) { aiJson = null; }
 
         // Fallbacks if model returns unexpected shape
-        const metrics = aiJson?.metrics || {
-          totalTasks: posts.length,
-          completedTasks: posts.length,
-          timeSpent: null,
-          completionRate: null,
-          focusTime: null,
-          breakTime: null,
-        };
         const highlights = aiJson?.highlights || [
           `Created ${activityData.posts_created} content pieces`,
           `Worked across ${activityData.content_areas.length} different areas`,
@@ -307,11 +299,9 @@ Schema:
         const categories_summary = aiJson?.categories_summary || {
           [category]: {
             tasks: posts.map((p: any) => p.title).filter(Boolean).slice(0, 10),
-            timeSpent: null,
             insights,
           }
         };
-        const productivity_score = aiJson?.productivity_score ?? Math.min((posts.length || 0) * 10, 100);
         const generated_summary = aiJson?.generated_summary || `Daily work summary for ${summaryDate}: ${posts.length} items across ${activityData.content_areas.length} areas.`;
         const summary_type = aiJson?.summary_type || category;
 
@@ -321,12 +311,10 @@ Schema:
           .insert({
             user_id: userId,
             summary_date: summaryDate,
-            metrics,
             highlights,
             insights,
             recommendations,
             categories_summary,
-            productivity_score,
             generated_summary,
             summary_type,
           })

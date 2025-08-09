@@ -68,9 +68,6 @@ const WorkReportDetailPage: React.FC = () => {
   }
 
   const displayDate = format(parseISO(summary.summary_date), 'EEEE, MMMM d, yyyy');
-  const completionRate = summary.metrics.totalTasks && summary.metrics.completedTasks 
-    ? Math.round((summary.metrics.completedTasks / summary.metrics.totalTasks) * 100)
-    : 0;
 
   return (
     <>
@@ -117,66 +114,6 @@ const WorkReportDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Enhanced Summary Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-            <Card className="border-l-4 border-l-primary hover:shadow-md transition-shadow">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs lg:text-sm text-muted-foreground font-medium">Tasks</p>
-                    <p className="text-xl lg:text-2xl font-bold truncate">
-                      {summary.metrics.completedTasks || 0}/{summary.metrics.totalTasks || 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-emerald-500/10 rounded-lg">
-                    <Clock className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs lg:text-sm text-muted-foreground font-medium">Total Time</p>
-                    <p className="text-xl lg:text-2xl font-bold truncate">{summary.metrics.timeSpent || 'N/A'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs lg:text-sm text-muted-foreground font-medium">Completion</p>
-                    <p className="text-xl lg:text-2xl font-bold truncate">{completionRate}%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
-              <CardContent className="p-4 lg:p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-purple-500/10 rounded-lg">
-                    <Target className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs lg:text-sm text-muted-foreground font-medium">Productivity</p>
-                    <p className="text-xl lg:text-2xl font-bold truncate">{summary.productivity_score ? `${summary.productivity_score}/10` : 'N/A'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Enhanced Category Details */}
           <div className="grid gap-6 mb-8">
@@ -195,9 +132,6 @@ const WorkReportDetailPage: React.FC = () => {
                         </Badge>
                         <span className="text-base lg:text-lg">Work Summary</span>
                       </div>
-                      <Badge variant="outline" className="text-xs lg:text-sm">
-                        {categoryData?.timeSpent || 'N/A'}
-                      </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 lg:p-6">
