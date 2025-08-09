@@ -25,8 +25,7 @@ export const OPENAI_MODELS = {
   // Latest flagship model (launched Aug 7, 2025)
   FLAGSHIP: 'gpt-5-mini',
   // Reasoning models
-  REASONING: 'o3-2025-04-16', 
-  REASONING_FAST: 'o4-mini-2025-04-16',
+  REASONING: 'o3-2025-04-16',
   // Vision model (gpt-5-mini has vision capabilities)
   VISION: 'gpt-5-mini',
   // Legacy models (deprecated)
@@ -54,12 +53,6 @@ export const MODEL_OPTIONS = [
     value: OPENAI_MODELS.REASONING,
     label: 'o3-2025-04-16 (Reasoning)',
     description: 'Powerful reasoning model for complex problems',
-    recommended: false
-  },
-  {
-    value: OPENAI_MODELS.REASONING_FAST,
-    label: 'o4-mini-2025-04-16 (Fast Reasoning)',
-    description: 'Fast reasoning optimized for coding and visual tasks',
     recommended: false
   },
   {

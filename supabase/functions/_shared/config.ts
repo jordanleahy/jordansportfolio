@@ -6,7 +6,6 @@ export const OPENAI_CONFIG = {
     FLAGSHIP: 'gpt-5-mini',
     FAST: 'gpt-5-mini',
     REASONING: 'o3-2025-04-16',
-    REASONING_FAST: 'o4-mini-2025-04-16',
     VISION: 'gpt-5-mini',
     // Legacy models (deprecated)
     LEGACY_GPT4O: 'gpt-4o',
