@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Loader2, ChevronDown, X, ImageIcon } from 'lucide-react';
-import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+
 import { StreamingShimmer } from '@/components/ui/streaming-shimmer';
 import {
   DropdownMenu,
