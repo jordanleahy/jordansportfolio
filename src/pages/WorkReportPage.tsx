@@ -169,7 +169,6 @@ const WorkReportPage: React.FC = () => {
                     onSelect={(date) => date && setSelectedDate(date)}
                     disabled={(date) => date > new Date()}
                     initialFocus
-                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -255,7 +254,6 @@ const WorkReportPage: React.FC = () => {
                         onSelect={(date) => date && setSelectedDate(date)}
                         disabled={(date) => date > new Date()}
                         initialFocus
-                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
