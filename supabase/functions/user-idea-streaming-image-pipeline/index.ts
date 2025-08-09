@@ -518,26 +518,23 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
         console.log(`✅ Updated posts to status 'generating' for theme: ${themeData.theme}`);
       }
 
-      // Trigger background image generation (fire-and-forget)
+      // Trigger background image generation using EdgeRuntime.waitUntil
       try {
-        const firstPost = themeData.posts[0];
         const backgroundRequest = {
-          theme: themeData.theme,
-          category: themeData.category,
-          userId: userId,
-          firstPostTitle: firstPost.title,
-          firstPostDescription: firstPost.description
+          themeId: themeId,
+          userId: userId
         };
 
-        // Fire-and-forget background function call
-        supabase.functions.invoke('generate-day-1-4-3', {
-          body: backgroundRequest
-        }).then(({ error: bgError }) => {
-          if (bgError) {
-            console.error('❌ Background image generation failed to start:', bgError);
-          } else {
-            console.log('✅ Background image generation started successfully');
-          }
+        // Use proper background task handling
+        EdgeRuntime.waitUntil(
+          supabase.functions.invoke('generate-day-1-4-3', {
+            body: backgroundRequest
+          }).then(({ error: bgError }) => {
+            if (bgError) {
+              console.error('❌ Background image generation failed:', bgError);
+            } else {
+              console.log('✅ Background image generation started');
+            }
         });
 
         console.log('🔥 Triggered background image generation for theme:', themeData.theme);
