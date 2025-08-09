@@ -243,45 +243,55 @@ export const PostImageUploadCard = ({
         </DropdownMenu>
       </div>
       
-      {(isUploading || isGenerating) ? (
-        <>
-          {console.log('🎨 IMAGE_GEN: Rendering shimmer - isUploading:', isUploading, 'isGenerating:', isGenerating)}
-          <StreamingShimmer 
-            aspectRatio={aspectRatio} 
-            variant="card"
-            isGenerating={true}
-            className="w-full h-16"
-            generationStep="Generating image..."
-            fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
-          />
-        </>
-      ) : imageUrl ? (
-        <>
-          {console.log('🎨 IMAGE_GEN: Rendering existing image:', imageUrl)}
-          <div className="relative">
-            <img
-              src={imageUrl}
-              alt={`${label} for ${post.title}`}
-              className="w-full h-16 object-cover rounded border"
-              loading="lazy"
+      {(() => {
+        const shouldShowShimmer = (isUploading || isGenerating);
+        console.log('🎨 IMAGE_GEN: Render decision for', type, ':', {
+          isUploading,
+          isGenerating,
+          shouldShowShimmer,
+          hasImageUrl: !!imageUrl,
+          imageUrl: imageUrl?.substring(0, 50) + '...'
+        });
+        
+        if (shouldShowShimmer) {
+          console.log('🎨 IMAGE_GEN: Rendering shimmer for', type);
+          return (
+            <StreamingShimmer 
+              aspectRatio={aspectRatio} 
+              variant="card"
+              isGenerating={true}
+              className="w-full h-16"
+              generationStep="Generating image..."
+              fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
             />
-            {onImageDelete && (
-              <Button
-                size="sm"
-                variant="destructive"
-                className="absolute top-1 right-1 h-6 w-6 p-0"
-                onClick={handleDeleteImage}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          {console.log('🎨 IMAGE_GEN: No image to display')}
-        </>
-      )}
+          );
+        } else if (imageUrl) {
+          console.log('🎨 IMAGE_GEN: Rendering existing image for', type, ':', imageUrl);
+          return (
+            <div className="relative">
+              <img
+                src={imageUrl}
+                alt={`${label} for ${post.title}`}
+                className="w-full h-16 object-cover rounded border"
+                loading="lazy"
+              />
+              {onImageDelete && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="absolute top-1 right-1 h-6 w-6 p-0"
+                  onClick={handleDeleteImage}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          );
+        } else {
+          console.log('🎨 IMAGE_GEN: No image to display for', type);
+          return null;
+        }
+      })()}
     </div>
   );
 };
