@@ -25,6 +25,12 @@ export const SettingsModal: React.FC = () => {
   const { data: tiers } = useSubscriptionTiers();
   const navigate = useNavigate();
 
+  // Derive daily limits from active tiers
+  const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
+  const starterTier = tiers?.find((t) => t.name?.toLowerCase() === 'starter');
+  const freeDaily = freeTier?.max_gpt_images ?? 1;
+  const starterDaily = starterTier?.max_gpt_images ?? 1;
+
   const startStarterCheckout = async () => {
     if (!user) {
       closeSettings();
@@ -127,7 +133,7 @@ export const SettingsModal: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <Check className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm text-foreground">
-                              1 daily image (upt to 30/month)
+                              {freeDaily} daily image (up to 30/month)
                             </span>
                           </div>
                         </div>
@@ -170,7 +176,7 @@ export const SettingsModal: React.FC = () => {
                             <div className="flex items-center gap-2">
                               <Check className="h-4 w-4 text-muted-foreground" />
                               <span className="text-sm text-foreground">
-                                1 daily credit (upt to 30/month)
+                                {starterDaily} daily credit (up to 30/month)
                               </span>
                             </div>
                           </div>
