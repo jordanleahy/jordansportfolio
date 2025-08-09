@@ -173,12 +173,6 @@ export const SettingsModal: React.FC = () => {
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-2">
-                              <Check className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm text-foreground">
-                                {starterDaily} daily credit (up to 30/month)
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </div>
