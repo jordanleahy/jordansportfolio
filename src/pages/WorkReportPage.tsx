@@ -1,18 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, FileText, Plus, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { useDailyWorkSummaries, useDailyWorkSummary } from '@/hooks/useDailyWorkSummaries';
 import { WorkReportCard } from '@/components/work-report/WorkReportCard';
 import { WorkReportSkeleton } from '@/components/performance/WorkReportSkeleton';
+import { WorkReportHeader } from '@/components/work-report/WorkReportHeader';
+import { WorkReportFilters } from '@/components/work-report/WorkReportFilters';
+import { WorkReportEmptyState } from '@/components/work-report/WorkReportEmptyState';
 import { subDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 const WorkReportPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days'>('30days');
@@ -130,166 +128,32 @@ const WorkReportPage: React.FC = () => {
       
       <PageLayout>
         <div className="container mx-auto py-4 px-4 lg:py-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-            <div className="min-w-0">
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2">Daily Work Summary</h1>
-              <p className="text-muted-foreground text-sm lg:text-base">
-                Track and review your daily work insights and productivity
-              </p>
-            </div>
-            
-            {/* Mobile: Stack buttons vertically, Desktop: Horizontal */}
-            <div className="flex flex-col sm:flex-row gap-2 lg:gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="w-full sm:w-auto"
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                Filter
-                {showFilters ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />}
-              </Button>
-              
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "w-full sm:w-auto justify-start text-left font-normal",
-                        !selectedDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">
-                        {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick a date"}
-                      </span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => date && setSelectedDate(date)}
-                      disabled={(date) => date > new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                <Button 
-                  size="sm" 
-                  onClick={handleGenerateSummary}
-                  disabled={isGenerating}
-                  className="w-full sm:w-auto"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  ) : (
-                    <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
-                  )}
-                  <span className="truncate">
-                    {isGenerating ? 'Generating...' : 
-                     selectedDateSummary ? 'Regenerate' : 'Generate'}
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
+          <WorkReportHeader
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            onGenerateSummary={handleGenerateSummary}
+            isGenerating={isGenerating}
+            selectedDateSummary={selectedDateSummary}
+            showFilters={showFilters}
+            onToggleFilters={() => setShowFilters(!showFilters)}
+          />
 
-          {/* Filter Panel */}
           {showFilters && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant={dateFilter === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setDateFilter('all')}
-                    className="flex-1 sm:flex-none"
-                  >
-                    All Time
-                  </Button>
-                  <Button
-                    variant={dateFilter === '7days' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setDateFilter('7days')}
-                    className="flex-1 sm:flex-none"
-                  >
-                    Last 7 Days
-                  </Button>
-                  <Button
-                    variant={dateFilter === '30days' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setDateFilter('30days')}
-                    className="flex-1 sm:flex-none"
-                  >
-                    Last 30 Days
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <WorkReportFilters
+              dateFilter={dateFilter}
+              onDateFilterChange={setDateFilter}
+            />
           )}
 
           {!filteredSummaries || filteredSummaries.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8 px-4">
-                  <FileText className="h-12 lg:h-16 w-12 lg:w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h2 className="text-xl lg:text-2xl font-bold mb-2">No Work Reports Found</h2>
-                  <p className="text-muted-foreground mb-6 text-sm lg:text-base">
-                    {dateFilter !== 'all' 
-                      ? `No reports found for the selected time period. Try expanding your date range.`
-                      : 'Start tracking your daily work by generating your first summary.'
-                    }
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full sm:w-auto justify-start text-left font-normal",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">
-                            {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick a date"}
-                          </span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => date && setSelectedDate(date)}
-                          disabled={(date) => date > new Date()}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <Button 
-                      onClick={handleGenerateSummary}
-                      disabled={isGenerating}
-                      className="w-full sm:w-auto"
-                    >
-                      {isGenerating ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Plus className="mr-2 h-4 w-4" />
-                      )}
-                      <span className="truncate">
-                        {isGenerating ? 'Generating...' : 
-                         selectedDateSummary ? 'Regenerate Summary' : 'Generate Summary'}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <WorkReportEmptyState
+              dateFilter={dateFilter}
+              selectedDate={selectedDate}
+              onDateSelect={setSelectedDate}
+              onGenerateSummary={handleGenerateSummary}
+              isGenerating={isGenerating}
+              selectedDateSummary={selectedDateSummary}
+            />
           ) : (
             <div className="grid gap-4 lg:gap-6">
               {filteredSummaries.map((summary) => (
