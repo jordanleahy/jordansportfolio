@@ -26,7 +26,8 @@ export const PostImageUploadCard = ({
   imageUrl,
   isUploading,
   onImageDelete,
-  onImageGenerated
+  onImageGenerated,
+  onGenerationStart // Add this callback
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
@@ -74,7 +75,10 @@ export const PostImageUploadCard = ({
       setIsGenerating(true);
       setGenerationStep('prompt');
       
-      
+      // Notify parent immediately that generation has started
+      if (onGenerationStart) {
+        onGenerationStart(post.id, type);
+      }
       
       // Step 1: Generate prompt
       toast.info('Generating image prompt...');

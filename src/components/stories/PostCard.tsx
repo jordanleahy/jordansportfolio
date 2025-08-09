@@ -56,6 +56,7 @@ const PostCardComponent = ({
   const [showGallery, setShowGallery] = useState(false);
   const [isGeneratingHero, setIsGeneratingHero] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
+  const [generatingImages, setGeneratingImages] = useState<Set<'16_9' | '9_16' | '3_4' | '4_3'>>(new Set());
   const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
   
   const getStatusColor = (status: string) => {
@@ -209,7 +210,18 @@ const PostCardComponent = ({
     }
   };
 
+  const handleImageGenerationStart = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
+    setGeneratingImages(prev => new Set(prev).add(aspectRatio));
+  };
 
+  const handleImageGenerated = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => {
+    setGeneratingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(aspectRatio);
+      return newSet;
+    });
+    onImageGenerated(postId, aspectRatio, imageUrl);
+  };
 
 
   return (
@@ -446,37 +458,41 @@ const PostCardComponent = ({
                 post={post}
                 type="16_9"
                 label="Landscape (16:9)"
-                imageUrl={post.image_16_9_url || undefined}
-                isUploading={processingStates[`${post.id}_16_9`] || false}
+                imageUrl={generatingImages.has('16_9') ? undefined : post.image_16_9_url || undefined}
+                isUploading={processingStates[`${post.id}_16_9`] || generatingImages.has('16_9')}
                 onImageDelete={onImageDelete}
-                onImageGenerated={onImageGenerated}
+                onImageGenerated={handleImageGenerated}
+                onGenerationStart={handleImageGenerationStart}
               />
               <PostImageUploadCard
                 post={post}
                 type="9_16"
                 label="Portrait (9:16)"
-                imageUrl={post.image_9_16_url || undefined}
-                isUploading={processingStates[`${post.id}_9_16`] || false}
+                imageUrl={generatingImages.has('9_16') ? undefined : post.image_9_16_url || undefined}
+                isUploading={processingStates[`${post.id}_9_16`] || generatingImages.has('9_16')}
                 onImageDelete={onImageDelete}
-                onImageGenerated={onImageGenerated}
+                onImageGenerated={handleImageGenerated}
+                onGenerationStart={handleImageGenerationStart}
               />
               <PostImageUploadCard
                 post={post}
                 type="3_4"
                 label="Social (3:4)"
-                imageUrl={post.image_3_4_url || undefined}
-                isUploading={processingStates[`${post.id}_3_4`] || false}
+                imageUrl={generatingImages.has('3_4') ? undefined : post.image_3_4_url || undefined}
+                isUploading={processingStates[`${post.id}_3_4`] || generatingImages.has('3_4')}
                 onImageDelete={onImageDelete}
-                onImageGenerated={onImageGenerated}
+                onImageGenerated={handleImageGenerated}
+                onGenerationStart={handleImageGenerationStart}
               />
               <PostImageUploadCard
                 post={post}
                 type="4_3"
                 label="Standard (4:3)"
-                imageUrl={post.image_4_3_url || undefined}
-                isUploading={processingStates[`${post.id}_4_3`] || false}
+                imageUrl={generatingImages.has('4_3') ? undefined : post.image_4_3_url || undefined}
+                isUploading={processingStates[`${post.id}_4_3`] || generatingImages.has('4_3')}
                 onImageDelete={onImageDelete}
-                onImageGenerated={onImageGenerated}
+                onImageGenerated={handleImageGenerated}
+                onGenerationStart={handleImageGenerationStart}
               />
             </div>
           </div>
