@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
-
+import { useAuth } from '@/contexts/AuthContext';
 export interface SubscriptionTier {
   id: string;
   name: string;
@@ -33,10 +33,11 @@ export interface UserUsage {
 }
 
 export const useSubscriptionStatus = () => {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: QUERY_KEYS.subscriptionStatus,
+    queryKey: [QUERY_KEYS.subscriptionStatus, user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         // Return default values for unauthenticated users
         return {
@@ -139,7 +140,6 @@ export const useSubscriptionStatus = () => {
         isWithinLimits: { gptImages: (isFreeTier ? imagesUsedToday : monthlyImageUsage) < totalCredits }
       };
     },
-    enabled: true,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
