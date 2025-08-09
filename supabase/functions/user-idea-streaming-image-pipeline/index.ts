@@ -9,6 +9,64 @@ const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+// Generate correlation ID for request tracking
+const generateCorrelationId = (): string => {
+  return `pipeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Structured logger with correlation context
+class RequestLogger {
+  private correlationId: string;
+  private userId: string | null;
+  private startTime: number;
+  private context: Record<string, any>;
+
+  constructor(correlationId: string, userId: string | null = null) {
+    this.correlationId = correlationId;
+    this.userId = userId;
+    this.startTime = Date.now();
+    this.context = {
+      correlationId,
+      userId,
+      timestamp: new Date().toISOString(),
+      function: 'user-idea-streaming-image-pipeline'
+    };
+  }
+
+  log(level: 'INFO' | 'ERROR' | 'WARN' | 'DEBUG', message: string, data?: any) {
+    const logEntry = {
+      ...this.context,
+      level,
+      message,
+      data,
+      elapsedMs: Date.now() - this.startTime
+    };
+    
+    const prefix = level === 'ERROR' ? '❌' : level === 'WARN' ? '⚠️' : level === 'DEBUG' ? '🔍' : '✅';
+    console.log(`${prefix} [${this.correlationId}] ${message}`, data ? JSON.stringify(data, null, 2) : '');
+  }
+
+  error(message: string, error: any, context?: any) {
+    this.log('ERROR', message, {
+      error: {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      },
+      context,
+      requestDuration: Date.now() - this.startTime
+    });
+  }
+
+  performance(operation: string, duration: number, metadata?: any) {
+    this.log('INFO', `Performance: ${operation}`, {
+      operation,
+      durationMs: duration,
+      metadata
+    });
+  }
+}
+
 const generateTheme = async (description: string): Promise<ThemeData> => {
   console.log('🎯 THEME GENERATION START');
   console.log('📝 Raw description received:', JSON.stringify(description));
@@ -300,8 +358,29 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
 
 
 serve(async (req) => {
+  // Generate correlation ID for request tracking
+  const correlationId = generateCorrelationId();
+  const requestStart = Date.now();
+  
+  // Extract user agent and IP for debugging context
+  const userAgent = req.headers.get('User-Agent') || 'unknown';
+  const clientIP = req.headers.get('CF-Connecting-IP') || 
+                   req.headers.get('X-Forwarded-For') || 
+                   req.headers.get('X-Real-IP') || 'unknown';
+  
+  // Initialize logger without userId first
+  let logger = new RequestLogger(correlationId);
+  
+  logger.log('INFO', 'Request received', {
+    method: req.method,
+    userAgent,
+    clientIP,
+    timestamp: new Date().toISOString()
+  });
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    logger.log('INFO', 'CORS preflight request handled');
     return new Response(null, { headers: streamingCorsHeaders });
   }
 
@@ -313,9 +392,11 @@ serve(async (req) => {
     try {
       requestBody = await req.json();
     } catch (parseError) {
+      logger.error('JSON parsing failed', parseError, { requestSize: req.headers.get('Content-Length') });
       return new Response(JSON.stringify({
         success: false,
-        error: 'Invalid JSON in request body'
+        error: 'Invalid JSON in request body',
+        correlationId
       }), {
         status: 400,
         headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
@@ -326,9 +407,14 @@ serve(async (req) => {
 
     // Validate required fields
     if (!description || typeof description !== 'string' || !description.trim()) {
+      logger.error('Validation failed: Invalid description', null, { 
+        description: description?.substring(0, 100),
+        type: typeof description 
+      });
       return new Response(JSON.stringify({
         success: false,
-        error: 'Description is required and must be a non-empty string'
+        error: 'Description is required and must be a non-empty string',
+        correlationId
       }), {
         status: 400,
         headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
@@ -340,22 +426,32 @@ serve(async (req) => {
     let userId: string | null = null;
     
     if (authHeader) {
+      const authStart = Date.now();
       const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+      logger.performance('Authentication', Date.now() - authStart);
+      
       if (authError || !user) {
+        logger.error('Authentication failed', authError, { hasAuthHeader: !!authHeader });
         return new Response(JSON.stringify({
           success: false,
-          error: 'User not authenticated'
+          error: 'User not authenticated',
+          correlationId
         }), {
           status: 401,
           headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
         });
       }
       userId = user.id;
-      console.log('🔐 Authenticated user:', userId);
+      
+      // Update logger with user context
+      logger = new RequestLogger(correlationId, userId);
+      logger.log('INFO', 'User authenticated successfully', { userId });
     } else {
+      logger.error('Missing authorization header', null);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Authorization header required'
+        error: 'Authorization header required',
+        correlationId
       }), {
         status: 401,
         headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
@@ -363,23 +459,25 @@ serve(async (req) => {
     }
 
     if (!openaiApiKey) {
+      logger.error('OpenAI API key not configured', null);
       return new Response(JSON.stringify({
         success: false,
-        error: 'OpenAI API key not configured'
+        error: 'OpenAI API key not configured',
+        correlationId
       }), {
         status: 500,
         headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
-    console.log('🔧 Using updated pipeline v2.0 with proper theme table integration');
-    console.log('🔍 PIPELINE DEBUG: Environment check:', {
-      hasOpenAIKey: !!openaiApiKey,
-      hasSupabaseUrl: !!supabaseUrl,
-      hasServiceKey: !!supabaseServiceKey,
-      userIdProvided: !!userId,
-      descriptionLength: description?.length || 0
+    logger.log('INFO', 'Pipeline initialization complete', {
+      descriptionLength: description.length,
+      streamMode: stream,
+      environment: {
+        hasOpenAIKey: !!openaiApiKey,
+        hasSupabaseUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey
+      }
     });
 
     if (stream) {
@@ -463,16 +561,16 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
               EdgeRuntime.waitUntil(
                 supabase.functions.invoke('generate-day-1-4-3', {
                   body: backgroundRequest
-                }).then(({ error: bgError }) => {
-                  if (bgError) {
-                    console.error('❌ Background image generation failed:', bgError);
-                  } else {
-                    console.log('✅ Background image generation started');
-                  }
-                })
+                 }).then(({ error: bgError }) => {
+                   if (bgError) {
+                     logger.error('Background image generation failed', bgError, { themeId });
+                   } else {
+                     logger.log('INFO', 'Background image generation started successfully', { themeId });
+                   }
+                 })
               );
             } catch (bgTriggerError) {
-              console.error('❌ Error triggering background function:', bgTriggerError);
+              logger.error('Error triggering background function', bgTriggerError, { themeId });
               // Don't fail the main pipeline if background trigger fails
             }
 
@@ -499,11 +597,15 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
             controller.close();
 
           } catch (error) {
-            console.error('Pipeline error:', error);
+            logger.error('Pipeline streaming error', error, {
+              step: 'streaming_pipeline',
+              themeId: themeId || 'unknown'
+            });
             sendStreamEvent(controller, {
               type: 'pipeline_error',
               progress: 0,
-              error: error.message
+              error: error.message,
+              correlationId
             });
             controller.close();
           }
@@ -537,18 +639,24 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
             body: backgroundRequest
           }).then(({ error: bgError }) => {
             if (bgError) {
-              console.error('❌ Background image generation failed:', bgError);
+              logger.error('Background image generation failed', bgError, { themeId });
             } else {
-              console.log('✅ Background image generation started');
+              logger.log('INFO', 'Background image generation started successfully', { themeId });
             }
           })
         );
 
-        console.log('🔥 Triggered background image generation for theme:', themeData.theme);
+        logger.log('INFO', 'Background image generation triggered', { themeId: themeData.theme });
       } catch (bgTriggerError) {
-        console.error('❌ Error triggering background function:', bgTriggerError);
+        logger.error('Error triggering background function', bgTriggerError, { themeId });
         // Don't fail the main pipeline if background trigger fails
       }
+
+      logger.performance('Total request', Date.now() - requestStart, {
+        theme: themeData.theme,
+        category: themeData.category,
+        postCount: insertedCount
+      });
 
       return new Response(JSON.stringify({
         success: true,
@@ -563,10 +671,14 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
     }
 
   } catch (error) {
-    console.error('Pipeline error:', error);
+    logger.error('Pipeline fatal error', error, {
+      step: 'main_pipeline',
+      requestDuration: Date.now() - requestStart
+    });
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error.message,
+      correlationId
     }), {
       status: 500,
       headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
