@@ -234,7 +234,7 @@ export const PostsTable = ({
         toast.error('Category not found');
         return;
       }
-      const proceed = window.confirm('This will regenerate and replace 16:9 images for all matching posts. Continue?');
+      const proceed = window.confirm('This will regenerate and replace 16:9 images for all posts in this category (ignores theme filter). Continue?');
       if (!proceed) return;
 
       setIsBulk169(true);
@@ -248,14 +248,13 @@ export const PostsTable = ({
         return;
       }
 
-      // Determine posts to process (ALL matching posts regardless of existing image)
+      // Determine posts to process (ALL posts in this category, ignoring theme filter)
       const candidates = posts.filter(p =>
-        p.category === category &&
-        (!selectedThemeId || p.theme_id === selectedThemeId)
+        p.category === category
       );
 
       if (candidates.length === 0) {
-        toast.info('No posts found for this theme');
+        toast.info('No posts found in this category');
         return;
       }
 
@@ -400,13 +399,13 @@ export const PostsTable = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
-                          <DropdownMenuLabel>Bulk 16:9</DropdownMenuLabel>
+                          <DropdownMenuLabel>Bulk 16:9 actions</DropdownMenuLabel>
                           <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
-                            Generate for missing only
+                            Generate for missing only (respects theme filter)
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
-                            Regenerate for all
+                            Regenerate for all (ignores theme filter)
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
