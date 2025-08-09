@@ -3,4 +3,6 @@
 export const UI_FLAGS = {
   // Controls the first-visit hero on /stories with large heading and single input
   enableStoriesFirstVisitHero: false,
+  // Controls showing the Aurora hero on the home page
+  enableAuroraHomeHero: true,
 };
