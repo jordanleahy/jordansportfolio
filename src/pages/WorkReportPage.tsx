@@ -157,7 +157,7 @@ const WorkReportPage: React.FC = () => {
           ) : (
             <div className="grid gap-4 lg:gap-6">
               {filteredSummaries.map((summary) => (
-                <WorkReportCard key={summary.id} summary={summary} />
+                <WorkReportCard key={summary.id} summary={summary} isLoading={isGenerating && summary.summary_date === selectedDateString} />
               ))}
             </div>
           )}
