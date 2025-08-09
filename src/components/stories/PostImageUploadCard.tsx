@@ -46,8 +46,17 @@ export const PostImageUploadCard = ({
   const aspectRatio = aspectRatioMap[type];
 
   const handleGenerateImage = async () => {
+    console.log('🎨 IMAGE_GEN: Starting handleGenerateImage', {
+      postId: post.id,
+      type,
+      hasCredits: creditStatus.hasCredits,
+      isGenerating,
+      isUploading
+    });
+
     // Check credits before proceeding
     if (!creditStatus.hasCredits) {
+      console.log('🚫 IMAGE_GEN: No credits available');
       toastHook({
         title: "No credits remaining",
         description: getBlockingMessage(creditStatus),
@@ -57,6 +66,7 @@ export const PostImageUploadCard = ({
     }
     
     if (!post.title || !post.description) {
+      console.log('🚫 IMAGE_GEN: Missing title or description');
       toastHook({
         title: "Generation failed",
         description: "Post must have title and description for AI generation.",
@@ -68,19 +78,22 @@ export const PostImageUploadCard = ({
     // Enforce usage limits
     const usageCheck = await enforceUsage('gpt_image_generation', 1);
     if (!usageCheck.allowed) {
+      console.log('🚫 IMAGE_GEN: Usage check failed');
       return; // Toast already shown by enforceUsage
     }
 
     try {
+      console.log('🎨 IMAGE_GEN: Starting generation for post', post.id, 'ratio', type, 'setting status to \'uploading\'');
       setIsGenerating(true);
       setGenerationStep('prompt');
       
       // Notify parent immediately that generation has started
       if (onGenerationStart) {
+        console.log('🎨 IMAGE_GEN: Calling onGenerationStart callback');
         onGenerationStart(post.id, type);
       }
       
-      // Step 1: Generate prompt
+      console.log('🎨 IMAGE_GEN: Step 1 - Generating prompt...');
       toast.info('Generating image prompt...');
       
       const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
@@ -93,16 +106,20 @@ export const PostImageUploadCard = ({
       });
 
       if (promptResponse.error) {
+        console.error('🚫 IMAGE_GEN: Prompt generation failed:', promptResponse.error);
         throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
       }
 
       const generatedPrompt = promptResponse.data?.generatedPrompt;
+      console.log('✅ IMAGE_GEN: Prompt generated successfully:', generatedPrompt?.substring(0, 100) + '...');
       if (!generatedPrompt) {
+        console.error('🚫 IMAGE_GEN: No prompt in response:', promptResponse.data);
         throw new Error('No prompt generated');
       }
 
       // Step 2: Generate image
       setGenerationStep('image');
+      console.log('🎨 IMAGE_GEN: Step 2 - Generating image with AI...');
       toast.info('Generating image with AI...');
 
       const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
@@ -115,16 +132,20 @@ export const PostImageUploadCard = ({
       });
 
       if (imageResponse.error) {
+        console.error('🚫 IMAGE_GEN: Image generation failed:', imageResponse.error);
         throw new Error(`Failed to generate image: ${imageResponse.error.message}`);
       }
 
       const base64Image = imageResponse.data?.image;
+      console.log('✅ IMAGE_GEN: Image generated successfully, base64 length:', base64Image?.length);
       if (!base64Image) {
+        console.error('🚫 IMAGE_GEN: No image in response:', imageResponse.data);
         throw new Error('No image generated');
       }
 
       // Step 3: Convert to file and upload
       setGenerationStep('upload');
+      console.log('🎨 IMAGE_GEN: Step 3 - Processing and uploading image...');
       toast.info('Processing and uploading image...');
 
       // Convert base64 to blob
@@ -136,13 +157,17 @@ export const PostImageUploadCard = ({
       const file = new File([blob], fileName, { type: 'image/png' });
 
       // Upload to storage
+      console.log('🎨 IMAGE_GEN: Uploading file to storage:', fileName);
       const uploadResult = await uploadFileToStorage(file);
       
       if (!uploadResult.success || !uploadResult.url) {
+        console.error('🚫 IMAGE_GEN: Upload failed:', uploadResult.error);
         throw new Error(uploadResult.error || 'Failed to upload generated image');
       }
+      console.log('✅ IMAGE_GEN: Upload successful:', uploadResult.url);
 
       // Update the post with the new image URL
+      console.log('🎨 IMAGE_GEN: Updating post in database...');
       const updateField = `image_${type}_url`;
       const { error: updateError } = await supabase
         .from('social_media_posts')
@@ -150,16 +175,21 @@ export const PostImageUploadCard = ({
         .eq('id', post.id);
 
       if (updateError) {
+        console.error('🚫 IMAGE_GEN: Database update failed:', updateError);
         throw new Error(`Failed to update post: ${updateError.message}`);
       }
+      console.log('✅ IMAGE_GEN: Database updated successfully');
 
+      console.log('🎨 IMAGE_GEN: Calling onImageGenerated callback');
       onImageGenerated(post.id, type, uploadResult.url);
+      console.log('✅ IMAGE_GEN: Generation process completed successfully');
       toast.success('Image generated and uploaded successfully!');
 
     } catch (error) {
       console.error('🎨 IMAGE_GENERATION: Error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image');
     } finally {
+      console.log('🎨 IMAGE_GEN: Cleanup - setting isGenerating to false');
       setIsGenerating(false);
       setGenerationStep(null);
     }
@@ -214,34 +244,44 @@ export const PostImageUploadCard = ({
       </div>
       
       {(isUploading || isGenerating) ? (
-        <StreamingShimmer 
-          aspectRatio={aspectRatio} 
-          variant="card"
-          isGenerating={true}
-          className="w-full h-16"
-          generationStep="Generating image..."
-          fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
-        />
-      ) : imageUrl ? (
-        <div className="relative">
-          <img
-            src={imageUrl}
-            alt={`${label} for ${post.title}`}
-            className="w-full h-16 object-cover rounded border"
-            loading="lazy"
+        <>
+          {console.log('🎨 IMAGE_GEN: Rendering shimmer - isUploading:', isUploading, 'isGenerating:', isGenerating)}
+          <StreamingShimmer 
+            aspectRatio={aspectRatio} 
+            variant="card"
+            isGenerating={true}
+            className="w-full h-16"
+            generationStep="Generating image..."
+            fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
           />
-          {onImageDelete && (
-            <Button
-              size="sm"
-              variant="destructive"
-              className="absolute top-1 right-1 h-6 w-6 p-0"
-              onClick={handleDeleteImage}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
-      ) : null}
+        </>
+      ) : imageUrl ? (
+        <>
+          {console.log('🎨 IMAGE_GEN: Rendering existing image:', imageUrl)}
+          <div className="relative">
+            <img
+              src={imageUrl}
+              alt={`${label} for ${post.title}`}
+              className="w-full h-16 object-cover rounded border"
+              loading="lazy"
+            />
+            {onImageDelete && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="absolute top-1 right-1 h-6 w-6 p-0"
+                onClick={handleDeleteImage}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {console.log('🎨 IMAGE_GEN: No image to display')}
+        </>
+      )}
     </div>
   );
 };

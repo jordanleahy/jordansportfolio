@@ -211,13 +211,19 @@ const PostCardComponent = ({
   };
 
   const handleImageGenerationStart = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
+    console.log('🎨 POSTCARD: handleImageGenerationStart called', { postId, aspectRatio });
+    console.log('🎨 POSTCARD: Current generatingImages before:', Array.from(generatingImages));
     setGeneratingImages(prev => new Set(prev).add(aspectRatio));
+    console.log('🎨 POSTCARD: generatingImages should now include:', aspectRatio);
   };
 
   const handleImageGenerated = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => {
+    console.log('🎨 POSTCARD: handleImageGenerated called', { postId, aspectRatio, imageUrl });
+    console.log('🎨 POSTCARD: Current generatingImages before cleanup:', Array.from(generatingImages));
     setGeneratingImages(prev => {
       const newSet = new Set(prev);
       newSet.delete(aspectRatio);
+      console.log('🎨 POSTCARD: generatingImages after cleanup:', Array.from(newSet));
       return newSet;
     });
     onImageGenerated(postId, aspectRatio, imageUrl);
