@@ -39,7 +39,11 @@ const SubscriptionSuccess: React.FC = () => {
   };
 
   const debugStripeSession = async () => {
-    if (!sessionId) return;
+    console.log('SessionId from URL:', sessionId);
+    if (!sessionId) {
+      alert('No session_id found in URL. Please provide your session ID.');
+      return;
+    }
     try {
       const { data, error } = await supabase.functions.invoke('debug-stripe-session', {
         body: { session_id: sessionId }
@@ -84,11 +88,9 @@ const SubscriptionSuccess: React.FC = () => {
             <Button variant="secondary" onClick={() => navigate('/subscription')}>View Plans</Button>
             <Button onClick={() => navigate('/')}>Go to Dashboard</Button>
             <Button variant="outline" onClick={handleManageBilling}>Manage Billing</Button>
-            {sessionId && (
-              <Button variant="destructive" size="sm" onClick={debugStripeSession}>
-                Fix Plan Mapping
-              </Button>
-            )}
+            <Button variant="destructive" size="sm" onClick={debugStripeSession}>
+              Fix Plan Mapping
+            </Button>
           </div>
 
           <div className="pt-2">
