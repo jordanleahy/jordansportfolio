@@ -133,7 +133,7 @@ export const SettingsModal: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <Check className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm text-foreground">
-                              {freeDaily} daily image (up to 30/month)
+                              {freeDaily} free images (3/day max)
                             </span>
                           </div>
                         </div>
