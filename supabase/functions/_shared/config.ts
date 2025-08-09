@@ -55,7 +55,6 @@ export const DATABASE_CONFIG = {
   },
   STORAGE: {
     BUCKETS: {
-      THEME_IMAGES: 'theme-images',
       USER_UPLOADS: 'user-uploads',
     },
   },

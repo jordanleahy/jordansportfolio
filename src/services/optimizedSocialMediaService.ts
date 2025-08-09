@@ -261,7 +261,6 @@ export class OptimizedSocialMediaService {
         id,
         title,
         description,
-        theme_image_4_3_url,
         image_16_9_url,
         image_4_3_url,
         image_9_16_url,
@@ -288,8 +287,7 @@ export class OptimizedSocialMediaService {
     const processedThemes = themes.map((theme: any) => {
       const posts = postsByTheme[theme.id] || [];
       const firstPost = posts[0];
-      const imageUrl = firstPost?.theme_image_4_3_url ||
-                      firstPost?.image_16_9_url || 
+      const imageUrl = firstPost?.image_16_9_url ||
                       firstPost?.image_4_3_url ||
                       firstPost?.image_9_16_url ||
                       firstPost?.image_3_4_url;

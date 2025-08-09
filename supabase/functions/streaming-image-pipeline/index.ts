@@ -73,7 +73,7 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-mini',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -160,6 +160,13 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    // NOTE: This function is now focused on individual post images only
+    // Theme image generation is handled by the generate-day-1-4-3 function
+    if (mode === 'theme') {
+      console.log('ℹ️ Theme mode detected - this function now handles individual post images only');
+      console.log('ℹ️ For Day 1 theme images, use the generate-day-1-4-3 function instead');
+    }
+
     // Check if streaming is requested
     if (stream) {
       const encoder = new TextEncoder();
@@ -167,7 +174,7 @@ serve(async (req) => {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            // Send progress update with proper SSE formatting for large payloads
+            // Send progress update with proper SSE formatting
             const sendProgress = (stage: string, progress: number, data?: any) => {
               const message = JSON.stringify({ 
                 type: 'progress', 
@@ -178,25 +185,12 @@ serve(async (req) => {
                 ...data 
               });
               
-              // For large messages (like base64 images), ensure proper chunk boundaries
               const formattedMessage = `data: ${message}\n\n`;
               
               try {
                 controller.enqueue(encoder.encode(formattedMessage));
               } catch (error) {
                 console.error('Error sending progress update:', error);
-                // Try to send without the large data payload as fallback
-                if (data && (data.partialImage || data.imageUrl)) {
-                  const fallbackMessage = JSON.stringify({ 
-                    type: 'progress', 
-                    stage, 
-                    progress, 
-                    postId,
-                    mode,
-                    error: 'Image data too large for streaming'
-                  });
-                  controller.enqueue(encoder.encode(`data: ${fallbackMessage}\n\n`));
-                }
               }
             };
 
@@ -208,37 +202,24 @@ serve(async (req) => {
 
             sendProgress('prompt_generated', 30, { prompt });
 
-            // Generate image with OpenAI Responses API
+            // Generate image with OpenAI
             sendProgress('image_generation', 50);
 
             const imageSize = getAspectRatioSize(aspectRatio);
             
-            const requestBody = {
-              model: 'gpt-5-mini',
-              input: prompt,
-              stream: true,
-              tools: [{ 
-                type: "image_generation", 
-                partial_images: 2,
-                size: imageSize,
-                quality: 'high'
-              }]
-            };
-            
-            console.log('Making OpenAI Responses API request with:', {
-              model: requestBody.model,
-              promptLength: prompt.length,
-              size: imageSize,
-              partialImages: 2
-            });
-
-            const imageResponse = await fetch('https://api.openai.com/v1/responses', {
+            const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${openAIApiKey}`,
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify(requestBody),
+              body: JSON.stringify({
+                model: 'gpt-image-1',
+                prompt: prompt,
+                size: imageSize,
+                quality: 'high',
+                n: 1
+              }),
             });
 
             if (!imageResponse.ok) {
@@ -251,150 +232,13 @@ serve(async (req) => {
               throw new Error(`OpenAI API error: ${imageResponse.status} - ${errorText}`);
             }
 
-            if (!imageResponse.body) {
-              throw new Error('No response body received');
-            }
+            const imageData = await imageResponse.json();
+            const finalBase64Image = imageData.data[0].b64_json;
 
-            const reader = imageResponse.body.getReader();
-            const decoder = new TextDecoder();
-            let finalBase64Image = '';
-            let partialCount = 0;
-            let buffer = ''; // Buffer for incomplete lines
-
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                
-                // Add chunk to buffer
-                buffer += chunk;
-                
-                // Split buffer by newlines, but keep the last incomplete line
-                const lines = buffer.split('\n');
-                buffer = lines.pop() || ''; // Keep the last potentially incomplete line
-
-                for (const line of lines) {
-                  if (line.startsWith('data: ') && line.length > 6) {
-                    const dataContent = line.slice(6).trim();
-                    if (dataContent === '[DONE]') {
-                      console.log('Received [DONE] signal from OpenAI');
-                      continue;
-                    }
-
-                    if (!dataContent) {
-                      continue; // Skip empty data lines
-                    }
-
-                    try {
-                      const data = JSON.parse(dataContent);
-                      console.log('Received streaming data:', { type: data.type });
-                      
-                      if (data.type === 'response.image_generation_call.partial_image') {
-                        partialCount++;
-                        const progressPercent = 60 + (partialCount * 5);
-                        const imageBase64 = data.partial_image_b64;
-                        
-                        sendProgress(`partial_${partialCount}`, progressPercent, { 
-                          partialImage: `data:image/png;base64,${imageBase64}`,
-                          isPartial: true
-                        });
-                        
-                        console.log(`Sent partial image ${partialCount}`);
-                      } else if (data.type === 'response.image_generation_call.done') {
-                        // Final image in result field
-                        if (data.result) {
-                          finalBase64Image = data.result;
-                          
-                          sendProgress('image_generated', 70, { 
-                            partialImage: `data:image/png;base64,${finalBase64Image}`,
-                            isPartial: false
-                          });
-                          
-                          console.log('Received final image from result field');
-                        }
-                      } else if (data.output && Array.isArray(data.output)) {
-                        // Check if output contains image generation results
-                        for (const outputItem of data.output) {
-                          if (outputItem.type === 'image_generation_call' && outputItem.result) {
-                            finalBase64Image = outputItem.result;
-                            
-                            sendProgress('image_generated', 70, { 
-                              partialImage: `data:image/png;base64,${finalBase64Image}`,
-                              isPartial: false
-                            });
-                            
-                            console.log('Received final image from output array');
-                            break;
-                          }
-                        }
-                      }
-                    } catch (parseError) {
-                      console.log('Could not parse JSON, skipping line:', line.substring(0, 100) + (line.length > 100 ? '...' : ''));
-                      console.log('Parse error:', parseError.message);
-                    }
-                  }
-                }
-              }
-              
-              // Process any remaining data in buffer after stream ends
-              if (buffer.trim() && buffer.startsWith('data: ')) {
-                const dataContent = buffer.slice(6).trim();
-                if (dataContent && dataContent !== '[DONE]') {
-                  try {
-                    const data = JSON.parse(dataContent);
-                    console.log('Processed final buffered data:', { type: data.type });
-                    
-                    if (data.type === 'response.image_generation_call.done' && data.result) {
-                      finalBase64Image = data.result;
-                      console.log('Received final image from buffered data');
-                    }
-                  } catch (parseError) {
-                    console.log('Could not parse final buffered JSON:', buffer.substring(0, 100));
-                  }
-                }
-              }
-            } finally {
-              reader.releaseLock();
-            }
-
-            // If we still don't have a final image, try non-streaming fallback
-            if (!finalBase64Image) {
-              console.log('No final image from streaming, trying non-streaming fallback');
-              
-              const fallbackResponse = await fetch('https://api.openai.com/v1/images/generations', {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${openAIApiKey}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  model: 'gpt-image-1',
-                  prompt: prompt,
-                  size: imageSize,
-                  quality: 'high',
-                  n: 1
-                }),
-              });
-
-              if (fallbackResponse.ok) {
-                const fallbackData = await fallbackResponse.json();
-                if (fallbackData.data && fallbackData.data[0] && fallbackData.data[0].b64_json) {
-                  finalBase64Image = fallbackData.data[0].b64_json;
-                  console.log('Successfully generated image via fallback');
-                  
-                  sendProgress('image_generated', 70, { 
-                    partialImage: `data:image/png;base64,${finalBase64Image}`,
-                    isPartial: false
-                  });
-                }
-              }
-            }
-
-            if (!finalBase64Image) {
-              throw new Error('No final image received from OpenAI after trying both streaming and fallback methods');
-            }
+            sendProgress('image_generated', 70, { 
+              partialImage: `data:image/png;base64,${finalBase64Image}`,
+              isPartial: false
+            });
 
             // Upload to storage if user is authenticated
             let finalImageUrl = `data:image/png;base64,${finalBase64Image}`;
@@ -402,54 +246,11 @@ serve(async (req) => {
             if (userId) {
               sendProgress('uploading', 80);
               
-              const fileName = `${theme.replace(/\s+/g, '_')}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+              const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
               const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
             
               if (uploadedUrl) {
                 finalImageUrl = uploadedUrl;
-                
-                // Update database if this is for a theme
-                if (mode === 'theme' && theme && userId) {
-                  console.log('🔄 Updating database for theme image generation:', {
-                    theme,
-                    category,
-                    userId,
-                    finalImageUrl
-                  });
-                  
-                  // Get theme ID from theme name
-                  const { data: themeData, error: themeError } = await supabase
-                    .from('themes')
-                    .select('id')
-                    .eq('theme_name', theme)
-                    .eq('user_id', userId)
-                    .maybeSingle();
-
-                  if (themeError || !themeData) {
-                    console.error('❌ Theme not found:', theme);
-                    throw new Error(`Theme not found: ${theme}`);
-                  }
-                  
-                  const { data: updateData, error: updateError } = await supabase
-                    .from('social_media_posts')
-                    .update({
-                      theme_image_4_3_url: finalImageUrl,
-                      theme_image_generation_status: 'complete'
-                    })
-                    .eq('theme_id', themeData.id)
-                    .eq('user_id', userId)
-                    .select();
-                  
-                  if (updateError) {
-                    console.error('❌ Database update failed:', updateError);
-                    throw new Error(`Database update failed: ${updateError.message}`);
-                  } else {
-                    console.log('✅ Database updated successfully:', {
-                      updatedRows: updateData?.length || 0,
-                      data: updateData
-                    });
-                  }
-                }
               }
             }
 
@@ -465,33 +266,6 @@ serve(async (req) => {
             
           } catch (error) {
             console.error('Streaming error:', error);
-            
-            // Update status to failed in database
-            if (mode === 'theme' && theme && userId) {
-              console.log('❌ Updating database status to failed for:', { theme, category, userId });
-              
-              // Get theme ID for failed status update
-              const { data: themeData } = await supabase
-                .from('themes')
-                .select('id')
-                .eq('theme_name', theme)
-                .eq('user_id', userId)
-                .maybeSingle();
-
-              if (themeData) {
-                const { error: failError } = await supabase
-                  .from('social_media_posts')
-                  .update({ theme_image_generation_status: 'failed' })
-                  .eq('theme_id', themeData.id)
-                  .eq('user_id', userId);
-              
-                if (failError) {
-                  console.error('❌ Failed to update status to failed:', failError);
-                } else {
-                  console.log('✅ Successfully updated status to failed');
-                }
-              }
-            }
             
             // Track failed API usage
             await trackApiUsage(supabase, 'streaming-image-pipeline', 'gpt-image-1', false, 0, userId, error.message);
@@ -530,7 +304,6 @@ serve(async (req) => {
           prompt: prompt,
           size: imageSize,
           quality: 'high',
-          output_format: 'png',
           n: 1
         }),
       });
@@ -545,51 +318,11 @@ serve(async (req) => {
       let finalImageUrl = `data:image/png;base64,${base64Image}`;
       
       if (userId) {
-        const fileName = `${theme.replace(/\s+/g, '_')}_theme_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+        const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
         const uploadedUrl = await uploadImageToStorage(supabase, base64Image, fileName, userId);
         
         if (uploadedUrl) {
           finalImageUrl = uploadedUrl;
-          
-          // Update database for non-streaming theme mode
-          if (mode === 'theme' && theme) {
-            console.log('🔄 Non-streaming: Updating database for theme image:', {
-              theme,
-              category,
-              userId,
-              finalImageUrl
-            });
-            
-            // Get theme ID from theme name
-            const { data: themeData, error: themeError } = await supabase
-              .from('themes')
-              .select('id')
-              .eq('theme_name', theme)
-              .eq('user_id', userId)
-              .maybeSingle();
-
-            if (themeError || !themeData) {
-              console.error('❌ Theme not found for non-streaming update:', theme);
-            } else {
-              const { data: updateData, error: updateError } = await supabase
-                .from('social_media_posts')
-                .update({
-                  theme_image_4_3_url: finalImageUrl,
-                  theme_image_generation_status: 'complete'
-                })
-                .eq('theme_id', themeData.id)
-                .eq('user_id', userId)
-                .select();
-            
-              if (updateError) {
-                console.error('❌ Non-streaming database update failed:', updateError);
-              } else {
-                console.log('✅ Non-streaming database updated successfully:', {
-                  updatedRows: updateData?.length || 0
-                });
-              }
-            }
-          }
         }
       }
 

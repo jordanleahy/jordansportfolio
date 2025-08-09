@@ -45,7 +45,6 @@ export interface DatabaseConfig {
   };
   readonly STORAGE: {
     readonly BUCKETS: {
-      readonly THEME_IMAGES: string;
       readonly USER_UPLOADS: string;
     };
   };
@@ -167,7 +166,6 @@ export interface PostInsertData {
   category: string;
   user_id: string;
   status: PostStatus;
-  theme_image_generation_status: ImageGenerationStatus;
 }
 
 // ============= SUPABASE CLIENT TYPE =============

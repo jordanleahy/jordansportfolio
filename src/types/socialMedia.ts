@@ -29,9 +29,6 @@ export interface SocialMediaPost {
   // Theme relationship
   theme_id?: string | null;
   
-  // Theme image for category cards
-  theme_image_4_3_url?: string | null;
-  theme_image_generation_status?: string | null;
   
   status: PostStatus;
   scheduled_date?: string | null;

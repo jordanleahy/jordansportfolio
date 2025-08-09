@@ -1965,8 +1965,6 @@ export type Database = {
           seed_value: number | null
           status: Database["public"]["Enums"]["post_status"]
           theme_id: string | null
-          theme_image_4_3_url: string | null
-          theme_image_generation_status: string | null
           title: string
           updated_at: string
           user_id: string
@@ -2000,8 +1998,6 @@ export type Database = {
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
           theme_id?: string | null
-          theme_image_4_3_url?: string | null
-          theme_image_generation_status?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -2035,8 +2031,6 @@ export type Database = {
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
           theme_id?: string | null
-          theme_image_4_3_url?: string | null
-          theme_image_generation_status?: string | null
           title?: string
           updated_at?: string
           user_id?: string

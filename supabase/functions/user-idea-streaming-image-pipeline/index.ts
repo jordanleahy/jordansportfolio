@@ -228,8 +228,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       theme_id: themeId,
       category: themeData.category,
       user_id: userId,
-      status: 'draft' as const,
-      theme_image_generation_status: 'pending' as const
+      status: 'draft' as const
     }));
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
@@ -422,7 +421,6 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
             const { error: statusError } = await supabase
               .from('social_media_posts')
               .update({ 
-                theme_image_generation_status: 'generating',
                 updated_at: new Date().toISOString()
               })
               .eq('theme_id', themeId)
@@ -527,7 +525,6 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
       const { error: statusError } = await supabase
         .from('social_media_posts')
         .update({ 
-          theme_image_generation_status: 'generating',
           updated_at: new Date().toISOString()
         })
         .eq('theme_id', themeId)

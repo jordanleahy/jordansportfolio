@@ -23,13 +23,8 @@ export const updateThemeImageStatus = async (
   console.log(`🔄 Updating theme image status to '${status}' for theme ID: ${themeId}`);
   
   const updateData: Record<string, any> = {
-    theme_image_generation_status: status,
     updated_at: new Date().toISOString()
   };
-  
-  if (imageUrl && status === 'complete') {
-    updateData.theme_image_4_3_url = imageUrl;
-  }
   
   const { data, error } = await supabase
     .from('social_media_posts')
