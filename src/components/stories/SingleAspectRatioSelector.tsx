@@ -21,7 +21,6 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   post,
   onGenerateImage,
   onPostsChange,
-  isProcessing,
 }) => {
   const { toast } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();

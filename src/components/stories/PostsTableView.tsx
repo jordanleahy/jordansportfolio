@@ -58,8 +58,7 @@ export const PostsTableView = memo(({
   animatingRows = new Set(),
   completingRows = new Set(),
   getRowAnimationClass = () => '',
-  blogStatuses = {},
-  isProcessing
+  blogStatuses = {}
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('day');
@@ -229,8 +228,7 @@ export const PostsTableView = memo(({
           const selectorProps = {
             post,
             onGenerateImage,
-            onPostsChange,
-            isProcessing
+            onPostsChange
           };
 
           return (
