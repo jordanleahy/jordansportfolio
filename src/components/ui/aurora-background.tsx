@@ -23,7 +23,7 @@ export const AuroraBackground = ({
         {...props}
       >
         <div
-          className="fixed inset-0 -z-10 w-screen overflow-hidden pointer-events-none"
+          className="absolute inset-0 overflow-hidden"
           style={
             {
               "--aurora":
