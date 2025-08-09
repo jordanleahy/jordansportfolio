@@ -219,24 +219,15 @@ if (!openAIApiKey) {
 
 Schema:
 {
-  "metrics": {
-    "totalTasks": number,
-    "completedTasks": number,
-    "timeSpent": string | null,
-    "completionRate": number | null,
-    "focusTime": string | null,
-    "breakTime": string | null
-  },
   "highlights": string[],
   "insights": string[],
   "recommendations": string[],
   "categories_summary": {
-    "technical"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
-    "creative"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
-    "productivity"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] },
-    "insights"?: { "tasks": string[], "timeSpent": string | null, "insights": string[] }
+    "technical"?: { "tasks": string[], "insights": string[] },
+    "creative"?: { "tasks": string[], "insights": string[] },
+    "productivity"?: { "tasks": string[], "insights": string[] },
+    "insights"?: { "tasks": string[], "insights": string[] }
   },
-  "productivity_score": number,
   "generated_summary": string,
   "summary_type": "technical" | "creative" | "productivity" | "insights"
 }`;
