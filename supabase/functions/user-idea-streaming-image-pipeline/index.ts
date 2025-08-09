@@ -308,6 +308,33 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
+    // Parse request body first for proper validation
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid JSON in request body'
+      }), {
+        status: 400,
+        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { description, stream = true } = requestBody;
+
+    // Validate required fields
+    if (!description || typeof description !== 'string' || !description.trim()) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Description is required and must be a non-empty string'
+      }), {
+        status: 400,
+        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get authenticated user from the request
     const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
@@ -315,20 +342,34 @@ serve(async (req) => {
     if (authHeader) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
       if (authError || !user) {
-        throw new Error('User not authenticated');
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'User not authenticated'
+        }), {
+          status: 401,
+          headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        });
       }
       userId = user.id;
       console.log('🔐 Authenticated user:', userId);
-    }
-
-    const { description, stream = true } = await req.json();
-
-    if (!description || !userId) {
-      throw new Error('Description and authentication required');
+    } else {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Authorization header required'
+      }), {
+        status: 401,
+        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'OpenAI API key not configured'
+      }), {
+        status: 500,
+        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
 console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50)}...`);
@@ -400,31 +441,10 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
             sendStreamEvent(controller, {
               type: 'posts_status_update',
               progress: 70,
-              data: { status: 'Setting posts to generating status...' }
+              data: { status: 'Posts created successfully' }
             });
 
-            // Update posts to generating status (no longer waiting for image)
-            const { error: statusError } = await supabase
-              .from('social_media_posts')
-              .update({ 
-                updated_at: new Date().toISOString()
-              })
-              .eq('theme_id', themeId)
-              .eq('user_id', userId);
-
-            if (statusError) {
-              console.error('❌ Error updating post status:', statusError);
-            } else {
-              console.log(`✅ Updated posts to status 'generating' for theme: ${themeData.theme}`);
-            }
-
-            sendStreamEvent(controller, {
-              type: 'posts_status_updated',
-              progress: 80,
-              data: { status: 'Posts marked as generating' }
-            });
-
-            // Step 5: Trigger background image generation (90% progress)
+            // Step 5: Trigger background image generation (85% progress)
             sendStreamEvent(controller, {
               type: 'background_trigger_start',
               progress: 85,
@@ -503,20 +523,6 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
       const themeId = createdThemeId;
       await generateSystemPrompt(supabase, themeData, userId);
       
-      // Set posts to generating status
-      const { error: statusError } = await supabase
-        .from('social_media_posts')
-        .update({ 
-          updated_at: new Date().toISOString()
-        })
-        .eq('theme_id', themeId)
-        .eq('user_id', userId);
-
-      if (statusError) {
-        console.error('❌ Error updating post status:', statusError);
-      } else {
-        console.log(`✅ Updated posts to status 'generating' for theme: ${themeData.theme}`);
-      }
 
       // Trigger background image generation using EdgeRuntime.waitUntil
       try {
@@ -562,7 +568,7 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
       success: false,
       error: error.message
     }), {
-      status: 200,
+      status: 500,
       headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
     });
   }
