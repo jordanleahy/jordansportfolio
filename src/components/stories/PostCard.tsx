@@ -216,6 +216,14 @@ const PostCardComponent = ({
     console.log('🎨 POSTCARD: generatingImages should now include:', aspectRatio);
   };
 
+  const handleImageGenerationEnd = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
+    console.log('🎨 POSTCARD: handleImageGenerationEnd called', { postId, aspectRatio });
+    setGeneratingImages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(aspectRatio);
+      return newSet;
+    });
+  };
   const handleImageGenerated = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => {
     console.log('🎨 POSTCARD: handleImageGenerated called', { postId, aspectRatio, imageUrl });
     console.log('🎨 POSTCARD: Current generatingImages before cleanup:', Array.from(generatingImages));
@@ -468,6 +476,7 @@ const PostCardComponent = ({
                 onImageDelete={onImageDelete}
                 onImageGenerated={handleImageGenerated}
                 onGenerationStart={handleImageGenerationStart}
+                onGenerationEnd={handleImageGenerationEnd}
               />
               <PostImageUploadCard
                 post={post}
@@ -478,6 +487,7 @@ const PostCardComponent = ({
                 onImageDelete={onImageDelete}
                 onImageGenerated={handleImageGenerated}
                 onGenerationStart={handleImageGenerationStart}
+                onGenerationEnd={handleImageGenerationEnd}
               />
               <PostImageUploadCard
                 post={post}
@@ -488,6 +498,7 @@ const PostCardComponent = ({
                 onImageDelete={onImageDelete}
                 onImageGenerated={handleImageGenerated}
                 onGenerationStart={handleImageGenerationStart}
+                onGenerationEnd={handleImageGenerationEnd}
               />
               <PostImageUploadCard
                 post={post}
@@ -498,6 +509,7 @@ const PostCardComponent = ({
                 onImageDelete={onImageDelete}
                 onImageGenerated={handleImageGenerated}
                 onGenerationStart={handleImageGenerationStart}
+                onGenerationEnd={handleImageGenerationEnd}
               />
             </div>
           </div>

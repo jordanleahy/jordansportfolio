@@ -303,6 +303,7 @@ export interface PostImageUploadCardProps {
   onImageDelete?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
   onGenerationStart?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onGenerationEnd?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
 }
 
 export interface PostMediaGalleryModalProps {

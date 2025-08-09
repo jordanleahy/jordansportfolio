@@ -27,10 +27,11 @@ export const PostImageUploadCard = ({
   isUploading,
   onImageDelete,
   onImageGenerated,
-  onGenerationStart // Add this callback
+  onGenerationStart,
+  onGenerationEnd
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState<'prompt' | 'image' | 'upload' | null>(null);
+  
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   
@@ -40,9 +41,8 @@ export const PostImageUploadCard = ({
       isGenerating,
       isUploading,
       hasImageUrl: !!imageUrl,
-      generationStep
     });
-  }, [isGenerating, isUploading, imageUrl, generationStep, type]);
+  }, [isGenerating, isUploading, imageUrl, type]);
 
   const creditStatus = getCreditStatus();
 
@@ -95,7 +95,6 @@ export const PostImageUploadCard = ({
     try {
       console.log('🎨 IMAGE_GEN: Starting generation for post', post.id, 'ratio', type, 'setting status to \'uploading\'');
       setIsGenerating(true);
-      setGenerationStep('prompt');
       
       // Notify parent immediately that generation has started
       if (onGenerationStart) {
@@ -128,7 +127,7 @@ export const PostImageUploadCard = ({
       }
 
       // Step 2: Generate image
-      setGenerationStep('image');
+      
       console.log('🎨 IMAGE_GEN: Step 2 - Generating image with AI...');
       toast.info('Generating image with AI...');
 
@@ -154,7 +153,7 @@ export const PostImageUploadCard = ({
       }
 
       // Step 3: Convert to file and upload
-      setGenerationStep('upload');
+      
       console.log('🎨 IMAGE_GEN: Step 3 - Processing and uploading image...');
       toast.info('Processing and uploading image...');
 
@@ -201,10 +200,15 @@ export const PostImageUploadCard = ({
     } finally {
       console.log('🎨 IMAGE_GEN: Cleanup - setting isGenerating to false');
       setIsGenerating(false);
-      setGenerationStep(null);
+      if (onGenerationEnd) {
+        try {
+          onGenerationEnd(post.id, type);
+        } catch (e) {
+          console.warn('🎨 IMAGE_GEN: onGenerationEnd callback error', e);
+        }
+      }
     }
   };
-
 
   const handleDeleteImage = () => {
     if (onImageDelete) {
@@ -241,13 +245,6 @@ export const PostImageUploadCard = ({
             >
               <Sparkles className="mr-2 h-4 w-4" />
               Generate ({aspectRatio})
-              {isGenerating && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {generationStep === 'prompt' && 'Prompt...'}
-                  {generationStep === 'image' && 'Image...'}
-                  {generationStep === 'upload' && 'Upload...'}
-                </span>
-              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -270,8 +267,8 @@ export const PostImageUploadCard = ({
               aspectRatio={aspectRatio} 
               variant="card"
               isGenerating={true}
+              showProgress={false}
               className="w-full h-16"
-              generationStep="Generating image..."
               fallbackIcon={<ImageIcon className="h-6 w-6 text-primary/40" />}
             />
           );
