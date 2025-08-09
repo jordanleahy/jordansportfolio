@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Loader2, ChevronDown, X, ImageIcon } from 'lucide-react';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
@@ -34,6 +34,16 @@ export const PostImageUploadCard = ({
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   
+  // Debug effect to track state changes
+  useEffect(() => {
+    console.log('🎨 IMAGE_GEN: State changed for', type, ':', {
+      isGenerating,
+      isUploading,
+      hasImageUrl: !!imageUrl,
+      generationStep
+    });
+  }, [isGenerating, isUploading, imageUrl, generationStep, type]);
+
   const creditStatus = getCreditStatus();
 
   const aspectRatioMap = {
