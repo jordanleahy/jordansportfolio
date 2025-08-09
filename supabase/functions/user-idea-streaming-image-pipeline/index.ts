@@ -64,7 +64,7 @@ JSON STRUCTURE REQUIRED:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
@@ -269,20 +269,6 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     }
 
     console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
-    console.log('📊 Imported posts:', data.map(p => ({ id: p.id, theme_id: p.theme_id, title: p.title })));
-    
-    // Verify posts were actually created by querying them back
-    const { data: verification, error: verifyError } = await supabase
-      .from('social_media_posts')
-      .select('id, theme_id, category, title')
-      .eq('theme_id', themeId)
-      .eq('user_id', userId);
-    
-    if (verifyError) {
-      console.warn('⚠️ Could not verify posts were created:', verifyError);
-    } else {
-    console.log(`🔍 Verification: Found ${verification?.length || 0} posts in database for theme: ${themeData.theme}`);
-    }
     
     return { insertedCount: data.length, createdThemeId: themeId };
     
@@ -445,30 +431,26 @@ console.log(`🚀 Starting user idea pipeline for: ${description.substring(0, 50
               data: { status: 'Starting background image generation...' }
             });
 
-            // Trigger background image generation (fire-and-forget)
+            // Trigger background image generation using EdgeRuntime.waitUntil
             try {
               const firstPost = themeData.posts[0];
               const backgroundRequest = {
-                theme: themeData.theme,
-                category: themeData.category,
-                userId: userId,
-                themeId: themeId, // Pass the theme ID for more reliable lookup
-                firstPostTitle: firstPost.title,
-                firstPostDescription: firstPost.description
+                themeId: themeId,
+                userId: userId
               };
 
-              // Fire-and-forget background function call
-              supabase.functions.invoke('generate-day-1-4-3', {
-                body: backgroundRequest
-              }).then(({ error: bgError }) => {
-                if (bgError) {
-                  console.error('❌ Background image generation failed to start:', bgError);
-                } else {
-                  console.log('✅ Background image generation started successfully');
-                }
-              });
-
-              console.log('🔥 Triggered background image generation for theme:', themeData.theme);
+              // Use proper background task handling
+              EdgeRuntime.waitUntil(
+                supabase.functions.invoke('generate-day-1-4-3', {
+                  body: backgroundRequest
+                }).then(({ error: bgError }) => {
+                  if (bgError) {
+                    console.error('❌ Background image generation failed:', bgError);
+                  } else {
+                    console.log('✅ Background image generation started');
+                  }
+                })
+              );
             } catch (bgTriggerError) {
               console.error('❌ Error triggering background function:', bgTriggerError);
               // Don't fail the main pipeline if background trigger fails

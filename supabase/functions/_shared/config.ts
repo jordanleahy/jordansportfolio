@@ -19,7 +19,7 @@ export const OPENAI_CONFIG = {
     COMPREHENSIVE: 4000,
   },
   // Default model for theme generation
-  DEFAULT_THEME_MODEL: 'gpt-5-mini',
+  DEFAULT_THEME_MODEL: 'gpt-4.1-2025-04-14',
   DEFAULT_THEME_MAX_COMPLETION_TOKENS: 3000, // Increased to handle reasoning + content
 } as const;
 

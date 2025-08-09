@@ -92,7 +92,7 @@ Category: ${category}
 Create a detailed image generation prompt for this ${theme} theme content.`;
 
   const requestBody = {
-    model: 'gpt-5-mini',
+    model: 'gpt-4.1-2025-04-14',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }
@@ -181,12 +181,11 @@ export const generateThemeImage = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-image-1',
+        model: 'dall-e-3',
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'high',
-        output_format: 'png'
+        quality: 'hd'
       }),
     });
 
