@@ -38,6 +38,23 @@ const SubscriptionSuccess: React.FC = () => {
     }
   };
 
+  const debugStripeSession = async () => {
+    if (!sessionId) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('debug-stripe-session', {
+        body: { session_id: sessionId }
+      });
+      if (error) throw error;
+      console.log('Debug result:', data);
+      alert(`Price ID: ${data.price_id}\nUpdated Starter tier mapping!`);
+      // Refresh subscription status
+      window.location.reload();
+    } catch (e) {
+      console.error('Debug error:', e);
+      alert('Debug failed: ' + e.message);
+    }
+  };
+
   return (
     <main className="min-h-[60vh] flex items-center justify-center px-4 py-16">
       <Helmet>
@@ -67,6 +84,11 @@ const SubscriptionSuccess: React.FC = () => {
             <Button variant="secondary" onClick={() => navigate('/subscription')}>View Plans</Button>
             <Button onClick={() => navigate('/')}>Go to Dashboard</Button>
             <Button variant="outline" onClick={handleManageBilling}>Manage Billing</Button>
+            {sessionId && (
+              <Button variant="destructive" size="sm" onClick={debugStripeSession}>
+                Fix Plan Mapping
+              </Button>
+            )}
           </div>
 
           <div className="pt-2">
