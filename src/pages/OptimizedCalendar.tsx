@@ -14,6 +14,7 @@ import { useOptimizedStories } from '@/hooks/useOptimizedStories';
 import { useSystemPromptExists } from '@/hooks/useSystemPromptExists';
 import { useColorThemes } from '@/hooks/useColorThemes';
 import { ColorThemeSelector } from '@/components/stories/ColorThemeSelector';
+import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 // Removed complex realtime debugging system
 import { Trash2 } from 'lucide-react';
 import {
@@ -244,30 +245,34 @@ export default function OptimizedCalendar() {
               <TabsContent key={theme.theme_name} value={theme.theme_name} className="space-y-8">
                 <Suspense fallback={<CalendarSkeletonLoader />}>
                   {/* Color Theme Consistency Checker */}
-                  <ColorThemeConsistencyChecker category={theme.theme_name} />
-                  
-                   <PostsTable 
-                     posts={activeTabPosts}
-                     onPostsChange={() => loadCategoryPosts(theme.theme_name)}
-                     isAdmin={isAdmin}
-                     category={theme.theme_name}
-                     selectedThemeId={selectedThemeId}
-                     onThemeChange={setSelectedThemeId}
-                   />
+                   <ColorThemeConsistencyChecker category={theme.theme_name} />
+                   
+                   <ProcessingStatesProvider>
+                     <PostsTable 
+                       posts={activeTabPosts}
+                       onPostsChange={() => loadCategoryPosts(theme.theme_name)}
+                       isAdmin={isAdmin}
+                       category={theme.theme_name}
+                       selectedThemeId={selectedThemeId}
+                       onThemeChange={setSelectedThemeId}
+                     />
+                   </ProcessingStatesProvider>
                 </Suspense>
               </TabsContent>
             ))}
           </Tabs>
         ) : isEmpty ? (
           <Suspense fallback={<CalendarSkeletonLoader />}>
-            <PostsTable 
-              posts={[]} 
-              onPostsChange={() => {}}
-              isAdmin={isAdmin}
-              category={undefined}
-              selectedThemeId={selectedThemeId}
-              onThemeChange={setSelectedThemeId}
-            />
+            <ProcessingStatesProvider>
+              <PostsTable 
+                posts={[]} 
+                onPostsChange={() => {}}
+                isAdmin={isAdmin}
+                category={undefined}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={setSelectedThemeId}
+              />
+            </ProcessingStatesProvider>
           </Suspense>
         ) : null}
         

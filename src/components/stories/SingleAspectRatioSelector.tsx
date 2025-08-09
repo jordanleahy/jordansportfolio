@@ -15,6 +15,7 @@ import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,
@@ -26,6 +27,8 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   
   const creditStatus = getCreditStatus();
+  const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
+  const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -64,7 +67,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   };
 
   // Check if any aspect ratio is being generated for this post
-  const isGenerating = isProcessing?.(post.id, 'generate');
+  const isGenerating = isProcessingCtx(post.id, 'generate');
 
   return (
     <DropdownMenu>
@@ -91,7 +94,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           {isGenerating ? 'Generating...' : 'Generate'}
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => {
-          const isGeneratingAspectRatio = isProcessing?.(post.id, 'generate', option.value);
+          const isGeneratingAspectRatio = isProcessingCtx(post.id, 'generate', toAspect(option.value));
           const aspectRatioConfig = ASPECT_RATIO_CONFIGS.find(config => config.key === option.value);
           
           return (

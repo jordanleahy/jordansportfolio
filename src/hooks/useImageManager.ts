@@ -4,7 +4,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
-import { useProcessingStates } from '@/hooks/useProcessingStates';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
@@ -15,7 +15,7 @@ interface UseImageManagerReturn {
 }
 
 export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
-  const { setProcessing } = useProcessingStates();
+  const { setProcessing } = useProcessingStatesContext();
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);

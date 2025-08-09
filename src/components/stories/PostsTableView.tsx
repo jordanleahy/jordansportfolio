@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
@@ -64,6 +65,8 @@ export const PostsTableView = memo(({
   const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
+  const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
+  const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
     switch (currentStatus) {
@@ -285,7 +288,7 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
-                ) : isProcessing?.(post.id, 'generate', '16_9') ? (
+                ) : isProcessingCtx(post.id, 'generate', toAspect('16_9')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-16 h-9 flex-shrink-0"
@@ -303,7 +306,7 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
                   </div>
-                ) : isProcessing?.(post.id, 'generate', '4_3') ? (
+                ) : isProcessingCtx(post.id, 'generate', toAspect('4_3')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-16 h-12 flex-shrink-0"
@@ -322,7 +325,7 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
                   </div>
-                ) : isProcessing?.(post.id, 'generate', '9_16') ? (
+                ) : isProcessingCtx(post.id, 'generate', toAspect('9_16')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-9 h-16 flex-shrink-0"
@@ -340,7 +343,7 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
                   </div>
-                ) : isProcessing?.(post.id, 'generate', '3_4') ? (
+                ) : isProcessingCtx(post.id, 'generate', toAspect('3_4')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-12 h-16 flex-shrink-0"

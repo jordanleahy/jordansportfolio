@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { sanitizeText } from '@/utils/textSanitization';
-import { useProcessingStates } from './useProcessingStates';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import type { 
   BulkImageGenerationRequest, 
   BulkImageGenerationResponse, 
@@ -109,7 +109,7 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
 };
 
 export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
-  const { setBulkProcessing, isGenerating, clearProcessing } = useProcessingStates();
+  const { setBulkProcessing, isGenerating, clearProcessing } = useProcessingStatesContext();
   const [progress, setProgress] = useState<{ 
     completed: number; 
     total: number; 

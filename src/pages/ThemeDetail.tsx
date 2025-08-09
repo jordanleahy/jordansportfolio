@@ -26,6 +26,7 @@ import {
 // Lazy load components
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
+import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 
 export default function ThemeDetail() {
   const { theme } = useParams<{ theme: string }>();
@@ -153,14 +154,16 @@ export default function ThemeDetail() {
             {/* Color Theme Consistency Checker */}
             <ColorThemeConsistencyChecker category={decodedTheme} />
             
-            <PostsTable 
-              posts={posts as any}
-              onPostsChange={handlePostsChange}
-              isAdmin={isAdmin}
-              category={decodedTheme}
-              selectedThemeId={selectedThemeId}
-              onThemeChange={setSelectedThemeId}
-            />
+            <ProcessingStatesProvider>
+              <PostsTable 
+                posts={posts as any}
+                onPostsChange={handlePostsChange}
+                isAdmin={isAdmin}
+                category={decodedTheme}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={setSelectedThemeId}
+              />
+            </ProcessingStatesProvider>
           </Suspense>
         </div>
       </div>

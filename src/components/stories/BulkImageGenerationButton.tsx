@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
-import { useProcessingStates } from '@/hooks/useProcessingStates';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
@@ -16,7 +16,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   onPostsChange,
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
-  const { isGenerating, setBulkProcessing } = useProcessingStates();
+  const { isGenerating, setBulkProcessing } = useProcessingStatesContext();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   
