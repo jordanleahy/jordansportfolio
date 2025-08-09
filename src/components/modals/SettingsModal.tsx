@@ -25,7 +25,8 @@ export const SettingsModal: React.FC = () => {
   const { data: tiers } = useSubscriptionTiers();
   const navigate = useNavigate();
   const { data: subStatus } = useSubscriptionStatus();
-  const isFreeCurrentPlan = subStatus?.subscription?.tier?.name?.toLowerCase()?.startsWith('free') || subStatus?.hasActiveSubscription === false;
+  const FREE_TIER_ID = '4204f405-c592-48b1-9df8-b89e01f42db4';
+  const isFreeCurrentPlan = subStatus?.subscription?.tier_id === FREE_TIER_ID || subStatus?.hasActiveSubscription === false;
 
   // Derive daily limits from active tiers
   const freeTier = tiers?.find((t) => t.name?.toLowerCase()?.startsWith('free'));
@@ -117,7 +118,7 @@ export const SettingsModal: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
                   {/* Free Plan */}
                   <Card className="relative">
-                    {isFreeCurrentPlan && (
+                    {(subStatus?.subscription?.tier_id === '4204f405-c592-48b1-9df8-b89e01f42db4' || subStatus?.hasActiveSubscription === false) && (
                       <span className="absolute top-3 right-3 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-medium px-2 py-1">
                         Your Plan
                       </span>
