@@ -39,20 +39,22 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !serviceRoleKey) {
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
       throw new Error("Supabase environment not configured");
     }
 
-    // Create client with anon key for auth, then service role for operations
-    const authClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") || "", {
+    // Create auth client to verify user
+    const authClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
     });
 
     const user = await getUser(authClient);
-    
+    const userId = user.id;
+
     // Create service role client for database operations
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const userId = user.id;
 
     // Fetch posts for this user, category (+ optional theme) missing 16:9
     let query = supabase
