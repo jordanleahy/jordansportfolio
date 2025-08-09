@@ -20,14 +20,14 @@ export const SYSTEM_PROMPT_CATEGORIES = {
   CONVINCING_STORY: 'convincing_story',
 } as const;
 
-// OpenAI Model Versions (Latest)
+// OpenAI Model Versions (Latest - gpt-5 models launched Aug 7, 2025)
 export const OPENAI_MODELS = {
-  // Latest flagship model
+  // Latest flagship model (launched Aug 7, 2025)
   FLAGSHIP: 'gpt-5-mini',
   // Reasoning models
   REASONING: 'o3-2025-04-16', 
   REASONING_FAST: 'o4-mini-2025-04-16',
-  // Vision model
+  // Vision model (gpt-5-mini has vision capabilities)
   VISION: 'gpt-5-mini',
   // Legacy models (deprecated)
   LEGACY_GPT4O: 'gpt-4o',
