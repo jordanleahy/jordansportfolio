@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 
 interface UseTypewriterEffectOptions {
   texts: string[];
+  baseText?: string;
+  suffixes?: string[];
   typingSpeed?: number;
   deletingSpeed?: number;
   pauseDuration?: number;
@@ -11,6 +13,8 @@ interface UseTypewriterEffectOptions {
 
 export function useTypewriterEffect({
   texts,
+  baseText,
+  suffixes,
   typingSpeed = 100,
   deletingSpeed = 50,
   pauseDuration = 2000,
@@ -22,21 +26,29 @@ export function useTypewriterEffect({
   const [isDeleting, setIsDeleting] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
+  // Use suffixes mode if baseText and suffixes are provided, otherwise use legacy texts mode
+  const isBaseTextMode = Boolean(baseText && suffixes && suffixes.length > 0);
+  const workingTexts = isBaseTextMode ? suffixes : texts;
+  const base = isBaseTextMode ? baseText : '';
+
   useEffect(() => {
-    if (texts.length === 0) return;
+    if (workingTexts.length === 0) return;
 
     const animate = () => {
-      const currentText = texts[currentIndex];
+      const currentSuffix = workingTexts[currentIndex];
+      const fullTargetText = base + currentSuffix;
       
       if (isDeleting) {
-        // Delete one character
+        // Delete one character from the suffix only
         setDisplayText(prev => {
-          const newText = prev.slice(0, -1);
+          // Only delete from the suffix part (after base text)
+          const suffixPart = prev.slice(base.length);
+          const newSuffixPart = suffixPart.slice(0, -1);
+          const newText = base + newSuffixPart;
           
-          if (newText.length === 0) {
-            // Finished deleting, move to next text
-            const nextIndex = loop ? (currentIndex + 1) % texts.length : Math.min(currentIndex + 1, texts.length - 1);
-            console.log('🔄 Moving from text', currentIndex, 'to', nextIndex, '- from:', texts[currentIndex], 'to:', texts[nextIndex]);
+          if (newSuffixPart.length === 0) {
+            // Finished deleting suffix, move to next text
+            const nextIndex = loop ? (currentIndex + 1) % workingTexts.length : Math.min(currentIndex + 1, workingTexts.length - 1);
             
             timeoutRef.current = setTimeout(() => {
               setCurrentIndex(nextIndex);
@@ -53,11 +65,12 @@ export function useTypewriterEffect({
       } else {
         // Type one character
         setDisplayText(prev => {
-          const newText = currentText.slice(0, prev.length + 1);
+          const currentLength = prev.length;
+          const newText = fullTargetText.slice(0, currentLength + 1);
           
-          if (newText.length === currentText.length) {
-            // Finished typing, start deleting after pause
-            if (loop || currentIndex < texts.length - 1) {
+          if (newText.length === fullTargetText.length) {
+            // Finished typing, start deleting after pause (only if there are more texts or loop is enabled)
+            if (loop || currentIndex < workingTexts.length - 1) {
               timeoutRef.current = setTimeout(() => {
                 setIsDeleting(true);
                 animate();
@@ -78,15 +91,20 @@ export function useTypewriterEffect({
       clearTimeout(timeoutRef.current);
     }
     
-    // Start the animation cycle
-    timeoutRef.current = setTimeout(animate, 100);
+    // Initialize with base text if in base text mode
+    if (isBaseTextMode && displayText === '') {
+      setDisplayText(base);
+      timeoutRef.current = setTimeout(animate, 100);
+    } else {
+      timeoutRef.current = setTimeout(animate, 100);
+    }
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, isDeleting, texts, typingSpeed, deletingSpeed, pauseDuration, deletePauseDuration, loop]);
+  }, [currentIndex, isDeleting, workingTexts, base, isBaseTextMode, typingSpeed, deletingSpeed, pauseDuration, deletePauseDuration, loop]);
 
   const reset = () => {
     if (timeoutRef.current) {

@@ -3,7 +3,9 @@ import { cn } from "@/lib/utils";
 import { useTypewriterEffect } from "@/hooks/useTypewriterEffect";
 
 interface TypewriterInputProps extends Omit<React.ComponentProps<"input">, "placeholder"> {
-  typewriterTexts: string[];
+  typewriterTexts?: string[];
+  baseText?: string;
+  suffixes?: string[];
   fallbackPlaceholder?: string;
   typingSpeed?: number;
   deletingSpeed?: number;
@@ -15,6 +17,8 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
     className, 
     type, 
     typewriterTexts,
+    baseText,
+    suffixes,
     fallbackPlaceholder = "Type here...",
     typingSpeed = 80,
     deletingSpeed = 40,
@@ -28,7 +32,9 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
     const [hasValue, setHasValue] = React.useState(Boolean(value));
     
     const { displayText, reset } = useTypewriterEffect({
-      texts: typewriterTexts,
+      texts: typewriterTexts || [],
+      baseText,
+      suffixes,
       typingSpeed,
       deletingSpeed,
       pauseDuration,
@@ -49,7 +55,8 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
       onBlur?.(e);
     };
 
-    const showTypewriter = !isFocused && !hasValue && typewriterTexts.length > 0;
+    const hasTypewriterContent = (typewriterTexts && typewriterTexts.length > 0) || (baseText && suffixes && suffixes.length > 0);
+    const showTypewriter = !isFocused && !hasValue && hasTypewriterContent;
     const placeholder = showTypewriter ? displayText : fallbackPlaceholder;
 
     return (
