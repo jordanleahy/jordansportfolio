@@ -27,43 +27,6 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
   const [isCancelling, setIsCancelling] = useState(false);
   
-  // Listen for real-time database updates on the Day 1 post's image_4_3_url
-  useEffect(() => {
-    if (!user?.id || !category) return;
-
-    const channel = supabase
-      .channel(`day-1-image-updates-${category}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'social_media_posts',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          const updatedPost = payload.new as any;
-          // Check if this is a Day 1 post for our category and has a new image
-          if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.image_4_3_url) {
-            console.log('🎨 Day 1 image updated:', updatedPost.image_4_3_url);
-            setCurrentImageUrl(updatedPost.image_4_3_url);
-            setIsGeneratingDay1(false);
-            setGenerationError(null);
-          }
-          // Handle failed generation
-          if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.image_4_3_status === 'failed') {
-            console.log('❌ Day 1 image generation failed');
-            setIsGeneratingDay1(false);
-            setGenerationError('Failed to generate Day 1 image');
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, category]);
 
   // Reset generation attempt tracking when theme changes
   useEffect(() => {
