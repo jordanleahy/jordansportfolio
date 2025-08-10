@@ -78,6 +78,9 @@ verify_jwt = true
 [functions.get-usage-summary]
 verify_jwt = true
 
+[functions.social-media-agent]
+verify_jwt = true
+
 # ... keep existing code (other functions)
 
 [functions.check-subscription]
