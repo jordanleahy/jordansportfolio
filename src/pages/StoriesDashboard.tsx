@@ -562,7 +562,15 @@ export default function StoriesDashboard() {
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" fluid className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 px-0">
-          <AuroraBackground className="h-[60vh] md:h-[70vh]">
+          <AuroraBackground 
+            className="h-[60vh] md:h-[70vh] relative"
+            style={{
+              backgroundImage: 'url(/src/assets/story-ship-bg.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Story Ship</h1>
               <p className="text-base md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
