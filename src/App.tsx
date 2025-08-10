@@ -28,6 +28,7 @@ import PublicSharedCollection from "./pages/PublicSharedCollection";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
+import Library from "./pages/Library";
 
 import { AgentDetail } from "./pages/agents/AgentDetail";
 import { AgentEdit } from "./pages/agents/AgentEdit";
@@ -234,6 +235,9 @@ function App() {
                 <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
                 <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
+
+                {/* Public Library of shared collections */}
+                <Route path="/library" element={<Library />} />
 
                 {/* Admin Users */}
                 <Route 

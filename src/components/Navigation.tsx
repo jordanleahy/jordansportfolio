@@ -78,6 +78,7 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
     { href: "/", label: "Home", icon: Home },
     { href: "/#case-studies", label: "Case Studies", icon: Target },
     { href: "/blog", label: "Blog", icon: FileText },
+    { href: "/library", label: "Library", icon: BookOpen },
     { href: "/companies", label: "Companies", icon: Heart },
     { href: "/comparisons", label: "Battlecards", icon: GitCompare },
     { href: "/#about", label: "About", icon: User },
@@ -421,6 +422,18 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
+                          to="/library"
+                          className={cn(navLinkStyles, isActive("/library") && "bg-accent text-accent-foreground")}
+                        >
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          Library
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
                           to="/companies"
                           className={cn(navLinkStyles, isActive("/companies") && "bg-accent text-accent-foreground")}
                         >
@@ -607,6 +620,15 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                       )}
                     >
                       <FileText className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to="/library"
+                      className={cn(
+                        "p-2 rounded-lg transition-colors hover:bg-accent",
+                        isActive("/library") && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <BookOpen className="h-4 w-4" />
                     </Link>
                   </>
                 )}
