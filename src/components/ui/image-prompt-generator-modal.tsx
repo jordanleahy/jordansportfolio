@@ -105,9 +105,9 @@ export const ImagePromptGeneratorModal = ({
       const cleanPrompt = prompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
       setBasePrompt(cleanPrompt);
       
-      // Apply aspect ratio if needed
+      // Apply aspect ratio if needed - integrate naturally at the end
       const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
-        ? `${selectedAspectRatio} aspect ratio. ${cleanPrompt}`
+        ? `${cleanPrompt}. Composed in ${selectedAspectRatio} aspect ratio format with appropriate layout for this orientation.`
         : cleanPrompt;
         
       setGeneratedPrompt(finalPrompt);
@@ -150,8 +150,8 @@ export const ImagePromptGeneratorModal = ({
     if (basePrompt) {
       // Clean any existing aspect ratio mentions from the base prompt
       const cleanPrompt = basePrompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
-      // Add the new aspect ratio at the beginning for better AI attention
-      const newPrompt = `${ratio} aspect ratio. ${cleanPrompt}`;
+      // Add the new aspect ratio naturally at the end
+      const newPrompt = `${cleanPrompt}. Composed in ${ratio} aspect ratio format with appropriate layout for this orientation.`;
       setGeneratedPrompt(newPrompt);
     }
   };
@@ -185,7 +185,7 @@ export const ImagePromptGeneratorModal = ({
         
         // Apply current aspect ratio if needed
         const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
-          ? `${selectedAspectRatio} aspect ratio. ${cleanCachedPrompt}`
+          ? `${cleanCachedPrompt}. Composed in ${selectedAspectRatio} aspect ratio format with appropriate layout for this orientation.`
           : cleanCachedPrompt;
           
         setGeneratedPrompt(finalPrompt);
