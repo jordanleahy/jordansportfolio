@@ -9,6 +9,7 @@ import type {
   OptimizedBulkGenerationHook, 
   AspectRatio 
 } from '@/types/bulkImageGeneration';
+import { useParams } from 'react-router-dom';
 
 // Helper function to create a cache key for prompt caching
 const createPromptCacheKey = (request: BulkImageGenerationRequest): string => {
@@ -123,6 +124,9 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
   });
   const [error, setError] = useState<string | null>(null);
   const [cachedPrompts, setCachedPrompts] = useState<Map<string, string>>(new Map());
+  
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
   // Function to get or generate prompt with caching
   const getOrGeneratePrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {
@@ -157,6 +161,7 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
       body: { 
         title: request.title, 
         description: request.description, 
+        theme,
         category: request.category,
         colorTheme
       }

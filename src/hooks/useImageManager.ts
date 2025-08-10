@@ -7,6 +7,7 @@ import type { AspectRatio } from '@/types/bulkImageGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
+import { useParams } from 'react-router-dom';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
@@ -21,7 +22,10 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
-
+  
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  
   const sanitizeTitle = useCallback((title: string) => {
     return title.toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
@@ -64,6 +68,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         body: {
           title,
           description,
+          theme,
           category: category || 'cdi',
           aspectRatio: aspectRatio.replace('_', ':')
         }

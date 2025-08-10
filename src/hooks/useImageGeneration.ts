@@ -4,11 +4,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
+import { useParams } from 'react-router-dom';
 
 export const useImageGeneration = () => {
   const { toast } = useToast();
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
+  
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
@@ -38,6 +42,7 @@ export const useImageGeneration = () => {
         body: {
           title: post.title,
           description: post.description,
+          theme,
           category: post.category || 'general',
           colorTheme: colorTheme?.name || ''
         }

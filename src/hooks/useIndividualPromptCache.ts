@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
+import { useParams } from 'react-router-dom';
 
 interface IndividualPromptData {
   prompt: string;
@@ -13,6 +14,8 @@ interface IndividualPromptData {
 export const useIndividualPromptCache = (postId: string) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
   const query = useQuery({
     queryKey: QUERY_KEYS.individualPrompt(postId),
@@ -122,6 +125,7 @@ export const useIndividualPromptCache = (postId: string) => {
         body: { 
           title, 
           description, 
+          theme,
           category: category || 'gpt-5-launch',
           aspect_ratio: aspectRatio || '16:9'
         }
