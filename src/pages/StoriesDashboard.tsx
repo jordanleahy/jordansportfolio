@@ -638,7 +638,28 @@ export default function StoriesDashboard() {
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
               </div>
-              {isAdmin && <div className="mt-2">
+              {isAdmin && <div className="mt-2 space-y-2">
+                  {/* Submit button - only show when text is entered */}
+                  {customThemeDescription.trim() && (
+                    <Button 
+                      onClick={handleGenerateCustomTheme}
+                      disabled={isGeneratingTheme}
+                      className="w-full"
+                    >
+                      {isGeneratingTheme ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  
                   {roleLoading ? <Skeleton className="h-10 w-48" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline">
                       Import Themes
                     </Button>}
