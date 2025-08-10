@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen } from "lucide-react";
+import { Eye, BookOpen, Star } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -482,6 +482,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           aria-label="Featured"
                           title={isFeaturing ? 'Featuring…' : 'Feature'}
                         >
+                          <Star className="h-3 w-3 mr-1" />
                           Featured
                         </Button>
                         <Button
@@ -493,6 +494,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           aria-label="Library"
                           title={isPublishing ? 'Publishing…' : 'Library'}
                         >
+                          <BookOpen className="h-3 w-3 mr-1" />
                           Library
                         </Button>
                         <Button
@@ -602,6 +604,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           aria-label="Featured"
                           title={isFeaturing ? 'Featuring…' : 'Feature'}
                         >
+                          <Star className="h-3 w-3 mr-1" />
                           Featured
                         </Button>
                         <Button
@@ -613,6 +616,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           aria-label="Library"
                           title={isPublishing ? 'Publishing…' : 'Library'}
                         >
+                          <BookOpen className="h-3 w-3 mr-1" />
                           Library
                         </Button>
                         <Button 

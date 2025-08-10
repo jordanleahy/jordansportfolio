@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { SocialMediaPost } from '@/types/socialMedia';
+import { BookOpen } from 'lucide-react';
 
 interface LibraryChipButtonProps {
   post: SocialMediaPost;
@@ -66,11 +67,12 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
     <Button
       variant="outline"
       size="sm"
-      className="rounded-full px-3"
+      className="rounded-full px-3 inline-flex items-center gap-1"
       onClick={handlePublishSingle}
       disabled={disabled}
       title={!post.image_16_9_url ? 'Add a 16:9 image to publish to Library' : 'Publish to Library'}
     >
+      <BookOpen className="h-3 w-3" />
       Library
     </Button>
   );
