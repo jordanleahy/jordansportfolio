@@ -207,13 +207,26 @@ const BlogEditor = () => {
     updateFormData({ meta_keywords: keywords });
   }, [updateFormData]);
 
-    const handleOpenPromptModal = useCallback((index: number) => {
+  const handleOpenPromptModal = useCallback((index: number) => {
     setPromptModalOpen(index);
   }, []);
 
   const handleClosePromptModal = useCallback(() => {
     setPromptModalOpen(null);
   }, []);
+
+  const handleRegenerateSection = useCallback(async (index: number) => {
+    if (!existingPost?.id) return;
+    setImageGenerationStatus('generating');
+    try {
+      await supabase.functions.invoke('regenerate-blog-visuals', {
+        body: { blogPostId: existingPost.id, sectionIndex: index, aspectRatio: '4:3' }
+      });
+      toast({ title: 'Regenerating image', description: 'Working in the background. This will auto-update when ready.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Failed to start regeneration', description: e?.message || 'Please try again.' });
+    }
+  }, [existingPost?.id, toast]);
 
   // Manual save function with full validation
   const handleSave = useCallback(async (shouldPublish = false) => {
@@ -708,7 +721,8 @@ const BlogEditor = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => handleOpenPromptModal(index)}
+                            onClick={() => handleRegenerateSection(index)}
+                            disabled={imageGenerationStatus === 'generating'}
                           >
                             Regenerate
                           </Button>
