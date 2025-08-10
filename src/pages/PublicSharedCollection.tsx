@@ -88,14 +88,14 @@ export default function PublicSharedCollection() {
     <div className="min-h-screen">
       <Helmet>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription.slice(0, 155)} />
+        <meta name="description" content={pageDescription.slice(0, 165)} />
         <link rel="canonical" href={publicUrl} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription.slice(0, 200)} />
+        <meta property="og:description" content={pageDescription.slice(0, 165)} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={publicUrl} />
         {items[0]?.image_16_9_url && (
-          <meta property="og:image" content={items[0].image_16_9_url} />
+          <meta property="og:image" content={items[0].image_16_9_url.startsWith('http') ? items[0].image_16_9_url : `${window.location.origin}${items[0].image_16_9_url}`} />
         )}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

@@ -356,11 +356,19 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
 
       // Choose posts currently in scope (this page) and only those with a 16:9 image
       const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
-      const candidateIds = scoped.filter(p => !!p.image_16_9_url).map(p => p.id);
+      const candidates = scoped.filter(p => !!p.image_16_9_url);
+      const candidateIds = candidates.map(p => p.id);
       if (candidateIds.length === 0) {
         toast.error('No posts with 16:9 images found on this page');
         return;
       }
+
+      // Build safe title/description for OG on the public page
+      const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
+      const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
+      const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
+      const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
+      const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
       setIsPublishing(true);
       const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
@@ -368,6 +376,8 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         p_post_ids: candidateIds,
         p_category: null,
         p_theme_id: null,
+        p_title: titleArg,
+        p_description: descriptionArg,
       });
       if (error) {
         console.error(error);
