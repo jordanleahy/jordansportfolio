@@ -282,11 +282,15 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
             src={currentImageUrl} 
             alt={`${theme} Day 1 preview`}
             className="w-full h-full object-cover transition-all duration-200 group-hover:scale-105"
+            loading="lazy"
+            decoding="async"
+            sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+            referrerPolicy="no-referrer"
             onError={(e) => {
-              // Fallback to gradient background if image fails to load
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              target.nextElementSibling?.classList.remove('hidden');
+              const target = e.currentTarget as HTMLImageElement;
+              // Prevent infinite loop if placeholder also fails
+              if (target.src.includes('/placeholder.svg')) return;
+              setCurrentImageUrl('/placeholder.svg');
             }}
           />
         ) : null}
