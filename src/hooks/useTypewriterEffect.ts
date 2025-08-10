@@ -35,11 +35,12 @@ export function useTypewriterEffect({
           
           if (newText.length === 0) {
             // Finished deleting, move to next text
-            setIsDeleting(false);
             const nextIndex = loop ? (currentIndex + 1) % texts.length : Math.min(currentIndex + 1, texts.length - 1);
+            console.log('🔄 Moving from text', currentIndex, 'to', nextIndex, '- from:', texts[currentIndex], 'to:', texts[nextIndex]);
             
             timeoutRef.current = setTimeout(() => {
               setCurrentIndex(nextIndex);
+              setIsDeleting(false);
             }, deletePauseDuration);
             
             return newText;
