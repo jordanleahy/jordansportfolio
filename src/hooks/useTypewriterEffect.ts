@@ -20,59 +20,72 @@ export function useTypewriterEffect({
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (texts.length === 0) return;
 
-    const currentText = texts[currentIndex];
-
-    const type = () => {
+    const animate = () => {
+      const currentText = texts[currentIndex];
+      
       if (isDeleting) {
+        // Delete one character
         setDisplayText(prev => {
           const newText = prev.slice(0, -1);
-          // When we've deleted everything, move to next text
+          
           if (newText.length === 0) {
+            // Finished deleting, move to next text
             setIsDeleting(false);
-            setIsPaused(true);
+            const nextIndex = loop ? (currentIndex + 1) % texts.length : Math.min(currentIndex + 1, texts.length - 1);
+            
             timeoutRef.current = setTimeout(() => {
-              setIsPaused(false);
-              setCurrentIndex(prev => loop ? (prev + 1) % texts.length : Math.min(prev + 1, texts.length - 1));
+              setCurrentIndex(nextIndex);
             }, deletePauseDuration);
+            
+            return newText;
           }
+          
+          // Continue deleting
+          timeoutRef.current = setTimeout(animate, deletingSpeed);
           return newText;
         });
       } else {
+        // Type one character
         setDisplayText(prev => {
           const newText = currentText.slice(0, prev.length + 1);
-          // When we've typed the full text, start deleting
+          
           if (newText.length === currentText.length) {
+            // Finished typing, start deleting after pause
             if (loop || currentIndex < texts.length - 1) {
-              setIsPaused(true);
               timeoutRef.current = setTimeout(() => {
-                setIsPaused(false);
                 setIsDeleting(true);
+                animate();
               }, pauseDuration);
             }
+            return newText;
           }
+          
+          // Continue typing
+          timeoutRef.current = setTimeout(animate, typingSpeed);
           return newText;
         });
       }
     };
 
-    if (!isPaused && !timeoutRef.current) {
-      const speed = isDeleting ? deletingSpeed : typingSpeed;
-      timeoutRef.current = setTimeout(type, speed);
+    // Clear any existing timeout and start animation
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    
+    // Start the animation cycle
+    timeoutRef.current = setTimeout(animate, 100);
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
-        timeoutRef.current = undefined;
       }
     };
-  }, [displayText, currentIndex, isDeleting, isPaused, texts, typingSpeed, deletingSpeed, pauseDuration, deletePauseDuration, loop]);
+  }, [currentIndex, isDeleting, texts, typingSpeed, deletingSpeed, pauseDuration, deletePauseDuration, loop]);
 
   const reset = () => {
     if (timeoutRef.current) {
@@ -81,7 +94,6 @@ export function useTypewriterEffect({
     setDisplayText('');
     setCurrentIndex(0);
     setIsDeleting(false);
-    setIsPaused(false);
   };
 
   return { displayText, reset };
