@@ -27,6 +27,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
   const [isCancelling, setIsCancelling] = useState(false);
+  const generationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   
   // Listen to unified realtime events for Day 1 image updates
@@ -50,9 +51,16 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
 
           // Handle successful image generation
           if (updatedPost.image_4_3_url) {
+            console.log('✅ CategoryCard received image URL:', updatedPost.image_4_3_url);
             setCurrentImageUrl(updatedPost.image_4_3_url);
             setIsGeneratingDay1(false);
             setGenerationError(null);
+            
+            // Clear generation timeout
+            if (generationTimeoutRef.current) {
+              clearTimeout(generationTimeoutRef.current);
+              generationTimeoutRef.current = null;
+            }
           }
           
           // Handle failed generation
@@ -60,6 +68,12 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
             console.log('❌ Day 1 image generation failed for category:', category);
             setIsGeneratingDay1(false);
             setGenerationError('Failed to generate Day 1 image');
+            
+            // Clear generation timeout
+            if (generationTimeoutRef.current) {
+              clearTimeout(generationTimeoutRef.current);
+              generationTimeoutRef.current = null;
+            }
           }
           
           // Handle processing status
@@ -80,6 +94,12 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     imageGenerationAttempted.current = false;
     setGenerationError(null);
     setIsGeneratingDay1(false); // Reset generating state when theme changes
+    
+    // Clear any existing timeout
+    if (generationTimeoutRef.current) {
+      clearTimeout(generationTimeoutRef.current);
+      generationTimeoutRef.current = null;
+    }
   }, [theme, category]);
 
   // Sync image URL from props or firstPostData and manage generating state
@@ -156,6 +176,13 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       
       setIsGeneratingDay1(true);
       setGenerationError(null);
+
+      // Set a timeout to reset generating state if realtime doesn't respond
+      generationTimeoutRef.current = setTimeout(() => {
+        console.log('⏰ Generation timeout - resetting state for theme:', theme);
+        setIsGeneratingDay1(false);
+        setGenerationError('Generation timed out');
+      }, 30000); // 30 second timeout
 
       console.log('🎨 Calling generate-day-1-4-3 function for theme:', theme);
       
