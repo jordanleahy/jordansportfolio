@@ -46,15 +46,15 @@ export interface PostCardProps {
   onGenerateVoiceover?: (post: SocialMediaPost) => void;
   onVideoUpload: (postId: string, url: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
-  onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
+  onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
+  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', imageUrl: string) => void;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   onPostsChange?: () => void;
   processingStates: {
     [key: string]: boolean;
   };
   completingPosts?: Set<string>;
-  isGenerating: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3') => boolean;
+  isGenerating: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => boolean;
   isAdmin?: boolean;
 }
 
@@ -295,14 +295,14 @@ export interface VideoUploadCardProps {
 
 export interface PostImageUploadCardProps {
   post: SocialMediaPost;
-  type: '16_9' | '9_16' | '3_4' | '4_3';
+  type: '16_9' | '9_16' | '3_4' | '4_3' | '1_1';
   label: string;
   imageUrl?: string;
   isUploading: boolean;
-  onImageDelete?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => void;
-  onGenerationStart?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
-  onGenerationEnd?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => void;
+  onImageDelete?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
+  onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', imageUrl: string) => void;
+  onGenerationStart?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
+  onGenerationEnd?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
 }
 
 export interface PostMediaGalleryModalProps {

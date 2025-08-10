@@ -50,7 +50,8 @@ export const PostImageUploadCard = ({
     '16_9': '16:9',
     '9_16': '9:16', 
     '3_4': '3:4',
-    '4_3': '4:3'
+    '4_3': '4:3',
+    '1_1': '1:1'
   };
 
   const aspectRatio = aspectRatioMap[type];

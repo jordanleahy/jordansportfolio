@@ -11,7 +11,7 @@ interface UseImageManagerProps {
 }
 
 interface UseImageManagerReturn {
-  handleGenerateImage: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
+  handleGenerateImage: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 
 export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
@@ -35,7 +35,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
 
   const handleGenerateImage = async (
     postId: string, 
-    aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', 
+    aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', 
     title: string, 
     description: string, 
     category?: string

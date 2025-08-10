@@ -39,15 +39,15 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
 
-  const handleImageGenerationStart = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
+  const handleImageGenerationStart = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => {
     // This is handled by the parent component through processingStates
   };
 
-  const handleImageGenerationEnd = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3') => {
+  const handleImageGenerationEnd = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => {
     // This is handled by the parent component through processingStates
   };
 
-  const handleImageGenerated = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3', imageUrl: string) => {
+  const handleImageGenerated = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', imageUrl: string) => {
     onImageGenerated(postId, aspectRatio, imageUrl);
   };
 
@@ -132,7 +132,22 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
             />
           </div>
 
-          {/* Top row - 3 columns */}
+          {/* Primary card - 1:1 Square (default/cheapest) */}
+          <div className="mb-3">
+            <PostImageUploadCard
+              post={post}
+              type="1_1"
+              label="Square (1:1) - Default"
+              imageUrl={post.image_1_1_url || undefined}
+              isUploading={processingStates[`${post.id}_1_1`]}
+              onImageDelete={onImageDelete}
+              onImageGenerated={handleImageGenerated}
+              onGenerationStart={handleImageGenerationStart}
+              onGenerationEnd={handleImageGenerationEnd}
+            />
+          </div>
+
+          {/* Additional formats - top row */}
           <div className="grid grid-cols-3 gap-3 mb-3">
             <PostImageUploadCard
               post={post}
@@ -169,8 +184,8 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
             />
           </div>
 
-          {/* Bottom row - 2 columns */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Bottom row - 1 column */}
+          <div className="grid grid-cols-1 gap-3">
             <PostImageUploadCard
               post={post}
               type="4_3"
