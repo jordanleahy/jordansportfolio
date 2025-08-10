@@ -29,7 +29,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   return (
     <div className="space-y-4">
       {/* Hero Image Display */}
-      <div className="aspect-video rounded-t-lg overflow-hidden">
+      <div className="aspect-square md:aspect-video rounded-t-lg overflow-hidden">
         {isLoading ? (
           <SimpleShimmer 
             variant="full"
