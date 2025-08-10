@@ -30,7 +30,18 @@ export interface ThemeWithPosts {
     id: string;
     title: string;
     description: string;
+    day?: number;
     image_url?: string;
+    image_16_9_url?: string;
+    image_4_3_url?: string;
+    image_9_16_url?: string;
+    image_3_4_url?: string;
+    image_1_1_url?: string;
+    image_16_9_status?: string;
+    image_4_3_status?: string;
+    image_9_16_status?: string;
+    image_3_4_status?: string;
+    image_1_1_status?: string;
   } | null;
 }
 

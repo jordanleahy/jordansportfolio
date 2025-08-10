@@ -252,7 +252,7 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // Get post counts efficiently using indexed columns
+    // Get post counts efficiently using indexed columns with day and status info
     const themeIds = themes.map(t => t.id);
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
@@ -261,15 +261,23 @@ export class OptimizedSocialMediaService {
         id,
         title,
         description,
+        day,
         image_16_9_url,
         image_4_3_url,
         image_9_16_url,
         image_3_4_url,
+        image_1_1_url,
+        image_16_9_status,
+        image_4_3_status,
+        image_9_16_status,
+        image_3_4_status,
+        image_1_1_status,
         created_at
       `)
       .in('theme_id', themeIds)
       .eq('user_id', user.id)
       .neq('status', 'deleted')
+      .order('day', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true });
 
     if (postError) throw postError;
@@ -283,14 +291,22 @@ export class OptimizedSocialMediaService {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Process themes with their post data
+    // Process themes with their post data, prioritizing Day 1 posts
     const processedThemes = themes.map((theme: any) => {
       const posts = postsByTheme[theme.id] || [];
-      const firstPost = posts[0];
+      
+      // Find Day 1 post first, then fall back to earliest post with image
+      const day1Post = posts.find(p => p.day === 1);
+      const postWithImage = posts.find(p => 
+        p.image_16_9_url || p.image_4_3_url || p.image_9_16_url || p.image_3_4_url || p.image_1_1_url
+      );
+      const firstPost = day1Post || postWithImage || posts[0];
+      
       const imageUrl = firstPost?.image_16_9_url ||
                       firstPost?.image_4_3_url ||
                       firstPost?.image_9_16_url ||
-                      firstPost?.image_3_4_url;
+                      firstPost?.image_3_4_url ||
+                      firstPost?.image_1_1_url;
       
       return {
         id: theme.id,
@@ -302,12 +318,23 @@ export class OptimizedSocialMediaService {
           id: firstPost.id,
           title: firstPost.title,
           description: firstPost.description,
-          image_url: imageUrl
+          day: firstPost.day,
+          image_url: imageUrl,
+          image_16_9_url: firstPost.image_16_9_url,
+          image_4_3_url: firstPost.image_4_3_url,
+          image_9_16_url: firstPost.image_9_16_url,
+          image_3_4_url: firstPost.image_3_4_url,
+          image_1_1_url: firstPost.image_1_1_url,
+          image_16_9_status: firstPost.image_16_9_status,
+          image_4_3_status: firstPost.image_4_3_status,
+          image_9_16_status: firstPost.image_9_16_status,
+          image_3_4_status: firstPost.image_3_4_status,
+          image_1_1_status: firstPost.image_1_1_status
         } : null
       };
     });
     
-    this.setCache(cacheKey, processedThemes, 30 * 60 * 1000); // 30 minutes cache
+    this.setCache(cacheKey, processedThemes, 5 * 60 * 1000); // 5 minutes cache for faster updates
     return processedThemes;
   }
 

@@ -170,9 +170,15 @@ export default function StoriesDashboard() {
       description: `"${newPost.title}" added to ${newPost.category}`
     });
   };
-  const handlePostUpdate = (post: SocialMediaPost) => {
-    // Handle post updates if needed
+  const handlePostUpdate = async (post: SocialMediaPost) => {
+    // Refresh themes when posts are updated to keep grid in sync
     console.log('Post updated:', post);
+    try {
+      const themes = await optimizedSocialMediaService.refreshAvailableThemes();
+      setAvailableThemes(themes);
+    } catch (error) {
+      console.error('Failed to refresh themes after post update:', error);
+    }
   };
 
   // Realtime setup

@@ -38,7 +38,8 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       // Type guard to ensure we have the correct event payload structure
       if ('table' in event.payload && 'eventType' in event.payload && 'data' in event.payload) {
         if (event.payload.table === 'social_media_posts' && event.payload.eventType === 'UPDATE') {
-          const updatedPost = event.payload.data;
+          // Fix: Access the new data correctly from the payload
+          const updatedPost = event.payload.data.new || event.payload.data;
         
         // Check if this is a Day 1 post for our category
         if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.user_id === user.id) {
