@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { ArrowLeft, Calendar, Tag, Lightbulb, Mic } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Lightbulb, Mic, Image as ImageIcon } from 'lucide-react';
 import { useColorTheme } from '@/hooks/useColorThemes';
 import { ImagePreviewModal } from '@/components/stories/ImagePreviewModal';
 import { VoiceoverScriptModal } from '@/components/voiceover/VoiceoverScriptModal';
+import { useImageGeneration } from '@/hooks/useImageGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 export default function PostDetail() {
@@ -20,12 +21,21 @@ export default function PostDetail() {
   const { user, loading } = useAuth();
   const [previewImage, setPreviewImage] = React.useState<{ url: string; alt: string } | null>(null);
   const [showVoiceoverModal, setShowVoiceoverModal] = React.useState(false);
+  
+  // Image generation hook
+  const { 
+    isGenerating, 
+    generationStep, 
+    generateHeroImage, 
+    creditStatus 
+  } = useImageGeneration();
 
   // Fetch the specific post
   const { 
     data: post, 
     isLoading: isLoadingPost, 
-    error 
+    error,
+    refetch: refetchPost
   } = useQuery({
     queryKey: ['social-media-post', postId],
     queryFn: () => optimizedSocialMediaService.getPostById(postId!),
@@ -44,6 +54,21 @@ export default function PostDetail() {
 
   const handleImageClick = (imageUrl: string, alt: string) => {
     setPreviewImage({ url: imageUrl, alt });
+  };
+
+  const handleGenerateImage = async () => {
+    if (!post) return;
+    
+    await generateHeroImage(
+      {
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        category: post.category
+      },
+      colorTheme,
+      refetchPost
+    );
   };
 
   const handleBackClick = () => {
@@ -154,10 +179,54 @@ export default function PostDetail() {
                 </div>
               </div>
 
-              {/* Images Section */}
+              {/* 1:1 Hero Image Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">1:1 Hero Image</h2>
+                <div className="space-y-4">
+                  {post.image_1_1_url ? (
+                    <div className="space-y-2">
+                      <img
+                        src={post.image_1_1_url}
+                        alt="1:1 Hero image"
+                        className="w-full max-w-md h-auto rounded-lg border cursor-pointer hover:opacity-80 transition-opacity mx-auto"
+                        onClick={() => handleImageClick(post.image_1_1_url!, '1:1 Hero image')}
+                      />
+                      <p className="text-sm text-muted-foreground text-center">
+                        Status: {post.image_1_1_status || 'complete'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="w-full max-w-md mx-auto aspect-square bg-muted rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center p-8">
+                      <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-center text-muted-foreground">
+                        No 1:1 hero image generated yet
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handleGenerateImage}
+                      disabled={isGenerating || !creditStatus?.hasCredits}
+                      className="gap-2"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                      {isGenerating ? generationStep || 'Generating...' : 'Generate 1:1 Image'}
+                    </Button>
+                  </div>
+                  
+                  {!creditStatus?.hasCredits && (
+                    <p className="text-sm text-destructive text-center">
+                      Credit limit reached
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Other Images Section */}
               {(post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url) && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold mb-4">Images</h2>
+                  <h2 className="text-xl font-semibold mb-4">Other Images</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {post.image_16_9_url && (
                       <div className="space-y-2">
@@ -253,18 +322,6 @@ export default function PostDetail() {
 
               {/* Actions */}
               <div className="flex gap-2 pt-6 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // Here you could implement prompt generation logic
-                    console.log('Generate prompt for post:', post.id);
-                  }}
-                  className="gap-2"
-                >
-                  <Lightbulb className="h-4 w-4" />
-                  Generate Prompt
-                </Button>
-                
                 <Button
                   variant="outline"
                   onClick={() => setShowVoiceoverModal(true)}
