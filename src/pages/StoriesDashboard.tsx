@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Users, MessageSquareText, Send, Download } from 'lucide-react';
+import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
@@ -36,7 +36,7 @@ const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImpo
 export default function StoriesDashboard() {
   const { user, loading, isAdmin, roleLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
@@ -601,47 +601,39 @@ export default function StoriesDashboard() {
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/80 z-[1]" />
-            <div className="sail-shaped-container relative z-10 flex flex-col items-center justify-center gap-8 px-12 py-16 text-center max-w-5xl mx-auto">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground drop-shadow-lg">Story Ship</h1>
-                <p className="text-lg md:text-xl text-foreground/90 drop-shadow-md font-medium">Every Thought is a Visual Journey</p>
+            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center max-w-4xl mx-auto bg-background/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
+              <p className="text-base md:text-xl text-foreground">Every Thought is a Visual Journey</p>
+              <div className="w-full max-w-3xl mx-auto">
+                <Input
+                  aria-label="Describe your theme"
+                  placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
+                  value={customThemeDescription}
+                  onChange={(e) => setCustomThemeDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                      e.preventDefault();
+                      handleGenerateCustomTheme();
+                    }
+                  }}
+                  disabled={isGeneratingTheme || isProcessing}
+                />
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-2">
+                  <span>Press Enter to submit</span>
+                </div>
               </div>
-              
-              <div className="w-full max-w-4xl mx-auto space-y-6">
-                <div className="relative">
-                  <Input
-                    aria-label="Describe your theme"
-                    placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                    className="w-full h-18 px-10 py-7 text-lg bg-background/90 backdrop-blur-sm border-2 border-white/30 rounded-3xl placeholder:text-muted-foreground/70 focus:border-primary/60 focus:ring-4 focus:ring-primary/20 transition-all duration-300 hover:border-white/40 shadow-2xl font-medium"
-                    value={customThemeDescription}
-                    onChange={(e) => setCustomThemeDescription(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
-                        e.preventDefault();
-                        handleGenerateCustomTheme();
-                      }
-                    }}
-                    disabled={isGeneratingTheme || isProcessing}
-                  />
-                  {customThemeDescription.trim() && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <p className="text-sm text-muted-foreground/60 font-medium">Press Enter to submit</p>
-                    </div>
+              {isAdmin && (
+                <div className="mt-2">
+                  {roleLoading ? (
+                    <Skeleton className="h-10 w-48" />
+                  ) : (
+                    <Button onClick={() => setImportModalOpen(true)} variant="outline">
+                      Import Themes
+                    </Button>
                   )}
                 </div>
-                
-                <div className="flex justify-center">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => setIsImportModalOpen(true)}
-                    className="bg-white/20 backdrop-blur-sm border-white/30 text-foreground hover:bg-white/30 hover:border-white/40 transition-all duration-300 shadow-xl font-medium px-8 py-3"
-                  >
-                    <Download className="w-5 h-5 mr-2" />
-                    Import Themes
-                  </Button>
-                </div>
-              </div>
+              )}
             </div>
           </AuroraBackground>
 
@@ -651,8 +643,8 @@ export default function StoriesDashboard() {
           {isAdmin && (
             <Suspense fallback={<div>Loading...</div>}>
               <ThemeImportModal 
-                open={isImportModalOpen} 
-                onOpenChange={setIsImportModalOpen}
+                open={importModalOpen} 
+                onOpenChange={setImportModalOpen} 
                 onImportComplete={() => {
                   // Theme import completed
                 }}
