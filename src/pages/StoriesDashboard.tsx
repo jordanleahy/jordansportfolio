@@ -541,7 +541,7 @@ export default function StoriesDashboard() {
         </div>
       </PageLayout>;
   }
-  return <PageLayout>
+  return <PageLayout className="bg-slate-50 rounded-3xl px-[80px] py-[80px]">
       <Helmet>
         <title>Story Ship — Every Thought is a Visual Journey</title>
         <meta name="description" content="Every Thought is a Visual Journey" />
