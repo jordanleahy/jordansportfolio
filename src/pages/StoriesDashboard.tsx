@@ -548,7 +548,12 @@ export default function StoriesDashboard() {
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" fluid className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 px-0">
-          <AuroraBackground className="h-[60vh] md:h-[70vh] relative">
+          <AuroraBackground className="h-[60vh] md:h-[70vh] relative" style={{
+        backgroundImage: 'url(/src/assets/story-ship-bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
               <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl max-w-[2400px] h-[400px] w-full mx-4 flex flex-col justify-center rounded-[60px] bg-white/80">
                 <div className="space-y-6">
