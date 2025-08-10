@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+
 import { Input } from '@/components/ui/input';
 import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -28,33 +29,22 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 
 // Lazy load components
-const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({
-  default: module.ThemeImportModalOptimized
-})));
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+
 export default function StoriesDashboard() {
-  const {
-    user,
-    loading,
-    isAdmin,
-    roleLoading
-  } = useAuth();
+  const { user, loading, isAdmin, roleLoading } = useAuth();
   const queryClient = useQueryClient();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
   const [showHero, setShowHero] = useState(false);
-  const [duplicateInfo, setDuplicateInfo] = useState<{
-    category: string;
-    theme: string;
-  } | null>(null);
+  const [duplicateInfo, setDuplicateInfo] = useState<{ category: string; theme: string } | null>(null);
 
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -80,7 +70,7 @@ export default function StoriesDashboard() {
     onImportComplete: () => {
       toast({
         title: "Success!",
-        description: "Custom theme imported successfully"
+        description: "Custom theme imported successfully",
       });
       setCustomThemeDescription('');
     }
@@ -89,6 +79,7 @@ export default function StoriesDashboard() {
   // Enhanced initial load with loading states and error handling
   const [isLoadingThemes, setIsLoadingThemes] = useState(true);
   const [themesError, setThemesError] = useState<string | null>(null);
+
   React.useEffect(() => {
     const loadThemes = async () => {
       if (user?.id) {
@@ -97,7 +88,7 @@ export default function StoriesDashboard() {
           setThemesError(null);
           const themes = await optimizedSocialMediaService.getAvailableThemes();
           setAvailableThemes(themes);
-
+          
           // Clear textarea on page load to prevent accidental re-submission on refresh
           setCustomThemeDescription('');
         } catch (error) {
@@ -125,9 +116,7 @@ export default function StoriesDashboard() {
   // Auto-hide hero when content exists
   useEffect(() => {
     if (availableThemes.length > 0) {
-      try {
-        localStorage.setItem('stories_hero_seen', '1');
-      } catch {}
+      try { localStorage.setItem('stories_hero_seen', '1'); } catch {}
       setShowHero(false);
     }
   }, [availableThemes.length]);
@@ -136,37 +125,45 @@ export default function StoriesDashboard() {
   const handlePostInsert = (newPost: SocialMediaPost) => {
     toast({
       title: "New Post Created!",
-      description: `"${newPost.title}" added to ${newPost.category}`
+      description: `"${newPost.title}" added to ${newPost.category}`,
     });
   };
+
   const handlePostUpdate = (post: SocialMediaPost) => {
     // Handle post updates if needed
     console.log('Post updated:', post);
   };
 
+
   // Realtime setup
-  const {
-    isConnected,
-    connectionStatus
-  } = useUnifiedRealtime({
+  const { isConnected, connectionStatus } = useUnifiedRealtime({
     enabled: !!user,
     userId: user?.id,
     onPostInsert: handlePostInsert,
     onPostUpdate: handlePostUpdate
   });
+
   const handleDeleteCategory = async (category: string) => {
     try {
-      const {
-        error: postsError
-      } = await supabase.from('social_media_posts').delete().eq('category', category).eq('user_id', user?.id);
+      const { error: postsError } = await supabase
+        .from('social_media_posts')
+        .delete()
+        .eq('category', category)
+        .eq('user_id', user?.id);
+
       if (postsError) throw postsError;
-      const {
-        error: cacheError
-      } = await supabase.from('cached_prompts').delete().eq('category', category).eq('user_id', user?.id);
+
+      const { error: cacheError } = await supabase
+        .from('cached_prompts')
+        .delete()
+        .eq('category', category)
+        .eq('user_id', user?.id);
+
       if (cacheError) console.warn('Failed to delete cached prompts:', cacheError);
+
       toast({
         title: "Category Deleted",
-        description: `Successfully deleted "${category}" and all its posts`
+        description: `Successfully deleted "${category}" and all its posts`,
       });
     } catch (error: any) {
       console.error('Delete category error:', error);
@@ -183,16 +180,9 @@ export default function StoriesDashboard() {
     try {
       const themes = await optimizedSocialMediaService.refreshAvailableThemes();
       setAvailableThemes(themes);
-      toast({
-        title: 'Refreshed',
-        description: 'Themes reloaded from server.'
-      });
+      toast({ title: 'Refreshed', description: 'Themes reloaded from server.' });
     } catch (e: any) {
-      toast({
-        title: 'Refresh failed',
-        description: e.message || 'Could not refresh themes',
-        variant: 'destructive'
-      });
+      toast({ title: 'Refresh failed', description: e.message || 'Could not refresh themes', variant: 'destructive' });
     }
   };
 
@@ -201,6 +191,7 @@ export default function StoriesDashboard() {
     setIsSelectionMode(!isSelectionMode);
     setSelectedThemes(new Set());
   };
+
   const handleThemeSelect = (themeId: string) => {
     const newSelected = new Set(selectedThemes);
     if (newSelected.has(themeId)) {
@@ -210,20 +201,27 @@ export default function StoriesDashboard() {
     }
     setSelectedThemes(newSelected);
   };
+
   const handleSelectAll = () => {
-    const allThemeIds = availableThemes.filter(theme => !theme.id.startsWith('pending-')).map(theme => theme.id);
+    const allThemeIds = availableThemes
+      .filter(theme => !theme.id.startsWith('pending-'))
+      .map(theme => theme.id);
     setSelectedThemes(new Set(allThemeIds));
   };
+
   const handleDeselectAll = () => {
     setSelectedThemes(new Set());
   };
+
   const handleClearSelection = () => {
     setSelectedThemes(new Set());
     setIsSelectionMode(false);
   };
+
   const getSelectedThemes = () => {
     return availableThemes.filter(theme => selectedThemes.has(theme.id));
   };
+
   const handleBulkDelete = async () => {
     const themesToDelete = getSelectedThemes();
     setIsDeletingBulk(true);
@@ -232,6 +230,7 @@ export default function StoriesDashboard() {
       total: themesToDelete.length,
       errors: []
     });
+
     try {
       // Process in batches of 5 for safety
       const batchSize = 5;
@@ -239,26 +238,26 @@ export default function StoriesDashboard() {
       for (let i = 0; i < themesToDelete.length; i += batchSize) {
         batches.push(themesToDelete.slice(i, i + batchSize));
       }
+
       let completed = 0;
       const errors: string[] = [];
+
       for (const batch of batches) {
         const themeIds = batch.map(t => t.id);
         const categories = batch.map(t => t.category);
+
         setDeleteProgress(prev => prev ? {
           ...prev,
           current: batch.map(t => t.theme_name).join(', ')
         } : null);
+
         try {
-          const {
-            data,
-            error
-          } = await supabase.functions.invoke('bulk-delete-themes', {
-            body: {
-              themeIds,
-              categories
-            }
+          const { data, error } = await supabase.functions.invoke('bulk-delete-themes', {
+            body: { themeIds, categories }
           });
+
           if (error) throw error;
+
           if (data?.results) {
             const failedInBatch = data.results.filter((r: any) => !r.success);
             if (failedInBatch.length > 0) {
@@ -267,12 +266,14 @@ export default function StoriesDashboard() {
               });
             }
           }
+
           completed += batch.length;
           setDeleteProgress(prev => prev ? {
             ...prev,
             completed,
             errors
           } : null);
+
         } catch (error) {
           console.error('Batch delete error:', error);
           batch.forEach(theme => {
@@ -298,15 +299,18 @@ export default function StoriesDashboard() {
       // Refresh themes list
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
       setAvailableThemes(refreshedThemes);
+      
       setSelectedThemes(new Set());
       setIsSelectionMode(false);
       setShowDeleteDialog(false);
+
       const successCount = completed - errors.length;
       toast({
         title: "Bulk Delete Complete",
         description: `Successfully deleted ${successCount} themes${errors.length > 0 ? ` (${errors.length} errors)` : ''}`,
         variant: errors.length > 0 ? "destructive" : "default"
       });
+
     } catch (error) {
       console.error('Bulk delete error:', error);
       toast({
@@ -319,6 +323,7 @@ export default function StoriesDashboard() {
       setDeleteProgress(null);
     }
   };
+
   const handleGenerateCustomTheme = async () => {
     if (!customThemeDescription.trim()) {
       toast({
@@ -328,10 +333,11 @@ export default function StoriesDashboard() {
       });
       return;
     }
+
     const themeDescription = customThemeDescription.trim();
     setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
-
+    
     // Create a pending shimmer theme for optimistic UI
     const shimmerTheme: ThemeWithPosts = {
       id: 'pending-' + Date.now(),
@@ -345,60 +351,62 @@ export default function StoriesDashboard() {
         description: themeDescription
       }
     };
+    
     setPendingTheme({
       theme_name: shimmerTheme.theme_name,
       description: themeDescription
     });
-
+    
     // Add shimmer theme to the beginning of the list
     setAvailableThemes(prev => [shimmerTheme, ...prev]);
+    
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
-        body: {
+      const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+        body: { 
           description: themeDescription,
           stream: false
         }
       });
-      const isDuplicate = data && data.type === 'duplicate_theme' || error && /duplicate|23505|409/i.test(error.message || '');
+
+      const isDuplicate = (data && data.type === 'duplicate_theme') || (error && /duplicate|23505|409/i.test(error.message || ''));
       if (isDuplicate) {
         setDuplicateInfo({
-          category: data && data.category || 'existing-category',
-          theme: data && data.theme || shimmerTheme.theme_name
+          category: (data && data.category) || 'existing-category',
+          theme: (data && data.theme) || shimmerTheme.theme_name
         });
-        toast({
-          title: 'Category exists',
-          description: 'Create this theme under a new category?'
-        });
+        toast({ title: 'Category exists', description: 'Create this theme under a new category?', });
         setIsGeneratingTheme(false);
         return;
       }
+
       if (error) {
         throw new Error(`Edge function error: ${error.message}`);
       }
+
       if (!data?.success) {
         throw new Error(data?.error || 'Failed to generate theme');
       }
+
       toast({
         title: "Theme Created!",
-        description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`
+        description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`,
       });
 
       // Remove the pending shimmer theme and refresh the list
       setPendingTheme(null);
       setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-
+      
       // Refresh themes from server
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
       setAvailableThemes(refreshedThemes);
+
     } catch (error: any) {
       console.error('Theme generation error:', error);
-
+      
       // Remove the pending shimmer theme on error
       setPendingTheme(null);
       setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",
@@ -408,27 +416,30 @@ export default function StoriesDashboard() {
       setIsGeneratingTheme(false);
     }
   };
+
   const cancelThemeGeneration = async () => {
     if (!user?.id) {
       throw new Error('User not authenticated');
     }
+
     setIsCancelling(true);
+    
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('cancel-theme-generation');
+      const { data, error } = await supabase.functions.invoke('cancel-theme-generation');
+      
       if (error) {
         throw new Error(error.message);
       }
+      
       if (!data?.success) {
         throw new Error(data?.error || 'Failed to cancel theme generation');
       }
-
+      
       // Remove pending theme and reset states
       setPendingTheme(null);
       setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
       setIsGeneratingTheme(false);
+      
       return data;
     } catch (error) {
       console.error('Theme cancellation error:', error);
@@ -437,39 +448,34 @@ export default function StoriesDashboard() {
       setIsCancelling(false);
     }
   };
+
   const handleConfirmDuplicate = async (newCategory: string) => {
     if (!pendingTheme?.description) {
       setDuplicateInfo(null);
-      toast({
-        title: 'Missing description',
-        description: 'Please try again.',
-        variant: 'destructive'
-      });
+      toast({ title: 'Missing description', description: 'Please try again.' , variant: 'destructive'});
       return;
     }
     setDuplicateInfo(null);
     setIsGeneratingTheme(true);
+
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+      const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: {
           description: pendingTheme.description,
           stream: false,
           overrideCategory: newCategory
         }
       });
+
       if (error) {
         throw new Error(error.message);
       }
+
       if (!data?.success) {
         throw new Error(data?.error || 'Failed to generate theme');
       }
-      toast({
-        title: 'Theme Created!',
-        description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"`
-      });
+
+      toast({ title: 'Theme Created!', description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"` });
 
       // Clear pending shimmer and refresh
       setPendingTheme(null);
@@ -478,11 +484,7 @@ export default function StoriesDashboard() {
       setAvailableThemes(refreshedThemes);
     } catch (err: any) {
       console.error('Duplicate confirm error:', err);
-      toast({
-        title: 'Creation failed',
-        description: err.message || 'Could not create theme',
-        variant: 'destructive'
-      });
+      toast({ title: 'Creation failed', description: err.message || 'Could not create theme', variant: 'destructive' });
       // Remove shimmer to avoid stale UI
       setPendingTheme(null);
       setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
@@ -493,19 +495,24 @@ export default function StoriesDashboard() {
 
   // Use React Query loading pattern instead of local loading state
   if (loading) {
-    return <PageLayout>
+    return (
+      <PageLayout>
         <CalendarSkeletonLoader />
-      </PageLayout>;
+      </PageLayout>
+    );
   }
+
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
   // Feature flag controlled below for first-visit hero
 
+
   // Show first-visit hero when no content exists (feature-flagged)
   if (UI_FLAGS.enableStoriesFirstVisitHero && showHero && availableThemes.length === 0) {
-    return <PageLayout>
+    return (
+      <PageLayout>
         <Helmet>
           <title>Story Ship — Every Thought is a Visual Journey</title>
           <meta name="description" content="Every Thought is a Visual Journey" />
@@ -528,64 +535,89 @@ export default function StoriesDashboard() {
             </div>
             
             <div className="w-full max-w-7xl mx-auto">
-              <Input placeholder="Describe your theme..." className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" value={customThemeDescription} onChange={e => setCustomThemeDescription(e.target.value)} onKeyDown={e => {
-              if (e.key === 'Enter' && customThemeDescription.trim()) {
-                try {
-                  localStorage.setItem('stories_hero_seen', '1');
-                } catch {}
-                setShowHero(false);
-              }
-            }} />
+              <Input
+                placeholder="Describe your theme..."
+                className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
+                value={customThemeDescription}
+                onChange={(e) => setCustomThemeDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customThemeDescription.trim()) {
+                    try { localStorage.setItem('stories_hero_seen','1'); } catch {}
+                    setShowHero(false);
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
-      </PageLayout>;
+      </PageLayout>
+    );
   }
-  return <PageLayout className="bg-slate-50 rounded-3xl px-[80px] py-[80px]">
+
+  return (
+    <PageLayout>
       <Helmet>
         <title>Story Ship — Every Thought is a Visual Journey</title>
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" fluid className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 px-0">
-          <AuroraBackground className="h-[60vh] md:h-[70vh] relative" style={{
-        backgroundImage: 'url(/src/assets/story-ship-bg.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}>
+          <AuroraBackground 
+            className="h-[60vh] md:h-[70vh] relative"
+            style={{
+              backgroundImage: 'url(/src/assets/story-ship-bg.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
-              <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl max-w-[600px] h-[400px] w-full mx-4 flex flex-col justify-center rounded-[50%] bg-white/80">
-                <div className="space-y-6">
-                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">Story Ship</h1>
-                  <p className="text-lg md:text-xl text-gray-600">Every Thought is a Visual Journey</p>
-                  
-                  <div className="w-full max-w-2xl mx-auto">
-                    <Input aria-label="Describe your theme" placeholder="Describe your theme... (e.g., 'AI app" className="w-full h-14 px-6 py-4 text-lg bg-gray-50 border border-gray-200 rounded-2xl placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300" value={customThemeDescription} onChange={e => setCustomThemeDescription(e.target.value)} onKeyDown={e => {
-                  if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
-                    e.preventDefault();
-                    handleGenerateCustomTheme();
-                  }
-                }} disabled={isGeneratingTheme || isProcessing} />
-                  </div>
-                  
-                  <p className="text-sm text-gray-500 mt-6">By Jordan Leahy</p>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Story Ship</h1>
+              <p className="text-base md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
+              <div className="w-full max-w-3xl mx-auto">
+                <Input
+                  aria-label="Describe your theme"
+                  placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border"
+                  value={customThemeDescription}
+                  onChange={(e) => setCustomThemeDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                      e.preventDefault();
+                      handleGenerateCustomTheme();
+                    }
+                  }}
+                  disabled={isGeneratingTheme || isProcessing}
+                />
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-2">
+                  <span>Press Enter to submit</span>
                 </div>
-                
-                {isAdmin && <div className="mt-6">
-                    {roleLoading ? <Skeleton className="h-10 w-48" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline" className="bg-white text-gray-700 border-gray-300">
-                        Import Themes
-                      </Button>}
-                  </div>}
               </div>
+              {isAdmin && (
+                <div className="mt-2">
+                  {roleLoading ? (
+                    <Skeleton className="h-10 w-48" />
+                  ) : (
+                    <Button onClick={() => setImportModalOpen(true)} variant="outline">
+                      Import Themes
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </AuroraBackground>
 
-          {isAdmin && <Suspense fallback={<div>Loading...</div>}>
-              <ThemeImportModal open={importModalOpen} onOpenChange={setImportModalOpen} onImportComplete={() => {
-          // Theme import completed
-        }} />
-            </Suspense>}
+          {isAdmin && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <ThemeImportModal 
+                open={importModalOpen} 
+                onOpenChange={setImportModalOpen} 
+                onImportComplete={() => {
+                  // Theme import completed
+                }}
+              />
+            </Suspense>
+          )}
         </Section>
 
         {/* Cards Section for Theme/Category cards */}
@@ -597,28 +629,68 @@ export default function StoriesDashboard() {
             </header>
 
           {/* Bulk Actions Toolbar */}
-          <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
+          <BulkActionsToolbar
+            selectedCount={selectedThemes.size}
+            totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
+            onDeleteSelected={() => setShowDeleteDialog(true)}
+            onClearSelection={handleClearSelection}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
+            isDeleting={isDeletingBulk}
+          />
 
           {/* Enhanced Themes Grid with Loading States */}
-          {isLoadingThemes ? <ThemesSkeleton /> : themesError ? <div className="text-center py-8">
+          {isLoadingThemes ? (
+            <ThemesSkeleton />
+          ) : themesError ? (
+            <div className="text-center py-8">
               <div className="text-muted-foreground mb-4">
                 ⚠️ Failed to load themes: {themesError}
               </div>
-              <Button variant="outline" onClick={() => window.location.reload()}>
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.reload()}
+              >
                 Retry
               </Button>
-            </div> : <CategoriesGrid themes={availableThemes} onDeleteCategory={handleDeleteCategory} selectedThemes={selectedThemes} onThemeSelect={handleThemeSelect} isSelectionMode={isSelectionMode} isGeneratingTheme={isGeneratingTheme} onCancelGeneration={cancelThemeGeneration} />}
+            </div>
+          ) : (
+            <CategoriesGrid 
+              themes={availableThemes}
+              onDeleteCategory={handleDeleteCategory}
+              selectedThemes={selectedThemes}
+              onThemeSelect={handleThemeSelect}
+              isSelectionMode={isSelectionMode}
+              isGeneratingTheme={isGeneratingTheme}
+              onCancelGeneration={cancelThemeGeneration}
+            />
+          )}
         </Section>
 
         {/* Bulk Delete Confirmation Dialog */}
-        <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
+        <BulkDeleteConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          selectedThemes={getSelectedThemes()}
+          onConfirm={handleBulkDelete}
+          isDeleting={isDeletingBulk}
+          progress={deleteProgress}
+        />
 
         {/* Duplicate Theme Modal */}
-        <DuplicateThemeModal open={!!duplicateInfo} category={duplicateInfo?.category || ''} theme={duplicateInfo?.theme || ''} onCancel={() => {
-      setDuplicateInfo(null);
-      // Remove the pending shimmer theme if user cancels
-      setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-    }} onConfirm={handleConfirmDuplicate} />
-      </PageLayout>;
-}
+        <DuplicateThemeModal
+          open={!!duplicateInfo}
+          category={duplicateInfo?.category || ''}
+          theme={duplicateInfo?.theme || ''}
+          onCancel={() => {
+            setDuplicateInfo(null);
+            // Remove the pending shimmer theme if user cancels
+            setPendingTheme(null);
+            setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+          }}
+          onConfirm={handleConfirmDuplicate}
+        />
+      </PageLayout>
+    );
+  }
