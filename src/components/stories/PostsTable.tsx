@@ -41,6 +41,7 @@ export const PostsTable = ({
   const isMobile = useIsMobile();
   const [isBulk169, setIsBulk169] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isFeaturing, setIsFeaturing] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -374,9 +375,17 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         return;
       }
       const collectionId = data as unknown as string;
+      // Ensure it appears in Library by default
+      const { error: includeErr } = await supabase
+        .from('shared_collections')
+        .update({ include_in_library: true })
+        .eq('id', collectionId);
+      if (includeErr) {
+        console.warn('Failed to add to Library', includeErr);
+      }
       const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
       try { await navigator.clipboard.writeText(publicUrl); } catch {}
-      toast.success('Published! Public link copied to clipboard.');
+      toast.success('Published to Library! Link copied.');
       // Optionally open in a new tab
       // window.open(publicUrl, '_blank');
     } catch (e: any) {
@@ -384,6 +393,44 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
       toast.error('Failed to publish');
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  // Feature the latest published collection for this user
+  const handleFeatureLatestCollection = async () => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to feature');
+        return;
+      }
+      setIsFeaturing(true);
+      // Find most recent published shared collection for this user
+      const { data: latest, error: selErr } = await supabase
+        .from('shared_collections')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (selErr) throw selErr;
+      if (!latest) {
+        toast.error('No published collection found. Click Library first.');
+        return;
+      }
+      const { error: updErr } = await supabase
+        .from('shared_collections')
+        .update({ include_in_library: true, featured: true })
+        .eq('id', latest.id);
+      if (updErr) throw updErr;
+      toast.success('Featured in Library');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to feature');
+    } finally {
+      setIsFeaturing(false);
     }
   };
 
@@ -426,6 +473,17 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
               
                     {category && userIsAdmin && (
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleFeatureLatestCollection}
+                          disabled={isFeaturing}
+                          className="rounded-full px-3"
+                          aria-label="Featured"
+                          title={isFeaturing ? 'Featuring…' : 'Feature'}
+                        >
+                          Featured
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -535,6 +593,17 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleFeatureLatestCollection}
+                          disabled={isFeaturing}
+                          className="rounded-full px-3 text-xs sm:text-sm"
+                          aria-label="Featured"
+                          title={isFeaturing ? 'Featuring…' : 'Feature'}
+                        >
+                          Featured
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
