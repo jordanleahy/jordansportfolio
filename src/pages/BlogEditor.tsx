@@ -20,6 +20,7 @@ import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModa
 import { ImageGenerationStatus } from "@/components/blog/ImageGenerationStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Mic } from "lucide-react";
+import { SocialMediaGenerator } from "@/components/social-media/SocialMediaGenerator";
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -955,35 +956,42 @@ const BlogEditor = () => {
 
           {/* Settings Section */}
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Post Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="featured">Featured Post</Label>
-                    <p className="text-sm text-muted-foreground">Display this post prominently</p>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Post Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="featured">Featured Post</Label>
+                      <p className="text-sm text-muted-foreground">Display this post prominently</p>
+                    </div>
+                    <Switch
+                      id="featured"
+                      checked={formData.featured}
+                      onCheckedChange={(checked) => handleInputChange('featured', checked)}
+                    />
                   </div>
-                  <Switch
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={(checked) => handleInputChange('featured', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="share_enabled">Enable Sharing</Label>
-                    <p className="text-sm text-muted-foreground">Allow readers to share this post</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="share_enabled">Enable Sharing</Label>
+                      <p className="text-sm text-muted-foreground">Allow readers to share this post</p>
+                    </div>
+                    <Switch
+                      id="share_enabled"
+                      checked={formData.share_enabled}
+                      onCheckedChange={(checked) => handleInputChange('share_enabled', checked)}
+                    />
                   </div>
-                  <Switch
-                    id="share_enabled"
-                    checked={formData.share_enabled}
-                    onCheckedChange={(checked) => handleInputChange('share_enabled', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Social Media Generator */}
+              {existingPost && (
+                <SocialMediaGenerator blogPostId={existingPost.id} />
+              )}
+            </div>
           </TabsContent>
         </Tabs>
 

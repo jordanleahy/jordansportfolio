@@ -42,12 +42,30 @@ export const getStoryTellingAgentName = (): string => {
 };
 
 /**
+ * Get the Social Media Agent name
+ */
+export const getSocialMediaAgentName = (): string => {
+  return AGENT_NAMES.SOCIAL_MEDIA_AGENT;
+};
+
+// Agent Name Comparison Functions
+
+/**
  * Check if an agent name matches the Visual Prompt Generator
  * @param agentName - The agent name to check
  * @returns true if the name matches the Visual Prompt Generator
  */
 export const isVisualPromptGenerator = (agentName: string): boolean => {
   return agentName === AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
+};
+
+/**
+ * Check if an agent name matches the Social Media Agent
+ * @param agentName - The agent name to check
+ * @returns true if the name matches the Social Media Agent
+ */
+export const isSocialMediaAgent = (agentName: string): boolean => {
+  return agentName === AGENT_NAMES.SOCIAL_MEDIA_AGENT;
 };
 
 /**

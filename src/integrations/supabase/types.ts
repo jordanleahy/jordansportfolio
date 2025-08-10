@@ -2882,6 +2882,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      insert_social_media_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       insert_story_telling_agent: {
         Args: Record<PropertyKey, never>
         Returns: string
