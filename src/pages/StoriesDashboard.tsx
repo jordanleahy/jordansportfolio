@@ -595,7 +595,7 @@ export default function StoriesDashboard() {
               }
             }} disabled={isGeneratingTheme || isProcessing} />
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
-                  <span>Agentic Experience Created by Jordan Leahy</span>
+                  <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
               </div>
               {isAdmin && <div className="mt-2">
