@@ -460,6 +460,15 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1 text-xs sm:text-sm"
+                        aria-label="Publish posts"
+                        title="Publish posts"
+                      >
+                        Publish
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="hidden sm:inline">Category Prompt</span>
