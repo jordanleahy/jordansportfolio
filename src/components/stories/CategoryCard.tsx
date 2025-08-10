@@ -46,14 +46,14 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           console.log('🎨 CategoryCard received Day 1 update:', {
             postId: updatedPost.id,
             category: updatedPost.category,
-            image_4_3_url: updatedPost.image_4_3_url,
-            image_4_3_status: updatedPost.image_4_3_status
+            image_1_1_url: updatedPost.image_1_1_url,
+            image_1_1_status: updatedPost.image_1_1_status
           });
 
           // Handle successful image generation
-          if (updatedPost.image_4_3_url) {
-            console.log('✅ CategoryCard received image URL:', updatedPost.image_4_3_url);
-            setCurrentImageUrl(updatedPost.image_4_3_url);
+          if (updatedPost.image_1_1_url) {
+            console.log('✅ CategoryCard received image URL:', updatedPost.image_1_1_url);
+            setCurrentImageUrl(updatedPost.image_1_1_url);
             setIsGeneratingDay1(false);
             setGenerationError(null);
             
@@ -65,7 +65,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           }
           
           // Handle failed generation
-          if (updatedPost.image_4_3_status === 'failed') {
+          if (updatedPost.image_1_1_status === 'failed') {
             console.log('❌ Day 1 image generation failed for category:', category);
             setIsGeneratingDay1(false);
             setGenerationError('Failed to generate Day 1 image');
@@ -78,7 +78,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           }
           
           // Handle processing status
-          if (updatedPost.image_4_3_status === 'processing' && !updatedPost.image_4_3_url) {
+          if (updatedPost.image_1_1_status === 'processing' && !updatedPost.image_1_1_url) {
             setIsGeneratingDay1(true);
             setGenerationError(null);
           }
@@ -108,8 +108,8 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     console.log('🔍 CategoryCard image sync for theme:', theme, {
       imageUrl,
       firstPostData,
-      firstPost_image_4_3_url: (firstPostData as any)?.image_4_3_url,
-      firstPost_image_4_3_status: (firstPostData as any)?.image_4_3_status,
+      firstPost_image_1_1_url: (firstPostData as any)?.image_1_1_url,
+      firstPost_image_1_1_status: (firstPostData as any)?.image_1_1_status,
       currentImageUrl
     });
 
@@ -120,8 +120,8 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       return;
     }
     
-    const firstUrl = (firstPostData as any)?.image_4_3_url;
-    const status = (firstPostData as any)?.image_4_3_status;
+    const firstUrl = (firstPostData as any)?.image_1_1_url;
+    const status = (firstPostData as any)?.image_1_1_status;
     
     console.log('📊 FirstPost data analysis:', {
       firstUrl,
@@ -129,8 +129,8 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       hasFirstUrl: !!firstUrl,
       isProcessing: status === 'processing' || status === 'uploading',
       fullFirstPostData: firstPostData,
-      image_4_3_url_field: (firstPostData as any)?.image_4_3_url,
-      image_4_3_status_field: (firstPostData as any)?.image_4_3_status,
+      image_1_1_url_field: (firstPostData as any)?.image_1_1_url,
+      image_1_1_status_field: (firstPostData as any)?.image_1_1_status,
       image_16_9_url_field: (firstPostData as any)?.image_16_9_url,
       all_keys: firstPostData ? Object.keys(firstPostData) : 'no firstPostData'
     });
@@ -163,14 +163,14 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         return;
       }
 
-      const currentStatus = (firstPostData as any)?.image_4_3_status;
+      const currentStatus = (firstPostData as any)?.image_1_1_status;
       if (currentStatus === 'processing' || currentStatus === 'uploading') {
         console.log('🚫 Generation already in progress on server for theme:', theme);
         setIsGeneratingDay1(true);
         return;
       }
 
-      if ((firstPostData as any)?.image_4_3_url) {
+      if ((firstPostData as any)?.image_1_1_url) {
         console.log('🚫 Image already exists for theme:', theme);
         return;
       }
@@ -185,7 +185,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         setGenerationError('Generation timed out');
       }, 30000); // 30 second timeout
 
-      console.log('🎨 Calling generate-day-1-4-3 function for theme:', theme);
+      console.log('🎨 Calling generate-day-1-1-1 function for theme:', theme);
       
       // Find the theme ID by looking for a theme with this name and category
       const { data: themeData, error: themeError } = await supabase
@@ -200,7 +200,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         throw new Error('Theme not found');
       }
 
-      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_4_3, {
+      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_1_1, {
         body: {
           themeId: themeData.id,
           userId: user.id
