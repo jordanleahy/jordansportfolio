@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { createWatermarkedImageFile } from '@/utils/watermarkImage';
+import { uploadFileToStorage } from '@/utils/fileUpload';
 
 export const useImageGeneration = () => {
   const { toast } = useToast();
@@ -109,8 +111,32 @@ export const useImageGeneration = () => {
         })
         .eq('id', post.id);
 
+      // Create and upload watermarked variant (client-side)
+      try {
+        await supabase.from('social_media_posts')
+          .update({ image_1_1_watermark_status: 'processing' })
+          .eq('id', post.id);
+
+        const wmFile = await createWatermarkedImageFile(blob, fileName, 'image/jpeg');
+        const uploadResult = await uploadFileToStorage(wmFile, 'social-media-images', 'watermarked');
+        if (uploadResult.success && uploadResult.url) {
+          await supabase.from('social_media_posts')
+            .update({ image_1_1_watermark_url: uploadResult.url, image_1_1_watermark_status: 'complete' })
+            .eq('id', post.id);
+        } else {
+          await supabase.from('social_media_posts')
+            .update({ image_1_1_watermark_status: 'failed' })
+            .eq('id', post.id);
+        }
+      } catch (e) {
+        await supabase.from('social_media_posts')
+          .update({ image_1_1_watermark_status: 'failed' })
+          .eq('id', post.id);
+      }
+
       // Refresh the posts data
       onPostsChange?.();
+      
       
       toast({
         title: "Hero image generated!",

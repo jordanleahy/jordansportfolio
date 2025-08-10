@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { createWatermarkedImageFile } from '@/utils/watermarkImage';
+import { uploadFileToStorage } from '@/utils/fileUpload';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
@@ -143,7 +145,34 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         })
         .eq('id', postId);
 
-      // Trigger background processing for watermark
+      // Create and upload watermarked version (client-side)
+      const wmStatusField = `image_${aspectRatio}_watermark_status`;
+      const wmUrlField = `image_${aspectRatio}_watermark_url`;
+
+      try {
+        // Mark watermark processing
+        await supabase.from('social_media_posts')
+          .update({ [wmStatusField]: 'processing' })
+          .eq('id', postId);
+
+        const wmFile = await createWatermarkedImageFile(blob, fileName, 'image/jpeg');
+        const uploadResult = await uploadFileToStorage(wmFile, 'social-media-images', 'watermarked');
+        if (uploadResult.success && uploadResult.url) {
+          await supabase.from('social_media_posts')
+            .update({ [wmUrlField]: uploadResult.url, [wmStatusField]: 'complete' })
+            .eq('id', postId);
+        } else {
+          await supabase.from('social_media_posts')
+            .update({ [wmStatusField]: 'failed' })
+            .eq('id', postId);
+        }
+      } catch (e) {
+        await supabase.from('social_media_posts')
+          .update({ [wmStatusField]: 'failed' })
+          .eq('id', postId);
+      }
+
+      // Trigger background processing (kept for parity with backend workflows)
       await supabase.functions.invoke('process-uploaded-images', {
         body: {
           imageUrl: urlData.publicUrl,

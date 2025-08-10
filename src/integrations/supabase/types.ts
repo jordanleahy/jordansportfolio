@@ -2034,18 +2034,28 @@ export type Database = {
           id: string
           image_1_1_status: string | null
           image_1_1_url: string | null
+          image_1_1_watermark_status: string | null
+          image_1_1_watermark_url: string | null
           image_16_9_gif_url: string | null
           image_16_9_status: string | null
           image_16_9_url: string | null
           image_16_9_video_url: string | null
+          image_16_9_watermark_status: string | null
+          image_16_9_watermark_url: string | null
           image_3_4_gif_url: string | null
           image_3_4_status: string | null
           image_3_4_url: string | null
           image_3_4_video_url: string | null
+          image_3_4_watermark_status: string | null
+          image_3_4_watermark_url: string | null
           image_4_3_status: string | null
           image_4_3_url: string | null
+          image_4_3_watermark_status: string | null
+          image_4_3_watermark_url: string | null
           image_9_16_status: string | null
           image_9_16_url: string | null
+          image_9_16_watermark_status: string | null
+          image_9_16_watermark_url: string | null
           platform_tags: Json | null
           scheduled_date: string | null
           seed_value: number | null
@@ -2067,18 +2077,28 @@ export type Database = {
           id?: string
           image_1_1_status?: string | null
           image_1_1_url?: string | null
+          image_1_1_watermark_status?: string | null
+          image_1_1_watermark_url?: string | null
           image_16_9_gif_url?: string | null
           image_16_9_status?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
+          image_16_9_watermark_status?: string | null
+          image_16_9_watermark_url?: string | null
           image_3_4_gif_url?: string | null
           image_3_4_status?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
+          image_3_4_watermark_status?: string | null
+          image_3_4_watermark_url?: string | null
           image_4_3_status?: string | null
           image_4_3_url?: string | null
+          image_4_3_watermark_status?: string | null
+          image_4_3_watermark_url?: string | null
           image_9_16_status?: string | null
           image_9_16_url?: string | null
+          image_9_16_watermark_status?: string | null
+          image_9_16_watermark_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null
@@ -2100,18 +2120,28 @@ export type Database = {
           id?: string
           image_1_1_status?: string | null
           image_1_1_url?: string | null
+          image_1_1_watermark_status?: string | null
+          image_1_1_watermark_url?: string | null
           image_16_9_gif_url?: string | null
           image_16_9_status?: string | null
           image_16_9_url?: string | null
           image_16_9_video_url?: string | null
+          image_16_9_watermark_status?: string | null
+          image_16_9_watermark_url?: string | null
           image_3_4_gif_url?: string | null
           image_3_4_status?: string | null
           image_3_4_url?: string | null
           image_3_4_video_url?: string | null
+          image_3_4_watermark_status?: string | null
+          image_3_4_watermark_url?: string | null
           image_4_3_status?: string | null
           image_4_3_url?: string | null
+          image_4_3_watermark_status?: string | null
+          image_4_3_watermark_url?: string | null
           image_9_16_status?: string | null
           image_9_16_url?: string | null
+          image_9_16_watermark_status?: string | null
+          image_9_16_watermark_url?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null

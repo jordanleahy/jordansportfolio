@@ -30,36 +30,41 @@ export const WatermarkCanvas: React.FC<WatermarkCanvasProps> = ({
           // Draw the original image
           ctx.drawImage(img, 0, 0);
 
-          // Add subtle center watermark
-          const fontSize = Math.max(14, Math.min(img.width * 0.025, 28));
-          ctx.font = `${fontSize}px Arial`;
-          
-          // Measure text to center it
-          const textMetrics = ctx.measureText(watermarkText);
-          const textWidth = textMetrics.width;
-          
-          // Position at center
+          // Add watermarks
+          const centerText = 'JordanLeahy.com';
+          const bottomText = 'Free Illustrations at Jordanleahy.com';
+
+          // Center diagonal watermark (subtle)
+          const centerFontSize = Math.max(24, Math.min(img.width * 0.05, 64));
+          ctx.font = `${centerFontSize}px Arial`;
+          const centerMetrics = ctx.measureText(centerText);
+          const centerWidth = centerMetrics.width;
+
           const centerX = img.width / 2;
           const centerY = img.height / 2;
 
-          // Save context for rotation
           ctx.save();
-          
-          // Rotate 15 degrees for diagonal effect
           ctx.translate(centerX, centerY);
           ctx.rotate(-15 * Math.PI / 180);
-          
-          // Set very subtle styling
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
-          ctx.lineWidth = 0.5;
-          
-          // Draw watermark text at origin (now rotated center)
-          ctx.fillText(watermarkText, -textWidth / 2, fontSize / 3);
-          ctx.strokeText(watermarkText, -textWidth / 2, fontSize / 3);
-          
-          // Restore context
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.fillText(centerText, -centerWidth / 2, centerFontSize / 3);
+          ctx.strokeText(centerText, -centerWidth / 2, centerFontSize / 3);
           ctx.restore();
+
+          // Bottom center watermark (small, readable)
+          const bottomMargin = Math.max(12, img.height * 0.02);
+          const bottomFontSize = Math.max(14, Math.min(img.width * 0.025, 28));
+          ctx.font = `${bottomFontSize}px Arial`;
+          const bottomMetrics = ctx.measureText(bottomText);
+          const bottomWidth = bottomMetrics.width;
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.strokeText(bottomText, (img.width - bottomWidth) / 2, img.height - bottomMargin);
+          ctx.fillText(bottomText, (img.width - bottomWidth) / 2, img.height - bottomMargin);
 
           // Convert canvas to blob
           canvas.toBlob(

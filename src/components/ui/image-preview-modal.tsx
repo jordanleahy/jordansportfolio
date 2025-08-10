@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Download } from "lucide-react";
+import { X, Download, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -17,9 +18,43 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     ? `jordanleahy.com ${title} ${aspectRatio}`
     : alt;
 
+  const [wmUrl, setWmUrl] = useState<string | null>(null);
+  const [wmStatus, setWmStatus] = useState<string>('none');
+  const isLoading = wmStatus !== 'complete' || !wmUrl;
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchInfo = async () => {
+      try {
+        const { data } = await supabase
+          .from('social_media_posts')
+          .select('id, image_16_9_url, image_9_16_url, image_3_4_url, image_4_3_url, image_1_1_url, image_16_9_watermark_url, image_9_16_watermark_url, image_3_4_watermark_url, image_4_3_watermark_url, image_1_1_watermark_url, image_16_9_watermark_status, image_9_16_watermark_status, image_3_4_watermark_status, image_4_3_watermark_status, image_1_1_watermark_status')
+          .or(
+            `image_16_9_url.eq.${imageUrl},image_9_16_url.eq.${imageUrl},image_3_4_url.eq.${imageUrl},image_4_3_url.eq.${imageUrl},image_1_1_url.eq.${imageUrl}`
+          )
+          .limit(1)
+          .maybeSingle();
+        if (!data || !isMounted) return;
+        let url: string | null = null;
+        let status: string = 'none';
+        if (data.image_16_9_url === imageUrl) { url = data.image_16_9_watermark_url; status = data.image_16_9_watermark_status || 'none'; }
+        else if (data.image_9_16_url === imageUrl) { url = data.image_9_16_watermark_url; status = data.image_9_16_watermark_status || 'none'; }
+        else if (data.image_3_4_url === imageUrl) { url = data.image_3_4_watermark_url; status = data.image_3_4_watermark_status || 'none'; }
+        else if (data.image_4_3_url === imageUrl) { url = data.image_4_3_watermark_url; status = data.image_4_3_watermark_status || 'none'; }
+        else if (data.image_1_1_url === imageUrl) { url = data.image_1_1_watermark_url; status = data.image_1_1_watermark_status || 'none'; }
+        setWmUrl(url || null);
+        setWmStatus(status);
+      } catch {}
+    };
+    fetchInfo();
+    const t = setInterval(fetchInfo, 2000);
+    return () => { isMounted = false; clearInterval(t); };
+  }, [imageUrl]);
+
   const handleDownload = async () => {
     try {
-      const response = await fetch(imageUrl);
+      const finalUrl = wmUrl || imageUrl;
+      const response = await fetch(finalUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -53,9 +88,10 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
-                title="Download"
+                title={isLoading ? "Preparing watermark..." : "Download"}
+                disabled={isLoading}
               >
-                <Download className="h-5 w-5" />
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
               </Button>
               
               {/* Close button */}

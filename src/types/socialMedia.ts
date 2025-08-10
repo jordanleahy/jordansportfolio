@@ -22,6 +22,20 @@ export interface SocialMediaPost {
   image_4_3_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
   image_1_1_status?: 'none' | 'uploading' | 'processing' | 'complete' | 'failed';
   
+  // Watermarked image URLs
+  image_16_9_watermark_url?: string | null;
+  image_9_16_watermark_url?: string | null;
+  image_3_4_watermark_url?: string | null;
+  image_4_3_watermark_url?: string | null;
+  image_1_1_watermark_url?: string | null;
+  
+  // Watermark processing status fields
+  image_16_9_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
+  image_9_16_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
+  image_3_4_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
+  image_4_3_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
+  image_1_1_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
+  
   // Seed management
   seed_value?: number | null;
   
