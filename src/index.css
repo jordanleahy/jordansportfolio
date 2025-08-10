@@ -232,4 +232,48 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--scrollbar-thumb-hover));
 }
+
+/* Sail-shaped container for glass effect */
+.sail-shaped-container {
+  clip-path: polygon(
+    5% 15%, 
+    20% 8%, 
+    40% 5%, 
+    65% 8%, 
+    85% 15%, 
+    95% 25%, 
+    98% 40%, 
+    95% 60%, 
+    88% 75%, 
+    75% 85%, 
+    55% 90%, 
+    35% 88%, 
+    18% 82%, 
+    8% 70%, 
+    2% 50%, 
+    5% 30%
+  );
+  transition: clip-path 0.3s ease-in-out;
+}
+
+.sail-shaped-container:hover {
+  clip-path: polygon(
+    3% 12%, 
+    22% 6%, 
+    42% 3%, 
+    67% 6%, 
+    87% 12%, 
+    97% 22%, 
+    100% 37%, 
+    97% 57%, 
+    90% 72%, 
+    77% 82%, 
+    57% 87%, 
+    37% 85%, 
+    20% 79%, 
+    10% 67%, 
+    4% 47%, 
+    7% 27%
+  );
+}
 }
