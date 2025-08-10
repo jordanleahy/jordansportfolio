@@ -150,11 +150,11 @@ serve(async (req) => {
         if (!b64) throw new Error("No image base64 returned by generator");
 
         const bytes = b64ToUint8Array(b64);
-        const filePath = `post-images/${userId}/${post.id}/16_9_${Date.now()}.png`;
+        const filePath = `post-images/${userId}/${post.id}/16_9_${Date.now()}.jpg`;
         const { error: uploadError } = await supabase.storage
           .from("social-media-images")
-          .upload(filePath, new Blob([bytes], { type: "image/png" }), {
-            contentType: "image/png",
+          .upload(filePath, new Blob([bytes], { type: "image/jpeg" }), {
+            contentType: "image/jpeg",
             upsert: true,
             cacheControl: "3600",
           });

@@ -113,7 +113,7 @@ const uploadImageToStorage = async (supabase: any, imageData: string, fileName: 
     const { data, error } = await supabase.storage
       .from('social-media-images')
       .upload(filePath, byteArray, {
-        contentType: 'image/png',
+        contentType: 'image/jpeg',
         upsert: true
       });
 
@@ -218,6 +218,7 @@ serve(async (req) => {
                 prompt: prompt,
                 size: imageSize,
                 quality: 'high',
+                output_format: 'jpeg',
                 n: 1
               }),
             });
@@ -236,17 +237,17 @@ serve(async (req) => {
             const finalBase64Image = imageData.data[0].b64_json;
 
             sendProgress('image_generated', 70, { 
-              partialImage: `data:image/png;base64,${finalBase64Image}`,
+              partialImage: `data:image/jpeg;base64,${finalBase64Image}`,
               isPartial: false
             });
 
             // Upload to storage if user is authenticated
-            let finalImageUrl = `data:image/png;base64,${finalBase64Image}`;
+            let finalImageUrl = `data:image/jpeg;base64,${finalBase64Image}`;
             
             if (userId) {
               sendProgress('uploading', 80);
               
-              const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+              const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.jpg`;
               const uploadedUrl = await uploadImageToStorage(supabase, finalBase64Image, fileName, userId);
             
               if (uploadedUrl) {
@@ -304,6 +305,7 @@ serve(async (req) => {
           prompt: prompt,
           size: imageSize,
           quality: 'high',
+          output_format: 'jpeg',
           n: 1
         }),
       });
@@ -315,10 +317,10 @@ serve(async (req) => {
       const imageData = await imageResponse.json();
       const base64Image = imageData.data[0].b64_json;
       
-      let finalImageUrl = `data:image/png;base64,${base64Image}`;
+      let finalImageUrl = `data:image/jpeg;base64,${base64Image}`;
       
       if (userId) {
-        const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.png`;
+        const fileName = `${theme.replace(/\s+/g, '_')}_${aspectRatio.replace(':', '_')}_${Date.now()}.jpg`;
         const uploadedUrl = await uploadImageToStorage(supabase, base64Image, fileName, userId);
         
         if (uploadedUrl) {

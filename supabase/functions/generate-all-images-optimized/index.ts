@@ -206,20 +206,20 @@ Composition optimized for ${ratio} aspect ratio format.`;
         // PERFORMANCE IMPROVEMENT #2: Optimized image processing
         // Create optimized file path structure
         const timestamp = Date.now();
-        const fileName = `social-media/${user.id}/${postId}/${ratio.replace(':', 'x')}-${timestamp}.png`;
-        
+        const fileName = `social-media/${user.id}/${postId}/${ratio.replace(':', 'x')}-${timestamp}.jpg`;
+         
         // More efficient base64 conversion
         const imageData = base64Image.includes(',') 
           ? base64Image.split(',')[1] 
           : base64Image;
-        
+         
         const imageBuffer = Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
 
         // Upload to storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('social-media-images')
           .upload(fileName, imageBuffer, {
-            contentType: 'image/png',
+            contentType: 'image/jpeg',
             upsert: true
           });
 

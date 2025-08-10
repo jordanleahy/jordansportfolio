@@ -124,7 +124,7 @@ serve(async (req) => {
       prompt: prompt,
       size: size,
       quality: 'high',
-      output_format: 'png',
+      output_format: 'jpeg',
       n: 1,
       user: correlationId, // Only include user field for tracking
       ...(finalSeed && { seed: finalSeed })
@@ -164,15 +164,15 @@ serve(async (req) => {
         url: 'https://api.openai.com/v1/images/generations',
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': '[REDACTED]' },
-        body: JSON.stringify({
-          model: 'gpt-image-1',
-          prompt: prompt.substring(0, 100) + '...',
-          size: size,
-          quality: 'high',
-          output_format: 'png',
-          n: 1,
-          seed: finalSeed
-        }, null, 2)
+          body: JSON.stringify({
+            model: 'gpt-image-1',
+            prompt: prompt.substring(0, 100) + '...',
+            size: size,
+            quality: 'high',
+            output_format: 'jpeg',
+            n: 1,
+            seed: finalSeed
+          }, null, 2)
       });
       
       // Track failed usage with enhanced attribution

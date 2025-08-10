@@ -402,13 +402,13 @@ Requirements:
             const base64Data = imageData.image.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
             
-            const fileName = `blog_${blogPost.id}_section_${i + 1}_${Date.now()}.png`;
+            const fileName = `blog_${blogPost.id}_section_${i + 1}_${Date.now()}.jpg`;
             const filePath = `visual-sections/${fileName}`;
 
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('blog-images')
               .upload(filePath, buffer, {
-                contentType: 'image/png',
+                contentType: 'image/jpeg',
                 cacheControl: '3600',
                 upsert: false
               });

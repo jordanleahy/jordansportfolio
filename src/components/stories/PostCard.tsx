@@ -158,12 +158,12 @@ const PostCardComponent = ({
       setGenerationStep('Uploading image...');
       
       // Convert base64 to blob and upload to storage
-      const response = await fetch(`data:image/png;base64,${base64Image}`);
+      const response = await fetch(`data:image/jpeg;base64,${base64Image}`);
       const blob = await response.blob();
       
       // Create file object
-      const fileName = `generated_${post.id}_16_9_${Date.now()}.png`;
-      const file = new File([blob], fileName, { type: 'image/png' });
+      const fileName = `generated_${post.id}_16_9_${Date.now()}.jpg`;
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
 
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage

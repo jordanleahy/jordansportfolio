@@ -127,12 +127,12 @@ serve(async (req) => {
     console.log('🎨 DAY_1_4:3: Processing and uploading image...');
 
     // Convert base64 to blob
-    const response = await fetch(`data:image/png;base64,${base64Image}`);
+    const response = await fetch(`data:image/jpeg;base64,${base64Image}`);
     const blob = await response.blob();
     
     // Create file object
-    const fileName = `generated_${postId}_${aspectRatio}_${Date.now()}.png`;
-    const file = new File([blob], fileName, { type: 'image/png' });
+    const fileName = `generated_${postId}_${aspectRatio}_${Date.now()}.jpg`;
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
 
     // Upload to storage
     const { data: uploadData, error: uploadError } = await supabase.storage
