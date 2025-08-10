@@ -587,7 +587,7 @@ export default function StoriesDashboard() {
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center w-[95vw] md:w-[700px] mx-auto bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
               <p className="text-base md:text-xl text-foreground">Every Thought is a Visual Journey</p>
-              <div className="w-full">
+              <div className="w-full text-center">
                 <Input aria-label="Describe your theme" placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')" className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" value={customThemeDescription} onChange={e => setCustomThemeDescription(e.target.value)} onKeyDown={e => {
               if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
                 e.preventDefault();
