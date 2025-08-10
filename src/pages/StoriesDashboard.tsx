@@ -600,6 +600,7 @@ export default function StoriesDashboard() {
               backgroundRepeat: 'no-repeat'
             }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/80 z-[1]" />
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
               <p className="text-base md:text-xl text-foreground">Every Thought is a Visual Journey</p>
