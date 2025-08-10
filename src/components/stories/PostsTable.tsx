@@ -355,10 +355,12 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
       const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
       setIsPublishing(true);
+      const themeIdArg = (typeof selectedThemeId === 'string' && /^[0-9a-fA-F-]{36}$/.test(selectedThemeId)) ? selectedThemeId : null;
+      const categoryArg = (typeof category === 'string' && category.trim().length > 0) ? category : null;
       const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
-        p_category: category ?? null,
-        p_theme_id: selectedThemeId ?? null,
+        p_category: categoryArg,
+        p_theme_id: themeIdArg,
       });
       if (error) {
         console.error(error);
