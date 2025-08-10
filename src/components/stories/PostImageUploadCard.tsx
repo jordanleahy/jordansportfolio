@@ -277,7 +277,7 @@ export const PostImageUploadCard = ({
               <img
                 src={imageUrl}
                 alt={`${label} for ${post.title}`}
-                className="w-full h-16 object-cover rounded border"
+                className="w-full aspect-square object-cover rounded border"
                 loading="lazy"
               />
               {onImageDelete && (

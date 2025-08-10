@@ -80,8 +80,7 @@ const VideoUploadCard: React.FC<VideoUploadCardProps> = ({
             <video
               src={videoUrl}
               controls
-              className="w-full h-32 object-cover rounded-md bg-muted"
-              style={{ aspectRatio }}
+              className="w-full aspect-square object-cover rounded-md bg-muted"
             />
             <Button
               size="sm"

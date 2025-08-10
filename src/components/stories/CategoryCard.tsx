@@ -293,7 +293,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
           style={{ touchAction: 'manipulation' }}
         >
           {/* Shimmer Image Section */}
-          <div className="relative h-48">
+          <div className="relative aspect-square">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 flex items-center justify-center">
               <div className="space-y-2 text-center">
                 <Loader2 className="h-8 w-8 text-primary/60 animate-spin mx-auto" />
@@ -342,7 +342,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       isSelected ? 'ring-2 ring-primary border-primary/50' : ''
     } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} onClick={handleClick}>
       {/* Image Section */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative aspect-square overflow-hidden">
         {/* Display current image */}
         {currentImageUrl ? (
           <img 
