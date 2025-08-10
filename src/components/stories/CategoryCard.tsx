@@ -34,8 +34,10 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     if (!user?.id || !category) return;
 
     const unsubscribe = realtimeEventBus.on('update-received', (event) => {
-      if (event.type === 'update-received' && event.payload.table === 'social_media_posts' && event.payload.eventType === 'UPDATE') {
-        const updatedPost = event.payload.data;
+      // Type guard to ensure we have the correct event payload structure
+      if ('table' in event.payload && 'eventType' in event.payload && 'data' in event.payload) {
+        if (event.payload.table === 'social_media_posts' && event.payload.eventType === 'UPDATE') {
+          const updatedPost = event.payload.data;
         
         // Check if this is a Day 1 post for our category
         if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.user_id === user.id) {
@@ -65,6 +67,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
             setIsGeneratingDay1(true);
             setGenerationError(null);
           }
+          }
         }
       }
     });
@@ -72,21 +75,29 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     return unsubscribe;
   }, [user?.id, category]);
 
-  // Reset generation attempt tracking when theme changes
+  // Reset generation attempt tracking when theme or category changes
   useEffect(() => {
     imageGenerationAttempted.current = false;
     setGenerationError(null);
+    setIsGeneratingDay1(false); // Reset generating state when theme changes
   }, [theme, category]);
 
-  // Sync image URL from props or firstPostData
+  // Sync image URL from props or firstPostData and manage generating state
   useEffect(() => {
     if (imageUrl) {
       setCurrentImageUrl(imageUrl);
+      setIsGeneratingDay1(false); // If we have an image URL, we're not generating
       return;
     }
+    
     const firstUrl = (firstPostData as any)?.image_4_3_url;
+    const status = (firstPostData as any)?.image_4_3_status;
+    
     if (firstUrl) {
       setCurrentImageUrl(firstUrl);
+      setIsGeneratingDay1(false);
+    } else if (status === 'processing' || status === 'uploading') {
+      setIsGeneratingDay1(true);
     }
   }, [imageUrl, firstPostData]);
 
@@ -172,27 +183,40 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   useEffect(() => {
     if (isShimmer) return;
     if (imageGenerationAttempted.current) return;
+    if (!firstPostData) return;
 
     const status = (firstPostData as any)?.image_4_3_status as string | undefined;
     const inProgress = status === 'processing' || status === 'uploading';
     const hasImage = !!(currentImageUrl || (firstPostData as any)?.image_4_3_url);
+    const isComplete = status === 'complete';
 
-    // Reflect in-progress state visually
-    if (inProgress && !hasImage) {
+    console.log('🎯 Auto-generation check for theme:', theme, {
+      status,
+      inProgress,
+      hasImage,
+      isComplete,
+      isGeneratingDay1,
+      imageGenerationAttempted: imageGenerationAttempted.current
+    });
+
+    // Reflect server state accurately
+    if (inProgress) {
       setIsGeneratingDay1(true);
+      return;
     }
 
-    // Trigger generation once per card, but add additional guards
-    if (!hasImage && !inProgress && firstPostData && !isGeneratingDay1) {
-      console.log('🎯 Auto-generating Day 1 image for theme:', theme);
-      imageGenerationAttempted.current = true;
-      
-      // Add a small delay to prevent race conditions
-      setTimeout(() => {
-        generateDay1Image();
-      }, 100);
+    if (isComplete || hasImage) {
+      setIsGeneratingDay1(false);
+      return;
     }
-  }, [isShimmer, firstPostData, currentImageUrl]);
+
+    // Only trigger generation if truly needed
+    if (!hasImage && !inProgress && !isComplete && !isGeneratingDay1) {
+      console.log('🎯 Triggering auto-generation for theme:', theme);
+      imageGenerationAttempted.current = true;
+      generateDay1Image();
+    }
+  }, [isShimmer, firstPostData, currentImageUrl, theme]);
   
   const handleCancelThemeGeneration = async () => {
     if (!user?.id || !onCancelGeneration) return;
