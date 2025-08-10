@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,12 +36,65 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<SocialMediaResult[]>([]);
   const [regeneratingPlatform, setRegeneratingPlatform] = useState<string | null>(null);
+  const [agentExists, setAgentExists] = useState<boolean>(false);
+  const [isCreatingAgent, setIsCreatingAgent] = useState(false);
 
   const platforms = [
     { key: 'linkedin', ...SOCIAL_MEDIA_PLATFORMS.LINKEDIN },
     { key: 'instagram', ...SOCIAL_MEDIA_PLATFORMS.INSTAGRAM },
     { key: 'twitter_x', ...SOCIAL_MEDIA_PLATFORMS.TWITTER_X },
   ];
+
+  // Check if Social Media Agent exists
+  useEffect(() => {
+    const checkAgent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('openai_agents')
+          .select('id')
+          .eq('name', 'Social Media Agent')
+          .maybeSingle();
+        
+        if (!error && data) {
+          setAgentExists(true);
+        }
+      } catch (error) {
+        console.error('Error checking agent:', error);
+      }
+    };
+    
+    checkAgent();
+  }, []);
+
+  const createAgent = async () => {
+    setIsCreatingAgent(true);
+    try {
+      const { data, error } = await supabase.rpc('insert_social_media_agent');
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data.startsWith('SUCCESS:')) {
+        setAgentExists(true);
+        toast({
+          title: "Agent created successfully!",
+          description: "Social Media Agent is now ready to use."
+        });
+      } else {
+        throw new Error(data);
+      }
+    } catch (error) {
+      console.error('Error creating agent:', error);
+      toast({
+        title: "Failed to create agent",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCreatingAgent(false);
+    }
+  };
 
   const handlePlatformToggle = (platform: string) => {
     setSelectedPlatforms(prev => 
@@ -172,7 +225,38 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Platform Selection */}
+        {/* Agent Setup Check */}
+        {!agentExists && (
+          <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-orange-800">Setup Required</h4>
+                <p className="text-sm text-orange-700">
+                  Social Media Agent needs to be created first.
+                </p>
+              </div>
+              <Button 
+                onClick={createAgent}
+                disabled={isCreatingAgent}
+                variant="outline"
+                size="sm"
+              >
+                {isCreatingAgent ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Agent'
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {agentExists && (
+          <>
+            {/* Platform Selection */}
         <div className="space-y-3">
           <h4 className="font-medium">Select Platforms</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -223,6 +307,8 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
             </>
           )}
         </Button>
+        </>
+        )}
 
         {/* Results */}
         {results.length > 0 && (
