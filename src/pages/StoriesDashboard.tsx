@@ -572,7 +572,7 @@ export default function StoriesDashboard() {
             }}
           >
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
-              <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl max-w-4xl w-full mx-4">
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl max-w-[600px] h-[400px] w-full mx-4 flex flex-col justify-center">
                 <div className="space-y-6">
                   <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">Story Ship</h1>
                   <p className="text-lg md:text-xl text-gray-600">Every Thought is a Visual Journey</p>
