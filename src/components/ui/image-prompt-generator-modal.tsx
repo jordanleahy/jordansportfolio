@@ -65,6 +65,7 @@ export const ImagePromptGeneratorModal = ({
               description: content.secondary,
               theme: config.theme,
               category: config.category,
+              aspectRatio: selectedAspectRatio,
             }
           });
           break;

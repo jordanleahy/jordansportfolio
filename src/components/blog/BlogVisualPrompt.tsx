@@ -2,6 +2,7 @@ import React from 'react';
 import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generator-modal';
 import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
 import { getCategoryLabel } from '@/constants/categoryConstants';
+import { useParams } from 'react-router-dom';
 
 interface BlogVisualPromptProps {
   isOpen: boolean;
@@ -19,11 +20,15 @@ const aspectRatioOptions: AspectRatioOption[] = [
 ];
 
 export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare' }: BlogVisualPromptProps) => {
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+
   const config: ImagePromptConfig = {
-    title: `${getCategoryLabel(category)} Visual Prompt Generator`,
+    title: theme ? `${theme} Visual Prompt Generator` : `${getCategoryLabel(category)} Visual Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'generate-image-prompt-dynamic',
     category: category,
+    theme,
     enableCaching: true,
     aspectRatioOptions,
     cacheKeyPrefix: 'blog_visual'

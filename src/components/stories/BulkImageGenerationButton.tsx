@@ -10,6 +10,7 @@ import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 import type { BulkImageGenerationButtonProps } from '@/types/stories/ui';
+import { useParams } from 'react-router-dom';
 
 export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps> = ({
   post,
@@ -21,6 +22,9 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   const { toast } = useToast();
   
   const creditStatus = getCreditStatus();
+  
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const isCurrentlyGenerating = isGenerating(post.id);
 
@@ -54,6 +58,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         title: post.title,
         description: post.description,
         category: post.category,
+        theme,
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
       };

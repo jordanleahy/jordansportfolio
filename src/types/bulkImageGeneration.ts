@@ -27,6 +27,7 @@ export interface BulkImageGenerationRequest {
   title: string;
   description: string;
   category?: string;
+  theme?: string;
   context?: BulkGenerationMode;
   colorThemeId?: string;
 }

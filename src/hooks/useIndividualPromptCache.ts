@@ -127,7 +127,7 @@ export const useIndividualPromptCache = (postId: string) => {
           description, 
           theme,
           category: category || 'gpt-5-launch',
-          aspect_ratio: aspectRatio || '16:9'
+          aspectRatio: aspectRatio || '16:9'
         }
       });
 

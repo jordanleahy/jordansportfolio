@@ -73,21 +73,24 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, theme, category, colorTheme } = await req.json();
+    const { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio } = await req.json();
 
     if (!title || !description || (!theme && !category)) {
       throw new Error('Missing required fields: title, description, and either theme or category are required');
     }
 
+    const requestedAspectRatio = aspectRatio || aspect_ratio || null;
+
     // Store request metadata with correlation ID
-    requestMetadata = { theme, category, title, description, colorTheme, correlationId };
+    requestMetadata = { theme, category, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId };
 
     logger.info('Request payload received', {
       theme,
       category,
       titleLength: title?.length || 0,
       descriptionLength: description?.length || 0,
-      hasColorTheme: !!colorTheme
+      hasColorTheme: !!colorTheme,
+      aspectRatio: requestedAspectRatio
     });
     // Initialize Supabase client
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
@@ -183,6 +186,16 @@ Description: ${description}`;
     } else {
       userMessage += `\nCategory: ${usedIdentifier}`;
     }
+
+    // Add aspect ratio guidance if provided
+    if (requestedAspectRatio) {
+      let orientationHint = 'composition optimized for this orientation';
+      if (requestedAspectRatio === '16:9') orientationHint = 'wide landscape composition';
+      else if (requestedAspectRatio === '9:16') orientationHint = 'vertical portrait orientation';
+      else if (requestedAspectRatio === '1:1') orientationHint = 'balanced square format';
+      userMessage += `\nAspect Ratio: ${requestedAspectRatio} (${orientationHint})`;
+    }
+
 
     // Add color theme instructions if provided
     if (colorTheme) {
