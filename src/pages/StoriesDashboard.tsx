@@ -594,7 +594,7 @@ export default function StoriesDashboard() {
           <AuroraBackground 
             className="h-[60vh] md:h-[70vh] relative"
             style={{
-              backgroundImage: 'url(/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png)',
+              backgroundImage: 'url(/lovable-uploads/1ecc2c50-ea8f-464e-8f8f-9d41df739891.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
