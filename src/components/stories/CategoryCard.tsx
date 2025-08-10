@@ -84,7 +84,16 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
 
   // Sync image URL from props or firstPostData and manage generating state
   useEffect(() => {
+    console.log('🔍 CategoryCard image sync for theme:', theme, {
+      imageUrl,
+      firstPostData,
+      firstPost_image_4_3_url: (firstPostData as any)?.image_4_3_url,
+      firstPost_image_4_3_status: (firstPostData as any)?.image_4_3_status,
+      currentImageUrl
+    });
+
     if (imageUrl) {
+      console.log('✅ Setting image from imageUrl prop:', imageUrl);
       setCurrentImageUrl(imageUrl);
       setIsGeneratingDay1(false); // If we have an image URL, we're not generating
       return;
@@ -93,13 +102,22 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     const firstUrl = (firstPostData as any)?.image_4_3_url;
     const status = (firstPostData as any)?.image_4_3_status;
     
+    console.log('📊 FirstPost data analysis:', {
+      firstUrl,
+      status,
+      hasFirstUrl: !!firstUrl,
+      isProcessing: status === 'processing' || status === 'uploading'
+    });
+    
     if (firstUrl) {
+      console.log('✅ Setting image from firstPostData:', firstUrl);
       setCurrentImageUrl(firstUrl);
       setIsGeneratingDay1(false);
     } else if (status === 'processing' || status === 'uploading') {
+      console.log('⏳ Setting generating state for status:', status);
       setIsGeneratingDay1(true);
     }
-  }, [imageUrl, firstPostData]);
+  }, [imageUrl, firstPostData, theme]);
 
   // Generate Day 1 image function
   const generateDay1Image = async () => {
@@ -181,6 +199,14 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   
   // Auto-generate Day 1 image on mount if missing and not already in progress
   useEffect(() => {
+    console.log('🎯 Auto-generation check for theme:', theme, {
+      isShimmer,
+      imageGenerationAttempted: imageGenerationAttempted.current,
+      firstPostData: !!firstPostData,
+      currentImageUrl,
+      isGeneratingDay1
+    });
+
     if (isShimmer) return;
     if (imageGenerationAttempted.current) return;
     if (!firstPostData) return;
@@ -190,13 +216,15 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     const hasImage = !!(currentImageUrl || (firstPostData as any)?.image_4_3_url);
     const isComplete = status === 'complete';
 
-    console.log('🎯 Auto-generation check for theme:', theme, {
+    console.log('🎯 Auto-generation detailed check for theme:', theme, {
       status,
       inProgress,
       hasImage,
       isComplete,
       isGeneratingDay1,
-      imageGenerationAttempted: imageGenerationAttempted.current
+      imageGenerationAttempted: imageGenerationAttempted.current,
+      firstPost_image_4_3_url: (firstPostData as any)?.image_4_3_url,
+      firstPost_image_4_3_status: (firstPostData as any)?.image_4_3_status
     });
 
     // Reflect server state accurately
