@@ -30,7 +30,6 @@ export const navigationConfig: NavigationItem[] = [
   { href: "/sec", label: "Funded Startups", icon: Database, accessLevel: 'admin', showInMobile: true },
   { href: "/vendors", label: "Vendors", icon: Building2, accessLevel: 'admin', showInMobile: true },
   { href: "/investors", label: "Investors", icon: TrendingUp, accessLevel: 'admin', showInMobile: true },
-  { href: "/comparisons", label: "Battlecards", icon: GitCompare, accessLevel: 'admin', showInMobile: true },
   { href: "/work-report", label: "Work Reports", icon: ChartBar, accessLevel: 'admin', showInMobile: true },
   { href: "/admin/users", label: "Users", icon: User, accessLevel: 'admin', showInMobile: true },
   { href: "/admin/comparisons", label: "Admin Battlecards", icon: BarChart3, accessLevel: 'admin', showInMobile: true },
