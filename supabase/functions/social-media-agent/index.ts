@@ -115,7 +115,7 @@ ${custom_context ? `Additional Context: ${custom_context}` : ''}
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: agent.model_version || 'gpt-5-mini',
+          model: agent.model_version || 'gpt-5',
           messages: [
             {
               role: 'system',
@@ -126,8 +126,7 @@ ${custom_context ? `Additional Context: ${custom_context}` : ''}
               content: `Transform this blog post into platform-specific social media content:\n\n${blogContent}`
             }
           ],
-          temperature: agent.temperature || 0.7,
-          max_tokens: agent.max_tokens || 2000,
+          max_output_tokens: agent.max_tokens || 25000,
         }),
       });
 
@@ -166,7 +165,7 @@ ${custom_context ? `Additional Context: ${custom_context}` : ''}
       await supabase.from('api_usage_tracking').insert({
         user_id: userId,
         function_name: 'social-media-agent',
-        model_used: agent.model_version || 'gpt-5-mini',
+        model_used: agent.model_version || 'gpt-5',
         request_type: 'text_generation',
         success: true,
         request_metadata: {

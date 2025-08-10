@@ -49,14 +49,14 @@ export const SOCIAL_MEDIA_PLATFORMS = {
   }
 } as const;
 
-// OpenAI Model Versions (Latest - gpt-5 models launched Aug 7, 2025)
+// OpenAI Model Versions (Latest - GPT-5 models launched Aug 7, 2025)
 export const OPENAI_MODELS = {
   // Latest flagship model (launched Aug 7, 2025)
-  FLAGSHIP: 'gpt-5-mini',
+  FLAGSHIP: 'gpt-5',
   // Reasoning models
   REASONING: 'o3-2025-04-16',
-  // Vision model (gpt-5-mini has vision capabilities)
-  VISION: 'gpt-5-mini',
+  // Vision model (GPT-5 has vision capabilities)
+  VISION: 'gpt-5',
   // Legacy models (deprecated)
   LEGACY_GPT4O: 'gpt-4o',
   LEGACY_GPT4O_MINI: 'gpt-4o-mini',
@@ -74,8 +74,8 @@ export const DEFAULT_MODELS = {
 export const MODEL_OPTIONS = [
   {
     value: OPENAI_MODELS.FLAGSHIP,
-    label: 'gpt-5-mini (Flagship)',
-    description: 'Most capable flagship model',
+    label: 'gpt-5 (Flagship)',
+    description: 'Most capable flagship model with 128K output tokens',
     recommended: true
   },
   {
@@ -86,7 +86,7 @@ export const MODEL_OPTIONS = [
   },
   {
     value: OPENAI_MODELS.VISION,
-    label: 'gpt-5-mini (Vision)',
+    label: 'gpt-5 (Vision)',
     description: 'Model with vision capabilities',
     recommended: false
   }
@@ -125,10 +125,11 @@ export const TEMPERATURE_SETTINGS = {
   CREATIVE: 1,       // For highly creative content
 } as const;
 
-// Max Token Settings for Different Use Cases
-export const MAX_TOKENS = {
-  SHORT_RESPONSE: 500,      // For image prompts
-  MEDIUM_RESPONSE: 2000,    // For cover letters, scripts
-  LONG_RESPONSE: 2500,      // For comparison pages
-  COMPREHENSIVE: 4000,      // For blog content, system prompts
+// Max Output Token Settings for GPT-5 (Different Use Cases)
+export const MAX_OUTPUT_TOKENS = {
+  SHORT_RESPONSE: 1000,      // For image prompts
+  MEDIUM_RESPONSE: 5000,     // For cover letters, scripts
+  LONG_RESPONSE: 15000,      // For comparison pages
+  COMPREHENSIVE: 25000,      // For blog content, system prompts (includes reasoning)
+  MAXIMUM: 128000,           // GPT-5 maximum output tokens
 } as const;
