@@ -45,7 +45,7 @@ serve(async (req) => {
     // Step 1: Find Day 1 post for this theme and user
     const { data: day1Post, error: queryError } = await supabase
       .from('social_media_posts')
-      .select('id, title, description, category')
+      .select('id, title, description, category, image_4_3_url, image_4_3_status')
       .eq('theme_id', themeId)
       .eq('user_id', userId)
       .eq('day', 1)
@@ -68,6 +68,18 @@ serve(async (req) => {
     const imageField = `image_${aspectRatio}_url`;
 
     console.log(`🎨 DAY_1_4:3: Found Day 1 post ${postId}: "${day1Post.title}"`);
+
+    // Idempotency: skip if already processing/complete or URL already set
+    if (day1Post.image_4_3_status === 'processing' || day1Post.image_4_3_status === 'complete' || day1Post.image_4_3_url) {
+      console.log('⏭️ DAY_1_4:3: Skipping — already in progress or completed for post', postId, {
+        status: day1Post.image_4_3_status,
+        hasUrl: !!day1Post.image_4_3_url
+      });
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: 'already_processing_or_complete', postId }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Step 2: Update status to uploading
     await supabase
@@ -164,13 +176,22 @@ serve(async (req) => {
       .eq('id', postId);
 
     // Step 7: Trigger background processing for watermark (same as useImageManager)
-    await supabase.functions.invoke('process-uploaded-images', {
-      body: {
-        imageUrl: urlData.publicUrl,
-        postId,
-        aspectRatio
-      }
-    });
+    const triggerProcessing = () =>
+      supabase.functions.invoke('process-uploaded-images', {
+        body: {
+          imageUrl: urlData.publicUrl,
+          postId,
+          aspectRatio
+        }
+      });
+
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(
+        triggerProcessing().catch((e: any) => console.error('process-uploaded-images failed', e))
+      );
+    } else {
+      triggerProcessing().catch((e: any) => console.error('process-uploaded-images failed', e));
+    }
 
     console.log(`✅ DAY_1_4:3: Day 1 image generation completed successfully for post ${postId}`);
 

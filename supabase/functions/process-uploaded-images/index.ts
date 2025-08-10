@@ -55,10 +55,18 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, postId, aspectRatio, watermarkText = 'www.jordanleahy.com' } = await req.json();
-    
+    const body = await req.json();
+    const { postId, watermarkText = 'www.jordanleahy.com' } = body;
+    const imageUrl: string | undefined = body.imageUrl ?? (Array.isArray(body.imageUrls) ? body.imageUrls[0] : undefined);
+    const aspectRatio: string | undefined = body.aspectRatio ?? (Array.isArray(body.aspectRatios) ? body.aspectRatios[0] : undefined);
+
+    if (!imageUrl || !postId || !aspectRatio) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing required fields: imageUrl, postId, aspectRatio' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     console.log(`Processing image for post ${postId}, aspect ratio ${aspectRatio}`);
-    
     // Update status to processing
     const statusField = `image_${aspectRatio}_status`;
     await supabase

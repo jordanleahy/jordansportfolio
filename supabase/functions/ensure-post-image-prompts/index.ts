@@ -130,45 +130,24 @@ serve(async (req) => {
       try {
         console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
 
-        // Call OpenAI to generate image prompt
-        const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-5-mini',
-            messages: [
-              {
-                role: 'system',
-                content: systemPromptData.prompt_text
-              },
-              {
-                role: 'user',
-                content: `Generate an image prompt for this post:
-
-Title: ${post.title}
-Description: ${post.description}
-Category: ${post.category}
-
-Please generate a detailed, professional image prompt that will create an appropriate visual for this content. Include the aspect ratio naturally in the description (use 16:9 landscape format).`
-              }
-            ],
-            max_completion_tokens: 800,
-          }),
+        // Use internal edge function to generate prompts consistently
+        const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+          body: {
+            title: post.title,
+            description: post.description,
+            category: post.category,
+            aspectRatio: '16:9'
+          }
         });
 
-        if (!openAIResponse.ok) {
-          const errorText = await openAIResponse.text();
-          console.error(`❌ OPENAI ERROR for post ${post.id}:`, errorText);
+        if (promptFnError) {
+          console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id}:`, promptFnError);
           errorCount++;
-          results.push({ postId: post.id, success: false, error: errorText });
+          results.push({ postId: post.id, success: false, error: promptFnError.message });
           continue;
         }
 
-        const openAIData = await openAIResponse.json();
-        const generatedPrompt = openAIData.choices[0]?.message?.content;
+        const generatedPrompt = promptResp?.generatedPrompt;
 
         if (!generatedPrompt) {
           console.error(`❌ NO PROMPT GENERATED for post ${post.id}`);
