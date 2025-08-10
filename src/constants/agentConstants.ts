@@ -6,6 +6,7 @@ export const AGENT_NAMES = {
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
   STORY_TELLING_AGENT: 'Story Telling Agent',
+  SOCIAL_MEDIA_AGENT: 'Social Media Agent',
 } as const;
 
 // System Prompt Categories
@@ -18,6 +19,34 @@ export const SYSTEM_PROMPT_CATEGORIES = {
   PRODUCT_DESIGNER: 'product_designer',
   CHILDRENS_STORY: 'childrens_story',
   CONVINCING_STORY: 'convincing_story',
+  LINKEDIN: 'linkedin',
+  INSTAGRAM: 'instagram',
+  TWITTER_X: 'twitter_x',
+} as const;
+
+// Social Media Platforms Configuration
+export const SOCIAL_MEDIA_PLATFORMS = {
+  LINKEDIN: {
+    name: 'LinkedIn',
+    category: 'linkedin',
+    maxLength: 3000,
+    tone: 'professional',
+    features: ['business_insights', 'thought_leadership', 'industry_trends']
+  },
+  INSTAGRAM: {
+    name: 'Instagram',
+    category: 'instagram',
+    maxLength: 2200,
+    tone: 'casual',
+    features: ['visual_storytelling', 'personal_connection', 'behind_scenes']
+  },
+  TWITTER_X: {
+    name: 'X (Twitter)',
+    category: 'twitter_x',
+    maxLength: 280,
+    tone: 'engaging',
+    features: ['thread_format', 'viral_potential', 'conversation_starter']
+  }
 } as const;
 
 // OpenAI Model Versions (Latest - gpt-5 models launched Aug 7, 2025)
