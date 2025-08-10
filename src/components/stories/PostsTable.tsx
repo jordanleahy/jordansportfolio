@@ -424,29 +424,40 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                     )}
                   </div>
               
-                  {category && userIsAdmin && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={handlePublishCollection}
-                        disabled={isPublishing}
-                        aria-label="Library"
-                        title={isPublishing ? 'Publishing…' : 'Library'}
-                      >
-                        <BookOpen className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-                        aria-label="Category Prompt"
-                        title="Category Prompt"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                    {category && userIsAdmin && (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePublishCollection}
+                          disabled={isPublishing}
+                          className="rounded-full px-3"
+                          aria-label="Library"
+                          title={isPublishing ? 'Publishing…' : 'Library'}
+                        >
+                          Library
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={handlePublishCollection}
+                          disabled={isPublishing}
+                          aria-label="Library"
+                          title={isPublishing ? 'Publishing…' : 'Library'}
+                        >
+                          <BookOpen className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+                          aria-label="Category Prompt"
+                          title="Category Prompt"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                 </div>
 
                 <TabsContent value="draft">
@@ -524,17 +535,28 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handlePublishCollection}
-                        disabled={isPublishing}
-                        className="gap-1 text-xs sm:text-sm"
-                        aria-label="Publish posts"
-                        title="Publish posts"
-                      >
-                        {isPublishing ? 'Publishing…' : 'Publish'}
-                      </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePublishCollection}
+                          disabled={isPublishing}
+                          className="rounded-full px-3 text-xs sm:text-sm"
+                          aria-label="Library"
+                          title={isPublishing ? 'Publishing…' : 'Library'}
+                        >
+                          Library
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handlePublishCollection}
+                          disabled={isPublishing}
+                          className="gap-1 text-xs sm:text-sm"
+                          aria-label="Publish posts"
+                          title="Publish posts"
+                        >
+                          {isPublishing ? 'Publishing…' : 'Publish'}
+                        </Button>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span className="hidden sm:inline">Category Prompt</span>
