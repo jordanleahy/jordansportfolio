@@ -525,6 +525,14 @@ export default function StoriesDashboard() {
           
           {/* Content */}
           <div className="relative z-10 space-y-6">
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Story Ship
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground font-light">
+                Every Thought is a Visual Journey
+              </p>
+            </div>
             
             <div className="w-full max-w-7xl mx-auto">
               <Input
@@ -564,6 +572,8 @@ export default function StoriesDashboard() {
             }}
           >
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Story Ship</h1>
+              <p className="text-base md:text-xl text-muted-foreground">Every Thought is a Visual Journey</p>
               <div className="w-full max-w-3xl mx-auto">
                 <Input
                   aria-label="Describe your theme"
