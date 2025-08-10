@@ -1846,6 +1846,86 @@ export type Database = {
           },
         ]
       }
+      shared_collection_items: {
+        Row: {
+          collection_id: string
+          created_at: string
+          description: string
+          id: string
+          image_16_9_url: string
+          position: number
+          post_id: string
+          title: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          description: string
+          id?: string
+          image_16_9_url: string
+          position: number
+          post_id: string
+          title: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_16_9_url?: string
+          position?: number
+          post_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "shared_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          handle: string
+          id: string
+          item_count: number
+          published_at: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          handle: string
+          id?: string
+          item_count?: number
+          published_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          handle?: string
+          id?: string
+          item_count?: number
+          published_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       signatures: {
         Row: {
           accessionnumber: string
@@ -2901,6 +2981,17 @@ export type Database = {
           p_event_type: string
           p_event_data?: Json
           p_processing_time_ms?: number
+        }
+        Returns: string
+      }
+      publish_shared_collection_16_9: {
+        Args: {
+          p_handle: string
+          p_title?: string
+          p_description?: string
+          p_post_ids?: string[]
+          p_category?: string
+          p_theme_id?: string
         }
         Returns: string
       }
