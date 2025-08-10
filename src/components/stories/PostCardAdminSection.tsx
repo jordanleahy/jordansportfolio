@@ -118,7 +118,18 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       {showPhotos && (
         <div id="photos-section" className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Image Generation</h4>
-          <div className="grid grid-cols-2 gap-3">
+          
+          {/* Reference Image */}
+          <div className="mb-4">
+            <img 
+              src="/lovable-uploads/2a5cd48f-398c-4b72-893e-fe8f28261daf.png" 
+              alt="Image generation reference" 
+              className="w-full max-w-md rounded-lg border"
+            />
+          </div>
+
+          {/* Top row - 3 columns */}
+          <div className="grid grid-cols-3 gap-3 mb-3">
             <PostImageUploadCard
               post={post}
               type="16_9"
@@ -152,6 +163,10 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
             />
+          </div>
+
+          {/* Bottom row - 2 columns */}
+          <div className="grid grid-cols-2 gap-3">
             <PostImageUploadCard
               post={post}
               type="4_3"
