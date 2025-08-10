@@ -168,6 +168,7 @@ export interface ImagePromptModalProps {
   description: string;
   postId: string;
   cachedPrompt?: string | null;
+  theme?: string;
   category?: string;
 }
 

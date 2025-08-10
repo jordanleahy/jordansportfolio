@@ -3,6 +3,7 @@ import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generato
 import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
 import { getCategoryLabel } from '@/constants/categoryConstants';
 import type { ImagePromptModalProps } from '@/types/stories/ui';
+import { useParams } from 'react-router-dom';
 
 const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Landscape (16:9)", value: "16:9" },
@@ -12,14 +13,20 @@ const aspectRatioOptions: AspectRatioOption[] = [
 ];
 
 export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  
   const config: ImagePromptConfig = {
-    title: `${getCategoryLabel(category)} Image Prompt Generator`,
+    title: theme 
+      ? `${theme} Image Prompt Generator`
+      : `${getCategoryLabel(category)} Image Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'generate-image-prompt-dynamic',
     category: category,
+    theme: theme,
     enableCaching: true,
     aspectRatioOptions,
-    cacheKeyPrefix: 'calendar_image'
+    cacheKeyPrefix: theme ? `theme_${theme.toLowerCase().replace(/\s+/g, '_')}_image` : 'calendar_image'
   };
 
   const content: ImagePromptContent = {

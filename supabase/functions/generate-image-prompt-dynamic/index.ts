@@ -9,7 +9,8 @@
  * INPUTS:
  * - title: string - Content title for context
  * - description: string - Content description for prompt generation
- * - category: string - Content category (maps to specific Visual Prompt Generator prompts)
+ * - theme: string (optional) - Specific theme for targeted prompt generation
+ * - category: string - Content category (fallback if theme not found)
  * - colorTheme: object (optional) - Brand colors and visual style guidelines
  * 
  * OUTPUTS:
@@ -26,8 +27,8 @@
  * Authentication: Optional - enhanced features and caching available for authenticated users
  * 
  * FLOW:
- * 1. Validate required title, description, and category inputs
- * 2. Retrieve category-specific system prompt from system_prompts table
+ * 1. Validate required title, description inputs (theme or category required)
+ * 2. Retrieve theme-specific system prompt with category fallback from system_prompts table
  * 3. Integrate color theme instructions if provided for brand consistency
  * 4. Generate detailed image prompt using OpenAI with Visual Prompt Generator
  * 5. Cache generated prompt for future reuse (if user authenticated)
@@ -72,16 +73,17 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, category, colorTheme } = await req.json();
+    const { title, description, theme, category, colorTheme } = await req.json();
 
-    if (!title || !description || !category) {
-      throw new Error('Missing required fields: title, description, and category are required');
+    if (!title || !description || (!theme && !category)) {
+      throw new Error('Missing required fields: title, description, and either theme or category are required');
     }
 
     // Store request metadata with correlation ID
-    requestMetadata = { category, title, description, colorTheme, correlationId };
+    requestMetadata = { theme, category, title, description, colorTheme, correlationId };
 
     logger.info('Request payload received', {
+      theme,
       category,
       titleLength: title?.length || 0,
       descriptionLength: description?.length || 0,
@@ -103,34 +105,84 @@ serve(async (req) => {
 
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
-    console.log('🚀 Generating image prompt for:', { category, title, userId: userId?.slice(0, 8), correlationId });
+    console.log('🚀 Generating image prompt for:', { theme, category, title, userId: userId?.slice(0, 8), correlationId });
 
-    // First, check the new system_prompts table for category-specific prompts
-    const { data: systemPromptData, error: systemPromptError } = await supabase
-      .from('system_prompts')
-      .select('prompt_text, category')
-      .eq('category', category)
-      .eq('agent_name', 'Visual Prompt Generator')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    let systemPromptData: any = null;
+    let usedIdentifier: string;
+    let usedType: 'theme' | 'category';
 
-    let categoryPrompt: any = null;
+    // First, try to get theme-specific prompt if theme is provided
+    if (theme) {
+      console.log('🎯 Looking for theme-based system prompt:', theme);
+      const { data: themeData, error: themeError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, theme, category')
+        .eq('theme', theme)
+        .eq('agent_name', 'Visual Prompt Generator')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (systemPromptData && !systemPromptError) {
-      console.log('✅ Found prompt in system_prompts table for category:', category);
-      categoryPrompt = { prompt: systemPromptData.prompt_text, category: systemPromptData.category };
-    } else {
-      console.log('🔍 No prompt found in system_prompts table, removing legacy fallback');
-      throw new Error(`No system prompt found for category '${category}' in system_prompts table`);
+      if (themeData && !themeError) {
+        console.log('✅ Found theme-based prompt:', theme);
+        systemPromptData = themeData;
+        usedIdentifier = theme;
+        usedType = 'theme';
+      } else {
+        console.log('🔍 No theme-based prompt found, falling back to category:', category);
+      }
     }
 
-    // Build user message with color theme information
+    // If no theme prompt found, fall back to category-based prompt
+    if (!systemPromptData && category) {
+      console.log('🏷️ Looking for category-based system prompt:', category);
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, theme, category')
+        .eq('category', category)
+        .eq('agent_name', 'Visual Prompt Generator')
+        .eq('is_active', true)
+        .is('theme', null) // Prefer category-only prompts over theme-specific ones
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (categoryData && !categoryError) {
+        console.log('✅ Found category-based prompt:', category);
+        systemPromptData = categoryData;
+        usedIdentifier = category;
+        usedType = 'category';
+      }
+    }
+
+    if (!systemPromptData) {
+      const errorMsg = theme 
+        ? `No system prompt found for theme '${theme}' or category '${category}'`
+        : `No system prompt found for category '${category}'`;
+      console.log('❌', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    const categoryPrompt = { 
+      prompt: systemPromptData.prompt_text, 
+      theme: systemPromptData.theme,
+      category: systemPromptData.category,
+      usedIdentifier,
+      usedType
+    };
+
+    // Build user message with theme/category information
     let userMessage = `Generate an image prompt for:
 Title: ${title}
-Description: ${description}
-Category: ${category}`;
+Description: ${description}`;
+
+    if (usedType === 'theme') {
+      userMessage += `\nTheme: ${usedIdentifier}`;
+      if (category) userMessage += `\nCategory: ${category}`;
+    } else {
+      userMessage += `\nCategory: ${usedIdentifier}`;
+    }
 
     // Add color theme instructions if provided
     if (colorTheme) {
@@ -157,11 +209,11 @@ Please incorporate these colors and visual style into the image prompt to ensure
 - Composition: 80% safe zone - keep important elements in central 80% of frame
 - Color Palette: Use professional blues (#2563eb, #1e40af), teals (#0891b2, #0e7490), accent greens (#16a34a), highlight orange (#ea580c), and neutral grays (#64748b, #f8fafc)
 - Accessibility: High contrast, clear visual hierarchy, readable at various sizes
-- Background: Clean, minimal, professional setting appropriate for ${category}
+- Background: Clean, minimal, professional setting appropriate for ${usedType === 'theme' ? theme : category}
 - NEGATIVE PROMPTS: No photorealistic rendering, no complex gradients, no cluttered compositions, no dark/dramatic lighting
 
 **COMPOSITION GUIDELINES:**
-- Foreground: Main subject focused on ${category}-specific elements
+- Foreground: Main subject focused on ${usedType === 'theme' ? theme : category}-specific elements
 - Mid-ground: Supporting professional context and workflow elements  
 - Background: Clean, minimal professional environment
 - Visual Flow: Clear focal point with logical eye movement through the composition
@@ -325,11 +377,14 @@ Private Safe Space Visual Tone:
         await supabase.from('cached_prompts').insert({
           user_id: userId,
           cache_key: cacheKey,
-          category: category,
+          category: category || usedIdentifier,
           prompt_text: generatedText,
           metadata: {
             title,
             description,
+            theme: usedType === 'theme' ? usedIdentifier : undefined,
+            category: usedType === 'category' ? usedIdentifier : category,
+            usedType,
             agent: 'Visual Prompt Generator',
             model: 'gpt-5-mini',
             generated_at: new Date().toISOString(),
@@ -371,7 +426,9 @@ Private Safe Space Visual Tone:
 
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
-      category,
+      theme: usedType === 'theme' ? usedIdentifier : undefined,
+      category: usedType === 'category' ? usedIdentifier : category,
+      usedType,
       agent: 'Visual Prompt Generator',
       correlationId,
       usage: {
