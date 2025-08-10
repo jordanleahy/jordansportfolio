@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { generateSEOMetadata, SEO_DEFAULTS } from "@/utils/seoHelpers";
 import { useLibraryCollections } from "@/hooks/useLibraryCollections";
 import { CollectionCard } from "@/components/library/CollectionCard";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 const Library = () => {
   const [query, setQuery] = useState("");
@@ -42,52 +43,54 @@ const Library = () => {
         <link rel="canonical" href={`${SEO_DEFAULTS.siteUrl}/library`} />
       </Helmet>
 
-      <header className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Library of Shared Collections</h1>
-        <p className="mt-2 text-muted-foreground max-w-2xl">
-          Discover published, curated collections of visuals and insights.
-        </p>
-        <div className="mt-6 max-w-md">
-          <label htmlFor="library-search" className="sr-only">Search library</label>
-          <input
-            id="library-search"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search collections..."
-            className="w-full h-10 rounded-md border bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          />
-        </div>
-      </header>
-
-      <main className="container pb-16">
-        {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-lg border bg-card h-56 animate-pulse" />
-            ))}
+      <PageLayout>
+        <header className="container py-12">
+          <h1 className="text-3xl font-bold tracking-tight">Library of Shared Collections</h1>
+          <p className="mt-2 text-muted-foreground max-w-2xl">
+            Discover published, curated collections of visuals and insights.
+          </p>
+          <div className="mt-6 max-w-md">
+            <label htmlFor="library-search" className="sr-only">Search library</label>
+            <input
+              id="library-search"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search collections..."
+              className="w-full h-10 rounded-md border bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            />
           </div>
-        )}
+        </header>
 
-        {error && (
-          <div role="alert" className="rounded-lg border p-4 text-destructive">
-            Failed to load library. Please try again.
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <section aria-label="Collections" className="">
-            <div className="mb-4 text-sm text-muted-foreground">
-              {filtered.length} collection{filtered.length === 1 ? "" : "s"}
-            </div>
+        <main className="container pb-16">
+          {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((c) => (
-                <CollectionCard key={c.id} collection={c} />
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-lg border bg-card h-56 animate-pulse" />
               ))}
             </div>
-          </section>
-        )}
-      </main>
+          )}
+
+          {error && (
+            <div role="alert" className="rounded-lg border p-4 text-destructive">
+              Failed to load library. Please try again.
+            </div>
+          )}
+
+          {!isLoading && !error && (
+            <section aria-label="Collections" className="">
+              <div className="mb-4 text-sm text-muted-foreground">
+                {filtered.length} collection{filtered.length === 1 ? "" : "s"}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map((c) => (
+                  <CollectionCard key={c.id} collection={c} />
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
+      </PageLayout>
     </>
   );
 };
