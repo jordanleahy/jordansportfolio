@@ -214,7 +214,11 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     if (!hasImage && !inProgress && !isComplete && !isGeneratingDay1) {
       console.log('🎯 Triggering auto-generation for theme:', theme);
       imageGenerationAttempted.current = true;
-      generateDay1Image();
+      
+      // Add substantial debouncing to prevent race conditions
+      setTimeout(() => {
+        generateDay1Image();
+      }, 500);
     }
   }, [isShimmer, firstPostData, currentImageUrl, theme]);
   
