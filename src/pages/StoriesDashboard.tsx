@@ -637,6 +637,9 @@ export default function StoriesDashboard() {
             </div>
           </AuroraBackground>
 
+          {/* Add extra white space between hero and content */}
+          <div className="py-16" />
+
           {isAdmin && (
             <Suspense fallback={<div>Loading...</div>}>
               <ThemeImportModal 
