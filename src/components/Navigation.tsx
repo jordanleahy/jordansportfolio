@@ -14,7 +14,6 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { BookOpen, LogIn } from "lucide-react";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
@@ -99,66 +98,51 @@ const Navigation = () => {
           <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
             <div className="w-full flex-1 md:w-auto md:flex-none">
               {/* Desktop Navigation */}
-              <NavigationMenu className="hidden md:flex">
-                <NavigationMenuList>
-                  {user ? (
-                    // Authenticated user navigation
-                    <>
-                      {isAdmin && <AdminDropdown navLinkStyles={navLinkStyles} />}
+              <div className="hidden md:flex items-center space-x-6">
+                {user ? (
+                  // Authenticated user navigation
+                  <>
+                    {isAdmin && <AdminDropdown navLinkStyles={navLinkStyles} />}
 
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <NavLink
-                            item={{ href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'authenticated' }}
-                            className={navLinkStyles}
-                            onMouseEnter={() => handleMouseEnter('/stories')}
-                            onFocus={() => handleFocus('/stories')}
-                          />
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
+                    <NavLink
+                      item={{ href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'authenticated' }}
+                      className={navLinkStyles}
+                      onMouseEnter={() => handleMouseEnter('/stories')}
+                      onFocus={() => handleFocus('/stories')}
+                    />
 
-                      <NavigationMenuItem>
-                        <UserDropdown
-                          user={user}
-                          usageData={usageData}
-                          usedCredits={usedCredits}
-                          totalCredits={totalCredits}
-                          percentUsed={percentUsed}
-                          onOpenSettings={openSettings}
-                          onSignOut={handleSignOut}
-                        />
-                      </NavigationMenuItem>
-                    </>
-                  ) : (
-                    // Public navigation
-                    <>
-                      {publicNavItems.map((item) => (
-                        <NavigationMenuItem key={item.href}>
-                          <NavigationMenuLink asChild>
-                            <NavLink
-                              item={item}
-                              className={navLinkStyles}
-                              onClick={(e) => handleAnchorClick(e, item.href)}
-                            />
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-                      ))}
+                    <UserDropdown
+                      user={user}
+                      usageData={usageData}
+                      usedCredits={usedCredits}
+                      totalCredits={totalCredits}
+                      percentUsed={percentUsed}
+                      onOpenSettings={openSettings}
+                      onSignOut={handleSignOut}
+                    />
+                  </>
+                ) : (
+                  // Public navigation
+                  <>
+                    {publicNavItems.map((item) => (
+                      <NavLink
+                        key={item.href}
+                        item={item}
+                        className={navLinkStyles}
+                        onClick={(e) => handleAnchorClick(e, item.href)}
+                      />
+                    ))}
 
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/auth"
-                            className={cn(navLinkStyles, "bg-primary text-primary-foreground hover:bg-primary/90")}
-                          >
-                            <LogIn className="mr-2 h-4 w-4" />
-                            Sign in
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    </>
-                  )}
-                </NavigationMenuList>
-              </NavigationMenu>
+                    <Link
+                      to="/auth"
+                      className={cn(navLinkStyles, "bg-primary text-primary-foreground hover:bg-primary/90")}
+                    >
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign in
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Mobile Navigation */}
