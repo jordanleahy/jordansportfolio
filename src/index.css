@@ -236,44 +236,81 @@ html {
 /* Sail-shaped container for glass effect */
 .sail-shaped-container {
   clip-path: polygon(
-    5% 15%, 
-    20% 8%, 
-    40% 5%, 
-    65% 8%, 
-    85% 15%, 
-    95% 25%, 
-    98% 40%, 
-    95% 60%, 
-    88% 75%, 
-    75% 85%, 
-    55% 90%, 
-    35% 88%, 
-    18% 82%, 
-    8% 70%, 
-    2% 50%, 
-    5% 30%
+    8% 20%, 
+    25% 8%, 
+    45% 3%, 
+    70% 6%, 
+    88% 18%, 
+    96% 32%, 
+    98% 48%, 
+    94% 65%, 
+    85% 78%, 
+    70% 88%, 
+    50% 92%, 
+    30% 89%, 
+    15% 80%, 
+    6% 65%, 
+    2% 45%, 
+    5% 28%
   );
-  transition: clip-path 0.3s ease-in-out;
+  transform: rotate(-1.5deg);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 25px 50px -15px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  animation: gentle-float 6s ease-in-out infinite;
+}
+
+.sail-shaped-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  clip-path: inherit;
+  z-index: -1;
 }
 
 .sail-shaped-container:hover {
   clip-path: polygon(
-    3% 12%, 
-    22% 6%, 
-    42% 3%, 
-    67% 6%, 
-    87% 12%, 
-    97% 22%, 
-    100% 37%, 
-    97% 57%, 
-    90% 72%, 
-    77% 82%, 
-    57% 87%, 
-    37% 85%, 
-    20% 79%, 
-    10% 67%, 
-    4% 47%, 
-    7% 27%
+    6% 18%, 
+    27% 6%, 
+    47% 2%, 
+    72% 5%, 
+    90% 16%, 
+    98% 30%, 
+    100% 46%, 
+    96% 63%, 
+    87% 76%, 
+    72% 86%, 
+    52% 90%, 
+    32% 87%, 
+    17% 78%, 
+    8% 63%, 
+    4% 43%, 
+    7% 26%
   );
+  transform: rotate(-0.5deg) scale(1.02);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+}
+
+@keyframes gentle-float {
+  0%, 100% {
+    transform: rotate(-1.5deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(-1deg) translateY(-8px);
+  }
 }
 }
