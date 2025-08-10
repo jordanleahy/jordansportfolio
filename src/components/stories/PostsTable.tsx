@@ -40,6 +40,7 @@ export const PostsTable = ({
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
   const [isBulk169, setIsBulk169] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -337,6 +338,49 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     }
   };
 
+  // Publish 16:9 collection (exactly 10 posts)
+  const handlePublishCollection = async () => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to publish');
+        return;
+      }
+
+      const input = window.prompt('Public handle for the share URL (letters, numbers, - or _):');
+      if (!input) return;
+      const handle = input.trim();
+      if (!/^[a-zA-Z0-9_-]{2,32}$/.test(handle)) {
+        toast.error('Invalid handle. Use 2-32 characters: letters, numbers, - or _.');
+        return;
+      }
+
+      setIsPublishing(true);
+      const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
+        p_handle: handle,
+        p_category: category ?? null,
+        p_theme_id: selectedThemeId ?? null,
+      });
+      if (error) {
+        console.error(error);
+        toast.error(error.message || 'Failed to publish');
+        return;
+      }
+      const collectionId = data as unknown as string;
+      const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
+      try { await navigator.clipboard.writeText(publicUrl); } catch {}
+      toast.success('Published! Public link copied to clipboard.');
+      // Optionally open in a new tab
+      // window.open(publicUrl, '_blank');
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Failed to publish');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
   
@@ -463,11 +507,13 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
                       <Button 
                         variant="outline" 
                         size="sm" 
+                        onClick={handlePublishCollection}
+                        disabled={isPublishing}
                         className="gap-1 text-xs sm:text-sm"
                         aria-label="Publish posts"
                         title="Publish posts"
                       >
-                        Publish
+                        {isPublishing ? 'Publishing…' : 'Publish'}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />

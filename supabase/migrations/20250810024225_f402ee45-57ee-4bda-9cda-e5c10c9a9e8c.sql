@@ -1,0 +1,84 @@
+-- Harden function search_path for newly created functions
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.publish_shared_collection_16_9(
+  p_handle text,
+  p_title text DEFAULT NULL,
+  p_description text DEFAULT NULL,
+  p_post_ids uuid[] DEFAULT NULL,
+  p_category text DEFAULT NULL,
+  p_theme_id uuid DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  v_user_id uuid := auth.uid();
+  v_handle text;
+  v_collection_id uuid;
+  v_count integer := 0;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  v_handle := lower(regexp_replace(coalesce(p_handle, ''), '[^a-zA-Z0-9_-]+', '-', 'g'));
+  IF v_handle IS NULL OR length(trim(v_handle)) = 0 THEN
+    RAISE EXCEPTION 'Handle is required';
+  END IF;
+
+  WITH candidates AS (
+    SELECT id
+    FROM public.social_media_posts
+    WHERE user_id = v_user_id
+      AND image_16_9_url IS NOT NULL
+      AND (p_post_ids IS NULL OR id = ANY(p_post_ids))
+      AND (p_category IS NULL OR category = p_category)
+      AND (p_theme_id IS NULL OR theme_id = p_theme_id)
+    ORDER BY COALESCE(day, 999999) ASC, created_at ASC
+    LIMIT 10
+  )
+  SELECT COUNT(*) INTO v_count FROM candidates;
+
+  IF v_count <> 10 THEN
+    RAISE EXCEPTION 'Exactly 10 posts with 16:9 images are required (found: %).', v_count;
+  END IF;
+
+  INSERT INTO public.shared_collections (user_id, handle, title, description, item_count, status)
+  VALUES (v_user_id, v_handle, NULLIF(p_title, ''), NULLIF(p_description, ''), 0, 'draft')
+  RETURNING id INTO v_collection_id;
+
+  INSERT INTO public.shared_collection_items (collection_id, post_id, title, description, image_16_9_url, position)
+  SELECT v_collection_id, id, title, description, image_16_9_url,
+         row_number() OVER (ORDER BY COALESCE(day, 999999) ASC, created_at ASC)
+  FROM (
+    SELECT id, title, description, image_16_9_url, day, created_at
+    FROM public.social_media_posts
+    WHERE user_id = v_user_id
+      AND image_16_9_url IS NOT NULL
+      AND (p_post_ids IS NULL OR id = ANY(p_post_ids))
+      AND (p_category IS NULL OR category = p_category)
+      AND (p_theme_id IS NULL OR theme_id = p_theme_id)
+    ORDER BY COALESCE(day, 999999) ASC, created_at ASC
+    LIMIT 10
+  ) s;
+
+  UPDATE public.shared_collections 
+  SET item_count = 10, status = 'published', published_at = now()
+  WHERE id = v_collection_id;
+
+  RETURN v_collection_id;
+END;
+$$;
