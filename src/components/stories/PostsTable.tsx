@@ -13,7 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
 import { usePostActions } from "@/hooks/usePostActions";
 import { useImageManager } from "@/hooks/useImageManager";
-
+import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
 
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
@@ -49,7 +49,9 @@ export const PostsTable = ({
 
   // Batch blog status for all posts
   const postIds = posts.map(post => post.id);
-  const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
+const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
+
+  const { setBulkProcessing } = useProcessingStatesContext();
 
 
   // Animation state management
@@ -171,6 +173,7 @@ export const PostsTable = ({
 
   // Handle bulk 16:9 generation for current category/theme (only missing images)
   const handleBulkGenerate169 = async () => {
+    let candidateIds: string[] = [];
     try {
       if (!category) {
         toast.error('Category not found');
@@ -218,6 +221,9 @@ export const PostsTable = ({
 
       toast.info(`Starting generation (16:9 + 4:3) for ${candidates.length} post(s)...`);
 
+      candidateIds = candidates.map(c => c.post.id);
+      candidateIds.forEach(id => setBulkProcessing(id, true));
+
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
       let successes = 0;
@@ -248,11 +254,13 @@ export const PostsTable = ({
       toast.error('Failed to run 16:9 generation');
     } finally {
       setIsBulk169(false);
+      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
     }
   };
 
   // Force-regenerate 16:9 images for all matching posts (category/theme)
   const handleBulkRegenerate169 = async () => {
+    let candidateIds: string[] = [];
     try {
       if (!category) {
         toast.error('Category not found');
@@ -296,6 +304,9 @@ export const PostsTable = ({
 
       toast.info(`Regenerating 16:9 + 4:3 for ${candidates.length} post(s)...`);
 
+      candidateIds = candidates.map(p => p.id);
+      candidateIds.forEach(id => setBulkProcessing(id, true));
+
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
       let successes = 0;
@@ -321,6 +332,8 @@ export const PostsTable = ({
       toast.error('Failed to run 16:9 regeneration');
     } finally {
       setIsBulk169(false);
+      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+
     }
   };
 

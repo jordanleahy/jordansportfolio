@@ -227,6 +227,7 @@ export const PostsTableView = memo(({
             onPostsChange
           };
 
+          const isBulk = isProcessingCtx(post.id, 'bulk_generate');
           return (
           <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
             <TableCell className="font-medium w-12">
@@ -282,13 +283,12 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
                   </div>
-                ) : isProcessingCtx(post.id, 'generate', toAspect('16_9')) ? (
+                ) : (isProcessingCtx(post.id, 'generate', toAspect('16_9')) || isBulk) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-16 h-9 flex-shrink-0"
                   />
                 ) : <div className="w-16 h-9"></div>}
-
                 {post.image_4_3_url ? (
                   <div className="w-16 h-12 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
@@ -300,7 +300,7 @@ export const PostsTableView = memo(({
                     />
                     <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
                   </div>
-                ) : isProcessingCtx(post.id, 'generate', toAspect('4_3')) ? (
+                ) : (isProcessingCtx(post.id, 'generate', toAspect('4_3')) || isBulk) ? (
                   <SimpleShimmer
                     variant="thumbnail"
                     className="w-16 h-12 flex-shrink-0"
