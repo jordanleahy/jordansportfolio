@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye } from "lucide-react";
+import { Eye, Megaphone } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -426,21 +426,24 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
               
                   {category && userIsAdmin && (
                     <div className="flex items-center gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={handlePublishCollection}
                         disabled={isPublishing}
-                        className="gap-1 text-xs sm:text-sm"
                         aria-label="Publish posts"
-                        title="Publish posts"
+                        title={isPublishing ? 'Publishing…' : 'Publish'}
                       >
-                        {isPublishing ? 'Publishing…' : 'Publish'}
+                        <Megaphone className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
-                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Category Prompt</span>
-                        <span className="sm:hidden">Category Prompt</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+                        aria-label="Category Prompt"
+                        title="Category Prompt"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
