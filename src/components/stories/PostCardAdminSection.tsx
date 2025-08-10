@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ImageIcon, Lightbulb, Mic, BookOpen, Video } from 'lucide-react';
 import { BlogPostButton } from './BlogPostButton';
+import { LibraryChipButton } from './LibraryChipButton';
 import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
@@ -55,7 +56,10 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       <h4 className="text-sm font-medium text-muted-foreground">Admin Actions</h4>
       
       <div className="grid grid-cols-3 gap-2">
-        <BlogPostButton post={post} />
+        <div className="flex items-center gap-1">
+          <LibraryChipButton post={post} />
+          <BlogPostButton post={post} />
+        </div>
         <Button
           variant="outline"
           size="sm"
