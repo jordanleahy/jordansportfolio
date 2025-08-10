@@ -32,8 +32,11 @@ serve(async (req) => {
     
     const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = incomingRequestBody;
 
-    console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'seedContext exists:', !!seedContext);
-    console.log('📐 ASPECT_RATIO: Received aspect ratio:', aspectRatio);
+    // Normalize aspect ratio formats like "1_1" to "1:1"
+    const normalizedAspectRatio = String(aspectRatio).replace(/_/g, ':');
+
+    console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'normalized:', normalizedAspectRatio, 'seedContext exists:', !!seedContext);
+    console.log('📐 ASPECT_RATIO: Received aspect ratio:', normalizedAspectRatio);
 
     if (!prompt) {
       console.log('❌ DEBUG: No prompt provided');
@@ -72,8 +75,8 @@ serve(async (req) => {
       '1:1': '1024x1024'
     };
 
-    const size = sizeMap[aspectRatio] || '1536x1024';
-    console.log('📐 ASPECT_RATIO: Final size for OpenAI:', size, '(from aspect ratio:', aspectRatio + ')');
+    const size = sizeMap[normalizedAspectRatio] || '1536x1024';
+    console.log('📐 ASPECT_RATIO: Final size for OpenAI:', size, '(from aspect ratio:', normalizedAspectRatio + ')');
     console.log('🔗 CORRELATION: Request ID:', correlationId);
     const estimatedCost = calculateImageGenerationCost(size, 'high');
     
@@ -107,7 +110,7 @@ serve(async (req) => {
     if (useDeterministicSeed && !finalSeed && !isCDICategory) {
       // Create deterministic seed based on seedContext + prompt + aspect ratio for uniqueness
       const encoder = new TextEncoder();
-      const seedInput = seedContext ? `${seedContext}_${prompt}_${aspectRatio}` : `${prompt}_${aspectRatio}`;
+      const seedInput = seedContext ? `${seedContext}_${prompt}_${normalizedAspectRatio}` : `${prompt}_${normalizedAspectRatio}`;
       const data = encoder.encode(seedInput);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);
@@ -188,7 +191,7 @@ serve(async (req) => {
           imageQuality: 'high',
           responseTimeMs: responseTime,
           errorMessage: errorData.error?.message,
-          metadata: { prompt: prompt.substring(0, 200), aspectRatio },
+          metadata: { prompt: prompt.substring(0, 200), aspectRatio: normalizedAspectRatio },
           correlationId,
           openAIRequestId,
         });
@@ -224,7 +227,7 @@ serve(async (req) => {
           imageQuality: 'high',
           responseTimeMs: responseTime,
           errorMessage: `JSON parsing error: ${jsonError.message}`,
-          metadata: { prompt: prompt.substring(0, 200), aspectRatio },
+          metadata: { prompt: prompt.substring(0, 200), aspectRatio: normalizedAspectRatio },
           correlationId,
           openAIRequestId,
         });
@@ -258,7 +261,7 @@ serve(async (req) => {
         imageSize: size,
         imageQuality: 'high',
         responseTimeMs: responseTime,
-        metadata: { prompt: prompt.substring(0, 200), aspectRatio, seed: finalSeed },
+        metadata: { prompt: prompt.substring(0, 200), aspectRatio: normalizedAspectRatio, seed: finalSeed },
         correlationId,
         openAIRequestId,
       });
@@ -269,7 +272,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         image: base64Image,
-        aspectRatio: aspectRatio,
+        aspectRatio: normalizedAspectRatio,
         size: size,
         seed: finalSeed,
         usage: { estimated_cost: estimatedCost }
