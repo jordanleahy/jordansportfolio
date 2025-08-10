@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { blogPostId, sectionIndex = null, aspectRatio = '4:3' } = await req.json();
+    const { blogPostId, sectionIndex = null, aspectRatio = '1:1' } = await req.json();
 
     if (!blogPostId) {
       return new Response(JSON.stringify({ error: 'Missing blogPostId' }), {

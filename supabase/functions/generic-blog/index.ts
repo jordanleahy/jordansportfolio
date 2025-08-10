@@ -368,7 +368,7 @@ Requirements:
               continue;
             }
 
-            const imagePrompt = `${promptData.generatedPrompt.trim()}, professional 4:3 aspect ratio composition`;
+            const imagePrompt = `${promptData.generatedPrompt.trim()}, professional 1:1 aspect ratio composition`;
             generatedPrompts.push(imagePrompt);
             console.log(`✅ Generated prompt for section ${i + 1}:`, imagePrompt.substring(0, 100) + '...');
 
@@ -381,7 +381,7 @@ Requirements:
               },
               body: JSON.stringify({
                 prompt: imagePrompt,
-                aspectRatio: "4:3"
+                aspectRatio: "1:1"
               })
             });
 
