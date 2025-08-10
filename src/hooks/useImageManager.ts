@@ -40,164 +40,141 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
     description: string, 
     category?: string
   ) => {
-    // If user clicks 16:9 or 4:3, generate BOTH 16:9 and 4:3 safely in one go
-    const targetRatios: Array<'16_9' | '4_3' | '9_16' | '3_4'> =
-      aspectRatio === '16_9' || aspectRatio === '4_3' ? ['16_9', '4_3'] : [aspectRatio];
-
-    // Start shimmer for all target ratios
-    targetRatios.forEach(r => {
-      const visualAspect = r.replace('_', ':') as AspectRatio;
-      setProcessing(postId, 'generate', true, visualAspect);
-    });
-
     try {
-      // Fetch existing post info to reuse prompt and skip already-generated images
-      const { data: post, error: fetchError } = await supabase
+      // Start shimmer immediately for this aspect ratio
+      const visualAspect = aspectRatio.replace('_', ':') as AspectRatio;
+      setProcessing(postId, 'generate', true, visualAspect);
+
+      // Update status to uploading (DB)
+      const statusField = `image_${aspectRatio}_status`;
+      console.log(`🎨 IMAGE_GEN: Starting generation for post ${postId}, ratio ${aspectRatio}, setting status to 'uploading'`);
+      await supabase
         .from('social_media_posts')
-        .select('generated_image_prompt, image_16_9_url, image_4_3_url')
-        .eq('id', postId)
-        .maybeSingle();
+        .update({ [statusField]: 'uploading' })
+        .eq('id', postId);
 
-      if (fetchError) {
-        console.warn('⚠️ IMAGE_GEN: Could not fetch post (continuing):', fetchError.message);
-      }
-
-      // Determine which ratios actually need generation (skip if URL already exists)
-      const needGeneration: Array<'16_9' | '4_3' | '9_16' | '3_4'> = targetRatios.filter(r => {
-        if (!post) return true;
-        if (r === '16_9') return !post.image_16_9_url;
-        if (r === '4_3') return !post.image_4_3_url;
-        return true;
+      
+      
+      // Step 1: Generate prompt
+      toast.info('Generating image prompt...');
+      
+      const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+        body: {
+          title,
+          description,
+          category: category || 'cdi',
+          aspectRatio: aspectRatio.replace('_', ':')
+        }
       });
 
-      if (needGeneration.length === 0) {
-        toast.info('Images already exist for selected ratios.');
-        return { success: true };
+      if (promptResponse.error) {
+        throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
       }
 
-      // Optimistically set status to 'uploading' for needed ratios
-      const uploadingUpdate: Record<string, string> = {};
-      needGeneration.forEach(r => {
-        const statusField = `image_${r}_status`;
-        uploadingUpdate[statusField] = 'uploading';
-      });
-      if (Object.keys(uploadingUpdate).length > 0) {
-        await supabase
-          .from('social_media_posts')
-          .update(uploadingUpdate)
-          .eq('id', postId);
-      }
-
-      // Step 1: Get or generate prompt once
-      let generatedPrompt = post?.generated_image_prompt as string | undefined;
+      const generatedPrompt = promptResponse.data?.generatedPrompt;
       if (!generatedPrompt) {
-        toast.info('Generating image prompt...');
-        const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-          body: {
-            title,
-            description,
-            category: category || 'cdi',
-            aspectRatio: needGeneration[0].replace('_', ':'),
-          },
-        });
-        if (promptResponse.error) {
-          throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
+        throw new Error('No prompt generated');
+      }
+
+      // Store the generated prompt
+      await supabase
+        .from('social_media_posts')
+        .update({ generated_image_prompt: generatedPrompt })
+        .eq('id', postId);
+
+      // Step 2: Generate image
+      toast.info('Generating image with AI...');
+
+      const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
+        body: {
+          prompt: generatedPrompt,
+          aspectRatio: aspectRatio.replace('_', ':')
         }
-        generatedPrompt = promptResponse.data?.generatedPrompt;
-        if (!generatedPrompt) throw new Error('No prompt generated');
-        // Cache/store prompt on post
-        await supabase
-          .from('social_media_posts')
-          .update({ generated_image_prompt: generatedPrompt })
-          .eq('id', postId);
+      });
+
+      if (imageResponse.error) {
+        throw new Error(`Failed to generate image: ${imageResponse.error.message}`);
       }
 
-      // Step 2: Generate images for each needed ratio sequentially (safer for credits)
-      toast.info(`Generating images with AI (${needGeneration.map(r => r.replace('_', ':')).join(', ')})...`);
+      const base64Image = imageResponse.data?.image;
+      if (!base64Image) {
+        throw new Error('No image generated');
+      }
 
-      let firstUrl: string | undefined;
-      let successCount = 0;
-      const errors: Array<{ ratio: string; message: string }> = [];
+      // Step 3: Convert to file and upload
+      toast.info('Processing and uploading image...');
 
-      for (const r of needGeneration) {
-        try {
-          const ratioLabel = r.replace('_', ':');
+      // Convert base64 to blob
+      const response = await fetch(`data:image/jpeg;base64,${base64Image}`);
+      const blob = await response.blob();
+      
+      // Create file object
+      const fileName = `generated_${postId}_${aspectRatio}_${Date.now()}.jpg`;
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
 
-          const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
-            body: { prompt: generatedPrompt, aspectRatio: ratioLabel },
-          });
-          if (imageResponse.error) {
-            throw new Error(`Failed to generate image (${ratioLabel}): ${imageResponse.error.message}`);
-          }
-          const base64Image = imageResponse.data?.image;
-          if (!base64Image) throw new Error(`No image generated (${ratioLabel})`);
+      // Upload to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('social-media-images')
+        .upload(fileName, file);
 
-          // Convert to file and upload
-          const response = await fetch(`data:image/jpeg;base64,${base64Image}`);
-          const blob = await response.blob();
-          const fileName = `generated_${postId}_${r}_${Date.now()}.jpg`;
-          const file = new File([blob], fileName, { type: 'image/jpeg' });
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('social-media-images')
-            .upload(fileName, file);
-          if (uploadError) throw new Error(`Failed to upload image (${ratioLabel}): ${uploadError.message}`);
+      if (uploadError) {
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
+      }
 
-          const { data: urlData } = supabase.storage
-            .from('social-media-images')
-            .getPublicUrl(uploadData.path);
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('social-media-images')
+        .getPublicUrl(uploadData.path);
 
-          const imageField = `image_${r}_url`;
-          const statusField = `image_${r}_status`;
-          console.log(`🎨 IMAGE_GEN: ${ratioLabel} URL set, marking 'processing' for post ${postId}`);
+      // Update post with image URL
+      const imageField = `image_${aspectRatio}_url`;
+      
+      console.log(`🎨 IMAGE_GEN: Setting image URL and status to 'processing' for post ${postId}`, {
+        imageField,
+        statusField,
+        url: urlData.publicUrl.substring(0, 100) + '...'
+      });
+      
+      await supabase
+        .from('social_media_posts')
+        .update({ 
+          [imageField]: urlData.publicUrl,
+          [statusField]: 'processing' // Will be updated by background processing
+        })
+        .eq('id', postId);
 
-          await supabase
-            .from('social_media_posts')
-            .update({ [imageField]: urlData.publicUrl, [statusField]: 'processing' })
-            .eq('id', postId);
-
-          // Trigger background processing for watermark, etc.
-          await supabase.functions.invoke('process-uploaded-images', {
-            body: { imageUrl: urlData.publicUrl, postId, aspectRatio: r },
-          });
-
-          successCount += 1;
-          if (!firstUrl) firstUrl = urlData.publicUrl;
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Unknown error';
-          errors.push({ ratio: r, message: msg });
-          const statusField = `image_${r}_status`;
-          await supabase
-            .from('social_media_posts')
-            .update({ [statusField]: 'failed' })
-            .eq('id', postId);
-          console.error(`❌ IMAGE_GEN: Error on ${r} for post ${postId}:`, err);
+      // Trigger background processing for watermark
+      await supabase.functions.invoke('process-uploaded-images', {
+        body: {
+          imageUrl: urlData.publicUrl,
+          postId,
+          aspectRatio
         }
-      }
+      });
 
-      if (successCount > 0) {
-        toast.success(
-          successCount === needGeneration.length
-            ? 'Images generated successfully!'
-            : `Some images generated (${successCount}/${needGeneration.length}); others failed.`
-        );
-        debouncedOnPostsChange();
-        return { success: true, imageUrl: firstUrl };
-      }
+      toast.success('Image generated successfully!');
+      debouncedOnPostsChange();
+      
+      return { success: true, imageUrl: urlData.publicUrl };
 
-      // If we get here, all failed
-      const firstErr = errors[0]?.message || 'Failed to generate images';
-      toast.error(firstErr);
-      return { success: false, error: firstErr };
     } catch (error) {
-      console.error('🎨 MULTI_IMAGE_GENERATION: Error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate images');
+      console.error('🎨 SINGLE_IMAGE_GENERATION: Error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to generate image');
+      
+      // Update status to failed
+      const statusField = `image_${aspectRatio}_status`;
+      console.log(`❌ IMAGE_GEN: Setting status to 'failed' for post ${postId}, ratio ${aspectRatio}`);
+      await supabase
+        .from('social_media_posts')
+        .update({ [statusField]: 'failed' })
+        .eq('id', postId);
+        
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     } finally {
-      // Clear shimmer state for all target ratios
-      targetRatios.forEach(r => {
-        const visualAspect = r.replace('_', ':') as AspectRatio;
-        setProcessing(postId, 'generate', false, visualAspect);
-      });
+      // Clear shimmer state
+      const visualAspect = aspectRatio.replace('_', ':') as AspectRatio;
+      setProcessing(postId, 'generate', false, visualAspect);
+      // No upload state to clear since we removed file upload functionality
     }
   };
 
