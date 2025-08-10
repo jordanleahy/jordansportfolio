@@ -354,13 +354,20 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         || session.user.id.slice(0, 8)) as string;
       const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
+      // Choose posts currently in scope (this page) and only those with a 16:9 image
+      const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
+      const candidateIds = scoped.filter(p => !!p.image_16_9_url).map(p => p.id);
+      if (candidateIds.length === 0) {
+        toast.error('No posts with 16:9 images found on this page');
+        return;
+      }
+
       setIsPublishing(true);
-      const themeIdArg = (typeof selectedThemeId === 'string' && /^[0-9a-fA-F-]{36}$/.test(selectedThemeId)) ? selectedThemeId : null;
-      const categoryArg = (typeof category === 'string' && category.trim().length > 0) ? category : null;
       const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
-        p_category: categoryArg,
-        p_theme_id: themeIdArg,
+        p_post_ids: candidateIds,
+        p_category: null,
+        p_theme_id: null,
       });
       if (error) {
         console.error(error);
