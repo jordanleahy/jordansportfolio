@@ -417,14 +417,14 @@ export const PostsTable = ({
                             size="sm" 
                             disabled={isBulk169}
                             className="gap-1 text-xs sm:text-sm"
-                            aria-label="Bulk 16:9 actions"
-                            title="Bulk 16:9 actions"
+                            aria-label="Bulk actions"
+                            title="Bulk actions"
                           >
-                            16:9
+                            Bulk
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
-                          <DropdownMenuLabel>Bulk 16:9 actions</DropdownMenuLabel>
+                          <DropdownMenuLabel>Bulk actions</DropdownMenuLabel>
                           <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
                             Generate for missing only (respects theme filter)
                           </DropdownMenuItem>
