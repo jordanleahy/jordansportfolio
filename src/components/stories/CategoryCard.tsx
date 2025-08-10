@@ -95,6 +95,12 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
 
     try {
+      // Prevent duplicate calls
+      if (isGeneratingDay1) {
+        console.log('🚫 Already generating Day 1 for theme:', theme);
+        return;
+      }
+      
       setIsGeneratingDay1(true);
       setGenerationError(null);
 
