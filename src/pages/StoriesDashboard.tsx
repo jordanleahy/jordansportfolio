@@ -604,7 +604,7 @@ export default function StoriesDashboard() {
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center max-w-6xl mx-auto bg-background/20 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
               <p className="text-base md:text-xl text-foreground">Every Thought is a Visual Journey</p>
-              <div className="w-full max-w-3xl mx-auto">
+              <div className="w-full px-16 md:px-24 lg:px-32">
                 <Input
                   aria-label="Describe your theme"
                   placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
