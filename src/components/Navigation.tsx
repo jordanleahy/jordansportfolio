@@ -133,65 +133,20 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                   // Authenticated user navigation
                   <>
 
-                    {/* SEC - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/sec"
-                            className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
-                          >
-                            <span className="mr-2 text-sm font-bold">$$</span>
-                            Funded Startups
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Vendors - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/vendors"
-                            className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
-                          >
-                            <Building2 className="mr-2 h-4 w-4" />
-                            Vendors
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Investors - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/investors"
-                            className={cn(navLinkStyles, isActive("/investors") && "bg-accent text-accent-foreground")}
-                          >
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            Investors
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Battlecards - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/comparisons"
-                            className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
-                          >
-                            <GitCompare className="mr-2 h-4 w-4" />
-                            Battlecards
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
+                     {/* SEC - Admin Only */}
+                     {isAdmin && (
+                       <NavigationMenuItem>
+                         <NavigationMenuLink asChild>
+                           <Link
+                             to="/sec"
+                             className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
+                           >
+                             <span className="mr-2 text-sm font-bold">$$</span>
+                             Funded Startups
+                           </Link>
+                         </NavigationMenuLink>
+                       </NavigationMenuItem>
+                     )}
 
                      <NavigationMenuItem>
                        <NavigationMenuLink asChild>
