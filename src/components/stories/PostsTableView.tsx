@@ -172,7 +172,7 @@ export const PostsTableView = memo(({
             <div className="w-32">Status</div>
           </SortableHeader>
           <TableHead>
-            <div className="w-40">Images</div>
+            <div className="w-48">Images</div>
           </TableHead>
           <TableHead>
             <div className="w-48">Actions</div>
@@ -269,11 +269,11 @@ export const PostsTableView = memo(({
                 <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
               </div>
             </TableCell>
-            <TableCell className="w-40">
-              <div className="grid grid-cols-2 gap-2">
-                {/* Top row: 16:9 and 4:3 */}
+            <TableCell className="w-48">
+              <div className="grid grid-cols-3 gap-1">
+                {/* Top row: 16:9, 4:3, 1:1 */}
                 {post.image_16_9_url ? (
-                  <div className="w-16 h-9 relative group overflow-hidden rounded border flex-shrink-0">
+                  <div className="w-14 h-8 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_16_9_url}
                       alt="16:9 aspect ratio"
@@ -286,11 +286,12 @@ export const PostsTableView = memo(({
                 ) : (isProcessingCtx(post.id, 'generate', toAspect('16_9')) || isBulk) ? (
                   <SimpleShimmer
                     variant="thumbnail"
-                    className="w-16 h-9 flex-shrink-0"
+                    className="w-14 h-8 flex-shrink-0"
                   />
-                ) : <div className="w-16 h-9"></div>}
+                ) : <div className="w-14 h-8"></div>}
+                
                 {post.image_4_3_url ? (
-                  <div className="w-16 h-12 relative group overflow-hidden rounded border flex-shrink-0">
+                  <div className="w-14 h-10 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_4_3_url}
                       alt="4:3 aspect ratio"
@@ -303,13 +304,31 @@ export const PostsTableView = memo(({
                 ) : (isProcessingCtx(post.id, 'generate', toAspect('4_3')) || isBulk) ? (
                   <SimpleShimmer
                     variant="thumbnail"
-                    className="w-16 h-12 flex-shrink-0"
+                    className="w-14 h-10 flex-shrink-0"
                   />
-                ) : <div className="w-16 h-12"></div>}
+                ) : <div className="w-14 h-10"></div>}
+
+                {post.image_1_1_url ? (
+                  <div className="w-12 h-12 relative group overflow-hidden rounded border flex-shrink-0">
+                    <img
+                      src={post.image_1_1_url}
+                      alt="1:1 aspect ratio"
+                      className="w-full h-full object-cover cursor-pointer"
+                      loading="lazy"
+                      onClick={() => onPreviewImage(post.image_1_1_url!, `${post.title} - 1:1 image`)}
+                    />
+                    <ImageHoverOverlay className="text-xs">1:1</ImageHoverOverlay>
+                  </div>
+                ) : (isProcessingCtx(post.id, 'generate', toAspect('1_1')) || isBulk) ? (
+                  <SimpleShimmer
+                    variant="thumbnail"
+                    className="w-12 h-12 flex-shrink-0"
+                  />
+                ) : <div className="w-12 h-12"></div>}
 
                 {/* Bottom row: 9:16 and 3:4 */}
                 {post.image_9_16_url ? (
-                  <div className="w-9 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                  <div className="w-8 h-14 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_9_16_url}
                       alt="9:16 aspect ratio"
@@ -322,12 +341,12 @@ export const PostsTableView = memo(({
                 ) : isProcessingCtx(post.id, 'generate', toAspect('9_16')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
-                    className="w-9 h-16 flex-shrink-0"
+                    className="w-8 h-14 flex-shrink-0"
                   />
-                ) : <div className="w-9 h-16"></div>}
+                ) : <div className="w-8 h-14"></div>}
 
                 {post.image_3_4_url ? (
-                  <div className="w-12 h-16 relative group overflow-hidden rounded border flex-shrink-0">
+                  <div className="w-10 h-14 relative group overflow-hidden rounded border flex-shrink-0">
                     <img
                       src={post.image_3_4_url}
                       alt="3:4 aspect ratio"
@@ -340,9 +359,9 @@ export const PostsTableView = memo(({
                 ) : isProcessingCtx(post.id, 'generate', toAspect('3_4')) ? (
                   <SimpleShimmer
                     variant="thumbnail"
-                    className="w-12 h-16 flex-shrink-0"
+                    className="w-10 h-14 flex-shrink-0"
                   />
-                ) : <div className="w-12 h-16"></div>}
+                ) : <div className="w-10 h-14"></div>}
               </div>
             </TableCell>
             <TableCell className="w-48">
