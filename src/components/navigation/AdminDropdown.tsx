@@ -33,11 +33,10 @@ export const AdminDropdown = ({ navLinkStyles }: AdminDropdownProps) => {
         Admin
       </NavigationMenuTrigger>
       <NavigationMenuContent 
-        className="z-[100] bg-background border border-border shadow-lg"
         onPointerEnter={() => console.log('[AdminDropdown] Content pointer enter')}
         onPointerLeave={() => console.log('[AdminDropdown] Content pointer leave')}
       >
-        <div className="grid gap-1 p-4 w-[320px] bg-background">
+        <div className="grid gap-1 p-4 min-w-[320px]">
           {adminItems.length === 0 ? (
             <div className="px-3 py-2 text-muted-foreground">No admin items found</div>
           ) : (
