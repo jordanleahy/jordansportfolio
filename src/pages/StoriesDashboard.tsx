@@ -526,10 +526,10 @@ export default function StoriesDashboard() {
           {/* Content */}
           <div className="relative z-10 space-y-6">
             <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground opacity-100">
                 Story Ship
               </h1>
-              <p className="text-xl md:text-2xl text-foreground font-light">
+              <p className="text-xl md:text-2xl text-foreground font-light opacity-100">
                 Every Thought is a Visual Journey
               </p>
             </div>
