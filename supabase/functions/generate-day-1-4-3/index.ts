@@ -40,19 +40,19 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log(`🎨 DAY_1_4:3: Starting Day 1 image generation for theme ${themeId}, user ${userId}`);
+    console.log(`🎨 DAY_1_1:1: Starting Day 1 image generation for theme ${themeId}, user ${userId}`);
 
     // Step 1: Find Day 1 post for this theme and user
     const { data: day1Post, error: queryError } = await supabase
       .from('social_media_posts')
-      .select('id, title, description, category, image_4_3_url, image_4_3_status')
+      .select('id, title, description, category, image_1_1_url, image_1_1_status')
       .eq('theme_id', themeId)
       .eq('user_id', userId)
       .eq('day', 1)
       .single();
 
     if (queryError || !day1Post) {
-      console.error('❌ DAY_1_4:3: Day 1 post not found:', queryError);
+      console.error('❌ DAY_1_1:1: Day 1 post not found:', queryError);
       return new Response(
         JSON.stringify({ error: 'Day 1 post not found for this theme' }),
         { 
@@ -63,17 +63,17 @@ serve(async (req) => {
     }
 
     const postId = day1Post.id;
-    const aspectRatio = '4_3';
+    const aspectRatio = '1_1';
     const statusField = `image_${aspectRatio}_status`;
     const imageField = `image_${aspectRatio}_url`;
 
-    console.log(`🎨 DAY_1_4:3: Found Day 1 post ${postId}: "${day1Post.title}"`);
+    console.log(`🎨 DAY_1_1:1: Found Day 1 post ${postId}: "${day1Post.title}"`);
 
     // Idempotency: skip if already processing/complete or URL already set
-    if (day1Post.image_4_3_status === 'processing' || day1Post.image_4_3_status === 'complete' || day1Post.image_4_3_url) {
-      console.log('⏭️ DAY_1_4:3: Skipping — already in progress or completed for post', postId, {
-        status: day1Post.image_4_3_status,
-        hasUrl: !!day1Post.image_4_3_url
+    if (day1Post.image_1_1_status === 'processing' || day1Post.image_1_1_status === 'complete' || day1Post.image_1_1_url) {
+      console.log('⏭️ DAY_1_1:1: Skipping — already in progress or completed for post', postId, {
+        status: day1Post.image_1_1_status,
+        hasUrl: !!day1Post.image_1_1_url
       });
       return new Response(
         JSON.stringify({ success: true, skipped: true, reason: 'already_processing_or_complete', postId }),
@@ -88,14 +88,14 @@ serve(async (req) => {
       .eq('id', postId);
 
     // Step 3: Generate prompt using the same pipeline as useImageManager
-    console.log('🎨 DAY_1_4:3: Generating image prompt...');
+    console.log('🎨 DAY_1_1:1: Generating image prompt...');
     
     const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: {
         title: day1Post.title,
         description: day1Post.description,
         category: day1Post.category || 'cdi',
-        aspectRatio: '4:3'
+        aspectRatio: '1:1'
       }
     });
 
@@ -114,15 +114,15 @@ serve(async (req) => {
       .update({ generated_image_prompt: generatedPrompt })
       .eq('id', postId);
 
-    console.log(`🎨 DAY_1_4:3: Generated prompt: ${generatedPrompt.substring(0, 100)}...`);
+    console.log(`🎨 DAY_1_1:1: Generated prompt: ${generatedPrompt.substring(0, 100)}...`);
 
     // Step 4: Generate image using the same pipeline
-    console.log('🎨 DAY_1_4:3: Generating image with AI...');
+    console.log('🎨 DAY_1_1:1: Generating image with AI...');
 
     const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
       body: {
         prompt: generatedPrompt,
-        aspectRatio: '4:3'
+        aspectRatio: '1:1'
       }
     });
 
@@ -136,7 +136,7 @@ serve(async (req) => {
     }
 
     // Step 5: Convert to file and upload (same as useImageManager)
-    console.log('🎨 DAY_1_4:3: Processing and uploading image...');
+    console.log('🎨 DAY_1_1:1: Processing and uploading image...');
 
     // Convert base64 to blob
     const response = await fetch(`data:image/jpeg;base64,${base64Image}`);
@@ -160,7 +160,7 @@ serve(async (req) => {
       .from('social-media-images')
       .getPublicUrl(uploadData.path);
 
-    console.log(`🎨 DAY_1_4:3: Setting image URL and status to 'processing' for post ${postId}`, {
+    console.log(`🎨 DAY_1_1:1: Setting image URL and status to 'processing' for post ${postId}`, {
       imageField,
       statusField,
       url: urlData.publicUrl.substring(0, 100) + '...'
@@ -193,7 +193,7 @@ serve(async (req) => {
       triggerProcessing().catch((e: any) => console.error('process-uploaded-images failed', e));
     }
 
-    console.log(`✅ DAY_1_4:3: Day 1 image generation completed successfully for post ${postId}`);
+    console.log(`✅ DAY_1_1:1: Day 1 image generation completed successfully for post ${postId}`);
 
     return new Response(
       JSON.stringify({ 
@@ -208,7 +208,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('❌ DAY_1_4:3: Error in generate-day-1-4:3 function:', error);
+    console.error('❌ DAY_1_1:1: Error in generate-day-1-1:1 function:', error);
 
     // Try to update status to failed if we have the necessary info
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -233,13 +233,13 @@ serve(async (req) => {
           if (day1Post) {
             await supabase
               .from('social_media_posts')
-              .update({ image_4_3_status: 'failed' })
+              .update({ image_1_1_status: 'failed' })
               .eq('id', day1Post.id);
           }
         }
       }
     } catch (updateError) {
-      console.error('❌ DAY_1_4:3: Failed to update status to failed:', updateError);
+      console.error('❌ DAY_1_1:1: Failed to update status to failed:', updateError);
     }
 
     return new Response(
