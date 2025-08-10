@@ -565,11 +565,11 @@ export default function StoriesDashboard() {
             <div className="w-full max-w-7xl mx-auto">
               <TypewriterInput 
                 typewriterTexts={[
-                  "Create patient education for diabetes",
-                  "Create patient education for sepsis", 
-                  "Create patient education for UTI",
-                  "Create patient education for resp failure",
-                  "Create patient education for heart attack"
+                  "patient education for diabetes",
+                  "patient education for sepsis", 
+                  "patient education for UTI",
+                  "patient education for resp failure",
+                  "patient education for heart attack"
                 ]}
                 fallbackPlaceholder="Describe your theme..." 
                 className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
@@ -613,11 +613,11 @@ export default function StoriesDashboard() {
                 <TypewriterInput 
                   aria-label="Describe your theme" 
                   typewriterTexts={[
-                    "Create patient education for diabetes",
-                    "Create patient education for sepsis", 
-                    "Create patient education for UTI",
-                    "Create patient education for resp failure",
-                    "Create patient education for heart attack"
+                    "patient education for diabetes",
+                    "patient education for sepsis", 
+                    "patient education for UTI",
+                    "patient education for resp failure",
+                    "patient education for heart attack"
                   ]}
                   fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
                   className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
