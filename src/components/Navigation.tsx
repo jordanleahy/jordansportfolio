@@ -133,63 +133,64 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                   // Authenticated user navigation
                   <>
 
-                    {/* SEC - Admin Only */}
                     {isAdmin && (
                       <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/sec"
-                            className={cn(navLinkStyles, isActive("/sec") && "bg-accent text-accent-foreground")}
-                          >
-                            <span className="mr-2 text-sm font-bold">$$</span>
-                            Funded Startups
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Vendors - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/vendors"
-                            className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
-                          >
-                            <Building2 className="mr-2 h-4 w-4" />
-                            Vendors
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Investors - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/investors"
-                            className={cn(navLinkStyles, isActive("/investors") && "bg-accent text-accent-foreground")}
-                          >
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            Investors
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Battlecards - Admin Only */}
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/comparisons"
-                            className={cn(navLinkStyles, isActive("/comparisons") && "bg-accent text-accent-foreground")}
-                          >
-                            <GitCompare className="mr-2 h-4 w-4" />
-                            Battlecards
-                          </Link>
-                        </NavigationMenuLink>
+                        <NavigationMenuTrigger className={navLinkStyles}>
+                          <Settings className="mr-2 h-4 w-4" />
+                          Admin
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent className="z-50 bg-background">
+                          <div className="grid gap-1 p-2 w-[280px]">
+                            <Link to="/sec" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <span className="text-sm font-bold">$$</span>
+                              <span>Funded Startups</span>
+                            </Link>
+                            <Link to="/vendors" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <Building2 className="h-4 w-4" />
+                              <span>Vendors</span>
+                            </Link>
+                            <Link to="/investors" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <TrendingUp className="h-4 w-4" />
+                              <span>Investors</span>
+                            </Link>
+                            <Link to="/comparisons" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <GitCompare className="h-4 w-4" />
+                              <span>Battlecards</span>
+                            </Link>
+                            <Link to="/work-report" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <ChartBar className="h-4 w-4" />
+                              <span>Work Reports</span>
+                            </Link>
+                            <Link to="/admin/users" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <User className="h-4 w-4" />
+                              <span>Users</span>
+                            </Link>
+                            <Link to="/admin/comparisons" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <BarChart3 className="h-4 w-4" />
+                              <span>Admin Battlecards</span>
+                            </Link>
+                            <Link to="/admin/api-usage" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <Activity className="h-4 w-4" />
+                              <span>API Usage</span>
+                            </Link>
+                            <Link to="/jobs" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <FileText className="h-4 w-4" />
+                              <span>Jobs</span>
+                            </Link>
+                            <Link to="/agents" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <Settings className="h-4 w-4" />
+                              <span>AI Agents</span>
+                            </Link>
+                            <Link to="/admin-blog" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <BookOpen className="h-4 w-4" />
+                              <span>Blog Admin</span>
+                            </Link>
+                            <Link to="/admin/seeds" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground">
+                              <Settings className="h-4 w-4" />
+                              <span>Seed Management</span>
+                            </Link>
+                          </div>
+                        </NavigationMenuContent>
                       </NavigationMenuItem>
                     )}
 
@@ -207,108 +208,6 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/work-report"
-                            className={cn(navLinkStyles, isActive("/work-report") && "bg-accent text-accent-foreground")}
-                          >
-                            <ChartBar className="mr-2 h-4 w-4" />
-                            Work Reports
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    {/* Admin-only navigation items */}
-                    {isAdmin && (
-                      <>
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/users"
-                              className={cn(navLinkStyles, isActive("/admin/users") && "bg-accent text-accent-foreground")}
-                            >
-                              <User className="mr-2 h-4 w-4" />
-                              Users
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/comparisons"
-                              className={cn(navLinkStyles, isActive("/admin/comparisons") && "bg-accent text-accent-foreground")}
-                            >
-                              <BarChart3 className="mr-2 h-4 w-4" />
-                              Admin Battlecards
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/api-usage"
-                              className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
-                            >
-                              <Activity className="mr-2 h-4 w-4" />
-                              API Usage
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/jobs"
-                              className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              Jobs
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/agents"
-                              className={cn(navLinkStyles, isActive("/agents") && "bg-accent text-accent-foreground")}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              AI Agents
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin-blog"
-                              className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
-                            >
-                              <BookOpen className="mr-2 h-4 w-4" />
-                              Blog Admin
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/seeds"
-                              className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              Seed Management
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-                      </>
-                    )}
 
                     <NavigationMenuItem>
                       <DropdownMenu>
