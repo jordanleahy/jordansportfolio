@@ -24,7 +24,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
     generateHeroImage(post, colorTheme, onPostsChange);
   };
 
-  const isLoading = isGenerating || isProcessing;
+  const isLoading = isGenerating || isProcessing || (post.image_1_1_status === 'processing');
 
   return (
     <div className="space-y-4">
@@ -60,7 +60,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
         <Button
           variant="outline"
           size="sm"
-          className="mt-2 w-full"
+          className={`mt-2 w-full ${isLoading ? 'animate-pulse' : ''}`}
           onClick={handleGenerate}
           disabled={isLoading || creditStatus.isLoading || !creditStatus.hasCredits}
           title={!creditStatus.hasCredits ? 'No credits available' : creditStatus.isLoading ? "Checking credits..." : undefined}

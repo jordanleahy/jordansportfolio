@@ -38,7 +38,7 @@ const PostCardComponent = ({
   const [showGallery, setShowGallery] = useState(false);
   const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
   
-  const isProcessing = (aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3'): boolean => {
+  const isProcessing = (aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3' | '1_1'): boolean => {
     if (aspectRatio) {
       return processingStates[`${post.id}_${aspectRatio}`] || false;
     }
@@ -59,7 +59,7 @@ const PostCardComponent = ({
       <PostCardHeroImage
         post={post}
         colorTheme={colorTheme}
-        isProcessing={isProcessing('16_9')}
+        isProcessing={isProcessing('1_1')}
         onPostsChange={onPostsChange}
       />
       
@@ -140,7 +140,7 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
   }
 
   // Check image URLs
-  const imageFields = ['image_16_9_url', 'image_9_16_url', 'image_3_4_url', 'image_4_3_url', 'image_16_9_video_url', 'image_3_4_video_url', 'general_video_url'] as const;
+  const imageFields = ['image_16_9_url', 'image_9_16_url', 'image_3_4_url', 'image_4_3_url', 'image_1_1_url', 'image_16_9_video_url', 'image_3_4_video_url', 'general_video_url'] as const;
   for (const field of imageFields) {
     if (prevProps.post[field] !== nextProps.post[field]) {
       return false;
