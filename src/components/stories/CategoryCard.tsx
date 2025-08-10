@@ -12,6 +12,7 @@ import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLongPress } from "@/hooks/useLongPress";
 import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
+import { realtimeEventBus } from "@/services/realtime/RealtimeEventBus";
 
 import { CategoryCardProps } from '@/types/stories';
 
@@ -27,6 +28,49 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
   const [isCancelling, setIsCancelling] = useState(false);
   
+  
+  // Listen to unified realtime events for Day 1 image updates
+  useEffect(() => {
+    if (!user?.id || !category) return;
+
+    const unsubscribe = realtimeEventBus.on('update-received', (event) => {
+      if (event.type === 'update-received' && event.payload.table === 'social_media_posts' && event.payload.eventType === 'UPDATE') {
+        const updatedPost = event.payload.data;
+        
+        // Check if this is a Day 1 post for our category
+        if (updatedPost.day === 1 && updatedPost.category === category && updatedPost.user_id === user.id) {
+          console.log('🎨 CategoryCard received Day 1 update:', {
+            postId: updatedPost.id,
+            category: updatedPost.category,
+            image_4_3_url: updatedPost.image_4_3_url,
+            image_4_3_status: updatedPost.image_4_3_status
+          });
+
+          // Handle successful image generation
+          if (updatedPost.image_4_3_url) {
+            setCurrentImageUrl(updatedPost.image_4_3_url);
+            setIsGeneratingDay1(false);
+            setGenerationError(null);
+          }
+          
+          // Handle failed generation
+          if (updatedPost.image_4_3_status === 'failed') {
+            console.log('❌ Day 1 image generation failed for category:', category);
+            setIsGeneratingDay1(false);
+            setGenerationError('Failed to generate Day 1 image');
+          }
+          
+          // Handle processing status
+          if (updatedPost.image_4_3_status === 'processing' && !updatedPost.image_4_3_url) {
+            setIsGeneratingDay1(true);
+            setGenerationError(null);
+          }
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [user?.id, category]);
 
   // Reset generation attempt tracking when theme changes
   useEffect(() => {
@@ -58,9 +102,21 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
 
     try {
-      // Prevent duplicate calls
+      // Prevent duplicate calls with more comprehensive checks
       if (isGeneratingDay1) {
         console.log('🚫 Already generating Day 1 for theme:', theme);
+        return;
+      }
+
+      const currentStatus = (firstPostData as any)?.image_4_3_status;
+      if (currentStatus === 'processing' || currentStatus === 'uploading') {
+        console.log('🚫 Generation already in progress on server for theme:', theme);
+        setIsGeneratingDay1(true);
+        return;
+      }
+
+      if ((firstPostData as any)?.image_4_3_url) {
+        console.log('🚫 Image already exists for theme:', theme);
         return;
       }
       
@@ -126,10 +182,15 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       setIsGeneratingDay1(true);
     }
 
-    // Trigger generation once per card
-    if (!hasImage && !inProgress && firstPostData) {
+    // Trigger generation once per card, but add additional guards
+    if (!hasImage && !inProgress && firstPostData && !isGeneratingDay1) {
+      console.log('🎯 Auto-generating Day 1 image for theme:', theme);
       imageGenerationAttempted.current = true;
-      generateDay1Image();
+      
+      // Add a small delay to prevent race conditions
+      setTimeout(() => {
+        generateDay1Image();
+      }, 100);
     }
   }, [isShimmer, firstPostData, currentImageUrl]);
   
