@@ -35,9 +35,9 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
             variant="full"
             className="w-full h-full"
           />
-        ) : post.image_16_9_url ? (
+        ) : post.image_1_1_url ? (
           <img
-            src={post.image_16_9_url}
+            src={post.image_1_1_url}
             alt="Hero image"
             className="w-full h-full object-contain"
             loading="lazy"
@@ -46,7 +46,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
           <div className="bg-muted w-full h-full flex items-center justify-center">
             <div className="text-center text-muted-foreground">
               <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">16:9 Hero Image</p>
+              <p className="text-sm">1:1 Hero Image</p>
             </div>
           </div>
         )}

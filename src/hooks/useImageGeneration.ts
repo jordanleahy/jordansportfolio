@@ -63,7 +63,7 @@ export const useImageGeneration = () => {
       const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt', {
         body: {
           prompt: prompt,
-          aspectRatio: '16_9'
+          aspectRatio: '1_1'
         }
       });
 
@@ -83,7 +83,7 @@ export const useImageGeneration = () => {
       const blob = await response.blob();
       
       // Create file object
-      const fileName = `generated_${post.id}_16_9_${Date.now()}.jpg`;
+      const fileName = `generated_${post.id}_1_1_${Date.now()}.jpg`;
       const file = new File([blob], fileName, { type: 'image/jpeg' });
 
       // Upload to storage
@@ -104,8 +104,8 @@ export const useImageGeneration = () => {
       await supabase
         .from('social_media_posts')
         .update({ 
-          image_16_9_url: urlData.publicUrl,
-          image_16_9_status: 'complete'
+          image_1_1_url: urlData.publicUrl,
+          image_1_1_status: 'complete'
         })
         .eq('id', post.id);
 
@@ -114,7 +114,7 @@ export const useImageGeneration = () => {
       
       toast({
         title: "Hero image generated!",
-        description: "Your 16:9 hero image has been created successfully.",
+        description: "Your 1:1 square hero image has been created successfully.",
       });
 
     } catch (error) {
