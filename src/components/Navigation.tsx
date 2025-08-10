@@ -193,122 +193,178 @@ import { useUsageSummary } from "@/hooks/useUsageSummary";
                       </NavigationMenuItem>
                     )}
 
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/stories"
-                          className={cn(navLinkStyles, isActive("/stories") && "bg-accent text-accent-foreground")}
-                          onMouseEnter={() => handleMouseEnter('/stories')}
-                          onFocus={() => handleFocus('/stories')}
-                        >
-                          <BookOpen className="mr-2 h-4 w-4" />
-                          Stories
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                     <NavigationMenuItem>
+                       <NavigationMenuLink asChild>
+                         <Link
+                           to="/stories"
+                           className={cn(navLinkStyles, isActive("/stories") && "bg-accent text-accent-foreground")}
+                           onMouseEnter={() => handleMouseEnter('/stories')}
+                           onFocus={() => handleFocus('/stories')}
+                         >
+                           <BookOpen className="mr-2 h-4 w-4" />
+                           Stories
+                         </Link>
+                       </NavigationMenuLink>
+                     </NavigationMenuItem>
 
-                    {isAdmin && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/work-report"
-                            className={cn(navLinkStyles, isActive("/work-report") && "bg-accent text-accent-foreground")}
-                          >
-                            <ChartBar className="mr-2 h-4 w-4" />
-                            Work Reports
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
+                     {/* Admin Dropdown Menu */}
+                     {isAdmin && (
+                       <NavigationMenuItem>
+                         <NavigationMenuTrigger className="bg-background">
+                           <Settings className="mr-2 h-4 w-4" />
+                           Admin
+                         </NavigationMenuTrigger>
+                         <NavigationMenuContent className="bg-background/95 backdrop-blur-sm border shadow-lg">
+                           <div className="grid gap-3 p-4 w-[200px]">
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/agents"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <Sparkles className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">AI Agents</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/admin/users"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <User className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">Users</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/work-report"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <ChartBar className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">Work Reports</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                           </div>
+                         </NavigationMenuContent>
+                       </NavigationMenuItem>
+                     )}
 
-                    {/* Admin-only navigation items */}
-                    {isAdmin && (
-                      <>
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/users"
-                              className={cn(navLinkStyles, isActive("/admin/users") && "bg-accent text-accent-foreground")}
-                            >
-                              <User className="mr-2 h-4 w-4" />
-                              Users
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
+                     {/* Companies Dropdown Menu */}
+                     {isAdmin && (
+                       <NavigationMenuItem>
+                         <NavigationMenuTrigger className="bg-background">
+                           <Building2 className="mr-2 h-4 w-4" />
+                           Companies
+                         </NavigationMenuTrigger>
+                         <NavigationMenuContent className="bg-background/95 backdrop-blur-sm border shadow-lg">
+                           <div className="grid gap-3 p-4 w-[200px]">
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/investors"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <TrendingUp className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">Investors</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/comparisons"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <GitCompare className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">BattleCards</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                             <NavigationMenuLink asChild>
+                               <Link
+                                 to="/jobs"
+                                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                               >
+                                 <div className="flex items-center gap-2">
+                                   <FileText className="h-4 w-4" />
+                                   <div className="text-sm font-medium leading-none">Jobs</div>
+                                 </div>
+                               </Link>
+                             </NavigationMenuLink>
+                           </div>
+                         </NavigationMenuContent>
+                       </NavigationMenuItem>
+                     )}
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/comparisons"
-                              className={cn(navLinkStyles, isActive("/admin/comparisons") && "bg-accent text-accent-foreground")}
-                            >
-                              <BarChart3 className="mr-2 h-4 w-4" />
-                              Admin Battlecards
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
+                     {/* Other Admin-only navigation items */}
+                     {isAdmin && (
+                       <>
+                         <NavigationMenuItem>
+                           <NavigationMenuLink asChild>
+                             <Link
+                               to="/vendors"
+                               className={cn(navLinkStyles, isActive("/vendors") && "bg-accent text-accent-foreground")}
+                             >
+                               <Building2 className="mr-2 h-4 w-4" />
+                               Vendors
+                             </Link>
+                           </NavigationMenuLink>
+                         </NavigationMenuItem>
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/api-usage"
-                              className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
-                            >
-                              <Activity className="mr-2 h-4 w-4" />
-                              API Usage
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
+                         <NavigationMenuItem>
+                           <NavigationMenuLink asChild>
+                             <Link
+                               to="/admin/comparisons"
+                               className={cn(navLinkStyles, isActive("/admin/comparisons") && "bg-accent text-accent-foreground")}
+                             >
+                               <BarChart3 className="mr-2 h-4 w-4" />
+                               Admin Battlecards
+                             </Link>
+                           </NavigationMenuLink>
+                         </NavigationMenuItem>
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/jobs"
-                              className={cn(navLinkStyles, isActive("/jobs") && "bg-accent text-accent-foreground")}
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              Jobs
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
+                         <NavigationMenuItem>
+                           <NavigationMenuLink asChild>
+                             <Link
+                               to="/admin/api-usage"
+                               className={cn(navLinkStyles, isActive("/admin/api-usage") && "bg-accent text-accent-foreground")}
+                             >
+                               <Activity className="mr-2 h-4 w-4" />
+                               API Usage
+                             </Link>
+                           </NavigationMenuLink>
+                         </NavigationMenuItem>
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/agents"
-                              className={cn(navLinkStyles, isActive("/agents") && "bg-accent text-accent-foreground")}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              AI Agents
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
+                         <NavigationMenuItem>
+                           <NavigationMenuLink asChild>
+                             <Link
+                               to="/admin-blog"
+                               className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
+                             >
+                               <BookOpen className="mr-2 h-4 w-4" />
+                               Blog Admin
+                             </Link>
+                           </NavigationMenuLink>
+                         </NavigationMenuItem>
 
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin-blog"
-                              className={cn(navLinkStyles, isActive("/admin-blog") && "bg-accent text-accent-foreground")}
-                            >
-                              <BookOpen className="mr-2 h-4 w-4" />
-                              Blog Admin
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-
-                        <NavigationMenuItem>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              to="/admin/seeds"
-                              className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
-                            >
-                              <Settings className="mr-2 h-4 w-4" />
-                              Seed Management
-                            </Link>
-                          </NavigationMenuLink>
-                        </NavigationMenuItem>
-                      </>
-                    )}
+                         <NavigationMenuItem>
+                           <NavigationMenuLink asChild>
+                             <Link
+                               to="/admin/seeds"
+                               className={cn(navLinkStyles, isActive("/admin/seeds") && "bg-accent text-accent-foreground")}
+                             >
+                               <Settings className="mr-2 h-4 w-4" />
+                               Seed Management
+                             </Link>
+                           </NavigationMenuLink>
+                         </NavigationMenuItem>
+                       </>
+                     )}
 
                     <NavigationMenuItem>
                       <DropdownMenu>
