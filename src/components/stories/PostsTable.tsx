@@ -348,13 +348,11 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         return;
       }
 
-      const input = window.prompt('Public handle for the share URL (letters, numbers, - or _):');
-      if (!input) return;
-      const handle = input.trim();
-      if (!/^[a-zA-Z0-9_-]{2,32}$/.test(handle)) {
-        toast.error('Invalid handle. Use 2-32 characters: letters, numbers, - or _.');
-        return;
-      }
+      // Auto-generate handle from session
+      const rawHandle = (session.user.user_metadata?.preferred_username
+        || session.user.email?.split('@')[0]
+        || session.user.id.slice(0, 8)) as string;
+      const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
       setIsPublishing(true);
       const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
