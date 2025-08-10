@@ -26,6 +26,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
+import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -43,6 +44,7 @@ export default function StoriesDashboard() {
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
   const [showHero, setShowHero] = useState(false);
+  const [duplicateInfo, setDuplicateInfo] = useState<{ category: string; theme: string } | null>(null);
 
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -366,6 +368,17 @@ export default function StoriesDashboard() {
         }
       });
 
+      const isDuplicate = (data && data.type === 'duplicate_theme') || (error && /duplicate|23505|409/i.test(error.message || ''));
+      if (isDuplicate) {
+        setDuplicateInfo({
+          category: (data && data.category) || 'existing-category',
+          theme: (data && data.theme) || shimmerTheme.theme_name
+        });
+        toast({ title: 'Category exists', description: 'Create this theme under a new category?', });
+        setIsGeneratingTheme(false);
+        return;
+      }
+
       if (error) {
         throw new Error(`Edge function error: ${error.message}`);
       }
@@ -433,6 +446,50 @@ export default function StoriesDashboard() {
       throw error;
     } finally {
       setIsCancelling(false);
+    }
+  };
+
+  const handleConfirmDuplicate = async (newCategory: string) => {
+    if (!pendingTheme?.description) {
+      setDuplicateInfo(null);
+      toast({ title: 'Missing description', description: 'Please try again.' , variant: 'destructive'});
+      return;
+    }
+    setDuplicateInfo(null);
+    setIsGeneratingTheme(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+        body: {
+          description: pendingTheme.description,
+          stream: false,
+          overrideCategory: newCategory
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to generate theme');
+      }
+
+      toast({ title: 'Theme Created!', description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"` });
+
+      // Clear pending shimmer and refresh
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+      setAvailableThemes(refreshedThemes);
+    } catch (err: any) {
+      console.error('Duplicate confirm error:', err);
+      toast({ title: 'Creation failed', description: err.message || 'Could not create theme', variant: 'destructive' });
+      // Remove shimmer to avoid stale UI
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+    } finally {
+      setIsGeneratingTheme(false);
     }
   };
 
@@ -612,6 +669,20 @@ export default function StoriesDashboard() {
           isDeleting={isDeletingBulk}
           progress={deleteProgress}
         />
-    </PageLayout>
-  );
-}
+
+        {/* Duplicate Theme Modal */}
+        <DuplicateThemeModal
+          open={!!duplicateInfo}
+          category={duplicateInfo?.category || ''}
+          theme={duplicateInfo?.theme || ''}
+          onCancel={() => {
+            setDuplicateInfo(null);
+            // Remove the pending shimmer theme if user cancels
+            setPendingTheme(null);
+            setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+          }}
+          onConfirm={handleConfirmDuplicate}
+        />
+      </PageLayout>
+    );
+  }

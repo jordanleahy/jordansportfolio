@@ -271,6 +271,17 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
 
       if (themeInsertError) {
         console.error('❌ Theme creation error:', themeInsertError);
+        const code = (themeInsertError as any)?.code;
+        if (code === '23505' || (themeInsertError as any)?.message?.includes('duplicate key value')) {
+          throw {
+            type: 'duplicate_theme',
+            code: '23505',
+            message: 'A theme with this category already exists for your account.',
+            details: themeInsertError,
+            category: themeData.category,
+            theme: themeData.theme
+          } as const;
+        }
         throw new Error(`Theme creation failed: ${themeInsertError.message}`);
       }
 
@@ -403,7 +414,7 @@ serve(async (req) => {
       });
     }
 
-    const { description, stream = true } = requestBody;
+    const { description, stream = true, overrideCategory } = requestBody;
 
     // Validate required fields
     if (!description || typeof description !== 'string' || !description.trim()) {
@@ -621,10 +632,16 @@ serve(async (req) => {
     } else {
       // Non-streaming response (updated to use background processing)
       const themeData = await generateTheme(description);
+      // Apply overrideCategory if provided
+      if (overrideCategory && typeof overrideCategory === 'string') {
+        const slug = overrideCategory.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        if (slug) {
+          themeData.category = slug;
+        }
+      }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
       await generateSystemPrompt(supabase, themeData, userId);
-      
 
       // Trigger background image generation using EdgeRuntime.waitUntil
       try {
@@ -670,17 +687,26 @@ serve(async (req) => {
       });
     }
 
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Pipeline fatal error', error, {
       step: 'main_pipeline',
       requestDuration: Date.now() - requestStart
     });
-    return new Response(JSON.stringify({
+
+    const isDuplicate = error?.code === '23505' || error?.type === 'duplicate_theme' || (error?.message || '').includes('duplicate key value');
+
+    const responseBody: Record<string, any> = {
       success: false,
-      error: error.message,
+      error: isDuplicate ? 'A theme with this category already exists.' : (error?.message || 'Unexpected error'),
+      type: isDuplicate ? 'duplicate_theme' : 'unknown_error',
+      category: error?.category,
+      theme: error?.theme,
+      details: isDuplicate ? error?.details : undefined,
       correlationId
-    }), {
-      status: 500,
+    };
+
+    return new Response(JSON.stringify(responseBody), {
+      status: isDuplicate ? 409 : 500,
       headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
     });
   }
