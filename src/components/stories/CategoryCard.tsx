@@ -185,7 +185,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         setGenerationError('Generation timed out');
       }, 30000); // 30 second timeout
 
-      console.log('🎨 Calling generate-day-1-4-3 function for theme:', theme);
+      console.log('🎨 Calling generate-day-1-1-1 function for theme:', theme);
       
       // Find the theme ID by looking for a theme with this name and category
       const { data: themeData, error: themeError } = await supabase
@@ -200,7 +200,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         throw new Error('Theme not found');
       }
 
-      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_4_3, {
+      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTION_NAMES.GENERATE_DAY_1_1_1, {
         body: {
           themeId: themeData.id,
           userId: user.id
