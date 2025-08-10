@@ -42,13 +42,12 @@ const cacheGeneratedPrompt = async (
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
 
-    // Check if prompt already exists
     const { data: existing } = await supabase
       .from('cached_prompts')
       .select('id')
       .eq('cache_key', cacheKey)
       .eq('user_id', user.user.id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       // Update existing cache entry
@@ -91,10 +90,9 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
       .select('prompt_text, id')
       .eq('cache_key', cacheKey)
       .eq('user_id', user.user.id)
-      .single();
+      .maybeSingle();
 
     if (cached) {
-      // Update hit count and access time
       await supabase.rpc('update_cache_hit', {
         cache_key_param: cacheKey
       });
@@ -150,7 +148,7 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
         .from('color_themes')
         .select('*')
         .eq('id', request.colorThemeId)
-        .single();
+        .maybeSingle();
       colorTheme = themeData;
     }
 
@@ -319,7 +317,7 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
         });
       }, 1000);
     }
-  }, [cachedPrompts]);
+  }, [setBulkProcessing, isGenerating, getOrGeneratePrompt]);
 
   return {
     generateAllImages,

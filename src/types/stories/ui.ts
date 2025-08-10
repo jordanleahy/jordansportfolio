@@ -362,7 +362,11 @@ export interface PipelineProgressModalProps {
   currentStage: string;
   isProcessing: boolean;
   error: string | null;
-  result: any | null;
+  result: {
+    theme: string;
+    category: string;
+    postCount: number;
+  } | null;
 }
 
 export interface BatchProcessingSkeletonProps {
