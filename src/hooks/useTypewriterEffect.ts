@@ -30,46 +30,49 @@ export function useTypewriterEffect({
 
     const type = () => {
       if (isDeleting) {
-        setDisplayText(prev => prev.slice(0, -1));
-        
-        if (displayText.length <= 1) {
-          setIsDeleting(false);
-          setIsPaused(true);
-          timeoutRef.current = setTimeout(() => {
-            setIsPaused(false);
-            setCurrentIndex(prev => loop ? (prev + 1) % texts.length : Math.min(prev + 1, texts.length - 1));
-          }, deletePauseDuration);
-          return;
-        }
-      } else {
-        setDisplayText(currentText.slice(0, displayText.length + 1));
-        
-        if (displayText.length >= currentText.length - 1) {
-          if (loop || currentIndex < texts.length - 1) {
+        setDisplayText(prev => {
+          const newText = prev.slice(0, -1);
+          // When we've deleted everything, move to next text
+          if (newText.length === 0) {
+            setIsDeleting(false);
             setIsPaused(true);
             timeoutRef.current = setTimeout(() => {
               setIsPaused(false);
-              setIsDeleting(true);
-            }, pauseDuration);
-            return;
+              setCurrentIndex(prev => loop ? (prev + 1) % texts.length : Math.min(prev + 1, texts.length - 1));
+            }, deletePauseDuration);
           }
-        }
+          return newText;
+        });
+      } else {
+        setDisplayText(prev => {
+          const newText = currentText.slice(0, prev.length + 1);
+          // When we've typed the full text, start deleting
+          if (newText.length === currentText.length) {
+            if (loop || currentIndex < texts.length - 1) {
+              setIsPaused(true);
+              timeoutRef.current = setTimeout(() => {
+                setIsPaused(false);
+                setIsDeleting(true);
+              }, pauseDuration);
+            }
+          }
+          return newText;
+        });
       }
-
-      const speed = isDeleting ? deletingSpeed : typingSpeed;
-      timeoutRef.current = setTimeout(type, speed);
     };
 
-    if (!isPaused) {
-      timeoutRef.current = setTimeout(type, isDeleting ? deletingSpeed : typingSpeed);
+    if (!isPaused && !timeoutRef.current) {
+      const speed = isDeleting ? deletingSpeed : typingSpeed;
+      timeoutRef.current = setTimeout(type, speed);
     }
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = undefined;
       }
     };
-  }, [displayText, currentIndex, isDeleting, isPaused, texts, typingSpeed, deletingSpeed, pauseDuration, loop]);
+  }, [displayText, currentIndex, isDeleting, isPaused, texts, typingSpeed, deletingSpeed, pauseDuration, deletePauseDuration, loop]);
 
   const reset = () => {
     if (timeoutRef.current) {
