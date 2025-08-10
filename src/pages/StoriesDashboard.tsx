@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
+import { TypewriterInput } from '@/components/ui/typewriter-input';
 import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
@@ -557,14 +557,30 @@ export default function StoriesDashboard() {
             </div>
             
             <div className="w-full max-w-7xl mx-auto">
-              <Input placeholder="Describe your theme..." className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" value={customThemeDescription} onChange={e => setCustomThemeDescription(e.target.value)} onKeyDown={e => {
-              if (e.key === 'Enter' && customThemeDescription.trim()) {
-                try {
-                  localStorage.setItem('stories_hero_seen', '1');
-                } catch {}
-                setShowHero(false);
-              }
-            }} />
+              <TypewriterInput 
+                typewriterTexts={[
+                  "Create patient education for diabetes",
+                  "Create patient education for sepsis", 
+                  "Create patient education for UTI",
+                  "Create patient education for resp failure",
+                  "Create patient education for heart attack"
+                ]}
+                fallbackPlaceholder="Describe your theme..." 
+                className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                value={customThemeDescription} 
+                onChange={e => setCustomThemeDescription(e.target.value)} 
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && customThemeDescription.trim()) {
+                    try {
+                      localStorage.setItem('stories_hero_seen', '1');
+                    } catch {}
+                    setShowHero(false);
+                  }
+                }} 
+                typingSpeed={80}
+                deletingSpeed={40}
+                pauseDuration={2000}
+              />
             </div>
           </div>
         </div>
@@ -588,12 +604,30 @@ export default function StoriesDashboard() {
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
               <p className="text-base md:text-xl text-foreground font-semibold">Every Thought is a Visual Journey</p>
               <div className="w-full text-center">
-                <Input aria-label="Describe your theme" placeholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')" className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" value={customThemeDescription} onChange={e => setCustomThemeDescription(e.target.value)} onKeyDown={e => {
-              if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
-                e.preventDefault();
-                handleGenerateCustomTheme();
-              }
-            }} disabled={isGeneratingTheme || isProcessing} />
+                <TypewriterInput 
+                  aria-label="Describe your theme" 
+                  typewriterTexts={[
+                    "Create patient education for diabetes",
+                    "Create patient education for sepsis", 
+                    "Create patient education for UTI",
+                    "Create patient education for resp failure",
+                    "Create patient education for heart attack"
+                  ]}
+                  fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                  value={customThemeDescription} 
+                  onChange={e => setCustomThemeDescription(e.target.value)} 
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                      e.preventDefault();
+                      handleGenerateCustomTheme();
+                    }
+                  }} 
+                  disabled={isGeneratingTheme || isProcessing} 
+                  typingSpeed={80}
+                  deletingSpeed={40}
+                  pauseDuration={2000}
+                />
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
