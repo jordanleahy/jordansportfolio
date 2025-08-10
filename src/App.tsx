@@ -10,6 +10,7 @@ import { UsageRealtimeProvider } from "@/components/usage/UsageRealtimeProvider"
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy, useState } from "react";
+import Homepage from "./pages/Homepage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SEC from "./pages/SEC";
@@ -101,7 +102,7 @@ function App() {
             <AuthProvider>
               <UsageRealtimeProvider>
                 <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Homepage />} />
                 <Route 
                   path="/storyship" 
                   element={
