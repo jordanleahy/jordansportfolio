@@ -202,7 +202,7 @@ export const PostsTableView = memo(({
                 icon: <Sparkles className="h-4 w-4" />,
                 onClick: () => handleGenerateAllImages(post),
                 loading: isGenerating(post.id),
-                title: "Generate all images with AI"
+                title: "Bulk Generate"
               },
               {
                 icon: <Lightbulb className="h-4 w-4" />,

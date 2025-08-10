@@ -88,7 +88,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         variant="outline"
         size="sm"
         className={`h-8 flex-1 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
-        title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Generate All Images with AI"}
+        title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Bulk Generate"}
       >
         {isCurrentlyGenerating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
