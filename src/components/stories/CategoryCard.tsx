@@ -106,7 +106,12 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
       firstUrl,
       status,
       hasFirstUrl: !!firstUrl,
-      isProcessing: status === 'processing' || status === 'uploading'
+      isProcessing: status === 'processing' || status === 'uploading',
+      fullFirstPostData: firstPostData,
+      image_4_3_url_field: (firstPostData as any)?.image_4_3_url,
+      image_4_3_status_field: (firstPostData as any)?.image_4_3_status,
+      image_16_9_url_field: (firstPostData as any)?.image_16_9_url,
+      all_keys: firstPostData ? Object.keys(firstPostData) : 'no firstPostData'
     });
     
     if (firstUrl) {
