@@ -554,42 +554,6 @@ serve(async (req) => {
             });
 
             // Step 5: Trigger background image generation (85% progress)
-            sendStreamEvent(controller, {
-              type: 'background_trigger_start',
-              progress: 85,
-              data: { status: 'Starting background image generation...' }
-            });
-
-            // Trigger background image generation using EdgeRuntime.waitUntil
-            try {
-              const firstPost = themeData.posts[0];
-              const backgroundRequest = {
-                themeId: themeId,
-                userId: userId
-              };
-
-              // Use proper background task handling
-              EdgeRuntime.waitUntil(
-                supabase.functions.invoke('generate-day-1-4-3', {
-                  body: backgroundRequest
-                 }).then(({ error: bgError }) => {
-                   if (bgError) {
-                     logger.error('Background image generation failed', bgError, { themeId });
-                   } else {
-                     logger.log('INFO', 'Background image generation started successfully', { themeId });
-                   }
-                 })
-              );
-            } catch (bgTriggerError) {
-              logger.error('Error triggering background function', bgTriggerError, { themeId });
-              // Don't fail the main pipeline if background trigger fails
-            }
-
-            sendStreamEvent(controller, {
-              type: 'background_trigger_complete',
-              progress: 90,
-              data: { status: 'Background generation started' }
-            });
 
             // Step 6: Pipeline Complete (100% progress)
             sendStreamEvent(controller, {
@@ -600,8 +564,7 @@ serve(async (req) => {
                 category: themeData.category,
                 theme: themeData.theme,
                 postCount: insertedCount,
-                message: 'Theme created successfully! Image generation continues in background.',
-                backgroundProcessing: true
+                message: 'Theme created successfully!'
               }
             });
 
@@ -643,32 +606,6 @@ serve(async (req) => {
       const themeId = createdThemeId;
       await generateSystemPrompt(supabase, themeData, userId);
 
-      // Trigger background image generation using EdgeRuntime.waitUntil
-      try {
-        const backgroundRequest = {
-          themeId: themeId,
-          userId: userId
-        };
-
-        // Use proper background task handling
-        EdgeRuntime.waitUntil(
-          supabase.functions.invoke('generate-day-1-4-3', {
-            body: backgroundRequest
-          }).then(({ error: bgError }) => {
-            if (bgError) {
-              logger.error('Background image generation failed', bgError, { themeId });
-            } else {
-              logger.log('INFO', 'Background image generation started successfully', { themeId });
-            }
-          })
-        );
-
-        logger.log('INFO', 'Background image generation triggered', { themeId: themeData.theme });
-      } catch (bgTriggerError) {
-        logger.error('Error triggering background function', bgTriggerError, { themeId });
-        // Don't fail the main pipeline if background trigger fails
-      }
-
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
         category: themeData.category,
@@ -680,8 +617,7 @@ serve(async (req) => {
         category: themeData.category,
         theme: themeData.theme,
         postCount: insertedCount,
-        message: 'Theme created successfully! Image generation continues in background.',
-        backgroundProcessing: true
+        message: 'Theme created successfully!'
       }), {
         headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
       });
