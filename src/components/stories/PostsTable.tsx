@@ -210,18 +210,15 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         .map(p => ({
           post: p,
           need169: !p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete',
-          need43: !p.image_4_3_url || (p.image_4_3_status ?? 'none') !== 'complete',
         }))
-        .filter(c => c.need169 || c.need43);
+        .filter(c => c.need169);
 
       if (candidates.length === 0) {
         console.warn('[Bulk] No candidates (generate missing only)', { category, selectedThemeId, reason: 'All posts have required images', counts: { inTheme: inTheme.length } });
         toast.info('All posts already have required images');
         return;
       }
-
-      toast.info(`Starting generation (16:9 + 4:3) for ${candidates.length} post(s)...`);
-
+      toast.info(`Starting generation (16:9) for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(c => c.post.id);
       candidateIds.forEach(id => setBulkProcessing(id, true));
 
@@ -234,14 +231,10 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         while (queue.length) {
           const next = queue.shift();
           if (!next) break;
-          const { post, need169, need43 } = next as any;
+          const { post, need169 } = next as any;
           if (need169) {
             const r1 = await handleGenerateImage(post.id, '16_9', post.title, post.description, post.category);
             if (r1.success) successes++;
-          }
-          if (need43) {
-            const r2 = await handleGenerateImage(post.id, '4_3', post.title, post.description, post.category);
-            if (r2.success) successes++;
           }
         }
       };
@@ -302,9 +295,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         toast.info('No posts found in this category');
         return;
       }
-
-      toast.info(`Regenerating 16:9 + 4:3 for ${candidates.length} post(s)...`);
-
+      toast.info(`Regenerating 16:9 for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(p => p.id);
       candidateIds.forEach(id => setBulkProcessing(id, true));
 
@@ -319,8 +310,6 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
           if (!next) break;
           const r1 = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
           if (r1.success) successes++;
-          const r2 = await handleGenerateImage(next.id, '4_3', next.title, next.description, next.category);
-          if (r2.success) successes++;
         }
       };
 
