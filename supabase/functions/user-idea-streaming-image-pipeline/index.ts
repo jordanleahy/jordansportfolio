@@ -87,26 +87,31 @@ const generateTheme = async (description: string): Promise<ThemeData> => {
     console.log(`✂️ Description truncated from ${cleanDescription.length} to ${truncatedDescription.length} chars`);
   }
 
-  const systemPrompt = `You are a professional social media content strategist. Convert user descriptions into structured theme JSON for social media calendar generation.
+  const systemPrompt = `You are a supportive content strategist. Convert the user's description into a clean JSON theme plan.
 
-CRITICAL REQUIREMENTS:
-- Return ONLY valid JSON, no explanations or markdown
-- Category must be lowercase, no spaces, use hyphens for separation
-- Theme should be title case with proper spacing
-- Generate exactly 10 posts with days 1-10
-- Each post needs: day (number), title (engaging, professional), description (informative, 2-3 sentences)
-- All content should be professional and industry-appropriate
+Private Safe Space principles:
+- Write with empathy, encouragement, and zero judgment
+- Respect privacy: do not include names, locations, or any personally identifying details
+- Keep language inclusive, trauma-informed, and stigma-free
 
-JSON STRUCTURE REQUIRED:
+Guidelines:
+- Return ONLY valid JSON (no markdown, no commentary)
+- category must be lowercase-kebab-case (e.g., "type-1-diabetes")
+- theme should be title case
+- Generate between 5 and 10 posts (prefer 10 when possible) numbered by day starting at 1
+- Each post: day (number), title (engaging, supportive), description (2–3 concise, helpful sentences)
+- Keep content practical and approachable
+
+JSON STRUCTURE:
 {
   "category": "lowercase-category-name",
   "theme": "Professional Theme Title",
-  "theme_description": "Brief description of the theme focus",
+  "theme_description": "Brief description of the theme focus (1–2 sentences, supportive tone)",
   "posts": [
     {
       "day": 1,
-      "title": "Engaging Post Title",
-      "description": "Professional description explaining the topic clearly and providing value. Keep it informative and actionable."
+      "title": "Supportive Post Title",
+      "description": "Helpful, compassionate guidance. Avoid directives that feel clinical."
     }
   ]
 }`;

@@ -148,21 +148,23 @@ Color Theme Instructions:
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
     }
 
-    // Add strict output instructions and style enforcement
+    // Add Private Safe Space tone and flexible style guidance
     userMessage += `
 
-Style Requirements (MANDATORY):
-- Generate ONLY vector illustration style prompts
-- Use flat design, clean icons, and geometric shapes
-- Include "vector illustration style" or "flat design style" in your prompt
-- Add "DO NOT use photorealistic style" as a negative prompt
-- Focus on abstract symbols and schematic representations
-- NO real people, photographs, or realistic textures
+Private Safe Space Visual Tone:
+- Supportive, inclusive, and non-judgmental
+- Respect privacy: avoid PII and identifiable individuals; prefer abstract or generic figures
+- Avoid fear-based or alarming imagery
+- No text overlays, logos, or watermarks
 
-\nOutput Instructions:
+Style Preferences (flexible):
+- Prefer clean, modern illustration (vector/flat) OR tasteful minimal photo-style if it communicates the concept best
+- Emphasize clarity, composition, and readability
+- If an aspect ratio is specified elsewhere, weave it naturally into the prompt (e.g., "wide landscape composition" or "vertical portrait orientation")
+
+Output:
 - Respond with ONLY the final image prompt as plain text, no preface or analysis.
-- Do not include any hidden thoughts or chain-of-thought.
-- Keep output within ~350 tokens.`;
+- Keep it concise but detailed enough for a single image generation.`;
 
     // OpenAI request with proper format
     logger.debug('Prompt previews', {
