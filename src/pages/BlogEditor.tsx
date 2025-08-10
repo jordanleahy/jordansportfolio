@@ -704,6 +704,14 @@ const BlogEditor = () => {
                             <Sparkles className="h-4 w-4" />
                             AI Prompt
                           </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenPromptModal(index)}
+                          >
+                            Regenerate
+                          </Button>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Paste image, browse file, enter URL, or generate AI prompt</p>
                       </div>
