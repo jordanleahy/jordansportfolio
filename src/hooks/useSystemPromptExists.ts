@@ -15,7 +15,6 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
         .from('system_prompts')
         .select('id')
         .eq('theme', theme)
-        .eq('category', category || 'general')
         .limit(1);
       
       if (themeError) {

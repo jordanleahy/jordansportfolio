@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostImageUploadCardProps } from '@/types/stories/ui';
+import { useParams } from 'react-router-dom';
 
 export const PostImageUploadCard = ({ 
   post,
@@ -31,6 +32,9 @@ export const PostImageUploadCard = ({
   onGenerationEnd
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const params = useParams();
+  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
@@ -110,6 +114,7 @@ export const PostImageUploadCard = ({
         body: {
           title: post.title,
           description: post.description,
+          theme: theme,
           category: post.category || 'cdi',
           aspectRatio: aspectRatio
         }

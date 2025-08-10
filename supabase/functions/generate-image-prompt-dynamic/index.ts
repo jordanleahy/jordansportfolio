@@ -372,12 +372,13 @@ Private Safe Space Visual Tone:
         const data = encoder.encode(title + description);
         const hashArray = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        const cacheKey = `image_prompt_${category}_${hashHex.slice(0, 20)}`;
+        const identifierSlug = (usedIdentifier || (category || 'general')).toLowerCase().replace(/\s+/g, '_');
+        const cacheKey = `image_prompt_${usedType}_${identifierSlug}_${hashHex.slice(0, 20)}`;
         
         await supabase.from('cached_prompts').insert({
           user_id: userId,
           cache_key: cacheKey,
-          category: category || usedIdentifier,
+          category: usedType === 'category' ? usedIdentifier : (category || null),
           prompt_text: generatedText,
           metadata: {
             title,

@@ -63,7 +63,8 @@ export const ImagePromptGeneratorModal = ({
             body: {
               title: content.primary,
               description: content.secondary,
-              category: config.category || 'healthcare'
+              theme: config.theme,
+              category: config.category,
             }
           });
           break;
