@@ -29,7 +29,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   return (
     <div className="space-y-4">
       {/* Hero Image Display */}
-      <div className="aspect-square md:aspect-video rounded-t-lg overflow-hidden">
+      <div className="aspect-square rounded-t-lg overflow-hidden">
         {isLoading ? (
           <SimpleShimmer 
             variant="full"
@@ -39,7 +39,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
           <img
             src={post.image_1_1_url}
             alt="Hero image"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (

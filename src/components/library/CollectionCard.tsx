@@ -17,7 +17,7 @@ export const CollectionCard = ({ collection }: CollectionCardProps) => {
     <Link to={href} aria-label={`Open collection ${title}`}>
       <Card className="flex flex-col hover:shadow-lg transition-all duration-300 group h-full">
         {/* Cover placeholder - replace with real cover when available */}
-        <div className="aspect-[16/9] w-full overflow-hidden rounded-t-lg bg-muted">
+        <div className="aspect-square w-full overflow-hidden rounded-t-lg bg-muted">
           <img
             src="/placeholder.svg"
             alt={`${title} collection cover image`}
