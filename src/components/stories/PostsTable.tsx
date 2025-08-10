@@ -202,17 +202,21 @@ export const PostsTable = ({
       console.info('Counts', { total: posts.length, inScope: inScope.length, withUrl, withoutUrl, statusDist });
       console.table(inTheme.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, color_theme: p.color_theme_id, hasUrl: !!p.image_16_9_url, status: p.image_16_9_status ?? 'none' })));
       console.groupEnd();
-      const candidates = inTheme.filter(p =>
-        !p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete'
-      );
+      const candidates = inTheme
+        .map(p => ({
+          post: p,
+          need169: !p.image_16_9_url || (p.image_16_9_status ?? 'none') !== 'complete',
+          need43: !p.image_4_3_url || (p.image_4_3_status ?? 'none') !== 'complete',
+        }))
+        .filter(c => c.need169 || c.need43);
 
       if (candidates.length === 0) {
-        console.warn('[Bulk 16:9] No candidates (generate missing only)', { category, selectedThemeId, reason: 'All posts have image or status complete', counts: { inTheme: inTheme.length } });
-        toast.info('All posts already have a 16:9 image');
+        console.warn('[Bulk] No candidates (generate missing only)', { category, selectedThemeId, reason: 'All posts have required images', counts: { inTheme: inTheme.length } });
+        toast.info('All posts already have required images');
         return;
       }
 
-      toast.info(`Starting 16:9 generation for ${candidates.length} post(s)...`);
+      toast.info(`Starting generation (16:9 + 4:3) for ${candidates.length} post(s)...`);
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -223,14 +227,21 @@ export const PostsTable = ({
         while (queue.length) {
           const next = queue.shift();
           if (!next) break;
-          const res = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
-          if (res.success) successes++;
+          const { post, need169, need43 } = next as any;
+          if (need169) {
+            const r1 = await handleGenerateImage(post.id, '16_9', post.title, post.description, post.category);
+            if (r1.success) successes++;
+          }
+          if (need43) {
+            const r2 = await handleGenerateImage(post.id, '4_3', post.title, post.description, post.category);
+            if (r2.success) successes++;
+          }
         }
       };
 
       await Promise.all(Array.from({ length: concurrency }, worker));
 
-      toast.success(`Generated ${successes}/${candidates.length} 16:9 image(s)`);
+      toast.success(`Generated ${successes} image(s) for ${candidates.length} post(s)`);
       onPostsChange();
     } catch (e) {
       console.error(e);
@@ -283,7 +294,7 @@ export const PostsTable = ({
         return;
       }
 
-      toast.info(`Regenerating 16:9 for ${candidates.length} post(s)...`);
+      toast.info(`Regenerating 16:9 + 4:3 for ${candidates.length} post(s)...`);
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -294,14 +305,16 @@ export const PostsTable = ({
         while (queue.length) {
           const next = queue.shift();
           if (!next) break;
-          const res = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
-          if (res.success) successes++;
+          const r1 = await handleGenerateImage(next.id, '16_9', next.title, next.description, next.category);
+          if (r1.success) successes++;
+          const r2 = await handleGenerateImage(next.id, '4_3', next.title, next.description, next.category);
+          if (r2.success) successes++;
         }
       };
 
       await Promise.all(Array.from({ length: concurrency }, worker));
 
-      toast.success(`Regenerated ${successes}/${candidates.length} 16:9 image(s)`);
+      toast.success(`Regenerated ${successes} image(s) for ${candidates.length} post(s)`);
       onPostsChange();
     } catch (e) {
       console.error(e);
