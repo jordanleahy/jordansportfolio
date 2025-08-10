@@ -1891,8 +1891,10 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          featured: boolean
           handle: string
           id: string
+          include_in_library: boolean
           item_count: number
           published_at: string | null
           status: string
@@ -1903,8 +1905,10 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          featured?: boolean
           handle: string
           id?: string
+          include_in_library?: boolean
           item_count?: number
           published_at?: string | null
           status?: string
@@ -1915,8 +1919,10 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          featured?: boolean
           handle?: string
           id?: string
+          include_in_library?: boolean
           item_count?: number
           published_at?: string | null
           status?: string
