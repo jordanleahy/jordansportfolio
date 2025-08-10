@@ -229,58 +229,6 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
   };
   
-  // Auto-generate Day 1 image on mount if missing and not already in progress
-  useEffect(() => {
-    console.log('🎯 Auto-generation check for theme:', theme, {
-      isShimmer,
-      imageGenerationAttempted: imageGenerationAttempted.current,
-      firstPostData: !!firstPostData,
-      currentImageUrl,
-      isGeneratingDay1
-    });
-
-    if (isShimmer) return;
-    if (imageGenerationAttempted.current) return;
-    if (!firstPostData) return;
-
-    const status = (firstPostData as any)?.image_4_3_status as string | undefined;
-    const inProgress = status === 'processing' || status === 'uploading';
-    const hasImage = !!(currentImageUrl || (firstPostData as any)?.image_4_3_url);
-    const isComplete = status === 'complete';
-
-    console.log('🎯 Auto-generation detailed check for theme:', theme, {
-      status,
-      inProgress,
-      hasImage,
-      isComplete,
-      isGeneratingDay1,
-      imageGenerationAttempted: imageGenerationAttempted.current,
-      firstPost_image_4_3_url: (firstPostData as any)?.image_4_3_url,
-      firstPost_image_4_3_status: (firstPostData as any)?.image_4_3_status
-    });
-
-    // Reflect server state accurately
-    if (inProgress) {
-      setIsGeneratingDay1(true);
-      return;
-    }
-
-    if (isComplete || hasImage) {
-      setIsGeneratingDay1(false);
-      return;
-    }
-
-    // Only trigger generation if truly needed
-    if (!hasImage && !inProgress && !isComplete && !isGeneratingDay1) {
-      console.log('🎯 Triggering auto-generation for theme:', theme);
-      imageGenerationAttempted.current = true;
-      
-      // Add substantial debouncing to prevent race conditions
-      setTimeout(() => {
-        generateDay1Image();
-      }, 500);
-    }
-  }, [isShimmer, firstPostData, currentImageUrl, theme]);
   
   const handleCancelThemeGeneration = async () => {
     if (!user?.id || !onCancelGeneration) return;
