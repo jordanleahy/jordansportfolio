@@ -148,8 +148,23 @@ Color Theme Instructions:
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
     }
 
-    // Add Private Safe Space tone and flexible style guidance
+    // Add MANDATORY technical constraints and Private Safe Space guidelines
     userMessage += `
+
+**MANDATORY TECHNICAL REQUIREMENTS:**
+- Art Style: Vector illustration ONLY, flat design, NO photorealistic elements
+- Rendering: Clean, modern vector style with solid colors and minimal gradients
+- Composition: 80% safe zone - keep important elements in central 80% of frame
+- Color Palette: Use professional blues (#2563eb, #1e40af), teals (#0891b2, #0e7490), accent greens (#16a34a), highlight orange (#ea580c), and neutral grays (#64748b, #f8fafc)
+- Accessibility: High contrast, clear visual hierarchy, readable at various sizes
+- Background: Clean, minimal, professional setting appropriate for ${category}
+- NEGATIVE PROMPTS: No photorealistic rendering, no complex gradients, no cluttered compositions, no dark/dramatic lighting
+
+**COMPOSITION GUIDELINES:**
+- Foreground: Main subject focused on ${category}-specific elements
+- Mid-ground: Supporting professional context and workflow elements  
+- Background: Clean, minimal professional environment
+- Visual Flow: Clear focal point with logical eye movement through the composition
 
 Private Safe Space Visual Tone:
 - Supportive, inclusive, and non-judgmental
@@ -157,14 +172,10 @@ Private Safe Space Visual Tone:
 - Avoid fear-based or alarming imagery
 - No text overlays, logos, or watermarks
 
-Style Preferences (flexible):
-- Prefer clean, modern illustration (vector/flat) OR tasteful minimal photo-style if it communicates the concept best
-- Emphasize clarity, composition, and readability
-- If an aspect ratio is specified elsewhere, weave it naturally into the prompt (e.g., "wide landscape composition" or "vertical portrait orientation")
-
-Output:
-- Respond with ONLY the final image prompt as plain text, no preface or analysis.
-- Keep it concise but detailed enough for a single image generation.`;
+**OUTPUT FORMAT:**
+- Respond with ONLY the final image prompt as plain text, no preface or analysis
+- If an aspect ratio is specified elsewhere, integrate it naturally (e.g., "wide landscape composition" or "vertical portrait orientation")
+- Keep technical constraints mandatory while making composition engaging and professional`;
 
     // OpenAI request with proper format
     logger.debug('Prompt previews', {
