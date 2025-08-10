@@ -541,7 +541,7 @@ export default function StoriesDashboard() {
         </div>
       </PageLayout>;
   }
-  return <PageLayout className="bg-slate-50 rounded-3xl px-[80px] py-[80px]">
+  return <PageLayout className="bg-slate-50 px-[80px] py-[80px] rounded-2xl">
       <Helmet>
         <title>Story Ship — Every Thought is a Visual Journey</title>
         <meta name="description" content="Every Thought is a Visual Journey" />
@@ -555,7 +555,7 @@ export default function StoriesDashboard() {
         backgroundRepeat: 'no-repeat'
       }}>
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
-              <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl w-[600px] h-[400px] mx-4 flex flex-col justify-center rounded-[50%] bg-white/80">
+              <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl max-w-[1000px] h-[400px] w-full mx-4 flex flex-col justify-center rounded-full bg-transparent">
                 <div className="space-y-6">
                   <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">Story Ship</h1>
                   <p className="text-lg md:text-xl text-gray-600">Every Thought is a Visual Journey</p>
