@@ -27,6 +27,8 @@ import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
+import { BlogCard } from '@/components/ui/BlogCard';
+import type { BlogPost } from '@/types/blog';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
@@ -57,6 +59,11 @@ export default function StoriesDashboard() {
     current?: string;
     errors?: string[];
   } | null>(null);
+
+  // Featured posts (public view)
+  const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
+  const [isLoadingFeatured, setIsLoadingFeatured] = useState(false);
+  const [featuredError, setFeaturedError] = useState<string | null>(null);
 
   // Hook for theme import functionality
   const {
@@ -120,6 +127,31 @@ export default function StoriesDashboard() {
       setShowHero(false);
     }
   }, [availableThemes.length]);
+
+  // Load featured posts for public view
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        setIsLoadingFeatured(true);
+        setFeaturedError(null);
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .eq('featured', true)
+          .order('published_at', { ascending: false })
+          .limit(6);
+        if (error) throw error;
+        setFeaturedPosts((data || []) as any);
+      } catch (e: any) {
+        setFeaturedError(e.message || 'Failed to load featured posts');
+        setFeaturedPosts([]);
+      } finally {
+        setIsLoadingFeatured(false);
+      }
+    };
+    if (!user) loadFeatured();
+  }, [user]);
 
   // Simplified realtime handlers
   const handlePostInsert = (newPost: SocialMediaPost) => {
@@ -502,10 +534,7 @@ export default function StoriesDashboard() {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
+// Public view allowed when not authenticated
   // Feature flag controlled below for first-visit hero
 
 
@@ -620,7 +649,8 @@ export default function StoriesDashboard() {
           )}
         </Section>
 
-        {/* Cards Section for Theme/Category cards */}
+        {/* Second Section: Authenticated users see their themes; guests see Featured Posts */}
+        {user ? (
           <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
             <header className="mb-6 flex items-center justify-end gap-4">
               <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
@@ -628,45 +658,70 @@ export default function StoriesDashboard() {
               </Button>
             </header>
 
-          {/* Bulk Actions Toolbar */}
-          <BulkActionsToolbar
-            selectedCount={selectedThemes.size}
-            totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
-            onDeleteSelected={() => setShowDeleteDialog(true)}
-            onClearSelection={handleClearSelection}
-            onSelectAll={handleSelectAll}
-            onDeselectAll={handleDeselectAll}
-            allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
-            isDeleting={isDeletingBulk}
-          />
-
-          {/* Enhanced Themes Grid with Loading States */}
-          {isLoadingThemes ? (
-            <ThemesSkeleton />
-          ) : themesError ? (
-            <div className="text-center py-8">
-              <div className="text-muted-foreground mb-4">
-                ⚠️ Failed to load themes: {themesError}
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.reload()}
-              >
-                Retry
-              </Button>
-            </div>
-          ) : (
-            <CategoriesGrid 
-              themes={availableThemes}
-              onDeleteCategory={handleDeleteCategory}
-              selectedThemes={selectedThemes}
-              onThemeSelect={handleThemeSelect}
-              isSelectionMode={isSelectionMode}
-              isGeneratingTheme={isGeneratingTheme}
-              onCancelGeneration={cancelThemeGeneration}
+            {/* Bulk Actions Toolbar */}
+            <BulkActionsToolbar
+              selectedCount={selectedThemes.size}
+              totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length}
+              onDeleteSelected={() => setShowDeleteDialog(true)}
+              onClearSelection={handleClearSelection}
+              onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll}
+              allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0}
+              isDeleting={isDeletingBulk}
             />
-          )}
-        </Section>
+
+            {/* Enhanced Themes Grid with Loading States */}
+            {isLoadingThemes ? (
+              <ThemesSkeleton />
+            ) : themesError ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground mb-4">
+                  ⚠️ Failed to load themes: {themesError}
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.reload()}
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : (
+              <CategoriesGrid 
+                themes={availableThemes}
+                onDeleteCategory={handleDeleteCategory}
+                selectedThemes={selectedThemes}
+                onThemeSelect={handleThemeSelect}
+                isSelectionMode={isSelectionMode}
+                isGeneratingTheme={isGeneratingTheme}
+                onCancelGeneration={cancelThemeGeneration}
+              />
+            )}
+          </Section>
+        ) : (
+          <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
+            <header className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Featured Posts</h2>
+            </header>
+            {isLoadingFeatured ? (
+              <ThemesSkeleton />
+            ) : featuredError ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground mb-4">⚠️ Failed to load featured posts: {featuredError}</div>
+                <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredPosts.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground col-span-full">No featured posts yet.</div>
+                ) : (
+                  featuredPosts.map((post: any) => (
+                    <BlogCard key={post.id} post={post} />
+                  ))
+                )}
+              </div>
+            )}
+          </Section>
+        )}
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog
