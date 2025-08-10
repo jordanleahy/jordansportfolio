@@ -467,22 +467,6 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
         )}
 
         {/* Show generate button when no image and no error */}
-        {!currentImageUrl && !generationError && !isGeneratingDay1 && firstPostData && (
-          <div className="flex gap-2 mb-3">
-            <Button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                generateDay1Image(); 
-              }}
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs"
-            >
-              <Sparkles className="h-3 w-3 mr-1" />
-              Generate Day 1 Image
-            </Button>
-          </div>
-        )}
 
         <Button 
           onClick={(e) => { e.stopPropagation(); handleClick(); }}
