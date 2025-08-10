@@ -556,12 +556,8 @@ export default function StoriesDashboard() {
         </Section>
 
         {/* Cards Section for Theme/Category cards */}
-          <Section aria-labelledby="cards-heading" id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
-            <header className="mb-6 flex items-center justify-between gap-4">
-              <div>
-                <h2 id="cards-heading" className="text-2xl font-semibold tracking-tight">Themes</h2>
-                <p className="text-muted-foreground">Browse and manage your generated themes.</p>
-              </div>
+          <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
+            <header className="mb-6 flex items-center justify-end gap-4">
               <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
                 Refresh
               </Button>
