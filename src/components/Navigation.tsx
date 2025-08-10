@@ -30,10 +30,11 @@ import { NavLink } from "@/components/navigation/NavLink";
 import { AdminDropdown } from "@/components/navigation/AdminDropdown";
 import { UserDropdown } from "@/components/navigation/UserDropdown";
 import { MobileMenu } from "@/components/navigation/MobileMenu";
+import { useEffect } from "react";
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
   const { handleMouseEnter, handleFocus } = useNavigationPreloading();
@@ -41,6 +42,12 @@ const Navigation = () => {
 
   // Usage summary (unified) - always call hook to maintain consistent hook order
   const { data: usageData, isLoading: usageLoading, totalCredits, usedCredits, remainingCredits, percentUsed } = useUsageSummary();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[Navigation] User:', !!user, 'isAdmin:', isAdmin, 'roleLoading:', roleLoading);
+    console.log('[Navigation] User object:', user);
+  }, [user, isAdmin, roleLoading]);
 
   // Reusable style constants
   const navLinkStyles = "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50";
