@@ -5,6 +5,7 @@ interface UseTypewriterEffectOptions {
   typingSpeed?: number;
   deletingSpeed?: number;
   pauseDuration?: number;
+  deletePauseDuration?: number;
   loop?: boolean;
 }
 
@@ -13,6 +14,7 @@ export function useTypewriterEffect({
   typingSpeed = 100,
   deletingSpeed = 50,
   pauseDuration = 2000,
+  deletePauseDuration = 500,
   loop = true
 }: UseTypewriterEffectOptions) {
   const [displayText, setDisplayText] = useState('');
@@ -30,14 +32,19 @@ export function useTypewriterEffect({
       if (isDeleting) {
         setDisplayText(prev => prev.slice(0, -1));
         
-        if (displayText.length === 0) {
+        if (displayText.length <= 1) {
           setIsDeleting(false);
-          setCurrentIndex(prev => loop ? (prev + 1) % texts.length : Math.min(prev + 1, texts.length - 1));
+          setIsPaused(true);
+          timeoutRef.current = setTimeout(() => {
+            setIsPaused(false);
+            setCurrentIndex(prev => loop ? (prev + 1) % texts.length : Math.min(prev + 1, texts.length - 1));
+          }, deletePauseDuration);
+          return;
         }
       } else {
         setDisplayText(currentText.slice(0, displayText.length + 1));
         
-        if (displayText.length === currentText.length) {
+        if (displayText.length >= currentText.length - 1) {
           if (loop || currentIndex < texts.length - 1) {
             setIsPaused(true);
             timeoutRef.current = setTimeout(() => {

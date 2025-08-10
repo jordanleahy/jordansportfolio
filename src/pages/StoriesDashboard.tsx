@@ -577,9 +577,9 @@ export default function StoriesDashboard() {
                     setShowHero(false);
                   }
                 }} 
-                typingSpeed={80}
-                deletingSpeed={40}
-                pauseDuration={2000}
+                typingSpeed={60}
+                deletingSpeed={30}
+                pauseDuration={1500}
               />
             </div>
           </div>
