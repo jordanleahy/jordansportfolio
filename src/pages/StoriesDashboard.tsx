@@ -541,21 +541,16 @@ export default function StoriesDashboard() {
         </div>
       </PageLayout>;
   }
-  return <PageLayout className="bg-slate-50 px-[80px] py-[80px] rounded-2xl">
+  return <PageLayout className="bg-slate-50 rounded-3xl px-[80px] py-[80px]">
       <Helmet>
-        
+        <title>Story Ship — Every Thought is a Visual Journey</title>
         <meta name="description" content="Every Thought is a Visual Journey" />
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" fluid className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 px-0">
-          <AuroraBackground className="h-[60vh] md:h-[70vh] relative" style={{
-        backgroundImage: 'url(/src/assets/story-ship-bg.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}>
+          <AuroraBackground className="h-[60vh] md:h-[70vh] relative">
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
-              <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl max-w-[1000px] h-[400px] w-full mx-4 flex flex-col justify-center rounded-full bg-transparent">
+              <div className="backdrop-blur-sm p-8 md:p-12 shadow-2xl max-w-[2400px] h-[400px] w-full mx-4 flex flex-col justify-center rounded-[60px] bg-white/80">
                 <div className="space-y-6">
                   <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">Story Ship</h1>
                   <p className="text-lg md:text-xl text-gray-600">Every Thought is a Visual Journey</p>
