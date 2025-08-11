@@ -740,48 +740,38 @@ const { handleGenerateImage } = useImageManager({
                 
                 {/* Action Buttons Section */}
                 {category && userIsAdmin && (
-                  <div className="flex items-center justify-end mb-4 gap-1">
+                  <div className="flex items-center justify-end mb-4 gap-2">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={handleFeatureLatestCollection}
                       disabled={isFeaturing}
-                      className="rounded-full px-3"
                       aria-label="Featured"
                       title={isFeaturing ? 'Featuring…' : 'Feature'}
                     >
-                      <Star className="h-3 w-3" />
+                      <Star className="h-4 w-4 mr-2" />
+                      Featured
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={handlePublishCollection}
                       disabled={isPublishing}
-                      className="rounded-full px-3"
                       aria-label="Library"
                       title={isPublishing ? 'Publishing…' : 'Library'}
                     >
-                      <BookOpen className="h-3 w-3 mr-1" />
+                      <BookOpen className="h-4 w-4 mr-2" />
                       Library
                     </Button>
                     <Button
                       variant="outline"
-                      size="icon"
-                      onClick={handlePublishCollection}
-                      disabled={isPublishing}
-                      aria-label="Library"
-                      title={isPublishing ? 'Publishing…' : 'Library'}
-                    >
-                      <BookOpen className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
+                      size="default"
                       onClick={() => setShowSystemPrompt(!showSystemPrompt)}
                       aria-label="Category Prompt"
                       title="Category Prompt"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-2" />
+                      Prompt
                     </Button>
                   </div>
                 )}
