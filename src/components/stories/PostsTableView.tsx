@@ -252,20 +252,6 @@ export const PostsTableView = memo(({
             </TableCell>
             <TableCell className="w-32">
               <div className="flex gap-2 items-center flex-wrap">
-                <Badge 
-                  className={`${
-                    completingRows?.has(post.id) 
-                      ? 'bg-green-500/30 text-green-800 border-green-500/40 animate-pulse' 
-                      : getStatusColor(post.status)
-                  } cursor-pointer select-none transition-all duration-300`}
-                  onClick={() => {
-                    const nextStatus = getNextStatus(post.status);
-                    onStatusChange(post.id, nextStatus);
-                  }}
-                  title={`Click to ${getNextStatus(post.status) === 'draft' ? 'mark as draft' : 'publish'}`}
-                >
-                  {completingRows?.has(post.id) ? 'Published ✓' : post.status}
-                </Badge>
                 <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
               </div>
             </TableCell>

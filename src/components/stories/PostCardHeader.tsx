@@ -40,23 +40,6 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
       <div className="flex justify-between items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex gap-2 flex-wrap">
-            {isAdmin && (
-              <Badge 
-                className={`${getStatusColor(post.status)} text-xs cursor-pointer hover:opacity-80 transition-opacity`}
-                onClick={() => {
-                  if (post.status === 'draft') {
-                    onStatusChange(post.id, 'published');
-                  }
-                }}
-              >
-                {post.status === 'published' ? new Date(post.updated_at).toLocaleDateString() : post.status}
-              </Badge>
-            )}
-            {isAdmin && post.status === 'draft' && post.day && (
-              <Badge variant="outline" className="text-xs">
-                {post.day}
-              </Badge>
-            )}
             <BlogStatusBadge postId={post.id} />
             {colorTheme && (
               <Badge variant="outline" className="text-xs" title={`Theme: ${colorTheme.name}`}>
