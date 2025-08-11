@@ -121,7 +121,7 @@ serve(async (req) => {
       console.log('🎯 Using explicit systemPromptId for system prompt:', systemPromptId);
       const { data: spById, error: spByIdError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category, id')
+        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
         .eq('id', systemPromptId)
         .eq('is_active', true)
         .maybeSingle();
@@ -129,6 +129,13 @@ serve(async (req) => {
         systemPromptData = spById;
         usedIdentifier = spById.theme || systemPromptId;
         usedType = 'systemPromptId';
+        console.log('🧾 SYSTEM PROMPT RESOLVED (by id):', {
+          id: spById.id,
+          agent_name: spById.agent_name,
+          updated_at: spById.updated_at,
+          length: spById.prompt_text?.length || 0,
+          preview: (spById.prompt_text || '').slice(0, 100).replace(/\n/g, ' ')
+        });
       }
     }
 
@@ -144,7 +151,7 @@ serve(async (req) => {
         if (themeRow.visual_prompt_system_prompt_id) {
           const { data: spFromTheme, error: spFromThemeErr } = await supabase
             .from('system_prompts')
-            .select('prompt_text, theme, category, id')
+            .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
             .eq('id', themeRow.visual_prompt_system_prompt_id)
             .eq('is_active', true)
             .maybeSingle();
@@ -152,6 +159,13 @@ serve(async (req) => {
             systemPromptData = spFromTheme;
             usedIdentifier = themeRow.theme_name || spFromTheme.theme || String(themeId);
             usedType = 'themeId';
+            console.log('🧾 SYSTEM PROMPT RESOLVED (by themeId mapping):', {
+              id: spFromTheme.id,
+              agent_name: spFromTheme.agent_name,
+              updated_at: spFromTheme.updated_at,
+              length: spFromTheme.prompt_text?.length || 0,
+              preview: (spFromTheme.prompt_text || '').slice(0, 100).replace(/\n/g, ' ')
+            });
           }
         }
         // If no mapping, fall back to theme name search later
@@ -166,7 +180,7 @@ serve(async (req) => {
       console.log('🎯 Looking for theme-based system prompt:', theme);
       const { data: themeData, error: themeError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category')
+        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
         .eq('theme', theme)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
@@ -175,7 +189,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (themeData && !themeError) {
-        console.log('✅ Found theme-based prompt:', theme);
+        console.log('✅ Found theme-based prompt:', { theme, id: themeData.id, agent: themeData.agent_name, updated_at: themeData.updated_at, length: themeData.prompt_text?.length || 0, preview: (themeData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
         systemPromptData = themeData;
         usedIdentifier = theme;
         usedType = 'theme';
@@ -190,7 +204,7 @@ serve(async (req) => {
       // First try category-only prompts (theme is NULL)
       const { data: categoryOnlyData, error: categoryOnlyError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category')
+        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
         .eq('category', category)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
@@ -200,7 +214,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (categoryOnlyData && !categoryOnlyError) {
-        console.log('✅ Found category-only prompt:', category);
+        console.log('✅ Found category-only prompt:', { category, id: categoryOnlyData.id, agent: categoryOnlyData.agent_name, updated_at: categoryOnlyData.updated_at, length: categoryOnlyData.prompt_text?.length || 0, preview: (categoryOnlyData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
         systemPromptData = categoryOnlyData;
         usedIdentifier = category;
         usedType = 'category';
@@ -208,7 +222,7 @@ serve(async (req) => {
         // Fallback: allow any prompt matching this category (even if tied to a theme)
         const { data: categoryAnyData, error: categoryAnyError } = await supabase
           .from('system_prompts')
-          .select('prompt_text, theme, category')
+          .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
           .eq('category', category)
           .eq('agent_name', 'Visual Prompt Generator')
           .eq('is_active', true)
@@ -216,7 +230,7 @@ serve(async (req) => {
           .limit(1)
           .maybeSingle();
         if (categoryAnyData && !categoryAnyError) {
-          console.log('✅ Found category-based prompt (theme-bound):', { category, theme: categoryAnyData.theme });
+          console.log('✅ Found category-based prompt (theme-bound):', { category, theme: categoryAnyData.theme, id: categoryAnyData.id, agent: categoryAnyData.agent_name, updated_at: categoryAnyData.updated_at, length: categoryAnyData.prompt_text?.length || 0, preview: (categoryAnyData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
           systemPromptData = categoryAnyData;
           usedIdentifier = category;
           usedType = 'category';

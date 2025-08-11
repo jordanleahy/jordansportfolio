@@ -102,9 +102,29 @@ serve(async (req) => {
 
     // Step 2: Get the system prompt for this category (most recent active for this user)
     console.log('🔍 STEP 2: Fetching system prompt for category');
+
+    // Diagnostics: list top recent prompts for this user+category to detect mismatches
+    const { data: promptCandidates, error: promptCandidatesError } = await supabase
+      .from('system_prompts')
+      .select('id, agent_name, name, is_active, created_at, updated_at, prompt_text')
+      .eq('user_id', userId)
+      .eq('category', category)
+      .order('updated_at', { ascending: false })
+      .limit(5);
+
+    if (promptCandidatesError) {
+      console.warn('⚠️ Failed to fetch prompt candidates for diagnostics:', promptCandidatesError);
+    } else {
+      console.log('🧪 PROMPT CANDIDATES (top 5 by updated_at desc):');
+      for (const p of promptCandidates || []) {
+        const preview = (p.prompt_text || '').slice(0, 90).replace(/\n/g, ' ');
+        console.log(` • ${p.id} | agent="${p.agent_name}" | active=${p.is_active} | updated=${p.updated_at} | preview="${preview}"`);
+      }
+    }
+
     const { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text')
+      .select('id, agent_name, prompt_text, created_at, updated_at')
       .eq('user_id', userId)
       .eq('category', category)
       .eq('is_active', true)
@@ -117,7 +137,12 @@ serve(async (req) => {
       throw new Error(`No system prompt found for category: ${category}`);
     }
 
-    console.log(`✅ SYSTEM PROMPT FOUND: Category: ${category}, Prompt length: ${systemPromptData.prompt_text.length}`);
+    const chosenPreview = (systemPromptData.prompt_text || '').slice(0, 120).replace(/\n/g, ' ');
+    console.log(`✅ SYSTEM PROMPT FOUND: Category: ${category}, id: ${systemPromptData.id}, agent: ${systemPromptData.agent_name}, updated: ${systemPromptData.updated_at}, length: ${systemPromptData.prompt_text.length}, preview: "${chosenPreview}"`);
+
+    if (systemPromptData.agent_name !== 'Visual Prompt Generator') {
+      console.warn('⚠️ Potential AGENT MISMATCH: expected "Visual Prompt Generator" but found', systemPromptData.agent_name);
+    }
 
     // Step 3: Generate image prompts for each post
     let successCount = 0;

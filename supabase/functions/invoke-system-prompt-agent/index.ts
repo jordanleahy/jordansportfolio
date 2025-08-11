@@ -230,6 +230,8 @@ Please generate a detailed, professional system prompt following the established
       max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
     }, correlationId);
 
+    console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, generator_agent: agent.name, correlationId });
+
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
       url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
@@ -258,7 +260,9 @@ Please generate a detailed, professional system prompt following the established
     const data = await response.json();
     const generatedPrompt = data.choices[0].message.content;
 
-    console.log('Generated system prompt length:', generatedPrompt.length);
+    const genPreview = (generatedPrompt || '').slice(0, 140).replace(/\n/g, ' ');
+    const formatHint = genPreview.startsWith('#') || genPreview.includes('VISUAL PROMPT GENERATOR') ? 'visual_template' : (genPreview.toLowerCase().startsWith('header') ? 'header_template' : 'unknown');
+    console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview, formatHint });
 
     // 🔍 ENHANCED LOGGING: Starting database operations
     console.log('📊 DATABASE OPERATIONS: Starting system prompt storage');
@@ -314,7 +318,9 @@ Please generate a detailed, professional system prompt following the established
       console.log('✅ SYSTEM_PROMPTS INSERT SUCCESS:', {
         inserted_records: insertedPrompt?.length || 0,
         first_record_id: insertedPrompt?.[0]?.id,
-        category: insertedPrompt?.[0]?.category
+        category: insertedPrompt?.[0]?.category,
+        agent_name: insertedPrompt?.[0]?.agent_name,
+        updated_at: insertedPrompt?.[0]?.updated_at
       });
 
     // 🎯 Step 2: Determine target agent based on prompt type
@@ -399,7 +405,7 @@ Please generate a detailed, professional system prompt following the established
           if (promptUpdateError) {
             console.error('❌ PROMPT RECORD UPDATE ERROR:', promptUpdateError);
           } else {
-            console.log('✅ PROMPT RECORD UPDATED: System prompt attribution updated');
+            console.log('✅ PROMPT RECORD UPDATED: System prompt attribution updated', { id: insertedPrompt[0].id, agent_name: targetAgent.name });
           }
         }
       } else {
