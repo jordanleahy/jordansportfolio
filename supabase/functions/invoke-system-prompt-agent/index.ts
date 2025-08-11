@@ -277,8 +277,49 @@ Please generate a detailed, professional system prompt following the established
     });
 
     try {
-      // 📝 Step 1: Save the generated prompt to system_prompts table
-      console.log('💾 STEP 1: Attempting to insert into system_prompts table');
+      // 🔍 Step 0: Check if system prompt already exists for this theme
+      console.log('🔍 STEP 0: Checking for existing system prompts for theme:', actualTheme);
+      const { data: existingPrompts, error: checkError } = await supabase
+        .from('system_prompts')
+        .select('id, category, created_at')
+        .eq('theme', actualTheme)
+        .eq('user_id', user_id)
+        .order('created_at', { ascending: false });
+
+      if (checkError) {
+        console.error('❌ ERROR CHECKING EXISTING PROMPTS:', checkError);
+      } else {
+        console.log('📊 EXISTING PROMPTS FOUND:', {
+          count: existingPrompts?.length || 0,
+          prompts: existingPrompts?.map(p => ({ id: p.id, category: p.category, created_at: p.created_at }))
+        });
+
+        // If a prompt already exists for this theme, return the existing one
+        if (existingPrompts && existingPrompts.length > 0) {
+          const existingPrompt = existingPrompts[0];
+          console.log('♻️ USING EXISTING SYSTEM PROMPT:', {
+            existing_prompt_id: existingPrompt.id,
+            theme: actualTheme,
+            category: existingPrompt.category,
+            message: 'System prompt already exists for this theme'
+          });
+
+          return new Response(JSON.stringify({ 
+            success: true, 
+            system_prompt: generatedPrompt,
+            agent_id: agent.id,
+            theme: actualTheme,
+            category: contextCategory,
+            database_record_id: existingPrompt.id,
+            message: `Using existing system prompt for "${actualTheme}" theme (found ${existingPrompts.length} existing prompts)`
+          }), {
+            headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+
+      // 📝 Step 1: Save the generated prompt to system_prompts table (only if none exists)
+      console.log('💾 STEP 1: Creating new system prompt (none found for theme)');
       const { data: insertedPrompt, error: insertError } = await supabase
         .from('system_prompts')
         .insert({
