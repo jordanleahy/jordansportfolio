@@ -314,7 +314,7 @@ Private Safe Space Visual Tone:
     });
 
     const requestBody = {
-      model: 'gpt-4.1-2025-04-14',
+      model: 'gpt-5-mini',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -465,7 +465,7 @@ Private Safe Space Visual Tone:
             category: usedType === 'category' ? usedIdentifier : category,
             usedType,
             agent: 'Visual Prompt Generator',
-            model: 'gpt-4.1-2025-04-14',
+            model: 'gpt-5-mini',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
             estimated_cost: estimatedCost
