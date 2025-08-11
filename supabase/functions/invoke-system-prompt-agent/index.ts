@@ -17,13 +17,13 @@ const SYSTEM_PROMPT_CATEGORIES = {
 } as const;
 
 const OPENAI_CONFIG = {
-  DEFAULT_MODEL: 'gpt-5-mini',
+  DEFAULT_MODEL: 'gpt-4.1-2025-04-14',
   MAX_COMPLETION_TOKENS: 4000,
-  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
+  TIMEOUT_MS: 60000, // 60 seconds for system prompt generation
   ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,   // 180 seconds for first attempt
-    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,   // 300 seconds for final attempt
+    ATTEMPT_1: 60000,   // 60 seconds for first attempt
+    ATTEMPT_2: 90000,   // 90 seconds for second attempt  
+    ATTEMPT_3: 120000,  // 120 seconds for final attempt
   },
 } as const;
 
@@ -562,40 +562,8 @@ Please generate a detailed, professional system prompt following the established
         console.log('✅ AGENT UPDATE SUCCESS: Updated last_run timestamp');
       }
 
-      // 🎨 Step 4: Ensure all posts have image prompts
-      console.log('🎨 STEP 4: Ensuring posts have image prompts');
-      if (skipEnsure) {
-        console.log('⏭️ Skipping ensure-post-image-prompts per request flag');
-      } else {
-        try {
-          // Run ensure in the background to avoid blocking the main response
-          EdgeRuntime.waitUntil((async () => {
-            const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
-              body: { 
-                category: contextCategory,
-                theme: actualTheme,
-                userId: user_id 
-              }
-            });
-
-            if (imagePromptResponse.error) {
-              console.error('⚠️  IMAGE PROMPT GENERATION WARNING:', imagePromptResponse.error);
-            } else {
-              const promptResults = imagePromptResponse.data;
-              console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
-                theme: actualTheme,
-                category: contextCategory,
-                totalPosts: promptResults?.totalPosts || 0,
-                successCount: promptResults?.successCount || 0,
-                errorCount: promptResults?.errorCount || 0
-              });
-            }
-          })());
-        } catch (promptError) {
-          console.error('⚠️  IMAGE PROMPT GENERATION ERROR (non-critical):', promptError);
-          // Continue with success response even if prompt generation fails
-        }
-      }
+      // Skip background image prompt generation to prevent timeouts
+      console.log('⏭️ Skipping background image prompt generation to prevent timeouts');
 
       // 🎉 Final success response
       console.log('🎉 OPERATION COMPLETE: System prompt generated and stored successfully');
