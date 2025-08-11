@@ -180,10 +180,16 @@ serve(async (req) => {
       console.log('🎯 Resolving themeId to system prompt:', themeId);
       const { data: themeRow, error: themeRowErr } = await supabase
         .from('themes')
-        .select('visual_prompt_system_prompt_id, theme_name')
+        .select('visual_prompt_system_prompt_id, theme_name, category')
         .eq('id', themeId)
         .maybeSingle();
       if (themeRow && !themeRowErr) {
+        // Get category from themes table if not provided
+        if (themeRow.category && !category) {
+          category = themeRow.category;
+          console.log('📌 Using category from themes table:', category);
+        }
+        
         if (themeRow.visual_prompt_system_prompt_id) {
           const { data: spFromTheme, error: spFromThemeErr } = await supabase
             .from('system_prompts')
