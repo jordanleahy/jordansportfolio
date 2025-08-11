@@ -41,6 +41,7 @@ export const PostsTable = ({
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
   const [isBulk169, setIsBulk169] = useState(false);
+  const [isBulk11, setIsBulk11] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isFeaturing, setIsFeaturing] = useState(false);
   
@@ -341,6 +342,161 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
+  // Handle bulk 1:1 generation for current category/theme (only missing images)
+  const handleBulkGenerate11 = async () => {
+    let candidateIds: string[] = [];
+    try {
+      if (!category) {
+        toast.error('Category not found');
+        return;
+      }
+      setIsBulk11(true);
+
+      // Ensure user is authenticated
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to generate images');
+        setIsBulk11(false);
+        return;
+      }
+
+      // Determine posts to process (missing or not-complete 1:1 only)
+      const inScope = posts; // already scoped by current page (theme or category)
+      const inTheme = selectedThemeId ? inScope.filter(p => p.color_theme_id === selectedThemeId) : inScope;
+      const statusDist = inTheme.reduce((acc, p) => {
+        const s = (p.image_1_1_status ?? 'none');
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const withUrl = inTheme.filter(p => !!p.image_1_1_url).length;
+      const withoutUrl = inTheme.length - withUrl;
+      console.groupCollapsed('[Bulk 1:1] Generate missing only – filter debug');
+      console.info('Filters', { category, selectedThemeId, note: 'Using posts array as scope; theme filter = color_theme_id' });
+      console.info('Counts', { total: posts.length, inScope: inScope.length, withUrl, withoutUrl, statusDist });
+      console.table(inTheme.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, color_theme: p.color_theme_id, hasUrl: !!p.image_1_1_url, status: p.image_1_1_status ?? 'none' })));
+      console.groupEnd();
+      const candidates = inTheme
+        .map(p => ({
+          post: p,
+          need11: !p.image_1_1_url || (p.image_1_1_status ?? 'none') !== 'complete',
+        }))
+        .filter(c => c.need11);
+
+      if (candidates.length === 0) {
+        console.warn('[Bulk] No candidates (generate missing only)', { category, selectedThemeId, reason: 'All posts have required images', counts: { inTheme: inTheme.length } });
+        toast.info('All posts already have required images');
+        return;
+      }
+      toast.info(`Starting generation (1:1) for ${candidates.length} post(s)...`);
+      candidateIds = candidates.map(c => c.post.id);
+      candidateIds.forEach(id => setBulkProcessing(id, true));
+
+      // Concurrency-limited client-side batch using existing single-image flow
+      const concurrency = Math.min(3, candidates.length);
+      let successes = 0;
+
+      const queue = [...candidates];
+      const worker = async () => {
+        while (queue.length) {
+          const next = queue.shift();
+          if (!next) break;
+          const { post, need11 } = next as any;
+          if (need11) {
+            const r1 = await handleGenerateImage(post.id, '1_1', post.title, post.description, post.category);
+            if (r1.success) successes++;
+          }
+        }
+      };
+
+      await Promise.all(Array.from({ length: concurrency }, worker));
+
+      toast.success(`Generated ${successes} image(s) for ${candidates.length} post(s)`);
+      onPostsChange();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to run 1:1 generation');
+    } finally {
+      setIsBulk11(false);
+      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+    }
+  };
+
+  // Force-regenerate 1:1 images for all matching posts (category/theme)
+  const handleBulkRegenerate11 = async () => {
+    let candidateIds: string[] = [];
+    try {
+      if (!category) {
+        toast.error('Category not found');
+        return;
+      }
+      const proceed = window.confirm('This will regenerate and replace 1:1 images for all posts in this category (ignores theme filter). Continue?');
+      if (!proceed) return;
+
+      setIsBulk11(true);
+
+      // Ensure user is authenticated
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to generate images');
+        setIsBulk11(false);
+        return;
+      }
+
+      // Determine posts to process (ALL posts visible on this page, ignoring color theme)
+      const inScope = posts;
+      const statusDist = inScope.reduce((acc, p) => {
+        const s = (p.image_1_1_status ?? 'none');
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const withUrl = inScope.filter(p => !!p.image_1_1_url).length;
+      const withoutUrl = inScope.length - withUrl;
+      console.groupCollapsed('[Bulk 1:1] Regenerate all – filter debug');
+      console.info('Filters', { category, selectedThemeId, note: 'Theme filter ignored; using posts array as scope' });
+      console.info('Counts', { total: posts.length, inScope: inScope.length, withUrl, withoutUrl, statusDist });
+      console.table(inScope.map(p => ({ id: p.id, day: p.day ?? '', theme: p.theme_id, color_theme: p.color_theme_id, hasUrl: !!p.image_1_1_url, status: p.image_1_1_status ?? 'none' })));
+      console.groupEnd();
+      const candidates = inScope;
+
+      if (candidates.length === 0) {
+        console.warn('[Bulk 1:1] No candidates (regenerate all)', { category, counts: { inScope: inScope.length } });
+        toast.info('No posts found in this category');
+        return;
+      }
+      toast.info(`Regenerating 1:1 for ${candidates.length} post(s)...`);
+      candidateIds = candidates.map(p => p.id);
+      candidateIds.forEach(id => setBulkProcessing(id, true));
+
+      // Concurrency-limited client-side batch using existing single-image flow
+      const concurrency = Math.min(3, candidates.length);
+      let successes = 0;
+
+      const queue = [...candidates];
+      const worker = async () => {
+        while (queue.length) {
+          const next = queue.shift();
+          if (!next) break;
+          const r1 = await handleGenerateImage(next.id, '1_1', next.title, next.description, next.category);
+          if (r1.success) successes++;
+        }
+      };
+
+      await Promise.all(Array.from({ length: concurrency }, worker));
+
+      toast.success(`Regenerated ${successes} image(s) for ${candidates.length} post(s)`);
+      onPostsChange();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to run 1:1 regeneration');
+    } finally {
+      setIsBulk11(false);
+      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+
+    }
+  };
+
   // Publish 16:9 collection (exactly 10 posts)
   const handlePublishCollection = async () => {
     try {
@@ -598,12 +754,19 @@ const { handleGenerateImage } = useImageManager({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
-                          <DropdownMenuLabel>Bulk actions</DropdownMenuLabel>
+                          <DropdownMenuLabel>Bulk: 16:9</DropdownMenuLabel>
                           <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
                             Generate for missing only (respects theme filter)
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
+                            Regenerate for all (ignores theme filter)
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Bulk: 1:1</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={handleBulkGenerate11} disabled={isBulk11}>
+                            Generate for missing only (respects theme filter)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleBulkRegenerate11} disabled={isBulk11}>
                             Regenerate for all (ignores theme filter)
                           </DropdownMenuItem>
                         </DropdownMenuContent>
