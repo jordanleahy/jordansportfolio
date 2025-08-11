@@ -364,7 +364,7 @@ Private Safe Space Visual Tone:
     });
 
     const requestBody = {
-      model: 'gpt-5-mini',
+      model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
