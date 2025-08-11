@@ -742,36 +742,33 @@ const { handleGenerateImage } = useImageManager({
                 {category && userIsAdmin && (
                   <div className="flex items-center justify-end mb-4 gap-2">
                     <Button
-                      variant="outline"
-                      size="default"
+                      variant={isFeatured ? "default" : "outline"}
+                      size="icon"
                       onClick={handleFeatureLatestCollection}
                       disabled={isFeaturing}
-                      aria-label="Featured"
-                      title={isFeaturing ? 'Featuring…' : 'Feature'}
+                      aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
+                      title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
                     >
-                      <Star className="h-4 w-4 mr-2" />
-                      Featured
+                      <Star className={`h-4 w-4 ${isFeatured ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
-                      variant="outline"
-                      size="default"
+                      variant={isInLibrary ? "default" : "outline"}
+                      size="icon"
                       onClick={handlePublishCollection}
                       disabled={isPublishing}
-                      aria-label="Library"
-                      title={isPublishing ? 'Publishing…' : 'Library'}
+                      aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
+                      title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
                     >
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Library
+                      <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
                       variant="outline"
-                      size="default"
+                      size="icon"
                       onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-                      aria-label="Category Prompt"
-                      title="Category Prompt"
+                      aria-label="Edit Category Prompt"
+                      title="Edit Category Prompt"
                     >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Prompt
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   </div>
                 )}
