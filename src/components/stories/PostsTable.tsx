@@ -515,7 +515,7 @@ const { handleGenerateImage } = useImageManager({
       // Check if we already have a published collection to toggle
       const { data: existing, error: checkErr } = await supabase
         .from('shared_collections')
-        .select('id, include_in_library')
+        .select('id, include_in_library, featured')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
@@ -525,17 +525,33 @@ const { handleGenerateImage } = useImageManager({
       if (checkErr) throw checkErr;
 
       if (existing) {
-        // Toggle library status
         const newLibraryState = !existing.include_in_library;
+        
+        // If removing from library and it's featured, also remove from featured
+        const updateData = newLibraryState
+          ? { include_in_library: true }
+          : { include_in_library: false, featured: false };
+
         const { error: updateErr } = await supabase
           .from('shared_collections')
-          .update({ include_in_library: newLibraryState })
+          .update(updateData)
           .eq('id', existing.id);
 
         if (updateErr) throw updateErr;
         
+        // Update local state
         setIsInLibrary(newLibraryState);
-        toast.success(newLibraryState ? 'Added to Library' : 'Removed from Library');
+        if (!newLibraryState) {
+          setIsFeatured(false); // Can't be featured if not in library
+        }
+        
+        const message = newLibraryState 
+          ? 'Added to Library' 
+          : existing.featured 
+            ? 'Removed from Library & Featured' 
+            : 'Removed from Library';
+        
+        toast.success(message);
         return;
       }
 
@@ -636,7 +652,7 @@ const { handleGenerateImage } = useImageManager({
       // Find most recent published shared collection for this user
       const { data: latest, error: selErr } = await supabase
         .from('shared_collections')
-        .select('id, featured')
+        .select('id, featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
@@ -645,20 +661,31 @@ const { handleGenerateImage } = useImageManager({
       
       if (selErr) throw selErr;
       if (!latest) {
-        toast.error('No published collection found. Click Library first.');
+        toast.error('No published collection found. Click Library first to create one.');
         return;
       }
 
       const newFeaturedState = !latest.featured;
+      
+      // If featuring, ensure it's also in library. If unfeaturing, keep library status as is
+      const updateData = newFeaturedState 
+        ? { featured: true, include_in_library: true }
+        : { featured: false };
+        
       const { error: updErr } = await supabase
         .from('shared_collections')
-        .update({ featured: newFeaturedState })
+        .update(updateData)
         .eq('id', latest.id);
       
       if (updErr) throw updErr;
       
+      // Update local state
       setIsFeatured(newFeaturedState);
-      toast.success(newFeaturedState ? 'Added to Featured' : 'Removed from Featured');
+      if (newFeaturedState) {
+        setIsInLibrary(true); // Featured items are always in library
+      }
+      
+      toast.success(newFeaturedState ? 'Added to Featured & Library' : 'Removed from Featured');
     } catch (e) {
       console.error(e);
       toast.error('Failed to update featured status');
