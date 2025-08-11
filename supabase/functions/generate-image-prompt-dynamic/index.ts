@@ -140,22 +140,40 @@ serve(async (req) => {
     // If no theme prompt found, fall back to category-based prompt
     if (!systemPromptData && category) {
       console.log('🏷️ Looking for category-based system prompt:', category);
-      const { data: categoryData, error: categoryError } = await supabase
+      // First try category-only prompts (theme is NULL)
+      const { data: categoryOnlyData, error: categoryOnlyError } = await supabase
         .from('system_prompts')
         .select('prompt_text, theme, category')
         .eq('category', category)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
-        .is('theme', null) // Prefer category-only prompts over theme-specific ones
+        .is('theme', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (categoryData && !categoryError) {
-        console.log('✅ Found category-based prompt:', category);
-        systemPromptData = categoryData;
+      if (categoryOnlyData && !categoryOnlyError) {
+        console.log('✅ Found category-only prompt:', category);
+        systemPromptData = categoryOnlyData;
         usedIdentifier = category;
         usedType = 'category';
+      } else {
+        // Fallback: allow any prompt matching this category (even if tied to a theme)
+        const { data: categoryAnyData, error: categoryAnyError } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, theme, category')
+          .eq('category', category)
+          .eq('agent_name', 'Visual Prompt Generator')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (categoryAnyData && !categoryAnyError) {
+          console.log('✅ Found category-based prompt (theme-bound):', { category, theme: categoryAnyData.theme });
+          systemPromptData = categoryAnyData;
+          usedIdentifier = category;
+          usedType = 'category';
+        }
       }
     }
 
