@@ -37,6 +37,25 @@ export const useImageGeneration = () => {
       setIsGenerating(true);
       setGenerationStep('Generating prompt...');
       
+      // Fetch theme_id from database to ensure we have proper theme resolution
+      const { data: postData, error: fetchError } = await supabase
+        .from('social_media_posts')
+        .select('theme_id')
+        .eq('id', post.id)
+        .single();
+
+      if (fetchError) {
+        console.warn('Could not fetch theme_id for post:', fetchError.message);
+      }
+
+      const themeId = postData?.theme_id;
+      console.log('Theme resolution debug:', {
+        urlTheme: theme,
+        fetchedThemeId: themeId,
+        postCategory: post.category,
+        colorTheme: colorTheme?.name
+      });
+      
       // Generate prompt using Supabase functions
       const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
@@ -46,7 +65,7 @@ export const useImageGeneration = () => {
           category: post.category || 'general',
           colorTheme: colorTheme?.name || '',
           aspectRatio: '1:1',
-          themeId: (post as any).theme_id || undefined
+          themeId
         }
       });
 
