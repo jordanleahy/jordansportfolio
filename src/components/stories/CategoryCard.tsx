@@ -378,6 +378,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
             <ImageIcon className="h-8 w-8 text-destructive/60 mb-2" />
             <div className="text-xs text-destructive text-center px-2">
               Failed to generate
+              <div className="text-xs text-muted-foreground mt-1">Generation takes up to 3 minutes</div>
             </div>
           </div>
         )}
