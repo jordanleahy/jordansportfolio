@@ -2397,6 +2397,7 @@ export type Database = {
           theme_name: string
           updated_at: string
           user_id: string
+          visual_prompt_system_prompt_id: string | null
         }
         Insert: {
           category: string
@@ -2406,6 +2407,7 @@ export type Database = {
           theme_name: string
           updated_at?: string
           user_id: string
+          visual_prompt_system_prompt_id?: string | null
         }
         Update: {
           category?: string
@@ -2415,8 +2417,17 @@ export type Database = {
           theme_name?: string
           updated_at?: string
           user_id?: string
+          visual_prompt_system_prompt_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "themes_visual_prompt_system_prompt_id_fkey"
+            columns: ["visual_prompt_system_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "system_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
