@@ -48,6 +48,28 @@ serve(async (req) => {
   const startTime = Date.now();
   let userId: string | null = null;
   const correlationId = generateCorrelationId();
+  let functionExitReason = 'unknown';
+
+  // Enhanced startup logging
+  console.log('🚀 FUNCTION_START: Image generation initiated', {
+    correlationId,
+    timestamp: new Date().toISOString(),
+    requestId: req.headers.get('x-request-id') || 'unknown',
+    userAgent: req.headers.get('user-agent'),
+    method: req.method,
+    url: req.url
+  });
+
+  const exitHandler = (reason: string) => {
+    functionExitReason = reason;
+    console.log('🏁 FUNCTION_EXIT:', {
+      correlationId,
+      reason,
+      duration: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+      userId: userId?.slice(0, 8)
+    });
+  };
 
   try {
     console.log('🔍 DEBUG: Function started, parsing request body...');
@@ -304,6 +326,8 @@ serve(async (req) => {
     }
     
     console.log('🎨 IMAGE_GENERATION: Successfully generated image');
+    
+    exitHandler('success');
     
     return new Response(
       JSON.stringify({ 

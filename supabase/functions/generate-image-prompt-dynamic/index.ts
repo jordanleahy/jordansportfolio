@@ -68,6 +68,42 @@ serve(async (req) => {
   let requestMetadata: any = {};
   let openAIRequestId: string | undefined;
 
+  // Enhanced shutdown tracking
+  console.log('🚀 FUNCTION_START: Request initiated', {
+    correlationId,
+    timestamp: new Date().toISOString(),
+    requestId: req.headers.get('x-request-id') || 'unknown',
+    userAgent: req.headers.get('user-agent'),
+    method: req.method,
+    url: req.url
+  });
+
+  // Add signal handler for cleanup
+  const controller = new AbortController();
+  let functionExitReason = 'unknown';
+  
+  const exitHandler = (reason: string) => {
+    functionExitReason = reason;
+    console.log('🏁 FUNCTION_EXIT:', {
+      correlationId,
+      reason,
+      duration: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+      success,
+      userId: userId?.slice(0, 8)
+    });
+  };
+
+  // Setup cleanup on various exit conditions
+  const cleanup = () => {
+    controller.abort();
+    exitHandler('cleanup_called');
+  };
+
+  // Track process signals
+  globalThis.addEventListener('beforeunload', () => exitHandler('beforeunload'));
+  globalThis.addEventListener('unload', () => exitHandler('unload'));
+
   try {
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');

@@ -139,6 +139,29 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  const requestId = crypto.randomUUID();
+  let functionExitReason = 'unknown';
+
+  // Enhanced startup logging
+  console.log('🚀 PIPELINE_START: Streaming pipeline initiated', {
+    requestId,
+    timestamp: new Date().toISOString(),
+    userAgent: req.headers.get('user-agent'),
+    method: req.method,
+    url: req.url
+  });
+
+  const exitHandler = (reason: string) => {
+    functionExitReason = reason;
+    console.log('🏁 PIPELINE_EXIT:', {
+      requestId,
+      reason,
+      duration: Date.now() - startTime,
+      timestamp: new Date().toISOString()
+    });
+  };
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
@@ -342,6 +365,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in streaming-image-pipeline:', error);
     
+    exitHandler('error_caught');
+    
     return new Response(JSON.stringify({ 
       success: false,
       error: error.message 
@@ -349,5 +374,14 @@ serve(async (req) => {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+  } finally {
+    console.log('📊 PIPELINE_SUMMARY:', {
+      requestId,
+      duration: Date.now() - startTime,
+      exitReason: functionExitReason,
+      timestamp: new Date().toISOString()
+    });
+    
+    exitHandler('function_complete');
   }
 });
