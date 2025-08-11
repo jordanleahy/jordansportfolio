@@ -170,22 +170,20 @@ serve(async (req) => {
 
     // Get the system prompt for this agent from the system_prompts table
     // Use order by to get the most recent one and handle multiple records gracefully
-    const { data: systemPromptData, error: systemPromptError } = await supabase
-      .from('system_prompts')
-      .select('prompt_text')
-      .eq('agent_id', agent.id)
-      .eq('category', SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      const { data: systemPromptData, error: systemPromptError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text')
+        .eq('agent_id', agent.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
     
     if (systemPromptError || !systemPromptData) {
-      console.error('❌ SYSTEM PROMPT NOT FOUND:', {
-        agent_id: agent.id,
-        category: SYSTEM_PROMPT_CATEGORIES.SYSTEM_PROMPT_GENERATION,
-        error: systemPromptError
-      });
+        console.error('❌ SYSTEM PROMPT NOT FOUND:', {
+          agent_id: agent.id,
+          error: systemPromptError
+        });
       return new Response(JSON.stringify({ 
         success: false, 
         error: ERROR_MESSAGES.SYSTEM_PROMPT_NOT_FOUND 
@@ -345,7 +343,7 @@ Please generate a detailed, professional system prompt following the established
       console.log('🔍 STEP 0: Checking for existing system prompts for theme_id:', theme_id);
       const existingPromptsQuery = supabase
         .from('system_prompts')
-        .select('id, category, created_at, theme')
+        .select('id, created_at, theme')
         .eq('user_id', user_id);
 
       // Use theme_id if provided, otherwise fall back to theme name
@@ -363,7 +361,7 @@ Please generate a detailed, professional system prompt following the established
       } else {
         console.log('📊 EXISTING PROMPTS FOUND:', {
           count: existingPrompts?.length || 0,
-          prompts: existingPrompts?.map(p => ({ id: p.id, category: p.category, created_at: p.created_at }))
+          prompts: existingPrompts?.map(p => ({ id: p.id, created_at: p.created_at }))
         });
 
         // If a prompt already exists for this theme, return the existing one
@@ -372,7 +370,6 @@ Please generate a detailed, professional system prompt following the established
           console.log('♻️ USING EXISTING SYSTEM PROMPT:', {
             existing_prompt_id: existingPrompt.id,
             theme: actualTheme,
-            category: existingPrompt.category,
             message: 'System prompt already exists for this theme'
           });
 
@@ -381,7 +378,6 @@ Please generate a detailed, professional system prompt following the established
             system_prompt: generatedPrompt,
             agent_id: agent.id,
             theme: actualTheme,
-            category: contextCategory,
             database_record_id: existingPrompt.id,
             message: `Using existing system prompt for "${actualTheme}" theme (found ${existingPrompts.length} existing prompts)`
           }), {
@@ -401,7 +397,6 @@ Please generate a detailed, professional system prompt following the established
           agent_purpose: agent.purpose,
           agent_owner: agent.owner,
           name: `${actualTheme} Theme System Prompt`,
-          category: contextCategory,
           theme: actualTheme,
           theme_id: theme_id,
           theme_description: description,
@@ -429,13 +424,12 @@ Please generate a detailed, professional system prompt following the established
         });
       }
 
-      console.log('✅ SYSTEM_PROMPTS INSERT SUCCESS:', {
-        inserted_records: insertedPrompt?.length || 0,
-        first_record_id: insertedPrompt?.[0]?.id,
-        category: insertedPrompt?.[0]?.category,
-        agent_name: insertedPrompt?.[0]?.agent_name,
-        updated_at: insertedPrompt?.[0]?.updated_at
-      });
+        console.log('✅ SYSTEM_PROMPTS INSERT SUCCESS:', {
+          inserted_records: insertedPrompt?.length || 0,
+          first_record_id: insertedPrompt?.[0]?.id,
+          agent_name: insertedPrompt?.[0]?.agent_name,
+          updated_at: insertedPrompt?.[0]?.updated_at
+        });
 
       // Update the themes table with the generated system prompt ID if theme_id is provided
       if (theme_id && insertedPrompt?.[0]?.id) {

@@ -311,10 +311,6 @@ async function fetchFreshPrompt(theme?: string, userId?: string, category?: stri
         .eq('user_id', userId)
         .eq('theme', theme);
       
-      // If category is provided, filter by it; otherwise find any theme match
-      if (category) {
-        query = query.eq('category', category);
-      }
       
       const { data: themeTextData, error: themeTextError } = await query
         .order('updated_at', { ascending: false })
@@ -323,22 +319,6 @@ async function fetchFreshPrompt(theme?: string, userId?: string, category?: stri
 
       promptData = themeTextData;
       promptError = themeTextError;
-    }
-
-    // If no theme-specific prompt found and category provided, try category fallback
-    if (!promptData && category) {
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('system_prompts')
-        .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
-        .eq('user_id', userId)
-        .eq('category', category)
-        .is('theme', null)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      promptData = categoryData;
-      promptError = categoryError;
     }
 
     if (promptError && promptError.code !== 'PGRST116') {

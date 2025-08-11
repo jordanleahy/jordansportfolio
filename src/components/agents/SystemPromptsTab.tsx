@@ -72,15 +72,12 @@ export const SystemPromptsTab = ({
 
   // Calculate active categories dynamically based on existing prompts
   const activeCategories = useMemo(() => {
-    const dbCategories = databasePrompts.map(p => p.category);
     const legacyCategories = systemPrompts.map(p => p.category);
-    const allCategories = [...new Set([...dbCategories, ...legacyCategories])];
-    return allCategories.filter(Boolean); // Remove any undefined/null categories
-  }, [databasePrompts, systemPrompts]);
+    return [...new Set(legacyCategories)].filter(Boolean); // Remove any undefined/null categories
+  }, [systemPrompts]);
 
   // Group Visual Prompt Generator categories by domain
   const groupedCategories = useMemo(() => {
-    const hasPrompt = (category: string) => databasePrompts.some(p => p.category === category) || systemPrompts.some(p => p.category === category);
     return {
       'Healthcare & Medical': ['cdi', 'contracts', 'healthcare-coding', 'medical-devices', 'pharmaceuticals', 'telemedicine', 'hospital-operations', 'patient-care'],
       'Technology & AI': ['coding ai', 'ai agents', 'cybersecurity', 'cloud-computing', 'data-analytics', 'machine-learning', 'blockchain', 'iot'],
@@ -90,7 +87,7 @@ export const SystemPromptsTab = ({
       'Legal & Compliance': ['legal-tech', 'regulatory-compliance', 'data-privacy', 'risk-management', 'contract-management', 'intellectual-property'],
       'Education & Learning': ['educational-technology', 'e-learning', 'corporate-training', 'skill-development', 'knowledge-management']
     };
-  }, [databasePrompts, systemPrompts]);
+  }, [systemPrompts]);
 
   // Update agent's supported categories when active categories change
   useEffect(() => {
@@ -143,8 +140,6 @@ export const SystemPromptsTab = ({
         supabase
       } = await import('@/integrations/supabase/client');
 
-      // Get the prompt being deleted to check its category
-      const deletedPrompt = databasePrompts.find(p => p.id === promptId);
       const {
         error
       } = await supabase.from('system_prompts').delete().eq('id', promptId);
@@ -152,18 +147,6 @@ export const SystemPromptsTab = ({
 
       // Remove from local state
       setDatabasePrompts(prev => prev.filter(p => p.id !== promptId));
-
-      // Update supported categories if this was the last prompt for a category
-      if (deletedPrompt) {
-        const categoryStillExists = databasePrompts.some(p => p.id !== promptId && p.category === deletedPrompt.category);
-
-        // Also check if category exists in legacy prompts
-        const categoryInLegacy = systemPrompts.some(p => p.category === deletedPrompt.category);
-        if (!categoryStillExists && !categoryInLegacy) {
-          const updatedCategories = supportedCategories.filter(cat => cat !== deletedPrompt.category);
-          onChange(systemPrompts, updatedCategories);
-        }
-      }
       toast({
         title: "System prompt deleted",
         description: "The system prompt has been successfully deleted from the database."
@@ -220,7 +203,7 @@ export const SystemPromptsTab = ({
               </h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {categories.map(category => {
-              const hasPrompt = databasePrompts.some(p => p.category === category) || systemPrompts.some(p => p.category === category);
+              const hasPrompt = systemPrompts.some(p => p.category === category);
               return <div key={category} className={`flex items-center justify-between p-3 rounded-lg border ${hasPrompt ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' : 'bg-muted/30 border-dashed'}`}>
                       <div className="flex items-center gap-2">
                         <Badge variant={hasPrompt ? "default" : "outline"} className="text-xs">
@@ -243,7 +226,7 @@ export const SystemPromptsTab = ({
                   
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => {
-                window.open(`/stories?category=${dbPrompt.category}`, '_blank');
+                window.open(`/stories`, '_blank');
               }}>
                       <ExternalLink className="h-4 w-4 mr-1" />
                       View

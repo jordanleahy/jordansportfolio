@@ -55,22 +55,6 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
         return true;
       }
       
-      // Final fallback to category-only check
-      if (category) {
-        const { data: categoryData, error: categoryError } = await supabase
-          .from('system_prompts')
-          .select('id')
-          .eq('category', category)
-          .is('theme', null)
-          .limit(1);
-        
-        if (categoryError) {
-          console.error('Error checking category fallback system prompt existence:', categoryError);
-          return false;
-        }
-        
-        return categoryData && categoryData.length > 0;
-      }
       
       return false;
     },
