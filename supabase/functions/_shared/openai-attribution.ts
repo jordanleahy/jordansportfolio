@@ -156,10 +156,10 @@ const circuitBreaker: CircuitBreakerState = {
 // Timeout configuration based on operation type
 function getTimeoutForOperation(operationType: string = 'default', retryAttempt: number = 1): number {
   const baseTimeouts = {
-    'system_prompt': 90000,      // 90 seconds for complex system prompts
-    'content_generation': 60000,  // 60 seconds for content generation
-    'image_generation': 45000,    // 45 seconds for image generation
-    'default': 60000             // 60 seconds default
+    'system_prompt': 180000,      // 180 seconds for complex system prompts
+    'content_generation': 120000,  // 120 seconds for content generation
+    'image_generation': 90000,    // 90 seconds for image generation
+    'default': 180000             // 180 seconds default
   };
   
   const baseTimeout = baseTimeouts[operationType] || baseTimeouts['default'];
@@ -330,13 +330,14 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
       }
       
       throw {
-        error: new Error(`OpenAI request timeout after ${TIMEOUT_MS}ms (${retryAttempt} attempts)`),
+        error: new Error(`Trying to generate some prompts, your internet connection good? Request timed out after ${TIMEOUT_MS}ms (${retryAttempt} attempts)`),
         correlationId,
         responseTime,
         timeout: true,
         retryAttempt,
         operationType,
         circuitBreakerState: circuitBreaker.state,
+        userFriendlyMessage: "Trying to generate some prompts, your internet connection good?",
       };
     }
     

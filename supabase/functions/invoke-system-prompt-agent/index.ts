@@ -19,11 +19,11 @@ const SYSTEM_PROMPT_CATEGORIES = {
 const OPENAI_CONFIG = {
   DEFAULT_MODEL: 'gpt-5-mini',
   MAX_COMPLETION_TOKENS: 4000,
-  TIMEOUT_MS: 90000, // 90 seconds for system prompt generation
+  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
   ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 90000,   // 90 seconds for first attempt
-    ATTEMPT_2: 135000,  // 135 seconds for second attempt  
-    ATTEMPT_3: 180000,  // 180 seconds for final attempt
+    ATTEMPT_1: 180000,   // 180 seconds for first attempt
+    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
+    ATTEMPT_3: 300000,   // 300 seconds for final attempt
   },
 } as const;
 
@@ -597,9 +597,18 @@ Please generate a detailed, professional system prompt following the established
     }
   } catch (error) {
     console.error('Error in invoke-system-prompt-agent function:', error);
+    
+    // Check if this is a timeout error and provide user-friendly message
+    const isTimeoutError = error?.timeout || error?.userFriendlyMessage || error?.error?.message?.includes('timeout');
+    const userMessage = isTimeoutError 
+      ? (error?.userFriendlyMessage || "Trying to generate some prompts, your internet connection good?")
+      : error?.error?.message || error?.message || 'Unknown error occurred';
+    
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: userMessage,
+      isTimeout: !!isTimeoutError,
+      correlationId: error?.correlationId || correlationId,
     }), {
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
