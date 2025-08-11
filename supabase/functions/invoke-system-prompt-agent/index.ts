@@ -266,9 +266,65 @@ Please generate a detailed, professional system prompt following the established
     }
 
     const data = await response.json();
-    const generatedPrompt = data.choices[0].message.content;
+    
+    // Validate OpenAI response structure before accessing content
+    if (!data || !data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
+      console.error('❌ INVALID OPENAI RESPONSE STRUCTURE:', {
+        hasData: !!data,
+        hasChoices: !!data?.choices,
+        isChoicesArray: Array.isArray(data?.choices),
+        choicesLength: data?.choices?.length,
+        fullResponse: JSON.stringify(data, null, 2)
+      });
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid OpenAI response: missing choices array or empty response',
+        openai_response: data
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
 
-    const genPreview = (generatedPrompt || '').slice(0, 140).replace(/\n/g, ' ');
+    const choice = data.choices[0];
+    if (!choice || !choice.message || typeof choice.message.content !== 'string') {
+      console.error('❌ INVALID OPENAI CHOICE STRUCTURE:', {
+        hasChoice: !!choice,
+        hasMessage: !!choice?.message,
+        hasContent: !!choice?.message?.content,
+        contentType: typeof choice?.message?.content,
+        choice: JSON.stringify(choice, null, 2)
+      });
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid OpenAI response: missing or invalid message content',
+        openai_choice: choice
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const generatedPrompt = choice.message.content.trim();
+    
+    // Validate that we actually got content
+    if (!generatedPrompt || generatedPrompt.length === 0) {
+      console.error('❌ EMPTY OPENAI CONTENT:', {
+        originalContent: choice.message.content,
+        trimmedLength: generatedPrompt.length,
+        fullChoice: JSON.stringify(choice, null, 2)
+      });
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'OpenAI returned empty content',
+        openai_choice: choice
+      }), {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const genPreview = generatedPrompt.slice(0, 140).replace(/\n/g, ' ');
     const formatHint = genPreview.startsWith('#') || genPreview.includes('VISUAL PROMPT GENERATOR') ? 'visual_template' : (genPreview.toLowerCase().startsWith('header') ? 'header_template' : 'unknown');
     console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview, formatHint });
 
