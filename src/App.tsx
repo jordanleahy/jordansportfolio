@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy, useState } from "react";
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Auth from "./pages/Auth";
 import SEC from "./pages/SEC";
 import Blog from "./pages/Blog";
@@ -102,6 +103,8 @@ function App() {
               <UsageRealtimeProvider>
                 <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/portfolio" element={<Navigate to="/about" replace />} />
                 <Route 
                   path="/storyship" 
                   element={
@@ -120,11 +123,9 @@ function App() {
                 <Route 
                   path="/stories" 
                   element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <StoriesDashboard />
-                      </Suspense>
-                    </ProtectedRoute>
+                    <Suspense fallback={<CalendarSkeletonLoader />}>
+                      <StoriesDashboard />
+                    </Suspense>
                   } 
                 />
                 <Route 
@@ -146,8 +147,7 @@ function App() {
                       </Suspense>
                     </ProtectedRoute>
                   } 
-                />
-                <Route path="/portfolio" element={<Index />} />
+                 />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 

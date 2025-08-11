@@ -1,92 +1,20 @@
 
-import React, { Suspense, lazy } from "react";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import type { User, Session } from "@supabase/supabase-js";
-import AppLayout from "@/components/layout/AppLayout";
-import CompaniesSection from "@/components/CompaniesSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import ProjectCardsSection from "@/components/ProjectCardsSection";
-import BlogTeaser from "@/components/BlogTeaser";
-import ContactSection from "@/components/ContactSection";
-import RecentBlogsSection from "@/components/RecentBlogsSection";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 
-
-// Lazy load heavy HeroParallax component
-const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
-
 const Index = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  // Generate SEO metadata for homepage
+  // Generate SEO metadata for homepage redirect
   const homeSEO = generateSEOMetadata({
-    title: "Jordan Leahy - Healthcare Technology & Product Development",
-    description: "Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.",
+    title: "Jordan Leahy - AI Content Marketing Platform",
+    description: "Create compelling marketing content with AI-powered stories and insights. Join Jordan Leahy's platform for healthcare technology content.",
     image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
     url: "/",
     type: "website"
   });
 
-  // Auth state management
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred during sign out",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Redirect to stories immediately
   return (
     <>
       <Helmet>
@@ -103,26 +31,7 @@ const Index = () => {
         <meta name="twitter:description" content={homeSEO.ogDescription} />
         <meta name="twitter:image" content={homeSEO.image} />
       </Helmet>
-      <AppLayout>
-      {/* Hero Parallax Section */}
-      <Suspense fallback={
-        <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading hero section...</p>
-          </div>
-        </div>
-      }>
-        <HeroParallaxDemo />
-      </Suspense>
-      
-      {/* Portfolio Content - Reordered sections */}
-      <CompaniesSection />
-      <RecentBlogsSection />
-      <ProjectCardsSection />
-      <TestimonialsSection />
-      <ContactSection />
-    </AppLayout>
+      <Navigate to="/stories" replace />
     </>
   );
 };

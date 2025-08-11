@@ -117,25 +117,29 @@ export default function StoriesDashboard() {
     loadThemes();
   }, [user?.id]);
 
-  // First-visit hero visibility
+  // First-visit hero visibility - always show for unauthenticated users
   useEffect(() => {
+    if (!user) {
+      setShowHero(true);
+      return;
+    }
     try {
       const seen = localStorage.getItem('stories_hero_seen');
       setShowHero(!seen);
     } catch {
       setShowHero(true);
     }
-  }, []);
+  }, [user]);
 
-  // Auto-hide hero when content exists
+  // Auto-hide hero when content exists (only for authenticated users)
   useEffect(() => {
-    if (availableThemes.length > 0) {
+    if (user && availableThemes.length > 0) {
       try {
         localStorage.setItem('stories_hero_seen', '1');
       } catch {}
       setShowHero(false);
     }
-  }, [availableThemes.length]);
+  }, [user, availableThemes.length]);
 
   // Load featured posts for public view
   useEffect(() => {
@@ -801,17 +805,47 @@ export default function StoriesDashboard() {
                   Retry
                 </Button>
               </div> : <CategoriesGrid themes={availableThemes} onDeleteCategory={handleDeleteCategory} selectedThemes={selectedThemes} onThemeSelect={handleThemeSelect} isSelectionMode={isSelectionMode} isGeneratingTheme={isGeneratingTheme} onCancelGeneration={cancelThemeGeneration} />}
-          </Section> : <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
-            <header className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Featured Posts</h2>
-            </header>
-            {isLoadingFeatured ? <ThemesSkeleton /> : featuredError ? <div className="text-center py-8">
-                <div className="text-muted-foreground mb-4">⚠️ Failed to load featured posts: {featuredError}</div>
-                <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
-              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredPosts.length === 0 ? <div className="text-center py-12 text-muted-foreground col-span-full">No featured posts yet.</div> : featuredPosts.map((post: any) => <BlogCard key={post.id} post={post} />)}
-              </div>}
-          </Section>}
+          </Section> : <>
+            <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
+              <header className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-foreground">Featured Posts</h2>
+              </header>
+              {isLoadingFeatured ? <ThemesSkeleton /> : featuredError ? <div className="text-center py-8">
+                  <div className="text-muted-foreground mb-4">⚠️ Failed to load featured posts: {featuredError}</div>
+                  <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+                </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {featuredPosts.length === 0 ? <div className="text-center py-12 text-muted-foreground col-span-full">No featured posts yet.</div> : featuredPosts.map((post: any) => <BlogCard key={post.id} post={post} />)}
+                </div>}
+            </Section>
+            
+            {/* Sign-up CTA for unauthenticated users */}
+            <Section id="signup-cta" className="mb-12" fluid>
+              <div className="max-w-4xl mx-auto text-center space-y-6 p-8 bg-card rounded-lg border">
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-bold text-foreground">Ready to Create Your Own Stories?</h2>
+                  <p className="text-lg text-muted-foreground">
+                    Join thousands of content creators using AI to generate compelling marketing stories and visuals.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Button size="lg" asChild>
+                    <a href="/auth">
+                      <Users className="w-5 h-5 mr-2" />
+                      Sign Up Free
+                    </a>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <a href="/about">
+                      Learn More
+                    </a>
+                  </Button>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  No credit card required • Free plan available
+                </div>
+              </div>
+            </Section>
+          </>}
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
