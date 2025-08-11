@@ -118,11 +118,13 @@ export const SystemPromptViewer = ({
     }
     
     try {
+      console.log('🚀 Starting regeneration...');
       setPreviousPrompt(promptData?.prompt || '');
-      await regeneratePrompt();
+      const result = await regeneratePrompt();
+      console.log('✅ Regeneration successful:', result);
       toast.success('System prompt regenerated successfully');
     } catch (error) {
-      console.error('Error regenerating system prompt:', error);
+      console.error('❌ Error regenerating system prompt:', error);
       toast.error('Failed to regenerate system prompt');
     }
   }, [theme, category, themeId, promptData?.prompt, regeneratePrompt]);
