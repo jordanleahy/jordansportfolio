@@ -687,8 +687,8 @@ const { handleGenerateImage } = useImageManager({
         const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
           p_handle: newHandle,
           p_post_ids: candidateIds,
-          p_category: null,
-          p_theme_id: null,
+          p_category: category || null,
+          p_theme_id: themeId || null,
           p_title: titleArg,
           p_description: descriptionArg,
         });
