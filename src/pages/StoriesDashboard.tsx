@@ -26,8 +26,8 @@ import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
-import { BlogCard } from '@/components/ui/BlogCard';
-import type { BlogPost } from '@/types/blog';
+import { CollectionCard } from '@/components/library/CollectionCard';
+import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -69,10 +69,8 @@ export default function StoriesDashboard() {
     errors?: string[];
   } | null>(null);
 
-  // Featured posts (public view)
-  const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
-  const [isLoadingFeatured, setIsLoadingFeatured] = useState(false);
-  const [featuredError, setFeaturedError] = useState<string | null>(null);
+  // Featured collections (public view)
+  const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
   // Hook for theme import functionality
   const {
@@ -142,29 +140,6 @@ export default function StoriesDashboard() {
     }
   }, [user, availableThemes.length]);
 
-  // Load featured posts for public view
-  useEffect(() => {
-    const loadFeatured = async () => {
-      try {
-        setIsLoadingFeatured(true);
-        setFeaturedError(null);
-        const {
-          data,
-          error
-        } = await supabase.from('blog_posts').select('*').eq('status', 'published').eq('featured', true).order('published_at', {
-          ascending: false
-        }).limit(6);
-        if (error) throw error;
-        setFeaturedPosts((data || []) as any);
-      } catch (e: any) {
-        setFeaturedError(e.message || 'Failed to load featured posts');
-        setFeaturedPosts([]);
-      } finally {
-        setIsLoadingFeatured(false);
-      }
-    };
-    if (!user) loadFeatured();
-  }, [user]);
 
   // Simplified realtime handlers
   const handlePostInsert = (newPost: SocialMediaPost) => {
@@ -825,13 +800,13 @@ export default function StoriesDashboard() {
           </Section> : <>
             <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
               <header className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-foreground">Featured Posts</h2>
+                <h2 className="text-2xl font-bold text-foreground">Featured</h2>
               </header>
               {isLoadingFeatured ? <ThemesSkeleton /> : featuredError ? <div className="text-center py-8">
-                  <div className="text-muted-foreground mb-4">⚠️ Failed to load featured posts: {featuredError}</div>
+                  <div className="text-muted-foreground mb-4">⚠️ Failed to load featured collections: {featuredError.message}</div>
                   <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
                 </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {featuredPosts.length === 0 ? <div className="text-center py-12 text-muted-foreground col-span-full">No featured posts yet.</div> : featuredPosts.map((post: any) => <BlogCard key={post.id} post={post} />)}
+                  {featuredCollections.length === 0 ? <div className="text-center py-12 text-muted-foreground col-span-full">No featured collections yet.</div> : featuredCollections.map((collection) => <CollectionCard key={collection.id} collection={collection} />)}
                 </div>}
             </Section>
             
