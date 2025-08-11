@@ -2337,7 +2337,6 @@ export type Database = {
           agent_name: string | null
           agent_owner: string | null
           agent_purpose: string | null
-          category: string
           created_at: string
           description: string | null
           generated_by: string | null
@@ -2357,7 +2356,6 @@ export type Database = {
           agent_name?: string | null
           agent_owner?: string | null
           agent_purpose?: string | null
-          category: string
           created_at?: string
           description?: string | null
           generated_by?: string | null
@@ -2377,7 +2375,6 @@ export type Database = {
           agent_name?: string | null
           agent_owner?: string | null
           agent_purpose?: string | null
-          category?: string
           created_at?: string
           description?: string | null
           generated_by?: string | null
@@ -2408,45 +2405,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      theme_submissions: {
-        Row: {
-          category: string
-          completed_at: string | null
-          created_at: string | null
-          error_message: string | null
-          id: string
-          idempotency_key: string
-          status: string
-          theme_id: string | null
-          theme_name: string
-          user_id: string
-        }
-        Insert: {
-          category: string
-          completed_at?: string | null
-          created_at?: string | null
-          error_message?: string | null
-          id?: string
-          idempotency_key: string
-          status?: string
-          theme_id?: string | null
-          theme_name: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          completed_at?: string | null
-          created_at?: string | null
-          error_message?: string | null
-          id?: string
-          idempotency_key?: string
-          status?: string
-          theme_id?: string | null
-          theme_name?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       themes: {
         Row: {
