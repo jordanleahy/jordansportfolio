@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen, Star, Share } from "lucide-react";
+import { Eye, BookOpen, Star, Share2 } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -640,7 +640,7 @@ const { handleGenerateImage } = useImageManager({
                           aria-label="Share"
                           title="Share"
                         >
-                          <Share className="h-4 w-4" />
+                          <Share2 className="h-4 w-4" />
                         </Button>
                       <Button variant="outline" size="sm" onClick={() => setShowSystemPrompt(!showSystemPrompt)} className="gap-1 text-xs sm:text-sm">
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
