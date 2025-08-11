@@ -741,6 +741,36 @@ const { handleGenerateImage } = useImageManager({
                 {/* Action Buttons Section */}
                 {category && userIsAdmin && (
                   <div className="flex items-center justify-end mb-4 gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          disabled={isBulk169}
+                          aria-label="Bulk actions"
+                          title="Bulk actions"
+                        >
+                          <span className="text-xs font-medium">Bulk</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
+                        <DropdownMenuLabel>Bulk: 16:9</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
+                          Generate for missing only (respects theme filter)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
+                          Regenerate for all (ignores theme filter)
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Bulk: 1:1</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={handleBulkGenerate11} disabled={isBulk11}>
+                          Generate for missing only (respects theme filter)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleBulkRegenerate11} disabled={isBulk11}>
+                          Regenerate for all (ignores theme filter)
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button
                       variant={isFeatured ? "default" : "outline"}
                       size="icon"
@@ -760,6 +790,16 @@ const { handleGenerateImage } = useImageManager({
                       title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
                     >
                       <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handlePublishCollection}
+                      disabled={isPublishing}
+                      aria-label="Share"
+                      title="Share"
+                    >
+                      <Share2 className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
