@@ -232,6 +232,16 @@ async function fetchFreshPrompt(theme?: string, userId?: string, category?: stri
     // Priority 1: Use provided themeId directly
     if (themeId) {
       console.log(`🎯 [fetchFreshPrompt] Using provided themeId: ${themeId}`);
+      
+      // First get the category from themes table
+      const { data: themeData } = await supabase
+        .from('themes')
+        .select('category')
+        .eq('id', themeId)
+        .single();
+        
+      const themeCategory = themeData?.category;
+      
       const { data: directThemeData, error: directThemeError } = await supabase
         .from('system_prompts')
         .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
@@ -243,6 +253,8 @@ async function fetchFreshPrompt(theme?: string, userId?: string, category?: stri
 
       promptData = directThemeData;
       promptError = directThemeError;
+      
+      console.log(`📋 [fetchFreshPrompt] ThemeId lookup - category: ${themeCategory}, found prompt: ${!!promptData}`);
     }
 
     // Priority 2: Try to find theme record to get theme_id

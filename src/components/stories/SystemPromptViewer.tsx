@@ -50,7 +50,7 @@ export const SystemPromptViewer = ({
     regeneratePrompt,
     isRegenerating,
     invalidateCache
-  } = useSystemPromptCache(undefined, category, themeId);
+  } = useSystemPromptCache(undefined, undefined, themeId);
 
   // Use realtime system prompts
   const { isConnected } = useUnifiedRealtime({
