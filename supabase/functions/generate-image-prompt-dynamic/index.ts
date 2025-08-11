@@ -356,7 +356,7 @@ Private Safe Space Visual Tone:
 - Supportive, inclusive, and non-judgmental
 - Respect privacy: avoid PII and identifiable individuals; prefer abstract or generic figures
 - Avoid fear-based or alarming imagery
-- No text overlays, logos, or watermarks
+- On-image text: allowed sparingly when it adds clarity (e.g., short labels 2–6 words); avoid large headlines; never include watermarks or logos
 
 **OUTPUT FORMAT:**
 - Respond with ONLY the final image prompt as plain text, no preface or analysis

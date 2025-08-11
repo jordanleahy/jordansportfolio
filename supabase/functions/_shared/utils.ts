@@ -74,7 +74,7 @@ export const generateImagePrompt = async (
 Private Safe Space principles:
 - Supportive, inclusive, non-judgmental tone
 - Respect privacy: no PII or identifiable people; use abstract or generic figures when needed
-- No text overlays, headlines, or logos in the generated image
+- Prefer text-free visuals; allow concise, meaningful on-image text when contextually helpful (2–6 words max). Avoid large headlines, watermarks, and logos
 
 Create prompts that will generate:
 - Professional visuals suitable for ${theme}

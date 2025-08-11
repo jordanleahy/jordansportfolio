@@ -51,9 +51,9 @@ Create prompts that will generate:
 ${category ? `- Context-aware visuals that relate to ${category} industry` : ''}
 
 CRITICAL FORMATTING RULES:
-- DO NOT include any title, headline, or text overlays in the generated image
+- On-image text: allowed sparingly when conceptually helpful (e.g., concise labels 2–6 words); otherwise prefer text-free visuals
 - Include the aspect ratio naturally within the prompt description (e.g., "in a ${aspectRatio} landscape format")
-- Focus purely on the visual elements, composition, and professional aesthetic
+- Focus primarily on visual elements and composition; if text is used, ensure high contrast, legibility, and that it does not dominate the scene
 - End the prompt with a period, no additional formatting or labels
 
 Generate professional, high-quality visual prompts that seamlessly integrate the specified aspect ratio without adding formatting labels or hardcoded text.`;
