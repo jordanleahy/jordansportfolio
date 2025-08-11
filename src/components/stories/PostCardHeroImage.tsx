@@ -55,7 +55,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
       {/* Description and Generate Button */}
       <div className="space-y-3 p-4">
         <h3 className="text-lg font-semibold text-foreground leading-tight">
-          What Is a Chat?
+          {post.title || 'Untitled Post'}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {post.description}

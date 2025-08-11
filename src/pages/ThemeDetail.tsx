@@ -141,7 +141,7 @@ export default function ThemeDetail() {
         {/* Theme Title Section */}
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            What Is a Chat?
+            {themeData?.theme_name ?? decodedTheme}
           </h1>
           <p className="text-base text-muted-foreground leading-relaxed mb-2">
             {themeData?.description || `Theme details for ${decodedTheme}`}
