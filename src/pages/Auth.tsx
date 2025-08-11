@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 const Auth = () => {
   const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -165,8 +166,18 @@ const Auth = () => {
         <meta name="twitter:image" content={authSEO.image} />
       </Helmet>
 
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <AuroraBackground 
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          backgroundImage: 'url(/lovable-uploads/c10eeac3-3271-45ea-88f4-a37d7f3fe1bd.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/80 z-[1]" />
+        <div className="relative z-10 flex items-center justify-center w-full">
+          <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
             <CardDescription>Sign in to your account or create a new one</CardDescription>
@@ -296,8 +307,9 @@ const Auth = () => {
 
             </Tabs>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </AuroraBackground>
     </>;
 };
 export default Auth;
