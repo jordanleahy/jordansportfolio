@@ -44,6 +44,8 @@ export const PostsTable = ({
   const [isBulk11, setIsBulk11] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isFeaturing, setIsFeaturing] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isInLibrary, setIsInLibrary] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -498,38 +500,66 @@ const { handleGenerateImage } = useImageManager({
   };
 
   // Publish 16:9 collection (exactly 10 posts)
+  // Publish/remove from library toggle
   const handlePublishCollection = async () => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error('Please sign in to publish');
+        toast.error('Please sign in to manage library');
         return;
       }
 
-      // Auto-generate handle from session
+      setIsPublishing(true);
+
+      // Check if we already have a published collection to toggle
+      const { data: existing, error: checkErr } = await supabase
+        .from('shared_collections')
+        .select('id, include_in_library')
+        .eq('user_id', session.user.id)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (checkErr) throw checkErr;
+
+      if (existing) {
+        // Toggle library status
+        const newLibraryState = !existing.include_in_library;
+        const { error: updateErr } = await supabase
+          .from('shared_collections')
+          .update({ include_in_library: newLibraryState })
+          .eq('id', existing.id);
+
+        if (updateErr) throw updateErr;
+        
+        setIsInLibrary(newLibraryState);
+        toast.success(newLibraryState ? 'Added to Library' : 'Removed from Library');
+        return;
+      }
+
+      // Create new collection if none exists
       const rawHandle = (session.user.user_metadata?.preferred_username
         || session.user.email?.split('@')[0]
         || session.user.id.slice(0, 8)) as string;
       const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
-      // Choose posts currently in scope (this page) and only those with a 16:9 image
       const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
       const candidates = scoped.filter(p => !!p.image_16_9_url);
       const candidateIds = candidates.map(p => p.id);
+      
       if (candidateIds.length === 0) {
         toast.error('No posts with 16:9 images found on this page');
         return;
       }
 
-      // Build safe title/description for OG on the public page
       const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
       const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
       const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
-      setIsPublishing(true);
       const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
         p_post_ids: candidateIds,
@@ -538,34 +568,61 @@ const { handleGenerateImage } = useImageManager({
         p_title: titleArg,
         p_description: descriptionArg,
       });
+      
       if (error) {
         console.error(error);
         toast.error(error.message || 'Failed to publish');
         return;
       }
+      
       const collectionId = data as unknown as string;
-      // Ensure it appears in Library by default
       const { error: includeErr } = await supabase
         .from('shared_collections')
         .update({ include_in_library: true })
         .eq('id', collectionId);
+      
       if (includeErr) {
         console.warn('Failed to add to Library', includeErr);
       }
+      
+      setIsInLibrary(true);
       const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
       try { await navigator.clipboard.writeText(publicUrl); } catch {}
       toast.success('Published to Library! Link copied.');
-      // Optionally open in a new tab
-      // window.open(publicUrl, '_blank');
     } catch (e: any) {
       console.error(e);
-      toast.error('Failed to publish');
+      toast.error('Failed to manage library');
     } finally {
       setIsPublishing(false);
     }
   };
 
-  // Feature the latest published collection for this user
+  // Check current featured and library status
+  const checkCollectionStatus = async () => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data: latest, error } = await supabase
+        .from('shared_collections')
+        .select('featured, include_in_library')
+        .eq('user_id', session.user.id)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && latest) {
+        setIsFeatured(latest.featured || false);
+        setIsInLibrary(latest.include_in_library || false);
+      }
+    } catch (e) {
+      console.error('Failed to check collection status', e);
+    }
+  };
+
+  // Feature/unfeature the latest published collection for this user
   const handleFeatureLatestCollection = async () => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
@@ -575,33 +632,47 @@ const { handleGenerateImage } = useImageManager({
         return;
       }
       setIsFeaturing(true);
+      
       // Find most recent published shared collection for this user
       const { data: latest, error: selErr } = await supabase
         .from('shared_collections')
-        .select('id')
+        .select('id, featured')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      
       if (selErr) throw selErr;
       if (!latest) {
         toast.error('No published collection found. Click Library first.');
         return;
       }
+
+      const newFeaturedState = !latest.featured;
       const { error: updErr } = await supabase
         .from('shared_collections')
-        .update({ include_in_library: true, featured: true })
+        .update({ featured: newFeaturedState })
         .eq('id', latest.id);
+      
       if (updErr) throw updErr;
-      toast.success('Featured in Library');
+      
+      setIsFeatured(newFeaturedState);
+      toast.success(newFeaturedState ? 'Added to Featured' : 'Removed from Featured');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to feature');
+      toast.error('Failed to update featured status');
     } finally {
       setIsFeaturing(false);
     }
   };
+
+  // Check collection status on mount and when theme changes
+  useEffect(() => {
+    if (userIsAdmin && category) {
+      checkCollectionStatus();
+    }
+  }, [selectedThemeId, category, userIsAdmin]);
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
@@ -772,26 +843,26 @@ const { handleGenerateImage } = useImageManager({
                         </DropdownMenuContent>
                       </DropdownMenu>
                         <Button
-                          variant="outline"
+                          variant={isFeatured ? "default" : "outline"}
                           size="sm"
                           onClick={handleFeatureLatestCollection}
                           disabled={isFeaturing}
                           className="rounded-sm px-3 text-xs sm:text-sm"
-                          aria-label="Featured"
-                          title={isFeaturing ? 'Featuring…' : 'Feature'}
+                          aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
+                          title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
                         >
-                          <Star className="h-3 w-3" />
+                          <Star className={`h-3 w-3 ${isFeatured ? 'fill-current' : ''}`} />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant={isInLibrary ? "default" : "outline"}
                           size="icon"
                           onClick={handlePublishCollection}
                           disabled={isPublishing}
                           className=""
-                          aria-label="Library"
-                          title={isPublishing ? 'Publishing…' : 'Library'}
+                          aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
+                          title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
                         >
-                          <BookOpen className="h-4 w-4" />
+                          <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                         </Button>
                         <Button 
                           variant="outline" 
