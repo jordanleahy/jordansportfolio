@@ -53,7 +53,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
       </div>
 
       {/* Description and Generate Button */}
-      <div className="space-y-3">
+      <div className="space-y-3 p-4">
         <p className="text-sm text-muted-foreground leading-relaxed">
           {post.description}
         </p>
