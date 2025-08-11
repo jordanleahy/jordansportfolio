@@ -495,8 +495,7 @@ const { handleGenerateImage } = useImageManager({
                           aria-label="Featured"
                           title={isFeaturing ? 'Featuring…' : 'Feature'}
                         >
-                          <Star className="h-3 w-3 mr-1" />
-                          Featured
+                          <Star className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="outline"
@@ -617,8 +616,7 @@ const { handleGenerateImage } = useImageManager({
                           aria-label="Featured"
                           title={isFeaturing ? 'Featuring…' : 'Feature'}
                         >
-                          <Star className="h-3 w-3 mr-1" />
-                          Featured
+                          <Star className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="outline"
