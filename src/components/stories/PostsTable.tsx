@@ -92,9 +92,13 @@ const handleStatusChange = async (postId: string, newStatus: 'draft' | 'schedule
 const params = useParams();
 const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
 
-// Get themeId from posts if available
+// Get themeId from posts if available (posts have the correct theme_id)
 const themeId = posts.length > 0 ? posts[0]?.theme_id : undefined;
-console.log('PostsTable themeId debug:', { posts: posts.slice(0, 2), themeId });
+console.log('PostsTable themeId debug:', { 
+  urlTheme: themeName, 
+  postsThemeId: themeId, 
+  firstPostTitle: posts[0]?.title 
+});
 
 const { handleGenerateImage } = useImageManager({
   onPostsChange,
