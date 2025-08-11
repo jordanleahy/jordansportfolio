@@ -98,8 +98,9 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id } = requestBody;
+    const { category, theme, description, sample_posts, user_id, skip_ensure } = requestBody;
     userId = user_id;
+    const skipEnsure = !!skip_ensure;
     
     // Input validation - theme is now primary, category secondary
     if (!theme || !user_id) {
@@ -429,31 +430,37 @@ Please generate a detailed, professional system prompt following the established
 
       // 🎨 Step 4: Ensure all posts have image prompts
       console.log('🎨 STEP 4: Ensuring posts have image prompts');
-      try {
-        const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
-          body: { 
-            category: contextCategory,
-            theme: actualTheme,
-            userId: user_id 
-          }
-        });
+      if (skipEnsure) {
+        console.log('⏭️ Skipping ensure-post-image-prompts per request flag');
+      } else {
+        try {
+          // Run ensure in the background to avoid blocking the main response
+          EdgeRuntime.waitUntil((async () => {
+            const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
+              body: { 
+                category: contextCategory,
+                theme: actualTheme,
+                userId: user_id 
+              }
+            });
 
-        if (imagePromptResponse.error) {
-          console.error('⚠️  IMAGE PROMPT GENERATION WARNING:', imagePromptResponse.error);
-          // Non-critical error, don't fail the whole operation
-        } else {
-          const promptResults = imagePromptResponse.data;
-          console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
-            theme: actualTheme,
-            category: contextCategory,
-            totalPosts: promptResults?.totalPosts || 0,
-            successCount: promptResults?.successCount || 0,
-            errorCount: promptResults?.errorCount || 0
-          });
+            if (imagePromptResponse.error) {
+              console.error('⚠️  IMAGE PROMPT GENERATION WARNING:', imagePromptResponse.error);
+            } else {
+              const promptResults = imagePromptResponse.data;
+              console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
+                theme: actualTheme,
+                category: contextCategory,
+                totalPosts: promptResults?.totalPosts || 0,
+                successCount: promptResults?.successCount || 0,
+                errorCount: promptResults?.errorCount || 0
+              });
+            }
+          })());
+        } catch (promptError) {
+          console.error('⚠️  IMAGE PROMPT GENERATION ERROR (non-critical):', promptError);
+          // Continue with success response even if prompt generation fails
         }
-      } catch (promptError) {
-        console.error('⚠️  IMAGE PROMPT GENERATION ERROR (non-critical):', promptError);
-        // Continue with success response even if prompt generation fails
       }
 
       // 🎉 Final success response

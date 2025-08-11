@@ -355,20 +355,112 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
 
 const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<void> => {
   console.log('🤖 Generating system prompt for theme:', themeData.theme);
-  
-  const { error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-    body: {
-      theme: themeData.theme,
-      category: themeData.category,
-      description: themeData.theme_description,
-      sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
-      user_id: userId
-    }
-  });
 
-  if (error) {
-    console.warn('System prompt generation warning:', error);
-    // Non-critical error, continue pipeline
+  const MAX_RETRIES = 2;
+  const TIMEOUT_MS = 12000; // soft timeout to avoid long waits
+  const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const invokeOnce = async () => {
+    return await supabase.functions.invoke('invoke-system-prompt-agent', {
+      body: {
+        theme: themeData.theme,
+        category: themeData.category,
+        description: themeData.theme_description,
+        sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
+        user_id: userId,
+        skip_ensure: true, // decouple follow-up work from this call
+      },
+    });
+  };
+
+  let attempt = 0;
+  let succeeded = false;
+  let lastError: any = null;
+
+  while (attempt <= MAX_RETRIES && !succeeded) {
+    attempt++;
+    const start = Date.now();
+    console.log(`🏁 System prompt attempt ${attempt}/${MAX_RETRIES + 1}`);
+
+    const resultOrTimeout = await Promise.race([
+      invokeOnce().then((res) => ({ kind: 'result' as const, res })),
+      SLEEP(TIMEOUT_MS).then(() => ({ kind: 'timeout' as const })),
+    ]);
+
+    if (resultOrTimeout.kind === 'timeout') {
+      console.warn('⏱️ invoke-system-prompt-agent timed out (soft timeout)');
+      lastError = new Error('timeout');
+    } else {
+      const { res } = resultOrTimeout;
+      if (!res.error) {
+        console.log('✅ System prompt function returned 2xx');
+        succeeded = true;
+        break;
+      }
+      console.warn('⚠️ System prompt function error:', res.error);
+      lastError = res.error;
+    }
+
+    // Exponential backoff before retrying
+    const backoff = Math.min(2000 * attempt, 6000);
+    console.log(`🔁 Retrying after ${backoff}ms`);
+    await SLEEP(backoff);
+  }
+
+  // If still not succeeded, poll DB to see if the prompt actually got created
+  if (!succeeded) {
+    console.log('🔎 Falling back to DB poll for newly created system prompt');
+    const maxPolls = 5;
+    for (let i = 0; i < maxPolls; i++) {
+      const { data, error } = await supabase
+        .from('system_prompts')
+        .select('id, created_at')
+        .eq('user_id', userId)
+        .eq('category', themeData.category)
+        .eq('theme', themeData.theme)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('⚠️ DB poll error while checking system_prompts:', error);
+      }
+      if (data?.id) {
+        console.log('✅ Found system prompt via DB poll:', data.id);
+        succeeded = true;
+        break;
+      }
+
+      await SLEEP(2000);
+    }
+  }
+
+  if (!succeeded) {
+    console.warn('⚠️ System prompt generation did not confirm; continuing pipeline gracefully', {
+      lastError: lastError?.message || String(lastError),
+    });
+    return; // non-blocking
+  }
+
+  // Trigger ensure-post-image-prompts in the background
+  try {
+    EdgeRuntime.waitUntil((async () => {
+      console.log('🎨 Triggering ensure-post-image-prompts in background');
+      const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
+        body: {
+          category: themeData.category,
+          theme: themeData.theme,
+          userId,
+        },
+      });
+      if (ensureRes.error) {
+        console.warn('⚠️ ensure-post-image-prompts warning:', ensureRes.error);
+      } else {
+        console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
+      }
+    })());
+  } catch (e) {
+    console.error('⚠️ Failed to start background ensure task:', e);
   }
 };
 
