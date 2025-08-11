@@ -144,74 +144,109 @@ serve(async (req) => {
       console.warn('⚠️ Potential AGENT MISMATCH: expected "Visual Prompt Generator" but found', systemPromptData.agent_name);
     }
 
-    // Step 3: Generate image prompts for each post
+    // Step 3: Generate image prompts for each post in batches
     let successCount = 0;
     let errorCount = 0;
     const results = [];
+    const BATCH_SIZE = 3; // Process 3 posts at a time
+    const BATCH_DELAY_MS = 2000; // 2 second delay between batches
 
-    console.log('🎨 STEP 3: Starting image prompt generation for posts');
+    console.log('🎨 STEP 3: Starting batch image prompt generation for posts');
+    console.log(`📊 Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
 
-    for (const post of posts) {
-      try {
-        console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
+    // Process posts in batches to prevent timeout
+    for (let i = 0; i < posts.length; i += BATCH_SIZE) {
+      const batch = posts.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(posts.length / BATCH_SIZE);
+      
+      console.log(`🔄 Processing batch ${batchNum}/${totalBatches} (${batch.length} posts)`);
 
-        // Use internal edge function to generate prompts consistently
-        const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-          body: {
-            title: post.title,
-            description: post.description,
-            category: post.category,
-            themeId: post.theme_id,
-            aspectRatio: '16:9'
+      // Process batch in parallel
+      const batchPromises = batch.map(async (post) => {
+        try {
+          console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
+
+          // Use internal edge function to generate prompts consistently
+          const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+            body: {
+              title: post.title,
+              description: post.description,
+              category: post.category,
+              themeId: post.theme_id,
+              aspectRatio: '16:9'
+            }
+          });
+
+          if (promptFnError) {
+            console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id}:`, promptFnError);
+            return { postId: post.id, success: false, error: promptFnError.message };
           }
-        });
 
-        if (promptFnError) {
-          console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id}:`, promptFnError);
-          errorCount++;
-          results.push({ postId: post.id, success: false, error: promptFnError.message });
-          continue;
+          const generatedPrompt = promptResp?.generatedPrompt;
+
+          if (!generatedPrompt) {
+            console.error(`❌ NO PROMPT GENERATED for post ${post.id}`);
+            return { postId: post.id, success: false, error: 'No prompt generated' };
+          }
+
+          // Update the post with the generated prompt
+          const { error: updateError } = await supabase
+            .from('social_media_posts')
+            .update({ 
+              generated_image_prompt: generatedPrompt.trim(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', post.id);
+
+          if (updateError) {
+            console.error(`❌ UPDATE ERROR for post ${post.id}:`, updateError);
+            return { postId: post.id, success: false, error: updateError.message };
+          } else {
+            console.log(`✅ PROMPT GENERATED and SAVED: Post ${post.id}`);
+            return { 
+              postId: post.id, 
+              success: true, 
+              promptLength: generatedPrompt.length 
+            };
+          }
+
+        } catch (error) {
+          console.error(`❌ UNEXPECTED ERROR for post ${post.id}:`, error);
+          return { postId: post.id, success: false, error: error.message };
         }
+      });
 
-        const generatedPrompt = promptResp?.generatedPrompt;
-
-        if (!generatedPrompt) {
-          console.error(`❌ NO PROMPT GENERATED for post ${post.id}`);
-          errorCount++;
-          results.push({ postId: post.id, success: false, error: 'No prompt generated' });
-          continue;
-        }
-
-        // Step 4: Update the post with the generated prompt
-        const { error: updateError } = await supabase
-          .from('social_media_posts')
-          .update({ 
-            generated_image_prompt: generatedPrompt.trim(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', post.id);
-
-        if (updateError) {
-          console.error(`❌ UPDATE ERROR for post ${post.id}:`, updateError);
-          errorCount++;
-          results.push({ postId: post.id, success: false, error: updateError.message });
+      // Wait for all posts in the batch to complete
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      // Process batch results
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value) {
+          results.push(result.value);
+          if (result.value.success) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
         } else {
-          console.log(`✅ PROMPT GENERATED and SAVED: Post ${post.id}`);
-          successCount++;
+          const post = batch[index];
+          console.error(`❌ BATCH PROMISE FAILED for post ${post.id}:`, result.reason);
+          errorCount++;
           results.push({ 
             postId: post.id, 
-            success: true, 
-            promptLength: generatedPrompt.length 
+            success: false, 
+            error: result.reason?.message || 'Promise rejected' 
           });
         }
+      });
 
-        // Add small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`✅ Batch ${batchNum}/${totalBatches} completed: ${batchResults.filter(r => r.status === 'fulfilled' && r.value?.success).length}/${batch.length} successful`);
 
-      } catch (error) {
-        console.error(`❌ UNEXPECTED ERROR for post ${post.id}:`, error);
-        errorCount++;
-        results.push({ postId: post.id, success: false, error: error.message });
+      // Add delay between batches (except for the last batch)
+      if (i + BATCH_SIZE < posts.length) {
+        console.log(`⏱️ Waiting ${BATCH_DELAY_MS}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
       }
     }
 

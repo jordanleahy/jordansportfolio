@@ -148,14 +148,36 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
 
   const startTime = Date.now();
   
+  // Implement timeout using AbortController
+  const TIMEOUT_MS = 30000; // 30 seconds timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  
   try {
+    console.log(`🔍 OpenAI Request with timeout (${TIMEOUT_MS}ms):`, {
+      url: options.url,
+      method: options.method,
+      correlationId,
+      timeout: TIMEOUT_MS
+    });
+
     const response = await fetch(options.url, {
       method: options.method,
       headers: enhancedHeaders,
       body: options.body,
+      signal: controller.signal,
     });
 
+    clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
+    
+    console.log(`📥 OpenAI Response Details:`, {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      responseTime,
+      correlationId
+    });
     
     // Extract OpenAI request ID from response headers if available
     const openAIRequestId = response.headers.get('x-request-id') || 
@@ -170,7 +192,30 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
     };
     
   } catch (error) {
+    clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
+    
+    if (error.name === 'AbortError') {
+      console.error(`⏰ OpenAI Request timeout after ${TIMEOUT_MS}ms:`, {
+        correlationId,
+        responseTime,
+        url: options.url
+      });
+      throw {
+        error: new Error(`OpenAI request timeout after ${TIMEOUT_MS}ms`),
+        correlationId,
+        responseTime,
+        timeout: true,
+      };
+    }
+    
+    console.error(`❌ OpenAI Request failed:`, {
+      error: error.message,
+      correlationId,
+      responseTime,
+      url: options.url
+    });
+    
     throw {
       error,
       correlationId,

@@ -353,11 +353,11 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<void> => {
+const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<void> => {
   console.log('🤖 Generating system prompt for theme:', themeData.theme);
 
   const MAX_RETRIES = 2;
-  const TIMEOUT_MS = 12000; // soft timeout to avoid long waits
+  const TIMEOUT_MS = 25000; // Increased timeout to align with backend timeout
   const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const invokeOnce = async () => {
@@ -368,6 +368,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
         description: themeData.theme_description,
         sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
         user_id: userId,
+        theme_id: themeId, // Pass theme_id for proper linking
         skip_ensure: true, // decouple follow-up work from this call
       },
     });
@@ -402,7 +403,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
     }
 
     // Exponential backoff before retrying
-    const backoff = Math.min(2000 * attempt, 6000);
+    const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 8000);
     console.log(`🔁 Retrying after ${backoff}ms`);
     await SLEEP(backoff);
   }
@@ -410,14 +411,14 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
   // If still not succeeded, poll DB to see if the prompt actually got created
   if (!succeeded) {
     console.log('🔎 Falling back to DB poll for newly created system prompt');
-    const maxPolls = 5;
+    const maxPolls = 3; // Reduced polling attempts
     for (let i = 0; i < maxPolls; i++) {
       const { data, error } = await supabase
         .from('system_prompts')
-        .select('id, created_at')
+        .select('id, created_at, theme_id')
         .eq('user_id', userId)
         .eq('category', themeData.category)
-        .eq('theme', themeData.theme)
+        .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -431,7 +432,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
         break;
       }
 
-      await SLEEP(2000);
+      await SLEEP(1500); // Reduced poll delay
     }
   }
 
@@ -439,17 +440,17 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
     console.warn('⚠️ System prompt generation did not confirm; continuing pipeline gracefully', {
       lastError: lastError?.message || String(lastError),
     });
-    return; // non-blocking
+    // Still continue to trigger background image generation
   }
 
-  // Trigger ensure-post-image-prompts in the background
-  try {
-    EdgeRuntime.waitUntil((async () => {
-      console.log('🎨 Triggering ensure-post-image-prompts in background');
+  // Trigger ensure-post-image-prompts in the background with proper error handling
+  console.log('🎨 Triggering ensure-post-image-prompts in background');
+  
+  EdgeRuntime.waitUntil((async () => {
+    try {
       const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
         body: {
           category: themeData.category,
-          theme: themeData.theme,
           userId,
         },
       });
@@ -458,10 +459,10 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
       } else {
         console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
       }
-    })());
-  } catch (e) {
-    console.error('⚠️ Failed to start background ensure task:', e);
-  }
+    } catch (e) {
+      console.error('⚠️ Background ensure task failed:', e);
+    }
+  })());
 };
 
 
@@ -635,7 +636,7 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-            await generateSystemPrompt(supabase, themeData, userId);
+            await generateSystemPrompt(supabase, themeData, userId, createdThemeId);
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -701,7 +702,7 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
-      await generateSystemPrompt(supabase, themeData, userId);
+      await generateSystemPrompt(supabase, themeData, userId, themeId);
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,

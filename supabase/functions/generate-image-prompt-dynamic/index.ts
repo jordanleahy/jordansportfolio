@@ -38,7 +38,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
+import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse, makeOpenAIRequest } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -365,34 +365,31 @@ Private Safe Space Visual Tone:
       correlationId
     });
 
-    // Make direct fetch call to avoid any potential issues with makeOpenAIRequest
+    // Use timeout-aware OpenAI request function
     const requestStartTime = Date.now();
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const { response, openAIRequestId, responseTime } = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
-        'X-Correlation-ID': correlationId,
-        'X-Request-Source': 'supabase-edge-function',
       },
       body: JSON.stringify(requestBody),
+      correlationId,
     });
     
-    const responseTime = Date.now() - requestStartTime;
-    const responseOpenAIRequestId = response.headers.get('x-request-id') || 
-                                   response.headers.get('request-id') || 
-                                   correlationId;
+    // responseTime and openAIRequestId already from makeOpenAIRequest
 
     console.log('📥 OpenAI Response Details:', {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok,
-      openAIRequestId: responseOpenAIRequestId,
+      openAIRequestId: openAIRequestId,
       responseTime,
       correlationId
     });
 
-    openAIRequestId = responseOpenAIRequestId;
+    // Use openAIRequestId from makeOpenAIRequest
 
     if (!response.ok) {
       // Get the actual error response body
@@ -413,7 +410,7 @@ Private Safe Space Visual Tone:
       logger.error('OpenAI chat API error', {
         status: response.status,
         statusText: response.statusText,
-        openAIRequestId: responseOpenAIRequestId,
+        openAIRequestId: openAIRequestId,
         correlationId,
         errorBody
       });
