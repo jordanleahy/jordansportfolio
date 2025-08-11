@@ -13,26 +13,24 @@ interface SystemPromptData {
   themeDescription?: string;
 }
 
-export const useSystemPromptCache = (theme: string, category?: string, themeId?: string) => {
+export const useSystemPromptCache = (theme?: string, category?: string, themeId?: string) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const query = useQuery({
     queryKey: ['system-prompt-cached', theme, category, themeId],
     queryFn: async (): Promise<SystemPromptData | null> => {
-      if (!theme) return null;
+      if (!theme && !themeId) return null;
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Try cache first with normalized theme-based key
-        const normalizedTheme = theme.toLowerCase().replace(/\s+/g, '-');
-        const normalizedCategory = category?.toLowerCase().replace(/\s+/g, '-');
-        const cacheKey = `${normalizedTheme}${normalizedCategory ? `-${normalizedCategory}` : ''}`;
+        // Try cache first - use themeId for cache key if available, otherwise use theme
+        const cacheKey = themeId || (theme ? `${theme.toLowerCase().replace(/\s+/g, '-')}${category ? `-${category.toLowerCase().replace(/\s+/g, '-')}` : ''}` : 'unknown');
         const cached = await systemPromptCache.get(cacheKey, user.id);
         if (cached) {
-          console.log(`⚡ [useSystemPromptCache] Cache hit for theme: ${theme}`);
+          console.log(`⚡ [useSystemPromptCache] Cache hit for ${themeId ? 'themeId' : 'theme'}: ${themeId || theme}`);
           
           // Background update - don't await this
           setTimeout(async () => {
@@ -52,7 +50,7 @@ export const useSystemPromptCache = (theme: string, category?: string, themeId?:
         }
 
         // Cache miss - fetch fresh data
-        console.log(`💾 [useSystemPromptCache] Cache miss for theme: ${theme}, fetching fresh data`);
+        console.log(`💾 [useSystemPromptCache] Cache miss for ${themeId ? 'themeId' : 'theme'}: ${themeId || theme}, fetching fresh data`);
         const fresh = await fetchFreshPrompt(theme, user.id, category, themeId);
         
         if (fresh) {
@@ -226,7 +224,7 @@ export const useSystemPromptCache = (theme: string, category?: string, themeId?:
 };
 
 // Helper function to fetch fresh prompt data from new system_prompts table with theme priority
-async function fetchFreshPrompt(theme: string, userId: string, category?: string, themeId?: string): Promise<SystemPromptData | null> {
+async function fetchFreshPrompt(theme?: string, userId?: string, category?: string, themeId?: string): Promise<SystemPromptData | null> {
   try {
     let promptData = null;
     let promptError = null;
