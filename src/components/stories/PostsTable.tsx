@@ -468,69 +468,69 @@ const { handleGenerateImage } = useImageManager({
             {/* Tabs and controls with selective padding */}
             <div>
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-                <div className="flex items-center justify-between mb-4 gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {userIsAdmin && (
-                      <TabsList>
-                        <TabsTrigger value="draft">
-                          Draft {posts.filter(p => p.status === 'draft').length > 0 && (
-                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
-                              {posts.filter(p => p.status === 'draft').length}
-                            </span>
-                          )}
-                        </TabsTrigger>
-                        <TabsTrigger value="published">Published</TabsTrigger>
-                      </TabsList>
-                    )}
+                {/* Tabs Section */}
+                {userIsAdmin && (
+                  <div className="mb-4">
+                    <TabsList>
+                      <TabsTrigger value="draft">
+                        Draft {posts.filter(p => p.status === 'draft').length > 0 && (
+                          <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
+                            {posts.filter(p => p.status === 'draft').length}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                      <TabsTrigger value="published">Published</TabsTrigger>
+                    </TabsList>
                   </div>
-              
-                    {category && userIsAdmin && (
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleFeatureLatestCollection}
-                          disabled={isFeaturing}
-                          className="rounded-full px-3"
-                          aria-label="Featured"
-                          title={isFeaturing ? 'Featuring…' : 'Feature'}
-                        >
-                          <Star className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handlePublishCollection}
-                          disabled={isPublishing}
-                          className="rounded-full px-3"
-                          aria-label="Library"
-                          title={isPublishing ? 'Publishing…' : 'Library'}
-                        >
-                          <BookOpen className="h-3 w-3 mr-1" />
-                          Library
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={handlePublishCollection}
-                          disabled={isPublishing}
-                          aria-label="Library"
-                          title={isPublishing ? 'Publishing…' : 'Library'}
-                        >
-                          <BookOpen className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-                          aria-label="Category Prompt"
-                          title="Category Prompt"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
-                </div>
+                )}
+                
+                {/* Action Buttons Section */}
+                {category && userIsAdmin && (
+                  <div className="flex items-center justify-end mb-4 gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFeatureLatestCollection}
+                      disabled={isFeaturing}
+                      className="rounded-full px-3"
+                      aria-label="Featured"
+                      title={isFeaturing ? 'Featuring…' : 'Feature'}
+                    >
+                      <Star className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePublishCollection}
+                      disabled={isPublishing}
+                      className="rounded-full px-3"
+                      aria-label="Library"
+                      title={isPublishing ? 'Publishing…' : 'Library'}
+                    >
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      Library
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePublishCollection}
+                      disabled={isPublishing}
+                      aria-label="Library"
+                      title={isPublishing ? 'Publishing…' : 'Library'}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowSystemPrompt(!showSystemPrompt)}
+                      aria-label="Category Prompt"
+                      title="Category Prompt"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
 
                 <TabsContent value="draft">
                   {filteredPosts.length === 0 ? (
@@ -565,24 +565,25 @@ const { handleGenerateImage } = useImageManager({
           <Card className="h-full">
             <div className="p-6">
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-                <div className="flex items-center justify-between mb-4 gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {userIsAdmin && (
-                      <TabsList>
-                        <TabsTrigger value="draft">
-                          Draft {posts.filter(p => p.status === 'draft').length > 0 && (
-                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
-                              {posts.filter(p => p.status === 'draft').length}
-                            </span>
-                          )}
-                        </TabsTrigger>
-                        <TabsTrigger value="published">Published</TabsTrigger>
-                      </TabsList>
-                    )}
+                {/* Tabs Section */}
+                {userIsAdmin && (
+                  <div className="mb-4">
+                    <TabsList>
+                      <TabsTrigger value="draft">
+                        Draft {posts.filter(p => p.status === 'draft').length > 0 && (
+                          <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
+                            {posts.filter(p => p.status === 'draft').length}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                      <TabsTrigger value="published">Published</TabsTrigger>
+                    </TabsList>
                   </div>
-              
-                  {category && userIsAdmin && (
-                    <div className="flex items-center gap-1">
+                )}
+                
+                {/* Action Buttons Section */}
+                {category && userIsAdmin && (
+                  <div className="flex items-center justify-end mb-4 gap-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
@@ -648,7 +649,6 @@ const { handleGenerateImage } = useImageManager({
                       </Button>
                     </div>
                   )}
-                </div>
 
                 <TabsContent value="draft">
                   {filteredPosts.length === 0 ? (
