@@ -102,10 +102,11 @@ serve(async (req) => {
     // Get the system prompt for the tone from the system_prompts table
     const { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text, category')
+      .select('prompt_text')
       .eq('agent_id', agent.id)
-      .eq('category', tone)
       .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .single();
     
     let selectedPrompt = systemPromptData;

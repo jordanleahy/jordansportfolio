@@ -140,8 +140,9 @@ serve(async (req) => {
       .from('system_prompts')
       .select('prompt_text')
       .eq('agent_id', agent.id)
-      .eq('category', roleType)
       .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .single();
     
     if (promptError || !systemPromptData) {

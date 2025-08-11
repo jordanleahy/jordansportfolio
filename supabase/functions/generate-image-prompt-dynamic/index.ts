@@ -157,7 +157,7 @@ serve(async (req) => {
       console.log('🎯 Using explicit systemPromptId for system prompt:', systemPromptId);
       const { data: spById, error: spByIdError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at')
         .eq('id', systemPromptId)
         .eq('is_active', true)
         .maybeSingle();
@@ -187,7 +187,7 @@ serve(async (req) => {
         if (themeRow.visual_prompt_system_prompt_id) {
           const { data: spFromTheme, error: spFromThemeErr } = await supabase
             .from('system_prompts')
-            .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
+            .select('prompt_text, theme, id, agent_name, created_at, updated_at')
             .eq('id', themeRow.visual_prompt_system_prompt_id)
             .eq('is_active', true)
             .maybeSingle();

@@ -103,12 +103,11 @@ serve(async (req) => {
     // Step 2: Get the system prompt for this category (most recent active for this user)
     console.log('🔍 STEP 2: Fetching system prompt for category');
 
-    // Diagnostics: list top recent prompts for this user+category to detect mismatches
+    // Diagnostics: list top recent prompts for this user to detect mismatches
     const { data: promptCandidates, error: promptCandidatesError } = await supabase
       .from('system_prompts')
       .select('id, agent_name, name, is_active, created_at, updated_at, prompt_text')
       .eq('user_id', userId)
-      .eq('category', category)
       .order('updated_at', { ascending: false })
       .limit(5);
 
@@ -126,19 +125,18 @@ serve(async (req) => {
       .from('system_prompts')
       .select('id, agent_name, prompt_text, created_at, updated_at')
       .eq('user_id', userId)
-      .eq('category', category)
       .eq('is_active', true)
       .order('updated_at', { ascending: false })
       .limit(1)
       .single();
 
     if (promptError || !systemPromptData) {
-      console.error(`❌ ERROR: No system prompt found for category: ${category}`, promptError);
-      throw new Error(`No system prompt found for category: ${category}`);
+      console.error(`❌ ERROR: No system prompt found for user`, promptError);
+      throw new Error(`No system prompt found for user`);
     }
 
     const chosenPreview = (systemPromptData.prompt_text || '').slice(0, 120).replace(/\n/g, ' ');
-    console.log(`✅ SYSTEM PROMPT FOUND: Category: ${category}, id: ${systemPromptData.id}, agent: ${systemPromptData.agent_name}, updated: ${systemPromptData.updated_at}, length: ${systemPromptData.prompt_text.length}, preview: "${chosenPreview}"`);
+    console.log(`✅ SYSTEM PROMPT FOUND: id: ${systemPromptData.id}, agent: ${systemPromptData.agent_name}, updated: ${systemPromptData.updated_at}, length: ${systemPromptData.prompt_text.length}, preview: "${chosenPreview}"`);
 
     if (systemPromptData.agent_name !== 'Visual Prompt Generator') {
       console.warn('⚠️ Potential AGENT MISMATCH: expected "Visual Prompt Generator" but found', systemPromptData.agent_name);
