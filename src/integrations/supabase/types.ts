@@ -2284,6 +2284,53 @@ export type Database = {
         }
         Relationships: []
       }
+      system_prompt_versions: {
+        Row: {
+          change_description: string | null
+          created_at: string
+          generated_by: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          prompt_text: string
+          system_prompt_id: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          change_description?: string | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          prompt_text: string
+          system_prompt_id: string
+          user_id: string
+          version_number: number
+        }
+        Update: {
+          change_description?: string | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          prompt_text?: string
+          system_prompt_id?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_prompt_versions_system_prompt_id_fkey"
+            columns: ["system_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "system_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_prompts: {
         Row: {
           agent_id: string
@@ -2293,6 +2340,7 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          generated_by: string | null
           id: string
           is_active: boolean
           name: string | null
@@ -2312,6 +2360,7 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          generated_by?: string | null
           id?: string
           is_active?: boolean
           name?: string | null
@@ -2331,6 +2380,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          generated_by?: string | null
           id?: string
           is_active?: boolean
           name?: string | null
