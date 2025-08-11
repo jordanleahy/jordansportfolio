@@ -23,6 +23,7 @@ import type { SystemPromptViewerProps } from '@/types/stories/ui';
 export const SystemPromptViewer = ({
   category,
   theme,
+  themeId,
   isVisible,
   onClose,
   selectedThemeId,
@@ -49,7 +50,7 @@ export const SystemPromptViewer = ({
     regeneratePrompt,
     isRegenerating,
     invalidateCache
-  } = useSystemPromptCache(theme || category, category);
+  } = useSystemPromptCache(theme || category, category, themeId);
 
   // Use realtime system prompts
   const { isConnected } = useUnifiedRealtime({

@@ -13,12 +13,12 @@ interface SystemPromptData {
   themeDescription?: string;
 }
 
-export const useSystemPromptCache = (theme: string, category?: string) => {
+export const useSystemPromptCache = (theme: string, category?: string, themeId?: string) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const query = useQuery({
-    queryKey: ['system-prompt-cached', theme, category],
+    queryKey: ['system-prompt-cached', theme, category, themeId],
     queryFn: async (): Promise<SystemPromptData | null> => {
       if (!theme) return null;
 
@@ -37,10 +37,10 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
           // Background update - don't await this
           setTimeout(async () => {
             try {
-              const fresh = await fetchFreshPrompt(theme, user.id, category);
+              const fresh = await fetchFreshPrompt(theme, user.id, category, themeId);
               if (fresh && fresh.version > cached.version) {
                 await systemPromptCache.set(cacheKey, user.id, fresh);
-                queryClient.setQueryData(['system-prompt-cached', theme, category], fresh);
+                queryClient.setQueryData(['system-prompt-cached', theme, category, themeId], fresh);
                 console.log(`🔄 [useSystemPromptCache] Background update for theme: ${theme}`);
               }
             } catch (error) {
@@ -53,7 +53,7 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
 
         // Cache miss - fetch fresh data
         console.log(`💾 [useSystemPromptCache] Cache miss for theme: ${theme}, fetching fresh data`);
-        const fresh = await fetchFreshPrompt(theme, user.id, category);
+        const fresh = await fetchFreshPrompt(theme, user.id, category, themeId);
         
         if (fresh) {
           await systemPromptCache.set(cacheKey, user.id, fresh);
@@ -226,41 +226,59 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
 };
 
 // Helper function to fetch fresh prompt data from new system_prompts table with theme priority
-async function fetchFreshPrompt(theme: string, userId: string, category?: string): Promise<SystemPromptData | null> {
+async function fetchFreshPrompt(theme: string, userId: string, category?: string, themeId?: string): Promise<SystemPromptData | null> {
   try {
-    // First try to find theme record to get theme_id
-    const { data: themeRecord, error: themeError } = await supabase
-      .from('themes')
-      .select('id')
-      .eq('theme_name', theme)
-      .eq('category', category || 'general')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (themeError) {
-      console.error('Error finding theme record:', themeError);
-    }
-
     let promptData = null;
     let promptError = null;
 
-    // Try to find system prompt using theme_id if theme record exists
-    if (themeRecord?.id) {
-      const { data: themeIdData, error: themeIdError } = await supabase
+    // Priority 1: Use provided themeId directly
+    if (themeId) {
+      console.log(`🎯 [fetchFreshPrompt] Using provided themeId: ${themeId}`);
+      const { data: directThemeData, error: directThemeError } = await supabase
         .from('system_prompts')
         .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
-        .eq('theme_id', themeRecord.id)
+        .eq('theme_id', themeId)
         .eq('user_id', userId)
         .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      promptData = themeIdData;
-      promptError = themeIdError;
+      promptData = directThemeData;
+      promptError = directThemeError;
     }
 
-    // Fallback to text-based theme search if no theme_id match
+    // Priority 2: Try to find theme record to get theme_id
+    if (!promptData) {
+      const { data: themeRecord, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', theme)
+        .eq('category', category || 'general')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      if (themeError) {
+        console.error('Error finding theme record:', themeError);
+      }
+
+      // Try to find system prompt using theme_id if theme record exists
+      if (themeRecord?.id) {
+        const { data: themeIdData, error: themeIdError } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
+          .eq('theme_id', themeRecord.id)
+          .eq('user_id', userId)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        promptData = themeIdData;
+        promptError = themeIdError;
+      }
+    }
+
+    // Priority 3: Fallback to text-based theme search if no theme_id match
     if (!promptData) {
       let query = supabase
         .from('system_prompts')

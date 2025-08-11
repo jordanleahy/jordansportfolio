@@ -92,6 +92,9 @@ const handleStatusChange = async (postId: string, newStatus: 'draft' | 'schedule
 const params = useParams();
 const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
 
+// Get themeId from posts if available
+const themeId = posts.length > 0 ? posts[0]?.theme_id : undefined;
+
 const { handleGenerateImage } = useImageManager({
   onPostsChange,
   themeName,
@@ -683,6 +686,7 @@ const { handleGenerateImage } = useImageManager({
       }} />
           <SystemPromptViewer 
             category={category} 
+            themeId={themeId}
             isVisible={showSystemPrompt} 
             onClose={() => setShowSystemPrompt(false)} 
             selectedThemeId={selectedThemeId}
