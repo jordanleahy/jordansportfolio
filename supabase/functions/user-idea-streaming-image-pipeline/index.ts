@@ -357,7 +357,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
   console.log('🤖 Generating system prompt for theme:', themeData.theme);
 
   const MAX_RETRIES = 2;
-  const TIMEOUT_MS = 25000; // Increased timeout to align with backend timeout
+  const TIMEOUT_MS = 45000; // Increased to 45 seconds to accommodate OpenAI response times
   const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const invokeOnce = async () => {
