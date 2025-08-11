@@ -39,8 +39,7 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
     <CardHeader className="pb-3">
       <div className="flex justify-between items-start gap-3">
         <div className="flex-1 min-w-0">
-          <CardTitle className="text-lg leading-tight">{post.title}</CardTitle>
-          <div className="flex gap-2 mt-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap">
             {isAdmin && (
               <Badge 
                 className={`${getStatusColor(post.status)} text-xs cursor-pointer hover:opacity-80 transition-opacity`}
