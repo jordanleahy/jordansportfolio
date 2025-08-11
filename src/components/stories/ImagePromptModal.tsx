@@ -12,9 +12,10 @@ const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Standard (4:3)", value: "4:3" }
 ];
 
-export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi' }: ImagePromptModalProps) => {
+export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi', theme: propTheme }: ImagePromptModalProps) => {
   const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const theme = propTheme ?? routeTheme;
   
   const config: ImagePromptConfig = {
     title: theme 

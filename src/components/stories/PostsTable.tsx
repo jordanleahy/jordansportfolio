@@ -24,6 +24,7 @@ import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { PostsTableProps } from '@/types/stories';
+import { useParams } from 'react-router-dom';
 
 
 export const PostsTable = ({
@@ -82,15 +83,19 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     handleCreateBlogPost
   } = usePostActions(onPostsChange);
 
-  // Enhanced status change with animation
-  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
-    await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
-  };
-  const {
-    handleGenerateImage
-  } = useImageManager({
-    onPostsChange
-  });
+// Enhanced status change with animation
+const handleStatusChange = async (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => {
+  await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
+};
+
+// Resolve theme from route (if present)
+const params = useParams();
+const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
+
+const { handleGenerateImage } = useImageManager({
+  onPostsChange,
+  themeName,
+});
 
 
 

@@ -29,12 +29,14 @@ export const PostImageUploadCard = ({
   onImageDelete,
   onImageGenerated,
   onGenerationStart,
-  onGenerationEnd
+  onGenerationEnd,
+  themeName
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   
   const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const theme = themeName ?? routeTheme;
   
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();

@@ -11,20 +11,22 @@ import { useParams } from 'react-router-dom';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
+  themeName?: string;
 }
 
 interface UseImageManagerReturn {
   handleGenerateImage: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 
-export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
+export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerProps): UseImageManagerReturn => {
   const { setProcessing } = useProcessingStatesContext();
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
   
   const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const theme = themeName ?? routeTheme;
   
   const sanitizeTitle = useCallback((title: string) => {
     return title.toLowerCase()
