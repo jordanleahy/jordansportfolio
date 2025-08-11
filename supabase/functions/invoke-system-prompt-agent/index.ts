@@ -373,6 +373,26 @@ Please generate a detailed, professional system prompt following the established
         updated_at: insertedPrompt?.[0]?.updated_at
       });
 
+      // Update the themes table with the generated system prompt ID if theme_id is provided
+      if (theme_id && insertedPrompt?.[0]?.id) {
+        console.log('🔗 LINKING SYSTEM PROMPT TO THEME:', { theme_id, prompt_id: insertedPrompt[0].id });
+        
+        const { error: themeUpdateError } = await supabase
+          .from('themes')
+          .update({ 
+            visual_prompt_system_prompt_id: insertedPrompt[0].id,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', theme_id)
+          .eq('user_id', user_id); // Ensure user owns the theme
+
+        if (themeUpdateError) {
+          console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
+        } else {
+          console.log('✅ THEME UPDATED: Successfully linked system prompt to theme');
+        }
+      }
+
     // 🎯 Step 2: Determine target agent based on prompt type
       let targetAgentName = null;
       
