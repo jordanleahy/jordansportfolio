@@ -2299,6 +2299,7 @@ export type Database = {
           prompt_text: string
           theme: string | null
           theme_description: string | null
+          theme_id: string | null
           updated_at: string
           user_id: string
           version: number
@@ -2317,6 +2318,7 @@ export type Database = {
           prompt_text: string
           theme?: string | null
           theme_description?: string | null
+          theme_id?: string | null
           updated_at?: string
           user_id: string
           version?: number
@@ -2335,11 +2337,19 @@ export type Database = {
           prompt_text?: string
           theme?: string | null
           theme_description?: string | null
+          theme_id?: string | null
           updated_at?: string
           user_id?: string
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_system_prompts_theme_id"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "system_prompts_agent_id_fkey"
             columns: ["agent_id"]

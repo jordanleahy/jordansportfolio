@@ -227,59 +227,95 @@ export const useSystemPromptCache = (theme: string, category?: string) => {
 
 // Helper function to fetch fresh prompt data from new system_prompts table with theme priority
 async function fetchFreshPrompt(theme: string, userId: string, category?: string): Promise<SystemPromptData | null> {
-  // First try to find by theme and specific category (if provided)
-  let query = supabase
-    .from('system_prompts')
-    .select('prompt_text, agent_name, updated_at, version, theme, theme_description')
-    .eq('user_id', userId)
-    .eq('theme', theme);
-  
-  // If category is provided, filter by it; otherwise find any theme match
-  if (category) {
-    query = query.eq('category', category);
-  }
-  
-  const { data, error } = await query
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .single();
+  try {
+    // First try to find theme record to get theme_id
+    const { data: themeRecord, error: themeError } = await supabase
+      .from('themes')
+      .select('id')
+      .eq('theme_name', theme)
+      .eq('category', category || 'general')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No data found for theme, try fallback to category-only
+    if (themeError) {
+      console.error('Error finding theme record:', themeError);
+    }
+
+    let promptData = null;
+    let promptError = null;
+
+    // Try to find system prompt using theme_id if theme record exists
+    if (themeRecord?.id) {
+      const { data: themeIdData, error: themeIdError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
+        .eq('theme_id', themeRecord.id)
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      promptData = themeIdData;
+      promptError = themeIdError;
+    }
+
+    // Fallback to text-based theme search if no theme_id match
+    if (!promptData) {
+      let query = supabase
+        .from('system_prompts')
+        .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
+        .eq('user_id', userId)
+        .eq('theme', theme);
+      
+      // If category is provided, filter by it; otherwise find any theme match
       if (category) {
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('system_prompts')
-          .select('prompt_text, agent_name, updated_at, version, theme, theme_description')
-          .eq('user_id', userId)
-          .eq('category', category)
-          .is('theme', null)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .single();
-        
-        if (fallbackError || !fallbackData) return null;
-        
-        return {
-          prompt: fallbackData.prompt_text,
-          agentName: fallbackData.agent_name,
-          lastUpdated: fallbackData.updated_at,
-          version: fallbackData.version,
-          theme: fallbackData.theme,
-          themeDescription: fallbackData.theme_description
-        };
+        query = query.eq('category', category);
       }
+      
+      const { data: themeTextData, error: themeTextError } = await query
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      promptData = themeTextData;
+      promptError = themeTextError;
+    }
+
+    // If no theme-specific prompt found and category provided, try category fallback
+    if (!promptData && category) {
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
+        .eq('user_id', userId)
+        .eq('category', category)
+        .is('theme', null)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      promptData = categoryData;
+      promptError = categoryError;
+    }
+
+    if (promptError && promptError.code !== 'PGRST116') {
+      throw promptError;
+    }
+
+    if (!promptData) {
       return null;
     }
-    throw error;
-  }
 
-  return {
-    prompt: data.prompt_text,
-    agentName: data.agent_name,
-    lastUpdated: data.updated_at,
-    version: data.version,
-    theme: data.theme,
-    themeDescription: data.theme_description
-  };
+    return {
+      prompt: promptData.prompt_text,
+      agentName: promptData.agent_name,
+      lastUpdated: promptData.updated_at,
+      version: promptData.version || 1,
+      theme: promptData.theme,
+      themeDescription: promptData.theme_description
+    };
+  } catch (error) {
+    console.error('Error in fetchFreshPrompt:', error);
+    return null;
+  }
 }
