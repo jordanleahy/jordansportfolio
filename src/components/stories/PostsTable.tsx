@@ -621,15 +621,14 @@ const { handleGenerateImage } = useImageManager({
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon"
                           onClick={handlePublishCollection}
                           disabled={isPublishing}
-                          className="rounded-full px-3 text-xs sm:text-sm"
+                          className=""
                           aria-label="Library"
                           title={isPublishing ? 'Publishing…' : 'Library'}
                         >
-                          <BookOpen className="h-3 w-3 mr-1" />
-                          Library
+                          <BookOpen className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
