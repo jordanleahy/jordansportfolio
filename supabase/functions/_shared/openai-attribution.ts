@@ -134,31 +134,131 @@ export interface OpenAIRequestOptions {
   headers: Record<string, string>;
   body?: string;
   correlationId?: string;
+  timeout?: number;
+  retryAttempt?: number;
+  maxRetries?: number;
+  operationType?: 'system_prompt' | 'content_generation' | 'image_generation' | 'default';
+}
+
+// Circuit breaker state for OpenAI API
+interface CircuitBreakerState {
+  failures: number;
+  lastFailureTime: number;
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+}
+
+const circuitBreaker: CircuitBreakerState = {
+  failures: 0,
+  lastFailureTime: 0,
+  state: 'CLOSED'
+};
+
+// Timeout configuration based on operation type
+function getTimeoutForOperation(operationType: string = 'default', retryAttempt: number = 1): number {
+  const baseTimeouts = {
+    'system_prompt': 90000,      // 90 seconds for complex system prompts
+    'content_generation': 60000,  // 60 seconds for content generation
+    'image_generation': 45000,    // 45 seconds for image generation
+    'default': 60000             // 60 seconds default
+  };
+  
+  const baseTimeout = baseTimeouts[operationType] || baseTimeouts['default'];
+  
+  // Escalating timeouts for retries
+  const escalationMultipliers = [1, 1.5, 2]; // 1x, 1.5x, 2x for attempts 1, 2, 3
+  const multiplier = escalationMultipliers[Math.min(retryAttempt - 1, 2)] || 2;
+  
+  return Math.floor(baseTimeout * multiplier);
+}
+
+// Exponential backoff with jitter
+function calculateBackoffDelay(attempt: number): number {
+  const baseDelay = 1000; // 1 second base
+  const maxDelay = 10000; // 10 seconds max
+  const exponentialDelay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
+  const jitter = Math.random() * 0.3; // ±30% jitter
+  return Math.floor(exponentialDelay * (1 + jitter));
+}
+
+// Check circuit breaker state
+function checkCircuitBreaker(): boolean {
+  const now = Date.now();
+  const FAILURE_THRESHOLD = 3;
+  const RECOVERY_TIMEOUT = 30000; // 30 seconds
+  
+  if (circuitBreaker.state === 'OPEN') {
+    if (now - circuitBreaker.lastFailureTime >= RECOVERY_TIMEOUT) {
+      circuitBreaker.state = 'HALF_OPEN';
+      console.log('🔄 Circuit breaker: HALF_OPEN - testing recovery');
+      return true;
+    }
+    console.log('⚡ Circuit breaker: OPEN - blocking request');
+    return false;
+  }
+  
+  return true;
+}
+
+// Update circuit breaker state
+function updateCircuitBreaker(success: boolean) {
+  if (success) {
+    if (circuitBreaker.state === 'HALF_OPEN') {
+      circuitBreaker.state = 'CLOSED';
+      circuitBreaker.failures = 0;
+      console.log('✅ Circuit breaker: CLOSED - recovered');
+    }
+  } else {
+    circuitBreaker.failures++;
+    circuitBreaker.lastFailureTime = Date.now();
+    
+    if (circuitBreaker.failures >= 3) {
+      circuitBreaker.state = 'OPEN';
+      console.log('🚨 Circuit breaker: OPEN - too many failures');
+    }
+  }
 }
 
 export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
   const correlationId = options.correlationId || generateCorrelationId();
+  const retryAttempt = options.retryAttempt || 1;
+  const maxRetries = options.maxRetries || 3;
+  const operationType = options.operationType || 'default';
+  
+  // Check circuit breaker
+  if (!checkCircuitBreaker()) {
+    throw {
+      error: new Error('Circuit breaker is open - too many recent failures'),
+      correlationId,
+      responseTime: 0,
+      circuitBreakerOpen: true,
+    };
+  }
   
   // Add correlation headers for OpenAI request tracking
   const enhancedHeaders = {
     ...options.headers,
     'X-Correlation-ID': correlationId,
     'X-Request-Source': 'supabase-edge-function',
+    'X-Retry-Attempt': retryAttempt.toString(),
+    'X-Operation-Type': operationType,
   };
 
   const startTime = Date.now();
+  const TIMEOUT_MS = options.timeout || getTimeoutForOperation(operationType, retryAttempt);
   
   // Implement timeout using AbortController
-  const TIMEOUT_MS = 30000; // 30 seconds timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
   
   try {
-    console.log(`🔍 OpenAI Request with timeout (${TIMEOUT_MS}ms):`, {
+    console.log(`🔍 OpenAI Request with escalating timeout (${TIMEOUT_MS}ms):`, {
       url: options.url,
       method: options.method,
       correlationId,
-      timeout: TIMEOUT_MS
+      retryAttempt,
+      operationType,
+      timeout: TIMEOUT_MS,
+      circuitBreakerState: circuitBreaker.state
     });
 
     const response = await fetch(options.url, {
@@ -171,12 +271,17 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
     clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
     
+    // Update circuit breaker on success
+    updateCircuitBreaker(true);
+    
     console.log(`📥 OpenAI Response Details:`, {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok,
       responseTime,
-      correlationId
+      correlationId,
+      retryAttempt,
+      operationType
     });
     
     // Extract OpenAI request ID from response headers if available
@@ -189,23 +294,49 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
       correlationId,
       openAIRequestId,
       responseTime,
+      retryAttempt,
+      operationType,
     };
     
   } catch (error) {
     clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
     
+    // Update circuit breaker on failure
+    updateCircuitBreaker(false);
+    
     if (error.name === 'AbortError') {
       console.error(`⏰ OpenAI Request timeout after ${TIMEOUT_MS}ms:`, {
         correlationId,
         responseTime,
-        url: options.url
+        url: options.url,
+        retryAttempt,
+        operationType,
+        circuitBreakerState: circuitBreaker.state
       });
+      
+      // Attempt retry with exponential backoff if retries remaining
+      if (retryAttempt < maxRetries) {
+        const backoffDelay = calculateBackoffDelay(retryAttempt);
+        console.log(`🔄 Retrying OpenAI request in ${backoffDelay}ms (attempt ${retryAttempt + 1}/${maxRetries})`);
+        
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        
+        return makeOpenAIRequest({
+          ...options,
+          retryAttempt: retryAttempt + 1,
+          correlationId, // Keep same correlation ID for tracking
+        });
+      }
+      
       throw {
-        error: new Error(`OpenAI request timeout after ${TIMEOUT_MS}ms`),
+        error: new Error(`OpenAI request timeout after ${TIMEOUT_MS}ms (${retryAttempt} attempts)`),
         correlationId,
         responseTime,
         timeout: true,
+        retryAttempt,
+        operationType,
+        circuitBreakerState: circuitBreaker.state,
       };
     }
     
@@ -213,13 +344,33 @@ export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
       error: error.message,
       correlationId,
       responseTime,
-      url: options.url
+      url: options.url,
+      retryAttempt,
+      operationType,
+      circuitBreakerState: circuitBreaker.state
     });
+    
+    // Attempt retry for non-timeout errors if retries remaining
+    if (retryAttempt < maxRetries) {
+      const backoffDelay = calculateBackoffDelay(retryAttempt);
+      console.log(`🔄 Retrying OpenAI request in ${backoffDelay}ms (attempt ${retryAttempt + 1}/${maxRetries})`);
+      
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
+      
+      return makeOpenAIRequest({
+        ...options,
+        retryAttempt: retryAttempt + 1,
+        correlationId, // Keep same correlation ID for tracking
+      });
+    }
     
     throw {
       error,
       correlationId,
       responseTime,
+      retryAttempt,
+      operationType,
+      circuitBreakerState: circuitBreaker.state,
     };
   }
 }

@@ -19,7 +19,12 @@ const SYSTEM_PROMPT_CATEGORIES = {
 const OPENAI_CONFIG = {
   DEFAULT_MODEL: 'gpt-5-mini',
   MAX_COMPLETION_TOKENS: 4000,
-  TIMEOUT_MS: 30000,
+  TIMEOUT_MS: 90000, // 90 seconds for system prompt generation
+  ESCALATION_TIMEOUTS: {
+    ATTEMPT_1: 90000,   // 90 seconds for first attempt
+    ATTEMPT_2: 135000,  // 135 seconds for second attempt  
+    ATTEMPT_3: 180000,  // 180 seconds for final attempt
+  },
 } as const;
 
 const HTTP_STATUS = {
@@ -241,6 +246,9 @@ Please generate a detailed, professional system prompt following the established
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
+      timeout: OPENAI_CONFIG.TIMEOUT_MS,
+      maxRetries: 3,
+      operationType: 'system_prompt',
     });
 
     openAIRequestId = responseOpenAIRequestId;
