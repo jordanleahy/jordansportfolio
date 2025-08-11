@@ -31,7 +31,7 @@ import {
 
 // Lazy load components
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
-const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({ default: module.ThemeImportModalOptimized })));
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 const CustomThemeModal = React.lazy(() => import('@/components/stories/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
 

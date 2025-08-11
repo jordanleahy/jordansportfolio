@@ -30,9 +30,7 @@ import { BlogCard } from '@/components/ui/BlogCard';
 import type { BlogPost } from '@/types/blog';
 
 // Lazy load components
-const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized').then(module => ({
-  default: module.ThemeImportModalOptimized
-})));
+const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
 export default function StoriesDashboard() {
   const {
     user,
