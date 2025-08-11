@@ -15,11 +15,8 @@ export interface NavigationItem {
 export const navigationConfig: NavigationItem[] = [
   // Public items
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  { href: "/#case-studies", label: "Case Studies", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/library", label: "Library", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  { href: "/companies", label: "Companies", icon: Heart, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  { href: "/comparisons", label: "Battlecards", icon: GitCompare, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/#about", label: "About", icon: User, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
   // Authenticated user items
