@@ -94,6 +94,7 @@ const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
 
 // Get themeId from posts if available
 const themeId = posts.length > 0 ? posts[0]?.theme_id : undefined;
+console.log('PostsTable themeId debug:', { posts: posts.slice(0, 2), themeId });
 
 const { handleGenerateImage } = useImageManager({
   onPostsChange,
