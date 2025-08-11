@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
-import { JsonImportDialogProps } from '@/types/stories';
+import type { JsonImportDialogProps } from '@/types/stories/ui';
 
 interface ImportData {
   category: string;
@@ -97,11 +97,13 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
       }
       
       // Check if a system prompt exists for this category
-      const { data: existingSystemPrompts, error: promptsQueryError } = await supabase
+      const systemPromptsQuery = await supabase
         .from('system_prompts')
         .select('id')
-        .eq('category', previewData.category)
         .limit(1);
+      
+      const existingSystemPrompts = systemPromptsQuery.data;
+      const promptsQueryError = systemPromptsQuery.error;
       
       if (promptsQueryError) {
         console.error('❌ SYSTEM PROMPTS QUERY ERROR:', promptsQueryError);
