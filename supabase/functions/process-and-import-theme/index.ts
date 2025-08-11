@@ -271,16 +271,7 @@ serve(async (req) => {
               timestamp: new Date().toISOString()
             });
             
-            // Generate Day 1 image after system prompt (regardless of prompt result)
-            return generateDay1ImageBackground(createdTheme.id, user.id);
-          })
-          .then((imageResult) => {
-            console.log('🖼️ DAY 1 IMAGE RESULT:', {
-              success: imageResult?.success || false,
-              category: aiResult.cleanedData.category,
-              themeId: createdTheme.id,
-              timestamp: new Date().toISOString()
-            });
+            // Theme generation completed
             
             // Start blog post prompt generation after theme image (regardless of image result)
             console.log('📝 BLOG POST PROMPTS: Starting prompt generation');
@@ -568,47 +559,6 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
   }
 }
 
-// Background function to trigger Day 1 image generation
-async function generateDay1ImageBackground(themeId: string, userId: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    console.log(`🖼️ DAY 1 IMAGE: Starting generation for theme: ${themeId}`);
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Missing Supabase configuration for Day 1 image generation');
-      return { success: false, error: 'Missing Supabase configuration' };
-    }
-
-    // Call the generate-day-1-4-3 function
-    const imageResponse = await fetch(`${supabaseUrl}/functions/v1/generate-day-1-4-3`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({
-        themeId: themeId,
-        userId: userId
-      }),
-    });
-
-    if (imageResponse.ok) {
-      const result = await imageResponse.json();
-      console.log(`✅ DAY 1 IMAGE: Generated successfully for post: ${result.postId}`);
-      return { success: true };
-    } else {
-      const errorText = await imageResponse.text();
-      console.error('❌ DAY 1 IMAGE: Generation failed:', errorText);
-      return { success: false, error: errorText };
-    }
-
-  } catch (error) {
-    console.error('💥 DAY 1 IMAGE: Error in generation:', error);
-    return { success: false, error: error.message };
-  }
-}
 
 // Background function to generate blog post prompts
 async function generateBlogPostPromptsBackground(category: string, userId: string): Promise<{ success: boolean; error?: string }> {

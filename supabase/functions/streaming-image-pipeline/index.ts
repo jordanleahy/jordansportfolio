@@ -183,12 +183,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // NOTE: This function is now focused on individual post images only
-    // Theme image generation is handled by the generate-day-1-4-3 function
-    if (mode === 'theme') {
-      console.log('ℹ️ Theme mode detected - this function now handles individual post images only');
-      console.log('ℹ️ For Day 1 theme images, use the generate-day-1-4-3 function instead');
-    }
+    // NOTE: This function handles individual post images
 
     // Check if streaming is requested
     if (stream) {
