@@ -299,11 +299,11 @@ export class ThemeImportService {
       console.log('🔍 Fetching CDI template system prompt...');
       
       // Get the CDI system prompt from the new table
-      const { data: cdiPrompt, error: fetchError } = await supabase
+      const { data: cdiPrompt, error: fetchError } = await (supabase as any)
         .from('system_prompts')
         .select('prompt_text')
         .eq('category', 'cdi')
-        .single();
+        .maybeSingle();
 
       if (fetchError || !cdiPrompt?.prompt_text) {
         console.warn('⚠️ Could not fetch CDI template, skipping system prompt creation');

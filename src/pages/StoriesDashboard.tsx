@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +39,7 @@ export default function StoriesDashboard() {
     roleLoading
   } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
@@ -374,6 +375,14 @@ export default function StoriesDashboard() {
       return;
     }
     const themeDescription = customThemeDescription.trim();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to generate themes."
+      });
+      navigate('/auth');
+      return;
+    }
     setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
 
@@ -549,6 +558,14 @@ export default function StoriesDashboard() {
       return;
     }
     setDuplicateInfo(null);
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to generate themes.'
+      });
+      navigate('/auth');
+      return;
+    }
     setIsGeneratingTheme(true);
     try {
       const {
