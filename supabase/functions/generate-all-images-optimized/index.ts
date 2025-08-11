@@ -148,8 +148,14 @@ serve(async (req) => {
       masterPrompt = prompt;
     } else {
       // Step 1: Generate master prompt once
+      const { data: postRow } = await supabase
+        .from('social_media_posts')
+        .select('theme_id')
+        .eq('id', postId)
+        .maybeSingle();
+      const themeId = postRow?.theme_id || null;
       const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-        body: { title, description, category }
+        body: { title, description, category, themeId }
       });
 
       if (promptResponse.error) {

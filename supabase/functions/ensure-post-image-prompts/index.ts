@@ -76,7 +76,7 @@ serve(async (req) => {
     console.log('🔍 STEP 1: Fetching posts without image prompts');
     const { data: posts, error: postsError } = await supabase
       .from('social_media_posts')
-      .select('id, title, description, category')
+      .select('id, title, description, category, theme_id')
       .eq('category', category)
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
@@ -136,6 +136,7 @@ serve(async (req) => {
             title: post.title,
             description: post.description,
             category: post.category,
+            themeId: post.theme_id,
             aspectRatio: '16:9'
           }
         });

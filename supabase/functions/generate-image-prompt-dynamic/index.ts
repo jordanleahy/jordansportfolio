@@ -73,19 +73,21 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio } = await req.json();
+    let { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId } = await req.json();
 
-    if (!title || !description || (!theme && !category)) {
-      throw new Error('Missing required fields: title, description, and either theme or category are required');
+    if (!title || !description || (!theme && !category && !themeId && !systemPromptId)) {
+      throw new Error('Missing required fields: title, description, and one of theme, category, themeId, or systemPromptId');
     }
 
     const requestedAspectRatio = aspectRatio || aspect_ratio || null;
 
     // Store request metadata with correlation ID
-    requestMetadata = { theme, category, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId };
+    requestMetadata = { theme, category, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId };
 
     logger.info('Request payload received', {
       theme,
+      themeId,
+      systemPromptId: systemPromptId ? `${String(systemPromptId).slice(0,8)}…` : null,
       category,
       titleLength: title?.length || 0,
       descriptionLength: description?.length || 0,
@@ -112,10 +114,55 @@ serve(async (req) => {
 
     let systemPromptData: any = null;
     let usedIdentifier: string;
-    let usedType: 'theme' | 'category';
+    let usedType: 'systemPromptId' | 'themeId' | 'theme' | 'category';
 
-    // First, try to get theme-specific prompt if theme is provided
-    if (theme) {
+    // Highest priority: explicit systemPromptId
+    if (!systemPromptData && systemPromptId) {
+      console.log('🎯 Using explicit systemPromptId for system prompt:', systemPromptId);
+      const { data: spById, error: spByIdError } = await supabase
+        .from('system_prompts')
+        .select('prompt_text, theme, category, id')
+        .eq('id', systemPromptId)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (spById && !spByIdError) {
+        systemPromptData = spById;
+        usedIdentifier = spById.theme || systemPromptId;
+        usedType = 'systemPromptId';
+      }
+    }
+
+    // Next: themeId mapped to a specific system prompt
+    if (!systemPromptData && themeId) {
+      console.log('🎯 Resolving themeId to system prompt:', themeId);
+      const { data: themeRow, error: themeRowErr } = await supabase
+        .from('themes')
+        .select('visual_prompt_system_prompt_id, theme_name')
+        .eq('id', themeId)
+        .maybeSingle();
+      if (themeRow && !themeRowErr) {
+        if (themeRow.visual_prompt_system_prompt_id) {
+          const { data: spFromTheme, error: spFromThemeErr } = await supabase
+            .from('system_prompts')
+            .select('prompt_text, theme, category, id')
+            .eq('id', themeRow.visual_prompt_system_prompt_id)
+            .eq('is_active', true)
+            .maybeSingle();
+          if (spFromTheme && !spFromThemeErr) {
+            systemPromptData = spFromTheme;
+            usedIdentifier = themeRow.theme_name || spFromTheme.theme || String(themeId);
+            usedType = 'themeId';
+          }
+        }
+        // If no mapping, fall back to theme name search later
+        if (!systemPromptData && themeRow.theme_name && !theme) {
+          theme = themeRow.theme_name;
+        }
+      }
+    }
+
+    // Then: theme string search
+    if (!systemPromptData && theme) {
       console.log('🎯 Looking for theme-based system prompt:', theme);
       const { data: themeData, error: themeError } = await supabase
         .from('system_prompts')
@@ -137,7 +184,7 @@ serve(async (req) => {
       }
     }
 
-    // If no theme prompt found, fall back to category-based prompt
+    // Finally: category-based prompt
     if (!systemPromptData && category) {
       console.log('🏷️ Looking for category-based system prompt:', category);
       // First try category-only prompts (theme is NULL)
@@ -198,11 +245,11 @@ serve(async (req) => {
 Title: ${title}
 Description: ${description}`;
 
-    if (usedType === 'theme') {
-      userMessage += `\nTheme: ${usedIdentifier}`;
-      if (category) userMessage += `\nCategory: ${category}`;
-    } else {
+    if (usedType === 'category') {
       userMessage += `\nCategory: ${usedIdentifier}`;
+    } else {
+      userMessage += `\nTheme: ${systemPromptData.theme || theme || usedIdentifier}`;
+      if (category) userMessage += `\nCategory: ${category}`;
     }
 
     // Add aspect ratio guidance if provided
@@ -240,11 +287,11 @@ Please incorporate these colors and visual style into the image prompt to ensure
 - Composition: 80% safe zone - keep important elements in central 80% of frame
 - Color Palette: Use professional blues (#2563eb, #1e40af), teals (#0891b2, #0e7490), accent greens (#16a34a), highlight orange (#ea580c), and neutral grays (#64748b, #f8fafc)
 - Accessibility: High contrast, clear visual hierarchy, readable at various sizes
-- Background: Clean, minimal, professional setting appropriate for ${usedType === 'theme' ? theme : category}
+- Background: Clean, minimal, professional setting appropriate for ${usedType === 'category' ? category : (systemPromptData.theme || theme)}
 - NEGATIVE PROMPTS: No photorealistic rendering, no complex gradients, no cluttered compositions, no dark/dramatic lighting
 
 **COMPOSITION GUIDELINES:**
-- Foreground: Main subject focused on ${usedType === 'theme' ? theme : category}-specific elements
+- Foreground: Main subject focused on ${(usedType === 'category' ? category : (systemPromptData.theme || theme))}-specific elements
 - Mid-ground: Supporting professional context and workflow elements  
 - Background: Clean, minimal professional environment
 - Visual Flow: Clear focal point with logical eye movement through the composition
@@ -414,7 +461,7 @@ Private Safe Space Visual Tone:
           metadata: {
             title,
             description,
-            theme: usedType === 'theme' ? usedIdentifier : undefined,
+            theme: usedType === 'category' ? undefined : (systemPromptData.theme || theme || usedIdentifier),
             category: usedType === 'category' ? usedIdentifier : category,
             usedType,
             agent: 'Visual Prompt Generator',
@@ -458,7 +505,7 @@ Private Safe Space Visual Tone:
 
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
-      theme: usedType === 'theme' ? usedIdentifier : undefined,
+      theme: usedType === 'category' ? undefined : (systemPromptData.theme || theme || usedIdentifier),
       category: usedType === 'category' ? usedIdentifier : category,
       usedType,
       agent: 'Visual Prompt Generator',
