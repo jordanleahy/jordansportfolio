@@ -690,7 +690,7 @@ const { handleGenerateImage } = useImageManager({
         marginLeft: '-2px'
       }} />
           <SystemPromptViewer 
-            category={category} 
+            theme={category} 
             themeId={themeId}
             isVisible={showSystemPrompt} 
             onClose={() => setShowSystemPrompt(false)} 

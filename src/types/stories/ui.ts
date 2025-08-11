@@ -214,7 +214,6 @@ export interface MobilePlanComparisonProps {
 }
 
 export interface SystemPromptViewerProps {
-  category: string;
   theme?: string;
   themeId?: string;
   isVisible: boolean;

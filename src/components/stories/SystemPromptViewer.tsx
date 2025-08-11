@@ -21,7 +21,6 @@ import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
 import type { SystemPromptViewerProps } from '@/types/stories/ui';
 
 export const SystemPromptViewer = ({
-  category,
   theme,
   themeId,
   isVisible,
@@ -57,7 +56,7 @@ export const SystemPromptViewer = ({
     enabled: isVisible,
     userId: user?.id,
     onSystemPromptUpdate: (data) => {
-      if (data.theme === (theme || category) || data.category === category) {
+      if (data.theme === theme) {
         setRealtimeUpdateReceived(true);
         // Show update indicator briefly
         setTimeout(() => setRealtimeUpdateReceived(false), 3000);
@@ -110,7 +109,7 @@ export const SystemPromptViewer = ({
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    console.log('🔄 Regenerate button clicked - Debug info:', { theme, category, themeId });
+    console.log('🔄 Regenerate button clicked - Debug info:', { theme, themeId });
     if (!theme && !themeId) {
       console.error('❌ Cannot regenerate: missing theme', { theme, themeId });
       toast.error('Cannot regenerate: missing theme information');
