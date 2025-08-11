@@ -53,14 +53,14 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
       </div>
 
       {/* Description and Generate Button */}
-      <div>
+      <div className="space-y-3">
         <p className="text-sm text-muted-foreground leading-relaxed">
           {post.description}
         </p>
         <Button
           variant="outline"
           size="sm"
-          className={`mt-2 w-full ${isLoading ? 'animate-pulse' : ''}`}
+          className={`w-full ${isLoading ? 'animate-pulse' : ''}`}
           onClick={handleGenerate}
           disabled={isLoading || creditStatus.isLoading || !creditStatus.hasCredits}
           title={!creditStatus.hasCredits ? 'No credits available' : creditStatus.isLoading ? "Checking credits..." : undefined}

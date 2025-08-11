@@ -52,10 +52,10 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
   };
 
   return (
-    <div className="space-y-3 border-t pt-4">
+    <div className="space-y-4 border-t pt-6">
       <h4 className="text-sm font-medium text-muted-foreground">Admin Actions</h4>
       
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         <div className="flex items-center gap-1">
           <LibraryChipButton post={post} />
           <BlogPostButton post={post} />
