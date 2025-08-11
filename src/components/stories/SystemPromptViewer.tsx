@@ -110,7 +110,12 @@ export const SystemPromptViewer = ({
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    if (!theme && !category) return;
+    console.log('🔄 Regenerate button clicked - Debug info:', { theme, category, themeId });
+    if (!theme && !category) {
+      console.error('❌ Cannot regenerate: missing theme and category', { theme, category });
+      toast.error('Cannot regenerate: missing theme and category information');
+      return;
+    }
     
     try {
       setPreviousPrompt(promptData?.prompt || '');
@@ -120,7 +125,7 @@ export const SystemPromptViewer = ({
       console.error('Error regenerating system prompt:', error);
       toast.error('Failed to regenerate system prompt');
     }
-  }, [themeId, promptData?.prompt, regeneratePrompt]);
+  }, [theme, category, themeId, promptData?.prompt, regeneratePrompt]);
 
 
   // Compute diff when in diff view mode
