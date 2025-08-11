@@ -98,7 +98,7 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id, skip_ensure } = requestBody;
+    const { category, theme, description, sample_posts, user_id, skip_ensure, theme_id } = requestBody;
     userId = user_id;
     const skipEnsure = !!skip_ensure;
     
@@ -277,13 +277,21 @@ Please generate a detailed, professional system prompt following the established
     });
 
     try {
-      // 🔍 Step 0: Check if system prompt already exists for this theme
-      console.log('🔍 STEP 0: Checking for existing system prompts for theme:', actualTheme);
-      const { data: existingPrompts, error: checkError } = await supabase
+      // 🔍 Step 0: Check if system prompt already exists for this theme_id
+      console.log('🔍 STEP 0: Checking for existing system prompts for theme_id:', theme_id);
+      const existingPromptsQuery = supabase
         .from('system_prompts')
-        .select('id, category, created_at')
-        .eq('theme', actualTheme)
-        .eq('user_id', user_id)
+        .select('id, category, created_at, theme')
+        .eq('user_id', user_id);
+
+      // Use theme_id if provided, otherwise fall back to theme name
+      if (theme_id) {
+        existingPromptsQuery.eq('theme_id', theme_id);
+      } else {
+        existingPromptsQuery.eq('theme', actualTheme);
+      }
+
+      const { data: existingPrompts, error: checkError } = await existingPromptsQuery
         .order('created_at', { ascending: false });
 
       if (checkError) {
@@ -331,6 +339,7 @@ Please generate a detailed, professional system prompt following the established
           name: `${actualTheme} Theme System Prompt`,
           category: contextCategory,
           theme: actualTheme,
+          theme_id: theme_id,
           theme_description: description,
           prompt_text: generatedPrompt,
           description: `Generated system prompt for ${actualTheme} theme with ${contextCategory} context`
