@@ -1889,6 +1889,7 @@ export type Database = {
       }
       shared_collections: {
         Row: {
+          cover_image_url: string | null
           created_at: string
           description: string | null
           featured: boolean
@@ -1903,6 +1904,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -1917,6 +1919,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           featured?: boolean

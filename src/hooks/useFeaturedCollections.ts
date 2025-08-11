@@ -8,7 +8,7 @@ export const useFeaturedCollections = () => {
     queryFn: async (): Promise<SharedCollection[]> => {
       const { data, error } = await supabase
         .from("shared_collections")
-        .select("*")
+        .select("*, cover_image_url")
         .eq("featured", true)
         .eq("status", "published")
         .order("published_at", { ascending: false });
