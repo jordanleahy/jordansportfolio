@@ -100,7 +100,6 @@ export function JsonImportDialog({ onImportComplete }: JsonImportDialogProps) {
       const { data: existingSystemPrompts, error: promptsQueryError } = await supabase
         .from('system_prompts')
         .select('id')
-        .eq('category', previewData.category)
         .limit(1);
       
       if (promptsQueryError) {

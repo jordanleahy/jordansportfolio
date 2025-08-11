@@ -16,7 +16,7 @@ import { useThemeImport } from '@/hooks/useThemeImport';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
-import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
+import { OptimizedCategoriesGrid } from '@/components/stories/OptimizedCategoriesGrid';
 import { ThemesSkeleton } from '@/components/stories/ThemesSkeleton';
 import { BulkActionsToolbar } from '@/components/stories/BulkActionsToolbar';
 import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteConfirmationDialog';
@@ -694,7 +694,7 @@ export default function StoriesDashboard() {
                 <Button variant="outline" onClick={() => window.location.reload()}>
                   Retry
                 </Button>
-              </div> : <CategoriesGrid themes={availableThemes} onDeleteCategory={handleDeleteCategory} selectedThemes={selectedThemes} onThemeSelect={handleThemeSelect} isSelectionMode={isSelectionMode} isGeneratingTheme={isGeneratingTheme} onCancelGeneration={cancelThemeGeneration} />}
+              </div> : <OptimizedCategoriesGrid themes={availableThemes} onDeleteCategory={handleDeleteCategory} selectedThemes={selectedThemes} onThemeSelect={handleThemeSelect} isSelectionMode={isSelectionMode} pendingTheme={pendingTheme} />}
           </Section> : <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
             <header className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Featured Posts</h2>
