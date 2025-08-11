@@ -638,6 +638,87 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
+  // Handle sharing the public URL (separate from library functionality)
+  const handleShare = async () => {
+    try {
+      setIsPublishing(true);
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('Please sign in to share');
+        return;
+      }
+
+      // Check if there's already a published collection
+      const { data: existingCollection, error: checkError } = await supabase
+        .from('shared_collections')
+        .select('handle')
+        .eq('user_id', session.user.id)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let handle = existingCollection?.handle;
+
+      // If no published collection exists, create one first
+      if (!existingCollection) {
+        const rawHandle = (session.user.user_metadata?.preferred_username
+          || session.user.email?.split('@')[0]
+          || session.user.id.slice(0, 8)) as string;
+        const newHandle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
+
+        const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
+        const candidates = scoped.filter(p => !!p.image_16_9_url);
+        const candidateIds = candidates.map(p => p.id);
+        
+        if (candidateIds.length === 0) {
+          toast.error('No posts with 16:9 images found to share');
+          return;
+        }
+
+        const titleArg = (category && String(category).trim()) || candidates[0]?.title || newHandle;
+        const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
+        const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
+        const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
+        const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
+
+        const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
+          p_handle: newHandle,
+          p_post_ids: candidateIds,
+          p_category: null,
+          p_theme_id: null,
+          p_title: titleArg,
+          p_description: descriptionArg,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        handle = newHandle;
+      }
+
+      if (handle) {
+        const publicUrl = `${window.location.origin}/shared/${handle}`;
+        await navigator.clipboard.writeText(publicUrl);
+        
+        toast.success('Public URL copied to clipboard!', {
+          description: `Your collection is shareable at: ${publicUrl}`
+        });
+      } else {
+        throw new Error('Could not create or find collection handle');
+      }
+
+    } catch (error) {
+      console.error('Error sharing collection:', error);
+      toast.error('Failed to share collection. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   // Feature/unfeature the latest published collection for this user
   const handleFeatureLatestCollection = async () => {
     try {
@@ -794,7 +875,7 @@ const { handleGenerateImage } = useImageManager({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={handlePublishCollection}
+                      onClick={handleShare}
                       disabled={isPublishing}
                       aria-label="Share"
                       title="Share"
@@ -921,7 +1002,7 @@ const { handleGenerateImage } = useImageManager({
                         <Button 
                           variant="outline" 
                           size="icon" 
-                          onClick={handlePublishCollection}
+                          onClick={handleShare}
                           disabled={isPublishing}
                           className=""
                           aria-label="Share"
