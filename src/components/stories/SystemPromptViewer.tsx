@@ -120,7 +120,7 @@ export const SystemPromptViewer = ({
       console.error('Error regenerating system prompt:', error);
       toast.error('Failed to regenerate system prompt');
     }
-  }, [theme, category, promptData?.prompt, regeneratePrompt]);
+  }, [themeId, promptData?.prompt, regeneratePrompt]);
 
 
   // Compute diff when in diff view mode

@@ -158,8 +158,23 @@ export const useSystemPromptCache = (theme?: string, category?: string, themeId?
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Get theme data from themeId to get the necessary information
+      let themeData = null;
+      if (themeId) {
+        const { data } = await supabase
+          .from('themes')
+          .select('theme_name, category')
+          .eq('id', themeId)
+          .single();
+        themeData = data;
+      }
+
       const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
-        body: { theme, category, user_id: user.id }
+        body: { 
+          theme: themeData?.theme_name || theme, 
+          category: themeData?.category || category, 
+          user_id: user.id 
+        }
       });
 
       if (error) throw error;
