@@ -636,7 +636,8 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-            await generateSystemPrompt(supabase, themeData, userId, createdThemeId);
+            // Use EdgeRuntime.waitUntil to run system prompt generation in background
+            EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, createdThemeId));
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -702,7 +703,8 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
-      await generateSystemPrompt(supabase, themeData, userId, themeId);
+      // Use EdgeRuntime.waitUntil to run system prompt generation in background
+      EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, themeId));
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
