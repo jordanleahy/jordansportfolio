@@ -64,6 +64,7 @@ export const ImagePromptGeneratorModal = ({
               title: content.primary,
               description: content.secondary,
               theme: config.theme,
+              themeId: config.themeId,
               category: config.category,
               aspectRatio: selectedAspectRatio,
             }

@@ -118,7 +118,8 @@ export const PostImageUploadCard = ({
           description: post.description,
           theme: theme,
           category: post.category || 'cdi',
-          aspectRatio: aspectRatio
+          aspectRatio: aspectRatio,
+          themeId: (post as any).theme_id || undefined
         }
       });
 

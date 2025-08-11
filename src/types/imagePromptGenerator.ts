@@ -10,6 +10,7 @@ export interface ImagePromptConfig {
   systemPrompt: string;
   edgeFunction: 'generate-content' | 'generate-image-prompt-dynamic' | 'generate-hero-job-visual' | 'generate-job-context-visual';
   theme?: string;
+  themeId?: string;
   category?: string;
   enableCaching?: boolean;
   aspectRatioOptions?: AspectRatioOption[];

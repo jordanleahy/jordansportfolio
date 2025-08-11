@@ -158,13 +158,21 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
     }
 
     // Generate new prompt
+    const { data: postRow } = await supabase
+      .from('social_media_posts')
+      .select('theme_id')
+      .eq('id', request.postId)
+      .maybeSingle();
+    const themeId = postRow?.theme_id || null;
+
     const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: { 
         title: request.title, 
         description: request.description, 
         theme,
         category: request.category,
-        colorTheme
+        colorTheme,
+        themeId
       }
     });
 

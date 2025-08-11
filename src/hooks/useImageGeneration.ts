@@ -45,7 +45,8 @@ export const useImageGeneration = () => {
           theme,
           category: post.category || 'general',
           colorTheme: colorTheme?.name || '',
-          aspectRatio: '1:1'
+          aspectRatio: '1:1',
+          themeId: (post as any).theme_id || undefined
         }
       });
 

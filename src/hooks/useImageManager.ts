@@ -66,13 +66,22 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
       // Step 1: Generate prompt
       toast.info('Generating image prompt...');
       
+      // Fetch theme id for this post
+      const { data: postRow } = await supabase
+        .from('social_media_posts')
+        .select('theme_id')
+        .eq('id', postId)
+        .maybeSingle();
+      const themeId = postRow?.theme_id || null;
+      
       const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
           title,
           description,
           theme,
           category: category || 'cdi',
-          aspectRatio: aspectRatio.replace('_', ':')
+          aspectRatio: aspectRatio.replace('_', ':'),
+          themeId
         }
       });
 

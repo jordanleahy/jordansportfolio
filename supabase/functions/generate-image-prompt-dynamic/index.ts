@@ -38,7 +38,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
+import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -314,7 +314,7 @@ Private Safe Space Visual Tone:
     });
 
     const requestBody = {
-      model: 'gpt-5-mini',
+      model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -465,7 +465,7 @@ Private Safe Space Visual Tone:
             category: usedType === 'category' ? usedIdentifier : category,
             usedType,
             agent: 'Visual Prompt Generator',
-            model: 'gpt-5-mini',
+            model: 'gpt-4.1-2025-04-14',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
             estimated_cost: estimatedCost

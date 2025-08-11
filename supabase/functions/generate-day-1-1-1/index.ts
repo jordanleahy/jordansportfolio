@@ -95,7 +95,8 @@ serve(async (req) => {
         title: day1Post.title,
         description: day1Post.description,
         category: day1Post.category || 'cdi',
-        aspectRatio: '1:1'
+        aspectRatio: '1:1',
+        themeId
       }
     });
 
