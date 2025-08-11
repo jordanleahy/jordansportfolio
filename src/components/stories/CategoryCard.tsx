@@ -22,6 +22,9 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
   const [isCancelling, setIsCancelling] = useState(false);
   
+  // Detect error state from theme id
+  const isError = theme?.startsWith?.('error-') || false;
+  
   // Sync image URL from props
   useEffect(() => {
     if (imageUrl) {
@@ -63,7 +66,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
   });
 
   const handleClick = () => {
-    if (isShimmer) return; // Prevent clicks on shimmer cards
+    if (isShimmer || isError) return; // Prevent clicks on shimmer and error cards
     if (isSelectionMode && onSelect) {
       onSelect();
       return;
@@ -82,11 +85,48 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     }
   };
 
+  // Handle error state
+  if (isError) {
+    return (
+      <Card className="group overflow-hidden border-destructive/50 bg-destructive/5 select-none transition-all duration-300">
+        {/* Error Image Section */}
+        <div className="relative aspect-square">
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center">
+            <div className="space-y-2 text-center">
+              <div className="h-8 w-8 rounded-full bg-destructive/20 flex items-center justify-center mx-auto">
+                <span className="text-destructive text-sm">✕</span>
+              </div>
+              <div className="text-xs text-destructive/80">Generation failed</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Content Section */}
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium text-destructive mb-1">Generation Failed</h3>
+              <p className="text-sm text-destructive/70">{firstPostData?.description || themeDescription}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isShimmer) {
     return (
       <>
         <Card 
-          className="group overflow-hidden border-border/50 select-none" 
+          className="group overflow-hidden border-border/50 select-none transition-all duration-500" 
           {...longPressHandlers}
           style={{ touchAction: 'manipulation' }}
         >
@@ -100,6 +140,8 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
                 </div>
               </div>
             </div>
+            {/* Add shimmer animation overlay */}
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           </div>
 
           {/* Shimmer Content Section */}

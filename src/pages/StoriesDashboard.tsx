@@ -173,7 +173,13 @@ export default function StoriesDashboard() {
     console.log('Post updated:', post);
     try {
       const themes = await optimizedSocialMediaService.refreshAvailableThemes();
-      setAvailableThemes(themes);
+      
+      // Preserve pending themes by merging them with fresh data
+      setAvailableThemes(prevThemes => {
+        const pendingThemes = prevThemes.filter(theme => theme.id.startsWith('pending-'));
+        const freshThemes = themes.filter(theme => !theme.id.startsWith('pending-'));
+        return [...pendingThemes, ...freshThemes];
+      });
     } catch (error) {
       console.error('Failed to refresh themes after post update:', error);
     }
@@ -421,19 +427,75 @@ export default function StoriesDashboard() {
         description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`
       });
 
-      // Remove the pending shimmer theme and refresh the list
+      // Find and replace the pending theme with real data
       setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-
-      // Refresh themes from server
+      
+      // Refresh themes from server and merge with pending themes
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-      setAvailableThemes(refreshedThemes);
+      
+      setAvailableThemes(prevThemes => {
+        // Find the pending theme that matches our description
+        const pendingIndex = prevThemes.findIndex(theme => 
+          theme.id.startsWith('pending-') && 
+          theme.description === themeDescription
+        );
+        
+        if (pendingIndex !== -1) {
+          // Find the new theme that matches what we created
+          const newTheme = refreshedThemes.find(theme => 
+            theme.theme_name === data.theme || 
+            theme.category === data.category ||
+            theme.description?.includes(themeDescription)
+          );
+          
+          if (newTheme) {
+            // Replace the pending theme with the real one at the same position
+            const newThemes = [...prevThemes];
+            newThemes[pendingIndex] = newTheme;
+            
+            // Remove any duplicates from the end and filter out other pending themes
+            const filteredThemes = newThemes.filter((theme, index) => {
+              if (index === pendingIndex) return true; // Keep our replaced theme
+              return !theme.id.startsWith('pending-') && 
+                     !refreshedThemes.some(rt => rt.id === theme.id && rt.id !== newTheme.id);
+            });
+            
+            // Add any new themes that weren't already in the list
+            const existingIds = new Set(filteredThemes.map(t => t.id));
+            const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
+            
+            return [...filteredThemes, ...additionalThemes];
+          }
+        }
+        
+        // Fallback: just replace with fresh data, removing pending themes
+        return refreshedThemes;
+      });
     } catch (error: any) {
       console.error('Theme generation error:', error);
 
-      // Remove the pending shimmer theme on error
+      // Transform pending theme to error state instead of removing
       setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      setAvailableThemes(prev => prev.map(theme => {
+        if (theme.id.startsWith('pending-') && theme.description === themeDescription) {
+          return {
+            ...theme,
+            id: 'error-' + Date.now(),
+            theme_name: 'Generation Failed',
+            first_post: {
+              ...theme.first_post!,
+              title: 'Error: Generation failed',
+              description: `Failed to generate theme: ${error.message?.slice(0, 100) || 'Unknown error'}`
+            }
+          };
+        }
+        return theme;
+      }));
+      
+      // Auto-clear error state after 5 seconds
+      setTimeout(() => {
+        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('error-')));
+      }, 5000);
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",
@@ -506,11 +568,36 @@ export default function StoriesDashboard() {
         description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"`
       });
 
-      // Clear pending shimmer and refresh
+      // Replace pending theme with real data for duplicate case
       setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-      setAvailableThemes(refreshedThemes);
+      
+      setAvailableThemes(prevThemes => {
+        // Find and replace the pending theme
+        const pendingIndex = prevThemes.findIndex(theme => 
+          theme.id.startsWith('pending-')
+        );
+        
+        if (pendingIndex !== -1) {
+          const newTheme = refreshedThemes.find(theme => 
+            theme.theme_name === data.theme || theme.category === data.category
+          );
+          
+          if (newTheme) {
+            const newThemes = [...prevThemes];
+            newThemes[pendingIndex] = newTheme;
+            
+            // Filter out duplicates and add any missing themes
+            const existingIds = new Set(newThemes.map(t => t.id));
+            const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
+            
+            return [...newThemes.filter(t => !t.id.startsWith('pending-')), ...additionalThemes];
+          }
+        }
+        
+        return refreshedThemes;
+      });
     } catch (err: any) {
       console.error('Duplicate confirm error:', err);
       toast({
@@ -518,9 +605,28 @@ export default function StoriesDashboard() {
         description: err.message || 'Could not create theme',
         variant: 'destructive'
       });
-      // Remove shimmer to avoid stale UI
+      // Transform to error state for duplicate case failure
       setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      setAvailableThemes(prev => prev.map(theme => {
+        if (theme.id.startsWith('pending-')) {
+          return {
+            ...theme,
+            id: 'error-' + Date.now(),
+            theme_name: 'Generation Failed',
+            first_post: {
+              ...theme.first_post!,
+              title: 'Error: Generation failed',
+              description: `Failed to create duplicate theme: ${err.message?.slice(0, 100) || 'Unknown error'}`
+            }
+          };
+        }
+        return theme;
+      }));
+      
+      // Auto-clear error state after 5 seconds
+      setTimeout(() => {
+        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('error-')));
+      }, 5000);
     } finally {
       setIsGeneratingTheme(false);
     }
