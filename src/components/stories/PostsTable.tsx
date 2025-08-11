@@ -776,7 +776,7 @@ const { handleGenerateImage } = useImageManager({
                           size="sm"
                           onClick={handleFeatureLatestCollection}
                           disabled={isFeaturing}
-                          className="rounded-full px-3 text-xs sm:text-sm"
+                          className="rounded-sm px-3 text-xs sm:text-sm"
                           aria-label="Featured"
                           title={isFeaturing ? 'Featuring…' : 'Feature'}
                         >
