@@ -17,11 +17,8 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  let requestBody: RequestBody | null = null;
-
   try {
-    requestBody = await req.json();
-    const { themeId, userId } = requestBody;
+    const { themeId, userId }: RequestBody = await req.json();
 
     if (!themeId || !userId) {
       return new Response(
@@ -218,7 +215,8 @@ serve(async (req) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     try {
-      if (requestBody?.themeId && requestBody?.userId) {
+      const body = await req.clone().json();
+      if (body.themeId && body.userId) {
         const supabaseUrl = Deno.env.get('SUPABASE_URL');
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
         
@@ -228,8 +226,8 @@ serve(async (req) => {
           const { data: day1Post } = await supabase
             .from('social_media_posts')
             .select('id')
-            .eq('theme_id', requestBody.themeId)
-            .eq('user_id', requestBody.userId)
+            .eq('theme_id', body.themeId)
+            .eq('user_id', body.userId)
             .eq('day', 1)
             .single();
 
