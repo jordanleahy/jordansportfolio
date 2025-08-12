@@ -231,13 +231,8 @@ export default function PublicSharedCollection() {
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent className="max-w-none bg-transparent border-0 p-0 shadow-none">
           <div className="relative w-[95vw] md:w-[700px] mx-auto">
-            {/* Background Image */}
-            <div 
-              className="absolute inset-0 rounded-full bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: 'url(/lovable-uploads/0768e481-0efe-4e8f-8822-3806ba974f3b.png)'
-              }}
-            />
+            {/* White Background */}
+            <div className="absolute inset-0 rounded-full bg-white" />
             {/* Glass-morphism overlay */}
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center bg-background/20 backdrop-blur border border-white/20 shadow-2xl rounded-full">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Account Required</h2>
