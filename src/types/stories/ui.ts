@@ -167,6 +167,7 @@ export interface ImagePromptModalProps {
   postId: string;
   cachedPrompt?: string | null;
   theme?: string;
+  themeId?: string;
   category?: string;
 }
 
@@ -426,4 +427,5 @@ export interface IndividualPromptViewerProps {
   post: SocialMediaPost | null;
   isVisible: boolean;
   onClose: () => void;
+  themeId?: string;
 }

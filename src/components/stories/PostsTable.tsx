@@ -1246,6 +1246,7 @@ const { handleGenerateImage } = useImageManager({
             post={individualPromptPanel.post}
             isVisible={individualPromptPanel.isOpen}
             onClose={closeIndividualPromptPanel}
+            themeId={themeId}
           />
         </div>
       )}

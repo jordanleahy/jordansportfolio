@@ -16,7 +16,8 @@ import type { IndividualPromptViewerProps } from '@/types/stories/ui';
 export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   post,
   isVisible,
-  onClose
+  onClose,
+  themeId
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -29,7 +30,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     regeneratePrompt,
     isRegenerating,
     refetch
-  } = useIndividualPromptCache(post?.id || '');
+  } = useIndividualPromptCache(post?.id || '', themeId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [localPrompt, setLocalPrompt] = useState('');

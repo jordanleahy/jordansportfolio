@@ -11,7 +11,7 @@ interface IndividualPromptData {
   version: number;
 }
 
-export const useIndividualPromptCache = (postId: string) => {
+export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const params = useParams();
@@ -125,7 +125,7 @@ export const useIndividualPromptCache = (postId: string) => {
         body: { 
           title, 
           description, 
-          theme,
+          themeId,
           category: category || 'gpt-5-launch',
           aspectRatio: aspectRatio || '16:9'
         }
