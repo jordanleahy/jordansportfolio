@@ -212,7 +212,8 @@ export const PostsTableView = memo(({
           const selectorProps = {
             post,
             onGenerateImage,
-            onPostsChange
+            onPostsChange,
+            isAdmin
           };
 
           const isBulk = isProcessingCtx(post.id, 'bulk_generate');
