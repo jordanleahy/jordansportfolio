@@ -95,6 +95,7 @@ export const ImagePreviewModal = ({
               {/* Edit Image button */}
               <Button
                 onClick={() => {
+                  console.log('Edit Image clicked!');
                   // TODO: Wire up edit functionality
                 }}
                 variant="ghost"
