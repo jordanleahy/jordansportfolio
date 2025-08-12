@@ -249,6 +249,7 @@ export default function OptimizedCalendar() {
                    
                    <ProcessingStatesProvider>
                      <PostsTable 
+                       themeId={theme.id}
                        posts={activeTabPosts}
                        onPostsChange={() => loadCategoryPosts(theme.theme_name)}
                        isAdmin={isAdmin}
@@ -262,18 +263,7 @@ export default function OptimizedCalendar() {
             ))}
           </Tabs>
         ) : isEmpty ? (
-          <Suspense fallback={<CalendarSkeletonLoader />}>
-            <ProcessingStatesProvider>
-              <PostsTable 
-                posts={[]} 
-                onPostsChange={() => {}}
-                isAdmin={isAdmin}
-                category={undefined}
-                selectedThemeId={selectedThemeId}
-                onThemeChange={setSelectedThemeId}
-              />
-            </ProcessingStatesProvider>
-          </Suspense>
+          null
         ) : null}
         
         {/* Simplified calendar without complex realtime debugging */}

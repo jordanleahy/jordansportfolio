@@ -158,14 +158,17 @@ export default function ThemeDetail() {
             <ColorThemeConsistencyChecker category={decodedTheme} />
             
             <ProcessingStatesProvider>
-              <PostsTable 
-                posts={posts as any}
-                onPostsChange={handlePostsChange}
-                isAdmin={isAdmin}
-                category={decodedTheme}
-                selectedThemeId={selectedThemeId}
-                onThemeChange={setSelectedThemeId}
-              />
+              {themeData?.id && (
+                <PostsTable 
+                  themeId={themeData.id}
+                  posts={posts as any}
+                  onPostsChange={handlePostsChange}
+                  isAdmin={isAdmin}
+                  category={decodedTheme}
+                  selectedThemeId={selectedThemeId}
+                  onThemeChange={setSelectedThemeId}
+                />
+              )}
             </ProcessingStatesProvider>
           </Suspense>
         </div>

@@ -63,6 +63,7 @@ export interface PostsTableProps {
   onPostsChange: () => void | Promise<void>;
   isAdmin?: boolean;
   category?: string;
+  themeId: string;
   selectedThemeId?: string;
   onThemeChange?: (themeId: string) => void;
 }
