@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Share, Download } from 'lucide-react';
-import { QuickSubscribeModal } from '@/components/subscription/QuickSubscribeModal';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { User } from '@supabase/supabase-js';
 
 interface SharedCollection {
@@ -228,23 +228,24 @@ export default function PublicSharedCollection() {
         )}
       </main>
 
-      <QuickSubscribeModal
-        isOpen={showAuthModal}
-        onOpenChange={setShowAuthModal}
-        tier={{
-          id: 'story-ship',
-          name: 'Story Ship',
-          price_cents: 0,
-          max_gpt_images: 999,
-          billing_interval: 'month',
-          stripe_price_id: '',
-          is_active: true
-        }}
-        onSubscribe={() => {
-          window.open('https://www.jordanleahy.com/auth', '_blank');
-          return Promise.resolve();
-        }}
-      />
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Account Required</DialogTitle>
+            <DialogDescription>
+              You need to be signed in to download images. Create a free account to access downloads and other features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <a href="https://www.jordanleahy.com/auth" className="w-full">
+              <Button className="w-full">Sign Up Free</Button>
+            </a>
+            <a href="https://www.jordanleahy.com/auth" className="w-full">
+              <Button variant="outline" className="w-full">Sign In</Button>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
