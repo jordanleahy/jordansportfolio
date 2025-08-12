@@ -619,7 +619,7 @@ const { handleGenerateImage } = useImageManager({
         .select('featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
-        .eq('theme_id', themeId || null)
+        .eq('theme_id', themeId)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -653,7 +653,7 @@ const { handleGenerateImage } = useImageManager({
         .select('id, handle')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
-        .eq('theme_id', themeId || null)
+        .eq('theme_id', themeId)
         .order('published_at', { ascending: false })
         .limit(1)
         .single();
