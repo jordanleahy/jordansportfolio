@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
-export type ProcessingOperation = 'generate' | 'bulk_generate';
+export type ProcessingOperation = 'generate' | 'bulk_generate' | 'regenerate_prompt';
 
 interface ProcessingState {
   operation: ProcessingOperation;

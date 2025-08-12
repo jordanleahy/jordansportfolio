@@ -15,6 +15,7 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
@@ -62,7 +63,7 @@ export const PostsTableView = memo(({
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [hoveredCell, setHoveredCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
-  const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
+  const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
@@ -90,6 +91,19 @@ export const PostsTableView = memo(({
       onPostsChange();
     } catch (error) {
       console.error('Batch generation failed:', error);
+    }
+  };
+
+  const handleRegeneratePrompt = async (post: SocialMediaPost) => {
+    setProcessing(post.id, 'regenerate_prompt', true);
+    
+    try {
+      // Call the existing onGenerateImagePrompt which should handle the regeneration
+      await onGenerateImagePrompt(post);
+    } catch (error) {
+      console.error('Failed to regenerate prompt:', error);
+    } finally {
+      setProcessing(post.id, 'regenerate_prompt', false);
     }
   };
 
@@ -223,9 +237,9 @@ export const PostsTableView = memo(({
               const createLeftActions = () => {
                 const regenerateAction = {
                   icon: <RefreshCw className="h-4 w-4" />,
-                  onClick: () => onGenerateImagePrompt(post),
-                  title: "Regenerate content",
-                  loading: false
+                  onClick: () => handleRegeneratePrompt(post),
+                  title: "Regenerate prompt",
+                  loading: isProcessingCtx(post.id, 'regenerate_prompt')
                 };
 
                 const copyAction = {
