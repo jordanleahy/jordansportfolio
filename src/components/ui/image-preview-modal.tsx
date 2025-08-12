@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { X, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -21,6 +22,11 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [wmUrl, setWmUrl] = useState<string | null>(null);
   const [wmStatus, setWmStatus] = useState<string>('none');
   const isLoading = wmStatus !== 'complete' || !wmUrl;
+
+  // Edit sheet state (UI only, no backend wiring yet)
+  const [isSheetOpen, setSheetOpen] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -50,6 +56,25 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     const t = setInterval(fetchInfo, 2000);
     return () => { isMounted = false; clearInterval(t); };
   }, [imageUrl]);
+
+  // Keyboard shortcuts for the edit sheet
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isSheetOpen) return;
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        // Simulate submit (UI only)
+        setIsProcessing(true);
+        setTimeout(() => setIsProcessing(false), 1000);
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSheetOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSheetOpen]);
 
   const handleDownload = async () => {
     try {
@@ -95,14 +120,14 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
               </Button>
               {/* Edit Image text button */}
               <Button
-                onClick={() => {
-                  console.log('Edit Image clicked!');
-                  // TODO: Wire up edit functionality
-                }}
+                onClick={() => setSheetOpen(true)}
                 variant="ghost"
                 size="sm"
                 className="h-9 px-3 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
                 title="Edit Image"
+                aria-controls="edit-image-sheet"
+                aria-expanded={isSheetOpen}
+                disabled={isProcessing}
               >
                 Edit Image
               </Button>
@@ -121,7 +146,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
           </div>
 
           {/* Image */}
-          <div className="flex items-center justify-center flex-1 p-4">
+          <div className={`flex items-center justify-center flex-1 p-4 ${isSheetOpen ? 'pb-40 md:pb-44' : ''}`}>
             <img
               src={imageUrl}
               alt={alt}
@@ -129,6 +154,52 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
               loading="lazy"
             />
           </div>
+
+          {/* Bottom Edit Sheet */}
+          <AnimatePresence>
+            {isSheetOpen && (
+              <motion.div
+                id="edit-image-sheet"
+                role="region"
+                aria-label="Edit image prompt"
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 md:p-4"
+              >
+                <div className="max-w-5xl mx-auto">
+                  <label htmlFor="edit-prompt" className="sr-only">Describe the edit</label>
+                  <div className="flex items-end gap-3">
+                    <textarea
+                      id="edit-prompt"
+                      placeholder="Describe the edit… e.g., Remove the shadows from this image"
+                      className="flex-1 h-24 resize-none rounded-md border bg-card text-card-foreground placeholder-muted-foreground p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                    />
+                    <Button
+                      onClick={() => {
+                        setIsProcessing(true);
+                        setTimeout(() => setIsProcessing(false), 1000);
+                      }}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Processing…</span>
+                      ) : (
+                        'Edit image'
+                      )}
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Press ⌘/Ctrl + Enter to submit · Esc to close</span>
+                    <span className="hidden md:inline">No data sent yet — UI only</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </DialogContent>
     </Dialog>
