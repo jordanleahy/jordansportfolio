@@ -216,7 +216,7 @@ export const SystemPromptViewer = ({
         {isMobile ? (
           <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" onClick={handleCancel}>
+              <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="h-3 w-3" />
               </Button>
               <Button 
