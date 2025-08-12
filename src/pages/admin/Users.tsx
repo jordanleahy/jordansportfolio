@@ -1,4 +1,4 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import { AdminLayout } from "@/components/layouts/AdminLayout";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +33,7 @@ export default function AdminUsers() {
   });
 
   return (
-    <PageLayout>
+    <AdminLayout>
       <Helmet>
         <title>Users Admin - Usage Overview</title>
         <meta name="description" content="Admin view of all users with image counts and costs." />
@@ -96,6 +96,6 @@ export default function AdminUsers() {
           </CardContent>
         </Card>
       </main>
-    </PageLayout>
+    </AdminLayout>
   );
 }
