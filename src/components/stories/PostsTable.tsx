@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen, Star, Share2, Pencil, Clipboard, ExternalLink } from "lucide-react";
+import { Eye, BookOpen, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -51,6 +51,7 @@ export const PostsTable = ({
   const [isUpdatingCollection, setIsUpdatingCollection] = useState(false);
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [newPostsCount, setNewPostsCount] = useState(0);
+  const [hasImageActivity, setHasImageActivity] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -663,21 +664,23 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Handle copying existing link to clipboard
-  const handleCopyLink = async () => {
+  // Check for image generation activity since last publish
+  const checkImageActivity = useCallback(async () => {
+    if (!themeId || !hasSharedLink) {
+      setHasImageActivity(false);
+      return;
+    }
+    
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-        toast.error('Please sign in to copy link');
-        return;
-      }
+      if (!session) return;
 
-      // Get the existing collection for this theme
-      const { data: existingCollection, error } = await supabase
+      // Get the last published collection update time
+      const { data: collection, error: collectionError } = await supabase
         .from('shared_collections')
-        .select('id, handle')
+        .select('updated_at')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .eq('theme_id', themeId)
@@ -685,20 +688,36 @@ const { handleGenerateImage } = useImageManager({
         .limit(1)
         .single();
 
-      if (error || !existingCollection) {
-        toast.error('No shareable link found');
+      if (collectionError || !collection) {
+        setHasImageActivity(false);
         return;
       }
 
-      const publicUrl = `${window.location.origin}/public/collections/${existingCollection.handle}/${existingCollection.id}`;
-      await navigator.clipboard.writeText(publicUrl);
-      
-      toast.success('Link copied to clipboard!');
+      // Check if any posts have been updated (image generations) after collection update
+      const postIds = posts.map(p => p.id);
+      if (postIds.length === 0) {
+        setHasImageActivity(false);
+        return;
+      }
+
+      const { data: recentPosts, error: postsError } = await supabase
+        .from('social_media_posts')
+        .select('updated_at')
+        .in('id', postIds)
+        .gt('updated_at', collection.updated_at);
+
+      if (postsError) {
+        console.error('Error checking image activity:', postsError);
+        setHasImageActivity(false);
+        return;
+      }
+
+      setHasImageActivity((recentPosts?.length || 0) > 0);
     } catch (error) {
-      console.error('Error copying link:', error);
-      toast.error('Failed to copy link');
+      console.error('Error checking image activity:', error);
+      setHasImageActivity(false);
     }
-  };
+  }, [themeId, hasSharedLink, posts]);
 
   // Handle updating existing collection with new posts
   const handleUpdateCollection = async () => {
@@ -919,6 +938,13 @@ const { handleGenerateImage } = useImageManager({
     }
   }, [selectedThemeId, category, userIsAdmin, posts]);
 
+  // Check for image activity when collection status or posts change
+  useEffect(() => {
+    if (userIsAdmin && category) {
+      checkImageActivity();
+    }
+  }, [checkImageActivity, userIsAdmin, category]);
+
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
   
@@ -1022,18 +1048,36 @@ const { handleGenerateImage } = useImageManager({
                         <Share2 className="h-3 w-3" />
                         Update ({newPostsCount})
                       </Button>
-                    ) : (
+                     ) : (
                       <Button 
                         variant="outline" 
                         size="icon" 
-                        onClick={hasSharedLink ? handleCopyLink : handleShare}
+                        onClick={handleShare}
                         disabled={isPublishing}
-                        aria-label={hasSharedLink ? "Copy Link" : "Share"}
-                        title={hasSharedLink ? "Copy Link" : "Share"}
+                        aria-label={
+                          !hasSharedLink 
+                            ? "Share" 
+                            : hasImageActivity 
+                              ? "Update & Open" 
+                              : "Open"
+                        }
+                        title={
+                          !hasSharedLink 
+                            ? "Publish collection and open in new tab" 
+                            : hasImageActivity 
+                              ? "Update collection with new images and open in new tab" 
+                              : "Open collection in new tab"
+                        }
                       >
-                        {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                        {!hasSharedLink ? (
+                          <ExternalLink className="h-4 w-4" />
+                        ) : hasImageActivity ? (
+                          <RefreshCw className="h-4 w-4" />
+                        ) : (
+                          <ExternalLink className="h-4 w-4" />
+                        )}
                       </Button>
-                    )}
+                     )}
                     <Button
                       variant="outline"
                       size="icon"
@@ -1164,19 +1208,37 @@ const { handleGenerateImage } = useImageManager({
                             <Share2 className="h-3 w-3" />
                             Update ({newPostsCount})
                           </Button>
-                        ) : (
+                         ) : (
                           <Button 
                             variant="outline" 
                             size="icon" 
-                            onClick={hasSharedLink ? handleCopyLink : handleShare}
+                            onClick={handleShare}
                             disabled={isPublishing}
                             className=""
-                            aria-label={hasSharedLink ? "Copy Link" : "Share"}
-                            title={hasSharedLink ? "Copy Link" : "Share"}
+                            aria-label={
+                              !hasSharedLink 
+                                ? "Share" 
+                                : hasImageActivity 
+                                  ? "Update & Open" 
+                                  : "Open"
+                            }
+                            title={
+                              !hasSharedLink 
+                                ? "Publish collection and open in new tab" 
+                                : hasImageActivity 
+                                  ? "Update collection with new images and open in new tab" 
+                                  : "Open collection in new tab"
+                            }
                           >
-                            {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+                            {!hasSharedLink ? (
+                              <ExternalLink className="h-4 w-4" />
+                            ) : hasImageActivity ? (
+                              <RefreshCw className="h-4 w-4" />
+                            ) : (
+                              <ExternalLink className="h-4 w-4" />
+                            )}
                           </Button>
-                        )}
+                         )}
                       <Button 
                         variant="outline" 
                         size="icon" 
