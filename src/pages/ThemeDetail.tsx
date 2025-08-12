@@ -28,6 +28,7 @@ import {
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
+import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
 
 export default function ThemeDetail() {
   const { theme } = useParams<{ theme: string }>();
@@ -174,7 +175,7 @@ export default function ThemeDetail() {
             <ColorThemeConsistencyChecker category={decodedTheme} />
             
             <ProcessingStatesProvider>
-              {themeData?.id && (
+              {themeData?.id && posts.length > 0 ? (
                 <PostsTable 
                   themeId={themeData.id}
                   posts={posts as any}
@@ -184,6 +185,8 @@ export default function ThemeDetail() {
                   selectedThemeId={selectedThemeId}
                   onThemeChange={setSelectedThemeId}
                 />
+              ) : (
+                <LibraryCollectionsFallback />
               )}
             </ProcessingStatesProvider>
           </Suspense>
