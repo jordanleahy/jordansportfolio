@@ -235,7 +235,7 @@ export default function PublicSharedCollection() {
             <div 
               className="absolute inset-0 rounded-full bg-cover bg-center bg-no-repeat"
               style={{
-                backgroundImage: 'url(/lovable-uploads/08b30626-61b7-484c-b0d6-7dd6806dd37b.png)'
+                backgroundImage: 'url(/lovable-uploads/0768e481-0efe-4e8f-8822-3806ba974f3b.png)'
               }}
             />
             {/* Glass-morphism overlay */}
