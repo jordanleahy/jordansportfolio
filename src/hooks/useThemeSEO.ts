@@ -29,18 +29,43 @@ export const useThemeSEO = (theme: Theme | null | undefined): ThemeSEOData => {
     const themeName = theme.theme_name;
     const themeSlug = encodeURIComponent(themeName);
     
-    // Use theme title as OG title
-    const title = `${themeName} - Stories & Insights`;
+    // Enhanced SEO logic for specific educational content
+    let title: string;
+    let description: string;
     
-    // Use theme description as OG description, with fallback
-    const description = theme.description || 
-      `Explore content and insights about ${themeName}. Healthcare technology stories, analysis, and expert perspectives.`;
+    // Special handling for educational/program content
+    if (themeName === 'Discover StoryShip' && theme.description?.includes('Scandinavian-inspired')) {
+      title = 'Origins and Guiding Philosophy - Scandinavian Educational Approach';
+      description = 'Discover our Scandinavian-inspired educational program established in 2010, blending Reggio-Emilia principles with child-led, project-based learning that honors curiosity, play, and children\'s rights.';
+    } 
+    // Check for other educational content indicators
+    else if (theme.description?.includes('Reggio-Emilia') || theme.description?.includes('child-led') || theme.description?.includes('educational')) {
+      title = `${themeName} - Educational Philosophy & Approach`;
+      description = theme.description.length > 160 
+        ? theme.description.substring(0, 157) + '...'
+        : theme.description;
+    }
+    // Check for healthcare/technology content
+    else if (theme.description?.includes('healthcare') || theme.description?.includes('technology') || theme.description?.includes('medical')) {
+      title = `${themeName} - Healthcare Technology Insights`;
+      description = theme.description || `Explore healthcare technology insights and analysis about ${themeName}. Expert perspectives on digital health, medical innovation, and industry trends.`;
+    }
+    // Default handling for other themes
+    else {
+      title = `${themeName} - Stories & Insights`;
+      description = theme.description || `Explore content and insights about ${themeName}. Stories, analysis, and expert perspectives.`;
+    }
+    
+    // Ensure description is optimized for SEO (max 160 characters)
+    if (description.length > 160) {
+      description = description.substring(0, 157) + '...';
+    }
     
     // Generate the SEO metadata using existing utility
     const seoData = generateSEOMetadata({
       title,
       description,
-      image: SEO_DEFAULTS.defaultImage, // Could be enhanced later with theme-specific images
+      image: SEO_DEFAULTS.defaultImage,
       url: `/stories/theme/${themeSlug}`,
       type: 'website'
     });
