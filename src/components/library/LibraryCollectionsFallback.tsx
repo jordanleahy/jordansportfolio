@@ -26,13 +26,11 @@ export const LibraryCollectionsFallback = ({ onCreateTheme }: LibraryCollections
         <h2 className="text-xl font-semibold text-foreground">
           Get Started with Library Themes
         </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          No posts in this theme yet. Browse our curated library collections for inspiration 
-          or create your first post to get started. These featured collections showcase the best 
-          content from our community, covering healthcare technology insights, industry analysis, 
-          and expert perspectives. Each collection contains carefully crafted stories that can 
-          help guide your own content creation journey.
-        </p>
+        <div className="text-muted-foreground max-w-2xl mx-auto space-y-2">
+          <p>No posts in this theme yet. Browse our curated library collections for inspiration or create your first post to get started.</p>
+          <p>These featured collections showcase the best content from our community, covering healthcare technology insights, industry analysis, and expert perspectives.</p>
+          <p>Each collection contains carefully crafted stories that can help guide your own content creation journey.</p>
+        </div>
         {onCreateTheme && (
           <Button onClick={onCreateTheme} className="gap-2">
             <Plus className="h-4 w-4" />
