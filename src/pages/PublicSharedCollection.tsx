@@ -3,7 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Share } from 'lucide-react';
+import { Share, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import type { User } from '@supabase/supabase-js';
 
 interface SharedCollection {
   id: string;
@@ -36,11 +38,29 @@ export default function PublicSharedCollection() {
   const [items, setItems] = useState<SharedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const publicUrl = `${window.location.origin}/public/collections/${handle}/${id}`;
   const firstPost = items[0];
   const pageTitle = firstPost?.title || collection?.title || `${handle} – Photo Collection`;
   const pageDescription = firstPost?.description || collection?.description || `A shareable image collection published by ${handle}.`;
+
+  useEffect(() => {
+    // Check authentication state
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -105,6 +125,30 @@ export default function PublicSharedCollection() {
     }
   };
 
+  const handleDownload = async (item: SharedItem) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      const imageUrl = item.image_1_1_url || item.image_16_9_url;
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${item.title} @ JordanLeahy.com.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Helmet>
@@ -156,13 +200,22 @@ export default function PublicSharedCollection() {
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
-                  <figure key={item.id} className="rounded-md overflow-hidden border">
-                    <img
-                      src={item.image_1_1_url || item.image_16_9_url}
-                      alt={`${item.title} – shared image`}
-                      loading="lazy"
-                      className="w-full h-auto block"
-                    />
+                  <figure key={item.id} className="rounded-md overflow-hidden border relative group">
+                    <div className="relative">
+                      <img
+                        src={item.image_1_1_url || item.image_16_9_url}
+                        alt={`${item.title} – shared image`}
+                        loading="lazy"
+                        className="w-full h-auto block"
+                      />
+                      <button
+                        onClick={() => handleDownload(item)}
+                        className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        aria-label={`Download ${item.title}`}
+                      >
+                        <Download className="w-4 h-4 text-gray-700" />
+                      </button>
+                    </div>
                     <figcaption className="p-3">
                       <div className="font-medium">{item.title}</div>
                       <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
@@ -174,6 +227,25 @@ export default function PublicSharedCollection() {
           </article>
         )}
       </main>
+
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Account Required</DialogTitle>
+            <DialogDescription>
+              You need to be signed in to download images. Create a free account to access downloads and other features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <a href="https://www.jordanleahy.com/auth" className="w-full">
+              <Button className="w-full">Sign Up Free</Button>
+            </a>
+            <a href="https://www.jordanleahy.com/auth" className="w-full">
+              <Button variant="outline" className="w-full">Sign In</Button>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
