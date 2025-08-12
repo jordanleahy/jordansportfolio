@@ -1852,6 +1852,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          image_1_1_url: string | null
           image_16_9_url: string
           position: number
           post_id: string
@@ -1862,6 +1863,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          image_1_1_url?: string | null
           image_16_9_url: string
           position: number
           post_id: string
@@ -1872,6 +1874,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_1_1_url?: string | null
           image_16_9_url?: string
           position?: number
           post_id?: string

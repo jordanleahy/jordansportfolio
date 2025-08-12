@@ -576,6 +576,14 @@ const { handleGenerateImage } = useImageManager({
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
+      console.log('🔍 Publishing collection with params:', {
+        p_handle: handle,
+        p_post_ids: candidateIds,
+        p_theme_id: themeId,
+        p_title: titleArg,
+        p_description: descriptionArg,
+      });
+
       const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: candidateIds,
@@ -585,7 +593,7 @@ const { handleGenerateImage } = useImageManager({
       });
       
       if (error) {
-        console.error(error);
+        console.error('❌ Error publishing collection:', error);
         toast.error(error.message || 'Failed to publish');
         return;
       }
@@ -791,6 +799,14 @@ const { handleGenerateImage } = useImageManager({
         const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
         const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
+        console.log('🔍 Sharing collection with params:', {
+          p_handle: newHandle,
+          p_post_ids: candidateIds,
+          p_theme_id: themeId,
+          p_title: titleArg,
+          p_description: descriptionArg,
+        });
+
         const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
           p_handle: newHandle,
           p_post_ids: candidateIds,
@@ -800,6 +816,7 @@ const { handleGenerateImage } = useImageManager({
         });
 
         if (error) {
+          console.error('❌ Error sharing collection:', error);
           throw error;
         }
 

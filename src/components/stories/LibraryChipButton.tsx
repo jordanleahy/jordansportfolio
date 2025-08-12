@@ -37,6 +37,14 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       const baseDesc = (post.description || '').replace(/\s+/g, ' ').trim();
       const descriptionArg = baseDesc.length > 0 ? baseDesc.slice(0, 165) : `A shareable image from ${titleArg}.`;
 
+      console.log('🔍 LibraryChipButton publishing with params:', {
+        p_handle: handle,
+        p_post_ids: [post.id],
+        p_theme_id: post.theme_id ?? null,
+        p_title: titleArg,
+        p_description: descriptionArg,
+      });
+
       const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: [post.id],
@@ -46,7 +54,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       });
 
       if (error) {
-        console.error('Publish error', error);
+        console.error('❌ LibraryChipButton publish error:', error);
         toast({ title: 'Failed to publish', description: error.message || 'Try again later', variant: 'destructive' });
         return;
       }
