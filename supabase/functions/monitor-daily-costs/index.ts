@@ -124,17 +124,18 @@ const handler = async (req: Request): Promise<Response> => {
       if (userEmail) {
         console.log(`Sending ${alert.action} alert for $${alert.threshold} threshold`);
         
-        await supabase.functions.invoke('send-usage-alert', {
-          body: {
-            userEmail,
-            userName,
-            usageType: 'Daily API Costs',
-            currentUsage: totalCost,
-            limit: 50, // Daily limit
-            percentageUsed: (totalCost / 50) * 100,
-            customMessage: alert.message
-          }
-        });
+        // Email sending disabled
+        // await supabase.functions.invoke('send-usage-alert', {
+        //   body: {
+        //     userEmail,
+        //     userName,
+        //     usageType: 'Daily API Costs',
+        //     currentUsage: totalCost,
+        //     limit: 50, // Daily limit
+        //     percentageUsed: (totalCost / 50) * 100,
+        //     customMessage: alert.message
+        //   }
+        // });
       }
     }
 
