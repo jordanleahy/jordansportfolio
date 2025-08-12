@@ -135,7 +135,6 @@ export default function PublicSharedCollection() {
               <Share className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <Button variant="outline" onClick={copyLink}>Copy link</Button>
             <Link to="/signup">
               <Button variant="secondary">Sign Up</Button>
             </Link>
