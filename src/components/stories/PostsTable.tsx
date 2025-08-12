@@ -778,7 +778,7 @@ const { handleGenerateImage } = useImageManager({
       if (themeId) {
         const { data, error: checkError } = await supabase
           .from('shared_collections')
-          .select('handle')
+          .select('handle, id')
           .eq('user_id', session.user.id)
           .eq('status', 'published')
           .eq('theme_id', themeId)
@@ -846,22 +846,8 @@ const { handleGenerateImage } = useImageManager({
         window.open(publicUrl, '_blank', 'noopener,noreferrer');
         toast.success('Opened share link in a new tab');
       } else {
-        // For existing collections, we need to get the collection ID
-        const { data: existingCollectionData, error: fetchError } = await supabase
-          .from('shared_collections')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .eq('status', 'published')
-          .eq('handle', handle)
-          .order('published_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (fetchError || !existingCollectionData) {
-          throw new Error('Could not find collection ID');
-        }
-
-        const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollectionData.id}`;
+        // For existing collections, use the collection ID we already have
+        const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollection.id}`;
         window.open(publicUrl, '_blank', 'noopener,noreferrer');
         toast.success('Opened share link in a new tab');
       }
