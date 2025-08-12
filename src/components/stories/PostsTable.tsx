@@ -652,7 +652,7 @@ const { handleGenerateImage } = useImageManager({
       if (themeId) {
         const { data, error: checkError } = await supabase
           .from('shared_collections')
-          .select('handle, id')
+          .select('handle')
           .eq('user_id', session.user.id)
           .eq('status', 'published')
           .eq('theme_id', themeId)
