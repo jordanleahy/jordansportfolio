@@ -24,6 +24,7 @@ interface SharedItem {
   title: string;
   description: string;
   image_16_9_url: string;
+  image_1_1_url: string;
   position: number;
   created_at: string;
 }
@@ -36,8 +37,9 @@ export default function PublicSharedCollection() {
   const [error, setError] = useState<string | null>(null);
 
   const publicUrl = `${window.location.origin}/public/collections/${handle}/${id}`;
-  const pageTitle = collection?.title || `${handle} – 16:9 Photo Collection`;
-  const pageDescription = collection?.description || `A shareable 16:9 image collection published by ${handle}.`;
+  const firstPost = items[0];
+  const pageTitle = firstPost?.title || collection?.title || `${handle} – Photo Collection`;
+  const pageDescription = firstPost?.description || collection?.description || `A shareable image collection published by ${handle}.`;
 
   useEffect(() => {
     let active = true;
@@ -94,8 +96,8 @@ export default function PublicSharedCollection() {
         <meta property="og:description" content={pageDescription.slice(0, 165)} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={publicUrl} />
-        {items[0]?.image_16_9_url && (
-          <meta property="og:image" content={items[0].image_16_9_url.startsWith('http') ? items[0].image_16_9_url : `${window.location.origin}${items[0].image_16_9_url}`} />
+        {firstPost?.image_1_1_url && (
+          <meta property="og:image" content={firstPost.image_1_1_url.startsWith('http') ? firstPost.image_1_1_url : `${window.location.origin}${firstPost.image_1_1_url}`} />
         )}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
@@ -123,15 +125,15 @@ export default function PublicSharedCollection() {
         )}
         {!loading && !error && (
           <article>
-            <h2 className="text-xl font-semibold mb-4">Sepsis Validation and Coding Guidance</h2>
-            <p className="text-muted-foreground mb-6">Sepsis is a life-threatening organ dysfunction caused by a dysregulated host response to infection. This post gently reviews when sepsis is considered for coding</p>
+            <h2 className="text-xl font-semibold mb-4">{firstPost?.title || collection?.title || 'Image Collection'}</h2>
+            <p className="text-muted-foreground mb-6">{firstPost?.description || collection?.description || 'A collection of images'}</p>
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
                   <figure key={item.id} className="rounded-md overflow-hidden border">
                     <img
-                      src={item.image_16_9_url}
-                      alt={`${item.title} – shared 16:9 image`}
+                      src={item.image_1_1_url || item.image_16_9_url}
+                      alt={`${item.title} – shared image`}
                       loading="lazy"
                       className="w-full h-auto block"
                     />
