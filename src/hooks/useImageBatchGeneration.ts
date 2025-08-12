@@ -169,7 +169,6 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
       body: { 
         title: request.title, 
         description: request.description, 
-        theme,
         category: request.category,
         colorTheme,
         themeId

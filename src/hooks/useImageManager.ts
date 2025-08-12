@@ -78,7 +78,6 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
         body: {
           title,
           description,
-          theme,
           category: category || 'cdi',
           aspectRatio: aspectRatio.replace('_', ':'),
           themeId

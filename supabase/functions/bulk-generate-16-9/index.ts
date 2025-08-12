@@ -110,6 +110,7 @@ serve(async (req) => {
           description: post.description,
           context: "table",
           aspect_ratio: "16:9",
+          themeId: post.theme_id,
         } as Record<string, unknown>;
 
         const promptResp = await supabase.functions.invoke("generate-image-prompt-dynamic", {
