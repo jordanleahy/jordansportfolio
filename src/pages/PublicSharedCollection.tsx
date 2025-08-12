@@ -229,20 +229,17 @@ export default function PublicSharedCollection() {
       </main>
 
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Account Required</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-none bg-transparent border-0 p-0 shadow-none">
+          <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center w-[95vw] md:w-[700px] mx-auto bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Account Required</h2>
+            <p className="text-base md:text-lg text-foreground/80 max-w-md">
               You need to be signed in to download images. Create a free account to access downloads and other features.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 mt-4">
-            <a href="https://www.jordanleahy.com/auth" className="w-full">
-              <Button className="w-full">Sign Up Free</Button>
-            </a>
-            <a href="https://www.jordanleahy.com/auth" className="w-full">
-              <Button variant="outline" className="w-full">Sign In</Button>
-            </a>
+            </p>
+            <div className="w-full max-w-sm">
+              <a href="https://www.jordanleahy.com/auth" className="w-full block">
+                <Button className="w-full mb-3" size="lg">Sign Up</Button>
+              </a>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
