@@ -32,12 +32,22 @@ import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
 export default function StoriesDashboard() {
+  console.log('[StoriesDashboard] Component rendering');
+  
   const {
     user,
     loading,
     isAdmin,
     roleLoading
   } = useAuth();
+  
+  console.log('[StoriesDashboard] Auth state:', { 
+    user: !!user, 
+    loading, 
+    isAdmin, 
+    roleLoading 
+  });
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -93,31 +103,48 @@ export default function StoriesDashboard() {
   // Enhanced initial load with loading states and error handling
   const [isLoadingThemes, setIsLoadingThemes] = useState(true);
   const [themesError, setThemesError] = useState<string | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
   React.useEffect(() => {
+    console.log('[StoriesDashboard] Load themes effect triggered', { 
+      userId: user?.id, 
+      loading, 
+      hasInitialized 
+    });
+    
     const loadThemes = async () => {
-      if (user?.id) {
+      if (user?.id && !hasInitialized) {
         try {
+          console.log('[StoriesDashboard] Starting theme load');
           setIsLoadingThemes(true);
           setThemesError(null);
           const themes = await optimizedSocialMediaService.getAvailableThemes();
+          console.log('[StoriesDashboard] Themes loaded successfully:', themes.length);
           setAvailableThemes(themes);
+          setHasInitialized(true);
 
           // Clear textarea on page load to prevent accidental re-submission on refresh
           setCustomThemeDescription('');
         } catch (error) {
-          console.error('Failed to fetch themes:', error);
+          console.error('[StoriesDashboard] Failed to fetch themes:', error);
           setThemesError(error.message || 'Failed to load themes');
           setAvailableThemes([]);
         } finally {
           setIsLoadingThemes(false);
         }
+      } else if (!user && !loading) {
+        // User is not authenticated, but auth is done loading
+        console.log('[StoriesDashboard] User not authenticated, stopping theme load');
+        setIsLoadingThemes(false);
+        setHasInitialized(true);
       }
     };
+    
     loadThemes();
-  }, [user?.id]);
+  }, [user?.id, loading, hasInitialized]);
 
   // First-visit hero visibility - always show for unauthenticated users
   useEffect(() => {
+    console.log('[StoriesDashboard] Hero visibility effect', { user: !!user });
     if (!user) {
       setShowHero(true);
       return;
@@ -615,6 +642,46 @@ export default function StoriesDashboard() {
       setIsGeneratingTheme(false);
     }
   };
+
+  // Early return with loading screen if still initializing
+  if (loading || (user && !hasInitialized)) {
+    console.log('[StoriesDashboard] Showing loading state', { loading, hasInitialized });
+    return (
+      <PageLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+            <p className="text-muted-foreground">Loading Story Ship...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Error boundary for unhandled errors
+  if (themesError && user) {
+    console.log('[StoriesDashboard] Showing error state', themesError);
+    return (
+      <PageLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="text-red-500 text-xl">⚠️</div>
+            <h2 className="text-xl font-semibold">Something went wrong</h2>
+            <p className="text-muted-foreground">{themesError}</p>
+            <Button onClick={() => window.location.reload()}>
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  console.log('[StoriesDashboard] Rendering main component', {
+    showHero,
+    userAuthenticated: !!user,
+    themesCount: availableThemes.length
+  });
 
   // Use React Query loading pattern instead of local loading state
   if (loading) {
