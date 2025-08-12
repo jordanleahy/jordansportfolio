@@ -79,7 +79,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     const instructions = `Please format your response as a JSON object with the following structure:
 
 {
-  "category": "string (1-100 characters, required)",
+  "category": "string (1-100 characters, optional)",
   "theme": "string (1-200 characters, required)", 
   "theme_description": "string (max 1000 characters, optional)",
   "posts": [
@@ -93,7 +93,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
 }
 
 REQUIREMENTS:
-- Category: Brief category name (e.g., "healthcare", "technology")
+- Category: Brief category name (optional - defaults to "general" if not provided)
 - Theme: Descriptive theme title
 - Posts: Array of 1-100 posts maximum
 - Day: Optional numbering for sequence (1-365)
@@ -126,8 +126,7 @@ AVOID:
 - Empty strings for required fields
 - Exceeding character limits
 - Invalid status values
-- More than 100 posts
-- Missing required fields`;
+- More than 100 posts`;
     try {
       await navigator.clipboard.writeText(instructions);
       toast({
