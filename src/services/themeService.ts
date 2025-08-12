@@ -117,95 +117,9 @@ export class ThemeService {
       category: theme.category 
     });
 
-    // Check for similar categories before creating with timeout
-    logger.info('Starting similarity check for duplicate prevention');
-    try {
-      // Add timeout to the similarity check (8 seconds total - allows for 5s OpenAI + processing)
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Similarity check timeout')), 8000)
-      );
-
-      const similarityCheckStart = Date.now();
-      const similarityPromise = supabase.functions.invoke('check-category-similarity', {
-        body: { 
-          category: theme.category, 
-          userId: user.id 
-        }
-      });
-
-      const similarityResponse = await Promise.race([similarityPromise, timeoutPromise]) as any;
-      const similarityDuration = Date.now() - similarityCheckStart;
-      
-      logger.success('Similarity check completed', { 
-        duration: `${similarityDuration}ms`,
-        hasResponse: !!similarityResponse?.data
-      });
-
-      if (similarityResponse?.data?.hasSimilar) {
-        const similarCategories = similarityResponse.data.similarCategories;
-        const topSimilar = similarCategories[0];
-        
-        logger.warn('Similar category detected - blocking creation', {
-          newCategory: theme.category,
-          existingCategory: topSimilar.category,
-          similarity: topSimilar.similarity,
-          themeName: topSimilar.theme_name,
-          threshold: similarityResponse.data.threshold
-        });
-
-        // Throw error with detailed information about the similar category
-        throw new Error(
-          `A similar theme already exists: "${topSimilar.theme_name}" with category "${topSimilar.category}". ` +
-          `Similarity: ${Math.round(topSimilar.similarity * 100)}%. ` +
-          `Please use the existing theme or choose a more distinct category name.`
-        );
-      }
-
-      logger.success('No similar categories found - proceeding with creation');
-      
-    } catch (error) {
-      // If it's our similarity error, re-throw it
-      if (error instanceof Error && error.message.includes('similar theme already exists')) {
-        logger.error('Theme creation blocked due to similarity', error);
-        throw error;
-      }
-      
-      // If it's a timeout or service error, log but continue (don't block theme creation)
-      logger.warn('Similarity check failed/timed out - proceeding with fallback check', { 
-        error: error.message,
-        duration: Date.now() - startTime
-      });
-      
-      // For network timeouts, we add an extra database-level check as fallback
-      const exactMatchStart = Date.now();
-      const { data: exactMatch } = await supabase
-        .from('themes')
-        .select('id, theme_name, category')
-        .eq('user_id', user.id)
-        .eq('category', theme.category)
-        .maybeSingle();
-
-      logger.timing('fallback_exact_match_check', exactMatchStart);
-
-      if (exactMatch) {
-        logger.error('Exact category match found - blocking creation', {
-          existingTheme: exactMatch.theme_name,
-          category: exactMatch.category
-        });
-        
-        throw new Error(
-          `A theme with category "${theme.category}" already exists: "${exactMatch.theme_name}". ` +
-          `Please use the existing theme or choose a different category name.`
-        );
-      }
-      
-      logger.success('No exact matches found - proceeding with creation');
-    }
-
-    // Proceed with theme creation
+    // Directly create the theme without duplicate/similarity blocking
     logger.info('Creating theme in database');
     const dbOperationStart = Date.now();
-    
     const { data, error } = await supabase
       .from('themes')
       .insert({
@@ -227,10 +141,10 @@ export class ThemeService {
     }
 
     const createdTheme = data as Theme;
-    
+
     // Invalidate cache
     this.invalidateAllCaches();
-    
+
     const totalDuration = logger.timing('createTheme_total', startTime);
     logger.success('Theme creation completed successfully', {
       themeId: createdTheme.id,
@@ -238,7 +152,7 @@ export class ThemeService {
       category: createdTheme.category,
       totalDuration: `${totalDuration}ms`
     });
-    
+
     return createdTheme;
   }
 
@@ -280,7 +194,7 @@ export class ThemeService {
 
     logger.setContext('findOrCreateTheme', user.id);
 
-    // Try to find existing theme by exact match first
+    // Try to find existing theme by exact match first (kept for find-or-create semantics)
     const { data: existingTheme } = await supabase
       .from('themes')
       .select('*')
@@ -297,45 +211,8 @@ export class ThemeService {
       return existingTheme as Theme;
     }
 
-    // Check for similar categories before creating new theme
-    logger.info('Checking for similar categories before creating theme');
-    try {
-      const similarityResponse = await supabase.functions.invoke('check-category-similarity', {
-        body: { 
-          category: category, 
-          userId: user.id 
-        }
-      });
-
-      if (similarityResponse.data?.hasSimilar) {
-        const similarCategories = similarityResponse.data.similarCategories;
-        const topSimilar = similarCategories[0];
-        
-        logger.success('Found similar theme - returning existing instead of creating new', {
-          newCategory: category,
-          existingCategory: topSimilar.category,
-          similarity: topSimilar.similarity,
-          existingThemeName: topSimilar.theme_name
-        });
-
-        // Return the existing similar theme instead of creating a new one
-        const { data: similarTheme } = await supabase
-          .from('themes')
-          .select('*')
-          .eq('id', topSimilar.id)
-          .single();
-
-        if (similarTheme) {
-          return similarTheme as Theme;
-        }
-      }
-    } catch (error) {
-      // If similarity check fails, log but continue with creation
-      logger.warn('Similarity check failed - proceeding with creation', { error: error.message });
-    }
-
-    // Create new theme if no similar one found
-    logger.info('No similar themes found - creating new theme');
+    // Create new theme without similarity-based blocking
+    logger.info('No exact match found - creating new theme');
     return this.createTheme({ theme_name, category, description });
   }
 

@@ -87,12 +87,10 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
           updated.delete(result.idempotencyKey);
           return updated;
         });
-        
-        const isDuplicate = result.duplicate || false;
-        const title = isDuplicate ? "Theme already exists ✅" : "Theme imported successfully! 🎉";
-        const description = isDuplicate 
-          ? `Found existing theme with ${result.insertedCount || 0} posts`
-          : `${result.insertedCount || 0} posts imported`;
+
+        // Simplified messaging: no duplicate-specific branch
+        const title = "Theme imported successfully! 🎉";
+        const description = `${result.insertedCount || 0} posts imported`;
         
         toast({
           title,
