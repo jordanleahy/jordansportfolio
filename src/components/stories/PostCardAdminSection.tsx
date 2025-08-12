@@ -57,7 +57,6 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       
       <div className="grid grid-cols-3 gap-3">
         <div className="flex items-center gap-1">
-          <LibraryChipButton post={post} />
           <BlogPostButton post={post} />
         </div>
         <Button
