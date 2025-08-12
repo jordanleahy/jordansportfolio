@@ -35,54 +35,68 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string, version_number: number}>>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
   
+  
   // Fetch existing versions from database
-  useEffect(() => {
-    const fetchVersions = async () => {
-      // Initialize with original image
-      const originalVersion = { id: 'original', url: imageUrl, version_number: 0 };
-      setImageVersions([originalVersion]);
-      
-      // Get post ID from image URL to fetch versions
-      // This is a simplified approach - in production you'd pass post_id as a prop
-      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/);
-      if (!urlMatch) return;
-      
-      const postId = urlMatch[1];
-      const currentAspectRatio = aspectRatio || '1:1'; // Default to 1:1 if not provided
-      
-      try {
-        const { data: versions, error } = await supabase
-          .from('image_versions')
-          .select('*')
-          .eq('post_id', postId)
-          .eq('aspect_ratio', currentAspectRatio)
-          .order('version_number', { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching image versions:', error);
-          return;
-        }
+  const fetchVersionsFromDatabase = async (postId: string, currentAspectRatio: string) => {
+    try {
+      const { data: versions, error } = await supabase
+        .from('image_versions')
+        .select('*')
+        .eq('post_id', postId)
+        .eq('aspect_ratio', currentAspectRatio)
+        .order('version_number', { ascending: true });
         
-        if (versions && versions.length > 0) {
-          const allVersions = [
-            originalVersion,
-            ...versions.map(v => ({
-              id: v.id,
-              url: v.edited_url,
-              prompt: v.edit_prompt,
-              version_number: v.version_number
-            }))
-          ];
-          setImageVersions(allVersions);
-          // Set to the latest version
-          setCurrentVersionIndex(allVersions.length - 1);
-        }
-      } catch (error) {
-        console.error('Error fetching versions:', error);
+      if (error) {
+        console.error('Error fetching image versions:', error);
+        return;
+      }
+      
+      const originalVersion = { id: 'original', url: imageUrl, version_number: 0 };
+      
+      if (versions && versions.length > 0) {
+        const allVersions = [
+          originalVersion,
+          ...versions.map(v => ({
+            id: v.id,
+            url: v.edited_url,
+            prompt: v.edit_prompt,
+            version_number: v.version_number
+          }))
+        ];
+        setImageVersions(allVersions);
+        // Set to the latest version
+        setCurrentVersionIndex(allVersions.length - 1);
+      } else {
+        setImageVersions([originalVersion]);
+        setCurrentVersionIndex(0);
+      }
+    } catch (error) {
+      console.error('Error fetching versions:', error);
+      // Fallback to original image only
+      setImageVersions([{ id: 'original', url: imageUrl, version_number: 0 }]);
+      setCurrentVersionIndex(0);
+    }
+  };
+
+  useEffect(() => {
+    const initializeVersions = async () => {
+      // Extract post ID from image URL
+      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/) || 
+                       imageUrl.match(/([a-f0-9-]{8}-[a-f0-9-]{4}-[a-f0-9-]{4}-[a-f0-9-]{4}-[a-f0-9-]{12})/);
+      const postId = urlMatch?.[1];
+      
+      console.log('Initializing versions for postId:', postId);
+      
+      if (postId) {
+        await fetchVersionsFromDatabase(postId, aspectRatio || '1:1');
+      } else {
+        // Fallback to original image only
+        setImageVersions([{ id: 'original', url: imageUrl, version_number: 0 }]);
+        setCurrentVersionIndex(0);
       }
     };
     
-    fetchVersions();
+    initializeVersions();
   }, [imageUrl, aspectRatio]);
   
   // Current image URL based on selected version
@@ -123,8 +137,11 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
       setIsProcessing(true);
       
       // Extract post ID from image URL for database storage
-      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/);
+      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/) || 
+                       imageUrl.match(/([a-f0-9-]{8}-[a-f0-9-]{4}-[a-f0-9-]{4}-[a-f0-9-]{4}-[a-f0-9-]{12})/);
       const postId = urlMatch?.[1];
+      
+      console.log('Extracted postId:', postId, 'from URL:', imageUrl);
       
       // Get current user ID
       const { data: { user } } = await supabase.auth.getUser();
@@ -138,18 +155,25 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
           userId: user?.id
         }
       });
+      
       if (error) throw error;
       const newUrl = (data as any)?.url as string | undefined;
       if (newUrl) {
-        // Add new version to the array
-        const newVersion = {
-          id: `edit-${Date.now()}`,
-          url: newUrl,
-          prompt: prompt.trim(),
-          version_number: imageVersions.length
-        };
-        setImageVersions(prev => [...prev, newVersion]);
-        setCurrentVersionIndex(prev => prev + 1);
+        // If we have postId, fetch updated versions from database
+        if (postId && user?.id) {
+          await fetchVersionsFromDatabase(postId, aspectRatio || '1:1');
+        } else {
+          // Fallback to local state if no postId
+          const newVersion = {
+            id: `edit-${Date.now()}`,
+            url: newUrl,
+            prompt: prompt.trim(),
+            version_number: imageVersions.length
+          };
+          setImageVersions(prev => [...prev, newVersion]);
+          setCurrentVersionIndex(prev => prev + 1);
+        }
+        
         setPrompt(""); // Clear prompt after successful edit
         setSheetOpen(false); // Close edit sheet
         toast.success('Edit complete');

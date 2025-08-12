@@ -56,6 +56,9 @@ serve(async (req) => {
       });
     }
 
+    console.log(`📥 Received request - postId: ${postId}, userId: ${userId}, prompt: "${prompt}"`);
+    console.log(`🖼️ Image URL: ${imageUrl}, aspect: ${aspectRatio}`);
+
     const size = mapSize(aspectRatio);
     const correlationId = crypto.randomUUID();
     console.log(`✏️ edit-image start: ${correlationId}`);
