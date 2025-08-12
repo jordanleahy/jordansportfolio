@@ -28,7 +28,6 @@ export type {
   CategoryCardProps,
   PostCardProps,
   PostsTableProps,
-  ThemeImportModalProps,
   CustomThemeModalProps
 } from './ui';
 

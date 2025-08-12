@@ -115,9 +115,6 @@ export interface CustomThemeModalProps {
   onImportComplete?: () => void;
 }
 
-export interface JsonImportDialogProps {
-  onImportComplete: () => void;
-}
 
 // Form and Input Types
 export interface ThemeDescriptionInput {
