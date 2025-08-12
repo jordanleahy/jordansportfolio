@@ -514,7 +514,7 @@ const { handleGenerateImage } = useImageManager({
         .select('id, include_in_library, featured')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
-        .eq('theme_id', themeId || null)
+        .eq('theme_id', themeId)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -576,7 +576,7 @@ const { handleGenerateImage } = useImageManager({
       const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: candidateIds,
-        p_theme_id: themeId || null,
+        p_theme_id: themeId,
         p_title: titleArg,
         p_description: descriptionArg,
       });
@@ -733,7 +733,7 @@ const { handleGenerateImage } = useImageManager({
         const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
           p_handle: newHandle,
           p_post_ids: candidateIds,
-          p_theme_id: themeId || null,
+          p_theme_id: themeId,
           p_title: titleArg,
           p_description: descriptionArg,
         });
@@ -745,11 +745,8 @@ const { handleGenerateImage } = useImageManager({
         handle = newHandle;
         setHasSharedLink(true); // Mark that a shared link now exists
         const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
-        await navigator.clipboard.writeText(publicUrl);
-        
-        toast.success('Public URL copied to clipboard!', {
-          description: `Your collection is shareable at: ${publicUrl}`
-        });
+        window.open(publicUrl, '_blank', 'noopener,noreferrer');
+        toast.success('Opened share link in a new tab');
       } else {
         // For existing collections, we need to get the collection ID
         const { data: existingCollectionData, error: fetchError } = await supabase
@@ -767,11 +764,8 @@ const { handleGenerateImage } = useImageManager({
         }
 
         const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollectionData.id}`;
-        await navigator.clipboard.writeText(publicUrl);
-        
-        toast.success('Public URL copied to clipboard!', {
-          description: `Your collection is shareable at: ${publicUrl}`
-        });
+        window.open(publicUrl, '_blank', 'noopener,noreferrer');
+        toast.success('Opened share link in a new tab');
       }
 
     } catch (error) {
@@ -799,7 +793,7 @@ const { handleGenerateImage } = useImageManager({
         .select('id, featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
-        .eq('theme_id', themeId || null)
+        .eq('theme_id', themeId)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
