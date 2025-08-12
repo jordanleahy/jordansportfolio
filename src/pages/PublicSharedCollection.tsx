@@ -135,9 +135,9 @@ export default function PublicSharedCollection() {
               <Share className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <Link to="/signup" className="flex-1 md:flex-none">
+            <a href="https://www.jordanleahy.com/auth" className="flex-1 md:flex-none">
               <Button variant="secondary" className="w-full md:w-auto">Sign Up</Button>
-            </Link>
+            </a>
           </div>
         </div>
       </header>
