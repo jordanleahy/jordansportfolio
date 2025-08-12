@@ -7,7 +7,9 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2 } from 'lucide-react';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -56,6 +58,9 @@ export const PostsTableView = memo(({
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('title');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [editingCell, setEditingCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
+  const [editValues, setEditValues] = useState<{[key: string]: string}>({});
+  const [hoveredCell, setHoveredCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
@@ -86,6 +91,49 @@ export const PostsTableView = memo(({
     } catch (error) {
       console.error('Batch generation failed:', error);
     }
+  };
+
+  const handleCellEdit = (postId: string, field: 'title' | 'description', currentValue: string) => {
+    setEditingCell({ postId, field });
+    setEditValues({ ...editValues, [`${postId}-${field}`]: currentValue });
+  };
+
+  const handleCellSave = async (postId: string, field: 'title' | 'description') => {
+    const key = `${postId}-${field}`;
+    const newValue = editValues[key];
+    
+    if (!newValue || newValue.trim() === '') {
+      // Don't save empty values
+      setEditingCell(null);
+      return;
+    }
+
+    try {
+      const currentPost = posts.find(p => p.id === postId);
+      if (!currentPost) return;
+
+      // Use the usePostEditor logic via onEditPost
+      await onEditPost?.({
+        ...currentPost,
+        [field]: newValue.trim()
+      });
+      
+      setEditingCell(null);
+      // Clear the edit value
+      const newEditValues = { ...editValues };
+      delete newEditValues[key];
+      setEditValues(newEditValues);
+    } catch (error) {
+      console.error('Failed to save edit:', error);
+    }
+  };
+
+  const handleCellCancel = (postId: string, field: 'title' | 'description') => {
+    const key = `${postId}-${field}`;
+    const newEditValues = { ...editValues };
+    delete newEditValues[key];
+    setEditValues(newEditValues);
+    setEditingCell(null);
   };
 
   const handleSort = (field: SortField) => {
@@ -175,12 +223,6 @@ export const PostsTableView = memo(({
               const createPostActions = () => {
                 const baseActions = [
                   {
-                    icon: <Edit className="h-4 w-4" />,
-                    onClick: () => onEditPost?.(post),
-                    title: "Edit post",
-                    loading: false
-                  },
-                  {
                     icon: <Copy className="h-4 w-4" />,
                     onClick: () => onCopyContent(post),
                     title: "Copy content",
@@ -229,13 +271,75 @@ export const PostsTableView = memo(({
               return (
               <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
                 <TableCell className="font-medium w-48">
-                  <div className="break-words leading-tight line-clamp-4">
-                    {post.title}
+                  <div 
+                    className="relative group"
+                    onMouseEnter={() => setHoveredCell({ postId: post.id, field: 'title' })}
+                    onMouseLeave={() => setHoveredCell(null)}
+                  >
+                    {editingCell?.postId === post.id && editingCell?.field === 'title' ? (
+                      <Input
+                        value={editValues[`${post.id}-title`] || ''}
+                        onChange={(e) => setEditValues({ ...editValues, [`${post.id}-title`]: e.target.value })}
+                        onBlur={() => handleCellSave(post.id, 'title')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleCellSave(post.id, 'title');
+                          if (e.key === 'Escape') handleCellCancel(post.id, 'title');
+                        }}
+                        autoFocus
+                        className="h-8 text-sm"
+                      />
+                    ) : (
+                      <div className="break-words leading-tight line-clamp-4 pr-6">
+                        {post.title}
+                      </div>
+                    )}
+                    {hoveredCell?.postId === post.id && hoveredCell?.field === 'title' && !editingCell && (
+                      <button
+                        onClick={() => handleCellEdit(post.id, 'title', post.title)}
+                        className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted rounded"
+                        title="Edit title"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="w-64">
-                  <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
-                    {post.description}
+                  <div 
+                    className="relative group"
+                    onMouseEnter={() => setHoveredCell({ postId: post.id, field: 'description' })}
+                    onMouseLeave={() => setHoveredCell(null)}
+                  >
+                    {editingCell?.postId === post.id && editingCell?.field === 'description' ? (
+                      <Textarea
+                        value={editValues[`${post.id}-description`] || ''}
+                        onChange={(e) => setEditValues({ ...editValues, [`${post.id}-description`]: e.target.value })}
+                        onBlur={() => handleCellSave(post.id, 'description')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleCellSave(post.id, 'description');
+                          }
+                          if (e.key === 'Escape') handleCellCancel(post.id, 'description');
+                        }}
+                        autoFocus
+                        className="min-h-16 text-sm resize-none"
+                        rows={3}
+                      />
+                    ) : (
+                      <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden pr-6">
+                        {post.description}
+                      </div>
+                    )}
+                    {hoveredCell?.postId === post.id && hoveredCell?.field === 'description' && !editingCell && (
+                      <button
+                        onClick={() => handleCellEdit(post.id, 'description', post.description || '')}
+                        className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted rounded"
+                        title="Edit description"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </TableCell>
                 {isAdmin && (

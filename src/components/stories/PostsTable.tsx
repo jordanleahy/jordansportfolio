@@ -16,6 +16,7 @@ import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
 import { PostEditModal } from "./PostEditModal";
+import { optimizedSocialMediaService } from "@/services/optimizedSocialMediaService";
 
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
@@ -60,9 +61,18 @@ export const PostsTable = ({
   const { isAdmin: userIsAdmin } = useUserRole();
 
   // Handle edit post
-  const handleEditPost = (post: SocialMediaPost) => {
-    setSelectedPost(post);
-    setEditModalOpen(true);
+  const handleEditPost = async (updatedPost: SocialMediaPost) => {
+    try {
+      await optimizedSocialMediaService.updatePost(updatedPost.id, {
+        title: updatedPost.title,
+        description: updatedPost.description
+      });
+      onPostsChange();
+      toast.success('Post updated successfully');
+    } catch (error) {
+      console.error('Failed to update post:', error);
+      toast.error('Failed to update post');
+    }
   };
 
   const handleEditSuccess = () => {

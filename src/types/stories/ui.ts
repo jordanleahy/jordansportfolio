@@ -86,7 +86,7 @@ export interface PostsTableViewProps {
   completingRows?: Set<string>;
   getRowAnimationClass?: (postId: string) => string;
   blogStatuses?: Record<string, BlogStatus>;
-  onEditPost?: (post: SocialMediaPost) => void;
+  onEditPost?: (post: SocialMediaPost) => void | Promise<void>;
 }
 
 export interface UploadState {
