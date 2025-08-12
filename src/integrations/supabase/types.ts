@@ -3053,14 +3053,22 @@ export type Database = {
         Returns: string
       }
       publish_shared_collection_16_9: {
-        Args: {
-          p_handle: string
-          p_title?: string
-          p_description?: string
-          p_post_ids?: string[]
-          p_category?: string
-          p_theme_id?: string
-        }
+        Args:
+          | {
+              p_handle: string
+              p_title?: string
+              p_description?: string
+              p_post_ids?: string[]
+              p_category?: string
+              p_theme_id?: string
+            }
+          | {
+              p_handle: string
+              p_title?: string
+              p_description?: string
+              p_post_ids?: string[]
+              p_theme_id?: string
+            }
         Returns: string
       }
       refresh_monthly_aggregates: {

@@ -40,7 +40,6 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       const { error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
         p_post_ids: [post.id],
-        p_category: post.category ?? null,
         p_theme_id: post.theme_id ?? null,
         p_title: titleArg,
         p_description: descriptionArg,
