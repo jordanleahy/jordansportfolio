@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Download, Loader2 } from "lucide-react";
@@ -27,7 +27,8 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const [sheetHeight, setSheetHeight] = useState(0);
   useEffect(() => {
     let isMounted = true;
     const fetchInfo = async () => {
@@ -76,6 +77,20 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSheetOpen]);
 
+  // Dynamically measure bottom sheet height and pad the image area
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!isSheetOpen || !el) {
+      setSheetHeight(0);
+      return;
+    }
+    const update = () => setSheetHeight(el.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isSheetOpen]);
+
   const handleDownload = async () => {
     try {
       const finalUrl = wmUrl || imageUrl;
@@ -97,12 +112,12 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-[95vw] w-auto h-[95vh] p-0 border-0 bg-black/90 overflow-hidden"
+        className="max-w-[95vw] w-auto h-[100dvh] md:h-[95vh] p-0 border-0 bg-black/90 overflow-hidden"
         onPointerDownOutside={onClose}
       >
-        <div className="relative flex flex-col w-full h-full">
+        <div className="relative flex flex-col w-full h-full min-h-0">
           {/* Header with title and buttons */}
-          <div className="flex items-center justify-between p-4 bg-black/70">
+          <div className="flex items-center justify-between p-4 bg-black/70 md:sticky md:top-0 md:z-10">
             <DialogTitle className="text-white text-lg font-semibold truncate mr-4">
               {formattedTitle}
             </DialogTitle>
@@ -146,7 +161,10 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
           </div>
 
           {/* Image */}
-          <div className={`flex items-center justify-center flex-1 p-4 ${isSheetOpen ? 'pb-40 md:pb-44' : ''}`}>
+          <div
+            className="flex items-center justify-center flex-1 p-4 min-h-0 overflow-auto"
+            style={{ paddingBottom: isSheetOpen ? `calc(${sheetHeight}px + env(safe-area-inset-bottom))` : 'env(safe-area-inset-bottom)' }}
+          >
             <img
               src={imageUrl}
               alt={alt}
@@ -162,11 +180,12 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 id="edit-image-sheet"
                 role="region"
                 aria-label="Edit image prompt"
+                ref={sheetRef}
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 md:p-4"
+                className="absolute bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 md:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
               >
                 <div className="max-w-5xl mx-auto">
                   <label htmlFor="edit-prompt" className="sr-only">Describe the edit</label>
