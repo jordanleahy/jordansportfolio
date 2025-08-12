@@ -27,9 +27,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // SEO utilities for OG generation
 const SEO_CONSTANTS = {
   siteUrl: 'https://jordanleahy.com',
-  siteName: 'Jordan Leahy',
-  defaultTitle: 'Jordan Leahy - Healthcare Technology & Product Development',
-  defaultDescription: 'Explore healthcare technology solutions, competitive intelligence, and product development insights from Jordan Leahy.',
+  siteName: 'Story Ship by Jordan leahy',
+  defaultTitle: 'Story Ship by Jordan leahy',
+  defaultDescription: 'Every Thought is a Visual Journey - Create Yours Today'.',
   // Use absolute URL for default OG image to ensure compatibility with crawlers
   defaultImage: 'https://jordanleahy.com/og-default.png',
   twitterHandle: '@jordanleigh'
