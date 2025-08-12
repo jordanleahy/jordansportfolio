@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Share } from 'lucide-react';
 
 interface SharedCollection {
   id: string;
@@ -86,6 +87,24 @@ export default function PublicSharedCollection() {
     try { await navigator.clipboard.writeText(publicUrl); } catch {}
   };
 
+  const shareCollection = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: pageTitle,
+          text: pageDescription,
+          url: publicUrl,
+        });
+      } catch (error) {
+        // User cancelled the share or error occurred
+        console.log('Share cancelled or failed');
+      }
+    } else {
+      // Fallback to copying link if Web Share API isn't available
+      copyLink();
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Helmet>
@@ -112,6 +131,10 @@ export default function PublicSharedCollection() {
             </div>
           </h1>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={shareCollection}>
+              <Share className="w-4 h-4 mr-2" />
+              Share
+            </Button>
             <Button variant="outline" onClick={copyLink}>Copy link</Button>
             <Link to="/signup">
               <Button variant="secondary">Sign Up</Button>
