@@ -7,7 +7,7 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit } from 'lucide-react';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -50,7 +50,8 @@ export const PostsTableView = memo(({
   animatingRows = new Set(),
   completingRows = new Set(),
   getRowAnimationClass = () => '',
-  blogStatuses = {}
+  blogStatuses = {},
+  onEditPost
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
   const [sortField, setSortField] = useState<SortField>('title');
@@ -173,6 +174,12 @@ export const PostsTableView = memo(({
             {sortedPosts.map((post, index) => {
               const createPostActions = () => {
                 const baseActions = [
+                  {
+                    icon: <Edit className="h-4 w-4" />,
+                    onClick: () => onEditPost?.(post),
+                    title: "Edit post",
+                    loading: false
+                  },
                   {
                     icon: <Copy className="h-4 w-4" />,
                     onClick: () => onCopyContent(post),

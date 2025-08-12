@@ -15,6 +15,7 @@ import { usePostActions } from "@/hooks/usePostActions";
 import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
+import { PostEditModal } from "./PostEditModal";
 
 import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
@@ -52,9 +53,21 @@ export const PostsTable = ({
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const [hasImageActivity, setHasImageActivity] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
+
+  // Handle edit post
+  const handleEditPost = (post: SocialMediaPost) => {
+    setSelectedPost(post);
+    setEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    onPostsChange();
+  };
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
@@ -1244,7 +1257,7 @@ const { handleGenerateImage } = useImageManager({
                       <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
                     </div>
                   ) : (
-                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                   )}
                 </TabsContent>
 
@@ -1255,7 +1268,7 @@ const { handleGenerateImage } = useImageManager({
                       <div className="text-sm">No posts have been published in this theme yet.</div>
                     </div>
                   ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} />
+                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                   )}
                 </TabsContent>
               </Tabs>
@@ -1302,6 +1315,14 @@ const { handleGenerateImage } = useImageManager({
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
 
       {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
+
+      {/* Edit Post Modal */}
+      <PostEditModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        post={selectedPost}
+        onSuccess={handleEditSuccess}
+      />
 
     </div>
   );
