@@ -117,7 +117,7 @@ export class ThemeService {
       category: theme.category 
     });
 
-    // Directly create the theme without duplicate/similarity blocking
+    // Always create the theme - no duplicate checks
     logger.info('Creating theme in database');
     const dbOperationStart = Date.now();
     const { data, error } = await supabase
@@ -194,25 +194,8 @@ export class ThemeService {
 
     logger.setContext('findOrCreateTheme', user.id);
 
-    // Try to find existing theme by exact match first (kept for find-or-create semantics)
-    const { data: existingTheme } = await supabase
-      .from('themes')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('theme_name', theme_name)
-      .eq('category', category)
-      .maybeSingle();
-
-    if (existingTheme) {
-      logger.info('Found exact matching theme', {
-        themeId: existingTheme.id,
-        theme_name: existingTheme.theme_name
-      });
-      return existingTheme as Theme;
-    }
-
-    // Create new theme without similarity-based blocking
-    logger.info('No exact match found - creating new theme');
+    // Always create new theme - deprecating "find" behavior
+    logger.info('Creating new theme (deprecated exact match check)');
     return this.createTheme({ theme_name, category, description });
   }
 

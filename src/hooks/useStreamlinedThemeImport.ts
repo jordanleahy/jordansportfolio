@@ -88,7 +88,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
           return updated;
         });
 
-        // Simplified messaging: no duplicate-specific branch
+        // Standard success messaging
         const title = "Theme imported successfully! 🎉";
         const description = `${result.insertedCount || 0} posts imported`;
         

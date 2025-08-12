@@ -391,19 +391,7 @@ export default function StoriesDashboard() {
           stream: false
         }
       });
-      const isDuplicate = data && data.type === 'duplicate_theme' || error && /duplicate|23505|409/i.test(error.message || '');
-      if (isDuplicate) {
-        setDuplicateInfo({
-          category: data && data.category || 'existing-category',
-          theme: data && data.theme || shimmerTheme.theme_name
-        });
-        toast({
-          title: 'Category exists',
-          description: 'Create this theme under a new category?'
-        });
-        setIsGeneratingTheme(false);
-        return;
-      }
+      // Remove duplicate handling - always proceed with generation
       if (error) {
         throw new Error(`Edge function error: ${error.message}`);
       }
