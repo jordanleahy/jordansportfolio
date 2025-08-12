@@ -137,28 +137,32 @@ export const useImageGeneration = () => {
         })
         .eq('id', post.id);
 
-      // Create and upload watermarked variant (client-side)
-      try {
-        await supabase.from('social_media_posts')
-          .update({ image_1_1_watermark_status: 'processing' })
-          .eq('id', post.id);
-
-        const wmFile = await createWatermarkedImageFile(blob, fileName, 'image/jpeg');
-        const uploadResult = await uploadFileToStorage(wmFile, 'social-media-images', 'watermarked');
-        if (uploadResult.success && uploadResult.url) {
-          await supabase.from('social_media_posts')
-            .update({ image_1_1_watermark_url: uploadResult.url, image_1_1_watermark_status: 'complete' })
-            .eq('id', post.id);
-        } else {
-          await supabase.from('social_media_posts')
-            .update({ image_1_1_watermark_status: 'failed' })
-            .eq('id', post.id);
-        }
-      } catch (e) {
-        await supabase.from('social_media_posts')
-          .update({ image_1_1_watermark_status: 'failed' })
-          .eq('id', post.id);
-      }
+      // Create and upload watermarked variant (background processing)
+      // Set status to processing immediately and handle watermarking asynchronously
+      supabase.from('social_media_posts')
+        .update({ image_1_1_watermark_status: 'processing' })
+        .eq('id', post.id)
+        .then(() => {
+          // Handle watermarking in background (non-blocking)
+          createWatermarkedImageFile(blob, fileName, 'image/jpeg')
+            .then(wmFile => uploadFileToStorage(wmFile, 'social-media-images', 'watermarked'))
+            .then(uploadResult => {
+              if (uploadResult.success && uploadResult.url) {
+                return supabase.from('social_media_posts')
+                  .update({ image_1_1_watermark_url: uploadResult.url, image_1_1_watermark_status: 'complete' })
+                  .eq('id', post.id);
+              } else {
+                return supabase.from('social_media_posts')
+                  .update({ image_1_1_watermark_status: 'failed' })
+                  .eq('id', post.id);
+              }
+            })
+            .catch(() => {
+              supabase.from('social_media_posts')
+                .update({ image_1_1_watermark_status: 'failed' })
+                .eq('id', post.id);
+            });
+        });
 
       // Refresh the posts data
       onPostsChange?.();
