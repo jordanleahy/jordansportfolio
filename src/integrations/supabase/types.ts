@@ -3001,12 +3001,19 @@ export type Database = {
         Returns: undefined
       }
       insert_category_content: {
-        Args: {
-          category_name: string
-          posts_data: Json
-          theme_description_param?: string
-          theme_id_param?: string
-        }
+        Args:
+          | {
+              category_name: string
+              posts_data: Json
+              theme_description_param?: string
+              theme_id_param?: string
+            }
+          | {
+              posts_data: Json
+              category_name?: string
+              theme_description_param?: string
+              theme_id_param?: string
+            }
         Returns: number
       }
       insert_cdi_content: {
@@ -3024,6 +3031,14 @@ export type Database = {
       insert_engineering_work_report_agent: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      insert_posts_for_theme: {
+        Args: {
+          theme_id: string
+          posts_data: Json
+          theme_description_param?: string
+        }
+        Returns: number
       }
       insert_sample_agents: {
         Args: Record<PropertyKey, never>

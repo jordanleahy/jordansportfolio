@@ -60,12 +60,18 @@ export class ThemeValidationService {
 
     const data = { ...rawData } as Record<string, unknown>;
 
-    // Clean category
-    if (typeof data.category === 'string') {
-      const originalCategory = data.category;
-      data.category = this.sanitizeText(data.category).toLowerCase().replace(/\s+/g, '-');
-      if (data.category !== originalCategory) {
-        fixes.push('Normalized category name');
+    // Clean and normalize the category if present (now optional)
+    if (data.category !== undefined) {
+      if (typeof data.category === 'string' && data.category.trim().length > 0) {
+        const originalCategory = data.category;
+        data.category = this.sanitizeText(data.category).toLowerCase().replace(/\s+/g, '-');
+        if (data.category !== originalCategory) {
+          fixes.push('Normalized category name');
+        }
+      } else {
+        // Remove invalid/empty category
+        warnings.push('Category field was empty or invalid, will be derived from theme or use default');
+        delete data.category;
       }
     }
 

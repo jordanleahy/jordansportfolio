@@ -119,13 +119,19 @@ serve(async (req) => {
 
 
       // Create the theme
+      // Resolve category: prefer from data, otherwise use a safe default
+      const resolvedCategory = aiResult.cleanedData.category || 'general';
+      if (!aiResult.cleanedData.category) {
+        console.log('⚠️ CATEGORY: Not provided in JSON, using default:', resolvedCategory);
+      }
+
       const { data: createdTheme, error: themeError } = await supabase
         .from('themes')
         .insert({
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
           description: aiResult.cleanedData.theme_description || null,
-          category: aiResult.cleanedData.category
+          category: resolvedCategory
         })
         .select('id')
         .single();
@@ -142,13 +148,12 @@ serve(async (req) => {
         );
       }
 
-      // Insert posts using existing function
+      // Insert posts using new wrapper function (category derived from theme)
       const { data: insertedCount, error: postsError } = await supabase
-        .rpc('insert_category_content', {
-          category_name: aiResult.cleanedData.category,
+        .rpc('insert_posts_for_theme', {
+          theme_id: createdTheme.id,
           posts_data: aiResult.cleanedData.posts,
-          theme_description_param: aiResult.cleanedData.theme_description || null,
-          theme_id_param: createdTheme.id
+          theme_description_param: aiResult.cleanedData.theme_description || null
         });
 
       if (postsError) {
@@ -178,9 +183,9 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       });
 
-      // Generate system prompt in background
+      // Generate system prompt in background using resolved category
       EdgeRuntime.waitUntil(
-        generateSystemPromptBackground(supabase, aiResult.cleanedData.category, user.id)
+        generateSystemPromptBackground(supabase, resolvedCategory, user.id)
           .then((promptResult) => {
             console.log('📝 SYSTEM PROMPT RESULT:', {
               success: promptResult?.success || false,
@@ -193,7 +198,7 @@ serve(async (req) => {
             
             // Start blog post prompt generation after theme image (regardless of image result)
             console.log('📝 BLOG POST PROMPTS: Starting prompt generation');
-            return generateBlogPostPromptsBackground(aiResult.cleanedData.category, user.id);
+            return generateBlogPostPromptsBackground(resolvedCategory, user.id);
           })
           .then((promptsResult) => {
             console.log('📝 BLOG POST PROMPTS RESULT:', {
@@ -213,7 +218,7 @@ serve(async (req) => {
         JSON.stringify({
           success: true,
           insertedCount: insertedCount,
-          data: aiResult.cleanedData,
+          data: { ...aiResult.cleanedData, category: resolvedCategory },
           idempotencyKey,
           themeId: createdTheme.id,
           message: 'Theme imported successfully. Background processing initiated.'
@@ -335,10 +340,11 @@ Return only valid JSON:`;
 function validateThemeFields(data: any, fixes: string[], warnings: string[], errors: string[]): any {
   const validated = { ...data };
 
-  // Validate required fields
-  if (!validated.category || typeof validated.category !== 'string') {
-    errors.push('Category is required and must be a string');
-  } else if (validated.category.length > 100) {
+  // Category is now optional - will be derived from theme or use default
+  if (validated.category !== undefined && (typeof validated.category !== 'string' || validated.category.trim().length === 0)) {
+    warnings.push('Category provided but invalid, will use default category');
+    delete validated.category;
+  } else if (validated.category && validated.category.length > 100) {
     validated.category = validated.category.substring(0, 100);
     fixes.push('Truncated category to 100 characters');
   }

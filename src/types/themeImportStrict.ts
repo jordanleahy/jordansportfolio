@@ -9,7 +9,7 @@ export const ThemePostSchema = z.object({
 });
 
 export const ThemeImportDataSchema = z.object({
-  category: z.string().min(1).max(100),
+  category: z.string().min(1).max(100).optional(),
   theme: z.string().min(1).max(200),
   theme_description: z.string().max(1000).optional(),
   posts: z.array(ThemePostSchema).min(1).max(200),
