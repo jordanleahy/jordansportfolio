@@ -3,13 +3,14 @@ import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
+import shipImage from "@/assets/story-ship-bg.png";
 
 const Index = () => {
   // Generate SEO metadata for homepage redirect
   const homeSEO = generateSEOMetadata({
-    title: "Jordan Leahy - AI Content Marketing Platform",
-    description: "Create compelling marketing content with AI-powered stories and insights. Join Jordan Leahy's platform for healthcare technology content.",
-    image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
+    title: "Story Ship — Every Thought is a Visual Journey",
+    description: "Every Thought is a Visual Journey",
+    image: shipImage,
     url: "/",
     type: "website"
   });
@@ -30,6 +31,7 @@ const Index = () => {
         <meta name="twitter:title" content={homeSEO.ogTitle} />
         <meta name="twitter:description" content={homeSEO.ogDescription} />
         <meta name="twitter:image" content={homeSEO.image} />
+        <link rel="canonical" href="/" />
       </Helmet>
       <Navigate to="/stories" replace />
     </>

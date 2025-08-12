@@ -28,6 +28,8 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
+import { generateSEOMetadata } from '@/utils/seoHelpers';
+import shipImage from '@/assets/story-ship-bg.png';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -66,6 +68,15 @@ export default function StoriesDashboard() {
     category: string;
     theme: string;
   } | null>(null);
+
+  // Precompute SEO for /stories
+  const storiesSEO = generateSEOMetadata({
+    title: 'Story Ship — Every Thought is a Visual Journey',
+    description: 'Every Thought is a Visual Journey',
+    image: shipImage,
+    url: '/stories',
+    type: 'website'
+  });
 
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -697,8 +708,18 @@ export default function StoriesDashboard() {
   if (UI_FLAGS.enableStoriesFirstVisitHero && showHero && availableThemes.length === 0) {
     return <PageLayout>
         <Helmet>
-          <title>Story Ship — Every Thought is a Visual Journey</title>
-          <meta name="description" content="Every Thought is a Visual Journey" />
+          <title>{storiesSEO.title}</title>
+          <meta name="description" content={storiesSEO.description} />
+          <meta property="og:title" content={storiesSEO.ogTitle} />
+          <meta property="og:description" content={storiesSEO.ogDescription} />
+          <meta property="og:image" content={storiesSEO.image} />
+          <meta property="og:url" content={storiesSEO.url} />
+          <meta property="og:type" content={storiesSEO.type} />
+          <meta property="og:site_name" content={storiesSEO.siteName} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={storiesSEO.ogTitle} />
+          <meta name="twitter:description" content={storiesSEO.ogDescription} />
+          <meta name="twitter:image" content={storiesSEO.image} />
           <link rel="canonical" href="/stories" />
         </Helmet>
         <div className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center gap-8 relative overflow-hidden">
@@ -749,8 +770,18 @@ export default function StoriesDashboard() {
   }
   return <PageLayout>
       <Helmet>
-        <title>Story Ship — Every Thought is a Visual Journey</title>
-        <meta name="description" content="Every Thought is a Visual Journey" />
+        <title>{storiesSEO.title}</title>
+        <meta name="description" content={storiesSEO.description} />
+        <meta property="og:title" content={storiesSEO.ogTitle} />
+        <meta property="og:description" content={storiesSEO.ogDescription} />
+        <meta property="og:image" content={storiesSEO.image} />
+        <meta property="og:url" content={storiesSEO.url} />
+        <meta property="og:type" content={storiesSEO.type} />
+        <meta property="og:site_name" content={storiesSEO.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={storiesSEO.ogTitle} />
+        <meta name="twitter:description" content={storiesSEO.ogDescription} />
+        <meta name="twitter:image" content={storiesSEO.image} />
         <link rel="canonical" href="/stories" />
       </Helmet>
         <Section id="hero" fluid className="min-h-[calc(100vh-420px)] sm:min-h-[calc(100vh-380px)] md:min-h-[calc(100vh-360px)] py-0 px-0">
