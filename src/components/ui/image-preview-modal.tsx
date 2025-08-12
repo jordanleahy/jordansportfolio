@@ -97,7 +97,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-black/90"
+        className="max-w-[95vw] w-auto h-[95vh] p-0 border-0 bg-black/90 overflow-hidden"
         onPointerDownOutside={onClose}
       >
         <div className="relative flex flex-col w-full h-full">
