@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen, Star, Share2, Pencil } from "lucide-react";
+import { Eye, BookOpen, Star, Share2, Pencil, Clipboard } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { ColorThemeSelector } from "./ColorThemeSelector";
@@ -46,6 +46,7 @@ export const PostsTable = ({
   const [isFeaturing, setIsFeaturing] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isInLibrary, setIsInLibrary] = useState(false);
+  const [hasSharedLink, setHasSharedLink] = useState(false);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -631,9 +632,49 @@ const { handleGenerateImage } = useImageManager({
       if (!error && latest) {
         setIsFeatured(latest.featured || false);
         setIsInLibrary(latest.include_in_library || false);
+        setHasSharedLink(true); // Collection exists, so link is available
+      } else {
+        setHasSharedLink(false);
       }
     } catch (e) {
       console.error('Failed to check collection status', e);
+    }
+  };
+
+  // Handle copying existing link to clipboard
+  const handleCopyLink = async () => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('Please sign in to copy link');
+        return;
+      }
+
+      // Get the existing collection for this theme
+      const { data: existingCollection, error } = await supabase
+        .from('shared_collections')
+        .select('id, handle')
+        .eq('user_id', session.user.id)
+        .eq('status', 'published')
+        .eq('theme_id', themeId || null)
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error || !existingCollection) {
+        toast.error('No shareable link found');
+        return;
+      }
+
+      const publicUrl = `${window.location.origin}/public/collections/${existingCollection.handle}/${existingCollection.id}`;
+      await navigator.clipboard.writeText(publicUrl);
+      
+      toast.success('Link copied to clipboard!');
+    } catch (error) {
+      console.error('Error copying link:', error);
+      toast.error('Failed to copy link');
     }
   };
 
@@ -707,6 +748,7 @@ const { handleGenerateImage } = useImageManager({
         }
 
         handle = newHandle;
+        setHasSharedLink(true); // Mark that a shared link now exists
         const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
         await navigator.clipboard.writeText(publicUrl);
         
@@ -902,12 +944,12 @@ const { handleGenerateImage } = useImageManager({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={handleShare}
+                      onClick={hasSharedLink ? handleCopyLink : handleShare}
                       disabled={isPublishing}
-                      aria-label="Share"
-                      title="Share"
+                      aria-label={hasSharedLink ? "Copy Link" : "Share"}
+                      title={hasSharedLink ? "Copy Link" : "Share"}
                     >
-                      <Share2 className="h-4 w-4" />
+                      {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
                     </Button>
                     <Button
                       variant="outline"
@@ -1029,13 +1071,13 @@ const { handleGenerateImage } = useImageManager({
                         <Button 
                           variant="outline" 
                           size="icon" 
-                          onClick={handleShare}
+                          onClick={hasSharedLink ? handleCopyLink : handleShare}
                           disabled={isPublishing}
                           className=""
-                          aria-label="Share"
-                          title="Share"
+                          aria-label={hasSharedLink ? "Copy Link" : "Share"}
+                          title={hasSharedLink ? "Copy Link" : "Share"}
                         >
-                          <Share2 className="h-4 w-4" />
+                          {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
                         </Button>
                       <Button 
                         variant="outline" 
