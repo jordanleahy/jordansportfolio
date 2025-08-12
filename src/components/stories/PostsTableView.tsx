@@ -154,9 +154,11 @@ export const PostsTableView = memo(({
           <TableHead>
             <div className="w-64">Description</div>
           </TableHead>
-          <SortableHeader field="status">
-            <div className="w-32">Status</div>
-          </SortableHeader>
+          {isAdmin && (
+            <SortableHeader field="status">
+              <div className="w-32">Status</div>
+            </SortableHeader>
+          )}
           <TableHead>
             <div className="w-48">Images</div>
           </TableHead>
@@ -226,11 +228,13 @@ export const PostsTableView = memo(({
                 {post.description}
               </div>
             </TableCell>
-            <TableCell className="w-32">
-              <div className="flex gap-2 items-center flex-wrap">
-                <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
-              </div>
-            </TableCell>
+            {isAdmin && (
+              <TableCell className="w-32">
+                <div className="flex gap-2 items-center flex-wrap">
+                  <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
+                </div>
+              </TableCell>
+            )}
             <TableCell className="w-48">
               <div className="grid grid-cols-3 gap-1">
                 {/* Top row: 16:9, 4:3, 1:1 */}
