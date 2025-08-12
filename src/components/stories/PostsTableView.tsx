@@ -30,7 +30,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-type SortField = 'day' | 'title' | 'created_at' | 'status';
+type SortField = 'title' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 export const PostsTableView = memo(({
@@ -53,7 +53,7 @@ export const PostsTableView = memo(({
   blogStatuses = {}
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
-  const [sortField, setSortField] = useState<SortField>('day');
+  const [sortField, setSortField] = useState<SortField>('title');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
@@ -103,17 +103,9 @@ export const PostsTableView = memo(({
       let bValue: string | number;
 
       switch (sortField) {
-        case 'day':
-          aValue = a.day || 0;
-          bValue = b.day || 0;
-          break;
         case 'title':
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
-          break;
-        case 'created_at':
-          aValue = new Date(a.created_at).getTime();
-          bValue = new Date(b.created_at).getTime();
           break;
         case 'status':
           aValue = a.status;
@@ -156,18 +148,12 @@ export const PostsTableView = memo(({
     <Table>
       <TableHeader>
         <TableRow className="h-12">
-          <SortableHeader field="day">
-            <div className="w-12">Day</div>
-          </SortableHeader>
           <SortableHeader field="title">
             <div className="w-48">Title</div>
           </SortableHeader>
           <TableHead>
             <div className="w-64">Description</div>
           </TableHead>
-          <SortableHeader field="created_at">
-            <div className="w-24">Date</div>
-          </SortableHeader>
           <SortableHeader field="status">
             <div className="w-32">Status</div>
           </SortableHeader>
@@ -230,11 +216,6 @@ export const PostsTableView = memo(({
           const isBulk = isProcessingCtx(post.id, 'bulk_generate');
           return (
           <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
-            <TableCell className="font-medium w-12">
-              <div className="truncate">
-                {post.day || '-'}
-              </div>
-            </TableCell>
             <TableCell className="font-medium w-48">
               <div className="break-words leading-tight line-clamp-4">
                 {post.title}
@@ -243,11 +224,6 @@ export const PostsTableView = memo(({
             <TableCell className="w-64">
               <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
                 {post.description}
-              </div>
-            </TableCell>
-            <TableCell className="w-24">
-              <div className="truncate">
-                {new Date(post.created_at).toLocaleDateString()}
               </div>
             </TableCell>
             <TableCell className="w-32">
