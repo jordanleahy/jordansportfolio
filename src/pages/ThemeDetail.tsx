@@ -10,6 +10,8 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useThemeDetailsByName } from '@/hooks/useOptimizedStories';
 import { useColorThemes } from '@/hooks/useColorThemes';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useThemeSEO } from '@/hooks/useThemeSEO';
+import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Trash2, MoreVertical } from 'lucide-react';
 import {
   AlertDialog,
@@ -44,6 +46,9 @@ export default function ThemeDetail() {
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
+
+  // Generate SEO metadata for the theme
+  const seoData = useThemeSEO(themeData);
 
   const handleDeleteTheme = async () => {
     if (!themeData?.id) {
@@ -97,6 +102,21 @@ export default function ThemeDetail() {
 
   return (
     <PageLayout>
+      <Helmet>
+        <title>{seoData.title}</title>
+        <meta name="description" content={seoData.description} />
+        <meta property="og:title" content={seoData.ogTitle} />
+        <meta property="og:description" content={seoData.ogDescription} />
+        <meta property="og:image" content={seoData.image} />
+        <meta property="og:url" content={seoData.url} />
+        <meta property="og:type" content={seoData.type} />
+        <meta property="og:site_name" content={seoData.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoData.ogTitle} />
+        <meta name="twitter:description" content={seoData.ogDescription} />
+        <meta name="twitter:image" content={seoData.image} />
+        <link rel="canonical" href={seoData.url} />
+      </Helmet>
       <div className="container mx-auto py-4 px-4">
         {/* Navigation Header */}
         <div className="mb-4 flex items-center justify-between">
