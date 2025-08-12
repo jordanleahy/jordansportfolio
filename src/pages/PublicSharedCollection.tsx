@@ -199,29 +199,49 @@ export default function PublicSharedCollection() {
             <p className="text-muted-foreground mb-6">{firstPost?.description || collection?.description || 'A collection of images'}</p>
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map((item) => (
-                  <figure key={item.id} className="rounded-md overflow-hidden border relative group">
-                    <div className="relative">
-                      <img
-                        src={item.image_1_1_url || item.image_16_9_url}
-                        alt={`${item.title} – shared image`}
-                        loading="lazy"
-                        className="w-full h-auto block"
-                      />
-                      <button
-                        onClick={() => handleDownload(item)}
-                        className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        aria-label={`Download ${item.title}`}
-                      >
-                        <Download className="w-4 h-4 text-gray-700" />
-                      </button>
-                    </div>
-                    <figcaption className="p-3">
-                      <div className="font-medium">{item.title}</div>
-                      <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
-                    </figcaption>
-                  </figure>
-                ))}
+                {items.map((item, index) => {
+                  const isBlurred = !user && index >= 3;
+                  
+                  return (
+                    <figure key={item.id} className={`rounded-md overflow-hidden border relative group ${isBlurred ? 'blur-sm' : ''}`}>
+                      <div className="relative">
+                        <img
+                          src={item.image_1_1_url || item.image_16_9_url}
+                          alt={`${item.title} – shared image`}
+                          loading="lazy"
+                          className="w-full h-auto block"
+                        />
+                        {isBlurred && (
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            <div className="text-white font-semibold text-center p-4">
+                              <p className="mb-2">Sign up to view</p>
+                              <Button 
+                                onClick={() => setShowAuthModal(true)}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                Create Account
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        {!isBlurred && (
+                          <button
+                            onClick={() => handleDownload(item)}
+                            className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            aria-label={`Download ${item.title}`}
+                          >
+                            <Download className="w-4 h-4 text-gray-700" />
+                          </button>
+                        )}
+                      </div>
+                      <figcaption className="p-3">
+                        <div className="font-medium">{item.title}</div>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
+                      </figcaption>
+                    </figure>
+                  );
+                })}
               </div>
             </section>
           </article>
