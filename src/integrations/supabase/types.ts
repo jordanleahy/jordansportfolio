@@ -2888,6 +2888,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_old_cached_prompts: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_old_submissions: {
         Args: Record<PropertyKey, never>
         Returns: number
