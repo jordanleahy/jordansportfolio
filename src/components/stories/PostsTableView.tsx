@@ -220,21 +220,13 @@ export const PostsTableView = memo(({
           </TableHeader>
           <TableBody>
             {sortedPosts.map((post, index) => {
-              const createPostActions = () => {
-                const baseActions = [
-                  {
-                    icon: <Copy className="h-4 w-4" />,
-                    onClick: () => onCopyContent(post),
-                    title: "Copy content",
-                    loading: false
-                  },
-                  {
-                    icon: <Trash2 className="h-4 w-4" />,
-                    onClick: () => onDeletePost(post.id),
-                    title: "Delete post",
-                    loading: false
-                  }
-                ];
+              const createLeftActions = () => {
+                const copyAction = {
+                  icon: <Copy className="h-4 w-4" />,
+                  onClick: () => onCopyContent(post),
+                  title: "Copy content",
+                  loading: false
+                };
 
                 const adminActions = [
                   {
@@ -257,7 +249,16 @@ export const PostsTableView = memo(({
                   }
                 ];
 
-                return isAdmin ? [...baseActions.slice(0, 1), ...adminActions, ...baseActions.slice(1)] : baseActions;
+                return isAdmin ? [copyAction, ...adminActions] : [copyAction];
+              };
+
+              const createRightActions = () => {
+                return [{
+                  icon: <Trash2 className="h-4 w-4" />,
+                  onClick: () => onDeletePost(post.id),
+                  title: "Delete post",
+                  loading: false
+                }];
               };
 
               const selectorProps = {
@@ -445,25 +446,41 @@ export const PostsTableView = memo(({
                   </div>
                 </TableCell>
                 <TableCell className="w-48">
-                  <div className="flex gap-1 flex-wrap">
-                    {createPostActions().map((action, actionIndex) => (
-                      <ActionButton
-                        key={actionIndex}
-                        icon={action.icon}
-                        onClick={action.onClick}
-                        loading={action.loading}
-                        title={action.title}
-                      />
-                    ))}
-                    {isAdmin && (
-                    <BlogPostButtonForRow 
-                      post={post}
-                      creatingBlogIds={creatingBlogIds}
-                      onCreateBlogPost={onCreateBlogPost}
-                      blogStatus={blogStatuses[post.id]}
-                    />
-                    )}
-                    <SingleAspectRatioSelector {...selectorProps} />
+                  <div className="flex justify-between items-start">
+                    {/* Left container: Copy + Image actions */}
+                    <div className="flex gap-1 flex-wrap">
+                      {createLeftActions().map((action, actionIndex) => (
+                        <ActionButton
+                          key={actionIndex}
+                          icon={action.icon}
+                          onClick={action.onClick}
+                          loading={action.loading}
+                          title={action.title}
+                        />
+                      ))}
+                      {isAdmin && (
+                        <BlogPostButtonForRow 
+                          post={post}
+                          creatingBlogIds={creatingBlogIds}
+                          onCreateBlogPost={onCreateBlogPost}
+                          blogStatus={blogStatuses[post.id]}
+                        />
+                      )}
+                      <SingleAspectRatioSelector {...selectorProps} />
+                    </div>
+                    
+                    {/* Right container: Delete action */}
+                    <div className="flex gap-1">
+                      {createRightActions().map((action, actionIndex) => (
+                        <ActionButton
+                          key={actionIndex}
+                          icon={action.icon}
+                          onClick={action.onClick}
+                          loading={action.loading}
+                          title={action.title}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>
