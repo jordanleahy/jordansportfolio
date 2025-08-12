@@ -230,15 +230,25 @@ export default function PublicSharedCollection() {
 
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
         <DialogContent className="max-w-none bg-transparent border-0 p-0 shadow-none">
-          <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center w-[95vw] md:w-[700px] mx-auto bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Account Required</h2>
-            <p className="text-base md:text-lg text-foreground/80 max-w-md">
-              You need to be signed in to download images. Create a free account to access downloads and other features.
-            </p>
-            <div className="w-full max-w-sm">
-              <a href="https://www.jordanleahy.com/auth" className="w-full block">
-                <Button className="w-full mb-3" size="lg">Sign Up</Button>
-              </a>
+          <div className="relative w-[95vw] md:w-[700px] mx-auto">
+            {/* Background Image */}
+            <div 
+              className="absolute inset-0 rounded-full bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: 'url(/lovable-uploads/08b30626-61b7-484c-b0d6-7dd6806dd37b.png)'
+              }}
+            />
+            {/* Glass-morphism overlay */}
+            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Account Required</h2>
+              <p className="text-base md:text-lg text-foreground/80 max-w-md">
+                You need to be signed in to download images. Create a free account to access downloads and other features.
+              </p>
+              <div className="w-full max-w-sm">
+                <a href="https://www.jordanleahy.com/auth" className="w-full block">
+                  <Button className="w-full mb-3" size="lg">Sign Up</Button>
+                </a>
+              </div>
             </div>
           </div>
         </DialogContent>
