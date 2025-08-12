@@ -562,11 +562,11 @@ const { handleGenerateImage } = useImageManager({
       const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
       const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
-      const candidates = scoped.filter(p => !!p.image_16_9_url);
+      const candidates = scoped.filter(p => !!p.image_1_1_url);
       const candidateIds = candidates.map(p => p.id);
       
       if (candidateIds.length === 0) {
-        toast.error('No posts with 16:9 images found on this page');
+        toast.error('No posts with 1:1 images found on this page');
         return;
       }
 
@@ -576,7 +576,7 @@ const { handleGenerateImage } = useImageManager({
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
-      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
+      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: candidateIds,
         p_theme_id: null,
@@ -667,11 +667,11 @@ const { handleGenerateImage } = useImageManager({
         const newHandle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
         const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
-        const candidates = scoped.filter(p => !!p.image_16_9_url);
+        const candidates = scoped.filter(p => !!p.image_1_1_url);
         const candidateIds = candidates.map(p => p.id);
         
         if (candidateIds.length === 0) {
-          toast.error('No posts with 16:9 images found to share');
+          toast.error('No posts with 1:1 images found to share');
           return;
         }
 
@@ -681,7 +681,7 @@ const { handleGenerateImage } = useImageManager({
         const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
         const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
-        const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
+        const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
           p_handle: newHandle,
           p_post_ids: candidateIds,
           p_theme_id: themeId || null,

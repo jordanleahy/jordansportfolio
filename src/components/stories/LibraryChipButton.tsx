@@ -37,7 +37,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       const baseDesc = (post.description || '').replace(/\s+/g, ' ').trim();
       const descriptionArg = baseDesc.length > 0 ? baseDesc.slice(0, 165) : `A shareable image from ${titleArg}.`;
 
-      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
+      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: [post.id],
         p_theme_id: post.theme_id ?? null,
@@ -67,7 +67,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
     }
   };
 
-  const disabled = isPublishing || !post.image_16_9_url; // requires 16:9 image per RPC
+  const disabled = isPublishing || !post.image_1_1_url; // requires 1:1 image per RPC
 
   return (
     <Button
@@ -76,7 +76,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       className="rounded-full px-3 inline-flex items-center gap-1"
       onClick={handlePublishSingle}
       disabled={disabled}
-      title={!post.image_16_9_url ? 'Add a 16:9 image to publish to Library' : 'Publish to Library'}
+      title={!post.image_1_1_url ? 'Add a 1:1 image to publish to Library' : 'Publish to Library'}
     >
       <BookOpen className="h-3 w-3" />
       Library
