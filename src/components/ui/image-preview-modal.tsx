@@ -24,13 +24,25 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [wmStatus, setWmStatus] = useState<string>('none');
   const isLoading = wmStatus !== 'complete' || !wmUrl;
 
-  // Edit sheet state (UI only, no backend wiring yet)
+  // Edit sheet state and version control
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const [sheetHeight, setSheetHeight] = useState(0);
-  const [editedUrl, setEditedUrl] = useState<string | null>(null);
+  
+  // Version control state
+  const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string}>>([]);
+  const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
+  
+  // Initialize versions with original image
+  useEffect(() => {
+    setImageVersions([{ id: 'original', url: imageUrl }]);
+    setCurrentVersionIndex(0);
+  }, [imageUrl]);
+  
+  // Current image URL based on selected version
+  const currentImageUrl = imageVersions[currentVersionIndex]?.url || imageUrl;
   useEffect(() => {
     let isMounted = true;
     const fetchInfo = async () => {
@@ -71,7 +83,16 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
       if (error) throw error;
       const newUrl = (data as any)?.url as string | undefined;
       if (newUrl) {
-        setEditedUrl(newUrl);
+        // Add new version to the array
+        const newVersion = {
+          id: `edit-${Date.now()}`,
+          url: newUrl,
+          prompt: prompt.trim()
+        };
+        setImageVersions(prev => [...prev, newVersion]);
+        setCurrentVersionIndex(prev => prev + 1);
+        setPrompt(""); // Clear prompt after successful edit
+        setSheetOpen(false); // Close edit sheet
         toast.success('Edit complete');
       } else {
         toast.error('No image returned');
@@ -117,7 +138,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
 
   const handleDownload = async () => {
     try {
-      const finalUrl = wmUrl || imageUrl;
+      const finalUrl = wmUrl || currentImageUrl;
       const response = await fetch(finalUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -184,13 +205,39 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
             </div>
           </div>
 
+          {/* Version Control Thumbnails */}
+          {imageVersions.length > 1 && (
+            <div className="px-4 py-2 bg-black/50">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                {imageVersions.map((version, index) => (
+                  <button
+                    key={version.id}
+                    onClick={() => setCurrentVersionIndex(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      index === currentVersionIndex 
+                        ? 'border-white shadow-lg' 
+                        : 'border-white/30 hover:border-white/60'
+                    }`}
+                    title={version.prompt || (index === 0 ? 'Original' : `Edit ${index}`)}
+                  >
+                    <img
+                      src={version.url}
+                      alt={version.prompt || (index === 0 ? 'Original' : `Edit ${index}`)}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Image */}
           <div
             className="flex items-center justify-center flex-1 p-4 min-h-0 overflow-auto"
             style={{ paddingBottom: isSheetOpen ? `calc(${sheetHeight}px + env(safe-area-inset-bottom))` : 'env(safe-area-inset-bottom)' }}
           >
             <img
-              src={editedUrl || imageUrl}
+              src={currentImageUrl}
               alt={alt}
               className="max-w-full max-h-full object-contain rounded"
               loading="lazy"
