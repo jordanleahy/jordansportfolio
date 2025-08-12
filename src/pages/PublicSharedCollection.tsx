@@ -18,6 +18,13 @@ interface SharedCollection {
   created_at: string;
   updated_at: string;
   published_at: string | null;
+  theme_id: string | null;
+}
+
+interface Theme {
+  id: string;
+  theme_name: string;
+  description: string | null;
 }
 
 interface SharedItem {
@@ -35,6 +42,8 @@ interface SharedItem {
 export default function PublicSharedCollection() {
   const { handle, id } = useParams<{ handle: string; id: string }>();
   const [collection, setCollection] = useState<SharedCollection | null>(null);
+  const [theme, setTheme] = useState<Theme | null>(null);
+  const [firstPost, setFirstPost] = useState<SharedItem | null>(null);
   const [items, setItems] = useState<SharedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +51,10 @@ export default function PublicSharedCollection() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const publicUrl = `${window.location.origin}/public/collections/${handle}/${id}`;
-  const firstPost = items[0];
-  const pageTitle = firstPost?.title || collection?.title || `${handle} – Photo Collection`;
-  const pageDescription = firstPost?.description || collection?.description || `A shareable image collection published by ${handle}.`;
+  
+  // Priority system for OG metadata: First post > Theme data > Collection data > Fallback
+  const pageTitle = firstPost?.title || theme?.theme_name || collection?.title || `${handle} – Photo Collection`;
+  const pageDescription = firstPost?.description || theme?.description || collection?.description || `A shareable image collection published by ${handle}.`;
 
   useEffect(() => {
     // Check authentication state
@@ -90,9 +100,24 @@ export default function PublicSharedCollection() {
           .order('position', { ascending: true });
         if (itErr) throw itErr;
 
+        // Fetch theme data if collection has a theme_id
+        let themeData = null;
+        if (col.theme_id) {
+          const { data: thm, error: thmErr } = await supabase
+            .from('themes')
+            .select('id, theme_name, description')
+            .eq('id', col.theme_id)
+            .maybeSingle();
+          if (!thmErr && thm) {
+            themeData = thm as Theme;
+          }
+        }
+
         if (!active) return;
         setCollection(col as SharedCollection);
         setItems((it || []) as SharedItem[]);
+        setTheme(themeData);
+        setFirstPost((it && it.length > 0) ? it[0] as SharedItem : null);
       } catch (e: any) {
         console.error(e);
         setError('Failed to load');
@@ -195,8 +220,8 @@ export default function PublicSharedCollection() {
         )}
         {!loading && !error && (
           <article>
-            <h2 className="text-xl font-semibold mb-4">{firstPost?.title || collection?.title || 'Image Collection'}</h2>
-            <p className="text-muted-foreground mb-6">{firstPost?.description || collection?.description || 'A collection of images'}</p>
+            <h2 className="text-xl font-semibold mb-4">{pageTitle}</h2>
+            <p className="text-muted-foreground mb-6">{pageDescription}</p>
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item, index) => {
