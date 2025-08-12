@@ -1899,6 +1899,7 @@ export type Database = {
           item_count: number
           published_at: string | null
           status: string
+          theme_id: string | null
           title: string | null
           updated_at: string
           user_id: string
@@ -1914,6 +1915,7 @@ export type Database = {
           item_count?: number
           published_at?: string | null
           status?: string
+          theme_id?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
@@ -1929,6 +1931,7 @@ export type Database = {
           item_count?: number
           published_at?: string | null
           status?: string
+          theme_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string

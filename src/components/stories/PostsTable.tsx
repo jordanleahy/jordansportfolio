@@ -656,12 +656,16 @@ const { handleGenerateImage } = useImageManager({
           .eq('user_id', session.user.id)
           .eq('status', 'published')
           .eq('theme_id', themeId)
-          .maybeSingle();
+          .single();
         
         if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
+          // Only throw if it's not a "no rows returned" error
+          if (checkError.code !== 'PGRST116') {
+            console.error('Error checking existing collection:', checkError);
+          }
+        } else {
+          existingCollection = data;
         }
-        existingCollection = data;
       }
 
       let handle = existingCollection?.handle;
