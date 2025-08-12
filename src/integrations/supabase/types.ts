@@ -3096,6 +3096,10 @@ export type Database = {
         Args: { cache_key_param: string }
         Returns: undefined
       }
+      update_shared_collection_1_1: {
+        Args: { p_collection_id: string; p_theme_id?: string }
+        Returns: string
+      }
       upgrade_generic_system_prompts: {
         Args: Record<PropertyKey, never>
         Returns: string

@@ -48,6 +48,9 @@ export const PostsTable = ({
   const [isFeatured, setIsFeatured] = useState(false);
   const [isInLibrary, setIsInLibrary] = useState(false);
   const [hasSharedLink, setHasSharedLink] = useState(false);
+  const [isUpdatingCollection, setIsUpdatingCollection] = useState(false);
+  const [collectionId, setCollectionId] = useState<string | null>(null);
+  const [newPostsCount, setNewPostsCount] = useState(0);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -616,7 +619,7 @@ const { handleGenerateImage } = useImageManager({
 
       const { data: latest, error } = await supabase
         .from('shared_collections')
-        .select('featured, include_in_library')
+        .select('id, featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .eq('theme_id', themeId)
@@ -627,9 +630,25 @@ const { handleGenerateImage } = useImageManager({
       if (!error && latest) {
         setIsFeatured(latest.featured || false);
         setIsInLibrary(latest.include_in_library || false);
-        setHasSharedLink(true); // Collection exists, so link is available
+        setHasSharedLink(true);
+        setCollectionId(latest.id);
+
+        // Check if there are new posts not in the collection
+        const { data: collectionItems, error: itemsError } = await supabase
+          .from('shared_collection_items')
+          .select('post_id')
+          .eq('collection_id', latest.id);
+
+        if (!itemsError && collectionItems) {
+          const collectionPostIds = new Set(collectionItems.map(item => item.post_id));
+          const currentPostsWithImages = posts.filter(p => !!p.image_1_1_url);
+          const newPosts = currentPostsWithImages.filter(p => !collectionPostIds.has(p.id));
+          setNewPostsCount(newPosts.length);
+        }
       } else {
         setHasSharedLink(false);
+        setCollectionId(null);
+        setNewPostsCount(0);
       }
     } catch (e) {
       console.error('Failed to check collection status', e);
@@ -670,6 +689,48 @@ const { handleGenerateImage } = useImageManager({
     } catch (error) {
       console.error('Error copying link:', error);
       toast.error('Failed to copy link');
+    }
+  };
+
+  // Handle updating existing collection with new posts
+  const handleUpdateCollection = async () => {
+    if (!collectionId) return;
+    
+    try {
+      setIsUpdatingCollection(true);
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data: updatedCollectionId, error } = await supabase.rpc('update_shared_collection_1_1', {
+        p_collection_id: collectionId,
+        p_theme_id: themeId,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh collection status to update the UI
+      await checkCollectionStatus();
+      
+      toast.success(`Updated collection with all current posts`);
+      
+      // Open the updated collection
+      const { data: collectionData, error: fetchError } = await supabase
+        .from('shared_collections')
+        .select('handle')
+        .eq('id', updatedCollectionId)
+        .single();
+        
+      if (!fetchError && collectionData) {
+        const publicUrl = `${window.location.origin}/public/collections/${collectionData.handle}/${updatedCollectionId}`;
+        window.open(publicUrl, '_blank', 'noopener,noreferrer');
+      }
+      
+    } catch (error) {
+      console.error('Error updating collection:', error);
+      toast.error('Failed to update collection. Please try again.');
+    } finally {
+      setIsUpdatingCollection(false);
     }
   };
 
@@ -743,7 +804,8 @@ const { handleGenerateImage } = useImageManager({
         }
 
         handle = newHandle;
-        setHasSharedLink(true); // Mark that a shared link now exists
+        setHasSharedLink(true);
+        setCollectionId(collectionId);
         const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
         window.open(publicUrl, '_blank', 'noopener,noreferrer');
         toast.success('Opened share link in a new tab');
@@ -833,12 +895,12 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Check collection status on mount and when theme changes
+  // Check collection status on mount and when theme changes or posts change
   useEffect(() => {
     if (userIsAdmin && category) {
       checkCollectionStatus();
     }
-  }, [selectedThemeId, category, userIsAdmin]);
+  }, [selectedThemeId, category, userIsAdmin, posts]);
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
@@ -930,16 +992,31 @@ const { handleGenerateImage } = useImageManager({
                     >
                       <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      onClick={hasSharedLink ? handleCopyLink : handleShare}
-                      disabled={isPublishing}
-                      aria-label={hasSharedLink ? "Copy Link" : "Share"}
-                      title={hasSharedLink ? "Copy Link" : "Share"}
-                    >
-                      {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-                    </Button>
+                    {hasSharedLink && newPostsCount > 0 ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleUpdateCollection}
+                        disabled={isUpdatingCollection}
+                        className="gap-1 text-xs"
+                        aria-label={`Update & Share (${newPostsCount} new images)`}
+                        title={`Update collection with ${newPostsCount} new images and open in new tab`}
+                      >
+                        <Share2 className="h-3 w-3" />
+                        Update ({newPostsCount})
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={hasSharedLink ? handleCopyLink : handleShare}
+                        disabled={isPublishing}
+                        aria-label={hasSharedLink ? "Copy Link" : "Share"}
+                        title={hasSharedLink ? "Copy Link" : "Share"}
+                      >
+                        {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="icon"
@@ -1057,17 +1134,32 @@ const { handleGenerateImage } = useImageManager({
                         >
                           <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={hasSharedLink ? handleCopyLink : handleShare}
-                          disabled={isPublishing}
-                          className=""
-                          aria-label={hasSharedLink ? "Copy Link" : "Share"}
-                          title={hasSharedLink ? "Copy Link" : "Share"}
-                        >
-                          {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-                        </Button>
+                        {hasSharedLink && newPostsCount > 0 ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleUpdateCollection}
+                            disabled={isUpdatingCollection}
+                            className="gap-1 text-xs"
+                            aria-label={`Update & Share (${newPostsCount} new images)`}
+                            title={`Update collection with ${newPostsCount} new images and open in new tab`}
+                          >
+                            <Share2 className="h-3 w-3" />
+                            Update ({newPostsCount})
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={hasSharedLink ? handleCopyLink : handleShare}
+                            disabled={isPublishing}
+                            className=""
+                            aria-label={hasSharedLink ? "Copy Link" : "Share"}
+                            title={hasSharedLink ? "Copy Link" : "Share"}
+                          >
+                            {hasSharedLink ? <Clipboard className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                          </Button>
+                        )}
                       <Button 
                         variant="outline" 
                         size="icon" 
