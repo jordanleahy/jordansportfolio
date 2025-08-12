@@ -80,26 +80,9 @@ export const useUnifiedRealtime = ({
           handleVendorUpdate(eventType, data);
           break;
         case 'api_usage_tracking': {
-          if (eventType === 'INSERT') {
-            const rec = data.new as any;
-            const rt = rec?.request_type;
-            if (rec?.success && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
-              // Successful image generation – invalidate usage summary and subscription status
-              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.usageSummary });
-              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.subscriptionStatus });
-              onApiUsageUpdate?.();
-            }
-          } else if (eventType === 'UPDATE') {
-            const n = data.new as any;
-            const o = data.old as any;
-            const rt = n?.request_type;
-            const successFlippedTrue = !!n?.success && !o?.success;
-            if (successFlippedTrue && (rt === 'image_generation' || rt === 'gpt_image_generation')) {
-              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.usageSummary });
-              queryClient.invalidateQueries({ queryKey: QUERY_KEYS.subscriptionStatus });
-              onApiUsageUpdate?.();
-            }
-          }
+          // Simplified: just trigger callbacks for any usage tracking changes
+          // Individual hooks will handle their own real-time subscriptions
+          onApiUsageUpdate?.();
           break;
         }
       }
