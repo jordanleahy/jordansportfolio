@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, Download, Loader2 } from 'lucide-react';
+import { X, Download, Loader2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { ImagePreviewModalProps } from '@/types/stories/ui';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,6 +90,19 @@ export const ImagePreviewModal = ({
                 disabled={isLoading}
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
+              </Button>
+
+              {/* Edit Image button */}
+              <Button
+                onClick={() => {
+                  // TODO: Wire up edit functionality
+                }}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title="Edit Image"
+              >
+                <Edit className="h-5 w-5" />
               </Button>
               
               {/* Close button */}
