@@ -157,6 +157,31 @@ export const ImageHoverOverlay = ({
           </Button>
         )}
       </div>
+
+      {/* Edit Image text button - positioned below the floating icons */}
+      {imageUrl && (
+        <div
+          className={cn(
+            "absolute bottom-2 right-2 transition-all duration-300 hidden md:block z-10",
+            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
+          )}
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              // TODO: Wire up edit functionality
+            }}
+            className={cn(
+              "bg-black/80 hover:bg-black text-white shadow-lg transition-all duration-200 text-xs px-3 py-1",
+              isHovered ? "delay-250" : ""
+            )}
+          >
+            Edit Image
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
