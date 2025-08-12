@@ -103,8 +103,8 @@ export default function PublicSharedCollection() {
       </Helmet>
 
       <header className="border-b">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center md:justify-between gap-4">
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-center md:text-left">
             Create Free Illustrations in Minutes On <img src="/lovable-uploads/80e9ea7a-2cf5-4c9c-91f9-e663036e85e2.png" alt="Story Ship logo" className="h-8 w-auto inline" /> <a href="https://www.jordanleahy.com/stories" className="underline hover:no-underline">Story Ship</a>
           </h1>
           <div className="flex items-center gap-2">
