@@ -9,7 +9,7 @@ import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2 } from 'lucide-react';
+import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2, RefreshCw } from 'lucide-react';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -221,6 +221,13 @@ export const PostsTableView = memo(({
           <TableBody>
             {sortedPosts.map((post, index) => {
               const createLeftActions = () => {
+                const regenerateAction = {
+                  icon: <RefreshCw className="h-4 w-4" />,
+                  onClick: () => onGenerateImagePrompt(post),
+                  title: "Regenerate content",
+                  loading: false
+                };
+
                 const copyAction = {
                   icon: <Copy className="h-4 w-4" />,
                   onClick: () => onCopyContent(post),
@@ -249,7 +256,7 @@ export const PostsTableView = memo(({
                   }
                 ];
 
-                return isAdmin ? [copyAction, ...adminActions] : [copyAction];
+                return isAdmin ? [regenerateAction, copyAction, ...adminActions] : [regenerateAction, copyAction];
               };
 
               const createRightActions = () => {
