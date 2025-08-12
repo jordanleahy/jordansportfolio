@@ -145,219 +145,223 @@ export const PostsTableView = memo(({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="h-12">
-          <SortableHeader field="title">
-            <div className="w-48">Title</div>
-          </SortableHeader>
-          <TableHead>
-            <div className="w-64">Description</div>
-          </TableHead>
-          {isAdmin && (
-            <SortableHeader field="status">
-              <div className="w-32">Status</div>
-            </SortableHeader>
-          )}
-          <TableHead>
-            <div className="w-48">Images</div>
-          </TableHead>
-          <TableHead>
-            <div className="w-48">Actions</div>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedPosts.map((post, index) => {
-          const createPostActions = () => {
-            const baseActions = [
-              {
-                icon: <Copy className="h-4 w-4" />,
-                onClick: () => onCopyContent(post),
-                title: "Copy content",
-                loading: false
-              },
-              {
-                icon: <Trash2 className="h-4 w-4" />,
-                onClick: () => onDeletePost(post.id),
-                title: "Delete post",
-                loading: false
-              }
-            ];
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-max">
+        <Table>
+          <TableHeader>
+            <TableRow className="h-12">
+              <SortableHeader field="title">
+                <div className="w-48">Title</div>
+              </SortableHeader>
+              <TableHead>
+                <div className="w-64">Description</div>
+              </TableHead>
+              {isAdmin && (
+                <SortableHeader field="status">
+                  <div className="w-32">Status</div>
+                </SortableHeader>
+              )}
+              <TableHead>
+                <div className="w-48">Images</div>
+              </TableHead>
+              <TableHead>
+                <div className="w-48">Actions</div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedPosts.map((post, index) => {
+              const createPostActions = () => {
+                const baseActions = [
+                  {
+                    icon: <Copy className="h-4 w-4" />,
+                    onClick: () => onCopyContent(post),
+                    title: "Copy content",
+                    loading: false
+                  },
+                  {
+                    icon: <Trash2 className="h-4 w-4" />,
+                    onClick: () => onDeletePost(post.id),
+                    title: "Delete post",
+                    loading: false
+                  }
+                ];
 
-            const adminActions = [
-              {
-                icon: <Sparkles className="h-4 w-4" />,
-                onClick: () => handleGenerateAllImages(post),
-                loading: isGenerating(post.id),
-                title: "Bulk Generate"
-              },
-              {
-                icon: <Lightbulb className="h-4 w-4" />,
-                onClick: () => onGenerateImagePrompt(post),
-                title: "Generate image prompt",
-                loading: false
-              },
-              {
-                icon: <Mic className="h-4 w-4" />,
-                onClick: () => onGenerateVoiceoverScript(post),
-                title: "Generate voiceover script",
-                loading: false
-              }
-            ];
+                const adminActions = [
+                  {
+                    icon: <Sparkles className="h-4 w-4" />,
+                    onClick: () => handleGenerateAllImages(post),
+                    loading: isGenerating(post.id),
+                    title: "Bulk Generate"
+                  },
+                  {
+                    icon: <Lightbulb className="h-4 w-4" />,
+                    onClick: () => onGenerateImagePrompt(post),
+                    title: "Generate image prompt",
+                    loading: false
+                  },
+                  {
+                    icon: <Mic className="h-4 w-4" />,
+                    onClick: () => onGenerateVoiceoverScript(post),
+                    title: "Generate voiceover script",
+                    loading: false
+                  }
+                ];
 
-            return isAdmin ? [...baseActions.slice(0, 1), ...adminActions, ...baseActions.slice(1)] : baseActions;
-          };
+                return isAdmin ? [...baseActions.slice(0, 1), ...adminActions, ...baseActions.slice(1)] : baseActions;
+              };
 
-          const selectorProps = {
-            post,
-            onGenerateImage,
-            onPostsChange,
-            isAdmin
-          };
+              const selectorProps = {
+                post,
+                onGenerateImage,
+                onPostsChange,
+                isAdmin
+              };
 
-          const isBulk = isProcessingCtx(post.id, 'bulk_generate');
-          return (
-          <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
-            <TableCell className="font-medium w-48">
-              <div className="break-words leading-tight line-clamp-4">
-                {post.title}
-              </div>
-            </TableCell>
-            <TableCell className="w-64">
-              <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
-                {post.description}
-              </div>
-            </TableCell>
-            {isAdmin && (
-              <TableCell className="w-32">
-                <div className="flex gap-2 items-center flex-wrap">
-                  <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
-                </div>
-              </TableCell>
-            )}
-            <TableCell className="w-48">
-              <div className="grid grid-cols-3 gap-1">
-                {/* Top row: 16:9, 4:3, 1:1 */}
-                {post.image_16_9_url ? (
-                  <div className="w-14 h-8 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_16_9_url}
-                      alt="16:9 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_16_9_url!, `${post.title} - 16:9 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
+              const isBulk = isProcessingCtx(post.id, 'bulk_generate');
+              return (
+              <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
+                <TableCell className="font-medium w-48">
+                  <div className="break-words leading-tight line-clamp-4">
+                    {post.title}
                   </div>
-                ) : (isProcessingCtx(post.id, 'generate', toAspect('16_9')) || isBulk) ? (
-                  <SimpleShimmer
-                    variant="thumbnail"
-                    className="w-14 h-8 flex-shrink-0"
-                  />
-                ) : <div className="w-14 h-8"></div>}
-                
-                {post.image_4_3_url ? (
-                  <div className="w-14 h-10 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_4_3_url}
-                      alt="4:3 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_4_3_url!, `${post.title} - 4:3 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
+                </TableCell>
+                <TableCell className="w-64">
+                  <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
+                    {post.description}
                   </div>
-                ) : (isProcessingCtx(post.id, 'generate', toAspect('4_3')) || isBulk) ? (
-                  <SimpleShimmer
-                    variant="thumbnail"
-                    className="w-14 h-10 flex-shrink-0"
-                  />
-                ) : <div className="w-14 h-10"></div>}
-
-                {post.image_1_1_url ? (
-                  <div className="w-12 h-12 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_1_1_url}
-                      alt="1:1 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_1_1_url!, `${post.title} - 1:1 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">1:1</ImageHoverOverlay>
-                  </div>
-                ) : (isProcessingCtx(post.id, 'generate', toAspect('1_1')) || isBulk) ? (
-                  <SimpleShimmer
-                    variant="thumbnail"
-                    className="w-12 h-12 flex-shrink-0"
-                  />
-                ) : <div className="w-12 h-12"></div>}
-
-                {/* Bottom row: 9:16 and 3:4 */}
-                {post.image_9_16_url ? (
-                  <div className="w-8 h-14 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_9_16_url}
-                      alt="9:16 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
-                  </div>
-                ) : isProcessingCtx(post.id, 'generate', toAspect('9_16')) ? (
-                  <SimpleShimmer
-                    variant="thumbnail"
-                    className="w-8 h-14 flex-shrink-0"
-                  />
-                ) : <div className="w-8 h-14"></div>}
-
-                {post.image_3_4_url ? (
-                  <div className="w-10 h-14 relative group overflow-hidden rounded border flex-shrink-0">
-                    <img
-                      src={post.image_3_4_url}
-                      alt="3:4 aspect ratio"
-                      className="w-full h-full object-cover cursor-pointer"
-                      loading="lazy"
-                      onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
-                    />
-                    <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
-                  </div>
-                ) : isProcessingCtx(post.id, 'generate', toAspect('3_4')) ? (
-                  <SimpleShimmer
-                    variant="thumbnail"
-                    className="w-10 h-14 flex-shrink-0"
-                  />
-                ) : <div className="w-10 h-14"></div>}
-              </div>
-            </TableCell>
-            <TableCell className="w-48">
-              <div className="flex gap-1 flex-wrap">
-                {createPostActions().map((action, actionIndex) => (
-                  <ActionButton
-                    key={actionIndex}
-                    icon={action.icon}
-                    onClick={action.onClick}
-                    loading={action.loading}
-                    title={action.title}
-                  />
-                ))}
+                </TableCell>
                 {isAdmin && (
-                <BlogPostButtonForRow 
-                  post={post}
-                  creatingBlogIds={creatingBlogIds}
-                  onCreateBlogPost={onCreateBlogPost}
-                  blogStatus={blogStatuses[post.id]}
-                />
+                  <TableCell className="w-32">
+                    <div className="flex gap-2 items-center flex-wrap">
+                      <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
+                    </div>
+                  </TableCell>
                 )}
-                <SingleAspectRatioSelector {...selectorProps} />
-              </div>
-            </TableCell>
-          </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                <TableCell className="w-48">
+                  <div className="grid grid-cols-3 gap-1">
+                    {/* Top row: 16:9, 4:3, 1:1 */}
+                    {post.image_16_9_url ? (
+                      <div className="w-14 h-8 relative group overflow-hidden rounded border flex-shrink-0">
+                        <img
+                          src={post.image_16_9_url}
+                          alt="16:9 aspect ratio"
+                          className="w-full h-full object-cover cursor-pointer"
+                          loading="lazy"
+                          onClick={() => onPreviewImage(post.image_16_9_url!, `${post.title} - 16:9 image`)}
+                        />
+                        <ImageHoverOverlay className="text-xs">16:9</ImageHoverOverlay>
+                      </div>
+                    ) : (isProcessingCtx(post.id, 'generate', toAspect('16_9')) || isBulk) ? (
+                      <SimpleShimmer
+                        variant="thumbnail"
+                        className="w-14 h-8 flex-shrink-0"
+                      />
+                    ) : <div className="w-14 h-8"></div>}
+                    
+                    {post.image_4_3_url ? (
+                      <div className="w-14 h-10 relative group overflow-hidden rounded border flex-shrink-0">
+                        <img
+                          src={post.image_4_3_url}
+                          alt="4:3 aspect ratio"
+                          className="w-full h-full object-cover cursor-pointer"
+                          loading="lazy"
+                          onClick={() => onPreviewImage(post.image_4_3_url!, `${post.title} - 4:3 image`)}
+                        />
+                        <ImageHoverOverlay className="text-xs">4:3</ImageHoverOverlay>
+                      </div>
+                    ) : (isProcessingCtx(post.id, 'generate', toAspect('4_3')) || isBulk) ? (
+                      <SimpleShimmer
+                        variant="thumbnail"
+                        className="w-14 h-10 flex-shrink-0"
+                      />
+                    ) : <div className="w-14 h-10"></div>}
+
+                    {post.image_1_1_url ? (
+                      <div className="w-12 h-12 relative group overflow-hidden rounded border flex-shrink-0">
+                        <img
+                          src={post.image_1_1_url}
+                          alt="1:1 aspect ratio"
+                          className="w-full h-full object-cover cursor-pointer"
+                          loading="lazy"
+                          onClick={() => onPreviewImage(post.image_1_1_url!, `${post.title} - 1:1 image`)}
+                        />
+                        <ImageHoverOverlay className="text-xs">1:1</ImageHoverOverlay>
+                      </div>
+                    ) : (isProcessingCtx(post.id, 'generate', toAspect('1_1')) || isBulk) ? (
+                      <SimpleShimmer
+                        variant="thumbnail"
+                        className="w-12 h-12 flex-shrink-0"
+                      />
+                    ) : <div className="w-12 h-12"></div>}
+
+                    {/* Bottom row: 9:16 and 3:4 */}
+                    {post.image_9_16_url ? (
+                      <div className="w-8 h-14 relative group overflow-hidden rounded border flex-shrink-0">
+                        <img
+                          src={post.image_9_16_url}
+                          alt="9:16 aspect ratio"
+                          className="w-full h-full object-cover cursor-pointer"
+                          loading="lazy"
+                          onClick={() => onPreviewImage(post.image_9_16_url!, `${post.title} - 9:16 image`)}
+                        />
+                        <ImageHoverOverlay className="text-xs">9:16</ImageHoverOverlay>
+                      </div>
+                    ) : isProcessingCtx(post.id, 'generate', toAspect('9_16')) ? (
+                      <SimpleShimmer
+                        variant="thumbnail"
+                        className="w-8 h-14 flex-shrink-0"
+                      />
+                    ) : <div className="w-8 h-14"></div>}
+
+                    {post.image_3_4_url ? (
+                      <div className="w-10 h-14 relative group overflow-hidden rounded border flex-shrink-0">
+                        <img
+                          src={post.image_3_4_url}
+                          alt="3:4 aspect ratio"
+                          className="w-full h-full object-cover cursor-pointer"
+                          loading="lazy"
+                          onClick={() => onPreviewImage(post.image_3_4_url!, `${post.title} - 3:4 image`)}
+                        />
+                        <ImageHoverOverlay className="text-xs">3:4</ImageHoverOverlay>
+                      </div>
+                    ) : isProcessingCtx(post.id, 'generate', toAspect('3_4')) ? (
+                      <SimpleShimmer
+                        variant="thumbnail"
+                        className="w-10 h-14 flex-shrink-0"
+                      />
+                    ) : <div className="w-10 h-14"></div>}
+                  </div>
+                </TableCell>
+                <TableCell className="w-48">
+                  <div className="flex gap-1 flex-wrap">
+                    {createPostActions().map((action, actionIndex) => (
+                      <ActionButton
+                        key={actionIndex}
+                        icon={action.icon}
+                        onClick={action.onClick}
+                        loading={action.loading}
+                        title={action.title}
+                      />
+                    ))}
+                    {isAdmin && (
+                    <BlogPostButtonForRow 
+                      post={post}
+                      creatingBlogIds={creatingBlogIds}
+                      onCreateBlogPost={onCreateBlogPost}
+                      blogStatus={blogStatuses[post.id]}
+                    />
+                    )}
+                    <SingleAspectRatioSelector {...selectorProps} />
+                  </div>
+                </TableCell>
+              </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 });
 
