@@ -8,11 +8,10 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useThemeDetailsByName } from '@/hooks/useOptimizedStories';
-import { useColorThemes } from '@/hooks/useColorThemes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useThemeSEO } from '@/hooks/useThemeSEO';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,9 +43,6 @@ export default function ThemeDetail() {
   // Fetch theme and posts for this specific theme name
   const { theme: themeData, posts = [], isLoading: isLoadingPosts, refetch } = useThemeDetailsByName(decodedTheme, !!decodedTheme);
   
-  // Color themes
-  const { data: colorThemes = [] } = useColorThemes();
-
   // Generate SEO metadata for the theme
   const seoData = useThemeSEO(themeData);
 
