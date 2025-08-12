@@ -512,12 +512,13 @@ const { handleGenerateImage } = useImageManager({
 
       setIsPublishing(true);
 
-      // Check if we already have a published collection to toggle
+      // Check if we already have a published collection for this theme to toggle
       const { data: existing, error: checkErr } = await supabase
         .from('shared_collections')
         .select('id, include_in_library, featured')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
+        .eq('theme_id', themeId || null)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -579,7 +580,7 @@ const { handleGenerateImage } = useImageManager({
       const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
         p_handle: handle,
         p_post_ids: candidateIds,
-        p_theme_id: null,
+        p_theme_id: themeId || null,
         p_title: titleArg,
         p_description: descriptionArg,
       });
@@ -610,7 +611,7 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Check current featured and library status
+  // Check current featured and library status for this theme
   const checkCollectionStatus = async () => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
@@ -622,6 +623,7 @@ const { handleGenerateImage } = useImageManager({
         .select('featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
+        .eq('theme_id', themeId || null)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -743,7 +745,7 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Feature/unfeature the latest published collection for this user
+  // Feature/unfeature the latest published collection for this theme
   const handleFeatureLatestCollection = async () => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
@@ -754,12 +756,13 @@ const { handleGenerateImage } = useImageManager({
       }
       setIsFeaturing(true);
       
-      // Find most recent published shared collection for this user
+      // Find most recent published shared collection for this theme
       const { data: latest, error: selErr } = await supabase
         .from('shared_collections')
         .select('id, featured, include_in_library')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
+        .eq('theme_id', themeId || null)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
