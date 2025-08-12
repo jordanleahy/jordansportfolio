@@ -125,7 +125,7 @@ export default function PublicSharedCollection() {
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center md:justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight text-left">
             <span className="block md:inline">Create Free Illustrations on </span>
-            <span className="flex items-center gap-2 md:inline-flex">
+            <span className="flex items-center gap-2 md:inline-flex justify-start">
               <img src="/lovable-uploads/80e9ea7a-2cf5-4c9c-91f9-e663036e85e2.png" alt="Story Ship logo" className="h-8 w-auto" /> 
               <a href="https://www.jordanleahy.com/stories" className="underline hover:no-underline">Story Ship</a>
             </span>
