@@ -113,8 +113,8 @@ export default function PublicSharedCollection() {
           </h1>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={copyLink}>Copy link</Button>
-            <Link to="/">
-              <Button variant="secondary">Home</Button>
+            <Link to="/signup">
+              <Button variant="secondary">Sign Up</Button>
             </Link>
           </div>
         </div>
