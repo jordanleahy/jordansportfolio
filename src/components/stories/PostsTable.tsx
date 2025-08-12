@@ -576,7 +576,7 @@ const { handleGenerateImage } = useImageManager({
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
-      const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
+      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
         p_post_ids: candidateIds,
         p_theme_id: null,
@@ -589,8 +589,6 @@ const { handleGenerateImage } = useImageManager({
         toast.error(error.message || 'Failed to publish');
         return;
       }
-      
-      const collectionId = data as unknown as string;
       const { error: includeErr } = await supabase
         .from('shared_collections')
         .update({ include_in_library: true })
@@ -683,7 +681,7 @@ const { handleGenerateImage } = useImageManager({
         const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
         const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
-        const { data, error } = await supabase.rpc('publish_shared_collection_16_9', {
+        const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
           p_handle: newHandle,
           p_post_ids: candidateIds,
           p_theme_id: themeId || null,
@@ -696,17 +694,34 @@ const { handleGenerateImage } = useImageManager({
         }
 
         handle = newHandle;
-      }
-
-      if (handle) {
-        const publicUrl = `${window.location.origin}/shared/${handle}`;
+        const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
         await navigator.clipboard.writeText(publicUrl);
         
         toast.success('Public URL copied to clipboard!', {
           description: `Your collection is shareable at: ${publicUrl}`
         });
       } else {
-        throw new Error('Could not create or find collection handle');
+        // For existing collections, we need to get the collection ID
+        const { data: existingCollectionData, error: fetchError } = await supabase
+          .from('shared_collections')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('status', 'published')
+          .eq('handle', handle)
+          .order('published_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (fetchError || !existingCollectionData) {
+          throw new Error('Could not find collection ID');
+        }
+
+        const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollectionData.id}`;
+        await navigator.clipboard.writeText(publicUrl);
+        
+        toast.success('Public URL copied to clipboard!', {
+          description: `Your collection is shareable at: ${publicUrl}`
+        });
       }
 
     } catch (error) {

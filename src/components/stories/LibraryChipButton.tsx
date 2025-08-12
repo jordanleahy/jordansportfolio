@@ -37,7 +37,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
       const baseDesc = (post.description || '').replace(/\s+/g, ' ').trim();
       const descriptionArg = baseDesc.length > 0 ? baseDesc.slice(0, 165) : `A shareable image from ${titleArg}.`;
 
-      const { error } = await supabase.rpc('publish_shared_collection_16_9', {
+      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_16_9', {
         p_handle: handle,
         p_post_ids: [post.id],
         p_theme_id: post.theme_id ?? null,
@@ -51,7 +51,14 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
         return;
       }
 
-      toast({ title: 'Published to Library', description: 'Your post is now in your public Library.' });
+      // Copy the correct public URL
+      const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
+      try {
+        await navigator.clipboard.writeText(publicUrl);
+        toast({ title: 'Published to Library', description: 'Link copied to clipboard!' });
+      } catch {
+        toast({ title: 'Published to Library', description: 'Your post is now in your public Library.' });
+      }
     } catch (e: any) {
       console.error(e);
       toast({ title: 'Error', description: e?.message || 'Something went wrong', variant: 'destructive' });
