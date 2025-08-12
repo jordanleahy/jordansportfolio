@@ -124,11 +124,11 @@ export default function PublicSharedCollection() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center md:justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight text-left">
-            <div className="md:inline">Create Free Illustrations on </div>
-            <div className="flex items-center gap-2 md:inline">
+            <span className="block md:inline">Create Free Illustrations on </span>
+            <span className="flex items-center gap-2 md:inline-flex">
               <img src="/lovable-uploads/80e9ea7a-2cf5-4c9c-91f9-e663036e85e2.png" alt="Story Ship logo" className="h-8 w-auto" /> 
               <a href="https://www.jordanleahy.com/stories" className="underline hover:no-underline">Story Ship</a>
-            </div>
+            </span>
           </h1>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <Button variant="outline" onClick={shareCollection} className="flex-1 md:flex-none">
