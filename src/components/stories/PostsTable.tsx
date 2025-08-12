@@ -647,15 +647,24 @@ const { handleGenerateImage } = useImageManager({
         return;
       }
 
-      // Check if there's already a published collection
-      const { data: existingCollection, error: checkError } = await supabase
-        .from('shared_collections')
-        .select('handle')
-        .eq('user_id', session.user.id)
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Check if there's already a published collection for this theme
+      let existingCollection = null;
+      if (themeId) {
+        const { data, error: checkError } = await supabase
+          .from('shared_collections')
+          .select('handle, id')
+          .eq('user_id', session.user.id)
+          .eq('status', 'published')
+          .eq('theme_id', themeId)
+          .order('published_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+        existingCollection = data;
+      }
 
       let handle = existingCollection?.handle;
 
