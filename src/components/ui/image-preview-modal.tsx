@@ -112,22 +112,22 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-[95vw] w-auto h-[100dvh] md:h-[95vh] p-0 border-0 bg-background/95 overflow-hidden"
+        className="max-w-[95vw] w-auto h-[100dvh] md:h-[95vh] p-0 border-0 bg-black/90 overflow-hidden"
         onPointerDownOutside={onClose}
       >
         <div className="relative flex flex-col w-full h-full min-h-0">
           {/* Header with title and buttons */}
-          <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b md:sticky md:top-0 md:z-10">
-            <DialogTitle className="text-foreground text-lg font-semibold truncate mr-4">
+          <div className="flex items-center justify-between p-4 bg-black/70 md:sticky md:top-0 md:z-10">
+            <DialogTitle className="text-white text-lg font-semibold truncate mr-4">
               {formattedTitle}
             </DialogTitle>
             <div className="flex items-center gap-2">
               {/* Download button */}
               <Button
                 onClick={handleDownload}
-                variant="secondary"
+                variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
                 title={isLoading ? "Preparing watermark..." : "Download"}
                 disabled={isLoading}
               >
@@ -136,9 +136,9 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
               {/* Edit Image text button */}
               <Button
                 onClick={() => setSheetOpen(true)}
-                variant="default"
+                variant="ghost"
                 size="sm"
-                className="h-9 px-3 rounded-full"
+                className="h-9 px-3 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
                 title="Edit Image"
                 aria-controls="edit-image-sheet"
                 aria-expanded={isSheetOpen}
@@ -152,7 +152,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 onClick={onClose}
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -185,7 +185,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 md:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
+                className="absolute bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/80 text-white backdrop-blur supports-[backdrop-filter]:bg-black/60 p-3 md:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
               >
                 <div className="max-w-5xl mx-auto">
                   <label htmlFor="edit-prompt" className="sr-only">Describe the edit</label>
