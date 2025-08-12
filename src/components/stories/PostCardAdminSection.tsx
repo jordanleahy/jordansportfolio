@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ImageIcon, Lightbulb, Mic, BookOpen, Video } from 'lucide-react';
 import { BlogPostButton } from './BlogPostButton';
-import { LibraryChipButton } from './LibraryChipButton';
+
 import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
