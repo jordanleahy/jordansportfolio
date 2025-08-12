@@ -93,6 +93,19 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
               >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
               </Button>
+              {/* Edit Image text button */}
+              <Button
+                onClick={() => {
+                  console.log('Edit Image clicked!');
+                  // TODO: Wire up edit functionality
+                }}
+                variant="ghost"
+                size="sm"
+                className="h-9 px-3 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title="Edit Image"
+              >
+                Edit Image
+              </Button>
               
               {/* Close button */}
               <Button
