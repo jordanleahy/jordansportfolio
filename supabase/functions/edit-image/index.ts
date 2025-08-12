@@ -48,7 +48,7 @@ serve(async (req) => {
   const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
   try {
-    const { prompt, imageUrl, aspectRatio } = await req.json();
+    const { prompt, imageUrl, aspectRatio, postId, userId } = await req.json();
     if (!prompt || !imageUrl) {
       return new Response(JSON.stringify({ error: 'Missing required fields: prompt and imageUrl' }), {
         status: 400,
@@ -138,6 +138,44 @@ serve(async (req) => {
     if (uploadErr) throw uploadErr;
 
     const { data: pub } = supabaseAdmin.storage.from(bucket).getPublicUrl(filePath);
+
+    // Save version to database if postId and userId are provided
+    if (postId && userId) {
+      try {
+        // Get next version number
+        const { data: existingVersions } = await supabaseAdmin
+          .from('image_versions')
+          .select('version_number')
+          .eq('post_id', postId)
+          .eq('aspect_ratio', aspectRatio || '1:1')
+          .order('version_number', { ascending: false })
+          .limit(1);
+        
+        const nextVersionNumber = (existingVersions?.[0]?.version_number || 0) + 1;
+        
+        // Insert new version
+        const { error: insertError } = await supabaseAdmin
+          .from('image_versions')
+          .insert({
+            post_id: postId,
+            aspect_ratio: aspectRatio || '1:1',
+            original_url: imageUrl,
+            edited_url: pub.publicUrl,
+            edit_prompt: prompt,
+            version_number: nextVersionNumber,
+            user_id: userId
+          });
+          
+        if (insertError) {
+          console.error('Error saving image version:', insertError);
+        } else {
+          console.log(`✅ Saved version ${nextVersionNumber} for post ${postId}`);
+        }
+      } catch (saveError) {
+        console.error('Error saving to database:', saveError);
+        // Don't fail the whole request if database save fails
+      }
+    }
 
     const result = {
       url: pub.publicUrl,

@@ -1181,6 +1181,45 @@ export type Database = {
         }
         Relationships: []
       }
+      image_versions: {
+        Row: {
+          aspect_ratio: string
+          created_at: string
+          edit_prompt: string
+          edited_url: string
+          id: string
+          original_url: string
+          post_id: string
+          updated_at: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          aspect_ratio: string
+          created_at?: string
+          edit_prompt: string
+          edited_url: string
+          id?: string
+          original_url: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string
+          edit_prompt?: string
+          edited_url?: string
+          id?: string
+          original_url?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
       investors: {
         Row: {
           address: string | null

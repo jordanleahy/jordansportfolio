@@ -32,14 +32,58 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [sheetHeight, setSheetHeight] = useState(0);
   
   // Version control state
-  const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string}>>([]);
+  const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string, version_number: number}>>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
   
-  // Initialize versions with original image
+  // Fetch existing versions from database
   useEffect(() => {
-    setImageVersions([{ id: 'original', url: imageUrl }]);
-    setCurrentVersionIndex(0);
-  }, [imageUrl]);
+    const fetchVersions = async () => {
+      // Initialize with original image
+      const originalVersion = { id: 'original', url: imageUrl, version_number: 0 };
+      setImageVersions([originalVersion]);
+      
+      // Get post ID from image URL to fetch versions
+      // This is a simplified approach - in production you'd pass post_id as a prop
+      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/);
+      if (!urlMatch) return;
+      
+      const postId = urlMatch[1];
+      const currentAspectRatio = aspectRatio || '1:1'; // Default to 1:1 if not provided
+      
+      try {
+        const { data: versions, error } = await supabase
+          .from('image_versions')
+          .select('*')
+          .eq('post_id', postId)
+          .eq('aspect_ratio', currentAspectRatio)
+          .order('version_number', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching image versions:', error);
+          return;
+        }
+        
+        if (versions && versions.length > 0) {
+          const allVersions = [
+            originalVersion,
+            ...versions.map(v => ({
+              id: v.id,
+              url: v.edited_url,
+              prompt: v.edit_prompt,
+              version_number: v.version_number
+            }))
+          ];
+          setImageVersions(allVersions);
+          // Set to the latest version
+          setCurrentVersionIndex(allVersions.length - 1);
+        }
+      } catch (error) {
+        console.error('Error fetching versions:', error);
+      }
+    };
+    
+    fetchVersions();
+  }, [imageUrl, aspectRatio]);
   
   // Current image URL based on selected version
   const currentImageUrl = imageVersions[currentVersionIndex]?.url || imageUrl;
@@ -77,8 +121,22 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     if (!prompt?.trim() || isProcessing) return;
     try {
       setIsProcessing(true);
+      
+      // Extract post ID from image URL for database storage
+      const urlMatch = imageUrl.match(/generated_([a-f0-9-]+)_/);
+      const postId = urlMatch?.[1];
+      
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('edit-image', {
-        body: { prompt, imageUrl, aspectRatio }
+        body: { 
+          prompt, 
+          imageUrl, 
+          aspectRatio,
+          postId,
+          userId: user?.id
+        }
       });
       if (error) throw error;
       const newUrl = (data as any)?.url as string | undefined;
@@ -87,7 +145,8 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
         const newVersion = {
           id: `edit-${Date.now()}`,
           url: newUrl,
-          prompt: prompt.trim()
+          prompt: prompt.trim(),
+          version_number: imageVersions.length
         };
         setImageVersions(prev => [...prev, newVersion]);
         setCurrentVersionIndex(prev => prev + 1);
