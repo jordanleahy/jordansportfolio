@@ -121,9 +121,8 @@ export default function PublicSharedCollection() {
         )}
         {!loading && !error && (
           <article>
-            {collection?.description && (
-              <p className="text-muted-foreground mb-6">{collection.description}</p>
-            )}
+            <h2 className="text-xl font-semibold mb-4">Sepsis Validation and Coding Guidance</h2>
+            <p className="text-muted-foreground mb-6">Sepsis is a life-threatening organ dysfunction caused by a dysregulated host response to infection. This post gently reviews when sepsis is considered for coding</p>
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
