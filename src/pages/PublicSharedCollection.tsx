@@ -130,13 +130,13 @@ export default function PublicSharedCollection() {
               <a href="https://www.jordanleahy.com/stories" className="underline hover:no-underline">Story Ship</a>
             </div>
           </h1>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={shareCollection}>
+          <div className="flex items-center gap-2 w-full">
+            <Button variant="outline" onClick={shareCollection} className="flex-1">
               <Share className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <Link to="/signup">
-              <Button variant="secondary">Sign Up</Button>
+            <Link to="/signup" className="flex-1">
+              <Button variant="secondary" className="w-full">Sign Up</Button>
             </Link>
           </div>
         </div>
