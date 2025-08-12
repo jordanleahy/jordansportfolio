@@ -239,7 +239,7 @@ export default function PublicSharedCollection() {
               }}
             />
             {/* Glass-morphism overlay */}
-            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
+            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center bg-background/20 backdrop-blur border border-white/20 shadow-2xl rounded-full">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Account Required</h2>
               <p className="text-base md:text-lg text-foreground/80 max-w-md">
                 You need to be signed in to download images. Create a free account to access downloads and other features.
