@@ -102,7 +102,9 @@ export default function PublicSharedCollection() {
 
       <header className="border-b">
         <div className="container mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight">{pageTitle}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Created in 5 minutes on <a href="https://www.jordanleahy.com/stories" className="underline hover:no-underline">Story Ship</a>
+          </h1>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={copyLink}>Copy link</Button>
             <Link to="/">
