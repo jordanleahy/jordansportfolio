@@ -269,7 +269,7 @@ export const PostsTableView = memo(({
 
               const isBulk = isProcessingCtx(post.id, 'bulk_generate');
               return (
-              <TableRow key={post.id} className={`h-20 transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
+              <TableRow key={post.id} className={`transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
                 <TableCell className="font-medium w-48">
                   <div 
                     className="relative group"
@@ -289,7 +289,7 @@ export const PostsTableView = memo(({
                         className="h-8 text-sm"
                       />
                     ) : (
-                      <div className="break-words leading-tight line-clamp-4 pr-6">
+                      <div className="break-words leading-tight pr-6">
                         {post.title}
                       </div>
                     )}
@@ -327,7 +327,7 @@ export const PostsTableView = memo(({
                         rows={3}
                       />
                     ) : (
-                      <div className="text-sm text-muted-foreground line-clamp-3 overflow-hidden pr-6">
+                      <div className="text-sm text-muted-foreground pr-6">
                         {post.description}
                       </div>
                     )}
