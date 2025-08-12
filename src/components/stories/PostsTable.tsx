@@ -656,8 +656,6 @@ const { handleGenerateImage } = useImageManager({
           .eq('user_id', session.user.id)
           .eq('status', 'published')
           .eq('theme_id', themeId)
-          .order('published_at', { ascending: false })
-          .limit(1)
           .maybeSingle();
         
         if (checkError && checkError.code !== 'PGRST116') {
