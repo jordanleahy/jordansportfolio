@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const [isProcessing, setIsProcessing] = useState(false);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const [sheetHeight, setSheetHeight] = useState(0);
+  const [editedUrl, setEditedUrl] = useState<string | null>(null);
   useEffect(() => {
     let isMounted = true;
     const fetchInfo = async () => {
@@ -58,15 +60,37 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     return () => { isMounted = false; clearInterval(t); };
   }, [imageUrl]);
 
+  // Submit handler: calls edge function
+  const handleEditSubmit = async () => {
+    if (!prompt?.trim() || isProcessing) return;
+    try {
+      setIsProcessing(true);
+      const { data, error } = await supabase.functions.invoke('edit-image', {
+        body: { prompt, imageUrl, aspectRatio }
+      });
+      if (error) throw error;
+      const newUrl = (data as any)?.url as string | undefined;
+      if (newUrl) {
+        setEditedUrl(newUrl);
+        toast.success('Edit complete');
+      } else {
+        toast.error('No image returned');
+      }
+    } catch (err) {
+      console.error('Edit failed:', err);
+      toast.error('Edit failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Keyboard shortcuts for the edit sheet
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (!isSheetOpen) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
-        // Simulate submit (UI only)
-        setIsProcessing(true);
-        setTimeout(() => setIsProcessing(false), 1000);
+        handleEditSubmit();
       }
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -75,7 +99,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isSheetOpen]);
+  }, [isSheetOpen, handleEditSubmit]);
 
   // Dynamically measure bottom sheet height and pad the image area
   useEffect(() => {
@@ -166,7 +190,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
             style={{ paddingBottom: isSheetOpen ? `calc(${sheetHeight}px + env(safe-area-inset-bottom))` : 'env(safe-area-inset-bottom)' }}
           >
             <img
-              src={imageUrl}
+              src={editedUrl || imageUrl}
               alt={alt}
               className="max-w-full max-h-full object-contain rounded"
               loading="lazy"
@@ -198,11 +222,8 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                       onChange={(e) => setPrompt(e.target.value)}
                     />
                     <Button
-                      onClick={() => {
-                        setIsProcessing(true);
-                        setTimeout(() => setIsProcessing(false), 1000);
-                      }}
-                      disabled={isProcessing}
+                      onClick={handleEditSubmit}
+                      disabled={isProcessing || !prompt.trim()}
                     >
                       {isProcessing ? (
                         <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Processing…</span>
@@ -213,7 +234,7 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                     <span>Press ⌘/Ctrl + Enter to submit · Esc to close</span>
-                    <span className="hidden md:inline">No data sent yet — UI only</span>
+                    <span className="hidden md:inline">Edits run on server — saved automatically</span>
                   </div>
                 </div>
               </motion.div>
