@@ -67,7 +67,7 @@ const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
 const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const StoryShip = lazy(() => import("./pages/StoryShip"));
-import { ThemeNameRedirect } from "@/components/migration/ThemeNameRedirect";
+const ThemeNameRedirect = lazy(() => import("@/components/migration/ThemeNameRedirect").then(module => ({ default: module.ThemeNameRedirect })));
 
 
 function App() {
@@ -123,7 +123,11 @@ function App() {
                 {/* Migration route for old theme name URLs - redirects to theme ID URLs */}
                 <Route 
                   path="/stories/theme/:themeName" 
-                  element={<ThemeNameRedirect />}
+                  element={
+                    <Suspense fallback={<CalendarSkeletonLoader />}>
+                      <ThemeNameRedirect />
+                    </Suspense>
+                  }
                 />
                 
                 <Route 
