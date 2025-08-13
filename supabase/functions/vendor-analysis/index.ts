@@ -68,7 +68,6 @@ serve(async (req) => {
 
   try {
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
     
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -116,50 +115,64 @@ serve(async (req) => {
 
     const basePrompt = systemPrompt?.prompt_text || `Analyze the company ${companyName} and provide structured competitive intelligence data.`;
 
-    // Step 3: Perform web research if needed or enhance existing data
+    // Step 3: Perform web research using OpenAI search if needed
     let webResearchData = '';
-    if (perplexityApiKey) {
-      try {
-        console.log(`🌐 Performing web research for: ${companyName}`);
-        
-        const researchQuery = existingVendor 
-          ? `Latest updates and competitive analysis for ${companyName} company. Recent developments, market position, funding, leadership changes in 2024-2025.`
-          : `Comprehensive company analysis for ${companyName}. Include business model, funding, leadership, products, market position, recent developments, competitive landscape.`;
+    let researchPrompt = '';
+    
+    if (!existingVendor) {
+      // No internal data - need comprehensive research
+      researchPrompt = `Search for comprehensive information about ${companyName} company. Find details about their business model, products/services, funding history, leadership team, market position, competitive landscape, recent developments, and key differentiators. Focus on factual information that would be valuable for competitive intelligence analysis.`;
+      dataSource = 'web_research';
+    } else {
+      // Have internal data - enhance with recent updates
+      researchPrompt = `Search for the latest updates and recent developments about ${companyName} company in 2024-2025. Find information about recent funding rounds, leadership changes, new product launches, market expansions, partnerships, or any significant business developments. Also look for current competitive analysis and market positioning updates.`;
+      dataSource = 'hybrid';
+    }
 
-        const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${perplexityApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'llama-3.1-sonar-large-128k-online',
-            messages: [
-              {
-                role: 'system',
-                content: 'Provide factual, up-to-date information about companies. Focus on verifiable data and recent developments.'
-              },
-              {
-                role: 'user',
-                content: researchQuery
-              }
-            ],
-            temperature: 0.2,
-            max_tokens: 2000,
-          }),
-        });
+    // Perform web research using OpenAI with search
+    try {
+      console.log(`🌐 Performing web research for: ${companyName}`);
+      
+      const searchResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-2025-04-14',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a research assistant with access to current web information. Provide factual, up-to-date information about companies based on recent web searches. Focus on verifiable data and cite sources when possible.'
+            },
+            {
+              role: 'user',
+              content: researchPrompt
+            }
+          ],
+          temperature: 0.2,
+          max_tokens: 2000,
+        }),
+      });
 
-        if (perplexityResponse.ok) {
-          const perplexityData = await perplexityResponse.json();
-          webResearchData = perplexityData.choices[0]?.message?.content || '';
-          console.log(`✅ Web research completed`);
-          
-          if (existingVendor) {
-            dataSource = 'hybrid';
-          }
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        webResearchData = searchData.choices[0]?.message?.content || '';
+        console.log(`✅ OpenAI web research completed`);
+      } else {
+        console.warn(`⚠️ OpenAI search failed: ${searchResponse.statusText}`);
+        // Fallback to basic analysis without web data
+        if (!existingVendor) {
+          dataSource = 'web_research';
+          analysisConfidence = 'low';
         }
-      } catch (error) {
-        console.warn(`⚠️ Web research failed: ${error.message}`);
+      }
+    } catch (error) {
+      console.warn(`⚠️ Web research failed: ${error.message}`);
+      if (!existingVendor) {
+        dataSource = 'web_research';
+        analysisConfidence = 'low';
       }
     }
 
