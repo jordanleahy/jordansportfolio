@@ -109,22 +109,24 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    let { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
+    let { title, description, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
 
-    if (!title || !description || (!themeId && !systemPromptId)) {
-      throw new Error('Missing required fields: title, description, and themeId (or systemPromptId)');
+    if (!title || !description || !themeId) {
+      throw new Error('Missing required fields: title, description, and themeId');
     }
+
+    // Initialize category - will be fetched from themes table
+    let category: string | null = null;
 
     const requestedAspectRatio = aspectRatio || aspect_ratio || null;
 
     // Store request metadata with correlation ID
-    requestMetadata = { theme, category, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
+    requestMetadata = { theme, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
 
     logger.info('Request payload received', {
       theme,
       themeId,
       systemPromptId: systemPromptId ? `${String(systemPromptId).slice(0,8)}…` : null,
-      category,
       titleLength: title?.length || 0,
       descriptionLength: description?.length || 0,
       hasColorTheme: !!colorTheme,
@@ -146,7 +148,7 @@ serve(async (req) => {
 
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
-    console.log('🚀 Generating image prompt for:', { theme, category, title, userId: userId?.slice(0, 8), correlationId });
+    console.log('🚀 Generating image prompt for:', { theme, themeId, title, userId: userId?.slice(0, 8), correlationId });
 
     let systemPromptData: any = null;
     let usedIdentifier: string;
@@ -184,11 +186,9 @@ serve(async (req) => {
         .eq('id', themeId)
         .maybeSingle();
       if (themeRow && !themeRowErr) {
-        // Get category from themes table if not provided
-        if (themeRow.category && !category) {
-          category = themeRow.category;
-          console.log('📌 Using category from themes table:', category);
-        }
+        // Get category from themes table
+        category = themeRow.category;
+        console.log('📌 Retrieved category from themes table:', category);
         
         if (themeRow.visual_prompt_system_prompt_id) {
           const { data: spFromTheme, error: spFromThemeErr } = await supabase
