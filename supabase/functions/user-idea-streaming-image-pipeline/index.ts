@@ -98,9 +98,16 @@ Guidelines:
 - Return ONLY valid JSON (no markdown, no commentary)
 - category must be lowercase-kebab-case (e.g., "type-1-diabetes")
 - theme should be title case
-- Generate between 5 and 10 posts (prefer 10 when possible) numbered by day starting at 1
+- Generate optimal number of posts (1-100) based on content depth and user needs
 - Each post: day (number), title (engaging, supportive), description (2–3 concise, helpful sentences)
 - Keep content practical and approachable
+
+POST COUNT STRATEGY - Choose what serves the user best:
+- Quick guidance or simple topics: 3-5 posts
+- Standard educational series: 5-10 posts
+- Comprehensive support guides: 10-20 posts
+- Deep-dive or complex topics: 20+ posts (up to 100)
+- Consider natural content flow and user engagement patterns
 
 JSON STRUCTURE:
 {

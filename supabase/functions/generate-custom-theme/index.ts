@@ -4,7 +4,7 @@
  * PURPOSE:
  * Creates complete social media content themes from user descriptions using AI.
  * Generates structured theme data including category classification, theme naming,
- * and exactly 10 sequential daily posts with professional content for social media calendars.
+ * and AI-determined optimal number of posts (1-100) with professional content for social media calendars.
  * 
  * INPUTS:
  * - description: string - User's theme description or content idea
@@ -14,7 +14,7 @@
  * - Error: { success: false, error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4o-mini for theme and content generation)
+ * - OpenAI API (GPT-5-mini for theme and content generation)
  * 
  * USAGE:
  * Called from: Theme creation workflows, content planning tools, social media calendar generation
@@ -22,9 +22,9 @@
  * 
  * FLOW:
  * 1. Validate description input and OpenAI API availability
- * 2. Apply detailed system prompt requiring exact JSON structure with 10 posts
+ * 2. Apply detailed system prompt allowing AI to determine optimal post count (1-100)
  * 3. Generate complete theme using OpenAI with specific formatting requirements
- * 4. Parse and validate generated JSON for required fields and post count
+ * 4. Parse and validate generated JSON for required fields and post structure
  * 5. Verify each post has day, title, and description fields
  * 6. Return structured theme data ready for import into content management systems
  */
@@ -68,9 +68,16 @@ CRITICAL REQUIREMENTS:
 - Return ONLY valid JSON, no explanations or markdown
 - Category must be lowercase, no spaces, use hyphens for separation
 - Theme should be title case with proper spacing
-- Generate exactly 10 posts with days 1-10
+- Generate optimal number of posts (1-100) based on content complexity and user needs
 - Each post needs: day (number), title (engaging, professional), description (informative, 2-3 sentences)
 - All content should be professional and industry-appropriate
+
+POST COUNT GUIDELINES - Let AI determine the best number:
+- Simple topics or quick tips: 3-5 posts
+- Standard educational content: 5-10 posts
+- Comprehensive guides: 10-20 posts
+- In-depth series or complex topics: 20+ posts (up to 100)
+- Consider natural content breaking points and audience engagement patterns
 
 JSON STRUCTURE REQUIRED:
 {
@@ -88,10 +95,10 @@ JSON STRUCTURE REQUIRED:
 
 EXAMPLES:
 User: "AI in healthcare for doctors"
-Output: {"category": "ai-healthcare", "theme": "AI in Healthcare", "description": "Comprehensive guide to AI applications transforming healthcare delivery and patient outcomes", "posts": [...]}
+Output: {"category": "ai-healthcare", "theme": "AI in Healthcare", "description": "Comprehensive guide to AI applications transforming healthcare delivery and patient outcomes", "posts": [...15-20 posts for comprehensive coverage...]}
 
 User: "Marketing tips for small business"
-Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...]}`;
+Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...8-12 posts for practical coverage...]}`;
 
     console.log('🤖 [generate-custom-theme] Calling OpenAI API');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -146,9 +153,9 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
       throw new Error('Generated theme data is missing required fields');
     }
 
-    if (themeData.posts.length !== 10) {
-      console.log('❌ [generate-custom-theme] Wrong number of posts:', themeData.posts.length);
-      throw new Error('Theme must contain exactly 10 posts');
+    if (!themeData.posts.length || themeData.posts.length < 1 || themeData.posts.length > 100) {
+      console.log('❌ [generate-custom-theme] Invalid number of posts:', themeData.posts.length);
+      throw new Error('Theme must contain between 1 and 100 posts');
     }
 
     // Validate each post
