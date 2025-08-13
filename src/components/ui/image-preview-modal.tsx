@@ -31,6 +31,11 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const [sheetHeight, setSheetHeight] = useState(0);
   
+  // Reference image state
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [referenceImageAnalysis, setReferenceImageAnalysis] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Version control state
   const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string, version_number: number}>>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
@@ -130,6 +135,128 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     return () => { isMounted = false; clearInterval(t); };
   }, [imageUrl]);
 
+  // Handle image paste functionality
+  const handleImagePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    console.log('📋 Paste event triggered in UI modal');
+    console.log('📋 Event type:', e.type);
+    console.log('📋 ClipboardData available:', !!e.clipboardData);
+    
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) {
+      console.log('❌ No clipboard data found');
+      return;
+    }
+
+    const items = clipboardData.items;
+    if (!items) {
+      console.log('❌ No clipboard items found');
+      return;
+    }
+
+    console.log('📋 Clipboard items count:', items.length);
+    
+    let hasImage = false;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      console.log(`📋 Item ${i}: type=${item.type}, kind=${item.kind}`);
+      
+      if (item.type.startsWith('image/')) {
+        console.log('🖼️ Image detected in clipboard!');
+        hasImage = true;
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const file = item.getAsFile();
+        if (file) {
+          console.log('📁 File extracted from clipboard:', { name: file.name, size: file.size, type: file.type });
+          await processReferenceImage(file);
+        } else {
+          console.log('❌ Failed to extract file from clipboard item');
+        }
+        break;
+      }
+    }
+    
+    if (!hasImage) {
+      console.log('📝 No image in clipboard, allowing normal text paste');
+    }
+  };
+
+  // Process reference image
+  const processReferenceImage = async (file: File) => {
+    console.log('🔄 Processing reference image:', { name: file.name, size: file.size, type: file.type });
+    
+    try {
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        console.log('✅ File converted to base64, length:', base64.length);
+        
+        setReferenceImage(base64);
+        
+        try {
+          console.log('🔍 Sending image for analysis...');
+          const { data, error } = await supabase.functions.invoke('analyze-reference-image', {
+            body: { 
+              image: base64.split(',')[1], // Remove data:image/jpeg;base64, prefix
+              aspects: ['colors', 'composition', 'style', 'lighting', 'mood']
+            }
+          });
+
+          if (error) {
+            console.error('❌ Error analyzing reference image:', error);
+            toast.error('Failed to analyze reference image');
+          } else {
+            console.log('✅ Reference image analysis completed:', data);
+            setReferenceImageAnalysis(data);
+            toast.success('Reference image analyzed successfully');
+          }
+        } catch (error) {
+          console.error('❌ Error analyzing reference image:', error);
+          toast.error('Failed to analyze reference image');
+        }
+      };
+      
+      reader.onerror = () => {
+        console.error('❌ FileReader error');
+        toast.error('Failed to read image file');
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('❌ Error processing reference image:', error);
+      toast.error('Failed to process reference image');
+    }
+  };
+
+  // Handle image upload from file input
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log('📁 File selected from upload:', file);
+    
+    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+      console.log('✅ Valid image file type, processing...');
+      await processReferenceImage(file);
+    } else {
+      console.log('❌ Invalid file type or no file selected');
+      toast.error('Please select a PNG or JPEG image');
+    }
+  };
+
+  // Enhance prompt with reference image analysis
+  const enhancePromptWithReference = (basePrompt: string) => {
+    if (!referenceImageAnalysis?.extractedCharacteristics) return basePrompt;
+    
+    const characteristics = referenceImageAnalysis.extractedCharacteristics;
+    return `${basePrompt}\n\nReference image characteristics:
+- Color palette: ${characteristics.colorPalette?.join(', ')}
+- Artistic style: ${characteristics.artisticStyle}
+- Lighting mood: ${characteristics.lightingMood}
+- Overall mood: ${characteristics.overallMood}
+- Complexity: ${characteristics.complexity}`;
+  };
+
   // Submit handler: calls edge function
   const handleEditSubmit = async () => {
     if (!prompt?.trim() || isProcessing) return;
@@ -146,9 +273,13 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
       // Get current user ID
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Enhanced prompt with reference image if available
+      const enhancedPrompt = enhancePromptWithReference(prompt);
+      console.log('📝 Enhanced prompt:', enhancedPrompt);
+
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: { 
-          prompt, 
+          prompt: enhancedPrompt, 
           imageUrl, 
           aspectRatio,
           postId,
@@ -175,6 +306,8 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
         }
         
         setPrompt(""); // Clear prompt after successful edit
+        setReferenceImage(null); // Clear reference image
+        setReferenceImageAnalysis(null); // Clear analysis
         setSheetOpen(false); // Close edit sheet
         toast.success('Edit complete');
       } else {
@@ -341,16 +474,72 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 className="absolute bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/80 text-white backdrop-blur supports-[backdrop-filter]:bg-black/60 p-3 md:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
               >
-                <div className="max-w-5xl mx-auto">
+                <div className="max-w-5xl mx-auto space-y-3">
+                  
+                  {/* Reference image display */}
+                  {referenceImage && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white text-sm">Reference Image:</span>
+                        <Button
+                          onClick={() => {
+                            console.log('🗑️ Removing reference image');
+                            setReferenceImage(null);
+                            setReferenceImageAnalysis(null);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          className="text-white hover:bg-white/10 h-6 px-2"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <img 
+                          src={referenceImage} 
+                          alt="Reference" 
+                          className="w-16 h-16 object-cover rounded border border-white/20"
+                        />
+                        {referenceImageAnalysis?.extractedCharacteristics && (
+                          <div className="text-xs text-white/70 space-y-1">
+                            <div>Style: {referenceImageAnalysis.extractedCharacteristics.artisticStyle}</div>
+                            <div>Mood: {referenceImageAnalysis.extractedCharacteristics.overallMood}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <label htmlFor="edit-prompt" className="sr-only">Describe the edit</label>
                   <div className="flex items-end gap-3">
-                    <textarea
-                      id="edit-prompt"
-                      placeholder="Describe the edit… e.g., Remove the shadows from this image"
-                      className="flex-1 h-24 resize-none rounded-md border bg-card text-card-foreground placeholder-muted-foreground p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white text-sm">Describe the edit:</span>
+                        <Button
+                          onClick={() => {
+                            console.log('📁 Opening file picker');
+                            fileInputRef.current?.click();
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          className="text-white hover:bg-white/10 h-6 px-2"
+                          title="Upload reference image"
+                        >
+                          📷 Upload
+                        </Button>
+                      </div>
+                      <textarea
+                        id="edit-prompt"
+                        placeholder="Describe the edit… e.g., Remove the shadows from this image (You can also paste images here)"
+                        className="w-full h-24 resize-none rounded-md border bg-card text-card-foreground placeholder-muted-foreground p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border-2 border-dashed"
+                        value={prompt}
+                        onChange={(e) => {
+                          console.log('✏️ Prompt changed:', e.target.value);
+                          setPrompt(e.target.value);
+                        }}
+                        onPaste={handleImagePaste}
+                      />
+                    </div>
                     <Button
                       onClick={handleEditSubmit}
                       disabled={isProcessing || !prompt.trim()}
@@ -362,8 +551,17 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                       )}
                     </Button>
                   </div>
+                  
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  
                   <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Press ⌘/Ctrl + Enter to submit · Esc to close</span>
+                    <span>Press ⌘/Ctrl + Enter to submit · Paste images (Ctrl/Cmd+V) · Esc to close</span>
                     <span className="hidden md:inline">Edits run on server — saved automatically</span>
                   </div>
                 </div>
