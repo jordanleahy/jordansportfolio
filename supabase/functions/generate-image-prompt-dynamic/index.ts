@@ -222,7 +222,7 @@ serve(async (req) => {
       console.log('🎯 Looking for theme-based system prompt:', theme);
       const { data: themeData, error: themeError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
         .eq('theme', theme)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
@@ -240,43 +240,23 @@ serve(async (req) => {
       }
     }
 
-    // Finally: category-based prompt
-    if (!systemPromptData && category) {
-      console.log('🏷️ Looking for category-based system prompt:', category);
-      // First try category-only prompts (theme is NULL)
-      const { data: categoryOnlyData, error: categoryOnlyError } = await supabase
+    // Finally: generic fallback to any Visual Prompt Generator prompt
+    if (!systemPromptData) {
+      console.log('🔄 Looking for any Visual Prompt Generator system prompt as fallback');
+      const { data: fallbackData, error: fallbackError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
-        .eq('category', category)
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
-        .is('theme', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (categoryOnlyData && !categoryOnlyError) {
-        console.log('✅ Found category-only prompt:', { category, id: categoryOnlyData.id, agent: categoryOnlyData.agent_name, updated_at: categoryOnlyData.updated_at, length: categoryOnlyData.prompt_text?.length || 0, preview: (categoryOnlyData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
-        systemPromptData = categoryOnlyData;
-        usedIdentifier = category;
-        usedType = 'category';
-      } else {
-        // Fallback: allow any prompt matching this category (even if tied to a theme)
-        const { data: categoryAnyData, error: categoryAnyError } = await supabase
-          .from('system_prompts')
-          .select('prompt_text, theme, category, id, agent_name, created_at, updated_at')
-          .eq('category', category)
-          .eq('agent_name', 'Visual Prompt Generator')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (categoryAnyData && !categoryAnyError) {
-          console.log('✅ Found category-based prompt (theme-bound):', { category, theme: categoryAnyData.theme, id: categoryAnyData.id, agent: categoryAnyData.agent_name, updated_at: categoryAnyData.updated_at, length: categoryAnyData.prompt_text?.length || 0, preview: (categoryAnyData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
-          systemPromptData = categoryAnyData;
-          usedIdentifier = category;
-          usedType = 'category';
-        }
+      if (fallbackData && !fallbackError) {
+        console.log('✅ Found fallback Visual Prompt Generator prompt:', { id: fallbackData.id, theme: fallbackData.theme, agent: fallbackData.agent_name, updated_at: fallbackData.updated_at, length: fallbackData.prompt_text?.length || 0, preview: (fallbackData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
+        systemPromptData = fallbackData;
+        usedIdentifier = 'fallback';
+        usedType = 'fallback';
       }
     }
 
