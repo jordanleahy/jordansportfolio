@@ -87,4 +87,4 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.structure-theme-input]
-verify_jwt = true
+verify_jwt = false

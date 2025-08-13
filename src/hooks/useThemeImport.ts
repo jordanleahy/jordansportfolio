@@ -47,12 +47,12 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
     mutationFn: async (data: unknown): Promise<ProcessingResult> => {
       setProgress({ step: 'processing', progress: 30, message: 'Processing with AI...' });
       
-      const response = await supabase.functions.invoke('process-theme-json', {
-        body: { rawJson: data }
+      const response = await supabase.functions.invoke('structure-theme-input', {
+        body: { text: typeof data === 'string' ? data : JSON.stringify(data) }
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
+      if (response.error || !response.data?.success || !response.data?.data) {
+        throw new Error(response.error?.message || response.data?.errors?.join(', ') || 'Failed to structure input');
       }
 
       return response.data;

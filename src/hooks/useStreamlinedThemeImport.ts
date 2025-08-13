@@ -188,20 +188,15 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     options.onOptimisticStart?.(categoryName);
 
     try {
-      // Ensure we have valid structured JSON; if not JSON, call structuring agent
-      let finalJsonString = rawJson;
-      try {
-        JSON.parse(finalJsonString);
-      } catch {
-        const { data, error } = await supabase.functions.invoke('structure-theme-input', {
-          body: { text: rawJson }
-        });
-        if (error || !data?.success || !data?.data) {
-          throw new Error(error?.message || data?.errors?.join(', ') || 'Failed to structure input');
-        }
-        finalJsonString = JSON.stringify(data.data);
-        categoryName = data.data.category || data.data.theme || categoryName;
+      // Always structure input via edge function for strict schema enforcement
+      const { data, error } = await supabase.functions.invoke('structure-theme-input', {
+        body: { text: rawJson }
+      });
+      if (error || !data?.success || !data?.data) {
+        throw new Error(error?.message || data?.errors?.join(', ') || 'Failed to structure input');
       }
+      const finalJsonString = JSON.stringify(data.data);
+      categoryName = data.data.category || data.data.theme || categoryName;
 
       submitMutation.mutate({ rawJson: finalJsonString, categoryName, idempotencyKey });
     } catch (err) {
