@@ -153,6 +153,9 @@ export class ThemeService {
       totalDuration: `${totalDuration}ms`
     });
 
+    // Trigger background system prompt generation
+    this.triggerBackgroundSystemPrompt(createdTheme);
+
     return createdTheme;
   }
 
@@ -209,6 +212,35 @@ export class ThemeService {
 
   private invalidateAllCaches() {
     this.cache.clear();
+  }
+
+  private triggerBackgroundSystemPrompt(theme: Theme) {
+    // Run in background without blocking theme creation response
+    setTimeout(async () => {
+      try {
+        logger.setContext('backgroundSystemPrompt', theme.user_id);
+        logger.info('Starting background system prompt generation', {
+          themeId: theme.id,
+          category: theme.category,
+          themeName: theme.theme_name
+        });
+
+        const { triggerSystemPromptForNewTheme } = await import('@/utils/systemPromptTrigger');
+        await triggerSystemPromptForNewTheme(theme.id, theme.theme_name, theme.category);
+        
+        logger.success('Background system prompt generation completed', {
+          themeId: theme.id,
+          category: theme.category
+        });
+      } catch (error) {
+        logger.error('Background system prompt generation failed', error, {
+          themeId: theme.id,
+          category: theme.category,
+          themeName: theme.theme_name
+        });
+        // Don't throw - this shouldn't affect theme creation
+      }
+    }, 100); // Small delay to ensure theme creation response is sent first
   }
 }
 
