@@ -223,6 +223,11 @@ export const PostsTableView = memo(({
           aValue = a.status;
           bValue = b.status;
           break;
+        case 'day':
+          // Handle null/undefined days by treating them as very high numbers (sort to end)
+          aValue = a.day ?? 999999;
+          bValue = b.day ?? 999999;
+          break;
         default:
           return 0 as any;
       }
