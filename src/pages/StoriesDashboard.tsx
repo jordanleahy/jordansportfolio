@@ -7,7 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TypewriterInput } from '@/components/ui/typewriter-input';
-import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
+import { Loader2, Sparkles, Users, MessageSquareText, Send, Upload } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
@@ -795,31 +795,60 @@ export default function StoriesDashboard() {
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center w-[95vw] md:w-[700px] mx-auto bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Story Ship</h1>
               <p className="text-base md:text-xl text-foreground font-semibold">Every Thought is a Visual Journey</p>
-              <div className="w-full text-center">
-                <TypewriterInput 
-                  aria-label="Describe your theme" 
-                  typewriterTexts={[
-                    "patient education for diabetes",
-                    "patient education for sepsis", 
-                    "patient education for UTI",
-                    "patient education for resp failure",
-                    "patient education for heart attack"
-                  ]}
-                  fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
-                  value={customThemeDescription} 
-                  onChange={e => setCustomThemeDescription(e.target.value)} 
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
-                      e.preventDefault();
-                      handleGenerateCustomTheme();
-                    }
-                  }} 
-                  disabled={isGeneratingTheme || isProcessing} 
-                  typingSpeed={80}
-                  deletingSpeed={40}
-                  pauseDuration={2000}
-                />
+              <div className="w-full text-center relative">
+                <div className="relative flex items-center">
+                  <TypewriterInput 
+                    aria-label="Describe your theme" 
+                    typewriterTexts={[
+                      "patient education for diabetes",
+                      "patient education for sepsis", 
+                      "patient education for UTI",
+                      "patient education for resp failure",
+                      "patient education for heart attack"
+                    ]}
+                    fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                    className="w-full h-16 px-8 py-6 pr-16 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                    value={customThemeDescription} 
+                    onChange={e => setCustomThemeDescription(e.target.value)} 
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                        e.preventDefault();
+                        handleGenerateCustomTheme();
+                      }
+                    }} 
+                    onImagePaste={(file) => {
+                      toast({
+                        title: "Image Pasted",
+                        description: `${file.name} ready for analysis`,
+                      });
+                      // Here you could integrate with the reference image analyzer
+                    }}
+                    disabled={isGeneratingTheme || isProcessing} 
+                    typingSpeed={80}
+                    deletingSpeed={40}
+                    pauseDuration={2000}
+                  />
+                  
+                  {/* Upload button */}
+                  <label className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          toast({
+                            title: "Image Uploaded",
+                            description: `${file.name} ready for analysis`,
+                          });
+                          // Here you could integrate with the reference image analyzer
+                        }
+                      }}
+                    />
+                    <Upload className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+                  </label>
+                </div>
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
