@@ -136,9 +136,16 @@ export const ImagePreviewModal = ({
 
   const handleImagePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     console.log('📋 Paste event triggered');
-    console.log('📋 Clipboard data:', e.clipboardData);
+    console.log('📋 Event type:', e.type);
+    console.log('📋 ClipboardData available:', !!e.clipboardData);
     
-    const items = e.clipboardData?.items;
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) {
+      console.log('❌ No clipboard data found');
+      return;
+    }
+
+    const items = clipboardData.items;
     if (!items) {
       console.log('❌ No clipboard items found');
       return;
@@ -155,6 +162,7 @@ export const ImagePreviewModal = ({
         console.log('🖼️ Image detected in clipboard!');
         hasImage = true;
         e.preventDefault();
+        e.stopPropagation();
         
         const file = item.getAsFile();
         if (file) {
@@ -169,6 +177,38 @@ export const ImagePreviewModal = ({
     
     if (!hasImage) {
       console.log('📝 No image in clipboard, allowing normal text paste');
+    }
+  };
+
+  // Add drag and drop support
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🔄 Drag over detected');
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('📁 Drop event triggered');
+    
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) {
+      console.log('❌ No files in drop event');
+      return;
+    }
+
+    console.log('📁 Files dropped:', files.length);
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      console.log(`📁 File ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
+      
+      if (file.type.startsWith('image/')) {
+        console.log('🖼️ Processing dropped image');
+        await processReferenceImage(file);
+        break; // Only process the first image
+      }
     }
   };
 
@@ -425,18 +465,27 @@ export const ImagePreviewModal = ({
                   </Button>
                 </div>
                 
-                <Textarea
-                  value={editState.prompt}
-                  onChange={(e) => {
-                    console.log('✏️ Edit prompt changed:', e.target.value);
-                    setEditState(prev => ({ ...prev, prompt: e.target.value }));
-                  }}
-                  onKeyDown={handleKeyDown}
-                  onPaste={handleImagePaste}
-                  placeholder="Describe how you want to edit the image... (You can also paste or upload a reference image)"
-                  className="min-h-[100px] bg-black/50 border-white/20 text-white placeholder:text-white/50 resize-none"
-                  disabled={editState.isProcessing}
-                />
+                <div 
+                  className="relative"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  <Textarea
+                    value={editState.prompt}
+                    onChange={(e) => {
+                      console.log('✏️ Edit prompt changed:', e.target.value);
+                      setEditState(prev => ({ ...prev, prompt: e.target.value }));
+                    }}
+                    onKeyDown={handleKeyDown}
+                    onPaste={handleImagePaste}
+                    placeholder="Describe how you want to edit the image... (You can also paste or drag & drop a reference image)"
+                    className="min-h-[100px] bg-black/50 border-white/20 text-white placeholder:text-white/50 resize-none border-2 border-dashed"
+                    disabled={editState.isProcessing}
+                  />
+                  <div className="absolute top-2 right-2 text-white/30 text-xs pointer-events-none">
+                    Paste or drop image here
+                  </div>
+                </div>
                 
                 <input
                   ref={fileInputRef}
@@ -448,7 +497,7 @@ export const ImagePreviewModal = ({
 
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-white/50">
-                    Tip: Paste images (Ctrl/Cmd+V) or press Ctrl/Cmd+Enter to submit
+                    Tip: Paste images (Ctrl/Cmd+V), drag & drop, or press Ctrl/Cmd+Enter to submit
                   </div>
                   <div className="flex space-x-2">
                     <Button
