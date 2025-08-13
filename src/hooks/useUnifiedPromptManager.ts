@@ -105,32 +105,69 @@ export const useUnifiedPromptManager = () => {
       return cached.prompt;
     }
 
-    // Check database cache (simplified - using existing table)
+    // Check database cache using existing cached_prompts table
     const { data: dbCached } = await supabase
-      .from('social_media_posts')
-      .select('generated_image_prompt, created_at')
-      .eq('title', request.title)
+      .from('cached_prompts')
+      .select('prompt_text, created_at')
+      .eq('cache_key', cacheKey)
       .gte('created_at', new Date(Date.now() - 3600000).toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (dbCached?.generated_image_prompt) {
+    if (dbCached?.prompt_text) {
       const entry: PromptCacheEntry = {
-        prompt: dbCached.generated_image_prompt,
+        prompt: dbCached.prompt_text,
         timestamp: Date.now(),
         hits: 1,
         colorScheme: precomputeColorScheme(request.colorTheme)
       };
       memoryCache.current.set(cacheKey, entry);
-      return dbCached.generated_image_prompt;
+      
+      // Update hit count in database
+      supabase
+        .from('cached_prompts')
+        .update({ 
+          hit_count: (dbCached as any).hit_count ? (dbCached as any).hit_count + 1 : 1,
+          last_accessed_at: new Date().toISOString()
+        })
+        .eq('cache_key', cacheKey)
+        .then(() => console.log('✅ Cache hit count updated'));
+      
+      return dbCached.prompt_text;
     }
 
     // Generate new prompt with enhanced system
     const prompt = await generateEnhancedPrompt(request);
     
-    // Store in memory only for now
+    // Create cache entry
+    const entry: PromptCacheEntry = {
+      prompt,
+      timestamp: Date.now(),
+      hits: 1,
+      colorScheme: precomputeColorScheme(request.colorTheme),
+      themeVariant: request.theme
+    };
+    
+    // Store in memory and database
     memoryCache.current.set(cacheKey, entry);
+    
+    // Store in database (non-blocking)
+    supabase
+      .from('cached_prompts')
+      .upsert({
+        cache_key: cacheKey,
+        prompt_text: prompt,
+        category: request.category,
+        metadata: {
+          theme: request.theme,
+          color_scheme: entry.colorScheme,
+          aspect_ratio: request.aspectRatio
+        },
+        user_id: null, // Allow system-wide caching
+        expires_at: new Date(Date.now() + 86400000).toISOString() // 24 hours
+      })
+      .then(() => console.log('✅ Prompt cached in database'));
 
     // Update metrics
     const generationTime = Date.now() - startTime;
@@ -260,7 +297,7 @@ export const useUnifiedPromptManager = () => {
     
     if (type === 'database' || type === 'all') {
       supabase
-        .from('prompt_cache')
+        .from('cached_prompts')
         .delete()
         .lt('created_at', new Date(Date.now() - 86400000).toISOString()) // Clear old entries
         .then(() => console.log('✅ Database cache cleared'));
