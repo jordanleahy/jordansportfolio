@@ -203,7 +203,7 @@ export const ImagePromptGeneratorModal = ({
   useEffect(() => {
     if (isOpen && content.primary && content.secondary) {
       if (cachedPrompt) {
-        // Clean any existing aspect ratio mentions from cached prompt
+        // Instant loading of cached prompt - no delay
         const cleanCachedPrompt = cachedPrompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
         setBasePrompt(cleanCachedPrompt);
         
@@ -215,7 +215,12 @@ export const ImagePromptGeneratorModal = ({
         setGeneratedPrompt(finalPrompt);
         setIsFromCache(true);
       } else {
-        generateImagePrompt();
+        // Show immediate loading state
+        setIsGenerating(true);
+        // Use setTimeout to ensure UI updates before heavy operation
+        setTimeout(() => {
+          generateImagePrompt();
+        }, 10);
       }
     }
   }, [isOpen, content.primary, content.secondary, cachedPrompt]);

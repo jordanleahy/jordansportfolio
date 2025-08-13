@@ -1,5 +1,5 @@
 // PostsTableView - Updated to use standard img tags instead of OptimizedImage
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
@@ -12,10 +12,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2, RefreshCw } from 'lucide-react';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useInstantFeedback } from '@/hooks/useInstantFeedback';
+import { useThemeDataPrefetch } from '@/hooks/useThemeDataPrefetch';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
@@ -64,6 +67,8 @@ export const PostsTableView = memo(({
   const [hoveredCell, setHoveredCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
+  const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
+  const { themeData } = useThemeDataPrefetch();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
@@ -94,7 +99,9 @@ export const PostsTableView = memo(({
     }
   };
 
-  const handleRegeneratePrompt = async (post: SocialMediaPost) => {
+  const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
+    // Instant UI feedback - show loading immediately
+    setInstantLoading(post.id, true);
     setProcessing(post.id, 'regenerate_prompt', true);
     
     try {
@@ -103,9 +110,32 @@ export const PostsTableView = memo(({
     } catch (error) {
       console.error('Failed to regenerate prompt:', error);
     } finally {
+      setInstantLoading(post.id, false);
       setProcessing(post.id, 'regenerate_prompt', false);
     }
-  };
+  }, [onGenerateImagePrompt, setInstantLoading, setProcessing]);
+
+  const handleInstantImagePromptGeneration = useCallback((post: SocialMediaPost) => {
+    // Provide instant feedback before any async operations
+    setInstantLoading(post.id, true);
+    
+    // Use debounced action to prevent rapid clicking
+    debouncedAction(
+      `generate_prompt_${post.id}`,
+      async () => {
+        try {
+          setProcessing(post.id, 'generate', true);
+          await onGenerateImagePrompt(post);
+        } catch (error) {
+          console.error('Failed to generate image prompt:', error);
+        } finally {
+          setInstantLoading(post.id, false);
+          setProcessing(post.id, 'generate', false);
+        }
+      },
+      100 // Very short debounce to prevent double-clicks but keep responsiveness
+    );
+  }, [onGenerateImagePrompt, setInstantLoading, setProcessing, debouncedAction]);
 
   const handleCellEdit = (postId: string, field: 'title' | 'description', currentValue: string) => {
     setEditingCell({ postId, field });
@@ -239,7 +269,7 @@ export const PostsTableView = memo(({
                   icon: <RefreshCw className="h-4 w-4" />,
                   onClick: () => handleRegeneratePrompt(post),
                   title: "Regenerate prompt",
-                  loading: isProcessingCtx(post.id, 'regenerate_prompt')
+                  loading: isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)
                 };
 
                 const copyAction = {
@@ -258,9 +288,9 @@ export const PostsTableView = memo(({
                   },
                   {
                     icon: <Lightbulb className="h-4 w-4" />,
-                    onClick: () => onGenerateImagePrompt(post),
+                    onClick: () => handleInstantImagePromptGeneration(post),
                     title: "Generate image prompt",
-                    loading: false
+                    loading: isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)
                   },
                   {
                     icon: <Mic className="h-4 w-4" />,
@@ -368,6 +398,14 @@ export const PostsTableView = memo(({
                   <TableCell className="w-32">
                     <div className="flex gap-2 items-center flex-wrap">
                       <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
+                      
+                      {/* Instant feedback indicator */}
+                      <InstantLoadingIndicator 
+                        isVisible={isInstantGenerating(post.id)}
+                        message="Generating..."
+                        elapsedTime={getElapsedTime(post.id)}
+                        className="text-xs"
+                      />
                     </div>
                   </TableCell>
                 )}
