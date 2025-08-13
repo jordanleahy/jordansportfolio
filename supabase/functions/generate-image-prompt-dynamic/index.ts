@@ -109,26 +109,27 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    let { title, description, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
+    let { postId, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
 
-    if (!title || !description || !themeId) {
-      throw new Error('Missing required fields: title, description, and themeId');
+    if (!postId || !themeId) {
+      throw new Error('Missing required fields: postId and themeId');
     }
 
-    // Initialize category - will be fetched from themes table
+    // Initialize variables - will be fetched from database
+    let title: string = '';
+    let description: string = '';
     let category: string | null = null;
 
     const requestedAspectRatio = aspectRatio || aspect_ratio || null;
 
-    // Store request metadata with correlation ID
-    requestMetadata = { theme, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
+    // Store initial request metadata with correlation ID (will be updated after fetching data)
+    requestMetadata = { theme, themeId, systemPromptId, postId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
 
     logger.info('Request payload received', {
       theme,
       themeId,
+      postId: postId ? postId.slice(0, 8) : null,
       systemPromptId: systemPromptId ? `${String(systemPromptId).slice(0,8)}…` : null,
-      titleLength: title?.length || 0,
-      descriptionLength: description?.length || 0,
       hasColorTheme: !!colorTheme,
       aspectRatio: requestedAspectRatio
     });
@@ -148,7 +149,28 @@ serve(async (req) => {
 
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
-    console.log('🚀 Generating image prompt for:', { theme, themeId, title, userId: userId?.slice(0, 8), correlationId });
+    // Fetch post data from social_media_posts table
+    const { data: postData, error: postError } = await supabase
+      .from('social_media_posts')
+      .select('title, description')
+      .eq('id', postId)
+      .maybeSingle();
+
+    if (postError) {
+      console.error('❌ Error fetching post data:', postError);
+      throw new Error(`Failed to fetch post data: ${postError.message}`);
+    }
+
+    if (!postData) {
+      throw new Error(`Post not found with ID: ${postId}`);
+    }
+
+    title = postData.title;
+    description = postData.description;
+
+    console.log('✅ Retrieved post data:', { title: title.slice(0, 50), description: description.slice(0, 50) });
+
+    console.log('🚀 Generating image prompt for:', { theme, themeId, postId: postId.slice(0, 8), title: title.slice(0, 30), userId: userId?.slice(0, 8), correlationId });
 
     let systemPromptData: any = null;
     let usedIdentifier: string;

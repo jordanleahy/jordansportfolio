@@ -56,6 +56,7 @@ export const ImagePromptGeneratorModal = ({
     try {
       // Use cached generation
       const prompt = await generateWithCache({
+        postId: content.postId,
         title: content.primary,
         description: content.secondary,
         theme: config.theme,

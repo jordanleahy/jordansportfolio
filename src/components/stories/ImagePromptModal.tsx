@@ -32,6 +32,7 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
   };
 
   const content: ImagePromptContent = {
+    postId: postId,
     primary: title,
     secondary: description
   };

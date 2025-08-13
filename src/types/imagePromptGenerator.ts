@@ -19,6 +19,7 @@ export interface ImagePromptConfig {
 }
 
 export interface ImagePromptContent {
+  postId?: string;
   primary: string;
   secondary: string;
   tertiary?: string;

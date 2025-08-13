@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface CachedPromptGenerationConfig {
-  title: string;
-  description: string;
+  postId?: string;
+  title?: string;
+  description?: string;
   theme?: string;
   themeId?: string;
   category?: string;
@@ -38,6 +39,7 @@ export const useCachedPromptGeneration = () => {
       console.log('🔄 Generating new prompt...');
       const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
+          postId: config.postId,
           title: config.title,
           description: config.description,
           theme: config.theme,

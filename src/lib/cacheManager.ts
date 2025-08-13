@@ -35,14 +35,24 @@ class SimpleCacheManager {
 
   // Generate cache key for prompts
   private generatePromptKey(config: {
-    title: string;
-    description: string;
+    postId?: string;
+    title?: string;
+    description?: string;
     theme?: string;
     category?: string;
     aspectRatio?: string;
   }): string {
-    const normalizedTitle = config.title.toLowerCase().trim();
-    const normalizedDescription = config.description.toLowerCase().trim().substring(0, 100);
+    // If postId is provided, use it as the primary key
+    if (config.postId) {
+      const theme = config.theme || 'default';
+      const category = config.category || 'general';
+      const aspectRatio = config.aspectRatio || '1:1';
+      return `prompt:${category}:${theme}:${aspectRatio}:${config.postId}`;
+    }
+    
+    // Fallback to title/description based key for backwards compatibility
+    const normalizedTitle = (config.title || '').toLowerCase().trim();
+    const normalizedDescription = (config.description || '').toLowerCase().trim().substring(0, 100);
     const theme = config.theme || 'default';
     const category = config.category || 'general';
     const aspectRatio = config.aspectRatio || '1:1';
@@ -52,8 +62,9 @@ class SimpleCacheManager {
 
   // Get cached prompt (memory first, then database)
   async getCachedPrompt(config: {
-    title: string;
-    description: string;
+    postId?: string;
+    title?: string;
+    description?: string;
     theme?: string;
     category?: string;
     aspectRatio?: string;
@@ -109,8 +120,9 @@ class SimpleCacheManager {
 
   // Store prompt in both memory and database
   async setCachedPrompt(config: {
-    title: string;
-    description: string;
+    postId?: string;
+    title?: string;
+    description?: string;
     theme?: string;
     category?: string;
     aspectRatio?: string;
@@ -140,8 +152,9 @@ class SimpleCacheManager {
         metadata: {
           theme: config.theme,
           aspectRatio: config.aspectRatio,
-          titleLength: config.title.length,
-          descriptionLength: config.description.length
+          postId: config.postId,
+          titleLength: config.title?.length || 0,
+          descriptionLength: config.description?.length || 0
         }
       });
 
@@ -237,8 +250,9 @@ class SimpleCacheManager {
 
   // Clear specific cache entries
   clearPromptCache(config: {
-    title: string;
-    description: string;
+    postId?: string;
+    title?: string;
+    description?: string;
     theme?: string;
     category?: string;
     aspectRatio?: string;
