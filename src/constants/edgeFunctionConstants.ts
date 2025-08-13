@@ -62,6 +62,9 @@ export const ERROR_MESSAGES = {
   USER_NOT_AUTHENTICATED: 'User not authenticated',
   RATE_LIMIT_EXCEEDED: 'Rate limit exceeded',
   NETWORK_ERROR: 'Network error',
+  OPENAI_MODERATION_BLOCKED: 'OpenAI flagged this request as potentially unsafe. Please try a different prompt that doesn\'t include sensitive content.',
+  OPENAI_CONTENT_VIOLATION: 'The request was rejected due to content policy violations. Please modify your prompt and try again.',
+  OPENAI_SAFETY_SYSTEM_ERROR: 'Content was flagged by safety systems. Please use different wording in your request.',
 } as const;
 
 // CORS Headers

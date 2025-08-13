@@ -87,6 +87,21 @@ serve(async (req) => {
       const aiJson = await aiResp.json();
       if (!aiResp.ok) {
         console.warn('OpenAI edits failed, falling back to generations:', aiJson);
+        
+        // Check if this is a moderation error
+        if (aiJson?.error?.code === 'moderation_blocked' || 
+            aiJson?.error?.message?.includes('safety system') ||
+            aiJson?.error?.message?.includes('rejected by the safety system')) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'OpenAI flagged this request as potentially unsafe. Please try a different prompt that doesn\'t include sensitive content.' 
+            }),
+            { 
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
       } else {
         b64 = aiJson?.data?.[0]?.b64_json || null;
       }
@@ -114,6 +129,22 @@ serve(async (req) => {
       const genJson = await genResp.json();
       if (!genResp.ok) {
         console.error('OpenAI generation failed:', genJson);
+        
+        // Check if the generation error is also moderation-related
+        if (genJson?.error?.code === 'moderation_blocked' || 
+            genJson?.error?.message?.includes('safety system') ||
+            genJson?.error?.message?.includes('rejected by the safety system')) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'OpenAI flagged this request as potentially unsafe. Please try a different prompt that doesn\'t include sensitive content.' 
+            }),
+            { 
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+        
         return new Response(JSON.stringify({ error: 'OpenAI request failed', details: genJson }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
