@@ -16,6 +16,7 @@ import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLayout } from '@/components/layout/PageLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
+import { useSocialMediaPost } from "@/hooks/useSocialMediaPost";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { ImageGenerationStatus } from "@/components/blog/ImageGenerationStatus";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,9 @@ const BlogEditor = () => {
   const createPostMutation = useCreateBlogPost();
   const updatePostMutation = useUpdateBlogPost();
   const deletePostMutation = useDeleteBlogPost();
+  
+  // Fetch social media post data to get theme_id
+  const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id);
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
@@ -1002,7 +1006,8 @@ const BlogEditor = () => {
             onClose={handleClosePromptModal}
             headline={formData.visual_sections[promptModalOpen]?.headline || ''}
             content={formData.visual_sections[promptModalOpen]?.content || ''}
-            category={formData.category || 'healthcare'}
+            category={socialMediaPost?.category || formData.category || 'healthcare'}
+            themeId={socialMediaPost?.theme_id}
           />
         )}
 

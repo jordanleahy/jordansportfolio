@@ -48,6 +48,7 @@ export interface BlogPost {
   category: string;
   tags?: Json; // Will be cast to string[]
   theme?: string;
+  social_media_post_id?: string;
   
   // Timestamps
   created_at: string;

@@ -10,6 +10,7 @@ interface BlogVisualPromptProps {
   headline: string;
   content: string;
   category?: string;
+  themeId?: string;
 }
 
 const aspectRatioOptions: AspectRatioOption[] = [
@@ -19,7 +20,7 @@ const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Standard (4:3)", value: "4:3" }
 ];
 
-export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare' }: BlogVisualPromptProps) => {
+export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare', themeId }: BlogVisualPromptProps) => {
   const params = useParams();
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
@@ -29,6 +30,7 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
     edgeFunction: 'generate-image-prompt-dynamic',
     category: category,
     theme,
+    themeId,
     enableCaching: true,
     aspectRatioOptions,
     cacheKeyPrefix: 'blog_visual'
