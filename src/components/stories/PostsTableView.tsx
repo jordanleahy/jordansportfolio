@@ -33,7 +33,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-type SortField = 'title' | 'status';
+type SortField = 'title' | 'status' | 'day';
 type SortDirection = 'asc' | 'desc';
 
 export const PostsTableView = memo(({
@@ -57,7 +57,7 @@ export const PostsTableView = memo(({
   onEditPost
 }: PostsTableViewProps) => {
   const isMobile = useIsMobile();
-  const [sortField, setSortField] = useState<SortField>('title');
+  const [sortField, setSortField] = useState<SortField>('day');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [editingCell, setEditingCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
