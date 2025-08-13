@@ -23,6 +23,7 @@ export const CategoriesGrid = ({
         <CategoryCard
           key="shimmer"
           theme="Generating theme..."
+          themeId="shimmer-id"
           themeDescription="Preparing your theme"
           category=""
           postCount={0}
@@ -38,6 +39,7 @@ export const CategoriesGrid = ({
         <CategoryCard
           key={theme.id}
           theme={theme.theme_name}
+          themeId={theme.id}
           themeDescription={theme.description}
           category={theme.category}
           postCount={theme.post_count}

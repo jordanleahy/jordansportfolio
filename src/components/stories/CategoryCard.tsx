@@ -13,7 +13,7 @@ import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
 
 import { CategoryCardProps } from '@/types/stories';
 
-export const ThemeCard = ({ theme, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode, isGeneratingTheme, onCancelGeneration }: CategoryCardProps) => {
+export const ThemeCard = ({ theme, themeId, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode, isGeneratingTheme, onCancelGeneration }: CategoryCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -74,7 +74,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
     if (onClick) {
       onClick();
     } else {
-      navigate(`/stories/theme/${encodeURIComponent(theme)}`);
+      navigate(`/stories/id/${themeId}`);
     }
   };
 
@@ -263,7 +263,7 @@ export const ThemeCard = ({ theme, themeDescription, category, postCount, imageU
             if (onClick) {
               onClick();
             } else {
-              navigate(`/stories/theme/${encodeURIComponent(theme)}`);
+              navigate(`/stories/id/${themeId}`);
             }
           }}
         >

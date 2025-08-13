@@ -19,6 +19,7 @@ export interface CategoriesGridProps {
 
 export interface CategoryCardProps {
   theme: string;
+  themeId: string;  // Add theme ID for navigation
   themeDescription?: string | null;
   category: string;
   postCount: number;

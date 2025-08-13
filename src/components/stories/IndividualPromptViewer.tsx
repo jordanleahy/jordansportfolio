@@ -10,8 +10,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { diffLines } from 'diff';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import { useParams } from 'react-router-dom';
-import { useThemeByName } from '@/hooks/useOptimizedStories';
 
 import type { IndividualPromptViewerProps } from '@/types/stories/ui';
 
@@ -23,27 +21,6 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const params = useParams();
-  const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
-  
-  // Fallback theme ID resolution using URL params
-  const { data: themeByName, isLoading: isThemeLoading } = useThemeByName(themeName || '', !!themeName);
-  const fallbackThemeId = themeByName?.id;
-  
-  // Use provided themeId or fallback to resolved theme from URL
-  const resolvedThemeId = themeId || fallbackThemeId;
-  
-  // Debug logging for theme ID resolution
-  useEffect(() => {
-    console.log('🔍 IndividualPromptViewer Theme ID Debug:', {
-      providedThemeId: themeId,
-      themeName,
-      fallbackThemeId,
-      resolvedThemeId,
-      isThemeLoading,
-      postId: post?.id
-    });
-  }, [themeId, themeName, fallbackThemeId, resolvedThemeId, isThemeLoading, post?.id]);
   
   const {
     data: promptData,
@@ -53,7 +30,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     regeneratePrompt,
     isRegenerating,
     refetch
-  } = useIndividualPromptCache(post?.id || '', resolvedThemeId);
+  } = useIndividualPromptCache(post?.id || '', themeId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [localPrompt, setLocalPrompt] = useState('');
@@ -108,14 +85,6 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   }, [originalPrompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    console.log('🔄 Regenerate button clicked:', {
-      postId: post?.id,
-      providedThemeId: themeId,
-      resolvedThemeId,
-      themeName,
-      isThemeLoading
-    });
-    
     if (!post) {
       console.error('❌ Missing post for regeneration');
       toast({
@@ -126,18 +95,11 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
       return;
     }
     
-    if (!resolvedThemeId) {
-      console.error('❌ Missing themeId for regeneration:', {
-        providedThemeId: themeId,
-        fallbackThemeId,
-        themeName,
-        isThemeLoading
-      });
+    if (!themeId) {
+      console.error('❌ Missing themeId for regeneration');
       toast({
         title: "Error", 
-        description: isThemeLoading 
-          ? "Please wait while theme data loads..." 
-          : "Theme information not available. Please try refreshing the page.",
+        description: "Theme information not available. Please try refreshing the page.",
         variant: "destructive",
       });
       return;
@@ -146,7 +108,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     try {
       console.log('✅ Starting regeneration with:', {
         postId: post.id,
-        themeId: resolvedThemeId,
+        themeId: themeId,
         aspectRatio: '16:9'
       });
       
@@ -160,7 +122,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     } catch (error) {
       console.error('❌ Failed to regenerate prompt:', error);
     }
-  }, [post, themeId, resolvedThemeId, themeName, fallbackThemeId, isThemeLoading, regeneratePrompt, toast]);
+  }, [post, themeId, regeneratePrompt, toast]);
 
   if (!post) return null;
 

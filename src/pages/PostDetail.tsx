@@ -74,7 +74,7 @@ export default function PostDetail() {
   const handleBackClick = () => {
     // Navigate back to the theme if we have it, otherwise go to stories dashboard
     if (post?.theme_id) {
-      navigate(`/stories/theme/${encodeURIComponent(post.theme_id)}`);
+      navigate(`/stories/id/${post.theme_id}`);
     } else if (post?.category) {
       // Fallback to category for backward compatibility
       navigate(`/stories/theme/${encodeURIComponent(post.category)}`);

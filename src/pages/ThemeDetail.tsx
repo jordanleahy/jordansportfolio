@@ -7,7 +7,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useThemeDetailsByName } from '@/hooks/useOptimizedStories';
+import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useThemeSEO } from '@/hooks/useThemeSEO';
 import { Helmet } from 'react-helmet-async';
@@ -31,7 +31,7 @@ import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
 
 export default function ThemeDetail() {
-  const { theme } = useParams<{ theme: string }>();
+  const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
@@ -39,10 +39,12 @@ export default function ThemeDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const decodedTheme = theme ? decodeURIComponent(theme) : '';
   
-  // Fetch theme and posts for this specific theme name
-  const { theme: themeData, posts = [], isLoading: isLoadingPosts, refetch } = useThemeDetailsByName(decodedTheme, !!decodedTheme);
+  // Fetch theme and posts for this specific theme ID
+  const { theme: themeData, posts = [], isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
+  
+  // Get theme name for display purposes
+  const decodedTheme = themeData?.theme_name || '';
   
   // Generate SEO metadata for the theme
   const seoData = useThemeSEO(themeData);
@@ -93,7 +95,7 @@ export default function ThemeDetail() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!theme || !decodedTheme) {
+  if (!themeId || !themeData) {
     return <Navigate to="/stories" replace />;
   }
 

@@ -78,6 +78,34 @@ export const useThemeDetailsByName = (themeName: string, enabled = true) => {
   };
 };
 
+// Combined hook for theme details by ID - gets theme and posts directly by ID
+export const useThemeDetailsById = (themeId: string, enabled = true) => {
+  const { data: theme, isLoading: isLoadingTheme } = useQuery({
+    queryKey: ['theme-by-id', themeId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('themes')
+        .select('*')
+        .eq('id', themeId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: QUERY_CONFIG.THEMES_STALE_TIME,
+    enabled: enabled && !!themeId,
+  });
+  
+  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(themeId, enabled && !!themeId);
+
+  return {
+    theme,
+    posts,
+    isLoading: isLoadingTheme || isLoadingPosts,
+    refetch
+  };
+};
+
 // Optimized available themes hook with better error handling
 export const useAvailableThemes = (enabled = true) => {
   return useQuery({
