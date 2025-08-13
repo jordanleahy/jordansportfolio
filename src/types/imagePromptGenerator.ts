@@ -24,6 +24,55 @@ export interface ImagePromptContent {
   tertiary?: string;
 }
 
+export interface ReferenceImageAnalysis {
+  colors?: {
+    dominant: string[];
+    palette: string[];
+    mood: string;
+    temperature: 'warm' | 'cool' | 'neutral';
+  };
+  composition?: {
+    layout: string;
+    balance: string;
+    focalPoints: string[];
+    visualFlow: string;
+  };
+  style?: {
+    artistic: string;
+    technique: string;
+    aesthetic: string;
+    complexity: 'minimal' | 'moderate' | 'complex';
+  };
+  lighting?: {
+    quality: string;
+    direction: string;
+    mood: string;
+    intensity: 'soft' | 'moderate' | 'dramatic';
+  };
+  mood?: {
+    overall: string;
+    emotional: string;
+    professional: boolean;
+  };
+  elements?: {
+    subjects: string[];
+    objects: string[];
+    environment: string;
+  };
+}
+
+export interface ExtractedCharacteristics {
+  colorPalette: string[];
+  dominantColors: string[];
+  colorMood: string;
+  compositionStyle: string;
+  artisticStyle: string;
+  lightingMood: string;
+  overallMood: string;
+  complexity: 'minimal' | 'moderate' | 'complex';
+  professional: boolean;
+}
+
 export interface ImagePromptGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,4 +80,6 @@ export interface ImagePromptGeneratorModalProps {
   content: ImagePromptContent;
   cachedPrompt?: string;
   onPromptGenerated?: (prompt: string) => void;
+  referenceAnalysis?: ReferenceImageAnalysis;
+  extractedCharacteristics?: ExtractedCharacteristics;
 }

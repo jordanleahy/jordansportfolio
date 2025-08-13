@@ -109,7 +109,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    let { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId } = await req.json();
+    let { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
 
     if (!title || !description || (!theme && !category && !themeId && !systemPromptId)) {
       throw new Error('Missing required fields: title, description, and one of theme, category, themeId, or systemPromptId');
@@ -118,7 +118,7 @@ serve(async (req) => {
     const requestedAspectRatio = aspectRatio || aspect_ratio || null;
 
     // Store request metadata with correlation ID
-    requestMetadata = { theme, category, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId };
+    requestMetadata = { theme, category, themeId, systemPromptId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
 
     logger.info('Request payload received', {
       theme,
@@ -332,6 +332,43 @@ Color Theme Instructions:
 - Color Instructions: ${colorTheme.color_instructions}
 
 Please incorporate these colors and visual style into the image prompt to ensure brand consistency.`;
+    }
+
+    // Add reference image analysis if provided
+    if (referenceAnalysis && extractedCharacteristics) {
+      userMessage += `
+
+Reference Image Analysis (apply these characteristics):`;
+
+      if (extractedCharacteristics.dominantColors?.length > 0) {
+        userMessage += `
+- Color Palette: Incorporate colors from this palette: ${extractedCharacteristics.dominantColors.join(', ')}
+- Color Mood: ${extractedCharacteristics.colorMood}`;
+      }
+
+      if (extractedCharacteristics.compositionStyle) {
+        userMessage += `
+- Composition Style: ${extractedCharacteristics.compositionStyle}`;
+      }
+
+      if (extractedCharacteristics.artisticStyle) {
+        userMessage += `
+- Artistic Style: Adapt elements from this style: ${extractedCharacteristics.artisticStyle}`;
+      }
+
+      if (extractedCharacteristics.lightingMood) {
+        userMessage += `
+- Lighting Mood: ${extractedCharacteristics.lightingMood}`;
+      }
+
+      if (extractedCharacteristics.overallMood) {
+        userMessage += `
+- Overall Mood: ${extractedCharacteristics.overallMood}`;
+      }
+
+      userMessage += `
+
+Please integrate these reference characteristics naturally while maintaining the professional vector illustration style and ensuring the content remains relevant to the ${usedType === 'category' ? category : (systemPromptData.theme || theme)} theme.`;
     }
 
     // Add MANDATORY technical constraints and Private Safe Space guidelines
