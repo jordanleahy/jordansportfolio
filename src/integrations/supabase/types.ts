@@ -3107,6 +3107,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      insert_vendor_analysis_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       is_bootstrap_admin: {
         Args: { _user_id: string }
         Returns: boolean
