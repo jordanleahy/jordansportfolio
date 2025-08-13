@@ -184,17 +184,18 @@ export const ImagePromptGeneratorModal = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] mx-auto overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{config.title}</DialogTitle>
           </DialogHeader>
 
           <Tabs defaultValue="prompt" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="prompt">Image Prompt</TabsTrigger>
-              <TabsTrigger value="reference" className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Reference Image
+            <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsTrigger value="prompt" className="text-sm px-2 py-2">Image Prompt</TabsTrigger>
+              <TabsTrigger value="reference" className="flex items-center gap-1 text-sm px-2 py-2">
+                <ImageIcon className="h-3 w-3" />
+                <span className="hidden sm:inline">Reference Image</span>
+                <span className="sm:hidden">Reference</span>
               </TabsTrigger>
             </TabsList>
             
@@ -207,9 +208,9 @@ export const ImagePromptGeneratorModal = ({
               ) : generatedPrompt ? (
                 <>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <label className="text-sm font-medium">Generated Image Prompt:</label>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {isFromCache && (
                           <span className="text-xs text-muted-foreground bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
                             From Cache
@@ -244,8 +245,8 @@ export const ImagePromptGeneratorModal = ({
                     />
                     
                     {config.aspectRatioOptions && (
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                           {config.aspectRatioOptions.map((option) => (
                             <Button
                               key={option.value}
@@ -261,7 +262,7 @@ export const ImagePromptGeneratorModal = ({
                         
                         <Button 
                           onClick={handleCopyPrompt} 
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 w-full sm:w-auto justify-center"
                           size="default"
                         >
                           {copied ? (
@@ -280,10 +281,10 @@ export const ImagePromptGeneratorModal = ({
                     )}
 
                     {!config.aspectRatioOptions && (
-                      <div className="flex justify-end">
+                      <div className="flex justify-center sm:justify-end">
                         <Button 
                           onClick={handleCopyPrompt} 
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 w-full sm:w-auto justify-center"
                         >
                           {copied ? (
                             <>

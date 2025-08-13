@@ -55,8 +55,9 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
     <div className="space-y-4 border-t pt-6">
       <h4 className="text-sm font-medium text-muted-foreground">Admin Actions</h4>
       
-      <div className="grid grid-cols-3 gap-3">
-        <div className="flex items-center gap-1">
+      {/* First row - responsive grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+        <div className="flex items-center gap-1 col-span-2 sm:col-span-1">
           <BlogPostButton post={post} />
         </div>
         <Button
@@ -67,31 +68,35 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
           title="Generate Prompt"
         >
           <Lightbulb className="h-4 w-4" />
+          <span className="hidden sm:inline ml-2">Prompt</span>
         </Button>
         {onGenerateVoiceover ? (
           <Button
             variant="outline"
             size="sm"
             onClick={() => onGenerateVoiceover(post)}
-            className="flex-1"
+            className="flex-1 col-span-2 sm:col-span-1"
             title="Generate Voiceover Script"
           >
             <Mic className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Voice</span>
           </Button>
         ) : (
           <Button
             variant="outline"
             size="sm"
-            className="flex-1"
+            className="flex-1 col-span-2 sm:col-span-1"
             disabled
             title="Voiceover not available"
           >
             <BookOpen className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Voice</span>
           </Button>
         )}
       </div>
       
-      <div className="grid grid-cols-3 gap-2">
+      {/* Second row - responsive grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <BulkImageGenerationButton
           post={post}
           onPostsChange={onPostsChange}
@@ -105,15 +110,17 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
           disabled={creditStatus.isLoading || !creditStatus.hasCredits}
         >
           <ImageIcon className={`h-4 w-4 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-50' : ''}`} />
+          <span className="hidden sm:inline ml-2">Images</span>
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowVideos(!showVideos)}
-          className="flex-1"
+          className="flex-1 col-span-2 sm:col-span-1"
           title={showVideos ? "Hide video uploads" : "Show video uploads"}
         >
           <Video className="h-4 w-4" />
+          <span className="hidden sm:inline ml-2">Videos</span>
         </Button>
       </div>
 
@@ -146,8 +153,8 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
             />
           </div>
 
-          {/* Additional formats - top row */}
-          <div className="grid grid-cols-3 gap-3 mb-3">
+          {/* Additional formats - responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
             <PostImageUploadCard
               post={post}
               type="16_9"

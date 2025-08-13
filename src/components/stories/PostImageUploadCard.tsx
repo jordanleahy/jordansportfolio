@@ -224,8 +224,8 @@ export const PostImageUploadCard = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="text-sm font-medium">{label}</span>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+        <span className="text-sm font-medium text-center sm:text-left">{label}</span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

@@ -105,7 +105,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       {/* Skeleton Grid - shown during generation */}
       {isCurrentlyGenerating && (
           <div className="mt-4 animate-fade-in">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <div className="h-16 w-full">
                 <Skeleton className="w-full h-full rounded border" />
               </div>
