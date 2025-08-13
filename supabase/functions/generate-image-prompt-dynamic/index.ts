@@ -111,8 +111,8 @@ serve(async (req) => {
 
     let { title, description, theme, category, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
 
-    if (!title || !description || (!theme && !category && !themeId && !systemPromptId)) {
-      throw new Error('Missing required fields: title, description, and one of theme, category, themeId, or systemPromptId');
+    if (!title || !description || (!themeId && !systemPromptId)) {
+      throw new Error('Missing required fields: title, description, and themeId (or systemPromptId)');
     }
 
     const requestedAspectRatio = aspectRatio || aspect_ratio || null;
@@ -236,56 +236,8 @@ serve(async (req) => {
       }
     }
 
-    // Then: theme string search
-    if (!systemPromptData && theme) {
-      console.log('🎯 Looking for theme-based system prompt:', theme);
-      const { data: themeData, error: themeError } = await supabase
-        .from('system_prompts')
-        .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
-        .eq('theme', theme)
-        .eq('agent_name', 'Visual Prompt Generator')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (themeData && !themeError) {
-        console.log('✅ Found theme-based prompt:', { theme, id: themeData.id, agent: themeData.agent_name, updated_at: themeData.updated_at, length: themeData.prompt_text?.length || 0, preview: (themeData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
-        systemPromptData = themeData;
-        usedIdentifier = theme;
-        usedType = 'theme';
-      } else {
-        // Try resolving via themes table to get theme_id, then fetch system_prompts by theme_id
-        const { data: themeRowByName, error: themeByNameErr } = await supabase
-          .from('themes')
-          .select('id')
-          .eq('theme_name', theme)
-          .maybeSingle();
-
-        if (themeRowByName && !themeByNameErr) {
-          const { data: spByThemeId2, error: spByThemeId2Err } = await supabase
-            .from('system_prompts')
-            .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
-            .eq('theme_id', themeRowByName.id)
-            .eq('agent_name', 'Visual Prompt Generator')
-            .eq('is_active', true)
-            .order('updated_at', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (spByThemeId2 && !spByThemeId2Err) {
-            console.log('✅ Found theme-based prompt via theme_id from name:', { theme, theme_id: themeRowByName.id, id: spByThemeId2.id });
-            systemPromptData = spByThemeId2;
-            usedIdentifier = theme;
-            usedType = 'theme';
-          } else {
-            console.log('🔍 No theme-based prompt found by name or theme_id.');
-          }
-        } else {
-          console.log('🔍 No theme row found for name, skipping theme_id search.');
-        }
-      }
-    }
+    // Theme string search disabled: only themeId or systemPromptId are used.
+    // If themeId resolution fails, we rely on the generic fallback below.
 
     // Finally: generic fallback to any Visual Prompt Generator prompt
     if (!systemPromptData) {
@@ -328,12 +280,8 @@ serve(async (req) => {
 Title: ${title}
 Description: ${description}`;
 
-    if (usedType === 'category') {
-      userMessage += `\nCategory: ${usedIdentifier}`;
-    } else {
-      userMessage += `\nTheme: ${systemPromptData.theme || theme || usedIdentifier}`;
-      if (category) userMessage += `\nCategory: ${category}`;
-    }
+    // Always include theme context; category is deprecated
+    userMessage += `\nTheme: ${systemPromptData.theme || theme || usedIdentifier}`;
 
     // Add aspect ratio guidance if provided
     if (requestedAspectRatio) {
@@ -567,19 +515,19 @@ Private Safe Space Visual Tone:
         const data = encoder.encode(title + description);
         const hashArray = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        const identifierSlug = (usedIdentifier || (category || 'general')).toLowerCase().replace(/\s+/g, '_');
+        const identifierSlug = (usedIdentifier || 'theme').toLowerCase().replace(/\s+/g, '_');
         const cacheKey = `image_prompt_${usedType}_${identifierSlug}_${hashHex.slice(0, 20)}`;
         
         await supabase.from('cached_prompts').insert({
           user_id: userId,
           cache_key: cacheKey,
-          category: usedType === 'category' ? usedIdentifier : (category || null),
+          category: null,
           prompt_text: generatedText,
           metadata: {
             title,
             description,
-            theme: usedType === 'category' ? undefined : (systemPromptData.theme || theme || usedIdentifier),
-            category: usedType === 'category' ? usedIdentifier : category,
+            theme: (systemPromptData.theme || theme || usedIdentifier),
+            category: null,
             usedType,
             agent: 'Visual Prompt Generator',
             model: 'gpt-5-mini',
@@ -622,8 +570,8 @@ Private Safe Space Visual Tone:
 
     return new Response(JSON.stringify({ 
       generatedPrompt: generatedText,
-      theme: usedType === 'category' ? undefined : (systemPromptData.theme || theme || usedIdentifier),
-      category: usedType === 'category' ? usedIdentifier : category,
+      theme: usedType === 'fallback' ? undefined : (systemPromptData.theme || theme || usedIdentifier),
+      category: undefined,
       usedType,
       agent: 'Visual Prompt Generator',
       correlationId,
