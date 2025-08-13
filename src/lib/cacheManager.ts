@@ -3,12 +3,14 @@ class SimpleCacheManager {
   private memoryCache: Map<string, { value: string; expires: number }>;
   private systemPromptCache: Map<string, { value: any; expires: number }>;
   private themeCache: Map<string, { value: any; expires: number }>;
+  private visualPromptCache: Map<string, { value: any; expires: number }>;
   private maxSize = 1000;
 
   constructor() {
     this.memoryCache = new Map();
     this.systemPromptCache = new Map();
     this.themeCache = new Map();
+    this.visualPromptCache = new Map();
   }
 
   private isExpired(item: { value: any; expires: number }): boolean {
@@ -207,6 +209,32 @@ class SimpleCacheManager {
     console.log(`🎨 Theme cached: ${key}`);
   }
 
+  // Visual prompt caching per theme
+  async getVisualPromptByTheme(themeId: string, category: string): Promise<any | null> {
+    const key = `visual_prompt:${themeId}:${category}`;
+    
+    this.cleanExpired(this.visualPromptCache);
+    
+    const cached = this.visualPromptCache.get(key);
+    if (cached && !this.isExpired(cached)) {
+      console.log(`🎨 Visual prompt cache HIT: ${key}`);
+      return cached.value;
+    }
+
+    console.log(`🎨 Visual prompt cache MISS: ${key}`);
+    return null;
+  }
+
+  setVisualPromptByTheme(themeId: string, category: string, data: any): void {
+    const key = `visual_prompt:${themeId}:${category}`;
+    this.visualPromptCache.set(key, {
+      value: data,
+      expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+    });
+    this.enforceMaxSize(this.visualPromptCache);
+    console.log(`🎨 Visual prompt cached: ${key}`);
+  }
+
   // Clear specific cache entries
   clearPromptCache(config: {
     title: string;
@@ -224,6 +252,7 @@ class SimpleCacheManager {
     this.memoryCache.clear();
     this.systemPromptCache.clear();
     this.themeCache.clear();
+    this.visualPromptCache.clear();
     console.log('🧹 All caches cleared');
   }
 
@@ -232,6 +261,7 @@ class SimpleCacheManager {
     this.cleanExpired(this.memoryCache);
     this.cleanExpired(this.systemPromptCache);
     this.cleanExpired(this.themeCache);
+    this.cleanExpired(this.visualPromptCache);
     
     return {
       prompts: {
@@ -245,6 +275,10 @@ class SimpleCacheManager {
       },
       themes: {
         size: this.themeCache.size,
+        maxSize: this.maxSize
+      },
+      visualPrompts: {
+        size: this.visualPromptCache.size,
         maxSize: this.maxSize
       }
     };
