@@ -138,7 +138,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     }
   });
 
-  const submitRawData = useCallback((rawJson: string, providedIdempotencyKey?: string) => {
+  const submitRawData = useCallback(async (rawJson: string, providedIdempotencyKey?: string) => {
     console.log('📥 FRONTEND: Submit raw data called');
     console.log('📊 RAW DATA STATS:', {
       hasData: !!rawJson.trim(),
@@ -148,10 +148,10 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     });
     
     if (!rawJson.trim()) {
-      console.log('❌ NO DATA: Empty raw JSON provided');
+      console.log('❌ NO DATA: Empty raw JSON/text provided');
       toast({
         title: "No data provided",
-        description: "Please paste your JSON data first",
+        description: "Please paste your text or JSON first",
         variant: "destructive"
       });
       return;
@@ -171,30 +171,53 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       return;
     }
 
-    // Extract category name for optimistic UI
+    // Try to extract a friendly category/theme for optimistic UI
     let categoryName = 'New Theme';
     try {
       const parsed = JSON.parse(rawJson);
       categoryName = parsed.category || parsed.theme || 'New Theme';
       console.log('📋 EXTRACTED CATEGORY:', categoryName);
     } catch (parseError) {
-      console.log('⚠️ CATEGORY EXTRACTION FAILED:', parseError.message);
-      // Use default if parsing fails
+      console.log('ℹ️ Input is not valid JSON; will structure with AI');
     }
 
-    // Add to pending submissions
+    // Add to pending submissions and start processing
     setPendingSubmissions(prev => new Set(prev).add(idempotencyKey));
-
-    console.log('🚀 STARTING MUTATION:', { 
-      categoryName, 
-      processing: true, 
-      idempotencyKey 
-    });
+    console.log('🚀 STARTING MUTATION:', { categoryName, processing: true, idempotencyKey });
     setIsProcessing(true);
     options.onOptimisticStart?.(categoryName);
-    
-    submitMutation.mutate({ rawJson, categoryName, idempotencyKey });
-  }, [submitMutation, toast, options]);
+
+    try {
+      // Ensure we have valid structured JSON; if not JSON, call structuring agent
+      let finalJsonString = rawJson;
+      try {
+        JSON.parse(finalJsonString);
+      } catch {
+        const { data, error } = await supabase.functions.invoke('structure-theme-input', {
+          body: { text: rawJson }
+        });
+        if (error || !data?.success || !data?.data) {
+          throw new Error(error?.message || data?.errors?.join(', ') || 'Failed to structure input');
+        }
+        finalJsonString = JSON.stringify(data.data);
+        categoryName = data.data.category || data.data.theme || categoryName;
+      }
+
+      submitMutation.mutate({ rawJson: finalJsonString, categoryName, idempotencyKey });
+    } catch (err) {
+      setIsProcessing(false);
+      // Clear pending submission
+      setPendingSubmissions(prev => {
+        const updated = new Set(prev);
+        updated.delete(idempotencyKey);
+        return updated;
+      });
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('❌ PREPROCESS FAILURE:', msg);
+      toast({ title: 'Preprocess failed', description: msg, variant: 'destructive' });
+      options.onOptimisticComplete?.(false, categoryName);
+    }
+  }, [submitMutation, toast, options, pendingSubmissions]);
 
   return {
     submitRawData,
