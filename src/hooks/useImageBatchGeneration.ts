@@ -25,7 +25,11 @@ const createPromptCacheKey = (request: BulkImageGenerationRequest): string => {
   const content = `${sanitizedTitle}|${sanitizedDescription}|${sanitizedTheme}|${sanitizedCategory}`.toLowerCase().trim();
   
   try {
-    return `prompt_${sanitizedTheme || 'no_theme'}_${sanitizedCategory}_${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const chars = Array.from(data, byte => String.fromCharCode(byte));
+    const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+    return `prompt_${sanitizedTheme || 'no_theme'}_${sanitizedCategory}_${encoded}`;
   } catch (error) {
     console.warn('Failed to encode cache key, using fallback:', error);
     // Fallback: use a simple hash-like string

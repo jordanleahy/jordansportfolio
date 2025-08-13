@@ -74,7 +74,8 @@ serve(async (req) => {
     requestId: req.headers.get('x-request-id') || 'unknown',
     userAgent: req.headers.get('user-agent'),
     method: req.method,
-    url: req.url
+    url: req.url,
+    version: 'v2.0.0' // Added version for debugging
   });
 
   // Add signal handler for cleanup

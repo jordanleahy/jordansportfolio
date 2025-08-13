@@ -64,7 +64,16 @@ class OptimizedCacheManager {
     const aspectRatio = config.aspectRatio || '1:1';
     const colorThemeId = config.colorTheme?.id || 'none';
     
-    return `prompt:${category}:${theme}:${aspectRatio}:${colorThemeId}:${btoa(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(normalizedTitle + normalizedDesc);
+      const chars = Array.from(data, byte => String.fromCharCode(byte));
+      const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
+      return `prompt:${category}:${theme}:${aspectRatio}:${colorThemeId}:${encoded}`;
+    } catch (error) {
+      console.warn('Failed to encode optimized cache key, using fallback:', error);
+      return `prompt:${category}:${theme}:${aspectRatio}:${colorThemeId}:${(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
+    }
   }
 
   async getCachedPrompt(config: {

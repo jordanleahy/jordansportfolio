@@ -57,7 +57,16 @@ class SimpleCacheManager {
     const category = config.category || 'general';
     const aspectRatio = config.aspectRatio || '1:1';
     
-    return `prompt:${category}:${theme}:${aspectRatio}:${btoa(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(normalizedTitle + normalizedDescription);
+      const chars = Array.from(data, byte => String.fromCharCode(byte));
+      const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+      return `prompt:${category}:${theme}:${aspectRatio}:${encoded}`;
+    } catch (error) {
+      console.warn('Failed to encode cache key, using fallback:', error);
+      return `prompt:${category}:${theme}:${aspectRatio}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+    }
   }
 
   // Get cached prompt (memory first, then database)

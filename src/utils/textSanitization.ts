@@ -69,15 +69,24 @@ export function sanitizeText(text: string): string {
 }
 
 /**
+ * Unicode-safe base64 encoding utility
+ */
+function safeBase64Encode(text: string): string {
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const chars = Array.from(data, byte => String.fromCharCode(byte));
+    return btoa(chars.join(''));
+  } catch (error) {
+    console.warn('Failed to encode text, using fallback:', error);
+    return text.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50);
+  }
+}
+
+/**
  * Creates a safe cache key from text input by sanitizing and encoding
  */
 export function createSafeCacheKey(text: string): string {
   const sanitized = sanitizeText(text);
-  try {
-    return btoa(sanitized);
-  } catch (error) {
-    console.warn('Failed to encode sanitized text, using fallback:', error);
-    // Fallback: use a simple hash-like string
-    return sanitized.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50);
-  }
+  return safeBase64Encode(sanitized);
 }
