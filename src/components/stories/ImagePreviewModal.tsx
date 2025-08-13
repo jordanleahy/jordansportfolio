@@ -78,13 +78,15 @@ export const ImagePreviewModal = ({
     }
   };
 
-  const handleImagePaste = async (e: ClipboardEvent) => {
+  const handleImagePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
     if (!items) return;
 
+    let hasImage = false;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.type.startsWith('image/')) {
+        hasImage = true;
         e.preventDefault();
         const file = item.getAsFile();
         if (file) {
@@ -93,6 +95,7 @@ export const ImagePreviewModal = ({
         break;
       }
     }
+    // If no image found, allow normal text pasting
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,7 +322,7 @@ export const ImagePreviewModal = ({
                   value={editPrompt}
                   onChange={(e) => setEditPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  onPaste={handleImagePaste as any}
+                  onPaste={handleImagePaste}
                   placeholder="Describe how you want to edit the image... (You can also paste or upload a reference image)"
                   className="min-h-[100px] bg-black/50 border-white/20 text-white placeholder:text-white/50 resize-none"
                   disabled={isEditProcessing}
