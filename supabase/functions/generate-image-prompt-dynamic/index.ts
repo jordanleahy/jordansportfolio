@@ -450,7 +450,7 @@ Private Safe Space Visual Tone:
       userPreview: (userMessage || '').slice(0, 400)
     });
 
-    const requestBody = {
+    const openAIRequestBody = {
       model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
@@ -463,8 +463,8 @@ Private Safe Space Visual Tone:
     logger.startTiming('openai_request');
     console.log('🔍 OpenAI Request Details:', {
       url: 'https://api.openai.com/v1/chat/completions',
-      model: requestBody.model,
-      messageCount: requestBody.messages.length,
+      model: openAIRequestBody.model,
+      messageCount: openAIRequestBody.messages.length,
       systemPromptLength: categoryPrompt.prompt?.length || 0,
       userMessageLength: userMessage?.length || 0,
       correlationId,
@@ -473,19 +473,19 @@ Private Safe Space Visual Tone:
     });
 
     logger.info('OpenAI chat request prepared', {
-      model: requestBody.model,
+      model: openAIRequestBody.model,
       parameters: {
-        has_max_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_tokens'),
-        has_max_completion_tokens: Object.prototype.hasOwnProperty.call(requestBody as any, 'max_completion_tokens'),
-        max_tokens: (requestBody as any).max_tokens,
-        max_completion_tokens: (requestBody as any).max_completion_tokens,
-        user_set: !!(requestBody as any).user
+        has_max_tokens: Object.prototype.hasOwnProperty.call(openAIRequestBody as any, 'max_tokens'),
+        has_max_completion_tokens: Object.prototype.hasOwnProperty.call(openAIRequestBody as any, 'max_completion_tokens'),
+        max_tokens: (openAIRequestBody as any).max_tokens,
+        max_completion_tokens: (openAIRequestBody as any).max_completion_tokens,
+        user_set: !!(openAIRequestBody as any).user
       },
       message_summary: {
         system_len: (categoryPrompt.prompt?.length || 0),
         user_len: (userMessage?.length || 0)
       },
-      request_keys: Object.keys(requestBody),
+      request_keys: Object.keys(openAIRequestBody),
       correlationId
     });
 
@@ -498,7 +498,7 @@ Private Safe Space Visual Tone:
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(openAIRequestBody),
       correlationId,
     });
     
