@@ -67,15 +67,12 @@ serve(async (req) => {
   let requestMetadata: any = {};
   let openAIRequestId: string | undefined;
 
-  // Enhanced shutdown tracking
+  // Function start tracking (essential for debugging)
   console.log('🚀 FUNCTION_START: Request initiated', {
     correlationId,
     timestamp: new Date().toISOString(),
-    requestId: req.headers.get('x-request-id') || 'unknown',
-    userAgent: req.headers.get('user-agent'),
     method: req.method,
-    url: req.url,
-    version: 'v2.0.0' // Added version for debugging
+    version: 'v2.0.0'
   });
 
   // Add signal handler for cleanup
@@ -110,7 +107,6 @@ serve(async (req) => {
     }
 
     const requestBody = await req.json();
-    console.log('📥 RAW REQUEST PAYLOAD:', JSON.stringify(requestBody, null, 2));
     
     // Validate request structure
     
@@ -133,7 +129,6 @@ serve(async (req) => {
         received: requestBody,
         correlationId
       };
-      console.error('❌ VALIDATION FAILED:', errorDetails);
       throw new Error(`Missing required fields: ${!postId ? 'postId' : ''} ${!themeId ? 'themeId' : ''}`.trim());
     }
 
@@ -183,7 +178,6 @@ serve(async (req) => {
     
     if (postError) {
       logger.error('Database error fetching post', { postId, error: postError.message, code: postError.code });
-      console.error('❌ Error fetching post data:', postError);
       throw new Error(`Failed to fetch post data: ${postError.message}`);
     }
 
@@ -202,9 +196,6 @@ serve(async (req) => {
       titlePreview: title?.slice(0, 50) || '',
       descriptionPreview: description?.slice(0, 50) || ''
     });
-    console.log('✅ Retrieved post data:', { title: title.slice(0, 50), description: description.slice(0, 50) });
-
-    console.log('🚀 Generating image prompt for:', { theme, themeId, postId: postId.slice(0, 8), title: title.slice(0, 30), userId: userId?.slice(0, 8), correlationId });
 
     let systemPromptData: any = null;
     let usedIdentifier: string;
@@ -212,7 +203,6 @@ serve(async (req) => {
 
     // Highest priority: explicit systemPromptId
     if (!systemPromptData && systemPromptId) {
-      console.log('🎯 Using explicit systemPromptId for system prompt:', systemPromptId);
       const { data: spById, error: spByIdError } = await supabase
         .from('system_prompts')
         .select('prompt_text, theme, id, agent_name, created_at, updated_at')
@@ -223,20 +213,12 @@ serve(async (req) => {
         systemPromptData = spById;
         usedIdentifier = spById.theme || systemPromptId;
         usedType = 'systemPromptId';
-        console.log('🧾 SYSTEM PROMPT RESOLVED (by id):', {
-          id: spById.id,
-          agent_name: spById.agent_name,
-          updated_at: spById.updated_at,
-          length: spById.prompt_text?.length || 0,
-          preview: (spById.prompt_text || '').slice(0, 100).replace(/\n/g, ' ')
-        });
       }
     }
 
     // Next: themeId mapped to a specific system prompt
     if (!systemPromptData && themeId) {
       logger.startTiming('database_theme_fetch');
-      console.log('🎯 Resolving themeId to system prompt:', themeId);
       const { data: themeRow, error: themeRowErr } = await supabase
         .from('themes')
         .select('visual_prompt_system_prompt_id, theme_name, category')
@@ -252,7 +234,6 @@ serve(async (req) => {
           category: themeRow.category,
           hasSystemPromptId: !!themeRow.visual_prompt_system_prompt_id
         });
-        console.log('📌 Retrieved category from themes table:', category);
         
         if (themeRow.visual_prompt_system_prompt_id) {
           const { data: spFromTheme, error: spFromThemeErr } = await supabase
@@ -265,13 +246,6 @@ serve(async (req) => {
             systemPromptData = spFromTheme;
             usedIdentifier = themeRow.theme_name || spFromTheme.theme || String(themeId);
             usedType = 'themeId';
-            console.log('🧾 SYSTEM PROMPT RESOLVED (by themeId mapping):', {
-              id: spFromTheme.id,
-              agent_name: spFromTheme.agent_name,
-              updated_at: spFromTheme.updated_at,
-              length: spFromTheme.prompt_text?.length || 0,
-              preview: (spFromTheme.prompt_text || '').slice(0, 100).replace(/\n/g, ' ')
-            });
           }
         }
         // If no direct mapping, try theme_id on system_prompts
@@ -290,7 +264,6 @@ serve(async (req) => {
             systemPromptData = spByThemeId;
             usedIdentifier = themeRow.theme_name || String(themeId);
             usedType = 'themeId';
-            console.log('✅ Found system prompt by theme_id:', { id: spByThemeId.id, theme_id: themeId, agent: spByThemeId.agent_name });
           }
         }
         // If still no mapping, fall back to theme name search later
@@ -305,7 +278,6 @@ serve(async (req) => {
 
     // Finally: generic fallback to any Visual Prompt Generator prompt
     if (!systemPromptData) {
-      console.log('🔄 Looking for any Visual Prompt Generator system prompt as fallback');
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('system_prompts')
         .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
@@ -316,7 +288,6 @@ serve(async (req) => {
         .maybeSingle();
 
       if (fallbackData && !fallbackError) {
-        console.log('✅ Found fallback Visual Prompt Generator prompt:', { id: fallbackData.id, theme: fallbackData.theme, agent: fallbackData.agent_name, updated_at: fallbackData.updated_at, length: fallbackData.prompt_text?.length || 0, preview: (fallbackData.prompt_text || '').slice(0, 100).replace(/\n/g, ' ') });
         systemPromptData = fallbackData;
         usedIdentifier = 'fallback';
         usedType = 'fallback';
@@ -327,7 +298,6 @@ serve(async (req) => {
       const errorMsg = themeId
         ? `No system prompt found for themeId '${themeId}'${theme ? ` (theme: '${theme}')` : ''}`
         : (theme ? `No system prompt found for theme '${theme}'` : 'No system prompt found');
-      console.log('❌', errorMsg);
       throw new Error(errorMsg);
     }
 
@@ -464,16 +434,6 @@ Private Safe Space Visual Tone:
     };
 
     logger.startTiming('openai_request');
-    console.log('🔍 OpenAI Request Details:', {
-      url: 'https://api.openai.com/v1/chat/completions',
-      model: openAIRequestBody.model,
-      messageCount: openAIRequestBody.messages.length,
-      systemPromptLength: categoryPrompt.prompt?.length || 0,
-      userMessageLength: userMessage?.length || 0,
-      correlationId,
-      hasApiKey: !!openAIApiKey,
-      apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'MISSING'
-    });
 
     logger.info('OpenAI chat request prepared', {
       model: openAIRequestBody.model,
@@ -507,14 +467,7 @@ Private Safe Space Visual Tone:
     
     // responseTime and openAIRequestId already from makeOpenAIRequest
 
-    console.log('📥 OpenAI Response Details:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      openAIRequestId: openAIRequestId,
-      responseTime,
-      correlationId
-    });
+    // Response details logged by makeOpenAI function
 
     // Use openAIRequestId from makeOpenAIRequest
 
@@ -523,14 +476,11 @@ Private Safe Space Visual Tone:
       let errorBody: any = {};
       try {
         errorBody = await response.json();
-        console.log('❌ OpenAI Error Response Body:', errorBody);
       } catch (parseError) {
-        console.log('❌ Failed to parse OpenAI error response:', parseError);
         try {
           const errorText = await response.text();
-          console.log('❌ OpenAI Error Response Text:', errorText);
         } catch (textError) {
-          console.log('❌ Failed to get OpenAI error text:', textError);
+          // Error parsing failed
         }
       }
       
@@ -546,23 +496,10 @@ Private Safe Space Visual Tone:
     }
 
     const openAIData = await response.json();
-    console.log('✅ OpenAI Success Response:', {
-      hasChoices: !!openAIData.choices,
-      choicesLength: openAIData.choices?.length || 0,
-      hasUsage: !!openAIData.usage,
-      model: openAIData.model,
-      correlationId
-    });
     
     const generatedText = openAIData.choices?.[0]?.message?.content;
 
     if (!generatedText || typeof generatedText !== 'string' || generatedText.trim() === '') {
-      console.log('❌ Missing generated text. choices[0] snapshot:', {
-        choice0: openAIData.choices?.[0],
-        model: openAIData.model,
-        usage: openAIData.usage,
-        correlationId,
-      });
       logger.error('Missing generated text from OpenAI chat response', {
         firstChoice: openAIData.choices?.[0],
         model: openAIData.model,
@@ -612,14 +549,12 @@ Private Safe Space Visual Tone:
           version: 1,
           expires_at: null // No expiration for image prompts
         });
-        console.log('✅ Prompt stored in cache successfully');
       } catch (cacheError) {
-        console.error('❌ Failed to store prompt in cache:', cacheError);
         // Don't fail the request if caching fails
       }
     }
 
-    console.log('✅ Prompt generated successfully');
+    
 
     // Track API usage with enhanced attribution if we have userId
     if (userId) {
