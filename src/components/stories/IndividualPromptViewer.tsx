@@ -202,12 +202,6 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
             {post.description}
           </div>
         </div>
-        
-        {isMobile && (
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
       </div>
 
       {/* Actions */}
@@ -296,11 +290,8 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   return (
     <Card className="border-l-4 border-l-primary">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div>
           <CardTitle className="text-lg">Individual Image Prompt</CardTitle>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
         </div>
         {headerComponent}
       </CardHeader>
