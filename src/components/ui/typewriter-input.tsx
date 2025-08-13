@@ -10,6 +10,7 @@ interface TypewriterInputProps extends Omit<React.ComponentProps<"input">, "plac
   typingSpeed?: number;
   deletingSpeed?: number;
   pauseDuration?: number;
+  onImagePaste?: (file: File) => void;
 }
 
 const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>(
@@ -26,6 +27,7 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
     value,
     onFocus,
     onBlur,
+    onImagePaste,
     ...props 
   }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -55,6 +57,24 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
       onBlur?.(e);
     };
 
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (!onImagePaste) return;
+      
+      const items = e.clipboardData?.items;
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            if (file) {
+              onImagePaste(file);
+            }
+          }
+        }
+      }
+    };
+
     const hasTypewriterContent = (typewriterTexts && typewriterTexts.length > 0) || (baseText && suffixes && suffixes.length > 0);
     const showTypewriter = !isFocused && !hasValue && hasTypewriterContent;
     const placeholder = showTypewriter ? displayText : fallbackPlaceholder;
@@ -71,6 +91,7 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
           value={value}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onPaste={handlePaste}
           ref={ref}
           {...props}
         />
