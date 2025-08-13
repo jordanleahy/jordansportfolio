@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Share, Download } from 'lucide-react';
+import { Share, Download, BookOpen } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useDuplicatePublicCollection } from '@/hooks/useDuplicatePublicCollection';
 import type { User } from '@supabase/supabase-js';
 
 interface SharedCollection {
@@ -49,6 +50,8 @@ export default function PublicSharedCollection() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  const duplicateCollection = useDuplicatePublicCollection();
 
   const publicUrl = `${window.location.origin}/public/collections/${handle}/${id}`;
   
@@ -150,6 +153,19 @@ export default function PublicSharedCollection() {
     }
   };
 
+  const handleSaveCollection = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (!theme?.id) {
+      return;
+    }
+
+    duplicateCollection.mutate({ theme_id: theme.id });
+  };
+
   const handleDownload = async (item: SharedItem) => {
     if (!user) {
       setShowAuthModal(true);
@@ -200,13 +216,26 @@ export default function PublicSharedCollection() {
             </span>
           </h1>
           <div className="flex items-center gap-2 w-full md:w-auto">
+            {user && theme?.id && (
+              <Button 
+                variant="default" 
+                onClick={handleSaveCollection}
+                disabled={duplicateCollection.isPending}
+                className="flex-1 md:flex-none"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                {duplicateCollection.isPending ? 'Saving...' : 'Save'}
+              </Button>
+            )}
             <Button variant="outline" onClick={shareCollection} className="flex-1 md:flex-none">
               <Share className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <a href="https://www.jordanleahy.com/auth" className="flex-1 md:flex-none">
-              <Button variant="secondary" className="w-full md:w-auto">Sign Up</Button>
-            </a>
+            {!user && (
+              <a href="https://www.jordanleahy.com/auth" className="flex-1 md:flex-none">
+                <Button variant="secondary" className="w-full md:w-auto">Sign Up</Button>
+              </a>
+            )}
           </div>
         </div>
       </header>
