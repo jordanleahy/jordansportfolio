@@ -168,34 +168,34 @@ async function aiProcessThemeData(rawData: any, userId?: string, correlationId?:
   console.log('✅ OpenAI API key found');
 
   const prompt = `Fix and clean this JSON data for a social media content calendar. 
-
-Expected structure:
-{
-  "category": "string",
-  "theme": "string", 
-  "description": "string (optional)",
-  "posts": [
-    {
-      "day": number,
-      "title": "string",
-      "description": "string",
-      "status": "draft|scheduled|published"
-    }
-  ]
-}
-
-Rules:
-- Fix JSON syntax errors
-- Ensure all posts have title and description
-- Generate sequential day numbers if missing
-- Set status to "draft" if not provided
-- Limit to 30 posts maximum
-- Clean and improve content quality
-
-Raw data:
-${JSON.stringify(rawData, null, 2)}
-
-Return only the cleaned JSON:`;
+  
+  Expected structure:
+  {
+    "category": "string (1-100, optional)",
+    "theme": "string (1-200)", 
+    "theme_description": "string (optional, <=1000)",
+    "posts": [
+      {
+        "day": number (1-365, optional),
+        "title": "string (1-500)",
+        "story_description": "string (1-2000)",
+        "status": "draft|scheduled|published"
+      }
+    ]
+  }
+  
+  Rules:
+  - Fix JSON syntax errors
+  - Ensure all posts have title and story_description (map description -> story_description if needed)
+  - Generate sequential day numbers if missing
+  - Set status to "draft" if not provided
+  - Limit to 100 posts maximum
+  - Trim strings and enforce length limits
+  
+  Raw data:
+  ${JSON.stringify(rawData, null, 2)}
+  
+  Return only the cleaned JSON:`;
 
   console.log('🔗 Calling OpenAI API for theme processing...');
   console.log('📋 Prompt length:', prompt.length);
@@ -301,59 +301,97 @@ Return only the cleaned JSON:`;
 }
 
 function validateThemeFields(data: any, fixes: string[], warnings: string[], errors: string[]): any {
-  const validated = { ...data };
+  const validated: any = { ...data };
 
-  // Validate required fields
-  if (!validated.category || typeof validated.category !== 'string') {
-    errors.push('Category is required and must be a string');
+  // Category optional: default to 'general', enforce length ≤100
+  if (validated.category === undefined || validated.category === null || String(validated.category).trim().length === 0) {
+    validated.category = 'general';
+    fixes.push("Set default category to 'general'");
+  } else if (typeof validated.category !== 'string') {
+    validated.category = String(validated.category);
+    warnings.push('Coerced category to string');
+  }
+  if (validated.category.length > 100) {
+    validated.category = validated.category.slice(0, 100);
+    fixes.push('Truncated category to 100 characters');
   }
 
-  if (!validated.theme || typeof validated.theme !== 'string') {
-    errors.push('Theme is required and must be a string');
+  // Theme required with max length 200
+  if (!validated.theme || typeof validated.theme !== 'string' || validated.theme.trim().length === 0) {
+    errors.push('Theme is required and must be a non-empty string');
+  } else if (validated.theme.length > 200) {
+    validated.theme = validated.theme.slice(0, 200);
+    fixes.push('Truncated theme to 200 characters');
+  }
+
+  // theme_description optional, max 1000
+  if (validated.theme_description != null) {
+    validated.theme_description = String(validated.theme_description);
+    if (validated.theme_description.length > 1000) {
+      validated.theme_description = validated.theme_description.slice(0, 1000);
+      fixes.push('Truncated theme_description to 1000 characters');
+    }
   }
 
   if (!Array.isArray(validated.posts)) {
     errors.push('Posts must be an array');
     return validated;
   }
-
   if (validated.posts.length === 0) {
     errors.push('At least one post is required');
     return validated;
   }
-
-  if (validated.posts.length > 30) {
-    validated.posts = validated.posts.slice(0, 30);
-    warnings.push('Limited posts to maximum of 30');
+  if (validated.posts.length > 100) {
+    validated.posts = validated.posts.slice(0, 100);
+    warnings.push('Limited posts to maximum of 100');
   }
 
   // Validate each post
   validated.posts = validated.posts.map((post: any, index: number) => {
-    const validatedPost = { ...post };
+    const p: any = { ...post };
 
-    // Ensure day number
-    if (!validatedPost.day) {
-      validatedPost.day = index + 1;
-      fixes.push(`Generated day number ${index + 1} for post ${index + 1}`);
+    // day 1-365
+    const dayVal = p.day != null ? Number(p.day) : index + 1;
+    if (!Number.isFinite(dayVal)) {
+      p.day = index + 1;
+      warnings.push(`Post ${index + 1}: invalid day, auto-set`);
+    } else {
+      const day = Math.round(dayVal);
+      p.day = Math.max(1, Math.min(365, day));
+      if (p.day !== dayVal) warnings.push(`Post ${index + 1}: day clamped to [1,365]`);
     }
 
-    // Validate title
-    if (!validatedPost.title || typeof validatedPost.title !== 'string') {
+    // title 1-500
+    if (!p.title || typeof p.title !== 'string' || p.title.trim().length === 0) {
       errors.push(`Post ${index + 1}: Title is required`);
+    } else if (p.title.length > 500) {
+      p.title = p.title.slice(0, 500);
+      fixes.push(`Post ${index + 1}: Truncated title to 500 characters`);
     }
 
-    // Validate description
-    if (!validatedPost.description || typeof validatedPost.description !== 'string') {
-      errors.push(`Post ${index + 1}: Description is required`);
+    // story_description 1-2000 (map description if present)
+    if (!p.story_description && typeof p.description === 'string') {
+      p.story_description = p.description;
+      fixes.push(`Post ${index + 1}: Mapped description -> story_description`);
+    }
+    if (!p.story_description || typeof p.story_description !== 'string' || p.story_description.trim().length === 0) {
+      errors.push(`Post ${index + 1}: story_description is required`);
+    } else if (p.story_description.length > 2000) {
+      p.story_description = p.story_description.slice(0, 2000);
+      fixes.push(`Post ${index + 1}: Truncated story_description to 2000 characters`);
     }
 
-    // Set default status
-    if (!validatedPost.status || !['draft', 'scheduled', 'published'].includes(validatedPost.status)) {
-      validatedPost.status = 'draft';
-      fixes.push(`Set default status for post ${index + 1}`);
+    // status default draft
+    const status = String(p.status || 'draft').toLowerCase();
+    p.status = (status === 'draft' || status === 'scheduled' || status === 'published') ? status : 'draft';
+    if (p.status === 'draft' && status !== 'draft') {
+      fixes.push(`Post ${index + 1}: Invalid status, set to draft`);
     }
 
-    return validatedPost;
+    // Remove legacy field to keep output clean
+    if ('description' in p) delete p.description;
+
+    return p;
   });
 
   return validated;
