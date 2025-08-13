@@ -18,7 +18,8 @@ import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
-import { useThemeDataPrefetch } from '@/hooks/useThemeDataPrefetch';
+import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
+import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
@@ -68,7 +69,8 @@ export const PostsTableView = memo(({
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
-  const { themeData } = useThemeDataPrefetch();
+  const { themeData } = useEnhancedThemeDataPrefetch();
+  const { generateWithCache, fromCache } = useCachedPromptGeneration();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
@@ -125,7 +127,24 @@ export const PostsTableView = memo(({
       async () => {
         try {
           setProcessing(post.id, 'generate', true);
-          await onGenerateImagePrompt(post);
+          
+          // Use cached generation with enhanced theme data
+          const generatedPrompt = await generateWithCache({
+            title: post.title,
+            description: post.description,
+            theme: themeData?.theme,
+            themeId: themeData?.themeId,
+            category: themeData?.category || post.category,
+            aspectRatio: '1:1'
+          });
+
+          if (generatedPrompt) {
+            // Update the post with the generated prompt
+            const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
+            await optimizedSocialMediaService.updatePost(post.id, {
+              generated_image_prompt: generatedPrompt
+            });
+          }
         } catch (error) {
           console.error('Failed to generate image prompt:', error);
         } finally {
@@ -135,7 +154,7 @@ export const PostsTableView = memo(({
       },
       100 // Very short debounce to prevent double-clicks but keep responsiveness
     );
-  }, [onGenerateImagePrompt, setInstantLoading, setProcessing, debouncedAction]);
+  }, [generateWithCache, themeData, setInstantLoading, setProcessing, debouncedAction]);
 
   const handleCellEdit = (postId: string, field: 'title' | 'description', currentValue: string) => {
     setEditingCell({ postId, field });

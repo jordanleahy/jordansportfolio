@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
 import { ReferenceImageAnalyzer } from '@/components/ui/reference-image-analyzer';
+import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { ImagePromptGeneratorModalProps, ReferenceImageAnalysis, ExtractedCharacteristics } from '@/types/imagePromptGenerator';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
@@ -24,6 +25,7 @@ export const ImagePromptGeneratorModal = ({
 }: ImagePromptGeneratorModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { generateWithCache, fromCache } = useCachedPromptGeneration();
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -52,64 +54,18 @@ export const ImagePromptGeneratorModal = ({
     setIsFromCache(false);
 
     try {
-      let response;
-      
-      switch (config.edgeFunction) {
-        case 'generate-content':
-          response = await supabase.functions.invoke('generate-content', {
-            body: {
-              prompt: `${config.systemPrompt}\n\nTitle: ${content.primary}\nDescription: ${content.secondary}`,
-              type: 'image_prompt'
-            }
-          });
-          break;
-          
-        case 'generate-image-prompt-dynamic':
-          response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-            body: {
-              title: content.primary,
-              description: content.secondary,
-              theme: config.theme,
-              themeId: config.themeId,
-              category: config.category,
-              aspectRatio: selectedAspectRatio,
-              referenceAnalysis: currentReferenceAnalysis,
-              extractedCharacteristics: currentExtractedCharacteristics,
-            }
-          });
-          break;
-          
-        case 'generate-hero-job-visual':
-          response = await supabase.functions.invoke('generate-hero-job-visual', {
-            body: {
-              jobTitle: content.primary,
-              jobDescription: content.secondary,
-              companyName: content.tertiary || ''
-            }
-          });
-          break;
-          
-          
-        default:
-          throw new Error(`Unknown edge function: ${config.edgeFunction}`);
-      }
+      // Use cached generation
+      const prompt = await generateWithCache({
+        title: content.primary,
+        description: content.secondary,
+        theme: config.theme,
+        themeId: config.themeId,
+        category: config.category,
+        aspectRatio: selectedAspectRatio
+      });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate prompt');
-      }
-
-      const prompt = response.data?.generatedText || 
-                      response.data?.generatedPrompt || 
-                      response.data?.imagePrompt || '';
-      const receivedSystemPrompt = response.data?.systemPrompt || '';
-      
       if (!prompt) {
         throw new Error('No prompt received from the service');
-      }
-
-      // Store the system prompt if received
-      if (receivedSystemPrompt) {
-        setSystemPrompt(receivedSystemPrompt);
       }
 
       // Clean any existing aspect ratio mentions from the received prompt
@@ -122,27 +78,13 @@ export const ImagePromptGeneratorModal = ({
         : cleanPrompt;
         
       setGeneratedPrompt(finalPrompt);
-
-      // Cache the prompt if caching is enabled
-      if (config.enableCaching && config.cacheKeyPrefix) {
-        try {
-          const cacheKey = `${config.cacheKeyPrefix}_${content.primary.toLowerCase().replace(/\s+/g, '_')}`;
-          await supabase.from('cached_prompts').upsert({
-            cache_key: cacheKey,
-            prompt_text: prompt,
-            category: config.cacheKeyPrefix || 'image_prompt',
-            created_at: new Date().toISOString()
-          });
-        } catch (cacheError) {
-          console.error('Failed to cache prompt:', cacheError);
-        }
-      }
+      setIsFromCache(fromCache);
 
       onPromptGenerated?.(finalPrompt);
 
       toast({
         title: "Prompt Generated",
-        description: "Your image prompt has been generated successfully.",
+        description: fromCache ? "Retrieved from cache" : "Generated and cached successfully",
       });
     } catch (error) {
       console.error('Error generating prompt:', error);
