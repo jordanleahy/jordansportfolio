@@ -79,7 +79,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.generate-image-streamlined]
-verify_jwt = true
+verify_jwt = false
+
+[functions.background-task-processor]
+verify_jwt = false
 
 [functions.check-subscription]
 verify_jwt = true
