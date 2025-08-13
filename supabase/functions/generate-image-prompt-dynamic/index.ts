@@ -281,9 +281,14 @@ serve(async (req) => {
     }
 
     if (!systemPromptData) {
-      const errorMsg = theme 
-        ? `No system prompt found for theme '${theme}' or category '${category}'`
-        : `No system prompt found for category '${category}'`;
+      let errorMsg = '';
+      if (themeId) {
+        errorMsg = `No system prompt found for themeId '${themeId}'${theme ? ` (theme: '${theme}')` : ''}${category ? ` or category '${category}'` : ''}`;
+      } else if (theme) {
+        errorMsg = `No system prompt found for theme '${theme}'${category ? ` or category '${category}'` : ''}`;
+      } else {
+        errorMsg = `No system prompt found for category '${category}'`;
+      }
       console.log('❌', errorMsg);
       throw new Error(errorMsg);
     }
