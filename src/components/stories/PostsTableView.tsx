@@ -129,7 +129,16 @@ export const PostsTableView = memo(({
           setProcessing(post.id, 'generate', true);
           
           // Use cached generation with enhanced theme data
+          console.log('🎯 [POST_TABLE] Generating prompt for post:', {
+            postId: post.id,
+            title: post.title,
+            themeData: themeData,
+            hasThemeId: !!themeData?.themeId,
+            timestamp: new Date().toISOString()
+          });
+
           const generatedPrompt = await generateWithCache({
+            postId: post.id,
             title: post.title,
             description: post.description,
             theme: themeData?.theme,
