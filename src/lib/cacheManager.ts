@@ -39,21 +39,22 @@ class SimpleCacheManager {
     title?: string;
     description?: string;
     theme?: string;
+    themeId?: string;
     category?: string;
     aspectRatio?: string;
   }): string {
     // If postId is provided, use it as the primary key
     if (config.postId) {
-      const theme = config.theme || 'default';
+      const themeId = config.themeId || config.theme || 'default';
       const category = config.category || 'general';
       const aspectRatio = config.aspectRatio || '1:1';
-      return `prompt:${category}:${theme}:${aspectRatio}:${config.postId}`;
+      return `prompt:${category}:${themeId}:${aspectRatio}:${config.postId}`;
     }
     
     // Fallback to title/description based key for backwards compatibility
     const normalizedTitle = (config.title || '').toLowerCase().trim();
     const normalizedDescription = (config.description || '').toLowerCase().trim().substring(0, 100);
-    const theme = config.theme || 'default';
+    const themeId = config.themeId || config.theme || 'default';
     const category = config.category || 'general';
     const aspectRatio = config.aspectRatio || '1:1';
     
@@ -62,10 +63,10 @@ class SimpleCacheManager {
       const data = encoder.encode(normalizedTitle + normalizedDescription);
       const chars = Array.from(data, byte => String.fromCharCode(byte));
       const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
-      return `prompt:${category}:${theme}:${aspectRatio}:${encoded}`;
+      return `prompt:${category}:${themeId}:${aspectRatio}:${encoded}`;
     } catch (error) {
       console.warn('Failed to encode cache key, using fallback:', error);
-      return `prompt:${category}:${theme}:${aspectRatio}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+      return `prompt:${category}:${themeId}:${aspectRatio}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
     }
   }
 
@@ -75,6 +76,7 @@ class SimpleCacheManager {
     title?: string;
     description?: string;
     theme?: string;
+    themeId?: string;
     category?: string;
     aspectRatio?: string;
   }): Promise<string | null> {
@@ -133,6 +135,7 @@ class SimpleCacheManager {
     title?: string;
     description?: string;
     theme?: string;
+    themeId?: string;
     category?: string;
     aspectRatio?: string;
   }, prompt: string): Promise<void> {
@@ -160,6 +163,7 @@ class SimpleCacheManager {
         last_accessed_at: new Date().toISOString(),
         metadata: {
           theme: config.theme,
+          themeId: config.themeId,
           aspectRatio: config.aspectRatio,
           postId: config.postId,
           titleLength: config.title?.length || 0,
@@ -263,6 +267,7 @@ class SimpleCacheManager {
     title?: string;
     description?: string;
     theme?: string;
+    themeId?: string;
     category?: string;
     aspectRatio?: string;
   }): void {
