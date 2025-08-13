@@ -40,11 +40,7 @@ export const useCachedPromptGeneration = () => {
       const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
           postId: config.postId,
-          title: config.title,
-          description: config.description,
-          theme: config.theme,
           themeId: config.themeId,
-          category: config.category,
           aspectRatio: config.aspectRatio || '1:1'
         }
       });

@@ -109,10 +109,30 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    let { postId, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = await req.json();
+    const requestBody = await req.json();
+    console.log('📥 RAW REQUEST PAYLOAD:', JSON.stringify(requestBody, null, 2));
+    
+    let { postId, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = requestBody;
+
+    logger.info('Request validation', {
+      receivedFields: Object.keys(requestBody),
+      postId: postId ? `${String(postId).slice(0, 8)}...` : null,
+      themeId: themeId ? `${String(themeId).slice(0, 8)}...` : null,
+      hasAspectRatio: !!(aspectRatio || aspect_ratio),
+      hasColorTheme: !!colorTheme
+    });
 
     if (!postId || !themeId) {
-      throw new Error('Missing required fields: postId and themeId');
+      const errorDetails = {
+        missing: {
+          postId: !postId,
+          themeId: !themeId
+        },
+        received: requestBody,
+        correlationId
+      };
+      console.error('❌ VALIDATION FAILED:', errorDetails);
+      throw new Error(`Missing required fields: ${!postId ? 'postId' : ''} ${!themeId ? 'themeId' : ''}`.trim());
     }
 
     // Initialize variables - will be fetched from database
@@ -150,24 +170,36 @@ serve(async (req) => {
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
     // Fetch post data from social_media_posts table
+    logger.startTiming('database_post_fetch');
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
       .select('title, description')
       .eq('id', postId)
       .maybeSingle();
 
+    logger.endTiming('database_post_fetch');
+    
     if (postError) {
+      logger.error('Database error fetching post', { postId, error: postError.message, code: postError.code });
       console.error('❌ Error fetching post data:', postError);
       throw new Error(`Failed to fetch post data: ${postError.message}`);
     }
 
     if (!postData) {
+      logger.error('Post not found', { postId });
       throw new Error(`Post not found with ID: ${postId}`);
     }
 
     title = postData.title;
     description = postData.description;
 
+    logger.info('Post data retrieved successfully', { 
+      postId: postId.slice(0, 8),
+      titleLength: title?.length || 0,
+      descriptionLength: description?.length || 0,
+      titlePreview: title?.slice(0, 50) || '',
+      descriptionPreview: description?.slice(0, 50) || ''
+    });
     console.log('✅ Retrieved post data:', { title: title.slice(0, 50), description: description.slice(0, 50) });
 
     console.log('🚀 Generating image prompt for:', { theme, themeId, postId: postId.slice(0, 8), title: title.slice(0, 30), userId: userId?.slice(0, 8), correlationId });
@@ -201,15 +233,23 @@ serve(async (req) => {
 
     // Next: themeId mapped to a specific system prompt
     if (!systemPromptData && themeId) {
+      logger.startTiming('database_theme_fetch');
       console.log('🎯 Resolving themeId to system prompt:', themeId);
       const { data: themeRow, error: themeRowErr } = await supabase
         .from('themes')
         .select('visual_prompt_system_prompt_id, theme_name, category')
         .eq('id', themeId)
         .maybeSingle();
+      logger.endTiming('database_theme_fetch');
       if (themeRow && !themeRowErr) {
         // Get category from themes table
         category = themeRow.category;
+        logger.info('Theme data retrieved', {
+          themeId: themeId.slice(0, 8),
+          themeName: themeRow.theme_name,
+          category: themeRow.category,
+          hasSystemPromptId: !!themeRow.visual_prompt_system_prompt_id
+        });
         console.log('📌 Retrieved category from themes table:', category);
         
         if (themeRow.visual_prompt_system_prompt_id) {
@@ -398,6 +438,14 @@ Private Safe Space Visual Tone:
 - Keep technical constraints mandatory while making composition engaging and professional`;
 
     // OpenAI request with proper format
+    logger.info('Preparing OpenAI request', {
+      systemPromptLength: categoryPrompt.prompt?.length || 0,
+      userMessageLength: userMessage?.length || 0,
+      hasColorTheme: !!colorTheme,
+      hasReferenceAnalysis: !!referenceAnalysis,
+      aspectRatio: requestedAspectRatio
+    });
+    
     logger.debug('Prompt previews', {
       systemPreview: (categoryPrompt.prompt || '').slice(0, 400),
       userPreview: (userMessage || '').slice(0, 400)
@@ -413,6 +461,7 @@ Private Safe Space Visual Tone:
       user: correlationId // Only include user field for tracking
     };
 
+    logger.startTiming('openai_request');
     console.log('🔍 OpenAI Request Details:', {
       url: 'https://api.openai.com/v1/chat/completions',
       model: requestBody.model,
