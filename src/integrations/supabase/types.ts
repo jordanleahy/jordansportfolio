@@ -3107,6 +3107,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      insert_triage_orchestra_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       insert_vendor_analysis_agent: {
         Args: Record<PropertyKey, never>
         Returns: string

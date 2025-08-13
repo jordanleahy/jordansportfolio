@@ -1,5 +1,8 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
+[functions.input-triage]
+verify_jwt = true
+
 [functions.vendor-analysis]
 verify_jwt = true
 
