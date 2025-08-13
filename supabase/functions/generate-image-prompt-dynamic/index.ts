@@ -150,7 +150,7 @@ serve(async (req) => {
 
     let systemPromptData: any = null;
     let usedIdentifier: string;
-    let usedType: 'systemPromptId' | 'themeId' | 'theme' | 'category';
+    let usedType: 'systemPromptId' | 'themeId' | 'theme' | 'category' | 'fallback';
 
     // Highest priority: explicit systemPromptId
     if (!systemPromptData && systemPromptId) {
@@ -210,7 +210,26 @@ serve(async (req) => {
             });
           }
         }
-        // If no mapping, fall back to theme name search later
+        // If no direct mapping, try theme_id on system_prompts
+        if (!systemPromptData) {
+          const { data: spByThemeId, error: spByThemeIdErr } = await supabase
+            .from('system_prompts')
+            .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
+            .eq('theme_id', themeId)
+            .eq('agent_name', 'Visual Prompt Generator')
+            .eq('is_active', true)
+            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (spByThemeId && !spByThemeIdErr) {
+            systemPromptData = spByThemeId;
+            usedIdentifier = themeRow.theme_name || String(themeId);
+            usedType = 'themeId';
+            console.log('✅ Found system prompt by theme_id:', { id: spByThemeId.id, theme_id: themeId, agent: spByThemeId.agent_name });
+          }
+        }
+        // If still no mapping, fall back to theme name search later
         if (!systemPromptData && themeRow.theme_name && !theme) {
           theme = themeRow.theme_name;
         }
@@ -236,7 +255,35 @@ serve(async (req) => {
         usedIdentifier = theme;
         usedType = 'theme';
       } else {
-        console.log('🔍 No theme-based prompt found, falling back to category:', category);
+        // Try resolving via themes table to get theme_id, then fetch system_prompts by theme_id
+        const { data: themeRowByName, error: themeByNameErr } = await supabase
+          .from('themes')
+          .select('id')
+          .eq('theme_name', theme)
+          .maybeSingle();
+
+        if (themeRowByName && !themeByNameErr) {
+          const { data: spByThemeId2, error: spByThemeId2Err } = await supabase
+            .from('system_prompts')
+            .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
+            .eq('theme_id', themeRowByName.id)
+            .eq('agent_name', 'Visual Prompt Generator')
+            .eq('is_active', true)
+            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (spByThemeId2 && !spByThemeId2Err) {
+            console.log('✅ Found theme-based prompt via theme_id from name:', { theme, theme_id: themeRowByName.id, id: spByThemeId2.id });
+            systemPromptData = spByThemeId2;
+            usedIdentifier = theme;
+            usedType = 'theme';
+          } else {
+            console.log('🔍 No theme-based prompt found by name or theme_id.');
+          }
+        } else {
+          console.log('🔍 No theme row found for name, skipping theme_id search.');
+        }
       }
     }
 
@@ -261,14 +308,9 @@ serve(async (req) => {
     }
 
     if (!systemPromptData) {
-      let errorMsg = '';
-      if (themeId) {
-        errorMsg = `No system prompt found for themeId '${themeId}'${theme ? ` (theme: '${theme}')` : ''}${category ? ` or category '${category}'` : ''}`;
-      } else if (theme) {
-        errorMsg = `No system prompt found for theme '${theme}'${category ? ` or category '${category}'` : ''}`;
-      } else {
-        errorMsg = `No system prompt found for category '${category}'`;
-      }
+      const errorMsg = themeId
+        ? `No system prompt found for themeId '${themeId}'${theme ? ` (theme: '${theme}')` : ''}`
+        : (theme ? `No system prompt found for theme '${theme}'` : 'No system prompt found');
       console.log('❌', errorMsg);
       throw new Error(errorMsg);
     }
