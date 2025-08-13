@@ -284,6 +284,54 @@ export const ImagePreviewModal = ({
 - Complexity: ${characteristics.complexity}`;
   };
 
+  // Enhance prompt with AI agent
+  const enhancePromptWithAgent = async (userInput: string) => {
+    console.log('🤖 Calling Image Enhancement Agent with input:', userInput);
+    
+    try {
+      const sourceContext = {
+        title: title,
+        aspectRatio: aspectRatio || '1:1'
+      };
+
+      const requestBody = {
+        userInput,
+        sourceContext,
+        ...(referenceImageState.analysis && { 
+          referenceImageAnalysis: referenceImageState.analysis.extractedCharacteristics 
+        })
+      };
+
+      console.log('🤖 Enhancement request:', requestBody);
+
+      const { data, error } = await supabase.functions.invoke('image-enhancement-agent', {
+        body: requestBody
+      });
+
+      if (error) {
+        console.error('❌ Enhancement agent error:', error);
+        toast.error('Failed to enhance prompt, using original input');
+        return userInput;
+      }
+
+      console.log('✅ Enhancement result:', data);
+
+      // Show enhancement feedback to user
+      if (data.confidence === 'low' && data.clarificationNeeded) {
+        toast.warning(`Clarification needed: ${data.clarificationNeeded}`);
+      } else if (data.confidence === 'high') {
+        toast.success('Prompt enhanced by AI agent');
+      }
+
+      return data.enhancedPrompt || userInput;
+
+    } catch (error) {
+      console.error('❌ Enhancement agent failed:', error);
+      toast.error('Failed to enhance prompt, using original input');
+      return userInput;
+    }
+  };
+
   const handleEditSubmit = async () => {
     if (!editState.prompt.trim()) {
       toast.error('Please enter an edit description');
@@ -299,12 +347,18 @@ export const ImagePreviewModal = ({
     setEditState(prev => ({ ...prev, isProcessing: true }));
     
     try {
-      const enhancedPrompt = enhancePromptWithReference(editState.prompt);
-      console.log('📝 Enhanced prompt:', enhancedPrompt);
+      // First enhance the prompt with the AI agent
+      const enhancedPrompt = await enhancePromptWithAgent(editState.prompt);
+      console.log('📝 Original prompt:', editState.prompt);
+      console.log('🚀 Enhanced prompt:', enhancedPrompt);
+
+      // Then enhance with reference image if available
+      const finalPrompt = enhancePromptWithReference(enhancedPrompt);
+      console.log('🎯 Final prompt with reference:', finalPrompt);
 
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: {
-          prompt: enhancedPrompt,
+          prompt: finalPrompt,
           imageUrl: imageUrl,
           aspectRatio: aspectRatio || '1:1'
         }

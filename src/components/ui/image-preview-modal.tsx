@@ -258,8 +258,55 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   };
 
   // Submit handler: calls edge function
+  // Enhance prompt with AI agent
+  const enhancePromptWithAgent = async (userInput: string) => {
+    console.log('🤖 Calling Image Enhancement Agent with input:', userInput);
+    
+    try {
+      const sourceContext = {
+        title: title,
+        aspectRatio: aspectRatio || '1:1'
+      };
+
+      const requestBody = {
+        userInput,
+        sourceContext,
+        ...(referenceImageAnalysis && { referenceImageAnalysis: referenceImageAnalysis.extractedCharacteristics })
+      };
+
+      console.log('🤖 Enhancement request:', requestBody);
+
+      const { data, error } = await supabase.functions.invoke('image-enhancement-agent', {
+        body: requestBody
+      });
+
+      if (error) {
+        console.error('❌ Enhancement agent error:', error);
+        toast.error('Failed to enhance prompt, using original input');
+        return userInput;
+      }
+
+      console.log('✅ Enhancement result:', data);
+
+      // Show enhancement feedback to user
+      if (data.confidence === 'low' && data.clarificationNeeded) {
+        toast.warning(`Clarification needed: ${data.clarificationNeeded}`);
+      } else if (data.confidence === 'high') {
+        toast.success('Prompt enhanced successfully');
+      }
+
+      return data.enhancedPrompt || userInput;
+
+    } catch (error) {
+      console.error('❌ Enhancement agent failed:', error);
+      toast.error('Failed to enhance prompt, using original input');
+      return userInput;
+    }
+  };
+
   const handleEditSubmit = async () => {
     if (!prompt?.trim() || isProcessing) return;
+    
     try {
       setIsProcessing(true);
       
@@ -273,13 +320,18 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
       // Get current user ID
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Enhanced prompt with reference image if available
-      const enhancedPrompt = enhancePromptWithReference(prompt);
-      console.log('📝 Enhanced prompt:', enhancedPrompt);
+      // First enhance the prompt with the AI agent
+      const enhancedPrompt = await enhancePromptWithAgent(prompt);
+      console.log('📝 Original prompt:', prompt);
+      console.log('🚀 Enhanced prompt:', enhancedPrompt);
+
+      // Then enhance with reference image if available
+      const finalPrompt = enhancePromptWithReference(enhancedPrompt);
+      console.log('🎯 Final prompt with reference:', finalPrompt);
 
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: { 
-          prompt: enhancedPrompt, 
+          prompt: finalPrompt, 
           imageUrl, 
           aspectRatio,
           postId,
