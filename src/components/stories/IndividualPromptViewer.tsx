@@ -85,13 +85,18 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   }, [originalPrompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    if (!post) return;
+    if (!post || !themeId) {
+      console.error('Missing post or themeId for regeneration');
+      toast({
+        title: "Error",
+        description: "Missing required data for prompt regeneration",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       await regeneratePrompt({
-        title: post.title,
-        description: post.description,
-        category: post.category,
         aspectRatio: '16:9' // Default aspect ratio
       });
       setIsEditing(false);
@@ -99,7 +104,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     } catch (error) {
       console.error('Failed to regenerate prompt:', error);
     }
-  }, [post, regeneratePrompt]);
+  }, [post, themeId, regeneratePrompt, toast]);
 
   if (!post) return null;
 

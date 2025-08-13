@@ -111,22 +111,21 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   });
 
   const regenerateMutation = useMutation({
-    mutationFn: async ({ title, description, category, aspectRatio }: { 
-      title: string; 
-      description: string; 
-      category?: string;
+    mutationFn: async ({ aspectRatio }: { 
       aspectRatio?: string;
-    }) => {
+    } = {}) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Call the generate-image-prompt-dynamic function
+      if (!postId || !themeId) {
+        throw new Error('Missing postId or themeId for prompt regeneration');
+      }
+
+      // Call the generate-image-prompt-dynamic function with the new payload format
       const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: { 
-          title, 
-          description, 
+          postId,
           themeId,
-          category: category || 'gpt-5-launch',
           aspectRatio: aspectRatio || '16:9'
         }
       });
