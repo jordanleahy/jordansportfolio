@@ -3075,6 +3075,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      insert_image_enhancement_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       insert_posts_for_theme: {
         Args: {
           theme_id: string
