@@ -117,8 +117,17 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      console.log('🔄 Regeneration mutation called with:', {
+        postId,
+        themeId,
+        theme,
+        aspectRatio: aspectRatio || '16:9'
+      });
+
       if (!postId || !themeId) {
-        throw new Error('Missing postId or themeId for prompt regeneration');
+        const errorMsg = `Missing required data: postId=${postId}, themeId=${themeId}, theme=${theme}`;
+        console.error('❌ Regeneration failed:', errorMsg);
+        throw new Error(errorMsg);
       }
 
       // Call the generate-image-prompt-dynamic function with the new payload format

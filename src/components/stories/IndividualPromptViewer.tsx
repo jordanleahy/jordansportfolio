@@ -10,6 +10,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { diffLines } from 'diff';
 import type { SocialMediaPost } from '@/types/socialMedia';
+import { useParams } from 'react-router-dom';
+import { useThemeByName } from '@/hooks/useOptimizedStories';
 
 import type { IndividualPromptViewerProps } from '@/types/stories/ui';
 
@@ -21,6 +23,27 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const params = useParams();
+  const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
+  
+  // Fallback theme ID resolution using URL params
+  const { data: themeByName, isLoading: isThemeLoading } = useThemeByName(themeName || '', !!themeName);
+  const fallbackThemeId = themeByName?.id;
+  
+  // Use provided themeId or fallback to resolved theme from URL
+  const resolvedThemeId = themeId || fallbackThemeId;
+  
+  // Debug logging for theme ID resolution
+  useEffect(() => {
+    console.log('🔍 IndividualPromptViewer Theme ID Debug:', {
+      providedThemeId: themeId,
+      themeName,
+      fallbackThemeId,
+      resolvedThemeId,
+      isThemeLoading,
+      postId: post?.id
+    });
+  }, [themeId, themeName, fallbackThemeId, resolvedThemeId, isThemeLoading, post?.id]);
   
   const {
     data: promptData,
@@ -30,7 +53,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     regeneratePrompt,
     isRegenerating,
     refetch
-  } = useIndividualPromptCache(post?.id || '', themeId);
+  } = useIndividualPromptCache(post?.id || '', resolvedThemeId);
 
   const [isEditing, setIsEditing] = useState(false);
   const [localPrompt, setLocalPrompt] = useState('');
@@ -85,26 +108,59 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   }, [originalPrompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    if (!post || !themeId) {
-      console.error('Missing post or themeId for regeneration');
+    console.log('🔄 Regenerate button clicked:', {
+      postId: post?.id,
+      providedThemeId: themeId,
+      resolvedThemeId,
+      themeName,
+      isThemeLoading
+    });
+    
+    if (!post) {
+      console.error('❌ Missing post for regeneration');
       toast({
         title: "Error",
-        description: "Missing required data for prompt regeneration",
+        description: "Post data not available for regeneration",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!resolvedThemeId) {
+      console.error('❌ Missing themeId for regeneration:', {
+        providedThemeId: themeId,
+        fallbackThemeId,
+        themeName,
+        isThemeLoading
+      });
+      toast({
+        title: "Error", 
+        description: isThemeLoading 
+          ? "Please wait while theme data loads..." 
+          : "Theme information not available. Please try refreshing the page.",
         variant: "destructive",
       });
       return;
     }
     
     try {
+      console.log('✅ Starting regeneration with:', {
+        postId: post.id,
+        themeId: resolvedThemeId,
+        aspectRatio: '16:9'
+      });
+      
       await regeneratePrompt({
         aspectRatio: '16:9' // Default aspect ratio
       });
       setIsEditing(false);
       setShowDiff(false);
+      
+      console.log('✅ Regeneration completed successfully');
     } catch (error) {
-      console.error('Failed to regenerate prompt:', error);
+      console.error('❌ Failed to regenerate prompt:', error);
     }
-  }, [post, themeId, regeneratePrompt, toast]);
+  }, [post, themeId, resolvedThemeId, themeName, fallbackThemeId, isThemeLoading, regeneratePrompt, toast]);
 
   if (!post) return null;
 
