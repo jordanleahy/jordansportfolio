@@ -78,7 +78,8 @@ verify_jwt = true
 [functions.social-media-agent]
 verify_jwt = true
 
-# ... keep existing code (other functions)
+[functions.generate-image-streamlined]
+verify_jwt = true
 
 [functions.check-subscription]
 verify_jwt = true
