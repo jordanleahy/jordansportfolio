@@ -36,6 +36,23 @@ const COVER_LETTER_TEMPLATE: CreateAgentData = {
   supported_categories: ['product_manager', 'product_designer']
 };
 
+const THEME_STRUCTURING_TEMPLATE: CreateAgentData = {
+  name: 'Theme Structuring Agent',
+  purpose: 'Structures free text into strict ThemeImportData JSON (category, theme, theme_description, posts[]) with length and status validation.',
+  model_version: DEFAULT_MODELS.FAST,
+  trigger: 'api_call',
+  input_source: 'Free text or loosely formatted JSON',
+  output_target: 'Strict ThemeImportData JSON',
+  schedule: 'on-demand',
+  owner: 'Content Ops',
+  status: 'active',
+  tags: ['theme-structuring', 'json', 'validation', 'import'],
+  notes: 'Pre-processes user input before import; mirrors structure-theme-input behavior. Use to ensure compliant data before import.',
+  supported_categories: ['theme_structuring'],
+  temperature: 0.2,
+  max_tokens: 2000
+};
+
 export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelectorProps) => {
   return (
     <div className="space-y-4">
@@ -70,6 +87,22 @@ export const AgentTemplateSelector = ({ onSelectTemplate }: AgentTemplateSelecto
           </div>
           <div className="text-xs text-muted-foreground mt-2">
             Includes: Product Manager and Product Designer system prompts
+          </div>
+        </div>
+      </Button>
+
+      <Button 
+        variant="outline" 
+        onClick={() => onSelectTemplate(THEME_STRUCTURING_TEMPLATE)}
+        className="w-full justify-start text-left h-auto p-4"
+      >
+        <div>
+          <div className="font-medium">Theme Structuring Agent</div>
+          <div className="text-sm text-muted-foreground mt-1">
+            Converts free text into validated ThemeImportData JSON for clean imports (1–100 posts, exact schema)
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            Use before importing themes to ensure compliant data
           </div>
         </div>
       </Button>
