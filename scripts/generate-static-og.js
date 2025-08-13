@@ -29,7 +29,7 @@ const SEO_CONSTANTS = {
   siteUrl: 'https://jordanleahy.com',
   siteName: 'Story Ship by Jordan leahy',
   defaultTitle: 'Story Ship by Jordan leahy',
-  defaultDescription: 'Every Thought is a Visual Journey - Create Yours Today'.',
+  defaultDescription: 'Every Thought is a Visual Journey - Create Yours Today',
   // Use absolute URL for default OG image to ensure compatibility with crawlers
   defaultImage: 'https://jordanleahy.com/og-default.png',
   twitterHandle: '@jordanleigh'
