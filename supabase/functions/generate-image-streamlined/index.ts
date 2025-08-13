@@ -28,6 +28,7 @@ interface GenerationRequest {
   colorTheme?: any;
   aspectRatio: string;
   quality: string;
+  size?: string;
   requestKey: string;
 }
 
@@ -52,9 +53,9 @@ serve(async (req) => {
 
   try {
     const body: GenerationRequest = await req.json();
-    const { postId, title, description, category, theme, colorTheme, aspectRatio, requestKey } = body;
+    const { postId, title, description, category, theme, colorTheme, aspectRatio, requestKey, quality, size } = body;
 
-    console.log(`🚀 Streamlined generation started for post ${postId}`);
+    console.log(`🚀 Streamlined generation started for post ${postId} (${quality} quality, ${size || 'auto'} size)`);
 
     // Step 1: Generate cache key and check cache
     const cacheKey = `${title}_${description}_${theme}_${category}_${aspectRatio}`;
@@ -138,8 +139,10 @@ ${colorTheme ? `Color Theme: ${colorTheme.name} (${colorTheme.visual_style})` : 
       body: JSON.stringify({
         model: 'gpt-image-1',
         prompt: prompt,
-        size: aspectRatio === '1:1' ? '1024x1024' : '1024x1024',
-        quality: 'high',
+        size: size || (aspectRatio === '1:1' ? '1024x1024' : '1024x1024'),
+        quality: quality === 'low' ? 'medium' : 'high',
+        output_format: 'webp',
+        output_compression: quality === 'low' ? 60 : quality === 'medium' ? 75 : 85,
         n: 1
       }),
     });
