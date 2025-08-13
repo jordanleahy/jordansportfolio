@@ -99,16 +99,12 @@ export const useOptimizedImageGeneration = () => {
 
       const themeId = postData?.theme_id;
       
-      // Generate prompt using optimized function
+      // Generate prompt using optimized function with new payload format
       const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          title: post.title,
-          description: post.description,
-          theme,
-          category: post.category || 'general',
-          colorTheme: colorTheme?.name || '',
-          aspectRatio: '1:1',
-          themeId
+          postId: post.id,
+          themeId,
+          aspectRatio: '1:1'
         }
       });
 

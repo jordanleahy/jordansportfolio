@@ -184,19 +184,33 @@ export const useUnifiedPromptManager = () => {
   const generateEnhancedPrompt = async (request: UnifiedPromptRequest): Promise<string> => {
     const colorScheme = precomputeColorScheme(request.colorTheme);
     
-    const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-      body: {
+    // Create a temporary post for unified prompt generation
+    const { data: tempPost } = await supabase
+      .from('social_media_posts')
+      .insert({
         title: request.title,
         description: request.description,
         category: request.category,
-        theme: request.theme,
+        theme_id: request.themeId,
+        user_id: (await supabase.auth.getUser()).data.user?.id || null
+      })
+      .select('id')
+      .single();
+    
+    if (!tempPost) {
+      throw new Error('Failed to create temporary post for prompt generation');
+    }
+
+    const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      body: {
+        postId: tempPost.id,
         themeId: request.themeId,
-        aspectRatio: request.aspectRatio,
-        colorTheme: request.colorTheme,
-        enhancedColorScheme: colorScheme,
-        priority: request.priority || 'normal'
+        aspectRatio: request.aspectRatio
       }
     });
+
+    // Clean up temporary post
+    await supabase.from('social_media_posts').delete().eq('id', tempPost.id);
 
     if (error) {
       throw new Error(`Enhanced prompt generation failed: ${error.message}`);

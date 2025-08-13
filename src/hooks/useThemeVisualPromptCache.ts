@@ -191,25 +191,33 @@ export const useThemeVisualPromptCache = () => {
 
       // Generate new theme-specific base prompt
       console.log('🎨 Generating new theme-specific visual prompt...');
-      const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-        body: {
+      // Generate a synthetic post for theme template generation
+      const { data: templatePost } = await supabase
+        .from('social_media_posts')
+        .insert({
           title: 'Theme Visual Style Template',
           description: `Generate a reusable visual style template for the ${config.theme.name} color theme with ${config.theme.visual_style} styling.`,
-          theme: config.theme.name,
-          themeId: config.theme.id,
           category: config.category,
-          aspectRatio: '1:1',
-          colorTheme: {
-            primary_color: config.theme.primary_color,
-            secondary_color: config.theme.secondary_color,
-            accent_color: config.theme.accent_color,
-            background_color: config.theme.background_color,
-            text_color: config.theme.text_color,
-            color_instructions: config.theme.color_instructions,
-            visual_style: config.theme.visual_style
-          }
+          theme_id: config.theme.id,
+          user_id: (await supabase.auth.getUser()).data.user?.id || null
+        })
+        .select('id')
+        .single();
+      
+      if (!templatePost) {
+        throw new Error('Failed to create template post');
+      }
+
+      const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+        body: {
+          postId: templatePost.id,
+          themeId: config.theme.id,
+          aspectRatio: '1:1'
         }
       });
+
+      // Clean up template post
+      await supabase.from('social_media_posts').delete().eq('id', templatePost.id);
 
       if (response.error) {
         throw new Error(response.error.message || 'Failed to generate theme prompt');

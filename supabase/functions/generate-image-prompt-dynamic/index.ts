@@ -7,11 +7,9 @@
  * for cost monitoring and optimization.
  * 
  * INPUTS:
- * - title: string - Content title for context
- * - description: string - Content description for prompt generation
- * - theme: string (optional) - Specific theme for targeted prompt generation
- * - category: string - Content category (fallback if theme not found)
- * - colorTheme: object (optional) - Brand colors and visual style guidelines
+ * - postId: string - Social media post ID to fetch content and theme data
+ * - themeId: string (optional) - Theme ID for specific theme-based prompt generation
+ * - aspectRatio: string (optional) - Desired aspect ratio for the image (defaults to 1:1)
  * 
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
@@ -19,21 +17,22 @@
  * 
  * DEPENDENCIES:
  * - OpenAI API (GPT-4o-mini for prompt generation)
- * - Supabase Database (system_prompts, cached_prompts tables)
+ * - Supabase Database (social_media_posts, system_prompts, cached_prompts tables)
  * - OpenAI Attribution System (usage tracking and cost calculation)
  * 
  * USAGE:
  * Called from: Content creation workflows, image generation pipelines, social media management
- * Authentication: Optional - enhanced features and caching available for authenticated users
+ * Authentication: Required - fetches user-specific post data
  * 
  * FLOW:
- * 1. Validate required title, description inputs (theme or category required)
- * 2. Retrieve theme-specific system prompt with category fallback from system_prompts table
- * 3. Integrate color theme instructions if provided for brand consistency
- * 4. Generate detailed image prompt using OpenAI with Visual Prompt Generator
- * 5. Cache generated prompt for future reuse (if user authenticated)
- * 6. Track API usage, costs, and performance metrics
- * 7. Return optimized prompt ready for AI image generation
+ * 1. Validate required postId input
+ * 2. Fetch post data (title, description, category) and theme data from database
+ * 3. Retrieve theme-specific system prompt with category fallback from system_prompts table
+ * 4. Integrate color theme instructions if provided for brand consistency
+ * 5. Generate detailed image prompt using OpenAI with Visual Prompt Generator
+ * 6. Cache generated prompt for future reuse (if user authenticated)
+ * 7. Track API usage, costs, and performance metrics
+ * 8. Return optimized prompt ready for AI image generation
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";

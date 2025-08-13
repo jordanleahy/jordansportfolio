@@ -122,13 +122,9 @@ export const useAdvancedImageGeneration = () => {
 
       const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          title: post.title,
-          description: post.description,
-          theme,
-          category: post.category || 'general',
-          colorTheme: colorTheme || null, // Pass full color theme object
-          aspectRatio: '1:1',
-          themeId
+          postId: post.id,
+          themeId,
+          aspectRatio: '1:1'
         }
       });
 

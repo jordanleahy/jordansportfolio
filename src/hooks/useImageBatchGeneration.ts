@@ -167,11 +167,9 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
 
     const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: { 
-        title: request.title, 
-        description: request.description, 
-        category: request.category,
-        colorTheme,
-        themeId
+        postId: request.postId,
+        themeId,
+        aspectRatio: '1:1'
       }
     });
 

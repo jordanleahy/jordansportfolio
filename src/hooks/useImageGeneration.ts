@@ -56,16 +56,12 @@ export const useImageGeneration = () => {
         colorTheme: colorTheme?.name
       });
       
-      // Generate prompt using Supabase functions
+      // Generate prompt using Supabase functions with new payload format
       const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          title: post.title,
-          description: post.description,
-          theme,
-          category: post.category || 'general',
-          colorTheme: colorTheme?.name || '',
-          aspectRatio: '1:1',
-          themeId
+          postId: post.id,
+          themeId,
+          aspectRatio: '1:1'
         }
       });
 

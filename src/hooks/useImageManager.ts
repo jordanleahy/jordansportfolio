@@ -76,11 +76,9 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
       
       const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          title,
-          description,
-          category: category || 'cdi',
-          aspectRatio: aspectRatio.replace('_', ':'),
-          themeId
+          postId,
+          themeId,
+          aspectRatio: aspectRatio.replace('_', ':')
         }
       });
 

@@ -114,12 +114,9 @@ export const PostImageUploadCard = ({
       
       const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
-          title: post.title,
-          description: post.description,
-          theme: theme,
-          category: post.category || 'cdi',
-          aspectRatio: aspectRatio,
-          themeId: (post as any).theme_id || undefined
+          postId: post.id,
+          themeId: (post as any).theme_id || undefined,
+          aspectRatio: aspectRatio
         }
       });
 
