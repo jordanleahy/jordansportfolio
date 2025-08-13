@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { cacheManager } from '@/lib/cacheManager';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EnhancedThemeData {
   themeId: string;
@@ -17,10 +18,12 @@ export const useEnhancedThemeDataPrefetch = () => {
   const [error, setError] = useState<string | null>(null);
 
   const prefetchThemeData = useCallback(async () => {
-    const theme = params.theme ? decodeURIComponent(params.theme) : '';
+    const themeId = params.themeId;
+    const themeName = params.theme ? decodeURIComponent(params.theme) : '';
     const category = params.category || 'cdi';
     
-    if (!theme) {
+    // Handle both new themeId route and legacy theme name route
+    if (!themeId && !themeName) {
       setThemeData({ themeId: '', theme: '', category });
       return;
     }
@@ -29,18 +32,36 @@ export const useEnhancedThemeDataPrefetch = () => {
     setError(null);
 
     try {
-      // Use cache manager for theme data
-      const cachedTheme = await cacheManager.getThemeData(theme, category);
+      let cachedTheme;
+      let resolvedThemeId = themeId;
+      let resolvedThemeName = themeName;
+      
+      if (themeId) {
+        // New URL format: /stories/id/:themeId - fetch theme by ID
+        const { data, error } = await supabase
+          .from('themes')
+          .select('*')
+          .eq('id', themeId)
+          .single();
+          
+        if (error) throw error;
+        cachedTheme = data;
+        resolvedThemeName = data?.theme_name || '';
+      } else {
+        // Legacy URL format: /stories/theme/:themeName - fetch theme by name
+        cachedTheme = await cacheManager.getThemeData(themeName, category);
+        resolvedThemeId = cachedTheme?.id || '';
+      }
       
       let systemPrompt = null;
-      if (cachedTheme?.id) {
+      if (resolvedThemeId) {
         // Prefetch system prompt if we have theme ID
-        systemPrompt = await cacheManager.getSystemPrompt(cachedTheme.id, category);
+        systemPrompt = await cacheManager.getSystemPrompt(resolvedThemeId, category);
       }
 
       const result: EnhancedThemeData = {
-        themeId: cachedTheme?.id || '',
-        theme,
+        themeId: resolvedThemeId,
+        theme: resolvedThemeName,
         category,
         systemPromptId: cachedTheme?.system_prompt_id,
         systemPrompt
@@ -54,7 +75,7 @@ export const useEnhancedThemeDataPrefetch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [params.theme, params.category]);
+  }, [params.themeId, params.theme, params.category]);
 
   useEffect(() => {
     prefetchThemeData();
