@@ -112,6 +112,8 @@ serve(async (req) => {
     const requestBody = await req.json();
     console.log('📥 RAW REQUEST PAYLOAD:', JSON.stringify(requestBody, null, 2));
     
+    // Validate request structure
+    
     let { postId, theme, colorTheme, aspectRatio, aspect_ratio, themeId, systemPromptId, referenceAnalysis, extractedCharacteristics } = requestBody;
 
     logger.info('Request validation', {
