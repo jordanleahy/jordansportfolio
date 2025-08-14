@@ -40,18 +40,18 @@ export const useThemePosts = (themeId: string, enabled = true) => {
       
       if (error) throw error;
       
-      // Check if all posts have completed individual prompts
       const posts = data || [];
+      
+      // Check if all posts have completed individual prompts
       const allPromptsCompleted = posts.length > 0 && posts.every(post => 
         post.individual_prompt_status === 'completed'
       );
       
-      // Don't return posts until all individual prompts are completed
-      if (posts.length > 0 && !allPromptsCompleted) {
-        return [];
-      }
-      
-      return posts;
+      return {
+        posts,
+        allPromptsCompleted,
+        hasAnyPosts: posts.length > 0
+      };
     },
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
     enabled: enabled && !!themeId,
@@ -108,11 +108,13 @@ export const useThemeDetailsById = (themeId: string, enabled = true) => {
     enabled: enabled && !!themeId,
   });
   
-  const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(themeId, enabled && !!themeId);
+  const { data: postsData, isLoading: isLoadingPosts, refetch } = useThemePosts(themeId, enabled && !!themeId);
 
   return {
     theme,
-    posts,
+    posts: postsData?.posts || [],
+    allPromptsCompleted: postsData?.allPromptsCompleted || false,
+    hasAnyPosts: postsData?.hasAnyPosts || false,
     isLoading: isLoadingTheme || isLoadingPosts,
     refetch
   };
