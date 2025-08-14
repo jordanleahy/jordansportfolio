@@ -72,11 +72,22 @@ serve(async (req) => {
     // Create Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Step 1: Get all posts in the category that need image prompts
+    // Step 1: Get all posts in the category with theme data (optimized with JOIN)
     console.log('🔍 STEP 1: Fetching posts without image prompts');
     let postsQuery = supabase
       .from('social_media_posts')
-      .select('id, title, description, category, theme_id')
+      .select(`
+        id, 
+        title, 
+        description, 
+        category, 
+        theme_id,
+        themes!inner(
+          visual_prompt_system_prompt_id,
+          theme_name,
+          category
+        )
+      `)
       .eq('category', category)
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
@@ -113,54 +124,53 @@ serve(async (req) => {
       console.log(`📝 [Post ${index + 1}] ID: ${post.id}, Title: "${post.title}", Theme ID: ${post.theme_id}`);
     });
 
-    // Step 2: Get the system prompt for this category (most recent active for this user)
-    console.log('🔍 STEP 2: Fetching system prompt for category');
-
-    // Diagnostics: list top recent prompts for this user to detect mismatches
-    const { data: promptCandidates, error: promptCandidatesError } = await supabase
-      .from('system_prompts')
-      .select('id, agent_name, name, is_active, created_at, updated_at, prompt_text')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(5);
-
-    if (promptCandidatesError) {
-      console.warn('⚠️ Failed to fetch prompt candidates for diagnostics:', promptCandidatesError);
-    } else {
-      console.log('🧪 PROMPT CANDIDATES (top 5 by updated_at desc):');
-      for (const p of promptCandidates || []) {
-        const preview = (p.prompt_text || '').slice(0, 90).replace(/\n/g, ' ');
-        console.log(` • ${p.id} | agent="${p.agent_name}" | active=${p.is_active} | updated=${p.updated_at} | preview="${preview}"`);
+    // Step 2: Cache system prompt for efficiency (avoid repeated queries)
+    console.log('🔍 STEP 2: Caching system prompt for batch processing');
+    let cachedSystemPrompt = null;
+    
+    // Try to get system prompt from theme data first (if available)
+    const firstPost = posts[0];
+    if (firstPost?.themes?.visual_prompt_system_prompt_id) {
+      const { data: systemPromptData, error: promptError } = await supabase
+        .from('system_prompts')
+        .select('id, agent_name, prompt_text')
+        .eq('id', firstPost.themes.visual_prompt_system_prompt_id)
+        .eq('is_active', true)
+        .single();
+      
+      if (systemPromptData && !promptError) {
+        cachedSystemPrompt = systemPromptData;
+        console.log(`✅ CACHED SYSTEM PROMPT: ${systemPromptData.agent_name}, length: ${systemPromptData.prompt_text.length}`);
       }
     }
+    
+    // Fallback to user's most recent Visual Prompt Generator if no theme-specific prompt
+    if (!cachedSystemPrompt) {
+      const { data: systemPromptData, error: promptError } = await supabase
+        .from('system_prompts')
+        .select('id, agent_name, prompt_text')
+        .eq('user_id', userId)
+        .eq('agent_name', 'Visual Prompt Generator')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
 
-    const { data: systemPromptData, error: promptError } = await supabase
-      .from('system_prompts')
-      .select('id, agent_name, prompt_text, created_at, updated_at')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (promptError || !systemPromptData) {
-      console.error(`❌ ERROR: No system prompt found for user`, promptError);
-      throw new Error(`No system prompt found for user`);
-    }
-
-    const chosenPreview = (systemPromptData.prompt_text || '').slice(0, 120).replace(/\n/g, ' ');
-    console.log(`✅ SYSTEM PROMPT FOUND: id: ${systemPromptData.id}, agent: ${systemPromptData.agent_name}, updated: ${systemPromptData.updated_at}, length: ${systemPromptData.prompt_text.length}, preview: "${chosenPreview}"`);
-
-    if (systemPromptData.agent_name !== 'Visual Prompt Generator') {
-      console.warn('⚠️ Potential AGENT MISMATCH: expected "Visual Prompt Generator" but found', systemPromptData.agent_name);
+      if (promptError || !systemPromptData) {
+        console.error(`❌ ERROR: No system prompt found for user`);
+        throw new Error(`No system prompt found for user`);
+      }
+      
+      cachedSystemPrompt = systemPromptData;
+      console.log(`✅ FALLBACK SYSTEM PROMPT: ${systemPromptData.agent_name}, length: ${systemPromptData.prompt_text.length}`);
     }
 
     // Step 3: Generate image prompts for each post in batches
     let successCount = 0;
     let errorCount = 0;
     const results = [];
-    const BATCH_SIZE = 3; // Process 3 posts at a time
-    const BATCH_DELAY_MS = 2000; // 2 second delay between batches
+    const BATCH_SIZE = 7; // Increased from 3 to 7 posts per batch
+    const BATCH_DELAY_MS = 500; // Reduced from 2000ms to 500ms delay between batches
 
     console.log('🎨 STEP 3: Starting batch image prompt generation for posts');
     console.log(`📊 Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
@@ -173,28 +183,20 @@ serve(async (req) => {
       
       console.log(`🔄 Processing batch ${batchNum}/${totalBatches} (${batch.length} posts)`);
 
-      // Process batch in parallel
-      const batchPromises = batch.map(async (post) => {
+      // Process batch with parallel processing and reduced logging
+      const batchPromises = batch.map(async (post, index) => {
         try {
           console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
 
           // Use internal edge function to generate prompts consistently
           const invokePayload = {
-            postId: post.id,  // ❗ CRITICAL: generate-image-prompt-dynamic expects postId, not title/description
+            postId: post.id,
             themeId: post.theme_id,
             aspectRatio: '16:9'
           };
           
-          console.log(`🔧 [BULK_PROMPT] Calling generate-image-prompt-dynamic with payload:`, invokePayload);
-          
           const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
             body: invokePayload
-          });
-          
-          console.log(`🔧 [BULK_PROMPT] Response from generate-image-prompt-dynamic:`, {
-            hasData: !!promptResp,
-            error: promptFnError?.message,
-            responseKeys: promptResp ? Object.keys(promptResp) : null
           });
 
           if (promptFnError) {

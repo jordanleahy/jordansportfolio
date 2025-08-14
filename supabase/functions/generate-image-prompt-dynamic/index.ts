@@ -184,11 +184,19 @@ serve(async (req) => {
 
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
-    // Fetch post data from social_media_posts table
+    // Fetch post and theme data in single optimized query with JOIN
     logger.startTiming('database_post_fetch');
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
-      .select('title, description')
+      .select(`
+        title, 
+        description,
+        themes!inner(
+          visual_prompt_system_prompt_id,
+          theme_name,
+          category
+        )
+      `)
       .eq('id', postId)
       .maybeSingle();
 
@@ -206,6 +214,12 @@ serve(async (req) => {
 
     title = postData.title;
     description = postData.description;
+    
+    // Extract theme data from the JOIN
+    const themeData = postData.themes;
+    if (themeData) {
+      category = themeData.category;
+    }
 
     logger.info('Post data retrieved successfully', { 
       postId: postId.slice(0, 8),
@@ -234,59 +248,78 @@ serve(async (req) => {
       }
     }
 
-    // Next: themeId mapped to a specific system prompt
+    // Next: Use theme data from JOIN if available, otherwise fetch separately
     if (!systemPromptData && themeId) {
-      logger.startTiming('database_theme_fetch');
-      const { data: themeRow, error: themeRowErr } = await supabase
-        .from('themes')
-        .select('visual_prompt_system_prompt_id, theme_name, category')
-        .eq('id', themeId)
-        .maybeSingle();
-      logger.endTiming('database_theme_fetch');
-      if (themeRow && !themeRowErr) {
-        // Get category from themes table
-        category = themeRow.category;
-        logger.info('Theme data retrieved', {
+      if (themeData && themeData.visual_prompt_system_prompt_id) {
+        // Use theme data from JOIN to avoid extra query
+        logger.info('Theme data retrieved from JOIN', {
           themeId: themeId.slice(0, 8),
-          themeName: themeRow.theme_name,
-          category: themeRow.category,
-          hasSystemPromptId: !!themeRow.visual_prompt_system_prompt_id
+          themeName: themeData.theme_name,
+          category: themeData.category,
+          hasSystemPromptId: !!themeData.visual_prompt_system_prompt_id
         });
         
-        if (themeRow.visual_prompt_system_prompt_id) {
-          const { data: spFromTheme, error: spFromThemeErr } = await supabase
-            .from('system_prompts')
-            .select('prompt_text, theme, id, agent_name, created_at, updated_at')
-            .eq('id', themeRow.visual_prompt_system_prompt_id)
-            .eq('is_active', true)
-            .maybeSingle();
-          if (spFromTheme && !spFromThemeErr) {
-            systemPromptData = spFromTheme;
-            usedIdentifier = themeRow.theme_name || spFromTheme.theme || String(themeId);
-            usedType = 'themeId';
+        const { data: spFromTheme, error: spFromThemeErr } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, theme, id, agent_name, created_at, updated_at')
+          .eq('id', themeData.visual_prompt_system_prompt_id)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (spFromTheme && !spFromThemeErr) {
+          systemPromptData = spFromTheme;
+          usedIdentifier = themeData.theme_name || spFromTheme.theme || String(themeId);
+          usedType = 'themeId';
+        }
+      } else {
+        // Fallback: fetch theme data separately if not included in JOIN
+        logger.startTiming('database_theme_fetch');
+        const { data: themeRow, error: themeRowErr } = await supabase
+          .from('themes')
+          .select('visual_prompt_system_prompt_id, theme_name, category')
+          .eq('id', themeId)
+          .maybeSingle();
+        logger.endTiming('database_theme_fetch');
+        
+        if (themeRow && !themeRowErr) {
+          category = themeRow.category;
+          logger.info('Theme data retrieved', {
+            themeId: themeId.slice(0, 8),
+            themeName: themeRow.theme_name,
+            category: themeRow.category,
+            hasSystemPromptId: !!themeRow.visual_prompt_system_prompt_id
+          });
+          
+          if (themeRow.visual_prompt_system_prompt_id) {
+            const { data: spFromTheme, error: spFromThemeErr } = await supabase
+              .from('system_prompts')
+              .select('prompt_text, theme, id, agent_name, created_at, updated_at')
+              .eq('id', themeRow.visual_prompt_system_prompt_id)
+              .eq('is_active', true)
+              .maybeSingle();
+            if (spFromTheme && !spFromThemeErr) {
+              systemPromptData = spFromTheme;
+              usedIdentifier = themeRow.theme_name || spFromTheme.theme || String(themeId);
+              usedType = 'themeId';
+            }
           }
         }
-        // If no direct mapping, try theme_id on system_prompts
-        if (!systemPromptData) {
-          const { data: spByThemeId, error: spByThemeIdErr } = await supabase
-            .from('system_prompts')
-            .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
-            .eq('theme_id', themeId)
-            .eq('agent_name', 'Visual Prompt Generator')
-            .eq('is_active', true)
-            .order('updated_at', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (spByThemeId && !spByThemeIdErr) {
-            systemPromptData = spByThemeId;
-            usedIdentifier = themeRow.theme_name || String(themeId);
-            usedType = 'themeId';
-          }
-        }
-        // If still no mapping, fall back to theme name search later
-        if (!systemPromptData && themeRow.theme_name && !theme) {
-          theme = themeRow.theme_name;
+      }
+      
+      // If still no system prompt, try theme_id lookup
+      if (!systemPromptData) {
+        const { data: spByThemeId, error: spByThemeIdErr } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
+          .eq('theme_id', themeId)
+          .eq('agent_name', 'Visual Prompt Generator')
+          .eq('is_active', true)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (spByThemeId && !spByThemeIdErr) {
+          systemPromptData = spByThemeId;
+          usedIdentifier = themeData?.theme_name || String(themeId);
+          usedType = 'themeId';
         }
       }
     }
