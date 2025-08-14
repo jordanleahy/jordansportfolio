@@ -50,11 +50,6 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
       // Generate image with the selected aspect ratio
       onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
       
-      toast({
-        title: "Generating image",
-        description: `Creating ${aspectRatioConfig.label} image`,
-      });
-      
       // Refresh posts data if callback provided
       if (onPostsChange) {
         onPostsChange([]);
