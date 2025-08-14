@@ -54,7 +54,7 @@ serve(async (req) => {
   try {
     console.log('🚀 ENSURE POST IMAGE PROMPTS: Function started');
     
-    const { category, userId } = await req.json();
+    const { category, userId, themeId } = await req.json();
 
     if (!category || !userId) {
       console.log('❌ MISSING REQUIRED FIELDS: category and userId are required');
@@ -67,19 +67,27 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📋 ENSURE PROMPTS REQUEST: Category: ${category}, User: ${userId}`);
+    console.log(`📋 ENSURE PROMPTS REQUEST: Category: ${category}, User: ${userId}, Theme: ${themeId || 'all'}`);
 
     // Create Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Step 1: Get all posts in the category that need image prompts
     console.log('🔍 STEP 1: Fetching posts without image prompts');
-    const { data: posts, error: postsError } = await supabase
+    let postsQuery = supabase
       .from('social_media_posts')
       .select('id, title, description, category, theme_id')
       .eq('category', category)
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
+    
+    // If themeId is specified, filter by theme for more targeted processing
+    if (themeId) {
+      postsQuery = postsQuery.eq('theme_id', themeId);
+      console.log(`🎯 FILTERING BY THEME: ${themeId}`);
+    }
+    
+    const { data: posts, error: postsError } = await postsQuery;
 
     if (postsError) {
       console.error('❌ ERROR FETCHING POSTS:', postsError);

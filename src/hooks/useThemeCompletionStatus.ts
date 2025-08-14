@@ -7,11 +7,13 @@ interface ThemeCompletionData {
   prompt_generation_status: 'not_started' | 'in_progress' | 'completed';
   prompt_completion_count: number;
   total_posts_count: number;
+  visual_prompt_system_prompt_id: string | null;
 }
 
 export const useThemeCompletionStatus = (themeId: string | undefined) => {
   const [themeStatus, setThemeStatus] = useState<ThemeCompletionData | null>(null);
   const [hasShownCompletionToast, setHasShownCompletionToast] = useState(false);
+  const [hasShownSystemPromptToast, setHasShownSystemPromptToast] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
     const fetchThemeStatus = async () => {
       const { data } = await supabase
         .from('themes')
-        .select('id, prompt_generation_status, prompt_completion_count, total_posts_count')
+        .select('id, prompt_generation_status, prompt_completion_count, total_posts_count, visual_prompt_system_prompt_id')
         .eq('id', themeId)
         .single();
       
@@ -45,6 +47,21 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
         },
         (payload) => {
           const newData = payload.new as ThemeCompletionData;
+          const oldData = payload.old as ThemeCompletionData;
+          
+          // Check if system prompt was just completed 
+          if (newData.visual_prompt_system_prompt_id && 
+              !oldData.visual_prompt_system_prompt_id && 
+              !hasShownSystemPromptToast) {
+            
+            toast({
+              title: "System Prompt Ready! 🚀",
+              description: "Theme system prompt generated. Starting individual image prompt generation...",
+              duration: 4000,
+            });
+            
+            setHasShownSystemPromptToast(true);
+          }
           
           // Check if theme just completed and we haven't shown toast yet
           if (newData.prompt_generation_status === 'completed' && 
@@ -68,11 +85,12 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [themeId, hasShownCompletionToast, themeStatus?.prompt_generation_status, toast]);
+  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, themeStatus?.prompt_generation_status, toast]);
 
   return {
     themeStatus,
     isCompleted: themeStatus?.prompt_generation_status === 'completed',
+    hasSystemPrompt: !!themeStatus?.visual_prompt_system_prompt_id,
     completionProgress: themeStatus 
       ? Math.round((themeStatus.prompt_completion_count / themeStatus.total_posts_count) * 100) 
       : 0

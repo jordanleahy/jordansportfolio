@@ -448,6 +448,36 @@ Please generate a detailed, professional system prompt following the established
           console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
         } else {
           console.log('✅ THEME UPDATED: Successfully linked system prompt to theme');
+          
+          // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
+          console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });
+          
+          // Use EdgeRuntime.waitUntil to start background task without blocking response
+          EdgeRuntime.waitUntil(
+            (async () => {
+              try {
+                // Small delay to ensure database consistency
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                console.log('📝 BULK TRIGGER: Calling ensure-post-image-prompts for theme completion');
+                const { data: bulkResult, error: bulkError } = await supabase.functions.invoke('ensure-post-image-prompts', {
+                  body: {
+                    category: contextCategory,
+                    userId: user_id,
+                    themeId: theme_id // Add theme_id for better targeting
+                  }
+                });
+
+                if (bulkError) {
+                  console.error('❌ BULK PROMPT GENERATION ERROR:', bulkError);
+                } else {
+                  console.log('✅ BULK PROMPT GENERATION TRIGGERED:', bulkResult);
+                }
+              } catch (bulkProcessError) {
+                console.error('❌ BULK PROCESS EXCEPTION:', bulkProcessError);
+              }
+            })()
+          );
         }
       }
 
