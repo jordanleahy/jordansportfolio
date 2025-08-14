@@ -319,12 +319,28 @@ export const PostsCardView = memo(({
                       return (
                         <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
                           {imageUrl ? (
-                            <img 
-                              src={imageUrl}
-                              alt={`${post.title} - ${aspectRatio}`}
-                              className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
-                              onClick={() => onPreviewImage(imageUrl, `${post.title} - ${aspectRatio}`)}
-                            />
+                            <div className="relative w-full h-full">
+                              <img 
+                                src={imageUrl}
+                                alt={`${post.title} - ${aspectRatio}`}
+                                className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => onPreviewImage(imageUrl, `${post.title} - ${aspectRatio}`)}
+                              />
+                              {/* Regenerate button overlay */}
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
+                                  }}
+                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
+                                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Regenerate image"
+                                >
+                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
+                                </button>
+                              </div>
+                            </div>
                           ) : status === 'processing' ? (
                             <SimpleShimmer className="w-full h-full" />
                           ) : (
