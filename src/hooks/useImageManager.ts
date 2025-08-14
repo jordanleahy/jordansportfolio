@@ -61,43 +61,19 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
         .update({ [statusField]: 'uploading' })
         .eq('id', postId);
 
-      
-      
-      // Step 1: Generate prompt
-      toast.info('Generating image prompt...');
-      
-      // Fetch theme id for this post
-      const { data: postRow } = await supabase
+      // Get existing prompt (should already exist from automatic generation)
+      const { data: postData } = await supabase
         .from('social_media_posts')
-        .select('theme_id')
+        .select('generated_image_prompt')
         .eq('id', postId)
         .maybeSingle();
-      const themeId = postRow?.theme_id || null;
-      
-      const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-        body: {
-          postId,
-          themeId,
-          aspectRatio: aspectRatio.replace('_', ':')
-        }
-      });
 
-      if (promptResponse.error) {
-        throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
-      }
-
-      const generatedPrompt = promptResponse.data?.generatedPrompt;
+      const generatedPrompt = postData?.generated_image_prompt;
       if (!generatedPrompt) {
-        throw new Error('No prompt generated');
+        throw new Error('No image prompt found. Please try again or contact support.');
       }
 
-      // Store the generated prompt
-      await supabase
-        .from('social_media_posts')
-        .update({ generated_image_prompt: generatedPrompt })
-        .eq('id', postId);
-
-      // Step 2: Generate image
+      // Generate image directly with existing prompt
       toast.info('Generating image with AI...');
 
       const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
