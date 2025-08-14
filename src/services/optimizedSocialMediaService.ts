@@ -233,6 +233,8 @@ export class OptimizedSocialMediaService {
       userId: user?.id 
     });
     
+    console.log('📊 [BULK_CREATE] Checking for bulk image prompt creation opportunity');
+    
     if (!user) {
       console.error('❌ SERVICE: No authenticated user for getAvailableThemes');
       return [];

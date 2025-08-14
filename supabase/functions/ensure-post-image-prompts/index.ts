@@ -99,6 +99,11 @@ serve(async (req) => {
     }
 
     console.log(`📊 FOUND ${posts.length} POSTS: Need image prompt generation`);
+    
+    // Log details about posts found
+    posts.forEach((post, index) => {
+      console.log(`📝 [Post ${index + 1}] ID: ${post.id}, Title: "${post.title}", Theme ID: ${post.theme_id}`);
+    });
 
     // Step 2: Get the system prompt for this category (most recent active for this user)
     console.log('🔍 STEP 2: Fetching system prompt for category');
@@ -166,14 +171,22 @@ serve(async (req) => {
           console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
 
           // Use internal edge function to generate prompts consistently
+          const invokePayload = {
+            postId: post.id,  // ❗ CRITICAL: generate-image-prompt-dynamic expects postId, not title/description
+            themeId: post.theme_id,
+            aspectRatio: '16:9'
+          };
+          
+          console.log(`🔧 [BULK_PROMPT] Calling generate-image-prompt-dynamic with payload:`, invokePayload);
+          
           const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-            body: {
-              title: post.title,
-              description: post.description,
-              category: post.category,
-              themeId: post.theme_id,
-              aspectRatio: '16:9'
-            }
+            body: invokePayload
+          });
+          
+          console.log(`🔧 [BULK_PROMPT] Response from generate-image-prompt-dynamic:`, {
+            hasData: !!promptResp,
+            error: promptFnError?.message,
+            responseKeys: promptResp ? Object.keys(promptResp) : null
           });
 
           if (promptFnError) {

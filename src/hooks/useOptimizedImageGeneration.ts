@@ -100,12 +100,25 @@ export const useOptimizedImageGeneration = () => {
       const themeId = postData?.theme_id;
       
       // Generate prompt using optimized function with new payload format
+      console.log('🎯 [PROMPT_GEN] Starting prompt generation', { 
+        postId: post.id, 
+        themeId, 
+        postTitle: post.title 
+      });
+      
       const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
         body: {
           postId: post.id,
           themeId,
           aspectRatio: '1:1'
         }
+      });
+
+      console.log('🎯 [PROMPT_GEN] Prompt generation response', { 
+        success: !promptError,
+        error: promptError?.message,
+        dataKeys: promptData ? Object.keys(promptData) : null,
+        promptLength: promptData?.generatedPrompt?.length || 0
       });
 
       if (promptError) {

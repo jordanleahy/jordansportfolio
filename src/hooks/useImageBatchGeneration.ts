@@ -169,12 +169,25 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
       .maybeSingle();
     const themeId = postRow?.theme_id || null;
 
+    console.log('🎯 [BATCH_PROMPT] Starting prompt generation for batch', { 
+      postId: request.postId, 
+      themeId,
+      title: request.title 
+    });
+    
     const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
       body: { 
         postId: request.postId,
         themeId,
         aspectRatio: '1:1'
       }
+    });
+
+    console.log('🎯 [BATCH_PROMPT] Prompt generation response', { 
+      success: !error,
+      error: error?.message,
+      dataKeys: data ? Object.keys(data) : null,
+      promptLength: data?.generatedPrompt?.length || 0
     });
 
     if (error || !data?.generatedPrompt) {
@@ -255,8 +268,23 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
         useCachedPrompt: true
       };
       
+      console.log('🚀 [BULK_GEN] Starting bulk generation with request', { 
+        postId: request.postId,
+        hasTheme: !!request.theme,
+        hasCachedPrompt: !!cachedPrompt,
+        promptLength: cachedPrompt?.length || 0
+      });
+      
       const { data, error: functionError } = await supabase.functions.invoke('generate-all-images-optimized', {
         body: enhancedRequest
+      });
+
+      console.log('🚀 [BULK_GEN] Bulk generation response', { 
+        success: !functionError && data?.success,
+        error: functionError?.message,
+        imagesGenerated: data?.imagesGenerated || 0,
+        aspectRatiosProcessed: data?.aspectRatiosProcessed || 0,
+        failures: data?.failures?.length || 0
       });
 
       clearInterval(progressInterval);
