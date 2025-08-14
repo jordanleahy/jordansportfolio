@@ -217,8 +217,8 @@ class SimpleCacheManager {
   }
 
   // Theme data caching - simplified to use memory only initially  
-  async getThemeData(themeName: string, category: string): Promise<any | null> {
-    const key = `theme:${category}:${themeName}`;
+  async getThemeData(themeName: string): Promise<any | null> {
+    const key = `theme:${themeName}`;
     
     this.cleanExpired(this.themeCache);
     
@@ -246,8 +246,8 @@ class SimpleCacheManager {
   }
 
   // Set theme data in cache
-  setThemeData(themeName: string, category: string, data: any): void {
-    const key = `theme:${category}:${themeName}`;
+  setThemeData(themeName: string, data: any): void {
+    const key = `theme:${themeName}`;
     this.themeCache.set(key, {
       value: data,
       expires: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
@@ -257,8 +257,8 @@ class SimpleCacheManager {
   }
 
   // Visual prompt caching per theme
-  async getVisualPromptByTheme(themeId: string, category: string): Promise<any | null> {
-    const key = `visual_prompt:${themeId}:${category}`;
+  async getVisualPromptByTheme(themeId: string): Promise<any | null> {
+    const key = `visual_prompt:${themeId}`;
     
     this.cleanExpired(this.visualPromptCache);
     
@@ -272,8 +272,8 @@ class SimpleCacheManager {
     return null;
   }
 
-  setVisualPromptByTheme(themeId: string, category: string, data: any): void {
-    const key = `visual_prompt:${themeId}:${category}`;
+  setVisualPromptByTheme(themeId: string, data: any): void {
+    const key = `visual_prompt:${themeId}`;
     this.visualPromptCache.set(key, {
       value: data,
       expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours

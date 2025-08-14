@@ -49,7 +49,7 @@ export const useEnhancedThemeDataPrefetch = () => {
         resolvedThemeName = data?.theme_name || '';
       } else {
         // Legacy URL format: /stories/theme/:themeName - fetch theme by name
-        cachedTheme = await cacheManager.getThemeData(themeName, category);
+        cachedTheme = await cacheManager.getThemeData(themeName);
         resolvedThemeId = cachedTheme?.id || '';
       }
       

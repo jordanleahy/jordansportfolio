@@ -33,8 +33,8 @@ export class SystemPromptCache {
     return SystemPromptCache.instance;
   }
 
-  private getCacheKey(category: string, userId: string): string {
-    return createSafeCacheKey(`system_prompt_${category}_${userId}`);
+  private getCacheKey(themeId: string, userId: string): string {
+    return createSafeCacheKey(`system_prompt_${themeId}_${userId}`);
   }
 
   private setupPeriodicCleanup(): void {
@@ -149,8 +149,8 @@ export class SystemPromptCache {
     }
   }
 
-  async get(category: string, userId: string): Promise<CachedSystemPrompt | null> {
-    const cacheKey = this.getCacheKey(category, userId);
+  async get(themeId: string, userId: string): Promise<CachedSystemPrompt | null> {
+    const cacheKey = this.getCacheKey(themeId, userId);
     const now = Date.now();
 
     // Check memory cache first
@@ -168,11 +168,11 @@ export class SystemPromptCache {
   }
 
   async set(
-    category: string, 
+    themeId: string, 
     userId: string, 
     data: Omit<CachedSystemPrompt, 'expiresAt'>
   ): Promise<void> {
-    const cacheKey = this.getCacheKey(category, userId);
+    const cacheKey = this.getCacheKey(themeId, userId);
     const now = Date.now();
     
     const entry: SystemPromptCacheEntry = {
@@ -187,8 +187,8 @@ export class SystemPromptCache {
     this.saveToStorage(cacheKey, entry);
   }
 
-  async invalidate(category: string, userId: string): Promise<void> {
-    const cacheKey = this.getCacheKey(category, userId);
+  async invalidate(themeId: string, userId: string): Promise<void> {
+    const cacheKey = this.getCacheKey(themeId, userId);
     this.memoryCache.delete(cacheKey);
     
     const storageKey = `system_prompt_cache_${cacheKey}`;
