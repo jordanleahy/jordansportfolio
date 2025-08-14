@@ -393,7 +393,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       correlationId
     });
 
-    logger.debugOnly('Prompt previews', {
+    logger.debug('Prompt previews', {
       systemPreview: categoryPrompt.prompt.slice(0, 300),
       userPreview: userMessage.slice(0, 300)
     });
@@ -418,7 +418,7 @@ Incorporate these characteristics naturally into the generated prompt while main
 
     // Parse response
     let generatedText: string;
-    logger.debugOnly('OpenAI response structure', {
+    logger.debug('OpenAI response structure', {
       hasChoices: !!openAIResponse.choices,
       choicesLength: openAIResponse.choices?.length || 0,
       firstChoiceKeys: openAIResponse.choices?.[0] ? Object.keys(openAIResponse.choices[0]) : [],
@@ -428,7 +428,7 @@ Incorporate these characteristics naturally into the generated prompt while main
 
     if (openAIResponse.choices?.[0]?.message?.content) {
       generatedText = openAIResponse.choices[0].message.content.trim();
-      logger.debugOnly('Extracted using message.content', { correlationId });
+      logger.debug('Extracted using message.content', { correlationId });
     } else {
       logger.error('Missing generated text from OpenAI chat response', { error: {} });
       throw new Error('No generated text received from OpenAI');
