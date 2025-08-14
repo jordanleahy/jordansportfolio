@@ -166,12 +166,30 @@ export const PostsCardView = memo(({
                 return (
                   <div className="aspect-square relative group bg-muted rounded-md overflow-hidden">
                     {selectedImage ? (
-                      <img 
-                        src={selectedImage}
-                        alt={`${post.title} - ${selectedAspectRatio}`}
-                        className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => onPreviewImage(selectedImage, `${post.title} - ${selectedAspectRatio}`)}
-                      />
+                      <div className="relative w-full h-full">
+                        <img 
+                          src={selectedImage}
+                          alt={`${post.title} - ${selectedAspectRatio}`}
+                          className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => onPreviewImage(selectedImage, `${post.title} - ${selectedAspectRatio}`)}
+                        />
+                        {/* Regenerate button overlay */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Convert display format back to key format for regeneration
+                              const aspectRatioKey = selectedAspectRatio.replace(':', '_');
+                              onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
+                            }}
+                            disabled={isProcessingCtx(post.id, 'generate', selectedAspectRatio.replace(':', '_'))}
+                            className="absolute top-2 right-2 bg-background/80 hover:bg-background border border-border rounded-md p-2 text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Regenerate image"
+                          >
+                            <RefreshCw className={`h-4 w-4 ${isProcessingCtx(post.id, 'generate', selectedAspectRatio.replace(':', '_')) ? 'animate-spin' : ''}`} />
+                          </button>
+                        </div>
+                      </div>
                     ) : isProcessing ? (
                       <SimpleShimmer className="w-full h-full" />
                     ) : (
