@@ -26,7 +26,6 @@ import {
 
 // Lazy load components
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
-const PostsTableControls = React.lazy(() => import('@/components/stories/PostsTableControls').then(module => ({ default: module.PostsTableControls })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
@@ -37,7 +36,6 @@ export default function ThemeDetail() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -82,7 +80,6 @@ export default function ThemeDetail() {
   };
 
   const handlePostsChange = () => {
-    console.log('🔄 [THEME_DETAIL] Posts change requested, refetching data');
     refetch();
   };
 
@@ -168,25 +165,9 @@ export default function ThemeDetail() {
           <p className="text-base text-muted-foreground leading-relaxed mb-2">
             {themeData?.description || `Theme details for ${decodedTheme}`}
           </p>
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground">
             Theme: {decodedTheme}
           </p>
-
-          {/* Draft/Published Tabs and Action Buttons - Moved outside of PostsTable */}
-          {themeData?.id && posts.length > 0 && (
-            <Suspense fallback={<div>Loading controls...</div>}>
-              <PostsTableControls
-                posts={posts as any}
-                category={decodedTheme}
-                isAdmin={isAdmin}
-                onPostsChange={handlePostsChange}
-                activeTab={activeTab}
-                onActiveTabChange={setActiveTab}
-                themeId={themeData.id}
-                selectedThemeId={selectedThemeId}
-              />
-            </Suspense>
-          )}
         </div>
 
         {/* Content */}
@@ -205,7 +186,6 @@ export default function ThemeDetail() {
                   category={decodedTheme}
                   selectedThemeId={selectedThemeId}
                   onThemeChange={setSelectedThemeId}
-                  activeTab={activeTab}
                 />
               ) : (
                 <LibraryCollectionsFallback />

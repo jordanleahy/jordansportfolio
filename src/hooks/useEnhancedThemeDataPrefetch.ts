@@ -22,17 +22,8 @@ export const useEnhancedThemeDataPrefetch = () => {
     const themeName = params.theme ? decodeURIComponent(params.theme) : '';
     const category = params.category || 'cdi';
     
-    console.log('🎨 [THEME_PREFETCH] Starting theme data prefetch:', {
-      themeId,
-      themeName, 
-      category,
-      params: params,
-      timestamp: new Date().toISOString()
-    });
-    
     // Handle both new themeId route and legacy theme name route
     if (!themeId && !themeName) {
-      console.log('🎨 [THEME_PREFETCH] No theme ID or name provided, using defaults');
       setThemeData({ themeId: '', theme: '', category });
       return;
     }
@@ -46,7 +37,6 @@ export const useEnhancedThemeDataPrefetch = () => {
       let resolvedThemeName = themeName;
       
       if (themeId) {
-        console.log('🎨 [THEME_PREFETCH] Fetching theme by ID:', themeId);
         // New URL format: /stories/id/:themeId - fetch theme by ID
         const { data, error } = await supabase
           .from('themes')
@@ -54,57 +44,28 @@ export const useEnhancedThemeDataPrefetch = () => {
           .eq('id', themeId)
           .single();
           
-        if (error) {
-          console.error('❌ [THEME_PREFETCH] Error fetching theme by ID:', error);
-          throw error;
-        }
-        
-        console.log('✅ [THEME_PREFETCH] Theme fetched by ID:', {
-          themeId: data?.id,
-          themeName: data?.theme_name,
-          category: data?.category,
-          visualPromptSystemPromptId: data?.visual_prompt_system_prompt_id
-        });
-        
+        if (error) throw error;
         cachedTheme = data;
         resolvedThemeName = data?.theme_name || '';
       } else {
-        console.log('🎨 [THEME_PREFETCH] Fetching theme by name:', themeName);
         // Legacy URL format: /stories/theme/:themeName - fetch theme by name
         cachedTheme = await cacheManager.getThemeData(themeName);
         resolvedThemeId = cachedTheme?.id || '';
-        console.log('✅ [THEME_PREFETCH] Theme fetched by name:', {
-          cachedTheme,
-          resolvedThemeId
-        });
       }
       
       let systemPrompt = null;
       if (resolvedThemeId) {
-        console.log('🎨 [THEME_PREFETCH] Fetching system prompt for theme ID:', resolvedThemeId);
         // Prefetch system prompt if we have theme ID
         systemPrompt = await cacheManager.getSystemPrompt(resolvedThemeId);
-        console.log('✅ [THEME_PREFETCH] System prompt result:', {
-          hasSystemPrompt: !!systemPrompt,
-          systemPromptLength: systemPrompt?.length
-        });
       }
 
       const result: EnhancedThemeData = {
         themeId: resolvedThemeId,
         theme: resolvedThemeName,
         category,
-        systemPromptId: cachedTheme?.visual_prompt_system_prompt_id,
+        systemPromptId: cachedTheme?.system_prompt_id,
         systemPrompt
       };
-
-      console.log('🎯 [THEME_PREFETCH] Final theme data result:', {
-        themeId: result.themeId,
-        theme: result.theme,
-        category: result.category,
-        hasSystemPromptId: !!result.systemPromptId,
-        hasSystemPrompt: !!result.systemPrompt
-      });
 
       setThemeData(result);
     } catch (err) {
