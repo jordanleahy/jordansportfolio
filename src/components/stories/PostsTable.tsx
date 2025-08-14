@@ -884,10 +884,16 @@ const { handleGenerateImage } = useImageManager({
         window.open(publicUrl, '_blank', 'noopener,noreferrer');
         toast.success('Opened share link in a new tab');
       } else {
-        // For existing collections, use the collection ID we already have
-        const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollection.id}`;
-        window.open(publicUrl, '_blank', 'noopener,noreferrer');
-        toast.success('Opened share link in a new tab');
+        // For existing collections, check if we need to update with new images
+        if (hasImageActivity) {
+          console.log('🔄 Updating existing collection with new images');
+          await handleUpdateCollection();
+        } else {
+          // No changes, just open the existing collection
+          const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollection.id}`;
+          window.open(publicUrl, '_blank', 'noopener,noreferrer');
+          toast.success('Opened share link in a new tab');
+        }
       }
 
     } catch (error) {
