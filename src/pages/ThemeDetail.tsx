@@ -173,16 +173,18 @@ export default function ThemeDetail() {
 
           {/* Draft/Published Tabs and Action Buttons - Moved outside of PostsTable */}
           {themeData?.id && posts.length > 0 && (
-            <Suspense fallback={<div>Loading controls...</div>}>
-              <PostsTableControls
-                posts={posts as any}
-                category={decodedTheme}
-                isAdmin={isAdmin}
-                onPostsChange={handlePostsChange}
-                activeTab={activeTab}
-                onActiveTabChange={setActiveTab}
-              />
-            </Suspense>
+            <ProcessingStatesProvider>
+              <Suspense fallback={<div>Loading controls...</div>}>
+                <PostsTableControls
+                  posts={posts as any}
+                  category={decodedTheme}
+                  isAdmin={isAdmin}
+                  onPostsChange={handlePostsChange}
+                  activeTab={activeTab}
+                  onActiveTabChange={setActiveTab}
+                />
+              </Suspense>
+            </ProcessingStatesProvider>
           )}
         </div>
 
