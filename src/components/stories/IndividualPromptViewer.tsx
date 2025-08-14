@@ -8,6 +8,7 @@ import { Save, X, Edit, GitCompare, RotateCcw, Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { diffLines } from 'diff';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -30,6 +31,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
 
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isProcessing } = useProcessingStatesContext();
   
   const {
     data: promptData,
@@ -74,6 +76,14 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
       setShowDiff(false);
     }
   }, [post?.id]);
+
+  // Auto-close when regeneration starts
+  useEffect(() => {
+    if (post && isVisible && isProcessing(post.id, 'generate')) {
+      console.log('🎨 [IndividualPromptViewer] Auto-closing due to regeneration', { postId: post.id });
+      onClose();
+    }
+  }, [post, isVisible, isProcessing, onClose]);
 
   const hasChanges = useMemo(() => {
     return localPrompt.trim() !== originalPrompt.trim();

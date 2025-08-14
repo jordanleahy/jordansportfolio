@@ -91,7 +91,7 @@ export const PostsTable = ({
   const postIds = posts.map(post => post.id);
 const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
 
-  const { setBulkProcessing } = useProcessingStatesContext();
+  const { setBulkProcessing, isProcessing } = useProcessingStatesContext();
 
 
   // Animation state management
@@ -107,11 +107,21 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     previewImage,
     openVoiceoverModal,
     closeVoiceoverModal,
-    openIndividualPromptPanel,
+    openIndividualPromptPanel: originalOpenIndividualPromptPanel,
     closeIndividualPromptPanel,
     openPreviewImage,
     closePreviewImage
   } = useModalManager();
+
+  // Custom function to check processing state before opening prompt panel
+  const openIndividualPromptPanel = useCallback((post: SocialMediaPost) => {
+    // Check if any regeneration is in progress for this post
+    if (isProcessing(post.id, 'generate') || isProcessing(post.id, 'regenerate_prompt')) {
+      toast.error("Cannot open prompt viewer while image regeneration is in progress");
+      return;
+    }
+    originalOpenIndividualPromptPanel(post);
+  }, [isProcessing, originalOpenIndividualPromptPanel]);
   const {
     creatingBlogIds,
     handleStatusChange: originalHandleStatusChange,
