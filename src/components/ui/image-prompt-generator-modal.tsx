@@ -54,16 +54,28 @@ export const ImagePromptGeneratorModal = ({
     setIsFromCache(false);
 
     try {
-      // Use cached generation
-      const prompt = await generateWithCache({
-        postId: content.postId,
-        title: content.primary,
-        description: content.secondary,
-        theme: config.theme,
-        themeId: config.themeId,
-        category: config.category,
-        aspectRatio: selectedAspectRatio
+      // Use the specified edge function or default to visual-prompt-generator
+      const edgeFunction = config.edgeFunction === 'generate-image-prompt-dynamic' 
+        ? 'visual-prompt-generator' 
+        : config.edgeFunction;
+
+      // Call the appropriate edge function directly
+      const { data, error } = await supabase.functions.invoke(edgeFunction, {
+        body: {
+          postId: content.postId,
+          themeId: config.themeId,
+          aspectRatio: selectedAspectRatio,
+          colorTheme: null, // TODO: Add color theme support
+          referenceAnalysis: currentReferenceAnalysis,
+          extractedCharacteristics: currentExtractedCharacteristics
+        }
       });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to generate prompt');
+      }
+
+      const prompt = data?.generatedPrompt;
 
       if (!prompt) {
         throw new Error('No prompt received from the service');

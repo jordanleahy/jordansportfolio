@@ -22,7 +22,7 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
       ? `${theme} Image Prompt Generator`
       : `${getCategoryLabel(category)} Image Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'generate-image-prompt-dynamic',
+    edgeFunction: 'visual-prompt-generator',
     category: category,
     theme: theme,
     themeId: themeId,
