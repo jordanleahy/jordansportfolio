@@ -137,11 +137,11 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
       return { success: true, message: 'System prompt already exists' };
     }
 
-    // Check if posts exist for this category
+    // Check if posts exist for this theme
     const { data: posts } = await supabase
       .from('social_media_posts')
       .select('id, title, description')
-      .eq('category', category)
+      .eq('theme_id', themeId)
       .eq('user_id', user.id)
       .limit(10);
 
