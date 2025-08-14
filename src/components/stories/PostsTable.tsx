@@ -1,3 +1,4 @@
+// Enhanced PostsTable with view toggle support
 import { useState, useCallback, useEffect } from "react";
 import { SocialMediaPost } from "@/types/socialMedia";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Eye, BookOpen, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
+import { PostsCardView } from "./PostsCardView";
+import { ViewToggle, ViewMode } from "./ViewToggle";
 import { ColorThemeSelector } from "./ColorThemeSelector";
 import { useColorThemes } from "@/hooks/useColorThemes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +42,7 @@ export const PostsTable = ({
   onThemeChange,
 }: PostsTableProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
@@ -977,7 +981,7 @@ const { handleGenerateImage } = useImageManager({
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
                 {/* Tabs Section */}
                 {userIsAdmin && (
-                  <div className="mb-4">
+                  <div className="mb-4 flex items-center justify-between">
                     <TabsList>
                       <TabsTrigger value="draft">
                         Draft {posts.filter(p => p.status === 'draft').length > 0 && (
@@ -988,6 +992,11 @@ const { handleGenerateImage } = useImageManager({
                       </TabsTrigger>
                       <TabsTrigger value="published">Published</TabsTrigger>
                     </TabsList>
+                    
+                    <ViewToggle
+                      currentView={viewMode}
+                      onViewChange={setViewMode}
+                    />
                   </div>
                 )}
                 
@@ -1134,7 +1143,7 @@ const { handleGenerateImage } = useImageManager({
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
                 {/* Tabs Section */}
                 {userIsAdmin && (
-                  <div className="mb-4">
+                  <div className="mb-4 flex items-center justify-between">
                     <TabsList>
                       <TabsTrigger value="draft">
                         Draft {posts.filter(p => p.status === 'draft').length > 0 && (
@@ -1145,6 +1154,11 @@ const { handleGenerateImage } = useImageManager({
                       </TabsTrigger>
                       <TabsTrigger value="published">Published</TabsTrigger>
                     </TabsList>
+                    
+                    <ViewToggle
+                      currentView={viewMode}
+                      onViewChange={setViewMode}
+                    />
                   </div>
                 )}
                 
@@ -1267,7 +1281,11 @@ const { handleGenerateImage } = useImageManager({
                       <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
                     </div>
                   ) : (
-                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    viewMode === 'table' ? (
+                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    ) : (
+                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    )
                   )}
                 </TabsContent>
 
@@ -1278,7 +1296,11 @@ const { handleGenerateImage } = useImageManager({
                       <div className="text-sm">No posts have been published in this theme yet.</div>
                     </div>
                   ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    viewMode === 'table' ? (
+                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    ) : (
+                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                    )
                   )}
                 </TabsContent>
               </Tabs>
