@@ -705,10 +705,10 @@ const { handleGenerateImage } = useImageManager({
       
       if (!session) return;
 
-      // Get the last published collection update time
+      // Get the last published collection with its items
       const { data: collection, error: collectionError } = await supabase
         .from('shared_collections')
-        .select('updated_at')
+        .select('id, updated_at')
         .eq('user_id', session.user.id)
         .eq('status', 'published')
         .eq('theme_id', themeId)
@@ -721,26 +721,36 @@ const { handleGenerateImage } = useImageManager({
         return;
       }
 
-      // Check if any posts have been updated (image generations) after collection update
-      const postIds = posts.map(p => p.id);
-      if (postIds.length === 0) {
+      // Get the current collection items to compare image URLs
+      const { data: collectionItems, error: itemsError } = await supabase
+        .from('shared_collection_items')
+        .select('post_id, image_1_1_url')
+        .eq('collection_id', collection.id);
+
+      if (itemsError) {
+        console.error('Error fetching collection items:', itemsError);
         setHasImageActivity(false);
         return;
       }
 
-      const { data: recentPosts, error: postsError } = await supabase
-        .from('social_media_posts')
-        .select('updated_at')
-        .in('id', postIds)
-        .gt('updated_at', collection.updated_at);
+      // Create a map of post_id to published image URL
+      const publishedImageUrls = new Map(
+        collectionItems?.map(item => [item.post_id, item.image_1_1_url]) || []
+      );
 
-      if (postsError) {
-        console.error('Error checking image activity:', postsError);
-        setHasImageActivity(false);
-        return;
-      }
+      // Check if any current posts have different image URLs than what was published
+      const postsWithImages = posts.filter(p => !!p.image_1_1_url);
+      const hasImageChanges = postsWithImages.some(post => {
+        const publishedUrl = publishedImageUrls.get(post.id);
+        return !publishedUrl || publishedUrl !== post.image_1_1_url;
+      });
 
-      setHasImageActivity((recentPosts?.length || 0) > 0);
+      // Also check if there are new posts with images that weren't in the collection
+      const currentPostIds = new Set(postsWithImages.map(p => p.id));
+      const publishedPostIds = new Set(publishedImageUrls.keys());
+      const hasNewPosts = Array.from(currentPostIds).some(id => !publishedPostIds.has(id));
+
+      setHasImageActivity(hasImageChanges || hasNewPosts);
     } catch (error) {
       console.error('Error checking image activity:', error);
       setHasImageActivity(false);
