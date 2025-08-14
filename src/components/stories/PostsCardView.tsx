@@ -6,7 +6,7 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown } from 'lucide-react';
+import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
@@ -15,6 +15,9 @@ import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
 import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
+import { generatePostPDF } from '@/utils/pdfGenerator';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
@@ -55,6 +58,8 @@ export const PostsCardView = memo(({
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
@@ -133,6 +138,31 @@ export const PostsCardView = memo(({
       100
     );
   }, [generateWithCache, themeData, setInstantLoading, setProcessing, debouncedAction]);
+
+  const handleDownloadPDF = useCallback(async (post: SocialMediaPost) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to download PDF",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await generatePostPDF(post);
+      toast({
+        title: "PDF Downloaded",
+        description: "Post has been saved as PDF"
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [user, toast]);
 
   return (
     <div className="grid grid-cols-1 gap-4 p-6">
@@ -246,12 +276,21 @@ export const PostsCardView = memo(({
                     )}
                     
                      <div className="flex gap-1 flex-wrap">
-                       <ActionButton
-                         icon={<Copy className="h-4 w-4" />}
-                         onClick={() => onCopyContent(post)}
-                         title="Copy content"
-                         size="sm"
-                       />
+                        <ActionButton
+                          icon={<Copy className="h-4 w-4" />}
+                          onClick={() => onCopyContent(post)}
+                          title="Copy content"
+                          size="sm"
+                        />
+
+                        {user && (
+                          <ActionButton
+                            icon={<Download className="h-4 w-4" />}
+                            onClick={() => handleDownloadPDF(post)}
+                            title="Download as PDF"
+                            size="sm"
+                          />
+                        )}
                        
                        <ActionButton
                          icon={<RefreshCw className="h-4 w-4" />}
