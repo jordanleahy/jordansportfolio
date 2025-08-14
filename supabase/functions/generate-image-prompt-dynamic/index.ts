@@ -47,6 +47,24 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to get aspect ratio-specific safe space rules
+function getSafeSpaceRule(aspectRatio: string): string {
+  switch (aspectRatio) {
+    case '16:9':
+      return 'CRITICAL SAFE SPACE: Maintain 15-20% margins on left and right sides, 10% margins on top and bottom. Keep all workflow elements well within safe boundaries to prevent edge-touching content.';
+    case '9:16':
+      return 'CRITICAL SAFE SPACE: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room and proper spacing.';
+    case '1:1':
+      return 'CRITICAL SAFE SPACE: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed with proper spacing from edges.';
+    case '4:3':
+      return 'CRITICAL SAFE SPACE: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing and balanced composition.';
+    case '3:4':
+      return 'CRITICAL SAFE SPACE: Maintain 10-12% margins on top and bottom, 8% margins on left and right sides. Optimize for social media viewing with proper edge spacing.';
+    default:
+      return 'Maintain 80% safe zone - keep important elements in central 80% of frame';
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -317,13 +335,37 @@ Description: ${description}`;
     // Always include theme context; category is deprecated
     userMessage += `\nTheme: ${systemPromptData.theme || theme || usedIdentifier}`;
 
-    // Add aspect ratio guidance if provided
+    // Add aspect ratio guidance with specific safe space rules
     if (requestedAspectRatio) {
       let orientationHint = 'composition optimized for this orientation';
-      if (requestedAspectRatio === '16:9') orientationHint = 'wide landscape composition';
-      else if (requestedAspectRatio === '9:16') orientationHint = 'vertical portrait orientation';
-      else if (requestedAspectRatio === '1:1') orientationHint = 'balanced square format';
-      userMessage += `\nAspect Ratio: ${requestedAspectRatio} (${orientationHint})`;
+      let safeSpaceRules = '';
+      let negativePrompts = '';
+      
+      if (requestedAspectRatio === '16:9') {
+        orientationHint = 'wide landscape composition';
+        safeSpaceRules = 'CRITICAL: Maintain 15-20% margins on left and right sides, 10% margins on top and bottom. Keep all workflow elements well within safe boundaries.';
+        negativePrompts = 'No cramped horizontal layouts, no elements touching left/right edges, no edge-to-edge content';
+      } else if (requestedAspectRatio === '9:16') {
+        orientationHint = 'vertical portrait orientation';
+        safeSpaceRules = 'CRITICAL: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room.';
+        negativePrompts = 'No elements touching top/bottom edges, maintain vertical breathing room, no cramped vertical layouts';
+      } else if (requestedAspectRatio === '1:1') {
+        orientationHint = 'balanced square format';
+        safeSpaceRules = 'CRITICAL: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed.';
+        negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements';
+      } else if (requestedAspectRatio === '4:3') {
+        orientationHint = 'standard landscape format';
+        safeSpaceRules = 'CRITICAL: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing.';
+        negativePrompts = 'No cramped compositions, no elements touching frame borders, maintain horizontal balance';
+      } else if (requestedAspectRatio === '3:4') {
+        orientationHint = 'social media portrait format';
+        safeSpaceRules = 'CRITICAL: Maintain 10-12% margins on top and bottom, 8% margins on left and right sides. Optimize for social media viewing.';
+        negativePrompts = 'No elements touching edges, maintain social media safe zones, no cramped vertical content';
+      }
+      
+      userMessage += `\nAspect Ratio: ${requestedAspectRatio} (${orientationHint})
+${safeSpaceRules}
+NEGATIVE PROMPTS for ${requestedAspectRatio}: ${negativePrompts}`;
     }
 
 
@@ -380,17 +422,21 @@ Reference Image Analysis (apply these characteristics):`;
 Please integrate these reference characteristics naturally while maintaining the professional vector illustration style and ensuring the content remains relevant to the ${usedType === 'category' ? category : (systemPromptData.theme || theme)} theme.`;
     }
 
-    // Add MANDATORY technical constraints and Private Safe Space guidelines
+    // Add MANDATORY technical constraints and Private Safe Space guidelines with dynamic safe space rules
+    const dynamicSafeSpaceRule = requestedAspectRatio ? 
+      getSafeSpaceRule(requestedAspectRatio) : 
+      'Maintain 80% safe zone - keep important elements in central 80% of frame';
+      
     userMessage += `
 
 **MANDATORY TECHNICAL REQUIREMENTS:**
 - Art Style: Vector illustration ONLY, flat design, NO photorealistic elements
 - Rendering: Clean, modern vector style with solid colors and minimal gradients
-- Composition: 80% safe zone - keep important elements in central 80% of frame
+- Composition: ${dynamicSafeSpaceRule}
 - Color Palette: Use professional blues (#2563eb, #1e40af), teals (#0891b2, #0e7490), accent greens (#16a34a), highlight orange (#ea580c), and neutral grays (#64748b, #f8fafc)
 - Accessibility: High contrast, clear visual hierarchy, readable at various sizes
 - Background: Clean, minimal, professional setting appropriate for ${usedType === 'category' ? category : (systemPromptData.theme || theme)}
-- NEGATIVE PROMPTS: No photorealistic rendering, no complex gradients, no cluttered compositions, no dark/dramatic lighting
+- NEGATIVE PROMPTS: No photorealistic rendering, no complex gradients, no cluttered compositions, no dark/dramatic lighting, no edge-to-edge content
 
 **COMPOSITION GUIDELINES:**
 - Foreground: Main subject focused on ${(usedType === 'category' ? category : (systemPromptData.theme || theme))}-specific elements
