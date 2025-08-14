@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_categories: {
+        Row: {
+          category_key: string
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_key: string
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_key?: string
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_constants: {
         Row: {
           constant_name: string
@@ -38,6 +71,42 @@ export type Database = {
           description?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      agent_model_options: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_recommended: boolean
+          model_label: string
+          model_value: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_recommended?: boolean
+          model_label: string
+          model_value: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_recommended?: boolean
+          model_label?: string
+          model_value?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -88,6 +157,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      agent_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          template_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          template_data: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          template_data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       api_usage_daily_aggregates: {
         Row: {

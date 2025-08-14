@@ -16,6 +16,9 @@ export interface UseUnifiedRealtimeOptions {
   onSystemPromptUpdate?: (prompt: any) => void;
   onAgentUpdate?: (agent: any) => void;
   onVendorUpdate?: (vendor: any) => void;
+  onAgentTemplateUpdate?: (template: any) => void;
+  onAgentCategoryUpdate?: (category: any) => void;
+  onAgentModelOptionUpdate?: (modelOption: any) => void;
   onApiUsageUpdate?: () => void;
 }
 
@@ -28,6 +31,9 @@ export const useUnifiedRealtime = ({
   onSystemPromptUpdate,
   onAgentUpdate,
   onVendorUpdate,
+  onAgentTemplateUpdate,
+  onAgentCategoryUpdate,
+  onAgentModelOptionUpdate,
   onApiUsageUpdate,
 }: UseUnifiedRealtimeOptions = {}) => {
   const queryClient = useQueryClient();
@@ -78,6 +84,15 @@ export const useUnifiedRealtime = ({
           break;
         case 'vendors':
           handleVendorUpdate(eventType, data);
+          break;
+        case 'agent_templates':
+          handleAgentTemplateUpdate(eventType, data);
+          break;
+        case 'agent_categories':
+          handleAgentCategoryUpdate(eventType, data);
+          break;
+        case 'agent_model_options':
+          handleAgentModelOptionUpdate(eventType, data);
           break;
         case 'api_usage_tracking': {
           // Simplified: just trigger callbacks for any usage tracking changes
@@ -373,6 +388,72 @@ export const useUnifiedRealtime = ({
       toast.success('Vendor updated');
     } else if (eventType === 'DELETE') {
       toast.success('Vendor deleted');
+    }
+  };
+
+  const handleAgentTemplateUpdate = (eventType: string, data: any) => {
+    const record = data.new;
+    const oldRecord = data.old;
+
+    console.log(`[UnifiedRealtime] Agent template ${eventType}: ${record?.id || oldRecord?.id}`);
+    
+    if (onAgentTemplateUpdate && record) {
+      onAgentTemplateUpdate(record);
+    }
+
+    // Invalidate agent template caches
+    queryClient.invalidateQueries({ queryKey: ['agent-templates'] });
+
+    if (eventType === 'INSERT') {
+      toast.success('New agent template created');
+    } else if (eventType === 'UPDATE') {
+      toast.success('Agent template updated');
+    } else if (eventType === 'DELETE') {
+      toast.success('Agent template deleted');
+    }
+  };
+
+  const handleAgentCategoryUpdate = (eventType: string, data: any) => {
+    const record = data.new;
+    const oldRecord = data.old;
+
+    console.log(`[UnifiedRealtime] Agent category ${eventType}: ${record?.id || oldRecord?.id}`);
+    
+    if (onAgentCategoryUpdate && record) {
+      onAgentCategoryUpdate(record);
+    }
+
+    // Invalidate agent category caches
+    queryClient.invalidateQueries({ queryKey: ['agent-categories'] });
+
+    if (eventType === 'INSERT') {
+      toast.success('New agent category created');
+    } else if (eventType === 'UPDATE') {
+      toast.success('Agent category updated');
+    } else if (eventType === 'DELETE') {
+      toast.success('Agent category deleted');
+    }
+  };
+
+  const handleAgentModelOptionUpdate = (eventType: string, data: any) => {
+    const record = data.new;
+    const oldRecord = data.old;
+
+    console.log(`[UnifiedRealtime] Agent model option ${eventType}: ${record?.id || oldRecord?.id}`);
+    
+    if (onAgentModelOptionUpdate && record) {
+      onAgentModelOptionUpdate(record);
+    }
+
+    // Invalidate agent model option caches
+    queryClient.invalidateQueries({ queryKey: ['agent-model-options'] });
+
+    if (eventType === 'INSERT') {
+      toast.success('New model option added');
+    } else if (eventType === 'UPDATE') {
+      toast.success('Model option updated');
+    } else if (eventType === 'DELETE') {
+      toast.success('Model option removed');
     }
   };
 

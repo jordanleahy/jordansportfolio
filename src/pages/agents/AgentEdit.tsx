@@ -34,7 +34,8 @@ import { useOpenAIAgent, useUpdateAgent, useDeleteAgent, useCreateAgent } from '
 import { AgentStatus, CreateAgentData } from '@/types/openaiAgent';
 import { AgentDeleteModal } from '@/components/agents/AgentDeleteModal';
 import { SystemPromptsTab } from '@/components/agents/SystemPromptsTab';
-import { MODEL_OPTIONS, DEFAULT_MODELS } from '@/constants/agentConstants';
+import { useModelOptionsForForm } from '@/hooks/useAgentModelOptions';
+import { useCategoryOptions } from '@/hooks/useAgentCategories';
 import { toast } from 'sonner';
 
 const agentSchema = z.object({
@@ -70,6 +71,10 @@ export const AgentEdit = () => {
   const deleteAgent = useDeleteAgent();
   const createAgent = useCreateAgent();
   
+  // Fetch dynamic data
+  const { data: modelOptions, isLoading: modelsLoading } = useModelOptionsForForm();
+  const { data: categoryOptions, isLoading: categoriesLoading } = useCategoryOptions();
+  
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'prompts' | 'tools' | 'guardrails'>('basic');
 
@@ -78,7 +83,7 @@ export const AgentEdit = () => {
     defaultValues: {
       name: '',
       purpose: '',
-      model_version: DEFAULT_MODELS.FAST,
+      model_version: 'gpt-5-mini-2025-08-07',
       trigger: '',
       input_source: '',
       output_target: '',
@@ -476,18 +481,22 @@ export const AgentEdit = () => {
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            {MODEL_OPTIONS.map((model) => (
-                              <SelectItem key={model.value} value={model.value}>
-                                <div className="flex items-center gap-2">
-                                  <span>{model.label}</span>
-                                  {model.recommended && (
-                                    <Badge variant="secondary" className="text-xs">Recommended</Badge>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
+                           <SelectContent>
+                             {modelsLoading ? (
+                               <SelectItem value="" disabled>Loading models...</SelectItem>
+                             ) : (
+                               modelOptions?.map((model) => (
+                                 <SelectItem key={model.value} value={model.value}>
+                                   <div className="flex items-center gap-2">
+                                     <span>{model.label}</span>
+                                     {model.recommended && (
+                                       <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                                     )}
+                                   </div>
+                                 </SelectItem>
+                               ))
+                             )}
+                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
