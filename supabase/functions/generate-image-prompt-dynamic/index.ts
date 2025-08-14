@@ -497,15 +497,14 @@ Private Safe Space Visual Tone:
     logger.info('OpenAI chat request prepared', {
       model: openAIRequestBody.model,
       parameters: {
-        has_max_tokens: Object.prototype.hasOwnProperty.call(openAIRequestBody as any, 'max_tokens'),
-        has_max_completion_tokens: Object.prototype.hasOwnProperty.call(openAIRequestBody as any, 'max_completion_tokens'),
-        max_tokens: (openAIRequestBody as any).max_tokens,
-        max_completion_tokens: (openAIRequestBody as any).max_completion_tokens,
-        user_set: !!(openAIRequestBody as any).user
+        has_max_tokens: 'max_tokens' in openAIRequestBody,
+        has_max_completion_tokens: 'max_completion_tokens' in openAIRequestBody,
+        max_completion_tokens: openAIRequestBody.max_completion_tokens,
+        user_set: !!openAIRequestBody.user
       },
       message_summary: {
-        system_len: (categoryPrompt.prompt?.length || 0),
-        user_len: (userMessage?.length || 0)
+        system_len: categoryPrompt.prompt?.length || 0,
+        user_len: userMessage?.length || 0
       },
       request_keys: Object.keys(openAIRequestBody),
       correlationId
