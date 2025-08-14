@@ -161,6 +161,8 @@ export const PostsCardView = memo(({
                   }
                 }
                 
+                const isProcessing = post.image_1_1_status === 'processing' || post.image_4_3_status === 'processing' || post.image_16_9_status === 'processing';
+                
                 return (
                   <div className="aspect-square relative group bg-muted rounded-md overflow-hidden">
                     {selectedImage ? (
@@ -178,12 +180,22 @@ export const PostsCardView = memo(({
                           className="object-cover w-full h-full"
                         />
                       </ImageHoverOverlay>
-                    ) : post.image_1_1_status === 'processing' || post.image_4_3_status === 'processing' || post.image_16_9_status === 'processing' ? (
+                    ) : isProcessing ? (
                       <SimpleShimmer className="w-full h-full" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
-                        No Image
-                      </div>
+                      <button
+                        onClick={() => {
+                          // Start with 1:1 aspect ratio as default
+                          onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
+                        }}
+                        disabled={isProcessing}
+                        className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <Sparkles className="h-6 w-6" />
+                          <span>Generate Image</span>
+                        </div>
+                      </button>
                     )}
                   </div>
                 );
