@@ -56,7 +56,7 @@ export const useEnhancedThemeDataPrefetch = () => {
       let systemPrompt = null;
       if (resolvedThemeId) {
         // Prefetch system prompt if we have theme ID
-        systemPrompt = await cacheManager.getSystemPrompt(resolvedThemeId, category);
+        systemPrompt = await cacheManager.getSystemPrompt(resolvedThemeId);
       }
 
       const result: EnhancedThemeData = {

@@ -177,9 +177,9 @@ class SimpleCacheManager {
     }
   }
 
-  // System prompt caching - simplified to use memory only initially
-  async getSystemPrompt(themeId: string, category: string): Promise<any | null> {
-    const key = `system_prompt:${themeId}:${category}`;
+  // System prompt caching with database lookup by theme_id only
+  async getSystemPrompt(themeId: string): Promise<any | null> {
+    const key = `system_prompt:${themeId}`;
     
     this.cleanExpired(this.systemPromptCache);
     
@@ -190,7 +190,28 @@ class SimpleCacheManager {
       return cached.value;
     }
 
-    // For now, return null and implement database lookup separately to avoid TS issues
+    // Check database for system prompt by theme_id
+    try {
+      const supabaseModule = await import('@/integrations/supabase/client');
+      const response = await supabaseModule.supabase
+        .from('system_prompts')
+        .select('*')
+        .eq('theme_id', themeId)
+        .maybeSingle();
+
+      if (response.data && !response.error) {
+        console.log(`🧠 System prompt database HIT: ${key}`);
+        // Store in memory for next time
+        this.systemPromptCache.set(key, {
+          value: response.data,
+          expires: Date.now() + (4 * 60 * 60 * 1000) // 4 hours
+        });
+        return response.data;
+      }
+    } catch (error) {
+      console.error('System prompt database lookup error:', error);
+    }
+
     console.log(`🧠 System prompt cache MISS: ${key}`);
     return null;
   }
@@ -214,8 +235,8 @@ class SimpleCacheManager {
   }
 
   // Set system prompt in cache
-  setSystemPrompt(themeId: string, category: string, data: any): void {
-    const key = `system_prompt:${themeId}:${category}`;
+  setSystemPrompt(themeId: string, data: any): void {
+    const key = `system_prompt:${themeId}`;
     this.systemPromptCache.set(key, {
       value: data,
       expires: Date.now() + (4 * 60 * 60 * 1000) // 4 hours
