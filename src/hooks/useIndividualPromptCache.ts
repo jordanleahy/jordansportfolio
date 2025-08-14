@@ -121,7 +121,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         postId,
         themeId,
         theme,
-        aspectRatio: aspectRatio || '16:9'
+        aspectRatio
       });
 
       if (!postId || !themeId) {
@@ -135,7 +135,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         body: { 
           postId,
           themeId,
-          aspectRatio: aspectRatio || '16:9'
+          aspectRatio
         }
       });
 

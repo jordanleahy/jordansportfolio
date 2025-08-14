@@ -108,13 +108,10 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     try {
       console.log('✅ Starting regeneration with:', {
         postId: post.id,
-        themeId: themeId,
-        aspectRatio: '16:9'
+        themeId: themeId
       });
       
-      await regeneratePrompt({
-        aspectRatio: '16:9' // Default aspect ratio
-      });
+      await regeneratePrompt({});
       setIsEditing(false);
       setShowDiff(false);
       
