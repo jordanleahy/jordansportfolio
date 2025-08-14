@@ -139,41 +139,31 @@ serve(async (req) => {
       });
     }
 
-    // PERFORMANCE IMPROVEMENT #1: Generate single master prompt first
+    // Use existing prompt from post data (no generation needed for bulk)
     let masterPrompt: string;
     let promptUsage = { estimated_cost: 0, total_tokens: 0 };
 
-    // Use provided prompt if available, otherwise generate new one
     if (prompt) {
+      // Use provided prompt directly
       masterPrompt = prompt;
     } else {
-      // Step 1: Generate master prompt once
-      const { data: postRow } = await supabase
+      // Fetch existing prompt from the post data
+      const { data: postData, error: postError } = await supabase
         .from('social_media_posts')
-        .select('theme_id')
+        .select('generated_image_prompt')
         .eq('id', postId)
         .maybeSingle();
-      const themeId = postRow?.theme_id || null;
-      const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-        body: { title, description, category, themeId }
-      });
 
-      if (promptResponse.error) {
-        return new Response(JSON.stringify({ error: `Prompt generation failed: ${promptResponse.error.message}` }), {
-          status: 500,
+      if (postError || !postData?.generated_image_prompt) {
+        return new Response(JSON.stringify({ 
+          error: 'No existing image prompt found for this post. Please ensure individual prompts are generated first.' 
+        }), {
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      masterPrompt = promptResponse.data?.generatedPrompt;
-      promptUsage = promptResponse.data?.usage || { estimated_cost: 0, total_tokens: 0 };
-
-      if (!masterPrompt) {
-        return new Response(JSON.stringify({ error: 'No prompt generated' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      masterPrompt = postData.generated_image_prompt;
     }
 
     // Step 2: Generate images in parallel using single master prompt with aspect ratio enhancements

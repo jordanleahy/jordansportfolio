@@ -55,7 +55,7 @@ export interface OptimizedBulkGenerationHook {
     isFinalizing?: boolean;
   };
   error: string | null;
-  getOrGeneratePrompt: (request: BulkImageGenerationRequest) => Promise<string>;
+  getExistingPrompt: (request: BulkImageGenerationRequest) => Promise<string>;
   clearCache: () => void;
 }
 

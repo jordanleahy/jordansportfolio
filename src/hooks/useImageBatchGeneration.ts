@@ -133,81 +133,27 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
   const params = useParams();
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
-  // Function to get or generate prompt with caching
-  const getOrGeneratePrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {
-    const cacheKey = createPromptCacheKey(request);
-    
-    // Check memory cache first
-    if (cachedPrompts.has(cacheKey)) {
-      return cachedPrompts.get(cacheKey)!;
-    }
-    
-    // Check database cache
-    const cachedPrompt = await getCachedPrompt(cacheKey);
-    if (cachedPrompt) {
-      // Store in memory cache for faster subsequent access
-      setCachedPrompts(prev => new Map(prev).set(cacheKey, cachedPrompt));
-      return cachedPrompt;
-    }
-    
-    // Get color theme if available from the request
-    let colorTheme = null;
-    if (request.colorThemeId) {
-      const { data: themeData } = await supabase
-        .from('color_themes')
-        .select('*')
-        .eq('id', request.colorThemeId)
-        .maybeSingle();
-      colorTheme = themeData;
-    }
-
-    // Generate new prompt
-    const { data: postRow } = await supabase
+  // Function to get existing prompt from post data
+  const getExistingPrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {
+    // Get the existing prompt from the post (should already exist from automatic generation)
+    const { data: postData } = await supabase
       .from('social_media_posts')
-      .select('theme_id')
+      .select('generated_image_prompt')
       .eq('id', request.postId)
       .maybeSingle();
-    const themeId = postRow?.theme_id || null;
 
-    console.log('🎯 [BATCH_PROMPT] Starting prompt generation for batch', { 
-      postId: request.postId, 
-      themeId,
-      title: request.title 
-    });
-    
-    const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-      body: { 
-        postId: request.postId,
-        themeId,
-        aspectRatio: '1:1'
-      }
-    });
-
-    console.log('🎯 [BATCH_PROMPT] Prompt generation response', { 
-      success: !error,
-      error: error?.message,
-      dataKeys: data ? Object.keys(data) : null,
-      promptLength: data?.generatedPrompt?.length || 0
-    });
-
-    if (error || !data?.generatedPrompt) {
-      throw new Error('Failed to generate prompt');
+    const existingPrompt = postData?.generated_image_prompt;
+    if (!existingPrompt) {
+      throw new Error('No image prompt found for this post. Please ensure individual prompts are generated first.');
     }
 
-    const newPrompt = data.generatedPrompt;
-    
-    // Cache the new prompt
-    await cacheGeneratedPrompt(cacheKey, newPrompt, request.category || 'general', {
-      title: request.title,
-      description: request.description,
-      generated_at: new Date().toISOString()
+    console.log('🎯 [BATCH_PROMPT] Using existing prompt for batch', { 
+      postId: request.postId, 
+      promptLength: existingPrompt.length
     });
     
-    // Store in memory cache
-    setCachedPrompts(prev => new Map(prev).set(cacheKey, newPrompt));
-    
-    return newPrompt;
-  }, [cachedPrompts]);
+    return existingPrompt;
+  }, []);
 
   const generateAllImages = useCallback(async (request: BulkImageGenerationRequest): Promise<BulkImageGenerationResponse> => {
     console.log(`🚀 [BatchGeneration] Starting bulk generation for post: ${request.postId}`);
@@ -258,21 +204,21 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
     }, 15000); // Update every 15 seconds for more realistic timing
 
     try {
-      // Get or generate cached prompt first
-      const cachedPrompt = await getOrGeneratePrompt(request);
+      // Get existing prompt from post (no generation needed)
+      const existingPrompt = await getExistingPrompt(request);
       
-      // Use optimized edge function with enhanced request including cached prompt
+      // Use optimized edge function with existing prompt
       const enhancedRequest = {
         ...request,
-        cachedPrompt, // Pass the cached prompt to the edge function
-        useCachedPrompt: true
+        prompt: existingPrompt, // Pass the existing prompt to the edge function
+        useExistingPrompt: true
       };
       
       console.log('🚀 [BULK_GEN] Starting bulk generation with request', { 
         postId: request.postId,
         hasTheme: !!request.theme,
-        hasCachedPrompt: !!cachedPrompt,
-        promptLength: cachedPrompt?.length || 0
+        hasExistingPrompt: !!existingPrompt,
+        promptLength: existingPrompt?.length || 0
       });
       
       const { data, error: functionError } = await supabase.functions.invoke('generate-all-images-optimized', {
@@ -360,14 +306,14 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
         });
       }, 1000);
     }
-  }, [setBulkProcessing, isGenerating, getOrGeneratePrompt]);
+  }, [setBulkProcessing, isGenerating, getExistingPrompt]);
 
   return {
     generateAllImages,
     isGenerating,
     progress,
     error,
-    getOrGeneratePrompt, // Expose this function for single image generation
+    getExistingPrompt, // Expose this function for checking existing prompts
     clearCache: () => setCachedPrompts(new Map()) // Function to clear memory cache
   };
 };

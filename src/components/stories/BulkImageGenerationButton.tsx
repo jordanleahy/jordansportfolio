@@ -27,9 +27,20 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const isCurrentlyGenerating = isGenerating(post.id);
+  const hasIndividualPrompt = !!post.generated_image_prompt;
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
+    
+    // Check if individual prompt exists first
+    if (!hasIndividualPrompt) {
+      toast({
+        title: "Individual prompt required",
+        description: "Please wait for the individual image prompt to be generated first, then try bulk generation.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Check credits before proceeding
     if (!creditStatus.hasCredits) {
@@ -89,16 +100,20 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     <>
       <Button
         onClick={handleGenerateAllImages}
-        disabled={isCurrentlyGenerating || !creditStatus.hasCredits || creditStatus.isLoading}
+        disabled={isCurrentlyGenerating || !creditStatus.hasCredits || creditStatus.isLoading || !hasIndividualPrompt}
         variant="outline"
         size="sm"
-        className={`h-8 flex-1 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
-        title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Bulk Generate"}
+        className={`h-8 flex-1 ${!creditStatus.hasCredits || !hasIndividualPrompt ? 'opacity-50' : ''}`}
+        title={
+          !creditStatus.hasCredits ? getBlockingMessage(creditStatus) : 
+          !hasIndividualPrompt ? "Waiting for individual prompt generation..." :
+          "Bulk Generate"
+        }
       >
         {isCurrentlyGenerating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          <Sparkles className={`h-4 w-4 ${!creditStatus.hasCredits ? 'opacity-50' : ''}`} />
+          <Sparkles className={`h-4 w-4 ${!creditStatus.hasCredits || !hasIndividualPrompt ? 'opacity-50' : ''}`} />
         )}
       </Button>
       
