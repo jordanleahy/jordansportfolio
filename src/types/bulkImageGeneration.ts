@@ -67,11 +67,11 @@ export const convertAspectRatio = {
 
 // Constants for aspect ratio configurations
 export const ASPECT_RATIO_CONFIGS: AspectRatioConfig[] = [
+  { ratio: '1:1', key: '1_1', width: 1024, height: 1024, label: 'Square (1:1)' },
   { ratio: '16:9', key: '16_9', width: 1792, height: 1024, label: 'Landscape (16:9)' },
   { ratio: '9:16', key: '9_16', width: 1024, height: 1792, label: 'Portrait (9:16)' },
   { ratio: '4:3', key: '4_3', width: 1536, height: 1024, label: 'Standard (4:3)' },
   { ratio: '3:4', key: '3_4', width: 1024, height: 1536, label: 'Social (3:4)' },
-  { ratio: '1:1', key: '1_1', width: 1024, height: 1024, label: 'Square (1:1)' },
 ];
 
 // Re-export from config for backward compatibility
