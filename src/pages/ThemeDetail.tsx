@@ -82,6 +82,7 @@ export default function ThemeDetail() {
   };
 
   const handlePostsChange = () => {
+    console.log('🔄 [THEME_DETAIL] Posts change requested, refetching data');
     refetch();
   };
 

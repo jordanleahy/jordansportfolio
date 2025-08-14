@@ -147,7 +147,13 @@ export class OptimizedSocialMediaService {
   }
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
-    console.log('🖼️ IMAGE_UPLOAD: Database update started', { postId: id, updates });
+    console.log('🖼️ [SOCIAL_MEDIA_SERVICE] Database update started', { 
+      postId: id, 
+      updates, 
+      updateKeys: Object.keys(updates),
+      hasPromptUpdate: !!updates.generated_image_prompt,
+      promptLength: updates.generated_image_prompt?.length
+    });
     
     const { data, error } = await supabase
       .from('social_media_posts')

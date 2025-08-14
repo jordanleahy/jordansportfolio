@@ -118,6 +118,14 @@ export const PostsTableView = memo(({
   }, [onGenerateImagePrompt, setInstantLoading, setProcessing]);
 
   const handleInstantImagePromptGeneration = useCallback((post: SocialMediaPost) => {
+    console.log('🔥 [INSTANT_PROMPT] Starting instant prompt generation for post:', {
+      postId: post.id,
+      title: post.title,
+      category: post.category,
+      themeId: post.theme_id,
+      timestamp: new Date().toISOString()
+    });
+
     // Provide instant feedback before any async operations
     setInstantLoading(post.id, true);
     
@@ -134,7 +142,22 @@ export const PostsTableView = memo(({
             title: post.title,
             themeData: themeData,
             hasThemeId: !!themeData?.themeId,
+            themeDataDetails: {
+              themeId: themeData?.themeId,
+              theme: themeData?.theme,
+              category: themeData?.category
+            },
             timestamp: new Date().toISOString()
+          });
+
+          console.log('🔄 [POST_TABLE] About to call generateWithCache with config:', {
+            postId: post.id,
+            title: post.title,
+            description: post.description,
+            theme: themeData?.theme,
+            themeId: themeData?.themeId,
+            category: themeData?.category || post.category,
+            aspectRatio: '1:1'
           });
 
           const generatedPrompt = await generateWithCache({
@@ -147,15 +170,32 @@ export const PostsTableView = memo(({
             aspectRatio: '1:1'
           });
 
+          console.log('✅ [POST_TABLE] Generated prompt result:', {
+            postId: post.id,
+            promptReceived: !!generatedPrompt,
+            promptLength: generatedPrompt?.length || 0,
+            promptPreview: generatedPrompt?.substring(0, 100)
+          });
+
           if (generatedPrompt) {
+            console.log('💾 [POST_TABLE] Updating post with generated prompt');
             // Update the post with the generated prompt
             const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
             await optimizedSocialMediaService.updatePost(post.id, {
               generated_image_prompt: generatedPrompt
             });
+            console.log('✅ [POST_TABLE] Post updated successfully with prompt');
+          } else {
+            console.error('❌ [POST_TABLE] No prompt generated');
           }
         } catch (error) {
-          console.error('Failed to generate image prompt:', error);
+          console.error('❌ [POST_TABLE] Failed to generate image prompt:', {
+            error: error,
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            postId: post.id,
+            timestamp: new Date().toISOString()
+          });
         } finally {
           setInstantLoading(post.id, false);
           setProcessing(post.id, 'generate', false);
