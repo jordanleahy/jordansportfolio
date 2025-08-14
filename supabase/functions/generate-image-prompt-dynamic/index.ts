@@ -466,7 +466,7 @@ Private Safe Space Visual Tone:
 - Begin directly with the specific scene description using the detailed framework from your system instructions
 - Focus on the unique elements from your ${systemPromptData.theme || theme || usedIdentifier} guidelines first
 - Include technical constraints naturally within the scene description
-- Respond with ONLY the final image prompt as plain text, no preface or analysis
+- Respond with ONLY the final image prompt as plain text, no preface or analysis`;
 
     // OpenAI request with proper format
     logger.info('Preparing OpenAI request', {
