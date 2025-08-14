@@ -122,156 +122,212 @@ export const PostsCardView = memo(({
   }, [generateWithCache, themeData, setInstantLoading, setProcessing, debouncedAction]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <div className="grid grid-cols-1 gap-4 p-6">
       {posts.map((post, index) => (
         <Card key={post.id} className={`transition-all duration-300 hover:shadow-lg ${getRowAnimationClass(post.id)}`}>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-2">
-              <CardTitle className="text-lg leading-tight line-clamp-2">{post.title}</CardTitle>
-              {post.day && (
-                <Badge variant="outline" className="shrink-0 text-xs">
-                  Day {post.day}
-                </Badge>
-              )}
-            </div>
-            {post.description && (
-              <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
-                {post.description}
-              </p>
-            )}
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {/* Images Grid */}
-            <div className="grid grid-cols-3 gap-2">
-              {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
-                const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
-                const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
-                const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
+          <div className="flex flex-col md:flex-row">
+            {/* Image Section - Left */}
+            <div className="md:w-64 md:shrink-0">
+              {(() => {
+                // Try to find the best image to display, preferring 1:1, then 4:3, then 16:9
+                const imageOrder: AspectRatioKey[] = ['1_1', '4_3', '16_9'];
+                let selectedImage = null;
+                let selectedAspectRatio = null;
+                
+                for (const aspectKey of imageOrder) {
+                  const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
+                  const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
+                  
+                  if (imageUrl) {
+                    selectedImage = imageUrl;
+                    selectedAspectRatio = aspectKey.replace('_', ':');
+                    break;
+                  } else if (status === 'processing') {
+                    selectedAspectRatio = aspectKey.replace('_', ':');
+                    break;
+                  }
+                }
                 
                 return (
-                  <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
-                  {imageUrl ? (
-                    <ImageHoverOverlay
-                      onView={() => onPreviewImage(post.id, toAspect(aspectKey))}
-                      imageUrl={imageUrl}
-                      showUpload={false}
-                      showDownload={true}
-                      showDelete={false}
-                      className="w-full h-full"
-                    >
-                      <img 
-                        src={imageUrl}
-                        alt={`${post.title} - ${aspectRatio}`}
-                        className="object-cover w-full h-full"
-                      />
-                    </ImageHoverOverlay>
-                    ) : status === 'processing' ? (
+                  <div className="aspect-[4/3] md:aspect-[3/2] relative group bg-muted rounded-md overflow-hidden">
+                    {selectedImage ? (
+                      <ImageHoverOverlay
+                        onView={() => onPreviewImage(post.id, selectedAspectRatio as any)}
+                        imageUrl={selectedImage}
+                        showUpload={false}
+                        showDownload={true}
+                        showDelete={false}
+                        className="w-full h-full"
+                      >
+                        <img 
+                          src={selectedImage}
+                          alt={`${post.title} - ${selectedAspectRatio}`}
+                          className="object-cover w-full h-full"
+                        />
+                      </ImageHoverOverlay>
+                    ) : post.image_1_1_status === 'processing' || post.image_4_3_status === 'processing' || post.image_16_9_status === 'processing' ? (
                       <SimpleShimmer className="w-full h-full" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                        {aspectRatio}
+                      <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
+                        No Image
                       </div>
                     )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Content Section - Right */}
+            <div className="flex-1 md:pl-6">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="text-xl leading-tight">{post.title}</CardTitle>
+                  {post.day && (
+                    <Badge variant="outline" className="shrink-0 text-xs">
+                      Day {post.day}
+                    </Badge>
+                  )}
+                </div>
+                {post.description && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {post.description}
+                  </p>
+                )}
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Small Images Grid */}
+                <div className="grid grid-cols-3 gap-2">
+                  {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
+                    const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
+                    const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
+                    const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
                     
-                    <div className="absolute bottom-1 right-1">
-                      <SingleAspectRatioSelector
-                        post={post}
-                        onGenerateImage={onGenerateImage}
-                        onPostsChange={onPostsChange}
+                    return (
+                      <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
+                        {imageUrl ? (
+                          <ImageHoverOverlay
+                            onView={() => onPreviewImage(post.id, toAspect(aspectKey))}
+                            imageUrl={imageUrl}
+                            showUpload={false}
+                            showDownload={true}
+                            showDelete={false}
+                            className="w-full h-full"
+                          >
+                            <img 
+                              src={imageUrl}
+                              alt={`${post.title} - ${aspectRatio}`}
+                              className="object-cover w-full h-full"
+                            />
+                          </ImageHoverOverlay>
+                        ) : status === 'processing' ? (
+                          <SimpleShimmer className="w-full h-full" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            {aspectRatio}
+                          </div>
+                        )}
+                        
+                        <div className="absolute bottom-1 right-1">
+                          <SingleAspectRatioSelector
+                            post={post}
+                            onGenerateImage={onGenerateImage}
+                            onPostsChange={onPostsChange}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Status and Blog Info */}
+                {isAdmin && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={getStatusColor(post.status)}>
+                      {post.status}
+                    </Badge>
+                    <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
+                    <InstantLoadingIndicator 
+                      isVisible={isInstantGenerating(post.id)}
+                      message="Generating..."
+                      elapsedTime={getElapsedTime(post.id)}
+                      className="text-xs"
+                    />
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2">
+                  {/* Primary Actions Row */}
+                  <div className="flex gap-1 w-full">
+                    <ActionButton
+                      icon={<Copy className="h-4 w-4" />}
+                      onClick={() => onCopyContent(post)}
+                      title="Copy content"
+                      size="sm"
+                    />
+                    
+                    <ActionButton
+                      icon={<RefreshCw className="h-4 w-4" />}
+                      onClick={() => handleRegeneratePrompt(post)}
+                      title="Regenerate prompt"
+                      loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
+                      size="sm"
+                    />
+                    
+                    {isAdmin && (
+                      <>
+                        <ActionButton
+                          icon={<Sparkles className="h-4 w-4" />}
+                          onClick={() => handleGenerateAllImages(post)}
+                          loading={isGenerating(post.id)}
+                          title="Bulk Generate"
+                          size="sm"
+                        />
+                        
+                        <ActionButton
+                          icon={<Lightbulb className="h-4 w-4" />}
+                          onClick={() => handleInstantImagePromptGeneration(post)}
+                          title="Generate image prompt"
+                          loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
+                          size="sm"
+                        />
+                        
+                        <ActionButton
+                          icon={<Mic className="h-4 w-4" />}
+                          onClick={() => onGenerateVoiceoverScript(post)}
+                          title="Generate voiceover script"
+                          size="sm"
+                        />
+                      </>
+                    )}
+                    
+                    <div className="ml-auto">
+                      <ActionButton
+                        icon={<Trash2 className="h-4 w-4" />}
+                        onClick={() => onDeletePost(post.id)}
+                        title="Delete post"
+                        variant="destructive"
+                        size="sm"
                       />
                     </div>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Status and Blog Info */}
-            {isAdmin && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className={getStatusColor(post.status)}>
-                  {post.status}
-                </Badge>
-                <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
-                <InstantLoadingIndicator 
-                  isVisible={isInstantGenerating(post.id)}
-                  message="Generating..."
-                  elapsedTime={getElapsedTime(post.id)}
-                  className="text-xs"
-                />
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex flex-wrap gap-2">
-              {/* Primary Actions Row */}
-              <div className="flex gap-1 w-full">
-                <ActionButton
-                  icon={<Copy className="h-4 w-4" />}
-                  onClick={() => onCopyContent(post)}
-                  title="Copy content"
-                  size="sm"
-                />
-                
-                <ActionButton
-                  icon={<RefreshCw className="h-4 w-4" />}
-                  onClick={() => handleRegeneratePrompt(post)}
-                  title="Regenerate prompt"
-                  loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
-                  size="sm"
-                />
-                
-                {isAdmin && (
-                  <>
-                    <ActionButton
-                      icon={<Sparkles className="h-4 w-4" />}
-                      onClick={() => handleGenerateAllImages(post)}
-                      loading={isGenerating(post.id)}
-                      title="Bulk Generate"
-                      size="sm"
-                    />
-                    
-                    <ActionButton
-                      icon={<Lightbulb className="h-4 w-4" />}
-                      onClick={() => handleInstantImagePromptGeneration(post)}
-                      title="Generate image prompt"
-                      loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
-                      size="sm"
-                    />
-                    
-                    <ActionButton
-                      icon={<Mic className="h-4 w-4" />}
-                      onClick={() => onGenerateVoiceoverScript(post)}
-                      title="Generate voiceover script"
-                      size="sm"
-                    />
-                  </>
-                )}
-                
-                <div className="ml-auto">
-                  <ActionButton
-                    icon={<Trash2 className="h-4 w-4" />}
-                    onClick={() => onDeletePost(post.id)}
-                    title="Delete post"
-                    variant="destructive"
-                    size="sm"
-                  />
+                  {/* Blog Post Button */}
+                  {isAdmin && (
+                    <div className="w-full">
+                      <BlogPostButtonForRow
+                        post={post}
+                        creatingBlogIds={creatingBlogIds}
+                        onCreateBlogPost={onCreateBlogPost}
+                        blogStatus={blogStatuses[post.id]}
+                      />
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Blog Post Button */}
-              {isAdmin && (
-                <div className="w-full">
-                  <BlogPostButtonForRow
-                    post={post}
-                    creatingBlogIds={creatingBlogIds}
-                    onCreateBlogPost={onCreateBlogPost}
-                    blogStatus={blogStatuses[post.id]}
-                  />
-                </div>
-              )}
+              </CardContent>
             </div>
-          </CardContent>
+          </div>
         </Card>
       ))}
     </div>
