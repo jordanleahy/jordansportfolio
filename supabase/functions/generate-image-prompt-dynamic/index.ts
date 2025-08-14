@@ -330,10 +330,21 @@ serve(async (req) => {
     // Build user message with theme/category information
     let userMessage = `Generate an image prompt for:
 Title: ${title}
-Description: ${description}`;
+Description: ${description}
+Theme: ${systemPromptData.theme || theme || usedIdentifier}
 
-    // Always include theme context; category is deprecated
-    userMessage += `\nTheme: ${systemPromptData.theme || theme || usedIdentifier}`;
+**FRAMEWORK ACTIVATION INSTRUCTIONS:**
+- Use the ${systemPromptData.theme || theme || usedIdentifier} Visual Framework specified in your system instructions
+- Include the specific foreground elements, subjects, and visual metaphors from your guidelines
+- Follow the ${systemPromptData.theme || theme || usedIdentifier}-specific style requirements and composition guidelines
+- Reference the detailed content analysis framework provided in your instructions
+- Incorporate the specified visual metaphors and color palette from your system prompt
+
+**PREVENT GENERIC DEFAULTS:**
+- Do not use generic business illustrations
+- Avoid abstract professional scenes without healthcare/theme context
+- Do not default to basic vector templates
+- Generate specific, detailed prompts based on the comprehensive guidelines in your system instructions`;
 
     // Add aspect ratio guidance with specific safe space rules
     if (requestedAspectRatio) {
