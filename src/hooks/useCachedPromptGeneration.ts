@@ -49,13 +49,13 @@ export const useCachedPromptGeneration = () => {
       console.log('💥 [PROMPT_CACHE] Cache MISS - generating new prompt');
       console.log('🔄 Generating new prompt...');
       
-      console.log('📡 [EDGE_FUNCTION] Calling generate-image-prompt-dynamic with:', {
+      console.log('📡 [EDGE_FUNCTION] Calling visual-prompt-generator with:', {
         postId: config.postId,
         themeId: config.themeId,
         aspectRatio: config.aspectRatio || '1:1'
       });
 
-      const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const response = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: config.postId,
           themeId: config.themeId,

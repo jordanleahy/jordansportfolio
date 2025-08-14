@@ -114,7 +114,7 @@ export const PostImageUploadCard = ({
       console.log('🎨 IMAGE_GEN: Step 1 - Generating prompt...');
       toast.info('Generating image prompt...');
       
-      const promptResponse = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const promptResponse = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: post.id,
           themeId: (post as any).theme_id || undefined,

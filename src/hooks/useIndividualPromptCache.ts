@@ -160,8 +160,8 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         throw new Error(errorMsg);
       }
 
-      // Call the generate-image-prompt-dynamic function with the new payload format
-      const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      // Call the visual-prompt-generator function with the new payload format
+      const { data, error } = await supabase.functions.invoke('visual-prompt-generator', {
         body: { 
           postId,
           themeId,

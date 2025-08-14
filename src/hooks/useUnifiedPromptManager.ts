@@ -201,7 +201,7 @@ export const useUnifiedPromptManager = () => {
       throw new Error('Failed to create temporary post for prompt generation');
     }
 
-    const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+    const { data, error } = await supabase.functions.invoke('visual-prompt-generator', {
       body: {
         postId: tempPost.id,
         themeId: request.themeId,

@@ -300,7 +300,7 @@ export default function ApiUsage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">All functions</SelectItem>
-                        <SelectItem value="generate-image-prompt-dynamic">Image Prompt</SelectItem>
+                        <SelectItem value="visual-prompt-generator">Visual Prompt Generator</SelectItem>
                         <SelectItem value="generate-image-gpt">Image Generation</SelectItem>
                         <SelectItem value="generate-blog-content">Blog Content</SelectItem>
                         <SelectItem value="sync-openai-usage">OpenAI Sync</SelectItem>

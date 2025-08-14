@@ -126,8 +126,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         return;
       }
 
-      // Call the regenerate prompt edge function
-      const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const { data, error } = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: post.id,
           title: post.title,

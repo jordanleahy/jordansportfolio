@@ -87,8 +87,7 @@ export const usePromptValidatedImageGeneration = () => {
 
       const themeId = postData?.theme_id;
       
-      // Generate prompt using Supabase functions with new payload format
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: post.id,
           themeId,

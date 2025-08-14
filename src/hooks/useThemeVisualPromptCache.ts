@@ -208,7 +208,7 @@ export const useThemeVisualPromptCache = () => {
         throw new Error('Failed to create template post');
       }
 
-      const response = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const response = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: templatePost.id,
           themeId: config.theme.id,

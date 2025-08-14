@@ -120,7 +120,7 @@ export const useAdvancedImageGeneration = () => {
         urlTheme: theme
       });
 
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+      const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: post.id,
           themeId,

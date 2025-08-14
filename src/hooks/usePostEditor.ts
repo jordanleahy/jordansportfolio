@@ -53,8 +53,7 @@ export const usePostEditor = (): UsePostEditorReturn => {
 
           if (error) throw error;
 
-          // Call the regenerate function with new payload format
-          const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+          const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
             body: { 
               postId: postId,
               themeId: postData.theme_id,

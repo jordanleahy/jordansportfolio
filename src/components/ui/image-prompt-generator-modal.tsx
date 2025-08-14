@@ -9,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
 import { ReferenceImageAnalyzer } from '@/components/ui/reference-image-analyzer';
-import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { ImagePromptGeneratorModalProps, ReferenceImageAnalysis, ExtractedCharacteristics } from '@/types/imagePromptGenerator';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
@@ -25,7 +24,6 @@ export const ImagePromptGeneratorModal = ({
 }: ImagePromptGeneratorModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { generateWithCache, fromCache } = useCachedPromptGeneration();
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -55,9 +53,7 @@ export const ImagePromptGeneratorModal = ({
 
     try {
       // Use the specified edge function or default to visual-prompt-generator
-      const edgeFunction = config.edgeFunction === 'generate-image-prompt-dynamic' 
-        ? 'visual-prompt-generator' 
-        : config.edgeFunction;
+      const edgeFunction = config.edgeFunction || 'visual-prompt-generator';
 
       // Call the appropriate edge function directly
       const { data, error } = await supabase.functions.invoke(edgeFunction, {
@@ -81,23 +77,20 @@ export const ImagePromptGeneratorModal = ({
         throw new Error('No prompt received from the service');
       }
 
-      // Clean any existing aspect ratio mentions from the received prompt
-      const cleanPrompt = prompt.replace(/\b\d+:\d+\s+aspect\s+ratio\b/gi, '').trim();
-      setBasePrompt(cleanPrompt);
       
       // Apply aspect ratio if needed - integrate naturally at the end
       const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
-        ? `${cleanPrompt}. Composed in ${selectedAspectRatio} aspect ratio format with appropriate layout for this orientation.`
-        : cleanPrompt;
+        ? `${prompt}. Composed in ${selectedAspectRatio} aspect ratio format with appropriate layout for this orientation.`
+        : prompt;
         
       setGeneratedPrompt(finalPrompt);
-      setIsFromCache(fromCache);
+      setIsFromCache(false);
 
       onPromptGenerated?.(finalPrompt);
 
       toast({
         title: "Prompt Generated",
-        description: fromCache ? "Retrieved from cache" : "Generated and cached successfully",
+        description: "Generated successfully",
       });
     } catch (error) {
       console.error('Error generating prompt:', error);
