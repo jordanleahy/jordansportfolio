@@ -192,7 +192,7 @@ serve(async (req) => {
           const invokePayload = {
             postId: post.id,
             themeId: post.theme_id,
-            aspectRatio: '16:9'
+            aspectRatio: '1:1'
           };
           
           const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {

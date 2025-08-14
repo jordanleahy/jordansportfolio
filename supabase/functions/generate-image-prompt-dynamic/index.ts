@@ -9,7 +9,7 @@
  * INPUTS:
  * - postId: string - Social media post ID to fetch content and theme data
  * - themeId: string (optional) - Theme ID for specific theme-based prompt generation
- * - aspectRatio: string (optional) - Desired aspect ratio for the image (defaults to 1:1)
+ * - aspectRatio: string (optional) - Desired aspect ratio for the image (defaults to 1:1 for square images)
  * 
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }

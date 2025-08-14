@@ -30,7 +30,7 @@ export const ImagePromptGeneratorModal = ({
   const [isFromCache, setIsFromCache] = useState(false);
   const [cacheManagementOpen, setCacheManagementOpen] = useState(false);
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(
-    config.fixedAspectRatio || config.aspectRatioOptions?.[0]?.value || "16:9"
+    config.fixedAspectRatio || config.aspectRatioOptions?.[0]?.value || "1:1"
   );
   const [basePrompt, setBasePrompt] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
