@@ -8,6 +8,7 @@ import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
+import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import type { AspectRatioKey, BulkImageGenerationRequest } from '@/types/bulkImageGeneration';
 import type { BulkImageGenerationButtonProps } from '@/types/stories/ui';
 import { useParams } from 'react-router-dom';
@@ -25,14 +26,19 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   
   const params = useParams();
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const themeId = theme;
   
   const isCurrentlyGenerating = isGenerating(post.id);
-  const hasIndividualPrompt = !!post.generated_image_prompt;
+  
+  // Use the same hook that checks fresh database data
+  const { hasPrompt: hasIndividualPrompt } = useIndividualPromptCache(post.id, themeId);
   
   console.log('⚡ [BulkImageGenerationButton] Component state', {
     postId: post.id,
     postTitle: post.title,
     hasIndividualPrompt,
+    hasIndividualPromptFresh: hasIndividualPrompt, // Fresh from database
+    hasIndividualPromptStale: !!post.generated_image_prompt, // Stale from prop
     generatedPromptLength: post.generated_image_prompt?.length || 0,
     isCurrentlyGenerating,
     hasCredits: creditStatus.hasCredits,
