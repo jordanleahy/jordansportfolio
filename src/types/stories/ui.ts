@@ -306,6 +306,7 @@ export interface PostImageUploadCardProps {
   onGenerationStart?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
   onGenerationEnd?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
   themeName?: string;
+  hasPrompt?: boolean;
 }
 
 export interface PostMediaGalleryModalProps {

@@ -191,6 +191,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    hasPrompt: !!query.data?.prompt,
     updatePrompt: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
     regeneratePrompt: regenerateMutation.mutate,

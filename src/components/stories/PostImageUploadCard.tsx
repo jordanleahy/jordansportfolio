@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import {
@@ -30,7 +31,8 @@ export const PostImageUploadCard = ({
   onImageGenerated,
   onGenerationStart,
   onGenerationEnd,
-  themeName
+  themeName,
+  hasPrompt = true
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -243,15 +245,32 @@ export const PostImageUploadCard = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
             <DropdownMenuLabel>Generate with AI</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={handleGenerateImage}
-              disabled={isGenerating || isUploading || !creditStatus.hasCredits || creditStatus.isLoading}
-              className={`cursor-pointer ${!creditStatus.hasCredits ? 'opacity-50' : ''}`}
-              title={!creditStatus.hasCredits ? getBlockingMessage(creditStatus) : "Generate with AI"}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate ({aspectRatio})
-            </DropdownMenuItem>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DropdownMenuItem
+                      onClick={handleGenerateImage}
+                      disabled={isGenerating || isUploading || !creditStatus.hasCredits || creditStatus.isLoading || !hasPrompt}
+                      className={`cursor-pointer ${!creditStatus.hasCredits || !hasPrompt ? 'opacity-50' : ''}`}
+                      title={
+                        !hasPrompt ? "Generate individual prompt first" :
+                        !creditStatus.hasCredits ? getBlockingMessage(creditStatus) : 
+                        "Generate with AI"
+                      }
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate ({aspectRatio})
+                    </DropdownMenuItem>
+                  </div>
+                </TooltipTrigger>
+                {!hasPrompt && (
+                  <TooltipContent>
+                    <p>Generate an individual prompt first using the "Prompt" button</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

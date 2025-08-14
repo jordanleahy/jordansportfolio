@@ -8,6 +8,7 @@ import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostCardProps } from '@/types/stories/ui';
 
@@ -38,6 +39,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
 }) => {
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const creditStatus = getCreditStatus();
+  const { hasPrompt } = useIndividualPromptCache(post.id, themeId);
   
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -176,6 +178,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onImageGenerated={handleImageGenerated}
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
+              hasPrompt={hasPrompt}
             />
           </div>
 
@@ -191,6 +194,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onImageGenerated={handleImageGenerated}
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
+              hasPrompt={hasPrompt}
             />
             <PostImageUploadCard
               post={post}
@@ -202,6 +206,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onImageGenerated={handleImageGenerated}
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
+              hasPrompt={hasPrompt}
             />
             <PostImageUploadCard
               post={post}
@@ -213,6 +218,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onImageGenerated={handleImageGenerated}
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
+              hasPrompt={hasPrompt}
             />
           </div>
 
@@ -228,6 +234,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onImageGenerated={handleImageGenerated}
               onGenerationStart={handleImageGenerationStart}
               onGenerationEnd={handleImageGenerationEnd}
+              hasPrompt={hasPrompt}
             />
           </div>
         </div>
