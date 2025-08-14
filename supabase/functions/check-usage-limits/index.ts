@@ -95,21 +95,23 @@ serve(async (req) => {
       throw new Error(`Invalid usage type: ${usage_type}. Only 'gpt_image_generation' is supported.`);
     }
 
-    // Ensure admin users are auto-assigned to the hidden Admin tier
-    let isAdminUser = false;
+    // Handle role-based tier assignment for admin and regular users
+    let userRole = null;
     try {
       const { data: roleRow } = await supabaseClient
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single();
-      isAdminUser = roleRow?.role === 'admin';
+      userRole = roleRow?.role;
     } catch (_e) {
-      // ignore if user_roles doesn't exist
-      isAdminUser = false;
+      // ignore if user_roles doesn't exist or no role assigned
+      userRole = null;
     }
 
-    if (isAdminUser) {
+    // Auto-assign tiers based on user roles
+    if (userRole === 'admin') {
+      console.log(`🔑 Admin user detected, ensuring Admin tier assignment`);
       // Find Admin tier (created via migration), fallback to dynamic limits if missing
       const { data: adminTier } = await supabaseClient
         .from('subscription_tiers')
@@ -141,6 +143,58 @@ serve(async (req) => {
             .insert({
               user_id: userId,
               tier_id: adminTier.id,
+              status: 'active',
+              current_period_start: new Date().toISOString(),
+              current_period_end: null,
+            });
+        }
+      }
+    } else if (userRole === 'user') {
+      console.log(`👤 Regular user detected, ensuring Free Plan tier assignment`);
+      // Find Free Plan tier
+      const { data: freeTier } = await supabaseClient
+        .from('subscription_tiers')
+        .select('*')
+        .eq('name', 'Free Plan')
+        .eq('price_cents', 0)
+        .limit(1)
+        .single();
+
+      // Upsert user_subscriptions to point to Free Plan tier
+      if (freeTier?.id) {
+        const { data: existingSub } = await supabaseClient
+          .from('user_subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        if (existingSub) {
+          // Only update if not already on a paid tier
+          if (existingSub.tier_id !== freeTier.id) {
+            const { data: currentTier } = await supabaseClient
+              .from('subscription_tiers')
+              .select('price_cents')
+              .eq('id', existingSub.tier_id)
+              .single();
+            
+            // Only auto-assign Free Plan if current tier is also free (price_cents = 0)
+            if (currentTier?.price_cents === 0) {
+              await supabaseClient
+                .from('user_subscriptions')
+                .update({
+                  tier_id: freeTier.id,
+                  status: 'active',
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', existingSub.id);
+            }
+          }
+        } else {
+          await supabaseClient
+            .from('user_subscriptions')
+            .insert({
+              user_id: userId,
+              tier_id: freeTier.id,
               status: 'active',
               current_period_start: new Date().toISOString(),
               current_period_end: null,
