@@ -321,7 +321,7 @@ export const PostsTableView = memo(({
                   },
                   {
                     icon: <Lightbulb className="h-4 w-4" />,
-                    onClick: () => onGenerateImagePrompt(post),
+                    onClick: () => handleInstantImagePromptGeneration(post),
                     title: "Generate image prompt",
                     loading: isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)
                   },
