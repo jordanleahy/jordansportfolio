@@ -181,6 +181,8 @@ export default function ThemeDetail() {
                 onPostsChange={handlePostsChange}
                 activeTab={activeTab}
                 onActiveTabChange={setActiveTab}
+                themeId={themeData.id}
+                selectedThemeId={selectedThemeId}
               />
             </Suspense>
           )}
