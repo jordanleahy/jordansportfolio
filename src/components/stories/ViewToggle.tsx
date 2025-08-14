@@ -16,7 +16,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex border rounded-lg p-1 bg-muted/50 ${className}`}>
+    <div className={`hidden md:flex border rounded-lg p-1 bg-muted/50 ${className}`}>
       <Button
         variant={currentView === 'table' ? 'default' : 'ghost'}
         size="sm"
