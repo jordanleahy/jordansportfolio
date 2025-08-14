@@ -222,8 +222,8 @@ export const PostsCardView = memo(({
             {/* Image Section - Left */}
             <div className="md:w-64 md:shrink-0">
               {(() => {
-                // Try to find the best image to display, preferring 1:1, then 4:3, then 16:9
-                const imageOrder: AspectRatioKey[] = ['1_1', '4_3', '16_9'];
+                // Only display 1:1 images to maintain square container aspect
+                const imageOrder: AspectRatioKey[] = ['1_1'];
                 let selectedImage = null;
                 let selectedAspectRatio = null;
                 
@@ -241,7 +241,7 @@ export const PostsCardView = memo(({
                   }
                 }
                 
-                const isProcessing = post.image_1_1_status === 'processing' || post.image_4_3_status === 'processing' || post.image_16_9_status === 'processing';
+                const isProcessing = post.image_1_1_status === 'processing';
                 
                 return (
                   <div className="aspect-square relative group bg-muted rounded-md overflow-hidden">
@@ -258,15 +258,15 @@ export const PostsCardView = memo(({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Convert display format back to key format for regeneration
-                              const aspectRatioKey = selectedAspectRatio.replace(':', '_');
+                              // Always regenerate as 1:1 for square container
+                              const aspectRatioKey = '1_1';
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
-                            disabled={isProcessingCtx(post.id, 'generate', selectedAspectRatio.replace(':', '_'))}
+                            disabled={isProcessingCtx(post.id, 'generate', '1:1')}
                             className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Regenerate image"
                           >
-                            {isProcessingCtx(post.id, 'generate', selectedAspectRatio.replace(':', '_')) ? 'Regenerating...' : 'Regenerate'}
+                            {isProcessingCtx(post.id, 'generate', '1:1') ? 'Regenerating...' : 'Regenerate'}
                           </button>
                         </div>
                       </div>
