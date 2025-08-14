@@ -52,9 +52,9 @@ export const useUsageSummary = () => {
         const tier = subscription?.tier;
         const subscriptionTier = tier?.name?.toLowerCase() || 'free';
         
-        // Get usage limits from subscription tier
-        const monthlyLimit = tier?.max_gpt_images_monthly || 0;
-        const dailyLimit = tier?.max_gpt_images_daily || 0;
+        // Get usage limits from subscription tier - use Free Plan defaults if no tier assigned
+        const monthlyLimit = tier?.max_gpt_images_monthly ?? 30; // Default to Free Plan monthly limit
+        const dailyLimit = tier?.max_gpt_images_daily ?? 3; // Default to Free Plan daily limit
 
         // Calculate date ranges
         const now = new Date();
