@@ -15,7 +15,7 @@ import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
 import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
-import { generatePostPDF } from '@/utils/pdfGenerator';
+import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -164,8 +164,58 @@ export const PostsCardView = memo(({
     }
   }, [user, toast]);
 
+  const handleDownloadAllPDF = useCallback(async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to download PDF",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (posts.length === 0) {
+      toast({
+        title: "No posts",
+        description: "No posts available to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await generateMultiplePostsPDF(posts);
+      toast({
+        title: "PDF Downloaded",
+        description: `${posts.length} posts saved as PDF`
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [user, toast, posts]);
+
   return (
-    <div className="grid grid-cols-1 gap-4 p-6">
+    <div className="space-y-4">
+      {/* Download All Button */}
+      {user && posts.length > 1 && (
+        <div className="flex justify-end p-6 pb-0">
+          <Button
+            onClick={handleDownloadAllPDF}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Download All as PDF ({posts.length} posts)
+          </Button>
+        </div>
+      )}
+      
+      <div className={`grid grid-cols-1 gap-4 p-6${posts.length > 1 ? ' pt-0' : ''}`}>
       {posts.map((post, index) => (
         <Card key={post.id} className={`transition-all duration-300 hover:shadow-lg ${getRowAnimationClass(post.id)}`}>
           <div className="flex flex-col md:flex-row">
@@ -430,6 +480,7 @@ export const PostsCardView = memo(({
           </div>
         </Card>
       ))}
+      </div>
     </div>
   );
 });
