@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImageIcon, Lightbulb, Mic, BookOpen, Video } from 'lucide-react';
+import { ImageIcon, Lightbulb, Mic, BookOpen, Video, FileText } from 'lucide-react';
 import { BlogPostButton } from './BlogPostButton';
+import { IndividualPromptViewer } from './IndividualPromptViewer';
 
 import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { PostImageUploadCard } from './PostImageUploadCard';
@@ -20,6 +21,7 @@ interface PostCardAdminSectionProps {
   onImageDelete: (postId: string, aspectRatio: string) => void;
   onImageGenerated: (postId: string, aspectRatio: string, imageUrl: string) => void;
   onPostsChange?: () => void;
+  themeId?: string;
 }
 
 export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
@@ -31,13 +33,15 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
   onVideoRemove,
   onImageDelete,
   onImageGenerated,
-  onPostsChange
+  onPostsChange,
+  themeId
 }) => {
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const creditStatus = getCreditStatus();
   
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
+  const [showPromptViewer, setShowPromptViewer] = useState(false);
 
   const handleImageGenerationStart = (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => {
     // This is handled by the parent component through processingStates
@@ -96,11 +100,21 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       </div>
       
       {/* Second row - responsive grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <BulkImageGenerationButton
           post={post}
           onPostsChange={onPostsChange}
         />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowPromptViewer(!showPromptViewer)}
+          className="flex-1"
+          title={showPromptViewer ? "Hide image prompt" : "Show image prompt"}
+        >
+          <FileText className="h-4 w-4" />
+          <span className="hidden sm:inline ml-2">Prompt</span>
+        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -116,13 +130,25 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
           variant="outline"
           size="sm"
           onClick={() => setShowVideos(!showVideos)}
-          className="flex-1 col-span-2 sm:col-span-1"
+          className="flex-1"
           title={showVideos ? "Hide video uploads" : "Show video uploads"}
         >
           <Video className="h-4 w-4" />
           <span className="hidden sm:inline ml-2">Videos</span>
         </Button>
       </div>
+
+      {/* Individual Prompt Section */}
+      {showPromptViewer && (
+        <div className="border-t pt-4">
+          <IndividualPromptViewer
+            post={post}
+            isVisible={showPromptViewer}
+            onClose={() => setShowPromptViewer(false)}
+            themeId={themeId}
+          />
+        </div>
+      )}
 
       {/* Photos Section */}
       {showPhotos && (

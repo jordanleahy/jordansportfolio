@@ -86,6 +86,7 @@ const PostCardComponent = ({
             onImageDelete={onImageDelete}
             onImageGenerated={onImageGenerated}
             onPostsChange={onPostsChange}
+            themeId={post.theme_id}
           />
         )}
 
