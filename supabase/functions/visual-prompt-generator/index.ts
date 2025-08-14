@@ -409,18 +409,26 @@ Incorporate these characteristics naturally into the generated prompt while main
       userPreview: userMessage.slice(0, 300)
     });
 
-    const openAIResponse = await makeOpenAIRequest(
-      'https://api.openai.com/v1/chat/completions',
-      openAIRequestBody,
-      openAIApiKey!,
+    const openAIResponse = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(openAIRequestBody),
       correlationId,
-      180000
-    );
+      timeout: 180000,
+      operationType: 'content_generation'
+    });
 
     logger.endTiming('openai_request');
 
+    // Parse the response to get the actual OpenAI response data
+    const openAIData = await openAIResponse.response.json();
+    
     // Extract usage and costs
-    const usageData = extractUsageFromOpenAIResponse(openAIResponse);
+    const usageData = extractUsageFromOpenAIResponse(openAIData);
     promptTokens = usageData.promptTokens;
     completionTokens = usageData.completionTokens;
     tokensUsed = usageData.totalTokens;
@@ -430,15 +438,15 @@ Incorporate these characteristics naturally into the generated prompt while main
     // Parse response
     let generatedText: string;
     logger.debug('OpenAI response structure', {
-      hasChoices: !!openAIResponse.choices,
-      choicesLength: openAIResponse.choices?.length || 0,
-      firstChoiceKeys: openAIResponse.choices?.[0] ? Object.keys(openAIResponse.choices[0]) : [],
-      messageKeys: openAIResponse.choices?.[0]?.message ? Object.keys(openAIResponse.choices[0].message) : [],
+      hasChoices: !!openAIData.choices,
+      choicesLength: openAIData.choices?.length || 0,
+      firstChoiceKeys: openAIData.choices?.[0] ? Object.keys(openAIData.choices[0]) : [],
+      messageKeys: openAIData.choices?.[0]?.message ? Object.keys(openAIData.choices[0].message) : [],
       correlationId
     });
 
-    if (openAIResponse.choices?.[0]?.message?.content) {
-      generatedText = openAIResponse.choices[0].message.content.trim();
+    if (openAIData.choices?.[0]?.message?.content) {
+      generatedText = openAIData.choices[0].message.content.trim();
       logger.debug('Extracted using message.content', { correlationId });
     } else {
       logger.error('Missing generated text from OpenAI chat response', { error: {} });
