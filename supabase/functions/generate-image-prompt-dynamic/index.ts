@@ -406,7 +406,6 @@ Private Safe Space Visual Tone:
 
 **OUTPUT FORMAT:**
 - Respond with ONLY the final image prompt as plain text, no preface or analysis
-- If an aspect ratio is specified elsewhere, integrate it naturally (e.g., "wide landscape composition" or "vertical portrait orientation")
 - Keep technical constraints mandatory while making composition engaging and professional`;
 
     // OpenAI request with proper format
