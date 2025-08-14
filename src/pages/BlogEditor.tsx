@@ -451,7 +451,7 @@ const BlogEditor = () => {
                 aria-label="Preview post"
               >
                 <Eye className="xs:mr-0 sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Preview</span>
+                <span className="inline">Preview</span>
               </Button>
               <Button 
                 size="sm" 
