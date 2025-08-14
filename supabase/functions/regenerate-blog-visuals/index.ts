@@ -67,20 +67,20 @@ serve(async (req) => {
           if (!section) continue;
 
           try {
-            // Step 1: Prompt generation
-            const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+            // Step 1: Prompt generation using generate-content function for blog visuals
+            const promptRequestText = `Create a detailed image generation prompt for a blog section with the headline "${section.headline}" and content: "${section.content}". The blog is in the ${blogPost.category} category. Generate a professional, engaging visual prompt for ${aspectRatio} aspect ratio.`;
+            
+            const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-content', {
               body: {
-                title: section.headline,
-                description: section.content,
-                category: blogPost.category,
-                aspectRatio,
+                prompt: promptRequestText,
+                type: 'image_prompt'
               },
             });
-            if (promptError || !promptData?.generatedPrompt) {
-              console.warn(`Prompt generation failed for section ${idx + 1}:`, promptError?.message);
+            if (promptError || !promptData?.generatedText) {
+              console.error(`Prompt generation failed for section ${idx + 1}:`, promptError?.message || 'No generated text received');
               continue;
             }
-            const prompt = promptData.generatedPrompt as string;
+            const prompt = promptData.generatedText as string;
             generatedPrompts[idx] = prompt;
 
             // Step 2: Image generation
