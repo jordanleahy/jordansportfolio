@@ -43,7 +43,7 @@ export const PostsTable = ({
   onThemeChange,
 }: PostsTableProps) => {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
