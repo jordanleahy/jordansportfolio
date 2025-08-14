@@ -483,7 +483,7 @@ Private Safe Space Visual Tone:
     });
 
     const openAIRequestBody = {
-      model: 'gpt-4.1-2025-04-14',
+      model: 'gpt-5-nano-2025-08-07',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -598,7 +598,7 @@ Private Safe Space Visual Tone:
             category: null,
             usedType,
             agent: 'Visual Prompt Generator',
-            model: 'gpt-5-mini',
+            model: 'gpt-5-nano-2025-08-07',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
             estimated_cost: estimatedCost
@@ -620,7 +620,7 @@ Private Safe Space Visual Tone:
       await trackOpenAIUsage({
         userId,
         functionName: 'generate-image-prompt-dynamic',
-        model: 'gpt-5-mini',
+        model: 'gpt-5-nano-2025-08-07',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -662,7 +662,7 @@ Private Safe Space Visual Tone:
         await trackOpenAIUsage({
           userId,
           functionName: 'generate-image-prompt-dynamic',
-          model: 'gpt-5-mini',
+          model: 'gpt-5-nano-2025-08-07',
           requestType: 'text_generation',
           success: false,
           estimatedCost: 0,
