@@ -287,6 +287,42 @@ export const useUnifiedRealtime = ({
     queryClient.invalidateQueries({ queryKey: ['system-prompts'] });
     queryClient.invalidateQueries({ queryKey: ['cached-prompts'] });
 
+    // Auto-trigger image prompt generation for visual prompts
+    if ((eventType === 'INSERT' || eventType === 'UPDATE') && record) {
+      const isVisualPrompt = record.agent_name === 'Visual Prompt Generator' || 
+                            record.description?.includes('Visual Prompt Generator') ||
+                            record.category?.includes('visual') ||
+                            record.category?.includes('image');
+      
+      if (isVisualPrompt && record.category) {
+        console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for category: ${record.category}`);
+        
+        // Get current user from auth
+        import('@/integrations/supabase/client').then(({ supabase }) => {
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user?.id) {
+              // Trigger ensure-post-image-prompts in background
+              supabase.functions.invoke('ensure-post-image-prompts', {
+                body: {
+                  category: record.category,
+                  userId: user.id
+                }
+              }).then((result) => {
+                if (result.error) {
+                  console.error('[UnifiedRealtime] Failed to trigger image prompt generation:', result.error);
+                } else {
+                  console.log('[UnifiedRealtime] Image prompt generation triggered successfully:', result.data);
+                  toast.success('Generating image prompts in background');
+                }
+              }).catch((error) => {
+                console.error('[UnifiedRealtime] Error triggering image prompt generation:', error);
+              });
+            }
+          });
+        });
+      }
+    }
+
     if (eventType === 'UPDATE') {
       toast.success('System prompt updated');
     } else if (eventType === 'DELETE') {
