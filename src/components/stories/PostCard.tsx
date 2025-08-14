@@ -55,71 +55,77 @@ const PostCardComponent = ({
 
 
   return (
-    <Card className="w-full">
-      <PostCardHeroImage
-        post={post}
-        colorTheme={colorTheme}
-        isProcessing={isProcessing('1_1')}
-        onPostsChange={onPostsChange}
-      />
+    <Card className="w-full flex flex-col md:flex-row overflow-hidden">
+      {/* Image Section - Left side on desktop */}
+      <div className="w-full md:w-2/5 relative">
+        <PostCardHeroImage
+          post={post}
+          colorTheme={colorTheme}
+          isProcessing={isProcessing('1_1')}
+          onPostsChange={onPostsChange}
+        />
+      </div>
       
-      <PostCardHeader
-        post={post}
-        isAdmin={isAdmin}
-        colorTheme={colorTheme}
-        onCopy={onCopy}
-        onDelete={onDelete}
-        onStatusChange={handleStatusChange}
-        onStoryTelling={() => setShowStoryTellingModal(true)}
-      />
-      
-      <CardContent className="space-y-4">
-        {/* Admin Section */}
-        {isAdmin && (
-          <PostCardAdminSection
-            post={post}
-            processingStates={processingStates}
-            onGeneratePrompt={onGeneratePrompt}
-            onGenerateVoiceover={onGenerateVoiceover}
-            onVideoUpload={onVideoUpload}
-            onVideoRemove={onVideoRemove}
-            onImageDelete={onImageDelete}
-            onImageGenerated={onImageGenerated}
-            onPostsChange={onPostsChange}
-            themeId={post.theme_id}
-          />
-        )}
-
-        {/* Media Previews */}
-        <PostCardMediaPreview
+      {/* Content Section - Right side on desktop */}
+      <div className="flex-1 flex flex-col">
+        <PostCardHeader
           post={post}
           isAdmin={isAdmin}
-          showPhotos={false}
-          showVideos={false}
-          onImageDelete={onImageDelete}
-          onShowGallery={() => setShowGallery(true)}
+          colorTheme={colorTheme}
+          onCopy={onCopy}
+          onDelete={onDelete}
+          onStatusChange={handleStatusChange}
+          onStoryTelling={() => setShowStoryTellingModal(true)}
         />
+        
+        <CardContent className="flex-1 space-y-4">
+          {/* Admin Section */}
+          {isAdmin && (
+            <PostCardAdminSection
+              post={post}
+              processingStates={processingStates}
+              onGeneratePrompt={onGeneratePrompt}
+              onGenerateVoiceover={onGenerateVoiceover}
+              onVideoUpload={onVideoUpload}
+              onVideoRemove={onVideoRemove}
+              onImageDelete={onImageDelete}
+              onImageGenerated={onImageGenerated}
+              onPostsChange={onPostsChange}
+              themeId={post.theme_id}
+            />
+          )}
 
-        {/* Gallery Modal */}
-        <PostMediaGalleryModal
-          isOpen={showGallery}
-          onClose={() => setShowGallery(false)}
-          post={post}
-        />
+          {/* Media Previews */}
+          <PostCardMediaPreview
+            post={post}
+            isAdmin={isAdmin}
+            showPhotos={false}
+            showVideos={false}
+            onImageDelete={onImageDelete}
+            onShowGallery={() => setShowGallery(true)}
+          />
+        </CardContent>
+      </div>
 
-        {/* Story Telling Modal */}
-        <StoryTellingModal
-          isOpen={showStoryTellingModal}
-          onClose={() => setShowStoryTellingModal(false)}
-          post={{
-            id: post.id,
-            title: post.title,
-            description: post.description,
-            theme: post.category,
-            category: post.category
-          }}
-        />
-      </CardContent>
+      {/* Gallery Modal */}
+      <PostMediaGalleryModal
+        isOpen={showGallery}
+        onClose={() => setShowGallery(false)}
+        post={post}
+      />
+
+      {/* Story Telling Modal */}
+      <StoryTellingModal
+        isOpen={showStoryTellingModal}
+        onClose={() => setShowStoryTellingModal(false)}
+        post={{
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          theme: post.category,
+          category: post.category
+        }}
+      />
     </Card>
   );
 };
