@@ -242,12 +242,11 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // First get themes efficiently without posts - only show completed themes
+    // Get all themes - show them even if prompt generation is pending
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status')
       .eq('user_id', user.id)
-      .eq('prompt_generation_status', 'completed')
       .order('created_at', { ascending: false });
 
     if (themesError) throw themesError;
