@@ -12,6 +12,8 @@ interface IndividualPromptData {
 }
 
 export const useIndividualPromptCache = (postId: string, themeId?: string) => {
+  console.log('🔍 [useIndividualPromptCache] Hook called', { postId, themeId });
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const params = useParams();
@@ -20,12 +22,22 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   const query = useQuery({
     queryKey: QUERY_KEYS.individualPrompt(postId),
     queryFn: async (): Promise<IndividualPromptData | null> => {
-      if (!postId) return null;
+      console.log('🔍 [useIndividualPromptCache] Query function called', { postId, themeId });
+      
+      if (!postId) {
+        console.log('🔍 [useIndividualPromptCache] No postId provided, returning null');
+        return null;
+      }
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('User not authenticated');
+        if (!user) {
+          console.log('🔍 [useIndividualPromptCache] No authenticated user found');
+          throw new Error('User not authenticated');
+        }
 
+        console.log('🔍 [useIndividualPromptCache] Querying database for post', { postId, userId: user.id });
+        
         // Fetch the current post data to get the generated_image_prompt
         const { data: postData, error: postError } = await supabase
           .from('social_media_posts')
@@ -35,21 +47,38 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
           .single();
 
         if (postError) {
+          console.error('🔍 [useIndividualPromptCache] Database error:', postError);
           if (postError.code === 'PGRST116') {
+            console.log('🔍 [useIndividualPromptCache] Post not found (PGRST116)');
             return null; // Post not found
           }
           throw postError;
         }
 
+        console.log('🔍 [useIndividualPromptCache] Database response:', { 
+          postData, 
+          hasPrompt: !!postData?.generated_image_prompt,
+          promptLength: postData?.generated_image_prompt?.length || 0
+        });
+
         if (!postData.generated_image_prompt) {
+          console.log('🔍 [useIndividualPromptCache] No prompt found in database');
           return null; // No prompt yet
         }
 
-        return {
+        const result = {
           prompt: postData.generated_image_prompt,
           lastUpdated: postData.updated_at,
           version: 1 // We don't track versions for individual prompts yet
         };
+
+        console.log('🔍 [useIndividualPromptCache] Returning prompt data:', { 
+          hasPrompt: !!result.prompt,
+          promptLength: result.prompt.length,
+          lastUpdated: result.lastUpdated
+        });
+
+        return result;
       } catch (error) {
         console.error('Error in useIndividualPromptCache:', error);
         throw error;
@@ -186,12 +215,25 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     });
   }, [postId, queryClient]);
 
+  const hasPrompt = !!query.data?.prompt;
+  
+  console.log('🔍 [useIndividualPromptCache] Final state:', {
+    postId,
+    themeId,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error?.message,
+    hasPrompt,
+    promptLength: query.data?.prompt?.length || 0,
+    lastUpdated: query.data?.lastUpdated
+  });
+
   return {
     data: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
-    hasPrompt: !!query.data?.prompt,
+    hasPrompt,
     updatePrompt: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
     regeneratePrompt: regenerateMutation.mutate,

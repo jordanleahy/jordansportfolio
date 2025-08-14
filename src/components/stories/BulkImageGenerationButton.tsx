@@ -28,12 +28,27 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   
   const isCurrentlyGenerating = isGenerating(post.id);
   const hasIndividualPrompt = !!post.generated_image_prompt;
+  
+  console.log('⚡ [BulkImageGenerationButton] Component state', {
+    postId: post.id,
+    postTitle: post.title,
+    hasIndividualPrompt,
+    generatedPromptLength: post.generated_image_prompt?.length || 0,
+    isCurrentlyGenerating,
+    hasCredits: creditStatus.hasCredits,
+    isLoading: creditStatus.isLoading
+  });
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
     
     // Check if individual prompt exists first
     if (!hasIndividualPrompt) {
+      console.log('⚡ [BulkImageGenerationButton] Blocking bulk generation - no individual prompt', {
+        postId: post.id,
+        hasIndividualPrompt,
+        generatedPrompt: post.generated_image_prompt
+      });
       toast({
         title: "Individual prompt required",
         description: "Please wait for the individual image prompt to be generated first, then try bulk generation.",

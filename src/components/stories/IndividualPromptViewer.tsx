@@ -19,6 +19,15 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   onClose,
   themeId
 }) => {
+  console.log('🎨 [IndividualPromptViewer] Component rendered', { 
+    isVisible, 
+    postId: post?.id, 
+    postTitle: post?.title,
+    themeId,
+    hasGeneratedPrompt: !!post?.generated_image_prompt,
+    generatedPromptLength: post?.generated_image_prompt?.length || 0
+  });
+
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
@@ -31,6 +40,16 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     isRegenerating,
     refetch
   } = useIndividualPromptCache(post?.id || '', themeId);
+
+  console.log('🎨 [IndividualPromptViewer] Hook data received', {
+    postId: post?.id,
+    promptData,
+    isLoading,
+    isUpdating,
+    isRegenerating,
+    hasPromptData: !!promptData,
+    promptLength: promptData?.prompt?.length || 0
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [localPrompt, setLocalPrompt] = useState('');
@@ -163,7 +182,13 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
             No image prompt generated yet for this post.
           </div>
           <Button
-            onClick={handleRegeneratePrompt}
+            onClick={() => {
+              console.log('🎨 [IndividualPromptViewer] Generate Initial Prompt clicked', { 
+                postId: post?.id, 
+                themeId 
+              });
+              handleRegeneratePrompt();
+            }}
             disabled={isRegenerating}
             variant="outline"
             size="sm"
