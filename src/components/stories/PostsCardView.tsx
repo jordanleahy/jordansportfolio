@@ -191,82 +191,137 @@ export const PostsCardView = memo(({
                   </div>
                   
                   {/* Action Buttons - Right Aligned */}
-                  <div className="flex gap-1 shrink-0">
-                    <ActionButton
-                      icon={<Copy className="h-4 w-4" />}
-                      onClick={() => onCopyContent(post)}
-                      title="Copy content"
-                      size="sm"
-                    />
-                    
-                    <ActionButton
-                      icon={<RefreshCw className="h-4 w-4" />}
-                      onClick={() => handleRegeneratePrompt(post)}
-                      title="Regenerate prompt"
-                      loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
-                      size="sm"
-                    />
-                    
+                  <div className="flex gap-2 shrink-0">
+                    {/* Blog Post Button */}
                     {isAdmin && (
-                      <>
-                        <ActionButton
-                          icon={<Sparkles className="h-4 w-4" />}
-                          onClick={() => handleGenerateAllImages(post)}
-                          loading={isGenerating(post.id)}
-                          title="Bulk Generate"
-                          size="sm"
-                        />
-                        
-                        <ActionButton
-                          icon={<Lightbulb className="h-4 w-4" />}
-                          onClick={() => handleInstantImagePromptGeneration(post)}
-                          title="Generate image prompt"
-                          loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
-                          size="sm"
-                        />
-                        
-                        <ActionButton
-                          icon={<Mic className="h-4 w-4" />}
-                          onClick={() => onGenerateVoiceoverScript(post)}
-                          title="Generate voiceover script"
-                          size="sm"
-                        />
-                      </>
-                    )}
-                    
-                    <ActionButton
-                      icon={<Trash2 className="h-4 w-4" />}
-                      onClick={() => onDeletePost(post.id)}
-                      title="Delete post"
-                      variant="destructive"
-                      size="sm"
-                    />
-                  </div>
-                </div>
-                {post.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {post.description}
-                  </p>
-                )}
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-...
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2">
-
-                  {/* Blog Post Button */}
-                  {isAdmin && (
-                    <div className="w-full">
                       <BlogPostButtonForRow
                         post={post}
                         creatingBlogIds={creatingBlogIds}
                         onCreateBlogPost={onCreateBlogPost}
                         blogStatus={blogStatuses[post.id]}
                       />
-                    </div>
-                  )}
+                    )}
+                    
+                     <div className="flex gap-1">
+                       <ActionButton
+                         icon={<Copy className="h-4 w-4" />}
+                         onClick={() => onCopyContent(post)}
+                         title="Copy content"
+                         size="sm"
+                       />
+                       
+                       <ActionButton
+                         icon={<RefreshCw className="h-4 w-4" />}
+                         onClick={() => handleRegeneratePrompt(post)}
+                         title="Regenerate prompt"
+                         loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
+                         size="sm"
+                       />
+                       
+                       {isAdmin && (
+                         <>
+                           <ActionButton
+                             icon={<Sparkles className="h-4 w-4" />}
+                             onClick={() => handleGenerateAllImages(post)}
+                             loading={isGenerating(post.id)}
+                             title="Bulk Generate"
+                             size="sm"
+                           />
+                           
+                           <ActionButton
+                             icon={<Lightbulb className="h-4 w-4" />}
+                             onClick={() => handleInstantImagePromptGeneration(post)}
+                             title="Generate image prompt"
+                             loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
+                             size="sm"
+                           />
+                           
+                           <ActionButton
+                             icon={<Mic className="h-4 w-4" />}
+                             onClick={() => onGenerateVoiceoverScript(post)}
+                             title="Generate voiceover script"
+                             size="sm"
+                           />
+                         </>
+                       )}
+                       
+                       <ActionButton
+                         icon={<Trash2 className="h-4 w-4" />}
+                         onClick={() => onDeletePost(post.id)}
+                         title="Delete post"
+                         variant="destructive"
+                         size="sm"
+                       />
+                     </div>
+                   </div>
+                 </div>
+                 {post.description && (
+                   <p className="text-sm text-muted-foreground mt-2">
+                     {post.description}
+                   </p>
+                 )}
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Small Images Grid */}
+                <div className="grid grid-cols-3 gap-2">
+                  {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
+                    const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
+                    const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
+                    const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
+                    
+                    return (
+                      <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
+                        {imageUrl ? (
+                          <ImageHoverOverlay
+                            onView={() => onPreviewImage(post.id, toAspect(aspectKey))}
+                            imageUrl={imageUrl}
+                            showUpload={false}
+                            showDownload={true}
+                            showDelete={false}
+                            className="w-full h-full"
+                          >
+                            <img 
+                              src={imageUrl}
+                              alt={`${post.title} - ${aspectRatio}`}
+                              className="object-cover w-full h-full"
+                            />
+                          </ImageHoverOverlay>
+                        ) : status === 'processing' ? (
+                          <SimpleShimmer className="w-full h-full" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            {aspectRatio}
+                          </div>
+                        )}
+                        
+                        <div className="absolute bottom-1 right-1">
+                          <SingleAspectRatioSelector
+                            post={post}
+                            onGenerateImage={onGenerateImage}
+                            onPostsChange={onPostsChange}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+
+                {/* Status and Blog Info */}
+                {isAdmin && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={getStatusColor(post.status)}>
+                      {post.status}
+                    </Badge>
+                    <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
+                    <InstantLoadingIndicator 
+                      isVisible={isInstantGenerating(post.id)}
+                      message="Generating..."
+                      elapsedTime={getElapsedTime(post.id)}
+                      className="text-xs"
+                    />
+                  </div>
+                )}
               </CardContent>
             </div>
           </div>
