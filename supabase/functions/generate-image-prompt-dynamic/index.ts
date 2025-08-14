@@ -588,13 +588,63 @@ Private Safe Space Visual Tone:
 
     const openAIData = await response.json();
     
-    const generatedText = openAIData.choices?.[0]?.message?.content;
+    // Enhanced response parsing with fallbacks and detailed logging
+    let generatedText = null;
+    
+    // Log full response structure when debugging
+    logger.debug('OpenAI response structure', {
+      hasChoices: !!openAIData.choices,
+      choicesLength: openAIData.choices?.length || 0,
+      firstChoiceKeys: openAIData.choices?.[0] ? Object.keys(openAIData.choices[0]) : [],
+      messageKeys: openAIData.choices?.[0]?.message ? Object.keys(openAIData.choices[0].message) : [],
+      correlationId
+    });
+    
+    // Try multiple extraction methods
+    if (openAIData.choices && openAIData.choices.length > 0) {
+      const firstChoice = openAIData.choices[0];
+      
+      // Method 1: Standard chat completion format
+      if (firstChoice.message?.content) {
+        generatedText = firstChoice.message.content;
+        logger.debug('Extracted using message.content', { correlationId });
+      }
+      // Method 2: Legacy completion format
+      else if (firstChoice.text) {
+        generatedText = firstChoice.text;
+        logger.debug('Extracted using text field', { correlationId });
+      }
+      // Method 3: Streaming delta format
+      else if (firstChoice.delta?.content) {
+        generatedText = firstChoice.delta.content;
+        logger.debug('Extracted using delta.content', { correlationId });
+      }
+      // Method 4: Direct content field
+      else if (firstChoice.content) {
+        generatedText = firstChoice.content;
+        logger.debug('Extracted using direct content', { correlationId });
+      }
+    }
 
     if (!generatedText || typeof generatedText !== 'string' || generatedText.trim() === '') {
       logger.error('Missing generated text from OpenAI chat response', {
-        firstChoice: openAIData.choices?.[0],
-        model: openAIData.model,
-        usage: openAIData.usage,
+        error: {},
+        responseStructure: {
+          hasChoices: !!openAIData.choices,
+          choicesCount: openAIData.choices?.length || 0,
+          firstChoice: openAIData.choices?.[0] ? {
+            keys: Object.keys(openAIData.choices[0]),
+            hasMessage: !!openAIData.choices[0].message,
+            messageKeys: openAIData.choices[0].message ? Object.keys(openAIData.choices[0].message) : [],
+            messageContent: openAIData.choices[0].message?.content,
+            hasText: !!openAIData.choices[0].text,
+            text: openAIData.choices[0].text,
+            hasDelta: !!openAIData.choices[0].delta,
+            deltaContent: openAIData.choices[0].delta?.content
+          } : null,
+          model: openAIData.model,
+          usage: openAIData.usage
+        },
         correlationId
       });
       throw new Error('No generated text received from OpenAI');
