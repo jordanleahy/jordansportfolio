@@ -16,7 +16,7 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
   const config: ImagePromptConfig = {
     title: `Generate ${companyName} Job Visual Prompt (9:16)`,
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'generate-image-prompt-dynamic',
+    edgeFunction: 'generate-hero-job-visual',
     category: 'healthcare',
     enableCaching: true,
     cacheKeyPrefix: `job_visual_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
