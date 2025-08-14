@@ -3,10 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Share, Download, BookOpen } from 'lucide-react';
+import { Share, Download, BookOpen, FileDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useDuplicatePublicCollection } from '@/hooks/useDuplicatePublicCollection';
+import { generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import type { User } from '@supabase/supabase-js';
+import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface SharedCollection {
   id: string;
@@ -190,6 +192,46 @@ export default function PublicSharedCollection() {
     }
   };
 
+  const handleDownloadAllPDF = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (items.length === 0) return;
+
+    try {
+      // Convert shared items to SocialMediaPost format for PDF generation
+      const postsForPDF: SocialMediaPost[] = items.map(item => ({
+        id: item.id,
+        user_id: '',
+        title: item.title,
+        description: item.description,
+        image_16_9_url: item.image_16_9_url,
+        image_1_1_url: item.image_1_1_url,
+        image_4_3_url: null,
+        video_16_9_url: null,
+        video_1_1_url: null,
+        video_4_3_url: null,
+        watermarked_16_9_url: null,
+        watermarked_1_1_url: null,
+        watermarked_4_3_url: null,
+        image_processing_status: 'completed',
+        watermark_processing_status: 'completed',
+        status: 'published' as const,
+        scheduled_date: null,
+        created_at: item.created_at,
+        updated_at: item.created_at,
+        category: '',
+        theme_id: null
+      }));
+
+      await generateMultiplePostsPDF(postsForPDF);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Helmet>
@@ -225,6 +267,16 @@ export default function PublicSharedCollection() {
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 {duplicateCollection.isPending ? 'Saving...' : 'Save'}
+              </Button>
+            )}
+            {user && items.length > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={handleDownloadAllPDF}
+                className="flex-1 md:flex-none"
+              >
+                <FileDown className="w-4 h-4 mr-2" />
+                Download All PDF
               </Button>
             )}
             <Button variant="outline" onClick={shareCollection} className="flex-1 md:flex-none">
