@@ -45,7 +45,11 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     const updatedPrompt = cleanedPrompt ? `${cleanedPrompt}. ${aspectRatioText}` : aspectRatioText;
     
     try {
+      // Wait for prompt update to complete before starting image generation
       await updatePrompt({ newPrompt: updatedPrompt });
+      
+      // Small delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Generate image with the selected aspect ratio
       onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
@@ -56,7 +60,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
       }
     } catch (error) {
       toast({
-        title: "Error updating aspect ratio",
+        title: "Error updating prompt",
         description: "Please try again",
         variant: "destructive"
       });
