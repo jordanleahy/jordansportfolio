@@ -166,20 +166,12 @@ export const PostsCardView = memo(({
                 return (
                   <div className="aspect-square relative group bg-muted rounded-md overflow-hidden">
                     {selectedImage ? (
-                      <ImageHoverOverlay
-                        onView={() => onPreviewImage(selectedImage, `${post.title} - ${selectedAspectRatio}`)}
-                        imageUrl={selectedImage}
-                        showUpload={false}
-                        showDownload={true}
-                        showDelete={false}
-                        className="w-full h-full"
-                      >
-                        <img 
-                          src={selectedImage}
-                          alt={`${post.title} - ${selectedAspectRatio}`}
-                          className="object-cover w-full h-full"
-                        />
-                      </ImageHoverOverlay>
+                      <img 
+                        src={selectedImage}
+                        alt={`${post.title} - ${selectedAspectRatio}`}
+                        className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => onPreviewImage(selectedImage, `${post.title} - ${selectedAspectRatio}`)}
+                      />
                     ) : isProcessing ? (
                       <SimpleShimmer className="w-full h-full" />
                     ) : (
@@ -309,20 +301,12 @@ export const PostsCardView = memo(({
                       return (
                         <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
                           {imageUrl ? (
-                            <ImageHoverOverlay
-                              onView={() => onPreviewImage(imageUrl, `${post.title} - ${aspectRatio}`)}
-                              imageUrl={imageUrl}
-                              showUpload={false}
-                              showDownload={true}
-                              showDelete={false}
-                              className="w-full h-full"
-                            >
-                              <img 
-                                src={imageUrl}
-                                alt={`${post.title} - ${aspectRatio}`}
-                                className="object-cover w-full h-full"
-                              />
-                            </ImageHoverOverlay>
+                            <img 
+                              src={imageUrl}
+                              alt={`${post.title} - ${aspectRatio}`}
+                              className="object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => onPreviewImage(imageUrl, `${post.title} - ${aspectRatio}`)}
+                            />
                           ) : status === 'processing' ? (
                             <SimpleShimmer className="w-full h-full" />
                           ) : (
