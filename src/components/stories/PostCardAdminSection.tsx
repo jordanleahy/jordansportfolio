@@ -8,6 +8,7 @@ import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { PostImageUploadCard } from './PostImageUploadCard';
 import VideoUploadCard from './VideoUploadCard';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostCardProps } from '@/types/stories/ui';
@@ -40,6 +41,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const creditStatus = getCreditStatus();
   const { hasPrompt } = useIndividualPromptCache(post.id, themeId);
+  const { isAdmin } = useUserRole();
   
   const [showPhotos, setShowPhotos] = useState(false);
   const [showVideos, setShowVideos] = useState(false);
@@ -102,21 +104,23 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       </div>
       
       {/* Second row - responsive grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className={`grid gap-2 ${isAdmin ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'}`}>
         <BulkImageGenerationButton
           post={post}
           onPostsChange={onPostsChange}
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowPromptViewer(!showPromptViewer)}
-          className="flex-1"
-          title={showPromptViewer ? "Hide image prompt" : "Show image prompt"}
-        >
-          <FileText className="h-4 w-4" />
-          <span className="hidden sm:inline ml-2">Prompt</span>
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPromptViewer(!showPromptViewer)}
+            className="flex-1"
+            title={showPromptViewer ? "Hide image prompt" : "Show image prompt"}
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Prompt</span>
+          </Button>
+        )}
         <Button
           variant="outline"
           size="sm"
@@ -140,8 +144,8 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
         </Button>
       </div>
 
-      {/* Individual Prompt Section */}
-      {showPromptViewer && (
+      {/* Individual Prompt Section - Admin Only */}
+      {isAdmin && showPromptViewer && (
         <div className="border-t pt-4">
           <IndividualPromptViewer
             post={post}
