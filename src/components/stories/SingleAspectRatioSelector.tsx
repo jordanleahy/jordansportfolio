@@ -31,7 +31,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     ratio: config.ratio
   }));
 
-  const handleAppendAspectRatio = async (aspectRatioKey: AspectRatioKey) => {
+  const handleGenerateWithAspectRatio = async (aspectRatioKey: AspectRatioKey) => {
     const aspectRatioConfig = ASPECT_RATIO_CONFIGS.find(config => config.key === aspectRatioKey);
     if (!aspectRatioConfig) return;
 
@@ -46,9 +46,13 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     
     try {
       await updatePrompt({ newPrompt: updatedPrompt });
+      
+      // Generate image with the selected aspect ratio
+      onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
+      
       toast({
-        title: "Aspect ratio updated",
-        description: `Set to ${aspectRatioConfig.label}`,
+        title: "Generating image",
+        description: `Creating ${aspectRatioConfig.label} image`,
       });
       
       // Refresh posts data if callback provided
@@ -87,7 +91,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
             key={`aspect-ratio-${option.value}`}
-            onClick={() => handleAppendAspectRatio(option.value)}
+            onClick={() => handleGenerateWithAspectRatio(option.value)}
             className="cursor-pointer text-sm"
             disabled={isUpdating}
           >
