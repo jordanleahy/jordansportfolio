@@ -21,7 +21,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   onPostsChange,
 }) => {
   const { toast } = useToast();
-  const { updatePrompt, isUpdating } = useIndividualPromptCache(post.id);
+  const { updatePrompt, isUpdating, refetch } = useIndividualPromptCache(post.id);
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -45,11 +45,14 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     const updatedPrompt = cleanedPrompt ? `${cleanedPrompt}. ${aspectRatioText}` : aspectRatioText;
     
     try {
-      // Wait for prompt update to complete before starting image generation
+      // Wait for prompt update to complete and cache to refresh
       await updatePrompt({ newPrompt: updatedPrompt });
       
-      // Small delay to ensure database consistency
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Verify the prompt was updated in cache before proceeding
+      const updatedData = await refetch();
+      if (!updatedData.data?.prompt) {
+        throw new Error('Failed to verify prompt update. Please try again.');
+      }
       
       // Generate image with the selected aspect ratio
       onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
@@ -61,7 +64,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     } catch (error) {
       toast({
         title: "Error updating prompt",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive"
       });
     }

@@ -120,14 +120,16 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
 
       return { newPrompt, userId: user.id };
     },
-    onSuccess: async () => {
-      // Invalidate and refetch the individual prompt query
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
+    onSuccess: async (data) => {
+      // Use refetchQueries to await completion and ensure fresh data
+      await queryClient.refetchQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
       
-      // Also invalidate all post queries to keep them in sync
-      getAllPostQueryKeys().forEach(key => {
-        queryClient.invalidateQueries({ queryKey: key });
-      });
+      // Also refetch all post queries to keep them in sync
+      await Promise.all(
+        getAllPostQueryKeys().map(key => 
+          queryClient.refetchQueries({ queryKey: key })
+        )
+      );
       
       toast({
         title: "Success",
