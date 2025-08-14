@@ -1141,9 +1141,9 @@ const { handleGenerateImage } = useImageManager({
           <Card className="h-full">
             <div className="p-6">
               <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-                {/* Tabs Section */}
+                {/* Tabs and Controls Section */}
                 {userIsAdmin && (
-                  <div className="mb-4 flex items-center justify-between">
+                  <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <TabsList>
                       <TabsTrigger value="draft">
                         Draft {posts.filter(p => p.status === 'draft').length > 0 && (
@@ -1155,16 +1155,15 @@ const { handleGenerateImage } = useImageManager({
                       <TabsTrigger value="published">Published</TabsTrigger>
                     </TabsList>
                     
-                    <ViewToggle
-                      currentView={viewMode}
-                      onViewChange={setViewMode}
-                    />
-                  </div>
-                )}
-                
-                {/* Action Buttons Section */}
-                {category && userIsAdmin && (
-                  <div className="flex items-center justify-end mb-4 gap-1">
+                    <div className="flex items-center gap-4">
+                      <ViewToggle
+                        currentView={viewMode}
+                        onViewChange={setViewMode}
+                      />
+                      
+                      {/* Action Buttons */}
+                      {category && (
+                        <div className="flex items-center gap-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
@@ -1271,9 +1270,11 @@ const { handleGenerateImage } = useImageManager({
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
-
+                  </div>
+                )}
                 <TabsContent value="draft">
                   {filteredPosts.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
