@@ -44,7 +44,7 @@ export default function ThemeDetail() {
   useThemeCompletionStatus(themeId);
   
   // Fetch theme and posts for this specific theme ID
-  const { theme: themeData, posts = [], allPromptsCompleted, hasAnyPosts, isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
+  const { theme: themeData, posts = [], hasAnyPosts, isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
   
   // Get theme name for display purposes
   const decodedTheme = themeData?.theme_name || '';
@@ -181,21 +181,15 @@ export default function ThemeDetail() {
             
             <ProcessingStatesProvider>
               {themeData?.id && hasAnyPosts ? (
-                allPromptsCompleted ? (
-                  <PostsTable 
-                    themeId={themeData.id}
-                    posts={posts as any}
-                    onPostsChange={handlePostsChange}
-                    isAdmin={isAdmin}
-                    category={decodedTheme}
-                    selectedThemeId={selectedThemeId}
-                    onThemeChange={setSelectedThemeId}
-                  />
-                ) : (
-                  <div className="animate-fade-in">
-                    <CalendarSkeletonLoader />
-                  </div>
-                )
+                <PostsTable 
+                  themeId={themeData.id}
+                  posts={posts as any}
+                  onPostsChange={handlePostsChange}
+                  isAdmin={isAdmin}
+                  category={decodedTheme}
+                  selectedThemeId={selectedThemeId}
+                  onThemeChange={setSelectedThemeId}
+                />
               ) : (
                 <LibraryCollectionsFallback />
               )}

@@ -42,14 +42,8 @@ export const useThemePosts = (themeId: string, enabled = true) => {
       
       const posts = data || [];
       
-      // Check if all posts have completed individual prompts
-      const allPromptsCompleted = posts.length > 0 && posts.every(post => 
-        post.individual_prompt_status === 'completed'
-      );
-      
       return {
         posts,
-        allPromptsCompleted,
         hasAnyPosts: posts.length > 0
       };
     },
@@ -113,7 +107,6 @@ export const useThemeDetailsById = (themeId: string, enabled = true) => {
   return {
     theme,
     posts: postsData?.posts || [],
-    allPromptsCompleted: postsData?.allPromptsCompleted || false,
     hasAnyPosts: postsData?.hasAnyPosts || false,
     isLoading: isLoadingTheme || isLoadingPosts,
     refetch

@@ -240,11 +240,12 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // First get themes efficiently without posts
+    // First get themes efficiently without posts - only show completed themes
     const { data: themes, error: themesError } = await supabase
       .from('themes')
       .select('id, theme_name, description, category, created_at')
       .eq('user_id', user.id)
+      .eq('prompt_generation_status', 'completed')
       .order('created_at', { ascending: false });
 
     if (themesError) throw themesError;
