@@ -516,12 +516,13 @@ Private Safe Space Visual Tone:
     });
 
     const openAIRequestBody = {
-      model: 'gpt-5-nano-2025-08-07',
+      model: 'gpt-4.1-2025-04-14', // Switch to more reliable model
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: 3000, // Increased from 1024 to allow for both reasoning and content
+      max_tokens: 3000, // Use max_tokens for GPT-4.1
+      temperature: 0.7, // GPT-4.1 supports temperature
       user: correlationId // Only include user field for tracking
     };
 
@@ -681,7 +682,7 @@ Private Safe Space Visual Tone:
             category: null,
             usedType,
             agent: 'Visual Prompt Generator',
-            model: 'gpt-5-nano-2025-08-07',
+            model: 'gpt-4.1-2025-04-14',
             generated_at: new Date().toISOString(),
             tokens_used: tokensUsed,
             estimated_cost: estimatedCost
@@ -703,7 +704,7 @@ Private Safe Space Visual Tone:
       await trackOpenAIUsage({
         userId,
         functionName: 'generate-image-prompt-dynamic',
-        model: 'gpt-5-nano-2025-08-07',
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success,
         estimatedCost,
