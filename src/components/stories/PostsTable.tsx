@@ -113,15 +113,57 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     closePreviewImage
   } = useModalManager();
 
-  // Custom function to check processing state before opening prompt panel
-  const openIndividualPromptPanel = useCallback((post: SocialMediaPost) => {
+  // Custom function to handle prompt button based on user role
+  const handlePromptButton = useCallback((post: SocialMediaPost) => {
     // Check if any regeneration is in progress for this post
     if (isProcessing(post.id, 'generate') || isProcessing(post.id, 'regenerate_prompt')) {
-      toast.error("Cannot open prompt viewer while image regeneration is in progress");
+      toast.error("Cannot perform action while image regeneration is in progress");
       return;
     }
+
+    // For regular users, directly regenerate the prompt without showing the panel
+    if (!userIsAdmin && !isAdmin) {
+      handleRegeneratePrompt(post);
+      return;
+    }
+
+    // For admin/moderator users, open the prompt panel for editing
     originalOpenIndividualPromptPanel(post);
-  }, [isProcessing, originalOpenIndividualPromptPanel]);
+  }, [isProcessing, userIsAdmin, isAdmin, originalOpenIndividualPromptPanel]);
+
+  // Function to regenerate prompt directly for regular users
+  const handleRegeneratePrompt = async (post: SocialMediaPost) => {
+    try {
+      toast.info("Regenerating prompt...");
+      
+      // Use the individual prompt cache hook to regenerate
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to regenerate prompts');
+        return;
+      }
+
+      // Call the regenerate prompt edge function
+      const { data, error } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+        body: {
+          postId: post.id,
+          title: post.title,
+          description: post.description,
+          category: post.category,
+          themeId: post.theme_id
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success("Prompt regenerated successfully");
+      onPostsChange(); // Refresh the posts to show updated prompt
+    } catch (error) {
+      console.error('Error regenerating prompt:', error);
+      toast.error('Failed to regenerate prompt');
+    }
+  };
   const {
     creatingBlogIds,
     handleStatusChange: originalHandleStatusChange,
@@ -1143,7 +1185,7 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                       {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
+                        {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -1156,7 +1198,7 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -1317,9 +1359,9 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     viewMode === 'table' ? (
-                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={handlePromptButton} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                     ) : (
-                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={handlePromptButton} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                     )
                   )}
                 </TabsContent>
@@ -1332,9 +1374,9 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     viewMode === 'table' ? (
-                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                      <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={handlePromptButton} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                     ) : (
-                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+                      <PostsCardView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={handlePromptButton} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
                     )
                   )}
                 </TabsContent>
