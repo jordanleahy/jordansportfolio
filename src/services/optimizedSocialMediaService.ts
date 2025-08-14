@@ -251,7 +251,7 @@ export class OptimizedSocialMediaService {
     if (themesError) throw themesError;
 
     if (!themes || themes.length === 0) {
-      this.setCache(cacheKey, [], 5 * 60 * 1000); // 5 minutes cache for empty results
+      this.setCache(cacheKey, [], 1 * 60 * 1000); // 1 minute cache for empty results
       return [];
     }
 
@@ -337,7 +337,7 @@ export class OptimizedSocialMediaService {
       };
     });
     
-    this.setCache(cacheKey, processedThemes, 5 * 60 * 1000); // 5 minutes cache for faster updates
+    this.setCache(cacheKey, processedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
     return processedThemes;
   }
 
