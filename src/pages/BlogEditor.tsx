@@ -442,11 +442,14 @@ const BlogEditor = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
-                  if (slug) {
-                    window.open(`/blog/${slug}?preview=true`, '_blank');
+                  const previewSlug = slug || existingPost?.slug || id;
+                  if (previewSlug) {
+                    window.open(`/blog/${previewSlug}?preview=true`, '_blank');
+                  } else {
+                    console.warn('No slug or ID available for preview');
                   }
                 }}
-                disabled={!slug}
+                disabled={!slug && !existingPost?.slug && !id}
                 className="min-h-[44px] sm:min-h-[36px]"
                 aria-label="Preview post"
               >
