@@ -68,6 +68,11 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
               !hasShownCompletionToast && 
               themeStatus?.prompt_generation_status !== 'completed') {
             
+            // Clear themes cache to refresh the UI immediately when theme status changes
+            import('@/services/optimizedSocialMediaService').then(({ optimizedSocialMediaService }) => {
+              optimizedSocialMediaService.clearThemesCache();
+            });
+            
             toast({
               title: "Theme Created! 🎉",
               description: `All ${newData.total_posts_count} individual image prompts have been generated successfully.`,
