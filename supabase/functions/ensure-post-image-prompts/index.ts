@@ -201,11 +201,12 @@ serve(async (req) => {
             return { postId: post.id, success: false, error: 'No prompt generated' };
           }
 
-          // Update the post with the generated prompt
+          // Update the post with the generated prompt and mark as completed
           const { error: updateError } = await supabase
             .from('social_media_posts')
             .update({ 
               generated_image_prompt: generatedPrompt.trim(),
+              individual_prompt_status: 'completed',
               updated_at: new Date().toISOString()
             })
             .eq('id', post.id);
