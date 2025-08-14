@@ -323,9 +323,18 @@ export const PostsCardView = memo(({
                           ) : status === 'processing' ? (
                             <SimpleShimmer className="w-full h-full" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                              {aspectRatio}
-                            </div>
+                            <button
+                              onClick={() => {
+                                onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
+                              }}
+                              disabled={status === 'processing'}
+                              className="w-full h-full flex flex-col items-center justify-center text-xs text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <div className="flex flex-col items-center gap-1">
+                                <Sparkles className="h-4 w-4" />
+                                <span>{aspectRatio}</span>
+                              </div>
+                            </button>
                           )}
                           
                           <div className="absolute bottom-1 right-1">
