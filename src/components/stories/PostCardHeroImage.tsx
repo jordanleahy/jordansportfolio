@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { ImageIcon, Loader2 } from 'lucide-react';
-import { useImageGeneration } from '@/hooks/useImageGeneration';
+import { usePromptValidatedImageGeneration } from '@/hooks/usePromptValidatedImageGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardHeroImageProps {
@@ -18,7 +18,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   isProcessing,
   onPostsChange
 }) => {
-  const { isGenerating, generationStep, generateHeroImage, creditStatus } = useImageGeneration();
+  const { isGenerating, generationStep, generateHeroImage, creditStatus, steps } = usePromptValidatedImageGeneration();
 
   const handleGenerate = () => {
     generateHeroImage(post, colorTheme, onPostsChange);
@@ -71,7 +71,33 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
           {isGenerating ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-xs">{generationStep}</span>
+              <div className="flex flex-col items-start">
+                <span className="text-xs font-medium">{generationStep}</span>
+                {steps && (
+                  <div className="flex gap-1 mt-1">
+                    <div className={`w-2 h-1 rounded-full ${
+                      steps.promptValidation === 'complete' ? 'bg-primary' : 
+                      steps.promptValidation === 'active' ? 'bg-primary/60' : 
+                      steps.promptValidation === 'error' ? 'bg-destructive' : 'bg-muted'
+                    }`} />
+                    <div className={`w-2 h-1 rounded-full ${
+                      steps.promptGeneration === 'complete' ? 'bg-primary' : 
+                      steps.promptGeneration === 'active' ? 'bg-primary/60' : 
+                      steps.promptGeneration === 'error' ? 'bg-destructive' : 'bg-muted'
+                    }`} />
+                    <div className={`w-2 h-1 rounded-full ${
+                      steps.imageGeneration === 'complete' ? 'bg-primary' : 
+                      steps.imageGeneration === 'active' ? 'bg-primary/60' : 
+                      steps.imageGeneration === 'error' ? 'bg-destructive' : 'bg-muted'
+                    }`} />
+                    <div className={`w-2 h-1 rounded-full ${
+                      steps.imageUpload === 'complete' ? 'bg-primary' : 
+                      steps.imageUpload === 'active' ? 'bg-primary/60' : 
+                      steps.imageUpload === 'error' ? 'bg-destructive' : 'bg-muted'
+                    }`} />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">
