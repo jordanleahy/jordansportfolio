@@ -6,7 +6,7 @@ import { SingleAspectRatioSelector } from './SingleAspectRatioSelector';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { BlogPostButtonForRow } from './BlogPostButtonForRow';
 import { ActionButton } from '@/components/ui/action-button';
-import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw } from 'lucide-react';
+import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
@@ -56,6 +56,19 @@ export const PostsCardView = memo(({
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+
+  const togglePostExpansion = (postId: string) => {
+    setExpandedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
 
   const handleGenerateAllImages = async (post: SocialMediaPost) => {
     try {
@@ -244,15 +257,22 @@ export const PostsCardView = memo(({
                            />
                          </>
                        )}
-                       
-                       <ActionButton
-                         icon={<Trash2 className="h-4 w-4" />}
-                         onClick={() => onDeletePost(post.id)}
-                         title="Delete post"
-                         variant="destructive"
-                         size="sm"
-                       />
-                     </div>
+                        
+                        <ActionButton
+                          icon={<ChevronDown className={`h-4 w-4 transition-transform ${expandedPosts.has(post.id) ? 'rotate-180' : ''}`} />}
+                          onClick={() => togglePostExpansion(post.id)}
+                          title="Toggle images"
+                          size="sm"
+                        />
+                        
+                        <ActionButton
+                          icon={<Trash2 className="h-4 w-4" />}
+                          onClick={() => onDeletePost(post.id)}
+                          title="Delete post"
+                          variant="destructive"
+                          size="sm"
+                        />
+                      </div>
                    </div>
                  </div>
                  {post.description && (
@@ -263,49 +283,51 @@ export const PostsCardView = memo(({
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* Small Images Grid */}
-                <div className="grid grid-cols-3 gap-2">
-                  {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
-                    const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
-                    const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
-                    const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
-                    
-                    return (
-                      <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
-                        {imageUrl ? (
-                          <ImageHoverOverlay
-                            onView={() => onPreviewImage(post.id, toAspect(aspectKey))}
-                            imageUrl={imageUrl}
-                            showUpload={false}
-                            showDownload={true}
-                            showDelete={false}
-                            className="w-full h-full"
-                          >
-                            <img 
-                              src={imageUrl}
-                              alt={`${post.title} - ${aspectRatio}`}
-                              className="object-cover w-full h-full"
+                {/* Small Images Grid - Collapsible */}
+                {expandedPosts.has(post.id) && (
+                  <div className="grid grid-cols-3 gap-2 animate-in slide-in-from-top-2 duration-200">
+                    {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
+                      const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
+                      const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
+                      const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
+                      
+                      return (
+                        <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
+                          {imageUrl ? (
+                            <ImageHoverOverlay
+                              onView={() => onPreviewImage(post.id, toAspect(aspectKey))}
+                              imageUrl={imageUrl}
+                              showUpload={false}
+                              showDownload={true}
+                              showDelete={false}
+                              className="w-full h-full"
+                            >
+                              <img 
+                                src={imageUrl}
+                                alt={`${post.title} - ${aspectRatio}`}
+                                className="object-cover w-full h-full"
+                              />
+                            </ImageHoverOverlay>
+                          ) : status === 'processing' ? (
+                            <SimpleShimmer className="w-full h-full" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                              {aspectRatio}
+                            </div>
+                          )}
+                          
+                          <div className="absolute bottom-1 right-1">
+                            <SingleAspectRatioSelector
+                              post={post}
+                              onGenerateImage={onGenerateImage}
+                              onPostsChange={onPostsChange}
                             />
-                          </ImageHoverOverlay>
-                        ) : status === 'processing' ? (
-                          <SimpleShimmer className="w-full h-full" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                            {aspectRatio}
                           </div>
-                        )}
-                        
-                        <div className="absolute bottom-1 right-1">
-                          <SingleAspectRatioSelector
-                            post={post}
-                            onGenerateImage={onGenerateImage}
-                            onPostsChange={onPostsChange}
-                          />
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Status and Blog Info */}
                 {isAdmin && (
