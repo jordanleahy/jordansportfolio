@@ -18,6 +18,7 @@ import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
@@ -60,6 +61,7 @@ export const PostsCardView = memo(({
   const { generateWithCache } = useCachedPromptGeneration();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
@@ -256,8 +258,17 @@ export const PostsCardView = memo(({
                         {/* Regenerate button overlay */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                           <button
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
+                              const creditStatus = getCreditStatus();
+                              if (!creditStatus.hasCredits) {
+                                toast({
+                                  title: "Credit limit reached",
+                                  description: getBlockingMessage(creditStatus),
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
                               // Always regenerate as 1:1 for square container
                               const aspectRatioKey = '1_1';
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
@@ -270,8 +281,17 @@ export const PostsCardView = memo(({
                           </button>
                         </div>
                       </div>
-                    ) : isProcessing ? (
-                      <SimpleShimmer className="w-full h-full" />
+                    ) : (isProcessing || isProcessingCtx(post.id, 'generate', '1:1')) ? (
+                      <div className="relative w-full h-full">
+                        <SimpleShimmer className="w-full h-full" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <InstantLoadingIndicator 
+                            isVisible={true}
+                            message="Regenerating..."
+                            className="text-white drop-shadow-sm"
+                          />
+                        </div>
+                      </div>
                     ) : (
                       <button
                         onClick={() => {
@@ -423,20 +443,38 @@ export const PostsCardView = memo(({
                               {/* Regenerate button overlay */}
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                 <button
-                                  onClick={(e) => {
+                                  onClick={async (e) => {
                                     e.stopPropagation();
+                                    const creditStatus = getCreditStatus();
+                                    if (!creditStatus.hasCredits) {
+                                      toast({
+                                        title: "Credit limit reached",
+                                        description: getBlockingMessage(creditStatus),
+                                        variant: "destructive"
+                                      });
+                                      return;
+                                    }
                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                                   }}
-                                   disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
-                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                   title="Regenerate image"
-                                 >
-                                   {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
+                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
+                                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Regenerate image"
+                                >
+                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
                                 </button>
                               </div>
                             </div>
-                          ) : status === 'processing' ? (
-                            <SimpleShimmer className="w-full h-full" />
+                          ) : (status === 'processing' || isProcessingCtx(post.id, 'generate', aspectRatio)) ? (
+                            <div className="relative w-full h-full">
+                              <SimpleShimmer className="w-full h-full" aspectRatio={aspectRatio} />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <InstantLoadingIndicator 
+                                  isVisible={true}
+                                  message="Regenerating..."
+                                  className="text-white drop-shadow-sm text-xs"
+                                />
+                              </div>
+                            </div>
                           ) : (
                             <button
                               onClick={() => {
