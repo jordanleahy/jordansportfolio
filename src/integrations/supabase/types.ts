@@ -2209,6 +2209,7 @@ export type Database = {
           image_9_16_url: string | null
           image_9_16_watermark_status: string | null
           image_9_16_watermark_url: string | null
+          individual_prompt_status: string | null
           platform_tags: Json | null
           scheduled_date: string | null
           seed_value: number | null
@@ -2252,6 +2253,7 @@ export type Database = {
           image_9_16_url?: string | null
           image_9_16_watermark_status?: string | null
           image_9_16_watermark_url?: string | null
+          individual_prompt_status?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null
@@ -2295,6 +2297,7 @@ export type Database = {
           image_9_16_url?: string | null
           image_9_16_watermark_status?: string | null
           image_9_16_watermark_url?: string | null
+          individual_prompt_status?: string | null
           platform_tags?: Json | null
           scheduled_date?: string | null
           seed_value?: number | null
@@ -2565,7 +2568,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          prompt_completion_count: number | null
+          prompt_generation_status: string | null
           theme_name: string
+          total_posts_count: number | null
           updated_at: string
           user_id: string
           visual_prompt_system_prompt_id: string | null
@@ -2575,7 +2581,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          prompt_completion_count?: number | null
+          prompt_generation_status?: string | null
           theme_name: string
+          total_posts_count?: number | null
           updated_at?: string
           user_id: string
           visual_prompt_system_prompt_id?: string | null
@@ -2585,7 +2594,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          prompt_completion_count?: number | null
+          prompt_generation_status?: string | null
           theme_name?: string
+          total_posts_count?: number | null
           updated_at?: string
           user_id?: string
           visual_prompt_system_prompt_id?: string | null

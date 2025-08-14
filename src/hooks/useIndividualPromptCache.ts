@@ -101,11 +101,12 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Update the social_media_posts table
+      // Update the social_media_posts table with prompt and mark as completed
       const { error: updateError } = await supabase
         .from('social_media_posts')
         .update({ 
           generated_image_prompt: newPrompt,
+          individual_prompt_status: 'completed',
           updated_at: new Date().toISOString()
         })
         .eq('id', postId)
@@ -170,11 +171,12 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
 
       if (error) throw error;
       
-      // Update the post with the new prompt
+      // Update the post with the new prompt and mark as completed
       const { error: updateError } = await supabase
         .from('social_media_posts')
         .update({ 
           generated_image_prompt: data.generatedPrompt,
+          individual_prompt_status: 'completed',
           updated_at: new Date().toISOString()
         })
         .eq('id', postId)

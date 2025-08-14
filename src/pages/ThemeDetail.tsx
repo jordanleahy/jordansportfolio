@@ -10,6 +10,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useThemeSEO } from '@/hooks/useThemeSEO';
+import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
@@ -39,6 +40,8 @@ export default function ThemeDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // Track theme completion status for "Theme Created" toast
+  useThemeCompletionStatus(themeId);
   
   // Fetch theme and posts for this specific theme ID
   const { theme: themeData, posts = [], isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
