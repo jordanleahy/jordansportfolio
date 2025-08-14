@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { BookOpen, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
 import { useColorThemes } from "@/hooks/useColorThemes";
 import { useImageManager } from "@/hooks/useImageManager";
-import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useParams } from 'react-router-dom';
@@ -46,8 +45,6 @@ export const PostsTableControls = ({
   
   // Color themes
   const { data: colorThemes = [] } = useColorThemes();
-
-  const { setBulkProcessing } = useProcessingStatesContext();
 
   // Resolve theme from route (if present)
   const params = useParams();
@@ -93,7 +90,7 @@ export const PostsTableControls = ({
       }
       toast.info(`Starting generation (16:9) for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(c => c.post.id);
-      candidateIds.forEach(id => setBulkProcessing(id, true));
+      // Note: Bulk processing state management moved to PostsTable
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -121,7 +118,7 @@ export const PostsTableControls = ({
       toast.error('Failed to run 16:9 generation');
     } finally {
       setIsBulk169(false);
-      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+      // Note: Bulk processing state cleanup moved to PostsTable
     }
   };
 
@@ -154,7 +151,7 @@ export const PostsTableControls = ({
       }
       toast.info(`Regenerating 16:9 for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(p => p.id);
-      candidateIds.forEach(id => setBulkProcessing(id, true));
+      // Note: Bulk processing state management moved to PostsTable
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -179,7 +176,7 @@ export const PostsTableControls = ({
       toast.error('Failed to run 16:9 regeneration');
     } finally {
       setIsBulk169(false);
-      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+      // Note: Bulk processing state cleanup moved to PostsTable
     }
   };
 
@@ -218,7 +215,7 @@ export const PostsTableControls = ({
       }
       toast.info(`Starting generation (1:1) for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(c => c.post.id);
-      candidateIds.forEach(id => setBulkProcessing(id, true));
+      // Note: Bulk processing state management moved to PostsTable
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -246,7 +243,7 @@ export const PostsTableControls = ({
       toast.error('Failed to run 1:1 generation');
     } finally {
       setIsBulk11(false);
-      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+      // Note: Bulk processing state cleanup moved to PostsTable
     }
   };
 
@@ -279,7 +276,7 @@ export const PostsTableControls = ({
       }
       toast.info(`Regenerating 1:1 for ${candidates.length} post(s)...`);
       candidateIds = candidates.map(p => p.id);
-      candidateIds.forEach(id => setBulkProcessing(id, true));
+      // Note: Bulk processing state management moved to PostsTable
 
       // Concurrency-limited client-side batch using existing single-image flow
       const concurrency = Math.min(3, candidates.length);
@@ -304,7 +301,7 @@ export const PostsTableControls = ({
       toast.error('Failed to run 1:1 regeneration');
     } finally {
       setIsBulk11(false);
-      try { candidateIds.forEach(id => setBulkProcessing(id, false)); } catch {}
+      // Note: Bulk processing state cleanup moved to PostsTable
     }
   };
 
@@ -315,6 +312,7 @@ export const PostsTableControls = ({
       // Simulate a library action
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsInLibrary(!isInLibrary);
+      toast.success('Library action completed');
     } catch (error) {
       toast.error('Failed to perform library action');
     } finally {
@@ -328,6 +326,7 @@ export const PostsTableControls = ({
       // Simulate a feature action
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsFeatured(!isFeatured);
+      toast.success('Feature action completed');
     } catch (error) {
       toast.error('Failed to perform feature action');
     } finally {
@@ -343,6 +342,7 @@ export const PostsTableControls = ({
       setNewPostsCount(5); // Simulate 5 new images
       setHasImageActivity(true);
       window.open('https://example.com/shared-collection', '_blank');
+      toast.success('Share action completed');
     } catch (error) {
       toast.error('Failed to perform share action');
     }
@@ -356,6 +356,7 @@ export const PostsTableControls = ({
       setNewPostsCount(0);
       setHasImageActivity(false);
       window.open('https://example.com/shared-collection', '_blank');
+      toast.success('Collection updated');
     } catch (error) {
       toast.error('Failed to update collection');
     } finally {
