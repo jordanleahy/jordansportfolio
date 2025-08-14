@@ -64,7 +64,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       return failureCount < 2;
     },
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true, // Enable refetching on mount to load existing prompts
   });
 
   const updateMutation = useMutation({
