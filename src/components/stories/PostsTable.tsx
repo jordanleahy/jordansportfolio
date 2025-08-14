@@ -30,6 +30,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { PostsTableProps } from '@/types/stories';
 import { useParams } from 'react-router-dom';
+import { ManualPostForm } from './ManualPostForm';
 
 
 export const PostsTable = ({
@@ -1159,6 +1160,13 @@ const { handleGenerateImage } = useImageManager({
                       <ViewToggle
                         currentView={viewMode}
                         onViewChange={setViewMode}
+                      />
+                      
+                      {/* Manual Post Creation */}
+                      <ManualPostForm 
+                        category={category}
+                        themeId={selectedThemeId}
+                        onPostCreated={onPostsChange}
                       />
                       
                       {/* Action Buttons */}
