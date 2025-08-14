@@ -162,7 +162,7 @@ export const PostsCardView = memo(({
                 }
                 
                 return (
-                  <div className="aspect-[4/3] md:aspect-[3/2] relative group bg-muted rounded-md overflow-hidden">
+                  <div className="aspect-square relative group bg-muted rounded-md overflow-hidden">
                     {selectedImage ? (
                       <ImageHoverOverlay
                         onView={() => onPreviewImage(post.id, selectedAspectRatio as any)}
