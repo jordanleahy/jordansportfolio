@@ -85,6 +85,7 @@ const corsHeaders = {
 
 // Optimized aspect ratio configurations
 const ASPECT_RATIOS: AspectRatioConfig[] = [
+  { ratio: '1:1', width: 1024, height: 1024 },
   { ratio: '16:9', width: 1792, height: 1024 },
   { ratio: '9:16', width: 1024, height: 1792 },
   { ratio: '4:3', width: 1536, height: 1024 },
@@ -168,13 +169,16 @@ serve(async (req) => {
 
     // Step 2: Generate images in parallel using single master prompt with aspect ratio enhancements
     const generationPromises = ASPECT_RATIOS.map(async (aspectConfig): Promise<GenerationResult> => {
-      const { ratio } = aspectConfig;
+      const { ratio, width, height } = aspectConfig;
       
       try {
-        // Enhance master prompt with aspect ratio context
-        const enhancedPrompt = `${masterPrompt}
-
-Composition optimized for ${ratio} aspect ratio format.`;
+        // Use the same cleaning and formatting logic as SingleAspectRatioSelector
+        // Remove any existing aspect ratio dimensions
+        const cleanedPrompt = masterPrompt.replace(/Image dimensions:\s*\d+x\d+\s*\([^)]+\)\.?\s*/g, '').trim();
+        
+        // Append new aspect ratio dimensions using the same format as individual selection
+        const aspectRatioText = `Image dimensions: ${width}x${height} (${ratio})`;
+        const enhancedPrompt = cleanedPrompt ? `${cleanedPrompt}. ${aspectRatioText}` : aspectRatioText;
 
         // Step 2: Generate image using enhanced prompt
         const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
