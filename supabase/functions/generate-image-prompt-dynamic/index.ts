@@ -462,8 +462,11 @@ Private Safe Space Visual Tone:
 - On-image text: allowed sparingly when it adds clarity (e.g., short labels 2–6 words); avoid large headlines; never include watermarks or logos
 
 **OUTPUT FORMAT:**
+- DO NOT start with formulaic phrases like "Vector illustration, flat design, 16:9 aspect ratio"
+- Begin directly with the specific scene description using the detailed framework from your system instructions
+- Focus on the unique elements from your ${systemPromptData.theme || theme || usedIdentifier} guidelines first
+- Include technical constraints naturally within the scene description
 - Respond with ONLY the final image prompt as plain text, no preface or analysis
-- Keep technical constraints mandatory while making composition engaging and professional`;
 
     // OpenAI request with proper format
     logger.info('Preparing OpenAI request', {
