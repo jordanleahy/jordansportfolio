@@ -30,8 +30,8 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   
   const isCurrentlyGenerating = isGenerating(post.id);
   
-  // Use the same hook that checks fresh database data
-  const { hasPrompt: hasIndividualPrompt } = useIndividualPromptCache(post.id, themeId);
+  // Use the same hook that checks fresh database data and system prompt status
+  const { hasPrompt: hasIndividualPrompt, hasSystemPrompt } = useIndividualPromptCache(post.id, themeId);
   
   console.log('⚡ [BulkImageGenerationButton] Component state', {
     postId: post.id,
@@ -48,7 +48,22 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   const handleGenerateAllImages = async () => {
     if (!post) return;
     
-    // Check if individual prompt exists first
+    // Check system prompt first
+    if (!hasSystemPrompt) {
+      console.log('⚡ [BulkImageGenerationButton] Blocking bulk generation - no system prompt', {
+        postId: post.id,
+        hasSystemPrompt,
+        hasIndividualPrompt
+      });
+      toast({
+        title: "System prompt required",
+        description: "Theme system prompt is not ready yet. Please wait for theme completion before generating images.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if individual prompt exists
     if (!hasIndividualPrompt) {
       console.log('⚡ [BulkImageGenerationButton] Blocking bulk generation - no individual prompt', {
         postId: post.id,
@@ -121,12 +136,13 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     <>
       <Button
         onClick={handleGenerateAllImages}
-        disabled={isCurrentlyGenerating || !creditStatus.hasCredits || creditStatus.isLoading || !hasIndividualPrompt}
+        disabled={isCurrentlyGenerating || !creditStatus.hasCredits || creditStatus.isLoading || !hasSystemPrompt || !hasIndividualPrompt}
         variant="outline"
         size="sm"
-        className={`h-8 flex-1 ${!creditStatus.hasCredits || !hasIndividualPrompt ? 'opacity-50' : ''}`}
+        className={`h-8 flex-1 ${!creditStatus.hasCredits || !hasSystemPrompt || !hasIndividualPrompt ? 'opacity-50' : ''}`}
         title={
           !creditStatus.hasCredits ? getBlockingMessage(creditStatus) : 
+          !hasSystemPrompt ? "Waiting for system prompt..." :
           !hasIndividualPrompt ? "Waiting for individual prompt generation..." :
           "Bulk Generate"
         }
@@ -134,7 +150,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         {isCurrentlyGenerating ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          <Sparkles className={`h-4 w-4 ${!creditStatus.hasCredits || !hasIndividualPrompt ? 'opacity-50' : ''}`} />
+          <Sparkles className={`h-4 w-4 ${!creditStatus.hasCredits || !hasSystemPrompt || !hasIndividualPrompt ? 'opacity-50' : ''}`} />
         )}
       </Button>
       

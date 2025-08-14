@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
 import { useParams } from 'react-router-dom';
+import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
 
 interface IndividualPromptData {
   prompt: string;
@@ -18,6 +19,9 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   const { toast } = useToast();
   const params = useParams();
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  
+  // Check theme completion status to validate system prompt availability
+  const { hasSystemPrompt, isCompleted } = useThemeCompletionStatus(themeId);
 
   const query = useQuery({
     queryKey: QUERY_KEYS.individualPrompt(postId),
@@ -151,12 +155,20 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         postId,
         themeId,
         theme,
-        aspectRatio
+        aspectRatio,
+        hasSystemPrompt
       });
 
       if (!postId || !themeId) {
         const errorMsg = `Missing required data: postId=${postId}, themeId=${themeId}, theme=${theme}`;
         console.error('❌ Regeneration failed:', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Validate that system prompt is ready before proceeding
+      if (!hasSystemPrompt) {
+        const errorMsg = 'Theme system prompt is not ready yet. Please wait for theme completion before generating individual prompts.';
+        console.error('❌ System prompt validation failed:', errorMsg);
         throw new Error(errorMsg);
       }
 
@@ -201,9 +213,12 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       });
     },
     onError: (error) => {
+      const isSystemPromptError = error.message?.includes('system prompt is not ready');
       toast({
         title: "Error",
-        description: "Failed to generate individual prompt",
+        description: isSystemPromptError ? 
+          "Theme system prompt is not ready yet. Please wait for theme completion." : 
+          "Failed to generate individual prompt",
         variant: "destructive",
       });
       console.error('Regenerate error:', error);
@@ -236,6 +251,8 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     isError: query.isError,
     error: query.error,
     hasPrompt,
+    hasSystemPrompt,
+    isCompleted,
     updatePrompt: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
     regeneratePrompt: regenerateMutation.mutate,

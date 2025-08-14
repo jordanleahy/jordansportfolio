@@ -36,6 +36,8 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   const {
     data: promptData,
     isLoading,
+    hasSystemPrompt,
+    isCompleted,
     updatePrompt,
     isUpdating,
     regeneratePrompt,
@@ -189,22 +191,31 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
       ) : !promptData && !isEditing ? (
         <div className="flex flex-col items-center justify-center py-8 space-y-4">
           <div className="text-sm text-muted-foreground text-center">
-            No image prompt generated yet for this post.
+            {!hasSystemPrompt ? (
+              <>
+                Theme system prompt is not ready yet.
+                <br />
+                Please wait for theme completion to generate individual prompts.
+              </>
+            ) : (
+              "No image prompt generated yet for this post."
+            )}
           </div>
           <Button
             onClick={() => {
               console.log('🎨 [IndividualPromptViewer] Generate Initial Prompt clicked', { 
                 postId: post?.id, 
-                themeId 
+                themeId,
+                hasSystemPrompt 
               });
               handleRegeneratePrompt();
             }}
-            disabled={isRegenerating}
+            disabled={isRegenerating || !hasSystemPrompt}
             variant="outline"
             size="sm"
           >
             <Lightbulb className="h-4 w-4 mr-2" />
-            Generate Initial Prompt
+            {!hasSystemPrompt ? 'Waiting for System Prompt...' : 'Generate Initial Prompt'}
           </Button>
         </div>
       ) : showDiff ? (
@@ -284,10 +295,10 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={handleRegeneratePrompt}
-              disabled={isRegenerating}
+              disabled={isRegenerating || !hasSystemPrompt}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              {isRegenerating ? 'Generating...' : 'Regenerate'}
+              {isRegenerating ? 'Generating...' : !hasSystemPrompt ? 'System Prompt Required' : 'Regenerate'}
             </Button>
           </>
         )}

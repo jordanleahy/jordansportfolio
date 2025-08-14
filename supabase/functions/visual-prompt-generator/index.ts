@@ -244,7 +244,18 @@ serve(async (req) => {
       }
     }
 
-    // Fallback: generic Visual Prompt Generator prompt
+    // Validation: For theme-specific requests, system prompt should exist
+    if (!systemPromptData && themeId && themeData) {
+      logger.error('Theme system prompt validation failed', {
+        themeId: themeId.slice(0, 8),
+        themeName: themeData.theme_name,
+        hasVisualPromptSystemPromptId: !!themeData.visual_prompt_system_prompt_id,
+        errorType: 'system_prompt_not_ready'
+      });
+      throw new Error('Theme system prompt is not ready yet. Please wait for theme completion before generating individual prompts.');
+    }
+
+    // Fallback: generic Visual Prompt Generator prompt (only for non-theme requests)
     if (!systemPromptData) {
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('system_prompts')
