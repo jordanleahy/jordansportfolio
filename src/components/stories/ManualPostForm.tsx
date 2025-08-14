@@ -22,7 +22,6 @@ interface ManualPostFormProps {
 interface FormData {
   title: string;
   description: string;
-  day?: number;
 }
 
 export const ManualPostForm: React.FC<ManualPostFormProps> = ({
@@ -46,7 +45,6 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
       const postData: CreateSocialMediaPost = {
         title: data.title,
         description: data.description,
-        day: data.day,
         category,
         theme_id: themeId,
         status: 'draft'
@@ -159,24 +157,6 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
               />
               {errors.description && (
                 <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <Label htmlFor="day">Day (optional)</Label>
-              <Input
-                id="day"
-                type="number"
-                {...register('day', { 
-                  valueAsNumber: true,
-                  min: { value: 1, message: 'Day must be at least 1' },
-                  max: { value: 365, message: 'Day must be at most 365' }
-                })}
-                placeholder="1-365"
-                disabled={isProcessing}
-              />
-              {errors.day && (
-                <p className="text-sm text-destructive mt-1">{errors.day.message}</p>
               )}
             </div>
           </div>
