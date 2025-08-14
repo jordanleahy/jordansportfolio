@@ -67,6 +67,7 @@ export interface PostsTableProps {
   themeId: string;
   selectedThemeId?: string;
   onThemeChange?: (themeId: string) => void;
+  activeTab?: "draft" | "published";
 }
 
 export interface PostsTableViewProps {

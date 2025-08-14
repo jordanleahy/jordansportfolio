@@ -37,8 +37,8 @@ export const PostsTable = ({
   themeId,
   selectedThemeId,
   onThemeChange,
+  activeTab = "draft",
 }: PostsTableProps) => {
-  const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
   const [isResizing, setIsResizing] = useState(false);
@@ -972,316 +972,41 @@ const { handleGenerateImage } = useImageManager({
         {isMobile ? (
           /* Mobile: Edge-to-edge layout without Card wrapper */
           <div>
-            {/* Tabs and controls with selective padding */}
-            <div>
-              <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-                {/* Tabs Section */}
-                {userIsAdmin && (
-                  <div className="mb-4">
-                    <TabsList>
-                      <TabsTrigger value="draft">
-                        Draft {posts.filter(p => p.status === 'draft').length > 0 && (
-                          <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
-                            {posts.filter(p => p.status === 'draft').length}
-                          </span>
-                        )}
-                      </TabsTrigger>
-                      <TabsTrigger value="published">Published</TabsTrigger>
-                    </TabsList>
-                  </div>
-                )}
-                
-                {/* Action Buttons Section */}
-                {category && userIsAdmin && (
-                  <div className="flex items-center justify-end mb-4 gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          disabled={isBulk169}
-                          aria-label="Bulk actions"
-                          title="Bulk actions"
-                        >
-                          <span className="text-xs font-medium">Bulk</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
-                        <DropdownMenuLabel>Bulk: 16:9</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
-                          Generate for missing only (respects theme filter)
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
-                          Regenerate for all (ignores theme filter)
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Bulk: 1:1</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={handleBulkGenerate11} disabled={isBulk11}>
-                          Generate for missing only (respects theme filter)
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleBulkRegenerate11} disabled={isBulk11}>
-                          Regenerate for all (ignores theme filter)
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button
-                      variant={isFeatured ? "default" : "outline"}
-                      size="icon"
-                      onClick={handleFeatureLatestCollection}
-                      disabled={isFeaturing}
-                      aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
-                      title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
-                    >
-                      <Star className={`h-4 w-4 ${isFeatured ? 'fill-current' : ''}`} />
-                    </Button>
-                    <Button
-                      variant={isInLibrary ? "default" : "outline"}
-                      size="icon"
-                      onClick={handlePublishCollection}
-                      disabled={isPublishing}
-                      aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                      title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
-                    >
-                      <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
-                    </Button>
-                    {hasSharedLink && newPostsCount > 0 ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleUpdateCollection}
-                        disabled={isUpdatingCollection}
-                        className="gap-1 text-xs"
-                        aria-label={`Update & Share (${newPostsCount} new images)`}
-                        title={`Update collection with ${newPostsCount} new images and open in new tab`}
-                      >
-                        <Share2 className="h-3 w-3" />
-                        Update ({newPostsCount})
-                      </Button>
-                     ) : (
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={handleShare}
-                        disabled={isPublishing}
-                        aria-label={
-                          !hasSharedLink 
-                            ? "Share" 
-                            : hasImageActivity 
-                              ? "Update & Open" 
-                              : "Open"
-                        }
-                        title={
-                          !hasSharedLink 
-                            ? "Publish collection and open in new tab" 
-                            : hasImageActivity 
-                              ? "Update collection with new images and open in new tab" 
-                              : "Open collection in new tab"
-                        }
-                      >
-                        {!hasSharedLink ? (
-                          <ExternalLink className="h-4 w-4" />
-                        ) : hasImageActivity ? (
-                          <RefreshCw className="h-4 w-4" />
-                        ) : (
-                          <ExternalLink className="h-4 w-4" />
-                        )}
-                      </Button>
-                     )}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-                      aria-label="Edit Category Prompt"
-                      title="Edit Category Prompt"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-
-                <TabsContent value="draft">
-                  {filteredPosts.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <div className="text-lg font-medium mb-2">No draft posts</div>
-                      <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                       {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="published">
-                  {filteredPosts.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <div className="text-lg font-medium mb-2">No published posts</div>
-                      <div className="text-sm">No posts have been published in this theme yet.</div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </div>
+            {/* Post Content - No tabs, just content based on activeTab */}
+            {filteredPosts.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="text-lg font-medium mb-2">No {activeTab} posts</div>
+                <div className="text-sm">
+                  {activeTab === 'draft' 
+                    ? 'All posts in this theme are published or there are no posts yet.'
+                    : 'No posts have been published in this theme yet.'
+                  }
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => openIndividualPromptPanel(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
+              </div>
+            )}
           </div>
         ) : (
           /* Desktop: Keep existing Card container layout */
           <Card className="h-full">
             <div className="p-6">
-              <Tabs value={activeTab} onValueChange={value => setActiveTab(value as "draft" | "published")}>
-                {/* Tabs Section */}
-                {userIsAdmin && (
-                  <div className="mb-4">
-                    <TabsList>
-                      <TabsTrigger value="draft">
-                        Draft {posts.filter(p => p.status === 'draft').length > 0 && (
-                          <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
-                            {posts.filter(p => p.status === 'draft').length}
-                          </span>
-                        )}
-                      </TabsTrigger>
-                      <TabsTrigger value="published">Published</TabsTrigger>
-                    </TabsList>
+              {/* Post Content - No tabs, just content based on activeTab */}
+              {filteredPosts.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="text-lg font-medium mb-2">No {activeTab} posts</div>
+                  <div className="text-sm">
+                    {activeTab === 'draft' 
+                      ? 'All posts in this theme are published or there are no posts yet.'
+                      : 'No posts have been published in this theme yet.'
+                    }
                   </div>
-                )}
-                
-                {/* Action Buttons Section */}
-                {category && userIsAdmin && (
-                  <div className="flex items-center justify-end mb-4 gap-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            disabled={isBulk169}
-                            className="gap-1 text-xs sm:text-sm"
-                            aria-label="Bulk actions"
-                            title="Bulk actions"
-                          >
-                            Bulk
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50">
-                          <DropdownMenuLabel>Bulk: 16:9</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={handleBulkGenerate169} disabled={isBulk169}>
-                            Generate for missing only (respects theme filter)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleBulkRegenerate169} disabled={isBulk169}>
-                            Regenerate for all (ignores theme filter)
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Bulk: 1:1</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={handleBulkGenerate11} disabled={isBulk11}>
-                            Generate for missing only (respects theme filter)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleBulkRegenerate11} disabled={isBulk11}>
-                            Regenerate for all (ignores theme filter)
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                        <Button
-                          variant={isFeatured ? "default" : "outline"}
-                          size="sm"
-                          onClick={handleFeatureLatestCollection}
-                          disabled={isFeaturing}
-                          className="rounded-sm px-3 text-xs sm:text-sm"
-                          aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
-                          title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
-                        >
-                          <Star className={`h-3 w-3 ${isFeatured ? 'fill-current' : ''}`} />
-                        </Button>
-                        <Button
-                          variant={isInLibrary ? "default" : "outline"}
-                          size="icon"
-                          onClick={handlePublishCollection}
-                          disabled={isPublishing}
-                          className=""
-                          aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                          title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
-                        >
-                          <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
-                        </Button>
-                        {hasSharedLink && newPostsCount > 0 ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={handleUpdateCollection}
-                            disabled={isUpdatingCollection}
-                            className="gap-1 text-xs"
-                            aria-label={`Update & Share (${newPostsCount} new images)`}
-                            title={`Update collection with ${newPostsCount} new images and open in new tab`}
-                          >
-                            <Share2 className="h-3 w-3" />
-                            Update ({newPostsCount})
-                          </Button>
-                         ) : (
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            onClick={handleShare}
-                            disabled={isPublishing}
-                            className=""
-                            aria-label={
-                              !hasSharedLink 
-                                ? "Share" 
-                                : hasImageActivity 
-                                  ? "Update & Open" 
-                                  : "Open"
-                            }
-                            title={
-                              !hasSharedLink 
-                                ? "Publish collection and open in new tab" 
-                                : hasImageActivity 
-                                  ? "Update collection with new images and open in new tab" 
-                                  : "Open collection in new tab"
-                            }
-                          >
-                            {!hasSharedLink ? (
-                              <ExternalLink className="h-4 w-4" />
-                            ) : hasImageActivity ? (
-                              <RefreshCw className="h-4 w-4" />
-                            ) : (
-                              <ExternalLink className="h-4 w-4" />
-                            )}
-                          </Button>
-                         )}
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => setShowSystemPrompt(!showSystemPrompt)} 
-                        aria-label="Edit Category Prompt"
-                        title="Edit Category Prompt"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-
-                <TabsContent value="draft">
-                  {filteredPosts.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <div className="text-lg font-medium mb-2">No draft posts</div>
-                      <div className="text-sm">All posts in this theme are published or there are no posts yet.</div>
-                    </div>
-                  ) : (
-                     <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
-                  )}
-                </TabsContent>
-
-                <TabsContent value="published">
-                  {filteredPosts.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <div className="text-lg font-medium mb-2">No published posts</div>
-                      <div className="text-sm">No posts have been published in this theme yet.</div>
-                    </div>
-                  ) : (
-                    <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
-                  )}
-                </TabsContent>
-              </Tabs>
+                </div>
+              ) : (
+                <PostsTableView posts={filteredPosts} activeTab={activeTab} creatingBlogIds={creatingBlogIds} onStatusChange={handleStatusChange} onCopyContent={handleCopyContent} onDeletePost={handleDeletePost} onCreateBlogPost={handleCreateBlogPost} onGenerateVoiceoverScript={openVoiceoverModal} onGenerateImagePrompt={openIndividualPromptPanel} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} onPostsChange={onPostsChange} isAdmin={userIsAdmin} animatingRows={animatingRows} completingRows={completingRows} getRowAnimationClass={getRowAnimationClass} blogStatuses={blogStatuses} onEditPost={handleEditPost} />
+              )}
             </div>
           </Card>
         )}
