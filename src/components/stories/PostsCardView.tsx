@@ -406,7 +406,7 @@ export const PostsCardView = memo(({
                       const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
                       
                       return (
-                        <div key={aspectRatio} className="aspect-[4/3] relative group bg-muted rounded-md overflow-hidden">
+                        <div key={aspectRatio} className="aspect-video relative group bg-muted rounded-md overflow-hidden">
                           {imageUrl ? (
                             <div className="relative w-full h-full">
                               <img 
