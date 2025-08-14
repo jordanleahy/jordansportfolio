@@ -38,8 +38,11 @@ export const BlogPostButtonForRow: React.FC<BlogPostButtonForRowProps> = ({
   };
   
   const handleBlogAction = () => {
-    if (status.exists) {
+    if (status.exists && status.slug) {
       navigate(`/blog/${status.slug}`);
+    } else if (status.exists && status.id) {
+      // Fallback to blog editor if we have an ID but no slug
+      navigate(`/blog-editor/${status.id}`);
     } else {
       onCreateBlogPost(post);
     }
