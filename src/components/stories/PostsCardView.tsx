@@ -399,14 +399,19 @@ export const PostsCardView = memo(({
               <CardContent className="space-y-4">
                 {/* Small Images Grid - Collapsible */}
                 {expandedPosts.has(post.id) && (
-                  <div className="grid grid-cols-3 gap-2 animate-in slide-in-from-top-2 duration-200">
-                    {(['16:9', '4:3', '1:1'] as const).map((aspectRatio) => {
+                  <div className="grid grid-cols-4 gap-2 animate-in slide-in-from-top-2 duration-200">
+                    {(['16:9', '4:3', '3:4', '9:16'] as const).map((aspectRatio) => {
                       const aspectKey = aspectRatio.replace(':', '_') as AspectRatioKey;
                       const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
                       const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
                       
                       return (
-                        <div key={aspectRatio} className="aspect-video relative group bg-muted rounded-md overflow-hidden">
+                        <div key={aspectRatio} className={`${
+                          aspectRatio === '16:9' ? 'aspect-video' :
+                          aspectRatio === '4:3' ? 'aspect-[4/3]' :
+                          aspectRatio === '3:4' ? 'aspect-[3/4]' :
+                          aspectRatio === '9:16' ? 'aspect-[9/16]' : 'aspect-video'
+                        } relative group bg-muted rounded-md overflow-hidden`}>
                           {imageUrl ? (
                             <div className="relative w-full h-full">
                               <img 
