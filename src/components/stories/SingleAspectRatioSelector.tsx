@@ -86,7 +86,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
         className="w-48 bg-background border border-border shadow-lg z-50"
       >
         <DropdownMenuLabel className="text-sm font-medium">
-          Set Aspect Ratio
+          Create Image
         </DropdownMenuLabel>
         {aspectRatioOptions.map((option) => (
           <DropdownMenuItem
@@ -97,7 +97,6 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           >
             <div className="flex items-center w-full">
               <div className="flex items-center flex-1">
-                <Image className="mr-2 h-4 w-4" />
                 {option.label}
               </div>
               <span className="text-xs text-muted-foreground ml-2">
