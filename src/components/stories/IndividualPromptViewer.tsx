@@ -290,8 +290,16 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
   return (
     <Card className="border-l-4 border-l-primary">
       <CardHeader>
-        <div>
+        <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Individual Image Prompt</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
         {headerComponent}
       </CardHeader>
