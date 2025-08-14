@@ -205,8 +205,9 @@ export const PostsCardView = memo(({
             {/* Content Section - Right */}
             <div className="flex-1 md:pl-6">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                <div className="space-y-3">
+                  {/* Title and Day Badge */}
+                  <div className="flex items-center gap-3 flex-wrap">
                     <CardTitle className="text-xl leading-tight">{post.title}</CardTitle>
                     {post.day && (
                       <Badge variant="outline" className="shrink-0 text-xs">
@@ -215,8 +216,15 @@ export const PostsCardView = memo(({
                     )}
                   </div>
                   
-                  {/* Action Buttons - Right Aligned */}
-                  <div className="flex gap-2 shrink-0">
+                  {/* Description */}
+                  {post.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {post.description}
+                    </p>
+                  )}
+                  
+                  {/* Action Buttons - Wrapping Below */}
+                  <div className="flex gap-2 flex-wrap">
                     {/* Blog Post Button */}
                     {isAdmin && (
                       <BlogPostButtonForRow
@@ -227,7 +235,7 @@ export const PostsCardView = memo(({
                       />
                     )}
                     
-                     <div className="flex gap-1">
+                     <div className="flex gap-1 flex-wrap">
                        <ActionButton
                          icon={<Copy className="h-4 w-4" />}
                          onClick={() => onCopyContent(post)}
@@ -287,11 +295,6 @@ export const PostsCardView = memo(({
                       </div>
                    </div>
                  </div>
-                 {post.description && (
-                   <p className="text-sm text-muted-foreground mt-2">
-                     {post.description}
-                   </p>
-                 )}
               </CardHeader>
 
               <CardContent className="space-y-4">
