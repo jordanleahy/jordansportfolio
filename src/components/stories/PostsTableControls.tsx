@@ -340,7 +340,7 @@ export const PostsTableControls = ({
       setHasSharedLink(true);
       setNewPostsCount(5); // Simulate 5 new images
       setHasImageActivity(true);
-      window.open('https://example.com/shared-collection', '_blank');
+      // TODO: Replace with actual share URL when collection functionality is implemented
       toast.success('Share action completed');
     } catch (error) {
       toast.error('Failed to perform share action');
@@ -354,7 +354,7 @@ export const PostsTableControls = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       setNewPostsCount(0);
       setHasImageActivity(false);
-      window.open('https://example.com/shared-collection', '_blank');
+      // TODO: Replace with actual collection URL when update functionality is implemented
       toast.success('Collection updated');
     } catch (error) {
       toast.error('Failed to update collection');
