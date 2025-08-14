@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -2903,23 +2903,23 @@ export type Database = {
       }
       check_theme_submission_rate_limit: {
         Args: {
-          p_user_id: string
-          p_time_window_minutes?: number
           p_max_submissions?: number
+          p_time_window_minutes?: number
+          p_user_id: string
         }
         Returns: boolean
       }
       cleanup_duplicate_posts: {
         Args: {
-          p_user_id: string
           p_category: string
-          p_theme_id: string
           p_keep_latest?: boolean
+          p_theme_id: string
+          p_user_id: string
         }
         Returns: {
           action: string
-          post_count: number
           kept_posts: number
+          post_count: number
           removed_posts: number
         }[]
       }
@@ -2940,21 +2940,21 @@ export type Database = {
         Returns: boolean
       }
       find_duplicate_theme: {
-        Args: { p_user_id: string; p_category: string; p_theme: string }
+        Args: { p_category: string; p_theme: string; p_user_id: string }
         Returns: {
-          existing_id: string
-          existing_count: number
           created_at: string
+          existing_count: number
+          existing_id: string
         }[]
       }
       find_duplicate_themes: {
         Args: { p_user_id: string }
         Returns: {
           category: string
-          theme: string
           duplicate_count: number
-          latest_theme_id: string
           earliest_created_at: string
+          latest_theme_id: string
+          theme: string
         }[]
       }
       fix_hardcoded_aspect_ratio_in_prompts: {
@@ -2974,9 +2974,9 @@ export type Database = {
         Returns: {
           agent_id: string
           agent_name: string
-          relationship_type: string
           depth: number
           is_required: boolean
+          relationship_type: string
         }[]
       }
       get_agent_name: {
@@ -2986,49 +2986,49 @@ export type Database = {
       get_cache_stats: {
         Args: { user_id_param?: string }
         Returns: {
-          total_prompts: number
+          avg_hit_count: number
+          categories_count: number
           expired_prompts: number
           total_hits: number
-          categories_count: number
-          avg_hit_count: number
+          total_prompts: number
         }[]
       }
       get_or_create_monthly_aggregate: {
-        Args: { target_user_id: string; target_month: string }
+        Args: { target_month: string; target_user_id: string }
         Returns: string
       }
       get_submission_analytics: {
         Args: { p_user_id: string }
         Returns: {
-          total_submissions: number
-          successful_submissions: number
-          failed_submissions: number
-          duplicate_attempts: number
           avg_processing_time_ms: number
+          duplicate_attempts: number
+          failed_submissions: number
           last_submission_date: string
+          successful_submissions: number
+          total_submissions: number
         }[]
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
       import_theme_with_transaction: {
         Args: {
-          p_user_id: string
-          p_idempotency_key: string
           p_category: string
+          p_idempotency_key: string
+          p_posts_data: Json
           p_theme: string
           p_theme_description: string
-          p_posts_data: Json
+          p_user_id: string
         }
         Returns: {
-          success: boolean
+          error_message: string
           inserted_count: number
           submission_id: string
-          error_message: string
+          success: boolean
         }[]
       }
       insert_blog_agent: {
@@ -3052,8 +3052,8 @@ export type Database = {
               theme_id_param?: string
             }
           | {
-              posts_data: Json
               category_name?: string
+              posts_data: Json
               theme_description_param?: string
               theme_id_param?: string
             }
@@ -3081,9 +3081,9 @@ export type Database = {
       }
       insert_posts_for_theme: {
         Args: {
-          theme_id: string
           posts_data: Json
           theme_description_param?: string
+          theme_id: string
         }
         Returns: number
       }
@@ -3121,40 +3121,40 @@ export type Database = {
       }
       log_submission_event: {
         Args: {
-          p_user_id: string
-          p_submission_id: string
-          p_event_type: string
           p_event_data?: Json
+          p_event_type: string
           p_processing_time_ms?: number
+          p_submission_id: string
+          p_user_id: string
         }
         Returns: string
       }
       publish_shared_collection_1_1: {
         Args: {
-          p_handle: string
-          p_title?: string
           p_description?: string
+          p_handle: string
           p_post_ids?: string[]
           p_theme_id?: string
+          p_title?: string
         }
         Returns: string
       }
       publish_shared_collection_16_9: {
         Args:
           | {
-              p_handle: string
-              p_title?: string
-              p_description?: string
-              p_post_ids?: string[]
               p_category?: string
+              p_description?: string
+              p_handle: string
+              p_post_ids?: string[]
               p_theme_id?: string
+              p_title?: string
             }
           | {
-              p_handle: string
-              p_title?: string
               p_description?: string
+              p_handle: string
               p_post_ids?: string[]
               p_theme_id?: string
+              p_title?: string
             }
         Returns: string
       }
