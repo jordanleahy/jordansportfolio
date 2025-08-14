@@ -427,11 +427,11 @@ export const PostsCardView = memo(({
                                     e.stopPropagation();
                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                                   }}
-                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
-                                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title="Regenerate image"
-                                >
-                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
+                                   disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
+                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                                   title="Regenerate image"
+                                 >
+                                   {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
                                 </button>
                               </div>
                             </div>
