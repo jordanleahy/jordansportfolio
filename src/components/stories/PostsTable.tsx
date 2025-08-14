@@ -113,26 +113,8 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     closePreviewImage
   } = useModalManager();
 
-  // Custom function to handle prompt button based on user role
-  const handlePromptButton = useCallback((post: SocialMediaPost) => {
-    // Check if any regeneration is in progress for this post
-    if (isProcessing(post.id, 'generate') || isProcessing(post.id, 'regenerate_prompt')) {
-      toast.error("Cannot perform action while image regeneration is in progress");
-      return;
-    }
-
-    // For regular users, directly regenerate the prompt without showing the panel
-    if (!userIsAdmin && !isAdmin) {
-      handleRegeneratePrompt(post);
-      return;
-    }
-
-    // For admin/moderator users, open the prompt panel for editing
-    originalOpenIndividualPromptPanel(post);
-  }, [isProcessing, userIsAdmin, isAdmin, originalOpenIndividualPromptPanel]);
-
   // Function to regenerate prompt directly for regular users
-  const handleRegeneratePrompt = async (post: SocialMediaPost) => {
+  const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
     try {
       toast.info("Regenerating prompt...");
       
@@ -163,7 +145,25 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
       console.error('Error regenerating prompt:', error);
       toast.error('Failed to regenerate prompt');
     }
-  };
+  }, [onPostsChange]);
+
+  // Custom function to handle prompt button based on user role
+  const handlePromptButton = useCallback((post: SocialMediaPost) => {
+    // Check if any regeneration is in progress for this post
+    if (isProcessing(post.id, 'generate') || isProcessing(post.id, 'regenerate_prompt')) {
+      toast.error("Cannot perform action while image regeneration is in progress");
+      return;
+    }
+
+    // For regular users, directly regenerate the prompt without showing the panel
+    if (!userIsAdmin && !isAdmin) {
+      handleRegeneratePrompt(post);
+      return;
+    }
+
+    // For admin/moderator users, open the prompt panel for editing
+    originalOpenIndividualPromptPanel(post);
+  }, [isProcessing, userIsAdmin, isAdmin, originalOpenIndividualPromptPanel, handleRegeneratePrompt]);
   const {
     creatingBlogIds,
     handleStatusChange: originalHandleStatusChange,
