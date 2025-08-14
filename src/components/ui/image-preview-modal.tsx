@@ -367,7 +367,16 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
       }
     } catch (err) {
       console.error('Edit failed:', err);
-      toast.error('Edit failed');
+      
+      // Check for specific OpenAI moderation errors
+      const errorMessage = err?.message || '';
+      if (errorMessage.includes('safety system') || errorMessage.includes('moderation')) {
+        toast.error('Edit blocked by content safety system. Try rephrasing your request or use different wording.');
+      } else if (errorMessage.includes('rate limit')) {
+        toast.error('Rate limit exceeded. Please wait a moment and try again.');
+      } else {
+        toast.error('Edit failed. Please try again with different wording.');
+      }
     } finally {
       setIsProcessing(false);
     }
