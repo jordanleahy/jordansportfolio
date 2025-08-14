@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings2 } from 'lucide-react';
+import { Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -78,7 +78,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           className="h-8 w-8 p-0"
           disabled={isUpdating}
         >
-          <Settings2 className="h-4 w-4" />
+          <Image className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
@@ -97,7 +97,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           >
             <div className="flex items-center w-full">
               <div className="flex items-center flex-1">
-                <Settings2 className="mr-2 h-4 w-4" />
+                <Image className="mr-2 h-4 w-4" />
                 {option.label}
               </div>
               <span className="text-xs text-muted-foreground ml-2">
