@@ -39,7 +39,19 @@ export const useThemePosts = (themeId: string, enabled = true) => {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      return data || [];
+      
+      // Check if all posts have completed individual prompts
+      const posts = data || [];
+      const allPromptsCompleted = posts.length > 0 && posts.every(post => 
+        post.individual_prompt_status === 'completed'
+      );
+      
+      // Don't return posts until all individual prompts are completed
+      if (posts.length > 0 && !allPromptsCompleted) {
+        return [];
+      }
+      
+      return posts;
     },
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
     enabled: enabled && !!themeId,
