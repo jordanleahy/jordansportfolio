@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
           .from('social_media_posts')
           .select('id')
           .eq('user_id', user.id)
-          .eq('category', category);
+          .eq('theme_id', themeId);
 
         if (postsCheckError) {
           throw new Error(`Failed to verify ownership: ${postsCheckError.message}`);
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
         const { error: postsError } = await supabaseClient
           .from('social_media_posts')
           .delete()
-          .eq('category', category)
+          .eq('theme_id', themeId)
           .eq('user_id', user.id);
 
         if (postsError) {
@@ -122,22 +122,22 @@ Deno.serve(async (req) => {
         const { error: cacheError } = await supabaseClient
           .from('cached_prompts')
           .delete()
-          .eq('category', category)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .like('cache_key', `%${themeId}%`);
 
         if (cacheError) {
           console.warn(`Warning: Failed to delete cached prompts for ${category}:`, cacheError.message);
         }
 
-        // Delete theme submissions (best effort)
-        const { error: submissionsError } = await supabaseClient
-          .from('theme_submissions')
+        // Delete the theme itself
+        const { error: themeError } = await supabaseClient
+          .from('themes')
           .delete()
-          .eq('category', category)
+          .eq('id', themeId)
           .eq('user_id', user.id);
 
-        if (submissionsError) {
-          console.warn(`Warning: Failed to delete theme submissions for ${category}:`, submissionsError.message);
+        if (themeError) {
+          console.warn(`Warning: Failed to delete theme for ${category}:`, themeError.message);
         }
 
         results.push({

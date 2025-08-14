@@ -36,6 +36,8 @@ export const useCachedPrompts = (category?: string) => {
         .order('updated_at', { ascending: false });
       
       if (category) {
+        // For cached prompts, category field is still valid as it's used for prompt organization
+        // This is different from posts where we use theme_id for relationships
         query = query.eq('category', category);
       }
 
@@ -176,6 +178,7 @@ export const useClearAllCachedPrompts = (category?: string) => {
         .eq('user_id', currentUser.data.user.id);
       
       if (category) {
+        // For cached prompts cleanup by category, this is valid as category is used for organization
         query = query.eq('category', category);
       }
 

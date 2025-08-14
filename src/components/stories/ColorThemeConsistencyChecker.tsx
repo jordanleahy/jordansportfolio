@@ -33,12 +33,21 @@ export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyChecker
   const { data: colorThemes = [] } = useColorThemes();
 
   const { data: categoryPosts = [] } = useQuery({
-    queryKey: ['category-posts', category],
+    queryKey: ['theme-posts-for-consistency', category],
     queryFn: async () => {
+      // First get the theme ID from category name
+      const { data: theme, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', category)
+        .single();
+      
+      if (themeError || !theme) return [];
+      
       const { data, error } = await supabase
         .from('social_media_posts')
         .select('id, title, color_theme_id, status')
-        .eq('category', category);
+        .eq('theme_id', theme.id);
       
       if (error) throw error;
       return data;

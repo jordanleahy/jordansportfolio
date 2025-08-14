@@ -7,13 +7,24 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 
 // Individual category query hook for granular caching
 export const useCategoryPosts = (category: string, enabled = true) => {
+  // DEPRECATED: This hook uses category which is being replaced by theme_id
+  // Use useThemePosts instead for new code
   return useQuery({
     queryKey: QUERY_KEYS.postsByCategory(category),
     queryFn: async () => {
+      // First get the theme ID from category name
+      const { data: theme, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', category)
+        .single();
+      
+      if (themeError || !theme) return [];
+      
       const { data, error } = await supabase
         .from('social_media_posts')
         .select('*')
-        .eq('category', category)
+        .eq('theme_id', theme.id)
         .order('day', { ascending: true });
       
       if (error) throw error;
@@ -177,21 +188,26 @@ export function useOptimizedStories(user: any) {
     }
   }, [availableThemes, isLoadingAvailableThemes, searchParams, setSearchParams, isInitialized]);
 
-  // Active category posts query with optimistic updates
+  // Active theme posts query with optimistic updates 
   const activeTabQuery = useQuery({
-    queryKey: QUERY_KEYS.postsByCategory(activeTab),
+    queryKey: QUERY_KEYS.postsByTheme(activeTab),
     queryFn: async () => {
       if (!activeTab) return [];
+      
+      // Find the theme by name to get its ID
+      const selectedTheme = availableThemes.find(t => t.theme_name === activeTab);
+      if (!selectedTheme) return [];
+      
       const { data, error } = await supabase
         .from('social_media_posts')
         .select('*')
-        .eq('category', activeTab)
+        .eq('theme_id', selectedTheme.id)
         .order('day', { ascending: true });
       
       if (error) throw error;
       return (data || []) as SocialMediaPost[];
     },
-    enabled: !!activeTab && !!user?.id,
+    enabled: !!activeTab && !!user?.id && availableThemes.length > 0,
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
     refetchOnWindowFocus: false, // Background refetching only
     placeholderData: (previousData) => previousData, // Keep previous data while loading

@@ -42,6 +42,7 @@ export class OptimizedSocialMediaService {
       .order('id', { ascending: true });
 
     if (category) {
+      // DEPRECATED: category filtering - use getPostsByThemeId instead for theme-specific queries
       query = query.eq('category', category);
     }
 
@@ -54,8 +55,9 @@ export class OptimizedSocialMediaService {
     return posts;
   }
 
-  // Add new method for getting posts by category
+  // DEPRECATED: Use getPostsByThemeId instead for theme-based queries
   async getPostsByCategory(category: string): Promise<SocialMediaPost[]> {
+    console.warn('getPostsByCategory is deprecated. Use getPostsByThemeId for theme-based queries.');
     return this.getAllPosts(category);
   }
 

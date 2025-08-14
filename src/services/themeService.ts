@@ -73,6 +73,7 @@ export class ThemeService {
       .order('created_at', { ascending: false });
 
     if (category) {
+      // This is correct - filtering themes by their category field, not posts
       query = query.eq('category', category);
     }
 

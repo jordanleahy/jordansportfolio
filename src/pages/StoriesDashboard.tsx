@@ -215,16 +215,47 @@ export default function StoriesDashboard() {
   });
   const handleDeleteCategory = async (category: string) => {
     try {
-      const {
-        error: postsError
-      } = await supabase.from('social_media_posts').delete().eq('category', category).eq('user_id', user?.id);
+      // First get the theme ID from category name
+      const { data: theme, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('theme_name', category)
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (themeError || !theme) {
+        throw new Error(`Theme "${category}" not found`);
+      }
+      
+      // Delete posts by theme_id
+      const { error: postsError } = await supabase
+        .from('social_media_posts')
+        .delete()
+        .eq('theme_id', theme.id)
+        .eq('user_id', user?.id);
+      
       if (postsError) throw postsError;
-      const {
-        error: cacheError
-      } = await supabase.from('cached_prompts').delete().eq('category', category).eq('user_id', user?.id);
+      
+      // Delete the theme itself
+      const { error: themeDeleteError } = await supabase
+        .from('themes')
+        .delete()
+        .eq('id', theme.id)
+        .eq('user_id', user?.id);
+      
+      if (themeDeleteError) throw themeDeleteError;
+      
+      // Delete cached prompts related to this theme
+      const { error: cacheError } = await supabase
+        .from('cached_prompts')
+        .delete()
+        .eq('user_id', user?.id)
+        .like('cache_key', `%${theme.id}%`);
+      
       if (cacheError) console.warn('Failed to delete cached prompts:', cacheError);
+      
       toast({
-        title: "Category Deleted",
+        title: "Theme Deleted",
         description: `Successfully deleted "${category}" and all its posts`
       });
     } catch (error: any) {

@@ -9,11 +9,22 @@ export const triggerSystemPromptGeneration = async (category: string) => {
   
   try {
     console.log('🔍 STEP 1: Checking existing posts for category');
-    // Check if posts exist for this category
+    // Check if posts exist for this theme by getting theme ID first
+    const { data: theme } = await supabase
+      .from('themes')
+      .select('id')
+      .eq('theme_name', category)
+      .single();
+    
+    if (!theme) {
+      console.log('❌ No theme found for category:', category);
+      return { success: false, error: 'No theme found for this category' };
+    }
+    
     const postsQuery = supabase
       .from('social_media_posts')
       .select('id, title, description')
-      .eq('category', category)
+      .eq('theme_id', theme.id)
       .limit(3);
     const { data: existingPosts, error: postsError } = await postsQuery;
     
@@ -182,16 +193,16 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
 export const triggerMissingSystemPrompts = async () => {
   console.log('🔍 SEARCHING: Categories with posts but no system prompts');
   
-  // Get all categories with posts
-  const categoriesQuery = supabase
-    .from('social_media_posts')
-    .select('category')
-    .neq('category', null);
-  const { data: categories } = await categoriesQuery;
+  // Get all themes that have posts but no system prompts
+  const themesQuery = supabase
+    .from('themes')
+    .select('theme_name, id')
+    .is('visual_prompt_system_prompt_id', null);
+  const { data: themes } = await themesQuery;
   
-  if (!categories) return [];
+  if (!themes) return [];
   
-  const uniqueCategories = [...new Set(categories.map((c: any) => c.category))];
+  const uniqueCategories = themes.map((t: any) => t.theme_name);
   console.log('📂 FOUND CATEGORIES:', uniqueCategories);
   
   const results = [];
