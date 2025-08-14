@@ -23,15 +23,17 @@ import {
 import { Plus } from 'lucide-react';
 import { CreateAgentData, AgentStatus } from '@/types/openaiAgent';
 import { AgentTemplateSelector } from './AgentTemplateSelector';
-import { MODEL_OPTIONS, DEFAULT_MODELS } from '@/constants/agentConstants';
+import { useModelOptionsForForm } from '@/hooks/useAgentModelOptions';
 import { Badge } from '@/components/ui/badge';
 
 export const CreateAgentModal = () => {
   const [open, setOpen] = useState(false);
+  const { data: modelOptions, isLoading: modelsLoading } = useModelOptionsForForm();
+  
   const [formData, setFormData] = useState<CreateAgentData>({
     name: '',
     purpose: '',
-    model_version: DEFAULT_MODELS.FAST,
+    model_version: 'gpt-5-mini-2025-08-07',
     trigger: '',
     input_source: '',
     output_target: '',
@@ -53,7 +55,7 @@ export const CreateAgentModal = () => {
         setFormData({
           name: '',
           purpose: '',
-          model_version: DEFAULT_MODELS.FAST,
+          model_version: 'gpt-5-mini-2025-08-07',
           trigger: '',
           input_source: '',
           output_target: '',
@@ -139,19 +141,23 @@ export const CreateAgentModal = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {MODEL_OPTIONS.map((model) => (
-                    <SelectItem key={model.value} value={model.value}>
-                      <div className="flex items-center gap-2">
-                        <span>{model.label}</span>
-                        {model.recommended && (
-                          <Badge variant="secondary" className="text-xs">Recommended</Badge>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {modelsLoading ? (
+                    <SelectItem value="" disabled>Loading models...</SelectItem>
+                  ) : (
+                    modelOptions?.map((model) => (
+                      <SelectItem key={model.value} value={model.value}>
+                        <div className="flex items-center gap-2">
+                          <span>{model.label}</span>
+                          {model.recommended && (
+                            <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
-              </Select>
-            </div>
+                </Select>
+              </div>
             <div>
               <Label htmlFor="status">Status</Label>
               <Select
