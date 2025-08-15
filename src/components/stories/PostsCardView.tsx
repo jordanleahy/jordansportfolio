@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserRole } from '@/hooks/useUserRole';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
@@ -64,6 +65,7 @@ export const PostsCardView = memo(({
   const { toast } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const isMobile = useIsMobile();
+  const { isAdmin: isUserAdmin } = useUserRole();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
@@ -400,12 +402,14 @@ export const PostsCardView = memo(({
                          </>
                        )}
                         
-                        <ActionButton
-                          icon={<ChevronDown className={`h-4 w-4 transition-transform ${expandedPosts.has(post.id) ? 'rotate-180' : ''}`} />}
-                          onClick={() => togglePostExpansion(post.id)}
-                          title="Toggle images"
-                          size="sm"
-                        />
+                         {isUserAdmin && (
+                           <ActionButton
+                             icon={<ChevronDown className={`h-4 w-4 transition-transform ${expandedPosts.has(post.id) ? 'rotate-180' : ''}`} />}
+                             onClick={() => togglePostExpansion(post.id)}
+                             title="Toggle images"
+                             size="sm"
+                           />
+                         )}
                         
                          {false && (
                            <ActionButton
