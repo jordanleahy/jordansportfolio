@@ -8,13 +8,15 @@ interface PostCardActionsProps {
   onCopy: (post: SocialMediaPost) => void;
   onDelete: (postId: string) => void;
   onStoryTelling: () => void;
+  showStoryTelling?: boolean;
 }
 
 export const PostCardActions: React.FC<PostCardActionsProps> = ({
   post,
   onCopy,
   onDelete,
-  onStoryTelling
+  onStoryTelling,
+  showStoryTelling = true
 }) => {
   const handleShare = async () => {
     if (navigator.share) {
@@ -43,15 +45,17 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       >
         <Share className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onStoryTelling}
-        className="h-8 w-8 p-0"
-        title="Create Story Narration"
-      >
-        <Mic className="h-4 w-4" />
-      </Button>
+      {showStoryTelling && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onStoryTelling}
+          className="h-8 w-8 p-0"
+          title="Create Story Narration"
+        >
+          <Mic className="h-4 w-4" />
+        </Button>
+      )}
       <Button
         variant="ghost"
         size="sm"

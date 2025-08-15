@@ -13,6 +13,7 @@ interface PostCardHeaderProps {
   onDelete: (postId: string) => void;
   onStatusChange: (postId: string, status: string) => void;
   onStoryTelling: () => void;
+  showStoryTelling?: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -33,7 +34,8 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
   onCopy,
   onDelete,
   onStatusChange,
-  onStoryTelling
+  onStoryTelling,
+  showStoryTelling = false
 }) => {
   return (
     <CardHeader className="pb-3">
@@ -59,6 +61,7 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
           onCopy={onCopy}
           onDelete={onDelete}
           onStoryTelling={onStoryTelling}
+          showStoryTelling={showStoryTelling}
         />
       </div>
     </CardHeader>
