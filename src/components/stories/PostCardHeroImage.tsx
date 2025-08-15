@@ -75,6 +75,8 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                 isVisible={true}
                 message="Generating..."
                 className="text-white drop-shadow-sm"
+                showCountdown={true}
+                countdownDuration={90000}
               />
             </div>
           </div>

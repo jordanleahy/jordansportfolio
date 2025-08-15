@@ -1,22 +1,40 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CountdownTimer } from './countdown-timer';
 
 interface InstantLoadingIndicatorProps {
   isVisible: boolean;
   message?: string;
   elapsedTime?: number;
   className?: string;
+  showCountdown?: boolean;
+  countdownDuration?: number; // Duration in milliseconds
 }
 
 export const InstantLoadingIndicator: React.FC<InstantLoadingIndicatorProps> = ({
   isVisible,
   message = "Generating...",
   elapsedTime = 0,
-  className
+  className,
+  showCountdown = false,
+  countdownDuration = 90000
 }) => {
   if (!isVisible) return null;
 
+  // Use countdown timer if enabled
+  if (showCountdown) {
+    return (
+      <CountdownTimer 
+        elapsedTime={elapsedTime}
+        duration={countdownDuration}
+        className={className}
+        showProgress={true}
+      />
+    );
+  }
+
+  // Original behavior for non-countdown mode
   const getProgressMessage = () => {
     if (elapsedTime < 2000) return message;
     if (elapsedTime < 5000) return "Processing your request...";

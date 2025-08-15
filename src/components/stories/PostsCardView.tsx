@@ -290,6 +290,8 @@ export const PostsCardView = memo(({
                             isVisible={true}
                             message="Regenerating..."
                             className="text-white drop-shadow-sm"
+                            showCountdown={true}
+                            countdownDuration={90000}
                           />
                         </div>
                       </div>
@@ -477,6 +479,8 @@ export const PostsCardView = memo(({
                                   isVisible={true}
                                   message="Regenerating..."
                                   className="text-white drop-shadow-sm text-xs"
+                                  showCountdown={true}
+                                  countdownDuration={90000}
                                 />
                               </div>
                             </div>
@@ -519,6 +523,8 @@ export const PostsCardView = memo(({
                       isVisible={isInstantGenerating(post.id)}
                       message="Generating..."
                       elapsedTime={getElapsedTime(post.id)}
+                      showCountdown={true}
+                      countdownDuration={90000}
                       className="text-xs"
                     />
                   </div>
