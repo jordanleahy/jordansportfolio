@@ -7,8 +7,8 @@ import AppLayout from "@/components/layout/AppLayout";
 const Index = () => {
   // Generate SEO metadata for homepage
   const homeSEO = generateSEOMetadata({
-    title: "Jordan Leahy — Every Thought is a Visual Journey",
-    description: "Every Thought is a Visual Journey",
+    title: "Lead Healthcare Product Designer",
+    description: "ex BCG, SmarterDx, Definitive Healthcare, PrescriberPoint and HTD Health",
     image: shipImage,
     url: "/",
     type: "website"
