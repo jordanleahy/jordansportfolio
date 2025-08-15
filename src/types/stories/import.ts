@@ -48,33 +48,6 @@ export interface ImportRpcResponse {
   theme_id: string | null;
 }
 
-// Hook Options
-export interface UseThemeImportOptions {
-  onImportComplete?: () => void;
-  onStateChange?: (state: ProcessingState) => void;
-}
-
-// Hook Return Type
-export interface UseThemeImportReturn {
-  // State
-  state: ProcessingState;
-  progress: ImportProgress | null;
-  validationResult: ProcessingResult | null;
-  isProcessing: boolean;
-  canImport: boolean;
-  hasErrors: boolean;
-  hasWarnings: boolean;
-  
-  // Actions
-  validateInput: (input: string) => ProcessingResult;
-  processWithAI: (input: string) => void;
-  importData: () => void;
-  reset: () => void;
-  
-  // Raw mutations for advanced usage
-  aiProcessMutation: any;
-  importMutation: any;
-}
 
 // Import Strategy Types
 export interface ImportStrategy {

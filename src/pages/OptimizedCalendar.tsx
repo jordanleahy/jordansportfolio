@@ -33,7 +33,7 @@ import {
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
-const CustomThemeModal = React.lazy(() => import('@/components/stories/CustomThemeModal').then(module => ({ default: module.CustomThemeModal })));
+
 
 type CategoryType = string;
 
@@ -41,7 +41,7 @@ export default function OptimizedCalendar() {
   const { user, loading } = useAuth();
   const { isAdmin } = useUserRole();
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [customThemeModalOpen, setCustomThemeModalOpen] = useState(false);
+  
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
 
@@ -184,12 +184,6 @@ export default function OptimizedCalendar() {
                   </div>
                 </div>
                 
-                <Button
-                  onClick={() => setCustomThemeModalOpen(true)}
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                >
-                  Custom
-                </Button>
                 
                 <Button
                   onClick={() => setImportModalOpen(true)}
@@ -212,13 +206,6 @@ export default function OptimizedCalendar() {
           />
         </Suspense>
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <CustomThemeModal 
-            isOpen={customThemeModalOpen}
-            onClose={() => setCustomThemeModalOpen(false)}
-            onImportComplete={handleImportComplete}
-          />
-        </Suspense>
 
         {/* Show tabs only if user has themes, otherwise show empty state */}
         {hasThemes ? (

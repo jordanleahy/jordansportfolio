@@ -27,8 +27,7 @@ export type {
   CategoriesGridProps,
   CategoryCardProps,
   PostCardProps,
-  PostsTableProps,
-  CustomThemeModalProps
+  PostsTableProps
 } from './ui';
 
 export type {
@@ -44,6 +43,5 @@ export type {
   ThemePost,
   ProcessingState,
   ProcessingResult,
-  ImportProgress,
-  UseThemeImportOptions
+  ImportProgress
 } from './import';

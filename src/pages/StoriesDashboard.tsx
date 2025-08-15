@@ -12,7 +12,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { useThemeImport } from '@/hooks/useThemeImport';
+
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
@@ -94,23 +94,6 @@ export default function StoriesDashboard() {
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
-  // Hook for theme import functionality
-  const {
-    validateInput,
-    importData,
-    isProcessing,
-    validationResult,
-    canImport,
-    hasErrors
-  } = useThemeImport({
-    onImportComplete: () => {
-      toast({
-        title: "Success!",
-        description: "Custom theme imported successfully"
-      });
-      setCustomThemeDescription('');
-    }
-  });
 
   // Enhanced initial load with loading states and error handling
   const [isLoadingThemes, setIsLoadingThemes] = useState(true);
@@ -842,12 +825,12 @@ export default function StoriesDashboard() {
                   value={customThemeDescription} 
                   onChange={e => setCustomThemeDescription(e.target.value)} 
                   onKeyDown={e => {
-                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isProcessing) {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
                       e.preventDefault();
                       handleGenerateCustomTheme();
                     }
                   }} 
-                  disabled={isGeneratingTheme || isProcessing} 
+                  disabled={isGeneratingTheme} 
                   typingSpeed={80}
                   deletingSpeed={40}
                   pauseDuration={2000}

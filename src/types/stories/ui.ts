@@ -113,11 +113,6 @@ export interface ThemeImportModalOptimizedProps {
   onOptimisticComplete?: (success: boolean, categoryName?: string) => void;
 }
 
-export interface CustomThemeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onImportComplete?: () => void;
-}
 
 
 // Form and Input Types
