@@ -39,6 +39,7 @@ const PostCardComponent = ({
   
   const [showGallery, setShowGallery] = useState(false);
   const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
+  const [isAdminSectionOpen, setIsAdminSectionOpen] = useState(true);
   
   const isProcessing = (aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3' | '1_1'): boolean => {
     if (aspectRatio) {
@@ -74,11 +75,13 @@ const PostCardComponent = ({
         onDelete={onDelete}
         onStatusChange={handleStatusChange}
         onStoryTelling={() => setShowStoryTellingModal(true)}
+        isAdminSectionOpen={isAdminSectionOpen}
+        onToggleAdminSection={() => setIsAdminSectionOpen(!isAdminSectionOpen)}
       />
       
       <CardContent className="space-y-4">
         {/* Admin Section */}
-        {isAdmin && (
+        {isAdmin && isAdminSectionOpen && (
           <PostCardAdminSection
             post={post}
             processingStates={processingStates}
