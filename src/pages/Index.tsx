@@ -25,11 +25,12 @@ const Index = () => {
     type: "website"
   });
 
-  // Redirect authenticated admin/moderator users to stories
-  // Users with 'user' role or while role is loading should stay on index page
-  if (!loading && user && role && (role === 'admin' || role === 'moderator')) {
-    return <Navigate to="/stories" replace />;
-  }
+  // All authenticated users can access stories page
+  // Only redirect if user explicitly wants to stay on portfolio view
+  // Commenting out redirect to let users choose between index and stories
+  // if (!loading && user) {
+  //   return <Navigate to="/stories" replace />;
+  // }
 
   // Show loading state while checking auth
   if (loading) {
