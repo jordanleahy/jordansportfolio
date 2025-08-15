@@ -49,7 +49,6 @@ export interface PostCardProps {
   onVideoRemove: (postId: string, type: '16_9_video' | '3_4_video' | 'general_video') => void;
   onImageDelete: (postId: string, type: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', imageUrl: string) => void;
-  onGenerateImage?: (postId: string, aspectRatio: '1_1', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
   onStatusChange: (postId: string, newStatus: 'draft' | 'scheduled' | 'published') => void;
   onPostsChange?: () => void;
   processingStates: {

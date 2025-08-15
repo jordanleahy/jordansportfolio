@@ -24,7 +24,6 @@ const PostCardComponent = ({
   onVideoRemove,
   onImageDelete,
   onImageGenerated,
-  onGenerateImage,
   onStatusChange,
   onPostsChange,
   processingStates,
@@ -62,7 +61,6 @@ const PostCardComponent = ({
         colorTheme={colorTheme}
         isProcessing={isProcessing('1_1')}
         onPostsChange={onPostsChange}
-        onGenerateImage={onGenerateImage}
       />
       
       <PostCardHeader
@@ -148,11 +146,6 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
     if (prevProps.post[field] !== nextProps.post[field]) {
       return false;
     }
-  }
-
-  // Check if onGenerateImage function changed
-  if (prevProps.onGenerateImage !== nextProps.onGenerateImage) {
-    return false;
   }
 
   // Check processing states more efficiently
