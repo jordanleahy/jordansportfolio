@@ -394,7 +394,10 @@ export default function StoriesDashboard() {
     }
   };
   const handleGenerateCustomTheme = async () => {
+    console.log('🎯 handleGenerateCustomTheme called');
+    
     if (!customThemeDescription.trim()) {
+      console.log('❌ No theme description provided');
       toast({
         title: "Description Required",
         description: "Please describe the theme you want to create",
@@ -403,7 +406,10 @@ export default function StoriesDashboard() {
       return;
     }
     const themeDescription = customThemeDescription.trim();
+    console.log('📝 Theme description:', themeDescription);
+    
     if (!user) {
+      console.log('❌ No user found');
       toast({
         title: "Sign in required",
         description: "Please sign in to generate themes."
@@ -411,8 +417,11 @@ export default function StoriesDashboard() {
       navigate('/auth');
       return;
     }
+    
+    console.log('✅ User found:', user.id);
     setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
+    console.log('🚀 Starting theme generation...');
 
     // Create a pending shimmer theme for optimistic UI
     const shimmerTheme: ThemeWithPosts = {
@@ -434,7 +443,10 @@ export default function StoriesDashboard() {
 
     // Add shimmer theme to the beginning of the list
     setAvailableThemes(prev => [shimmerTheme, ...prev]);
+    console.log('✨ Added pending theme to UI');
+    
     try {
+      console.log('📡 Calling edge function...');
       const {
         data,
         error
@@ -444,13 +456,19 @@ export default function StoriesDashboard() {
           stream: false
         }
       });
+      
+      console.log('📡 Edge function response:', { data, error });
       // Remove duplicate handling - always proceed with generation
       if (error) {
+        console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
       if (!data?.success) {
+        console.log('❌ Edge function returned failure:', data);
         throw new Error(data?.error || 'Failed to generate theme');
       }
+      
+      console.log('✅ Theme generation successful:', data);
       toast({
         title: "Theme Created!",
         description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`
@@ -459,8 +477,10 @@ export default function StoriesDashboard() {
       // Find and replace the pending theme with real data
       setPendingTheme(null);
       
+      console.log('🔄 Refreshing themes from server...');
       // Refresh themes from server and merge with pending themes
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+      console.log('📊 Refreshed themes count:', refreshedThemes.length);
       
       setAvailableThemes(prevThemes => {
         // Find the pending theme that matches our description
@@ -830,10 +850,11 @@ export default function StoriesDashboard() {
                   onChange={e => setCustomThemeDescription(e.target.value)} 
                   onKeyDown={e => {
                     if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
+                      console.log('⌨️ Enter key pressed - triggering theme generation');
                       e.preventDefault();
                       handleGenerateCustomTheme();
                     }
-                  }} 
+                  }}
                   disabled={isGeneratingTheme} 
                   typingSpeed={80}
                   deletingSpeed={40}
