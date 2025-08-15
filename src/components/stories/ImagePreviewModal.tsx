@@ -1,6 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { X, Download, Loader2, Edit, Upload, Image as ImageIcon } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -25,6 +32,7 @@ export const ImagePreviewModal = ({
   aspectRatio
 }: ImagePreviewModalProps) => {
   console.log('🖼️ ImagePreviewModal rendered with:', { imageUrl, aspectRatio, title });
+  const isMobile = useIsMobile();
 
   const formattedTitle = title && aspectRatio 
     ? `${title} ${aspectRatio} jordanleahy.com`
@@ -395,195 +403,218 @@ export const ImagePreviewModal = ({
       setEditState(prev => ({ ...prev, isSheetOpen: false }));
     }
   };
+
+  // Shared content component
+  const ModalContent = () => (
+    <div className="relative flex flex-col w-full h-full">
+      {/* Header with title and buttons */}
+      <div className="flex items-center justify-between p-4 bg-black/70">
+        <DialogTitle className="text-white text-lg font-semibold truncate mr-4">
+          {formattedTitle}
+        </DialogTitle>
+        <div className="flex items-center gap-2">
+          {/* Download button */}
+          <Button
+            onClick={handleDownload}
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+            title={isLoading ? 'Preparing watermark...' : 'Download'}
+            disabled={isLoading}
+          >
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
+          </Button>
+
+          {/* Edit Image button */}
+          <Button
+            onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: true }))}
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+            title="Edit Image"
+          >
+            <Edit className="h-5 w-5" />
+          </Button>
+          
+          {/* Close button */}
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Image */}
+      <div className={`flex items-center justify-center flex-1 transition-all duration-300 ${editState.isSheetOpen ? 'pb-80' : 'p-4'}`}>
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          className="max-w-full max-h-full object-contain rounded"
+          loading="lazy"
+        />
+      </div>
+
+      {/* Edit Sheet */}
+      <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-white text-lg font-semibold">Edit Image</h3>
+            <Button
+              onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-white hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Reference image display */}
+          {referenceImageState.image && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-white text-sm">Reference Image:</span>
+                <Button
+                  onClick={() => {
+                    console.log('🗑️ Removing reference image');
+                    setReferenceImageState({ image: null, analysis: null });
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 h-6 px-2"
+                >
+                  Remove
+                </Button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <img 
+                  src={referenceImageState.image} 
+                  alt="Reference" 
+                  className="w-16 h-16 object-cover rounded border border-white/20"
+                />
+                {referenceImageState.analysis?.extractedCharacteristics && (
+                  <div className="text-xs text-white/70 space-y-1">
+                    <div>Style: {referenceImageState.analysis.extractedCharacteristics.artisticStyle}</div>
+                    <div>Mood: {referenceImageState.analysis.extractedCharacteristics.overallMood}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-white text-sm">Describe the edit:</span>
+              <Button
+                onClick={() => {
+                  console.log('📁 Opening file picker');
+                  fileInputRef.current?.click();
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/10 h-6 px-2"
+                title="Upload reference image"
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Upload
+              </Button>
+            </div>
+            
+            <div 
+              className="relative"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <Textarea
+                value={editState.prompt}
+                onChange={(e) => {
+                  console.log('✏️ Edit prompt changed:', e.target.value);
+                  setEditState(prev => ({ ...prev, prompt: e.target.value }));
+                }}
+                onKeyDown={handleKeyDown}
+                onPaste={handleImagePaste}
+                placeholder="Describe how you want to edit the image... (You can also paste or drag & drop a reference image)"
+                className="min-h-[100px] bg-black/50 border-white/20 text-white placeholder:text-white/50 resize-none border-2 border-dashed"
+                disabled={editState.isProcessing}
+              />
+              <div className="absolute top-2 right-2 text-white/30 text-xs pointer-events-none">
+                Paste or drop image here
+              </div>
+            </div>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-white/50">
+                Tip: Paste images (Ctrl/Cmd+V), drag & drop, or press Ctrl/Cmd+Enter to submit
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10"
+                  disabled={editState.isProcessing}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleEditSubmit}
+                  size="sm"
+                  className="bg-white text-black hover:bg-white/90"
+                  disabled={editState.isProcessing || !editState.prompt.trim()}
+                >
+                  {editState.isProcessing ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Editing...
+                    </>
+                  ) : (
+                    'Edit Image'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={onClose}>
+        <DrawerContent className="h-[92vh] overflow-hidden bg-black/90">
+          <DrawerHeader className="border-b border-white/10">
+            <DrawerTitle className="text-white">
+              {formattedTitle}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-hidden">
+            <ModalContent />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-black/90"
         onPointerDownOutside={onClose}
       >
-        <div className="relative flex flex-col w-full h-full">
-          {/* Header with title and buttons */}
-          <div className="flex items-center justify-between p-4 bg-black/70">
-            <DialogTitle className="text-white text-lg font-semibold truncate mr-4">
-              {formattedTitle}
-            </DialogTitle>
-            <div className="flex items-center gap-2">
-              {/* Download button */}
-              <Button
-                onClick={handleDownload}
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
-                title={isLoading ? 'Preparing watermark...' : 'Download'}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
-              </Button>
-
-              {/* Edit Image button */}
-              <Button
-                onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: true }))}
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
-                title="Edit Image"
-              >
-                <Edit className="h-5 w-5" />
-              </Button>
-              
-              {/* Close button */}
-              <Button
-                onClick={onClose}
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className={`flex items-center justify-center flex-1 transition-all duration-300 ${editState.isSheetOpen ? 'pb-80' : 'p-4'}`}>
-            <img
-              src={imageUrl}
-              alt={imageAlt}
-              className="max-w-full max-h-full object-contain rounded"
-              loading="lazy"
-            />
-          </div>
-
-          {/* Edit Sheet */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-white text-lg font-semibold">Edit Image</h3>
-                <Button
-                  onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full text-white hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Reference image display */}
-              {referenceImageState.image && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white text-sm">Reference Image:</span>
-                    <Button
-                      onClick={() => {
-                        console.log('🗑️ Removing reference image');
-                        setReferenceImageState({ image: null, analysis: null });
-                      }}
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:bg-white/10 h-6 px-2"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <img 
-                      src={referenceImageState.image} 
-                      alt="Reference" 
-                      className="w-16 h-16 object-cover rounded border border-white/20"
-                    />
-                    {referenceImageState.analysis?.extractedCharacteristics && (
-                      <div className="text-xs text-white/70 space-y-1">
-                        <div>Style: {referenceImageState.analysis.extractedCharacteristics.artisticStyle}</div>
-                        <div>Mood: {referenceImageState.analysis.extractedCharacteristics.overallMood}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-white text-sm">Describe the edit:</span>
-                  <Button
-                    onClick={() => {
-                      console.log('📁 Opening file picker');
-                      fileInputRef.current?.click();
-                    }}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/10 h-6 px-2"
-                    title="Upload reference image"
-                  >
-                    <Upload className="h-3 w-3 mr-1" />
-                    Upload
-                  </Button>
-                </div>
-                
-                <div 
-                  className="relative"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  <Textarea
-                    value={editState.prompt}
-                    onChange={(e) => {
-                      console.log('✏️ Edit prompt changed:', e.target.value);
-                      setEditState(prev => ({ ...prev, prompt: e.target.value }));
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onPaste={handleImagePaste}
-                    placeholder="Describe how you want to edit the image... (You can also paste or drag & drop a reference image)"
-                    className="min-h-[100px] bg-black/50 border-white/20 text-white placeholder:text-white/50 resize-none border-2 border-dashed"
-                    disabled={editState.isProcessing}
-                  />
-                  <div className="absolute top-2 right-2 text-white/30 text-xs pointer-events-none">
-                    Paste or drop image here
-                  </div>
-                </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-
-                <div className="flex justify-between items-center">
-                  <div className="text-xs text-white/50">
-                    Tip: Paste images (Ctrl/Cmd+V), drag & drop, or press Ctrl/Cmd+Enter to submit
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:bg-white/10"
-                      disabled={editState.isProcessing}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleEditSubmit}
-                      size="sm"
-                      className="bg-white text-black hover:bg-white/90"
-                      disabled={editState.isProcessing || !editState.prompt.trim()}
-                    >
-                      {editState.isProcessing ? (
-                        <>
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Editing...
-                        </>
-                      ) : (
-                        'Edit Image'
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ModalContent />
       </DialogContent>
     </Dialog>
   );
