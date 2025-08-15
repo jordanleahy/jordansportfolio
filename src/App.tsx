@@ -26,6 +26,7 @@ import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
 import PublicVendorView from "./components/vendors/PublicVendorView";
 import PublicSharedCollection from "./pages/PublicSharedCollection";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
@@ -188,7 +189,7 @@ function App() {
                 <Route path="/vendors/:slugname" element={<AdminRoute><Vendors /></AdminRoute>} />
                 <Route path="/vendors/:slugname/:vendorSlug" element={<AdminRoute><VendorDetail /></AdminRoute>} />
                 <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
-                <Route path="/public/collections/:handle/:id" element={<PublicSharedCollection />} />
+                <Route path="/public/collections/:handle/:id" element={<ErrorBoundary><PublicSharedCollection /></ErrorBoundary>} />
                 <Route path="/homehealth" element={<HomeHealth />} />
                 
                 <Route path="/comparisons" element={<ComparisonIndex />} />

@@ -294,12 +294,24 @@ export default function PublicSharedCollection() {
 
       <main className="container mx-auto px-4 py-8">
         {loading && (
-          <div className="text-muted-foreground">Loading…</div>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <div className="text-muted-foreground">Loading collection...</div>
+            </div>
+          </div>
         )}
         {error && !loading && (
-          <div className="text-destructive">Collection not found.</div>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="text-destructive mb-4">Collection not found.</div>
+              <Link to="/stories" className="text-primary hover:underline">
+                Return to Story Ship
+              </Link>
+            </div>
+          </div>
         )}
-        {!loading && !error && (
+        {!loading && !error && collection && (
           <article>
             <h2 className="text-xl font-semibold mb-4">{pageTitle}</h2>
             <p className="text-muted-foreground mb-6">{pageDescription}</p>
@@ -351,6 +363,16 @@ export default function PublicSharedCollection() {
               </div>
             </section>
           </article>
+        )}
+        {!loading && !error && !collection && (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="text-muted-foreground mb-4">Collection not available.</div>
+              <Link to="/stories" className="text-primary hover:underline">
+                Return to Story Ship
+              </Link>
+            </div>
+          </div>
         )}
       </main>
 
