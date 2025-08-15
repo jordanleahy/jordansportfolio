@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Mic } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -13,12 +19,14 @@ import {
 import StoryTellingSetupPage from './StoryTellingSetupPage';
 import StoryTellingReadPage from './StoryTellingReadPage';
 import type { StoryTellingModalProps } from '@/types/stories/ui';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type StoryType = 'childrens_story' | 'convincing_story';
 type ModalPage = 'setup' | 'read';
 
 const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, post }) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState<ModalPage>('setup');
   const [storyType, setStoryType] = useState<StoryType>('childrens_story');
   const [generatedScript, setGeneratedScript] = useState<string>('');
@@ -233,38 +241,59 @@ const StoryTellingModal: React.FC<StoryTellingModalProps> = ({ isOpen, onClose, 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Shared content component
+  const ModalContent = () => (
+    <div className="py-6">
+      {currentPage === 'setup' ? (
+        <StoryTellingSetupPage
+          storyType={storyType}
+          setStoryType={setStoryType}
+          post={post}
+          onGenerateScript={handleGenerateScript}
+          isGenerating={generateScript.isPending}
+        />
+      ) : (
+        <StoryTellingReadPage
+          storyType={storyType}
+          generatedScript={generatedScript}
+          post={post}
+          onBack={handleBack}
+          onSave={saveStoryRecording}
+          isSaving={createStoryRecording.isPending}
+        />
+      )}
+      
+      {currentPage === 'setup' && (
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={onClose}>
+        <DrawerContent className="h-[92vh] overflow-hidden">
+          <DrawerHeader>
+            <DrawerTitle>
+              {currentPage === 'setup' ? 'Story Telling Setup' : 'Story Script'}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto px-4">
+            <ModalContent />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-
-        <div className="py-6">
-          {currentPage === 'setup' ? (
-            <StoryTellingSetupPage
-              storyType={storyType}
-              setStoryType={setStoryType}
-              post={post}
-              onGenerateScript={handleGenerateScript}
-              isGenerating={generateScript.isPending}
-            />
-          ) : (
-            <StoryTellingReadPage
-              storyType={storyType}
-              generatedScript={generatedScript}
-              post={post}
-              onBack={handleBack}
-              onSave={saveStoryRecording}
-              isSaving={createStoryRecording.isPending}
-            />
-          )}
-        </div>
-
-        {currentPage === 'setup' && (
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          </div>
-        )}
+        <ModalContent />
       </DialogContent>
     </Dialog>
   );
