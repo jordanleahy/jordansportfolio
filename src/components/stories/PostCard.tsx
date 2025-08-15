@@ -39,7 +39,7 @@ const PostCardComponent = ({
   
   const [showGallery, setShowGallery] = useState(false);
   const [showStoryTellingModal, setShowStoryTellingModal] = useState(false);
-  const [isAdminSectionOpen, setIsAdminSectionOpen] = useState(true);
+  const [isAdminSectionOpen, setIsAdminSectionOpen] = useState(false);
   
   const isProcessing = (aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3' | '1_1'): boolean => {
     if (aspectRatio) {
