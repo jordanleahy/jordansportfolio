@@ -26,7 +26,8 @@ const Index = () => {
   });
 
   // Redirect authenticated admin/moderator users to stories
-  if (!loading && user && (role === 'admin' || role === 'moderator')) {
+  // Users with 'user' role or while role is loading should stay on index page
+  if (!loading && user && role && (role === 'admin' || role === 'moderator')) {
     return <Navigate to="/stories" replace />;
   }
 
