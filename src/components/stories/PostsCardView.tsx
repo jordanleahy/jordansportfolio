@@ -407,13 +407,15 @@ export const PostsCardView = memo(({
                           size="sm"
                         />
                         
-                        <ActionButton
-                          icon={<Trash2 className="h-4 w-4" />}
-                          onClick={() => onDeletePost(post.id)}
-                          title="Delete post"
-                          variant="destructive"
-                          size="sm"
-                        />
+                         {false && (
+                           <ActionButton
+                             icon={<Trash2 className="h-4 w-4" />}
+                             onClick={() => onDeletePost(post.id)}
+                             title="Delete post"
+                             variant="destructive"
+                             size="sm"
+                           />
+                         )}
                       </div>
                    </div>
                  </div>
