@@ -84,9 +84,6 @@ verify_jwt = true
 [functions.social-media-agent]
 verify_jwt = true
 
-[functions.generate-image-streamlined]
-verify_jwt = false
-
 [functions.background-task-processor]
 verify_jwt = false
 
