@@ -1,6 +1,8 @@
 import React from 'react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { BlogStatusBadge } from './BlogStatusBadge';
 import { PostCardActions } from './PostCardActions';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -14,6 +16,8 @@ interface PostCardHeaderProps {
   onStatusChange: (postId: string, status: string) => void;
   onStoryTelling: () => void;
   showStoryTelling?: boolean;
+  isAdminSectionOpen?: boolean;
+  onToggleAdminSection?: () => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -35,7 +39,9 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
   onDelete,
   onStatusChange,
   onStoryTelling,
-  showStoryTelling = false
+  showStoryTelling = false,
+  isAdminSectionOpen = false,
+  onToggleAdminSection
 }) => {
   return (
     <CardHeader className="pb-3">
@@ -56,13 +62,32 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
             )}
           </div>
         </div>
-        <PostCardActions
-          post={post}
-          onCopy={onCopy}
-          onDelete={onDelete}
-          onStoryTelling={onStoryTelling}
-          showStoryTelling={showStoryTelling}
-        />
+        
+        <div className="flex items-center gap-3">
+          {isAdmin && onToggleAdminSection && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleAdminSection}
+              className="h-8 w-8 p-0"
+              aria-label={isAdminSectionOpen ? "Collapse admin features" : "Expand admin features"}
+            >
+              {isAdminSectionOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+          
+          <PostCardActions
+            post={post}
+            onCopy={onCopy}
+            onDelete={onDelete}
+            onStoryTelling={onStoryTelling}
+            showStoryTelling={showStoryTelling}
+          />
+        </div>
       </div>
     </CardHeader>
   );
