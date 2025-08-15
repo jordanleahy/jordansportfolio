@@ -66,8 +66,7 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                      </div>
                      <div className="flex items-center gap-2">
                        <Check className="h-4 w-4 text-accent" />
-                       <span className="text-sm text-foreground">AI editing of public collectoins
-                  </span>
+                        <span className="text-sm text-foreground">Edit Images With AI</span>
                      </div>
                      <div className="flex items-center gap-2">
                        <Check className="h-4 w-4 text-accent" />
