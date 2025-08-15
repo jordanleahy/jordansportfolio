@@ -22,20 +22,12 @@ export const useCachedPromptGeneration = () => {
     setFromCache(false);
 
     try {
-      console.log('🚀 [PROMPT_CACHE] Starting generation with config:', {
-        postId: config.postId,
-        themeId: config.themeId,
-        title: config.title?.substring(0, 50),
-        theme: config.theme,
-        category: config.category,
-        timestamp: new Date().toISOString()
-      });
 
       // First check cache
       const cachedPrompt = await cacheManager.getCachedPrompt(config);
       
       if (cachedPrompt) {
-        console.log('💾 [PROMPT_CACHE] Cache HIT - using cached prompt');
+        
         setFromCache(true);
         toast({
           title: "Prompt Retrieved",
@@ -44,14 +36,6 @@ export const useCachedPromptGeneration = () => {
         return cachedPrompt;
       }
 
-      console.log('💥 [PROMPT_CACHE] Cache MISS - generating new prompt');
-      console.log('🔄 Generating new prompt...');
-      
-      console.log('📡 [EDGE_FUNCTION] Calling visual-prompt-generator with:', {
-        postId: config.postId,
-        themeId: config.themeId,
-        aspectRatio: '1:1' // Applied dynamically during image generation
-      });
 
       const response = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
@@ -61,10 +45,6 @@ export const useCachedPromptGeneration = () => {
         }
       });
 
-      console.log('📡 [EDGE_FUNCTION] Raw response:', {
-        data: response.data,
-        error: response.error
-      });
 
       if (response.error) {
         console.error('❌ [EDGE_FUNCTION] Error response:', response.error);
@@ -73,11 +53,6 @@ export const useCachedPromptGeneration = () => {
 
       const generatedPrompt = response.data?.generatedPrompt || response.data?.generatedText || '';
       
-      console.log('📝 [EDGE_FUNCTION] Extracted prompt:', {
-        promptLength: generatedPrompt?.length || 0,
-        promptPreview: generatedPrompt?.substring(0, 100),
-        fullResponseData: response.data
-      });
       
       if (!generatedPrompt) {
         console.error('❌ [EDGE_FUNCTION] No prompt in response data:', response.data);
@@ -85,10 +60,7 @@ export const useCachedPromptGeneration = () => {
       }
 
       // Cache the generated prompt
-      console.log('💾 [PROMPT_CACHE] Caching generated prompt');
       await cacheManager.setCachedPrompt(config, generatedPrompt);
-      
-      console.log('✅ [PROMPT_CACHE] Successfully generated and cached prompt');
       toast({
         title: "Prompt Generated",
         description: "New prompt generated and cached for future use.",

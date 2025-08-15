@@ -33,28 +33,12 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   // Use the same hook that checks fresh database data and system prompt status
   const { hasPrompt: hasIndividualPrompt, hasSystemPrompt } = useIndividualPromptCache(post.id, themeId);
   
-  console.log('⚡ [BulkImageGenerationButton] Component state', {
-    postId: post.id,
-    postTitle: post.title,
-    hasIndividualPrompt,
-    hasIndividualPromptFresh: hasIndividualPrompt, // Fresh from database
-    hasIndividualPromptStale: !!post.generated_image_prompt, // Stale from prop
-    generatedPromptLength: post.generated_image_prompt?.length || 0,
-    isCurrentlyGenerating,
-    hasCredits: creditStatus.hasCredits,
-    isLoading: creditStatus.isLoading
-  });
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
     
     // Check system prompt first
     if (!hasSystemPrompt) {
-      console.log('⚡ [BulkImageGenerationButton] Blocking bulk generation - no system prompt', {
-        postId: post.id,
-        hasSystemPrompt,
-        hasIndividualPrompt
-      });
       toast({
         title: "System prompt required",
         description: "Theme system prompt is not ready yet. Please wait for theme completion before generating images.",
@@ -65,11 +49,6 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 
     // Check if individual prompt exists
     if (!hasIndividualPrompt) {
-      console.log('⚡ [BulkImageGenerationButton] Blocking bulk generation - no individual prompt', {
-        postId: post.id,
-        hasIndividualPrompt,
-        generatedPrompt: post.generated_image_prompt
-      });
       toast({
         title: "Individual prompt required",
         description: "Please wait for the individual image prompt to be generated first, then try bulk generation.",

@@ -57,7 +57,7 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
 
       // Update status to uploading (DB)
       const statusField = `image_${aspectRatio}_status`;
-      console.log(`🎨 IMAGE_GEN: Starting generation for post ${postId}, ratio ${aspectRatio}, setting status to 'uploading'`);
+      
       await supabase
         .from('social_media_posts')
         .update({ [statusField]: 'uploading' })
@@ -70,12 +70,12 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
       const cachedData = queryClient.getQueryData(['individual_prompt', postId]);
       if (cachedData && typeof cachedData === 'object' && 'prompt' in cachedData) {
         generatedPrompt = cachedData.prompt as string;
-        console.log('🎨 IMAGE_GEN: Using cached prompt');
+        
       }
       
       // If not in cache, query database
       if (!generatedPrompt) {
-        console.log('🎨 IMAGE_GEN: No cached prompt, querying database');
+        
         const { data: postData } = await supabase
           .from('social_media_posts')
           .select('generated_image_prompt')
@@ -136,11 +136,6 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
       // Update post with image URL
       const imageField = `image_${aspectRatio}_url`;
       
-      console.log(`🎨 IMAGE_GEN: Setting image URL and status to 'processing' for post ${postId}`, {
-        imageField,
-        statusField,
-        url: urlData.publicUrl.substring(0, 100) + '...'
-      });
       
       await supabase
         .from('social_media_posts')
@@ -197,7 +192,7 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
       
       // Update status to failed
       const statusField = `image_${aspectRatio}_status`;
-      console.log(`❌ IMAGE_GEN: Setting status to 'failed' for post ${postId}, ratio ${aspectRatio}`);
+      
       await supabase
         .from('social_media_posts')
         .update({ [statusField]: 'failed' })
