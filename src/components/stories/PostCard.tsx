@@ -60,7 +60,6 @@ const PostCardComponent = ({
         post={post}
         colorTheme={colorTheme}
         isProcessing={isProcessing('1_1')}
-        onPostsChange={onPostsChange}
       />
       
       <PostCardHeader
