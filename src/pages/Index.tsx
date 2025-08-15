@@ -9,12 +9,13 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import ContactSection from "@/components/ContactSection";
 import RecentBlogsSection from "@/components/RecentBlogsSection";
+import { PublicCollectionsSection } from "@/components/PublicCollectionsSection";
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useAuth();
   // Generate SEO metadata for homepage
   const homeSEO = generateSEOMetadata({
     title: "Lead Healthcare Product Designer",
@@ -24,8 +25,8 @@ const Index = () => {
     type: "website"
   });
 
-  // Redirect authenticated users to stories
-  if (!loading && user) {
+  // Redirect authenticated admin/moderator users to stories
+  if (!loading && user && (role === 'admin' || role === 'moderator')) {
     return <Navigate to="/stories" replace />;
   }
 
@@ -76,6 +77,7 @@ const Index = () => {
       <ProjectCardsSection />
       <TestimonialsSection />
       <ContactSection />
+      <PublicCollectionsSection />
     </AppLayout>
   );
 };
