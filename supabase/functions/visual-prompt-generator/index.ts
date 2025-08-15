@@ -157,14 +157,15 @@ serve(async (req) => {
 
     logger.info('User authentication resolved', { userId: userId ? userId.slice(0, 8) : null });
 
-    // Fetch post and theme data in single optimized query with JOIN
+    // Fetch post and theme data in single optimized query with explicit JOIN
     logger.startTiming('database_post_fetch');
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
       .select(`
         title, 
         description,
-        themes!inner(
+        theme_id,
+        themes!social_media_posts_theme_id_fkey(
           visual_prompt_system_prompt_id,
           theme_name,
           category
@@ -188,11 +189,19 @@ serve(async (req) => {
     title = postData.title;
     description = postData.description;
     
-    // Extract theme data from the JOIN
-    const themeData = postData.themes;
+    // Extract theme data from the JOIN - handle both single object and array
+    const themeData = Array.isArray(postData.themes) ? postData.themes[0] : postData.themes;
     if (themeData) {
       category = themeData.category;
     }
+    
+    logger.info('Theme data extracted', { 
+      hasThemeData: !!themeData,
+      themeDataType: themeData ? typeof themeData : 'null',
+      themeName: themeData?.theme_name,
+      category: themeData?.category,
+      hasSystemPromptId: !!themeData?.visual_prompt_system_prompt_id
+    });
 
     logger.info('Post data retrieved successfully', { 
       postId: postId.slice(0, 8),
