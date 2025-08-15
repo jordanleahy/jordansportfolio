@@ -109,13 +109,20 @@ export default function StoriesDashboard() {
     const loadThemes = async () => {
       if (user?.id && !hasInitialized) {
         try {
-          console.log('[StoriesDashboard] Starting theme load');
           setIsLoadingThemes(true);
           setThemesError(null);
           const themes = await optimizedSocialMediaService.getAvailableThemes();
-          console.log('[StoriesDashboard] Themes loaded successfully:', themes.length);
           setAvailableThemes(themes);
           setHasInitialized(true);
+
+          // Check if any themes are currently being generated
+          const hasGeneratingThemes = themes.some(theme => 
+            theme.prompt_generation_status === 'in_progress'
+          );
+          
+          if (hasGeneratingThemes) {
+            setIsGeneratingTheme(true);
+          }
 
           // Clear textarea on page load to prevent accidental re-submission on refresh
           setCustomThemeDescription('');
@@ -128,7 +135,6 @@ export default function StoriesDashboard() {
         }
       } else if (!user && !loading) {
         // User is not authenticated, but auth is done loading
-        console.log('[StoriesDashboard] User not authenticated, stopping theme load');
         setIsLoadingThemes(false);
         setHasInitialized(true);
       }
