@@ -28,6 +28,7 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
+import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import shipImage from '@/assets/story-ship-bg.png';
 
@@ -955,6 +956,9 @@ export default function StoriesDashboard() {
               </div>
             </Section>
           </>}
+
+        {/* Public Collections Section */}
+        <PublicCollectionsSection />
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
