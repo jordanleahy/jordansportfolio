@@ -3128,6 +3128,12 @@ export type Database = {
           total_submissions: number
         }[]
       }
+      get_user_roles: {
+        Args: { p_user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
