@@ -19,6 +19,7 @@ import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator'
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
@@ -62,6 +63,7 @@ export const PostsCardView = memo(({
   const { user } = useAuth();
   const { toast } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
+  const isMobile = useIsMobile();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
@@ -515,6 +517,43 @@ export const PostsCardView = memo(({
                       elapsedTime={getElapsedTime(post.id)}
                       className="text-xs"
                     />
+                  </div>
+                )}
+
+                {/* Mobile Regenerate Button */}
+                {isMobile && post.image_1_1_url && (
+                  <div className="pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const creditStatus = getCreditStatus();
+                        if (!creditStatus.hasCredits) {
+                          toast({
+                            title: "Credits Required",
+                            description: getBlockingMessage(creditStatus),
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+                        onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
+                      }}
+                      disabled={isProcessingCtx(post.id, 'generate', '1:1')}
+                      className="w-full"
+                    >
+                      {isProcessingCtx(post.id, 'generate', '1:1') ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                          Regenerating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate Image
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </CardContent>
