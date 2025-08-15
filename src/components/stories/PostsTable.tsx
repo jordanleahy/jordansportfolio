@@ -876,10 +876,12 @@ const { handleGenerateImage } = useImageManager({
                       <TabsTrigger value="published">Published</TabsTrigger>
                     </TabsList>
                     
-                    <ViewToggle
-                      currentView={viewMode}
-                      onViewChange={setViewMode}
-                    />
+                    {!isMobile && (
+                      <ViewToggle
+                        currentView={viewMode}
+                        onViewChange={setViewMode}
+                      />
+                    )}
                   </div>
                 )}
                 
@@ -1039,10 +1041,12 @@ const { handleGenerateImage } = useImageManager({
                     </TabsList>
                     
                     <div className="flex items-center gap-4">
-                      <ViewToggle
-                        currentView={viewMode}
-                        onViewChange={setViewMode}
-                      />
+                      {!isMobile && (
+                        <ViewToggle
+                          currentView={viewMode}
+                          onViewChange={setViewMode}
+                        />
+                      )}
                       
                       {/* Manual Post Creation */}
                       <ManualPostForm 
