@@ -93,7 +93,9 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                      </div>
                      <div className="flex items-center gap-2">
                        <Check className="h-4 w-4 text-accent" />
-                       <span className="text-sm text-foreground">Premium GPT-image-1</span>
+                       <span className="text-sm text-foreground">
+                         {tier.max_gpt_images_monthly || 130} Monthly Credits
+                       </span>
                      </div>
                      <div className="flex items-center gap-2">
                        <Check className="h-4 w-4 text-accent" />
