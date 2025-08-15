@@ -3,6 +3,7 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -22,6 +23,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   onPreviewImage
 }) => {
   const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
+  const { isGenerating, getElapsedTime } = useInstantFeedback();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   
@@ -74,6 +76,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               <InstantLoadingIndicator 
                 isVisible={true}
                 message="Generating..."
+                elapsedTime={getElapsedTime(post.id)}
                 className="text-white drop-shadow-sm"
                 showCountdown={true}
                 countdownDuration={90000}
