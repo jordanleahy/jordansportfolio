@@ -1,10 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
-import shipImage from "@/assets/story-ship-bg.png";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
+import CompaniesSection from "@/components/CompaniesSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import ProjectCardsSection from "@/components/ProjectCardsSection";
+import ContactSection from "@/components/ContactSection";
+import RecentBlogsSection from "@/components/RecentBlogsSection";
+
+// Lazy load heavy HeroParallax component
+const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -12,7 +19,7 @@ const Index = () => {
   const homeSEO = generateSEOMetadata({
     title: "Lead Healthcare Product Designer",
     description: "ex BCG, SmarterDx, Definitive Healthcare, PrescriberPoint and HTD Health",
-    image: shipImage,
+    image: "/lovable-uploads/a3482ced-732a-40a0-95b4-3199495f0f4f.png",
     url: "/",
     type: "website"
   });
@@ -51,18 +58,24 @@ const Index = () => {
         <link rel="canonical" href="/" />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
-        <section className="relative py-20 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-              Jordan Leahy
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-              Every Thought is a Visual Journey
-            </p>
+      {/* Hero Parallax Section */}
+      <Suspense fallback={
+        <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Loading hero section...</p>
           </div>
-        </section>
-      </div>
+        </div>
+      }>
+        <HeroParallaxDemo />
+      </Suspense>
+      
+      {/* Portfolio Content */}
+      <CompaniesSection />
+      <RecentBlogsSection />
+      <ProjectCardsSection />
+      <TestimonialsSection />
+      <ContactSection />
     </AppLayout>
   );
 };
