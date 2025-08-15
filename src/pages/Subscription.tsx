@@ -125,7 +125,7 @@ const Subscription: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 text-accent">✓</div>
-                  <span className="text-foreground">Text Generation</span>
+                  <span className="text-foreground">Access to Public Collections</span>
                 </div>
               </div>
 
