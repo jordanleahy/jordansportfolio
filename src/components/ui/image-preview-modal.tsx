@@ -680,7 +680,11 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 <Button
                   onClick={handleEditSubmit}
                   disabled={!prompt.trim() || isProcessing}
-                  className="bg-white text-black hover:bg-white/90 disabled:bg-white/20 disabled:text-white/40"
+                  className={cn(
+                    "disabled:bg-white/20 disabled:text-white/40",
+                    !isMobile && "bg-white text-black hover:bg-white/90",
+                    isMobile && "w-full bg-primary text-primary-foreground hover:bg-primary/90 py-3 px-4 rounded-lg font-medium"
+                  )}
                 >
                   {isProcessing ? (
                     <>
