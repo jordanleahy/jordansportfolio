@@ -26,6 +26,7 @@ export interface ThemeWithPosts {
   description: string | null;
   category: string;
   post_count: number;
+  prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
   first_post: {
     id: string;
     title: string;

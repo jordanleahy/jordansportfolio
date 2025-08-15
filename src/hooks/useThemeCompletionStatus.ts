@@ -10,7 +10,7 @@ interface ThemeCompletionData {
   visual_prompt_system_prompt_id: string | null;
 }
 
-export const useThemeCompletionStatus = (themeId: string | undefined) => {
+export const useThemeCompletionStatus = (themeId: string | undefined, onCompletionRedirect?: () => void) => {
   const [themeStatus, setThemeStatus] = useState<ThemeCompletionData | null>(null);
   const [hasShownCompletionToast, setHasShownCompletionToast] = useState(false);
   const [hasShownSystemPromptToast, setHasShownSystemPromptToast] = useState(false);
@@ -80,6 +80,9 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
             });
             
             setHasShownCompletionToast(true);
+            
+            // Redirect to the theme page when completed
+            onCompletionRedirect?.();
           }
           
           setThemeStatus(newData);
@@ -90,7 +93,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, themeStatus?.prompt_generation_status, toast]);
+  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, themeStatus?.prompt_generation_status, toast, onCompletionRedirect]);
 
   return {
     themeStatus,

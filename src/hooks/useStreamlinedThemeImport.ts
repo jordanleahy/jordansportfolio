@@ -8,7 +8,7 @@ import type { ProcessingResult } from '@/types/themeImportStrict';
 interface UseStreamlinedThemeImportOptions {
   onImportComplete?: () => void;
   onOptimisticStart?: (categoryName: string) => void;
-  onOptimisticComplete?: (success: boolean, categoryName?: string) => void;
+  onOptimisticComplete?: (success: boolean, categoryName?: string, themeId?: string) => void;
 }
 
 export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOptions = {}) => {
@@ -90,22 +90,10 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
           return updated;
         });
 
-        // Standard success messaging
-        const title = "Theme imported successfully! 🎉";
-        const description = `${result.insertedCount || 0} posts imported`;
-        
-        toast({
-          title,
-          description,
-        });
+        // Theme imported successfully - now background processing begins
+        console.log('✅ Theme imported, starting background prompt generation:', result.themeId);
 
-        // Redirect to the new theme page if themeId is available
-        if (result.themeId) {
-          console.log('🔗 REDIRECTING to theme page:', `/stories/id/${result.themeId}`);
-          navigate(`/stories/id/${result.themeId}`);
-        }
-
-        options.onOptimisticComplete?.(true, result.categoryName);
+        options.onOptimisticComplete?.(true, result.categoryName, result.themeId);
         options.onImportComplete?.();
       } else {
         console.log('❌ IMPORT FAILED:', result.errors);

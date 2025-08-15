@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
+import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -19,12 +21,14 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null);
+  const [createdThemeId, setCreatedThemeId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Debounce input to prevent rapid submissions
   const debouncedJsonInput = useDebounce(jsonInput, 300);
 
-  // Streamlined import with improved feedback
+  // Streamlined import with theme completion tracking
   const {
     submitRawData,
     isProcessing: isStreamlinedProcessing
@@ -34,25 +38,32 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
       onImportComplete?.();
       // Trigger shimmer in parent component
       onOptimisticStart?.(jsonInput ? JSON.parse(jsonInput).category || 'New Theme' : 'New Theme');
-      
-      // Auto-close modal after showing success message
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        setShowErrorMessage(null);
-        onOpenChange(false);
-        setJsonInput('');
-      }, 2000);
     },
     onOptimisticStart: categoryName => {
       setShowSuccessMessage(false);
       setShowErrorMessage(null);
       onOptimisticStart?.(categoryName);
     },
-    onOptimisticComplete: (success, categoryName) => {
-      if (!success) {
+    onOptimisticComplete: (success, categoryName, themeId) => {
+      if (success && themeId) {
+        setCreatedThemeId(themeId);
+      } else if (!success) {
         setShowErrorMessage('Import failed. Please check your data and try again.');
       }
       onOptimisticComplete?.(success, categoryName);
+    }
+  });
+
+  // Track theme completion status and redirect when complete
+  useThemeCompletionStatus(createdThemeId || undefined, () => {
+    if (createdThemeId) {
+      // Close modal and navigate to theme page
+      setShowSuccessMessage(false);
+      setShowErrorMessage(null);
+      onOpenChange(false);
+      setJsonInput('');
+      setCreatedThemeId(null);
+      navigate(`/stories/id/${createdThemeId}`);
     }
   });
 
