@@ -15,12 +15,11 @@ export interface NavigationItem {
 export const navigationConfig: NavigationItem[] = [
   // Public items
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/library", label: "Library", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: User, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
-  { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  
   // Authenticated user items
   { href: "settings", label: "Settings", icon: User, accessLevel: 'authenticated', showInMobile: true, isModal: true, userInfo: true },
 
