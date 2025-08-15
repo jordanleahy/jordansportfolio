@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Trash2, Mic, Share } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface PostCardActionsProps {
   post: SocialMediaPost;
@@ -16,6 +17,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
   onDelete,
   onStoryTelling
 }) => {
+  const { isAdmin, isModerator } = useUserRole();
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -62,14 +64,16 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       >
         <Copy className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onDelete(post.id)}
-        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      {(isAdmin || isModerator) && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(post.id)}
+          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };
