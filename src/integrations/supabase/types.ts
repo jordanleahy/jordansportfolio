@@ -3177,7 +3177,7 @@ export type Database = {
               theme_description_param?: string
               theme_id_param?: string
             }
-        Returns: number
+        Returns: Json
       }
       insert_cdi_content: {
         Args: Record<PropertyKey, never>

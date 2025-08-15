@@ -4,7 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ThemeValidationService } from '@/services/themeValidationService';
 import { supabase } from '@/integrations/supabase/client';
 import { triggerSystemPromptGeneration } from '@/utils/systemPromptTrigger';
-import type { ProcessingState, ProcessingResult, ThemeImportData, ImportProgress, UseThemeImportOptions } from '@/types/stories/import';
+import { useNavigate } from 'react-router-dom';
+import type { ProcessingState, ProcessingResult, ThemeImportData, ImportProgress, UseThemeImportOptions, ImportRpcResponse } from '@/types/stories/import';
 
 // UseThemeImportOptions now imported from types/stories/import
 
@@ -15,6 +16,7 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Update state and call callback
   const updateState = useCallback((newState: ProcessingState) => {
@@ -121,7 +123,7 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
 
       // Insert using RPC with theme_id_param
       console.log('💾 [useThemeImport] Calling insert_category_content RPC');
-      const { data: insertCount, error } = await supabase
+      const { data: rpcResponse, error } = await supabase
         .rpc('insert_category_content', {
           category_name: data.category,
           posts_data: postsForDb,
@@ -129,19 +131,24 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
           theme_id_param: null // This hook doesn't create themes, so theme_id is null
         });
 
-      console.log('📥 [useThemeImport] RPC response:', { insertCount, error });
+      console.log('📥 [useThemeImport] RPC response:', { rpcResponse, error });
 
       if (error) {
         console.log('❌ [useThemeImport] RPC error:', error);
         throw error;
       }
 
-      console.log('✅ [useThemeImport] Import successful, inserted count:', insertCount);
+      const typedResponse = rpcResponse as unknown as ImportRpcResponse;
+      const insertedCount = typedResponse?.inserted_count || 0;
+      const themeId = typedResponse?.theme_id;
+      
+      console.log('✅ [useThemeImport] Import successful, inserted count:', insertedCount, 'theme_id:', themeId);
 
       return {
         success: true,
         data,
-        insertedCount: insertCount || 0,
+        insertedCount,
+        themeId,
         errors: [],
         warnings: [],
       };
@@ -202,6 +209,12 @@ export const useThemeImport = (options: UseThemeImportOptions = {}) => {
         title: "Import successful",
         description: `Imported ${result.insertedCount} posts successfully${systemPromptStatus}`,
       });
+      
+      // Navigate to theme page if theme_id is available
+      if (result.themeId) {
+        console.log('🧭 [useThemeImport] Navigating to theme page:', result.themeId);
+        navigate(`/stories/id/${result.themeId}`);
+      }
       
       options.onImportComplete?.();
       setProgress(null);

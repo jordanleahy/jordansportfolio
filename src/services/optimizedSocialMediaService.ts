@@ -206,7 +206,9 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(category);
     
-    return data || 0;
+    // Handle the new JSON response format
+    const result = data as { inserted_count: number } | null;
+    return result?.inserted_count || 0;
   }
 
   async getAvailableThemes(): Promise<Array<{

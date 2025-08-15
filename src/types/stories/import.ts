@@ -42,6 +42,12 @@ export interface ProcessingResult {
   message?: string;
 }
 
+// Interface for RPC response from insert_category_content
+export interface ImportRpcResponse {
+  inserted_count: number;
+  theme_id: string | null;
+}
+
 // Hook Options
 export interface UseThemeImportOptions {
   onImportComplete?: () => void;
