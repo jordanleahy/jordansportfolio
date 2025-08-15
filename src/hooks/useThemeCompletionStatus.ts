@@ -36,11 +36,11 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
         if (data.prompt_generation_status === 'completed' && !hasShownCompletionToast) {
           console.log('🎉 Theme already completed on initial fetch, triggering redirect');
           
-          toast({
-            title: "Theme Created! 🎉",
-            description: `All ${data.total_posts_count} individual image prompts have been generated successfully.`,
-            duration: 5000,
-          });
+          // toast({
+          //   title: "Theme Created! 🎉",
+          //   description: `All ${data.total_posts_count} individual image prompts have been generated successfully.`,
+          //   duration: 5000,
+          // });
           
           setHasShownCompletionToast(true);
           
@@ -94,11 +94,11 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
               optimizedSocialMediaService.clearThemesCache();
             });
             
-            toast({
-              title: "Theme Created! 🎉",
-              description: `All ${newData.total_posts_count} individual image prompts have been generated successfully.`,
-              duration: 5000,
-            });
+            // toast({
+            //   title: "Theme Created! 🎉",
+            //   description: `All ${newData.total_posts_count} individual image prompts have been generated successfully.`,
+            //   duration: 5000,
+            // });
             
             setHasShownCompletionToast(true);
             
