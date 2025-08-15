@@ -704,11 +704,6 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
     return (
       <Drawer open={isOpen} onOpenChange={onClose}>
         <DrawerContent className="h-[92vh] overflow-hidden bg-black/90">
-          <DrawerHeader className="border-b border-white/10">
-            <DrawerTitle className="text-white">
-              {formattedTitle}
-            </DrawerTitle>
-          </DrawerHeader>
           <div className="flex-1 overflow-hidden">
             <ModalContent />
           </div>
