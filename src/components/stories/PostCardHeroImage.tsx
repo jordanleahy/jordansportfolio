@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
-import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -23,20 +22,12 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   onPreviewImage
 }) => {
   const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
-  const { isGenerating, getElapsedTime, setInstantLoading } = useInstantFeedback();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   
   const selectedImage = post.image_1_1_url;
   const selectedAspectRatio = '1:1';
   const isLoadingOrProcessing = isProcessing || (post.image_1_1_status === 'processing') || isProcessingCtx(post.id, 'generate', '1:1');
-
-  // Clear instant loading when processing is complete
-  useEffect(() => {
-    if (!isLoadingOrProcessing && isGenerating(post.id)) {
-      setInstantLoading(post.id, false);
-    }
-  }, [isLoadingOrProcessing, isGenerating, post.id, setInstantLoading]);
 
   return (
     <div className="space-y-4">
@@ -83,18 +74,13 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               <InstantLoadingIndicator 
                 isVisible={true}
                 message="Generating..."
-                elapsedTime={getElapsedTime(post.id)}
                 className="text-white drop-shadow-sm"
-                showCountdown={true}
-                countdownDuration={90000}
               />
             </div>
           </div>
         ) : (
           <button
             onClick={() => {
-              // Start timer for instant feedback
-              setInstantLoading(post.id, true);
               // Start with 1:1 aspect ratio as default
               onGenerateImage?.(post.id, '1_1', post.title, post.description, post.category);
             }}
