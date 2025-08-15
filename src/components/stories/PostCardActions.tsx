@@ -43,6 +43,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       >
         <Share className="h-4 w-4" />
       </Button>
+      {/* TODO: Fix edge function error before re-enabling story telling button
       <Button
         variant="ghost"
         size="sm"
@@ -52,6 +53,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       >
         <Mic className="h-4 w-4" />
       </Button>
+      */}
       <Button
         variant="ghost"
         size="sm"
