@@ -1,23 +1,21 @@
-
-import React, { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import shipImage from "@/assets/story-ship-bg.png";
+import AppLayout from "@/components/layout/AppLayout";
 
 const Index = () => {
-  // Generate SEO metadata for homepage redirect
+  // Generate SEO metadata for homepage
   const homeSEO = generateSEOMetadata({
-    title: "Story Ship — Every Thought is a Visual Journey",
+    title: "Jordan Leahy — Every Thought is a Visual Journey",
     description: "Every Thought is a Visual Journey",
     image: shipImage,
     url: "/",
     type: "website"
   });
 
-  // Redirect to stories immediately
   return (
-    <>
+    <AppLayout>
       <Helmet>
         <title>{homeSEO.title}</title>
         <meta name="description" content={homeSEO.description} />
@@ -33,8 +31,20 @@ const Index = () => {
         <meta name="twitter:image" content={homeSEO.image} />
         <link rel="canonical" href="/" />
       </Helmet>
-      <Navigate to="/stories" replace />
-    </>
+      
+      <div className="min-h-screen bg-background">
+        <section className="relative py-20 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+              Jordan Leahy
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+              Every Thought is a Visual Journey
+            </p>
+          </div>
+        </section>
+      </div>
+    </AppLayout>
   );
 };
 
