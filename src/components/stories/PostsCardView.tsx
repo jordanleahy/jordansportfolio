@@ -363,13 +363,15 @@ export const PostsCardView = memo(({
                           />
                         )}
                        
-                       <ActionButton
-                         icon={<RefreshCw className="h-4 w-4" />}
-                         onClick={() => handleRegeneratePrompt(post)}
-                         title="Regenerate prompt"
-                         loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
-                         size="sm"
-                       />
+                        {isAdmin && (
+                          <ActionButton
+                            icon={<RefreshCw className="h-4 w-4" />}
+                            onClick={() => handleRegeneratePrompt(post)}
+                            title="Regenerate prompt"
+                            loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
+                            size="sm"
+                          />
+                        )}
                        
                        {isAdmin && (
                          <>
