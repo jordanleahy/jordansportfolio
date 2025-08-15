@@ -29,6 +29,8 @@ const PostCardComponent = ({
   processingStates,
   completingPosts,
   isGenerating: isGeneratingProp,
+  onGenerateImage,
+  onPreviewImage,
   isAdmin = false
 }: PostCardProps) => {
   const { toast } = useToast();
@@ -60,6 +62,8 @@ const PostCardComponent = ({
         post={post}
         colorTheme={colorTheme}
         isProcessing={isProcessing('1_1')}
+        onGenerateImage={onGenerateImage}
+        onPreviewImage={onPreviewImage}
       />
       
       <PostCardHeader

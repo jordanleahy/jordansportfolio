@@ -56,6 +56,8 @@ export interface PostCardProps {
   };
   completingPosts?: Set<string>;
   isGenerating: (postId: string, aspectRatio?: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => boolean;
+  onGenerateImage?: (postId: string, aspectRatio: string, title: string, description: string, category?: string) => void;
+  onPreviewImage?: (imageUrl: string, title: string) => void;
   isAdmin?: boolean;
 }
 
