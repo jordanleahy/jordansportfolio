@@ -70,7 +70,7 @@ export const PlanCarousel: React.FC<PlanCarouselProps> = ({
                      </div>
                      <div className="flex items-center gap-2">
                        <Check className="h-4 w-4 text-accent" />
-                       <span className="text-sm text-foreground">High Quality Generation</span>
+                       <span className="text-sm text-foreground">Add Personal Watermark</span>
                      </div>
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-accent" />
