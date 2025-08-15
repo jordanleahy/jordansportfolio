@@ -17,6 +17,7 @@ import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefet
 import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -61,6 +62,7 @@ export const PostsCardView = memo(({
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
   const { user } = useAuth();
+  const { isAdmin: userIsAdmin, isModerator } = useUserRole();
   const { toast } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const isMobile = useIsMobile();
@@ -363,13 +365,15 @@ export const PostsCardView = memo(({
                           />
                         )}
                        
-                       <ActionButton
-                         icon={<RefreshCw className="h-4 w-4" />}
-                         onClick={() => handleRegeneratePrompt(post)}
-                         title="Regenerate prompt"
-                         loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
-                         size="sm"
-                       />
+                        {(userIsAdmin || isModerator) && (
+                          <ActionButton
+                            icon={<RefreshCw className="h-4 w-4" />}
+                            onClick={() => handleRegeneratePrompt(post)}
+                            title="Regenerate prompt"
+                            loading={isProcessingCtx(post.id, 'regenerate_prompt') || isInstantGenerating(post.id)}
+                            size="sm"
+                          />
+                        )}
                        
                        {isAdmin && (
                          <>
