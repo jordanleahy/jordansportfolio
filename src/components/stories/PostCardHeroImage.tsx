@@ -87,6 +87,9 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               <div className="text-center text-muted-foreground">
                 <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Generate Image</p>
+                <p className="text-xs opacity-75 mt-1">
+                  {creditStatus.isLoading ? 'Checking credits...' : 'Click to generate'}
+                </p>
               </div>
             )}
           </div>
