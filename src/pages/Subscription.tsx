@@ -129,11 +129,13 @@ const Subscription: React.FC = () => {
                 </div>
               </div>
 
-              <button 
-                onClick={handleSelectFreePlan}
-                className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
-                {user ? 'Choose Free Plan' : 'Get Started Free'} →
-              </button>
+              {!(user && status?.subscription && status.subscription.tier?.name.toLowerCase().includes('free')) && (
+                <button 
+                  onClick={handleSelectFreePlan}
+                  className="w-full bg-muted text-foreground py-3 px-4 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2">
+                  {user ? 'Choose Free Plan' : 'Get Started Free'} →
+                </button>
+              )}
             </div>
           </div>
 
