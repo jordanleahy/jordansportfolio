@@ -999,7 +999,7 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                        {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
+                        {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} />)}
                     </div>
                   )}
                 </TabsContent>
@@ -1012,7 +1012,7 @@ const { handleGenerateImage } = useImageManager({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} />)}
+                      {filteredPosts.map(post => <PostCard key={post.id} post={post} onCopy={() => handleCopyContent(post)} onDelete={() => handleDeletePost(post.id)} onGeneratePrompt={() => handlePromptButton(post)} onGenerateVoiceover={() => openVoiceoverModal(post)} onVideoUpload={() => {}} onVideoRemove={() => {}} onImageDelete={handleImageDelete} onImageGenerated={() => onPostsChange()} onStatusChange={(postId, status) => handleStatusChange(postId, status)} onPostsChange={onPostsChange} processingStates={{}} completingPosts={new Set()} isGenerating={() => false} isAdmin={userIsAdmin} onGenerateImage={handleGenerateImage} onPreviewImage={openPreviewImage} />)}
                     </div>
                   )}
                 </TabsContent>
