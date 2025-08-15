@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { ImageIcon, Loader2 } from 'lucide-react';
 import { usePromptValidatedImageGeneration } from '@/hooks/usePromptValidatedImageGeneration';
@@ -43,16 +42,40 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
             loading="lazy"
           />
         ) : (
-          <div className="bg-muted w-full h-full flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">1:1 Hero Image</p>
-            </div>
+          <div 
+            className="bg-muted w-full h-full flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors"
+            onClick={handleGenerate}
+            role="button"
+            tabIndex={0}
+            aria-label="Generate 1:1 hero image"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleGenerate();
+              }
+            }}
+          >
+            {isGenerating ? (
+              <div className="text-center text-muted-foreground">
+                <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin" />
+                <p className="text-sm font-medium">{generationStep || 'Generating...'}</p>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <ImageIcon className={`h-8 w-8 mx-auto mb-2 opacity-50 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-25' : ''}`} />
+                <p className="text-sm">1:1 Hero Image</p>
+                <p className="text-xs opacity-75 mt-1">
+                  {!creditStatus.hasCredits ? 'No credits available' : 
+                   creditStatus.isLoading ? 'Checking credits...' : 
+                   'Click to generate'}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Description and Generate Button */}
+      {/* Description */}
       <div className="space-y-3 p-4">
         <h3 className="text-lg font-semibold text-foreground leading-tight">
           {post.title || 'Untitled Post'}
@@ -60,52 +83,6 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
         <p className="text-sm text-muted-foreground leading-relaxed">
           {post.description}
         </p>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`w-full ${isLoading ? 'animate-pulse' : ''}`}
-          onClick={handleGenerate}
-          disabled={isLoading || creditStatus.isLoading || !creditStatus.hasCredits}
-          title={!creditStatus.hasCredits ? 'No credits available' : creditStatus.isLoading ? "Checking credits..." : undefined}
-        >
-          {isGenerating ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <div className="flex flex-col items-start">
-                <span className="text-xs font-medium">{generationStep}</span>
-                {steps && (
-                  <div className="flex gap-1 mt-1">
-                    <div className={`w-2 h-1 rounded-full ${
-                      steps.promptValidation === 'complete' ? 'bg-primary' : 
-                      steps.promptValidation === 'active' ? 'bg-primary/60' : 
-                      steps.promptValidation === 'error' ? 'bg-destructive' : 'bg-muted'
-                    }`} />
-                    <div className={`w-2 h-1 rounded-full ${
-                      steps.promptGeneration === 'complete' ? 'bg-primary' : 
-                      steps.promptGeneration === 'active' ? 'bg-primary/60' : 
-                      steps.promptGeneration === 'error' ? 'bg-destructive' : 'bg-muted'
-                    }`} />
-                    <div className={`w-2 h-1 rounded-full ${
-                      steps.imageGeneration === 'complete' ? 'bg-primary' : 
-                      steps.imageGeneration === 'active' ? 'bg-primary/60' : 
-                      steps.imageGeneration === 'error' ? 'bg-destructive' : 'bg-muted'
-                    }`} />
-                    <div className={`w-2 h-1 rounded-full ${
-                      steps.imageUpload === 'complete' ? 'bg-primary' : 
-                      steps.imageUpload === 'active' ? 'bg-primary/60' : 
-                      steps.imageUpload === 'error' ? 'bg-destructive' : 'bg-muted'
-                    }`} />
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <ImageIcon className={`h-4 w-4 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-50' : ''}`} />
-              Generate
-            </div>
-          )}
-        </Button>
       </div>
     </div>
   );
