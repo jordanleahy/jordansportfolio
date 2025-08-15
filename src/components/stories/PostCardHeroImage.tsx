@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
-import { ImageIcon, Loader2 } from 'lucide-react';
+import { ImageIcon, Loader2, Crown } from 'lucide-react';
 import { usePromptValidatedImageGeneration } from '@/hooks/usePromptValidatedImageGeneration';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
@@ -17,9 +18,14 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   isProcessing,
   onPostsChange
 }) => {
+  const navigate = useNavigate();
   const { isGenerating, generationStep, generateHeroImage, creditStatus, steps } = usePromptValidatedImageGeneration();
 
   const handleGenerate = () => {
+    if (!creditStatus.hasCredits && !creditStatus.isLoading) {
+      navigate('/subscription');
+      return;
+    }
     generateHeroImage(post, colorTheme, onPostsChange);
   };
 
@@ -47,7 +53,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
             onClick={handleGenerate}
             role="button"
             tabIndex={0}
-            aria-label="Generate 1:1 hero image"
+            aria-label={!creditStatus.hasCredits && !creditStatus.isLoading ? "Upgrade to continue" : "Generate 1:1 hero image"}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -60,14 +66,20 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                 <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin" />
                 <p className="text-sm font-medium">{generationStep || 'Generating...'}</p>
               </div>
+            ) : !creditStatus.hasCredits && !creditStatus.isLoading ? (
+              <div className="text-center">
+                <Crown className="h-8 w-8 mx-auto mb-2 text-accent" />
+                <p className="text-sm font-medium text-foreground">Upgrade to Continue</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Get unlimited AI generations
+                </p>
+              </div>
             ) : (
               <div className="text-center text-muted-foreground">
-                <ImageIcon className={`h-8 w-8 mx-auto mb-2 opacity-50 ${(!creditStatus.hasCredits || creditStatus.isLoading) ? 'opacity-25' : ''}`} />
+                <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">1:1 Hero Image</p>
                 <p className="text-xs opacity-75 mt-1">
-                  {!creditStatus.hasCredits ? 'No credits available' : 
-                   creditStatus.isLoading ? 'Checking credits...' : 
-                   'Click to generate'}
+                  {creditStatus.isLoading ? 'Checking credits...' : 'Click to generate'}
                 </p>
               </div>
             )}
