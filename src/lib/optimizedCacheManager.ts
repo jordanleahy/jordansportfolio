@@ -47,13 +47,12 @@ class OptimizedCacheManager {
     toDelete.forEach(([key]) => this.memoryCache.delete(key));
   }
 
-  // Optimized prompt caching with aggressive deduplication
+  // Optimized prompt caching with aggressive deduplication (aspect ratio removed)
   generatePromptKey(config: {
     title: string;
     description: string;
     theme?: string;
     category?: string;
-    aspectRatio?: string;
     colorTheme?: any;
   }): string {
     // Normalize and truncate for better cache efficiency
@@ -61,7 +60,6 @@ class OptimizedCacheManager {
     const normalizedDesc = config.description.toLowerCase().trim().substring(0, 100);
     const theme = config.theme || 'default';
     const category = config.category || 'general';
-    const aspectRatio = config.aspectRatio || '1:1';
     const colorThemeId = config.colorTheme?.id || 'none';
     
     try {
@@ -69,10 +67,10 @@ class OptimizedCacheManager {
       const data = encoder.encode(normalizedTitle + normalizedDesc);
       const chars = Array.from(data, byte => String.fromCharCode(byte));
       const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
-      return `prompt:${category}:${theme}:${aspectRatio}:${colorThemeId}:${encoded}`;
+      return `prompt:${category}:${theme}:${colorThemeId}:${encoded}`;
     } catch (error) {
       console.warn('Failed to encode optimized cache key, using fallback:', error);
-      return `prompt:${category}:${theme}:${aspectRatio}:${colorThemeId}:${(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
+      return `prompt:${category}:${theme}:${colorThemeId}:${(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
     }
   }
 
@@ -81,7 +79,6 @@ class OptimizedCacheManager {
     description: string;
     theme?: string;
     category?: string;
-    aspectRatio?: string;
     colorTheme?: any;
   }): Promise<string | null> {
     const key = this.generatePromptKey(config);
@@ -147,7 +144,6 @@ class OptimizedCacheManager {
     description: string;
     theme?: string;
     category?: string;
-    aspectRatio?: string;
     colorTheme?: any;
   }, prompt: string): Promise<void> {
     const key = this.generatePromptKey(config);
@@ -175,7 +171,6 @@ class OptimizedCacheManager {
       last_accessed_at: new Date().toISOString(),
       metadata: {
         theme: config.theme,
-        aspectRatio: config.aspectRatio,
         colorThemeId: config.colorTheme?.id,
         optimized: true
       }

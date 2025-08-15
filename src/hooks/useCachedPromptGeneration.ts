@@ -10,7 +10,6 @@ interface CachedPromptGenerationConfig {
   theme?: string;
   themeId?: string;
   category?: string;
-  aspectRatio?: string;
 }
 
 export const useCachedPromptGeneration = () => {
@@ -29,7 +28,6 @@ export const useCachedPromptGeneration = () => {
         title: config.title?.substring(0, 50),
         theme: config.theme,
         category: config.category,
-        aspectRatio: config.aspectRatio,
         timestamp: new Date().toISOString()
       });
 
@@ -52,14 +50,14 @@ export const useCachedPromptGeneration = () => {
       console.log('📡 [EDGE_FUNCTION] Calling visual-prompt-generator with:', {
         postId: config.postId,
         themeId: config.themeId,
-        aspectRatio: config.aspectRatio || '1:1'
+        aspectRatio: '1:1' // Applied dynamically during image generation
       });
 
       const response = await supabase.functions.invoke('visual-prompt-generator', {
         body: {
           postId: config.postId,
           themeId: config.themeId,
-          aspectRatio: config.aspectRatio || '1:1'
+          aspectRatio: '1:1' // Base prompt without specific aspect ratio
         }
       });
 

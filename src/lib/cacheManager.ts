@@ -33,7 +33,7 @@ class SimpleCacheManager {
     }
   }
 
-  // Generate cache key for prompts
+  // Generate cache key for prompts (aspect ratio removed for better cache efficiency)
   private generatePromptKey(config: {
     postId?: string;
     title?: string;
@@ -41,14 +41,12 @@ class SimpleCacheManager {
     theme?: string;
     themeId?: string;
     category?: string;
-    aspectRatio?: string;
   }): string {
     // If postId is provided, use it as the primary key
     if (config.postId) {
       const themeId = config.themeId || config.theme || 'default';
       const category = config.category || 'general';
-      const aspectRatio = config.aspectRatio || '1:1';
-      return `prompt:${category}:${themeId}:${aspectRatio}:${config.postId}`;
+      return `prompt:${category}:${themeId}:${config.postId}`;
     }
     
     // Fallback to title/description based key for backwards compatibility
@@ -56,17 +54,16 @@ class SimpleCacheManager {
     const normalizedDescription = (config.description || '').toLowerCase().trim().substring(0, 100);
     const themeId = config.themeId || config.theme || 'default';
     const category = config.category || 'general';
-    const aspectRatio = config.aspectRatio || '1:1';
     
     try {
       const encoder = new TextEncoder();
       const data = encoder.encode(normalizedTitle + normalizedDescription);
       const chars = Array.from(data, byte => String.fromCharCode(byte));
       const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
-      return `prompt:${category}:${themeId}:${aspectRatio}:${encoded}`;
+      return `prompt:${category}:${themeId}:${encoded}`;
     } catch (error) {
       console.warn('Failed to encode cache key, using fallback:', error);
-      return `prompt:${category}:${themeId}:${aspectRatio}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+      return `prompt:${category}:${themeId}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
     }
   }
 
@@ -78,7 +75,6 @@ class SimpleCacheManager {
     theme?: string;
     themeId?: string;
     category?: string;
-    aspectRatio?: string;
   }): Promise<string | null> {
     const key = this.generatePromptKey(config);
     
@@ -137,7 +133,6 @@ class SimpleCacheManager {
     theme?: string;
     themeId?: string;
     category?: string;
-    aspectRatio?: string;
   }, prompt: string): Promise<void> {
     const key = this.generatePromptKey(config);
     
@@ -164,7 +159,6 @@ class SimpleCacheManager {
         metadata: {
           theme: config.theme,
           themeId: config.themeId,
-          aspectRatio: config.aspectRatio,
           postId: config.postId,
           titleLength: config.title?.length || 0,
           descriptionLength: config.description?.length || 0
@@ -290,7 +284,6 @@ class SimpleCacheManager {
     theme?: string;
     themeId?: string;
     category?: string;
-    aspectRatio?: string;
   }): void {
     const key = this.generatePromptKey(config);
     this.memoryCache.delete(key);

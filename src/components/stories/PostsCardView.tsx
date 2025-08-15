@@ -120,8 +120,7 @@ export const PostsCardView = memo(({
             description: post.description,
             theme: themeData?.theme,
             themeId: themeData?.themeId,
-            category: themeData?.category || post.category,
-            aspectRatio: '1:1'
+            category: themeData?.category || post.category
           });
 
           if (generatedPrompt) {

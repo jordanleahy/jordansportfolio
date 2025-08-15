@@ -73,8 +73,7 @@ export const useIntegratedImageGeneration = () => {
           description: request.post.description,
           theme: request.colorTheme?.name,
           themeId: request.colorTheme?.id,
-          category: request.post.category,
-          aspectRatio: '1:1'
+          category: request.post.category
         });
       }
       
@@ -87,7 +86,6 @@ export const useIntegratedImageGeneration = () => {
           description: request.post.description,
           theme: request.colorTheme?.name,
           category: request.post.category,
-          aspectRatio: '1:1',
           colorTheme: request.colorTheme
         });
       }
