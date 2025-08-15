@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import shipImage from "@/assets/story-ship-bg.png";
 import AppLayout from "@/components/layout/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const { user, loading } = useAuth();
   // Generate SEO metadata for homepage
   const homeSEO = generateSEOMetadata({
     title: "Lead Healthcare Product Designer",
@@ -13,6 +16,22 @@ const Index = () => {
     url: "/",
     type: "website"
   });
+
+  // Redirect authenticated users to stories
+  if (!loading && user) {
+    return <Navigate to="/stories" replace />;
+  }
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
