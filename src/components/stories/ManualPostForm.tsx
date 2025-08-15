@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
-import { usePromptValidatedImageGeneration } from '@/hooks/usePromptValidatedImageGeneration';
-import { GenerationProgress } from '@/components/ui/generation-progress';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import type { CreateSocialMediaPost } from '@/types/socialMedia';
 
@@ -31,10 +28,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [createdPost, setCreatedPost] = useState<any>(null);
   const { toast } = useToast();
-  
-  const { isGenerating, generationStep, generateHeroImage, steps } = usePromptValidatedImageGeneration();
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
 
@@ -51,20 +45,20 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
       };
 
       const newPost = await optimizedSocialMediaService.createPost(postData);
-      setCreatedPost(newPost);
       
       toast({
         title: "Post created successfully",
-        description: "Starting image prompt generation...",
+        description: "Image generation will begin automatically via the pipeline.",
       });
-      
-      // Trigger image generation
-      await generateHeroImage(newPost, undefined, onPostCreated);
       
       // Reset form and close modal
       reset();
       setIsOpen(false);
-      setCreatedPost(null);
+      
+      // Notify parent to refresh
+      if (onPostCreated) {
+        onPostCreated();
+      }
       
     } catch (error) {
       console.error('Error creating post:', error);
@@ -78,45 +72,6 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
     }
   };
 
-  const currentSteps = [
-    {
-      key: 'creation',
-      label: 'Creating Post',
-      icon: Plus,
-      isComplete: createdPost !== null,
-      isActive: isCreating && !createdPost
-    },
-    {
-      key: 'promptValidation',
-      label: 'Validating Prompt',
-      icon: Loader2,
-      isComplete: steps.promptValidation === 'complete',
-      isActive: steps.promptValidation === 'active'
-    },
-    {
-      key: 'promptGeneration',
-      label: 'Generating Prompt',
-      icon: Loader2,
-      isComplete: steps.promptGeneration === 'complete',
-      isActive: steps.promptGeneration === 'active'
-    },
-    {
-      key: 'imageGeneration',
-      label: 'Generating Image',
-      icon: Loader2,
-      isComplete: steps.imageGeneration === 'complete',
-      isActive: steps.imageGeneration === 'active'
-    },
-    {
-      key: 'imageUpload',
-      label: 'Uploading Image',
-      icon: Loader2,
-      isComplete: steps.imageUpload === 'complete',
-      isActive: steps.imageUpload === 'active'
-    }
-  ];
-
-  const isProcessing = isCreating || isGenerating;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -139,7 +94,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
                 id="title"
                 {...register('title', { required: 'Title is required' })}
                 placeholder="Enter post title..."
-                disabled={isProcessing}
+                disabled={isCreating}
               />
               {errors.title && (
                 <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
@@ -153,7 +108,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
                 {...register('description', { required: 'Description is required' })}
                 placeholder="Enter post description..."
                 rows={4}
-                disabled={isProcessing}
+                disabled={isCreating}
               />
               {errors.description && (
                 <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
@@ -161,38 +116,25 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
             </div>
           </div>
 
-          {isProcessing && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Processing...</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <GenerationProgress 
-                  currentStep={generationStep as "prompt" | "image" | "upload" | "complete"}
-                  variant="default"
-                />
-              </CardContent>
-            </Card>
-          )}
 
           <div className="flex justify-end gap-3">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => setIsOpen(false)}
-              disabled={isProcessing}
+              disabled={isCreating}
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              disabled={isProcessing}
+              disabled={isCreating}
               className="gap-2"
             >
-              {isProcessing ? (
+              {isCreating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {isCreating ? 'Creating...' : 'Generating...'}
+                  Creating...
                 </>
               ) : (
                 <>
