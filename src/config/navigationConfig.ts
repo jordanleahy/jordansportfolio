@@ -19,8 +19,9 @@ export const navigationConfig: NavigationItem[] = [
   { href: "/library", label: "Library", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: User, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
+  { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  
   // Authenticated user items
-  { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
   { href: "settings", label: "Settings", icon: User, accessLevel: 'authenticated', showInMobile: true, isModal: true, userInfo: true },
 
   // Admin-only items
