@@ -8,7 +8,6 @@ interface ProcessingStatesContextValue {
   isProcessing: (postId: string, operation?: 'generate' | 'bulk_generate' | 'regenerate_prompt', aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => boolean;
   isGenerating: (postId: string) => boolean;
   clearProcessing: (postId: string) => void;
-  hasAnyImageProcessing: () => boolean;
 }
 
 const ProcessingStatesContext = createContext<ProcessingStatesContextValue | null>(null);

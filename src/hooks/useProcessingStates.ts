@@ -99,17 +99,11 @@ export const useProcessingStates = () => {
     });
   }, []);
 
-  const hasAnyImageProcessing = useCallback((): boolean => {
-    const activeStates = Array.from(processingStates.values()).filter(state => state.isActive);
-    return activeStates.length > 0;
-  }, [processingStates]);
-
   return {
     setProcessing,
     setBulkProcessing,
     isProcessing,
     isGenerating,
     clearProcessing,
-    hasAnyImageProcessing,
   };
 };

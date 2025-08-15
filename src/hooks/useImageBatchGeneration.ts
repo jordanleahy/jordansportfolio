@@ -113,7 +113,7 @@ const getCachedPrompt = async (cacheKey: string): Promise<string | null> => {
 };
 
 export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
-  const { setBulkProcessing, isGenerating, clearProcessing, hasAnyImageProcessing } = useProcessingStatesContext();
+  const { setBulkProcessing, isGenerating, clearProcessing } = useProcessingStatesContext();
   const [progress, setProgress] = useState<{ 
     completed: number; 
     total: number; 
@@ -157,14 +157,6 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
 
   const generateAllImages = useCallback(async (request: BulkImageGenerationRequest): Promise<BulkImageGenerationResponse> => {
     console.log(`🚀 [BatchGeneration] Starting bulk generation for post: ${request.postId}`);
-    
-    // Quality control: Check if any image processing is active
-    if (hasAnyImageProcessing()) {
-      toast.error('Quality is key! 🎨', {
-        description: 'We\'re limiting to one image processing at a time to ensure the best results for you.'
-      });
-      throw new Error('Another image is already being processed');
-    }
     
     if (isGenerating(request.postId)) {
       console.log(`⚠️ [BatchGeneration] Generation already in progress for post: ${request.postId}`);

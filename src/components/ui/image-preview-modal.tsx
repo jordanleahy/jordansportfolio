@@ -14,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -27,7 +26,6 @@ interface ImagePreviewModalProps {
 
 export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspectRatio }: ImagePreviewModalProps) => {
   const isMobile = useIsMobile();
-  const { hasAnyImageProcessing } = useProcessingStatesContext();
   const formattedTitle = title && aspectRatio 
     ? `jordanleahy.com ${title} ${aspectRatio}`
     : alt;
@@ -364,14 +362,6 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
 
   const handleEditSubmit = async () => {
     if (!prompt?.trim() || isProcessing) return;
-    
-    // Quality control: Check if any image processing is active
-    if (hasAnyImageProcessing()) {
-      toast.error('Quality is key! 🎨', {
-        description: 'We\'re limiting to one image processing at a time to ensure the best results for you.'
-      });
-      return;
-    }
     
     try {
       setIsProcessing(true);

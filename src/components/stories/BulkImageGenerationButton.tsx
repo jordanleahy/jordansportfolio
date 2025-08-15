@@ -18,7 +18,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   onPostsChange,
 }) => {
   const { generateAllImages, progress } = useBulkImageGeneration();
-  const { isGenerating, setBulkProcessing, hasAnyImageProcessing } = useProcessingStatesContext();
+  const { isGenerating, setBulkProcessing } = useProcessingStatesContext();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   
@@ -36,16 +36,6 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
 
   const handleGenerateAllImages = async () => {
     if (!post) return;
-    
-    // Quality control: Check if any image processing is active
-    if (hasAnyImageProcessing()) {
-      toast({
-        title: "Quality is key! 🎨",
-        description: "We're limiting to one image processing at a time to ensure the best results for you.",
-        variant: "destructive"
-      });
-      return;
-    }
     
     // Check system prompt first
     if (!hasSystemPrompt) {

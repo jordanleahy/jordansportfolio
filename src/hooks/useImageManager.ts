@@ -20,7 +20,7 @@ interface UseImageManagerReturn {
 }
 
 export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerProps): UseImageManagerReturn => {
-  const { setProcessing, hasAnyImageProcessing } = useProcessingStatesContext();
+  const { setProcessing } = useProcessingStatesContext();
   const queryClient = useQueryClient();
 
   // Debounced version of onPostsChange to prevent rapid refetches
@@ -51,14 +51,6 @@ export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerPro
     category?: string
   ) => {
     try {
-      // Quality control: Check if any image processing is active
-      if (hasAnyImageProcessing()) {
-        toast.error('Quality is key! 🎨', {
-          description: 'We\'re limiting to one image processing at a time to ensure the best results for you.'
-        });
-        return { success: false, error: 'Another image is already being processed' };
-      }
-
       // Start shimmer immediately for this aspect ratio
       const visualAspect = aspectRatio.replace('_', ':') as AspectRatio;
       setProcessing(postId, 'generate', true, visualAspect);
