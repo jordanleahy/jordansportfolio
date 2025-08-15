@@ -40,7 +40,7 @@ export const navigationConfig: NavigationItem[] = [
 
 export const getNavigationItems = (user: any, isAdmin: boolean) => {
   return navigationConfig.filter(item => {
-    if (item.accessLevel === 'public') return !user; // Only show to unauthenticated users
+    if (item.accessLevel === 'public') return true; // Show to everyone
     if (item.accessLevel === 'authenticated') return !!user;
     if (item.accessLevel === 'admin') return user && isAdmin;
     return false;
