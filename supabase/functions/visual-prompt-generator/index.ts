@@ -320,22 +320,19 @@ Theme: ${systemPromptData.theme || usedIdentifier}
         safeSpaceRules = 'CRITICAL: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room.';
         negativePrompts = 'No elements touching top/bottom edges, maintain vertical breathing room, no cramped vertical layouts';
       } else if (requestedAspectRatio === '1:1') {
-        orientationHint = 'balanced square format';
         safeSpaceRules = 'CRITICAL: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed.';
         negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements';
       } else if (requestedAspectRatio === '4:3') {
-        orientationHint = 'standard landscape format';
         safeSpaceRules = 'CRITICAL: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing.';
         negativePrompts = 'No cramped compositions, no elements touching frame borders, maintain horizontal balance';
       } else if (requestedAspectRatio === '3:4') {
-        orientationHint = 'social media portrait format';
         safeSpaceRules = 'CRITICAL: Maintain 10-12% margins on top and bottom, 8% margins on left and right sides. Optimize for social media viewing.';
         negativePrompts = 'No elements touching edges, maintain social media safe zones, no cramped vertical content';
       }
       
-      userMessage += `\nAspect Ratio: ${requestedAspectRatio} (${orientationHint})
+      userMessage += `\nComposition Guidelines:
 ${safeSpaceRules}
-NEGATIVE PROMPTS for ${requestedAspectRatio}: ${negativePrompts}`;
+NEGATIVE PROMPTS: ${negativePrompts}`;
     }
 
     // Add color theme instructions if provided
