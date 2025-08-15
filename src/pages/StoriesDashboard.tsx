@@ -493,6 +493,10 @@ export default function StoriesDashboard() {
             const existingIds = new Set(filteredThemes.map(t => t.id));
             const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
             
+            // Automatically redirect to the new theme detail page
+            console.log('🚀 Auto-redirecting to theme:', newTheme.id);
+            navigate(`/stories/id/${newTheme.id}`);
+            
             return [...filteredThemes, ...additionalThemes];
           }
         }
