@@ -217,6 +217,7 @@ export class OptimizedSocialMediaService {
     description: string | null;
     category: string;
     post_count: number;
+    prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
     first_post: {
       id: string;
       title: string;
@@ -244,12 +245,11 @@ export class OptimizedSocialMediaService {
       return [];
     }
 
-    // Only show themes with completed prompt generation
+    // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
       .select('id, theme_name, description, category, created_at, prompt_generation_status')
       .eq('user_id', user.id)
-      .eq('prompt_generation_status', 'completed')
       .order('created_at', { ascending: false });
 
     if (themesError) throw themesError;
@@ -321,6 +321,7 @@ export class OptimizedSocialMediaService {
         description: theme.description,
         category: theme.category,
         post_count: posts.length,
+        prompt_generation_status: theme.prompt_generation_status,
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
