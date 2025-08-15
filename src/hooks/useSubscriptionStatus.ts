@@ -8,6 +8,8 @@ export interface SubscriptionTier {
   price_cents: number;
   billing_interval: string;
   max_gpt_images: number;
+  max_gpt_images_daily: number;
+  max_gpt_images_monthly: number;
   stripe_price_id: string;
   is_active: boolean;
 }
@@ -150,7 +152,7 @@ export const useSubscriptionTiers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('subscription_tiers')
-        .select('*')
+        .select('id, name, price_cents, billing_interval, max_gpt_images, max_gpt_images_daily, max_gpt_images_monthly, stripe_price_id, is_active')
         .eq('is_active', true)
         .order('price_cents', { ascending: true });
 
