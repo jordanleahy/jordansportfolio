@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { ImageIcon, Loader2, Crown } from 'lucide-react';
-import { usePromptValidatedImageGeneration } from '@/hooks/usePromptValidatedImageGeneration';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardHeroImageProps {
@@ -10,26 +11,34 @@ interface PostCardHeroImageProps {
   colorTheme?: { name: string };
   isProcessing?: boolean;
   onPostsChange?: () => void;
+  onGenerateImage?: (postId: string, aspectRatio: '1_1', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 
 export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   post,
   colorTheme,
   isProcessing,
-  onPostsChange
+  onPostsChange,
+  onGenerateImage
 }) => {
   const navigate = useNavigate();
-  const { isGenerating, generationStep, generateHeroImage, creditStatus, steps } = usePromptValidatedImageGeneration();
+  const { getCreditStatus } = useCreditCheck();
+  const { isProcessing: isGeneratingImage } = useProcessingStatesContext();
+  const creditStatus = getCreditStatus();
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!creditStatus.hasCredits && !creditStatus.isLoading) {
       navigate('/subscription');
       return;
     }
-    generateHeroImage(post, colorTheme, onPostsChange);
+    
+    if (onGenerateImage) {
+      await onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
+    }
   };
 
-  const isLoading = isGenerating || isProcessing || (post.image_1_1_status === 'processing');
+  const isCurrentlyGenerating = isGeneratingImage(post.id, 'generate', '1:1');
+  const isLoading = isCurrentlyGenerating || isProcessing || (post.image_1_1_status === 'processing');
 
   return (
     <div className="space-y-4">
@@ -53,7 +62,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
             onClick={handleGenerate}
             role="button"
             tabIndex={0}
-            aria-label={!creditStatus.hasCredits && !creditStatus.isLoading ? "Upgrade to continue" : "Generate 1:1 hero image"}
+            aria-label={!creditStatus.hasCredits && !creditStatus.isLoading ? "Upgrade to continue" : "Generate image"}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -61,10 +70,10 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               }
             }}
           >
-            {isGenerating ? (
+            {isCurrentlyGenerating ? (
               <div className="text-center text-muted-foreground">
                 <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin" />
-                <p className="text-sm font-medium">{generationStep || 'Generating...'}</p>
+                <p className="text-sm font-medium">Generating...</p>
               </div>
             ) : !creditStatus.hasCredits && !creditStatus.isLoading ? (
               <div className="text-center">
@@ -77,7 +86,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
             ) : (
               <div className="text-center text-muted-foreground">
                 <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">1:1 Hero Image</p>
+                <p className="text-sm">Generate Image</p>
                 <p className="text-xs opacity-75 mt-1">
                   {creditStatus.isLoading ? 'Checking credits...' : 'Click to generate'}
                 </p>
