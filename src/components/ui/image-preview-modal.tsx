@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -642,11 +643,14 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                   onKeyDown={handleKeyDown}
-                  placeholder="Describe how you want to edit the image... 
-• Paste or drag images for reference
-• Press Ctrl/Cmd+Enter to submit
-• Press Escape to close"
-                  className="min-h-[100px] resize-none bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40"
+                  placeholder={isMobile 
+                    ? "Describe how you want to edit the image...\n• Paste or drag images for reference"
+                    : "Describe how you want to edit the image... \n• Paste or drag images for reference\n• Press Ctrl/Cmd+Enter to submit\n• Press Escape to close"
+                  }
+                  className={cn(
+                    "resize-none bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40",
+                    isMobile ? "min-h-[80px]" : "min-h-[100px]"
+                  )}
                   disabled={isProcessing}
                 />
               </div>
@@ -689,10 +693,12 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
                 </Button>
               </div>
 
-              {/* Keyboard shortcuts info */}
-              <div className="text-xs text-white/50 border-t border-white/10 pt-2">
-                <p>💡 Ctrl/Cmd+Enter to submit • Escape to close • Paste or drag images for reference</p>
-              </div>
+              {/* Keyboard shortcuts info - desktop only */}
+              {!isMobile && (
+                <div className="text-xs text-white/50 border-t border-white/10 pt-2">
+                  <p>💡 Ctrl/Cmd+Enter to submit • Escape to close • Paste or drag images for reference</p>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
