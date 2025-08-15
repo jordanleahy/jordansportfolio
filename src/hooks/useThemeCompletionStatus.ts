@@ -21,15 +21,34 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
 
     // Initial fetch
     const fetchThemeStatus = async () => {
+      console.log('🔍 Initial theme status fetch for:', themeId);
       const { data } = await supabase
         .from('themes')
         .select('id, prompt_generation_status, prompt_completion_count, total_posts_count, visual_prompt_system_prompt_id')
         .eq('id', themeId)
         .single();
       
-        if (data) {
-          setThemeStatus(data as ThemeCompletionData);
+      if (data) {
+        console.log('📊 Initial theme status:', data);
+        setThemeStatus(data as ThemeCompletionData);
+        
+        // Check if theme is already completed on initial fetch
+        if (data.prompt_generation_status === 'completed' && !hasShownCompletionToast) {
+          console.log('🎉 Theme already completed on initial fetch, triggering redirect');
+          
+          toast({
+            title: "Theme Created! 🎉",
+            description: `All ${data.total_posts_count} individual image prompts have been generated successfully.`,
+            duration: 5000,
+          });
+          
+          setHasShownCompletionToast(true);
+          
+          // Redirect immediately if already completed
+          console.log('🚀 Calling onCompletionRedirect callback immediately');
+          onCompletionRedirect?.();
         }
+      }
     };
 
     fetchThemeStatus();
@@ -68,6 +87,8 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
               !hasShownCompletionToast && 
               themeStatus?.prompt_generation_status !== 'completed') {
             
+            console.log('🎉 Theme completion detected:', { themeId, newStatus: newData.prompt_generation_status });
+            
             // Clear themes cache to refresh the UI immediately when theme status changes
             import('@/services/optimizedSocialMediaService').then(({ optimizedSocialMediaService }) => {
               optimizedSocialMediaService.clearThemesCache();
@@ -82,6 +103,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
             setHasShownCompletionToast(true);
             
             // Redirect to the theme page when completed
+            console.log('🚀 Calling onCompletionRedirect callback');
             onCompletionRedirect?.();
           }
           

@@ -45,7 +45,9 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
       onOptimisticStart?.(categoryName);
     },
     onOptimisticComplete: (success, categoryName, themeId) => {
+      console.log('🎯 Modal onOptimisticComplete:', { success, categoryName, themeId });
       if (success && themeId) {
+        console.log('✅ Setting createdThemeId:', themeId);
         setCreatedThemeId(themeId);
       } else if (!success) {
         setShowErrorMessage('Import failed. Please check your data and try again.');
@@ -55,15 +57,18 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   });
 
   // Track theme completion status and redirect when complete
+  console.log('🔍 Theme completion tracking setup:', createdThemeId);
   useThemeCompletionStatus(createdThemeId || undefined, () => {
+    console.log('🚀 Theme completion redirect triggered for:', createdThemeId);
     if (createdThemeId) {
       // Close modal and navigate to theme page
       setShowSuccessMessage(false);
       setShowErrorMessage(null);
       onOpenChange(false);
       setJsonInput('');
+      const themeToNavigate = createdThemeId;
       setCreatedThemeId(null);
-      navigate(`/stories/id/${createdThemeId}`);
+      navigate(`/stories/id/${themeToNavigate}`);
     }
   });
 
