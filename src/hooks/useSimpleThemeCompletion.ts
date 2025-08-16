@@ -55,11 +55,7 @@ export const useSimpleThemeCompletion = (
             intervalRef.current = null;
           }
           
-          // Show success toast when ALL image prompts are completed
-          toast({
-            title: "All Image Prompts Generated!",
-            description: `"${data.theme_name}" - All ${data.total_posts_count} posts now have image prompts ready`
-          });
+          // Theme completion detected - no toast shown
           
           // Notify completion
           onComplete?.();
