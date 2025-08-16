@@ -173,48 +173,53 @@ export const DesktopImagePreviewModal = ({
             </div>
           </div>
 
-          {/* Image Container */}
-          <div className={`flex items-center justify-center flex-1 transition-all duration-300 ${editState.isSheetOpen ? 'pb-80' : 'p-4'}`}>
-            <img
-              src={currentImageUrl}
-              alt={alt}
-              className="max-w-full max-h-full object-contain rounded"
-              loading="lazy"
-            />
+          {/* Main content area with flexible layout */}
+          <div className="flex flex-col flex-1 min-h-0">
+            {/* Image Container */}
+            <div className="flex items-center justify-center flex-1 p-4 min-h-0">
+              <img
+                src={currentImageUrl}
+                alt={alt}
+                className="max-w-full max-h-full object-contain rounded"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Version Thumbnails */}
+            {imageVersions.length > 1 && !editState.isSheetOpen && (
+              <div className="flex justify-center p-4">
+                <div className="flex gap-2 bg-black/70 backdrop-blur-sm rounded-lg p-2">
+                  {imageVersions.map((version, index) => (
+                    <button
+                      key={version.id}
+                      onClick={() => setCurrentVersionIndex(index)}
+                      className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                        index === currentVersionIndex 
+                          ? 'border-white shadow-lg scale-110' 
+                          : 'border-transparent hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={version.url}
+                        alt={`Version ${version.version_number}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">
+                          {version.version_number === 0 ? 'O' : version.version_number}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Version Thumbnails */}
-          {imageVersions.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-sm rounded-lg p-2">
-              {imageVersions.map((version, index) => (
-                <button
-                  key={version.id}
-                  onClick={() => setCurrentVersionIndex(index)}
-                  className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
-                    index === currentVersionIndex 
-                      ? 'border-white shadow-lg scale-110' 
-                      : 'border-transparent hover:border-white/50'
-                  }`}
-                >
-                  <img
-                    src={version.url}
-                    alt={`Version ${version.version_number}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {version.version_number === 0 ? 'O' : version.version_number}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Edit Sheet - Floating from bottom */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
+          {/* Edit Sheet - Floating from bottom with proper height constraints */}
+          <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 max-h-[60vh] ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+            <div className="flex flex-col h-full max-h-full overflow-hidden">
+              <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
                 <h3 className="text-white text-lg font-semibold">Edit Image</h3>
                 <Button
                   onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
@@ -225,6 +230,8 @@ export const DesktopImagePreviewModal = ({
                   <X className="h-4 w-4" />
                 </Button>
               </div>
+
+              <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
 
               {/* Reference image display */}
               {referenceImage && (
@@ -298,30 +305,31 @@ export const DesktopImagePreviewModal = ({
                 />
               </div>
 
-              {/* Action buttons */}
-              <div className="flex justify-end gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
-                  className="text-white hover:bg-white/10"
-                  disabled={editState.isProcessing}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={onSubmitEdit}
-                  className="bg-white text-black hover:bg-white/90"
-                  disabled={editState.isProcessing || !editState.prompt.trim()}
-                >
-                  {editState.isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    'Apply Edit'
-                  )}
-                </Button>
+                {/* Action buttons */}
+                <div className="flex justify-end gap-3 pt-2 border-t border-white/10 mt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
+                    className="text-white hover:bg-white/10"
+                    disabled={editState.isProcessing}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={onSubmitEdit}
+                    className="bg-white text-black hover:bg-white/90"
+                    disabled={editState.isProcessing || !editState.prompt.trim()}
+                  >
+                    {editState.isProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Apply Edit'
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
