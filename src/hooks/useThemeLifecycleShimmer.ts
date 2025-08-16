@@ -41,12 +41,11 @@ export const useThemeLifecycleShimmer = ({
     if (pendingTheme && availableThemes.length > 0) {
       // Look for a completed theme that matches our pending theme
       const completedTheme = availableThemes.find(theme => {
-        // Primary: Match by theme_id if available (most reliable)
+        // Match by theme_id (most reliable)
         if (pendingTheme.theme_id) {
           return theme.id === pendingTheme.theme_id && isThemeReady(theme);
         }
-        // Fallback: Match by description (for backward compatibility)
-        return theme.description === pendingTheme.description && isThemeReady(theme);
+        return false;
       });
       
       if (completedTheme) {
