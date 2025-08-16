@@ -22,7 +22,7 @@ export const FundingAskSlide: React.FC = () => {
               <span className="text-lg font-semibold text-primary">40%</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-lg text-muted-foreground">Product team expansion</span>
+              <span className="text-lg text-muted-foreground">COGS: Technology </span>
               <span className="text-lg font-semibold text-primary">25%</span>
             </div>
             <div className="flex justify-between items-center">
