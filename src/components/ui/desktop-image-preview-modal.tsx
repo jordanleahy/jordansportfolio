@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Download, Loader2, Upload } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { X, Download, Loader2, Edit, Upload, Image as ImageIcon } from "lucide-react";
 import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
 import { useReferenceImage } from "@/hooks/useReferenceImage";
@@ -27,8 +25,17 @@ export const DesktopImagePreviewModal = ({
   title, 
   aspectRatio 
 }: DesktopImagePreviewModalProps) => {
+  // Grouped state management for better stability
+  const [editState, setEditState] = useState({
+    isSheetOpen: false,
+    prompt: '',
+    isProcessing: false
+  });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const formattedTitle = title && aspectRatio 
-    ? `jordanleahy.com ${title} ${aspectRatio}`
+    ? `${title} ${aspectRatio} jordanleahy.com`
     : alt;
 
   const { wmUrl, wmStatus, isLoading } = useWatermarkStatus(imageUrl);
@@ -58,250 +65,266 @@ export const DesktopImagePreviewModal = ({
     fetchVersionsFromDatabase,
     imageVersions,
     undefined,
-    undefined
+    setCurrentVersionIndex
   );
 
-  // Desktop-specific state
-  const [isSheetOpen, setSheetOpen] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Clean up edit state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setEditState({ isSheetOpen: false, prompt: '', isProcessing: false });
+      clearReferenceImage();
+    }
+  }, [isOpen, clearReferenceImage]);
 
-  // Handle download
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editState.isSheetOpen) return;
+
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        onSubmitEdit();
+      } else if (e.key === 'Escape') {
+        setEditState(prev => ({ ...prev, isSheetOpen: false }));
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, editState.isSheetOpen, editState.prompt]);
+
   const handleDownload = async () => {
     try {
-      const downloadUrl = wmUrl && wmStatus === 'complete' ? wmUrl : currentImageUrl;
-      const response = await fetch(downloadUrl);
+      const finalUrl = wmUrl || currentImageUrl;
+      const response = await fetch(finalUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = formattedTitle;
-      document.body.appendChild(a);
-      a.click();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formattedTitle}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
     } catch (error) {
       console.error('Download failed:', error);
     }
   };
 
-  // Desktop keyboard shortcuts
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      onSubmitEdit();
-    } else if (e.key === 'Escape') {
-      setSheetOpen(false);
-    }
-  };
+  const onSubmitEdit = () => {
+    if (!editState.prompt.trim()) return;
 
-  // Global keyboard shortcuts
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!isSheetOpen) return;
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault();
-        onSubmitEdit();
+    setEditState(prev => ({ ...prev, isProcessing: true }));
+
+    handleEditSubmit(
+      editState.prompt,
+      referenceImageAnalysis,
+      () => {
+        setEditState({ isSheetOpen: false, prompt: '', isProcessing: false });
+        clearReferenceImage();
       }
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setSheetOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isSheetOpen]);
-
-  const onSubmitEdit = async () => {
-    await handleEditSubmit(prompt, referenceImageAnalysis, () => {
-      setPrompt("");
-      clearReferenceImage();
-      setSheetOpen(false);
-    });
+    );
   };
-
-  // Focus textarea when sheet opens
-  useEffect(() => {
-    if (isSheetOpen && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [isSheetOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold truncate">
+      <DialogContent 
+        className="max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-black/90"
+        onPointerDownOutside={onClose}
+      >
+        <div className="relative flex flex-col w-full h-full">
+          {/* Header with title and buttons */}
+          <div className="flex items-center justify-between p-4 bg-black/70">
+            <DialogTitle className="text-white text-lg font-semibold truncate mr-4">
               {formattedTitle}
             </DialogTitle>
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
                 onClick={handleDownload}
-                className="flex items-center gap-2"
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title={isLoading ? 'Preparing watermark...' : 'Download'}
+                disabled={isLoading}
               >
-                <Download className="h-4 w-4" />
-                Download
-                {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
               </Button>
+
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSheetOpen(!isSheetOpen)}
+                onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: true }))}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+                title="Edit Image"
               >
-                Edit
+                <Edit className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
+              
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <X className="h-5 w-5" />
               </Button>
             </div>
           </div>
-        </DialogHeader>
 
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Image area */}
-          <div className="flex-1 flex items-center justify-center p-6 bg-muted/20">
+          {/* Image Container */}
+          <div className={`flex items-center justify-center flex-1 transition-all duration-300 ${editState.isSheetOpen ? 'pb-80' : 'p-4'}`}>
             <img
               src={currentImageUrl}
               alt={alt}
-              className="max-w-full max-h-full object-contain rounded-lg"
-              style={{ maxHeight: 'calc(100% - 2rem)' }}
+              className="max-w-full max-h-full object-contain rounded"
+              loading="lazy"
             />
           </div>
 
-          {/* Version thumbnails */}
+          {/* Version Thumbnails */}
           {imageVersions.length > 1 && (
-            <div className="p-4 border-t bg-background">
-              <div className="flex gap-2 overflow-x-auto">
-                {imageVersions.map((version, index) => (
-                  <button
-                    key={version.id}
-                    onClick={() => setCurrentVersionIndex(index)}
-                    className={cn(
-                      "flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden transition-all",
-                      currentVersionIndex === index
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <img
-                      src={version.url}
-                      alt={`Version ${version.version_number}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-sm rounded-lg p-2">
+              {imageVersions.map((version, index) => (
+                <button
+                  key={version.id}
+                  onClick={() => setCurrentVersionIndex(index)}
+                  className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                    index === currentVersionIndex 
+                      ? 'border-white shadow-lg scale-110' 
+                      : 'border-transparent hover:border-white/50'
+                  }`}
+                >
+                  <img
+                    src={version.url}
+                    alt={`Version ${version.version_number}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {version.version_number === 0 ? 'O' : version.version_number}
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
 
-          {/* Edit sheet */}
-          <AnimatePresence>
-            {isSheetOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="border-t bg-background overflow-hidden"
-              >
-                <div className="p-6 space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Edit prompt (Ctrl/Cmd + Enter to submit)
-                    </label>
-                    <Textarea
-                      ref={textareaRef}
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onPaste={handleImagePaste}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                      placeholder="Describe how you want to edit this image..."
-                      className="min-h-[100px] resize-none"
-                      disabled={isProcessing}
-                    />
-                  </div>
+          {/* Edit Sheet - Floating from bottom */}
+          <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-white text-lg font-semibold">Edit Image</h3>
+                <Button
+                  onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
 
-                  {/* Reference image display */}
-                  {referenceImage && (
-                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              {/* Reference image display */}
+              {referenceImage && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white text-sm">Reference Image:</span>
+                    <Button
+                      onClick={clearReferenceImage}
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-white/10 h-6 px-2"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden border border-white/20">
                       <img
                         src={referenceImage}
                         alt="Reference"
-                        className="w-12 h-12 object-cover rounded"
+                        className="w-full h-full object-cover"
                       />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Reference image attached</p>
-                        <p className="text-xs text-muted-foreground">
-                          Style characteristics will be applied to your edit
-                        </p>
+                    </div>
+                    
+                    {referenceImageAnalysis?.extractedCharacteristics && (
+                      <div className="text-white text-xs space-y-1 flex-1">
+                        <div>Style: {referenceImageAnalysis.extractedCharacteristics.artisticStyle}</div>
+                        <div>Mood: {referenceImageAnalysis.extractedCharacteristics.overallMood}</div>
+                        <div>Colors: {referenceImageAnalysis.extractedCharacteristics.colorPalette?.slice(0, 3).join(', ')}</div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearReferenceImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Upload area */}
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
-                    <div className="text-center">
-                      <Upload className="mx-auto h-6 w-6 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Drop a reference image here, paste from clipboard, or
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose File
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/png,image/jpeg"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setSheetOpen(false)}
-                      disabled={isProcessing}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={onSubmitEdit}
-                      disabled={!prompt.trim() || isProcessing}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Apply Edit"
-                      )}
-                    </Button>
+                    )}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+
+              {/* File upload area */}
+              <div className="grid grid-cols-1 gap-4">
+                <div
+                  className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:border-white/50 transition-colors"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <Upload className="h-4 w-4 text-white" />
+                      <ImageIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-white text-sm">
+                      Drop images here, paste, or click to upload
+                    </span>
+                  </div>
+                </div>
+
+                <Textarea
+                  ref={textareaRef}
+                  placeholder="Describe how you want to edit the image..."
+                  value={editState.prompt}
+                  onChange={(e) => setEditState(prev => ({ ...prev, prompt: e.target.value }))}
+                  onPaste={handleImagePaste}
+                  className="min-h-20 bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none focus:border-white/40"
+                  disabled={editState.isProcessing}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setEditState(prev => ({ ...prev, isSheetOpen: false }))}
+                  className="text-white hover:bg-white/10"
+                  disabled={editState.isProcessing}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={onSubmitEdit}
+                  className="bg-white text-black hover:bg-white/90"
+                  disabled={editState.isProcessing || !editState.prompt.trim()}
+                >
+                  {editState.isProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Apply Edit'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
