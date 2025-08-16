@@ -32,7 +32,7 @@ export const WhyNowSlide: React.FC = () => {
             Our unique position:
           </h2>
           <div className="space-y-3 text-left">
-            <p className="text-lg text-foreground">• First-mover in the thought to narrative space</p>
+            <p className="text-lg text-foreground">• First mover in the thought to narrative space</p>
             <p className="text-lg text-foreground">• Built on Agent AI technology without need for large team.</p>
             <p className="text-lg text-foreground">
               • Proven user engagement metrics exceeding industry standards
