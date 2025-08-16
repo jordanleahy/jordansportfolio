@@ -43,7 +43,7 @@ export const CompetitiveSlide: React.FC = () => {
           </div>
           <div className="grid md:grid-cols-3 gap-6 text-left">
             <p className="text-base md:text-lg text-muted-foreground">Digital Storytelling</p>
-            <p className="text-base md:text-lg text-muted-foreground">Template-based</p>
+            <p className="text-base md:text-lg text-muted-foreground">Template based</p>
             <p className="text-base md:text-lg text-primary font-medium">Uniquely personal</p>
           </div>
         </div>
