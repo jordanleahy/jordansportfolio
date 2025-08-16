@@ -7,7 +7,7 @@ export const SolutionSlide: React.FC = () => {
         4/14
       </div>
       <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 text-primary leading-tight">
-        Our Solution: Story Ship
+        Our Solution
       </h1>
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-8 text-foreground">
         Transforming thoughts into virtual journeys
