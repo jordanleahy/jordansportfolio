@@ -13,7 +13,7 @@ export const FundingSlide: React.FC = () => {
         <p className="text-xl md:text-2xl text-muted-foreground">
           Contact:{' '}
           <span className="text-primary font-semibold">
-            jordan@storyship.com
+            jordanwilliamleahy@gmail.com
           </span>
         </p>
         <p className="text-xl md:text-2xl text-muted-foreground">
