@@ -1,8 +1,6 @@
 import React from 'react';
-
 export const TractionSlide: React.FC = () => {
-  return (
-    <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
+  return <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         8/14
       </div>
@@ -21,10 +19,7 @@ export const TractionSlide: React.FC = () => {
           <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2024 Q4:</span>
           <p className="text-lg text-muted-foreground">AI engine prototype developed</p>
         </div>
-        <div className="flex items-start space-x-4">
-          <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q1:</span>
-          <p className="text-lg text-muted-foreground">Closed beta with <span className="text-primary font-semibold">1,500 users (97% retention rate)</span></p>
-        </div>
+        
         <div className="flex items-start space-x-4">
           <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q2:</span>
           <p className="text-lg text-muted-foreground">Strategic partnership with leading AI research institute</p>
@@ -38,6 +33,5 @@ export const TractionSlide: React.FC = () => {
           <p className="text-lg text-foreground font-medium">34% month-over-month growth with zero marketing spend</p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
