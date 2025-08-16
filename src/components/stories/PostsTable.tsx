@@ -21,7 +21,7 @@ import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
 import { PostEditModal } from "./PostEditModal";
 // Removed deprecated optimizedSocialMediaService import
 
-import { ImagePreviewModal } from "@/components/ui/image-preview-modal";
+import { ImagePreviewModal } from "@/components/ui/responsive-image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
 import { SystemPromptViewer } from "./SystemPromptViewer";
