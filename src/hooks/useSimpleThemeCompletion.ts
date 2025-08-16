@@ -8,9 +8,9 @@ interface SimpleThemeCompletion {
 }
 
 /**
- * Simple hook to track theme completion status with binary state only
- * No real-time updates, no toasts, no complex state management
- * Just polls until theme is fully completed (100% processed)
+ * Hook to track when ALL image prompts for a theme are completed
+ * Shows success notification only when every single post has its image prompt generated
+ * This is what actually matters - not when theme is initially created
  */
 export const useSimpleThemeCompletion = (
   themeId: string | undefined,
@@ -55,10 +55,10 @@ export const useSimpleThemeCompletion = (
             intervalRef.current = null;
           }
           
-          // Show success toast when theme is actually completed
+          // Show success toast when ALL image prompts are completed
           toast({
-            title: "Theme Created!",
-            description: `"${data.theme_name}" is now ready with all posts completed`
+            title: "All Image Prompts Generated!",
+            description: `"${data.theme_name}" - All ${data.total_posts_count} posts now have image prompts ready`
           });
           
           // Notify completion

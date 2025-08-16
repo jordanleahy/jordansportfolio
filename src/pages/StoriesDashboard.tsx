@@ -501,8 +501,8 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to generate theme');
       }
       
-      console.log('✅ Theme generation successful:', data);
-      // Note: Success toast will be shown when theme is actually completed via useSimpleThemeCompletion
+      console.log('✅ Theme saved to database:', data);
+      // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
 
       // Find and replace the pending theme with real data
       setPendingTheme(null);
