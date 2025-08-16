@@ -70,7 +70,7 @@ const PostDetail = lazy(() => import("./pages/PostDetail"));
 const StoryShip = lazy(() => import("./pages/StoryShip"));
 const NewInvestorDeck = lazy(() => import("./pages/NewInvestorDeck"));
 const DetailedInvestorDeck = lazy(() => import("./pages/DetailedInvestorDeck"));
-const ThemeNameRedirect = lazy(() => import("@/components/migration/ThemeNameRedirect").then(module => ({ default: module.ThemeNameRedirect })));
+// ✅ GOOD: ThemeNameRedirect removed - using themeId routes only
 
 
 function App() {
@@ -132,22 +132,17 @@ function App() {
                     </Suspense>
                   } 
                 />
-                {/* Redirect old calendar routes to stories */}
-                <Route path="/calendar" element={<Navigate to="/stories" replace />} />
-                <Route path="/calendar/category/:category" element={<Navigate to="/stories/theme/:category" replace />} />
+                {/* ✅ GOOD: Direct themeId routing only */}
                 
-                {/* Redirect old category routes to theme routes */}
-                <Route path="/stories/category/:category" element={<Navigate to="/stories/theme/:category" replace />} />
-                
-                {/* Migration route for old theme name URLs - redirects to theme ID URLs */}
-                <Route 
-                  path="/stories/theme/:themeName" 
-                  element={
-                    <Suspense fallback={<CalendarSkeletonLoader />}>
-                      <ThemeNameRedirect />
-                    </Suspense>
-                  }
-                />
+                  {/* ✅ GOOD: Only themeId routes supported */}
+                  <Route 
+                    path="/stories/id/:themeId" 
+                    element={
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <ThemeDetail />
+                      </Suspense>
+                    } 
+                  />
                 
                 <Route 
                   path="/stories" 
@@ -155,16 +150,6 @@ function App() {
                     <Suspense fallback={<CalendarSkeletonLoader />}>
                       <StoriesDashboard />
                     </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/stories/id/:themeId" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <ThemeDetail />
-                      </Suspense>
-                    </ProtectedRoute>
                   } 
                 />
                 <Route 
