@@ -32,7 +32,7 @@ export const FundingAskSlide: React.FC = () => {
           </div>
         </div>
         <p className="text-xl md:text-2xl text-primary font-semibold">
-          Projecting Series A readiness in 18 months with 10x user growth.
+          Projecting Series A readiness in 18 months.
         </p>
       </div>
     </div>;
