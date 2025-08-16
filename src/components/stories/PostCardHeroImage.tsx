@@ -33,7 +33,27 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
     <div className="space-y-4">
       {/* Hero Image Display */}
       <div className="aspect-square relative group bg-muted rounded-t-lg overflow-hidden">
-        {selectedImage ? (
+        {isLoadingOrProcessing ? (
+          <div className="relative w-full h-full">
+            {selectedImage && (
+              <img 
+                src={selectedImage}
+                alt={`${post.title} - ${selectedAspectRatio}`}
+                className="object-cover w-full h-full"
+              />
+            )}
+            <div className="absolute inset-0">
+              <SimpleShimmer className="w-full h-full" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <InstantLoadingIndicator 
+                  isVisible={true}
+                  message={selectedImage ? "Regenerating..." : "Generating..."}
+                  className="text-white drop-shadow-sm"
+                />
+              </div>
+            </div>
+          </div>
+        ) : selectedImage ? (
           <div className="relative w-full h-full">
             <img 
               src={selectedImage}
@@ -65,17 +85,6 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               >
                 {isProcessingCtx(post.id, 'generate', '1:1') ? 'Regenerating...' : 'Regenerate'}
               </button>
-            </div>
-          </div>
-        ) : (isLoadingOrProcessing) ? (
-          <div className="relative w-full h-full">
-            <SimpleShimmer className="w-full h-full" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <InstantLoadingIndicator 
-                isVisible={true}
-                message="Generating..."
-                className="text-white drop-shadow-sm"
-              />
             </div>
           </div>
         ) : (
