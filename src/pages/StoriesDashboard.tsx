@@ -478,30 +478,49 @@ export default function StoriesDashboard() {
       console.log('✅ Theme saved to database:', data);
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
 
-      // Find and replace the pending theme with real data
-      setPendingTheme(null);
-      
       console.log('🔄 Refreshing themes from server...');
       // Refresh themes from server and merge with pending themes
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
       console.log('📊 Refreshed themes count:', refreshedThemes.length);
       
+      let replacementSuccessful = false;
+      
       setAvailableThemes(prevThemes => {
+        console.log('🔍 Looking for pending theme to replace...');
+        
         // Find the pending theme that matches our description
         const pendingIndex = prevThemes.findIndex(theme => 
           theme.id.startsWith('pending-') && 
           theme.description === themeDescription
         );
         
+        console.log('📍 Pending theme index:', pendingIndex);
+        
         if (pendingIndex !== -1) {
-          // Find the new theme that matches what we created
-          const newTheme = refreshedThemes.find(theme => 
-            theme.theme_name === data.theme || 
-            theme.category === data.category ||
-            theme.description?.includes(themeDescription)
-          );
+          // Improved matching logic - try multiple criteria
+          const newTheme = refreshedThemes.find(theme => {
+            const matchesTheme = theme.theme_name === data.theme;
+            const matchesCategory = theme.category === data.category;
+            const matchesDescription = theme.description && themeDescription && 
+              (theme.description.toLowerCase().includes(themeDescription.toLowerCase()) ||
+               themeDescription.toLowerCase().includes(theme.description.toLowerCase()));
+            
+            console.log('🔍 Checking theme:', {
+              id: theme.id,
+              name: theme.theme_name,
+              category: theme.category,
+              matchesTheme,
+              matchesCategory,
+              matchesDescription
+            });
+            
+            return matchesTheme || matchesCategory || matchesDescription;
+          });
           
           if (newTheme) {
+            console.log('✅ Found matching theme for replacement:', newTheme.id);
+            replacementSuccessful = true;
+            
             // Replace the pending theme with the real one at the same position
             const newThemes = [...prevThemes];
             newThemes[pendingIndex] = newTheme;
@@ -522,12 +541,25 @@ export default function StoriesDashboard() {
             navigate(`/stories/id/${newTheme.id}`);
             
             return [...filteredThemes, ...additionalThemes];
+          } else {
+            console.log('❌ No matching theme found for replacement');
           }
+        } else {
+          console.log('❌ No pending theme found with description:', themeDescription);
         }
         
         // Fallback: just replace with fresh data, removing pending themes
+        console.log('🔄 Using fallback - replacing with fresh data');
         return refreshedThemes;
       });
+      
+      // Only clear pending theme after successful replacement or fallback
+      if (replacementSuccessful) {
+        console.log('✅ Theme replacement successful, clearing pending state');
+      } else {
+        console.log('⚠️ Theme replacement failed, clearing pending state anyway');
+      }
+      setPendingTheme(null);
     } catch (error: any) {
       console.error('Theme generation error:', error);
 
