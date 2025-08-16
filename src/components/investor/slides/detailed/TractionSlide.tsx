@@ -20,10 +20,7 @@ export const TractionSlide: React.FC = () => {
           <p className="text-lg text-muted-foreground">AI engine prototype developed</p>
         </div>
         
-        <div className="flex items-start space-x-4">
-          <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q2:</span>
-          <p className="text-lg text-muted-foreground">Strategic partnership with leading AI research institute</p>
-        </div>
+        
         <div className="flex items-start space-x-4">
           <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q3:</span>
           <p className="text-lg text-muted-foreground">Built as Agent AI first foundation</p>
