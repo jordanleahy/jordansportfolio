@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Download, Loader2, Edit, Upload, Image as ImageIcon } from "lucide-react";
+import { X, Download, Loader2, Edit } from "lucide-react";
 import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
 import { useReferenceImage } from "@/hooks/useReferenceImage";
@@ -50,11 +50,7 @@ export const DesktopImagePreviewModal = ({
   const {
     referenceImage,
     referenceImageAnalysis,
-    fileInputRef,
     handleImagePaste,
-    handleDragOver,
-    handleDrop,
-    handleImageUpload,
     clearReferenceImage
   } = useReferenceImage();
 
