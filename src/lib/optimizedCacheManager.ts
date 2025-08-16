@@ -47,7 +47,7 @@ class OptimizedCacheManager {
     toDelete.forEach(([key]) => this.memoryCache.delete(key));
   }
 
-  // Optimized prompt caching with aggressive deduplication (aspect ratio removed)
+  // Optimized prompt caching with aggressive deduplication and theme ID validation
   generatePromptKey(config: {
     title: string;
     description: string;
@@ -55,6 +55,14 @@ class OptimizedCacheManager {
     category?: string;
     colorTheme?: any;
   }): string {
+    // Import validation at runtime to avoid circular dependencies
+    const { cacheValidator } = require('./cacheValidator');
+    
+    // Validate theme ID if provided
+    if (config.themeId) {
+      cacheValidator.validateThemeInCacheOperation(config.themeId, 'generatePromptKey');
+    }
+    
     // Normalize and truncate for better cache efficiency
     const normalizedTitle = config.title.toLowerCase().trim().substring(0, 50);
     const normalizedDesc = config.description.toLowerCase().trim().substring(0, 100);

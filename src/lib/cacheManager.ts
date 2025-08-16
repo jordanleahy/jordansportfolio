@@ -1,10 +1,14 @@
-// Simple in-memory cache without external dependencies
+import { cacheValidator } from './cacheValidator';
+import { ThemeId, isValidThemeId, ThemeValidationError } from '@/types/stories/validation';
+
+// Simple in-memory cache without external dependencies with strict theme ID validation
 class SimpleCacheManager {
   private memoryCache: Map<string, { value: string; expires: number }>;
   private systemPromptCache: Map<string, { value: any; expires: number }>;
   private themeCache: Map<string, { value: any; expires: number }>;
   private visualPromptCache: Map<string, { value: any; expires: number }>;
   private maxSize = 1000;
+  private migrationCompleted = false;
 
   constructor() {
     this.memoryCache = new Map();
@@ -33,7 +37,7 @@ class SimpleCacheManager {
     }
   }
 
-  // Generate cache key for prompts (aspect ratio removed for better cache efficiency)
+  // Generate validated cache key for prompts with strict theme ID enforcement
   private generatePromptKey(config: {
     postId?: string;
     title?: string;
@@ -41,32 +45,37 @@ class SimpleCacheManager {
     themeId?: string;
     category?: string;
   }): string {
-    // If postId is provided, use it as the primary key
-    if (config.postId) {
-      const themeId = config.themeId || 'default';
-      const category = config.category || 'general';
-      return `prompt:${category}:${themeId}:${config.postId}`;
+    // Validate and normalize configuration
+    const validatedConfig = cacheValidator.validateCacheConfig(config);
+    
+    // Generate consistent cache key
+    return cacheValidator.generateValidatedCacheKey(validatedConfig, 'prompt');
+  }
+
+  // Ensure migration is completed before cache operations
+  private async ensureMigrationCompleted(): Promise<void> {
+    if (this.migrationCompleted) {
+      return;
     }
-    
-    // Fallback to title/description based key for backwards compatibility
-    const normalizedTitle = (config.title || '').toLowerCase().trim();
-    const normalizedDescription = (config.description || '').toLowerCase().trim().substring(0, 100);
-    const themeId = config.themeId || 'default';
-    const category = config.category || 'general';
-    
+
     try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(normalizedTitle + normalizedDescription);
-      const chars = Array.from(data, byte => String.fromCharCode(byte));
-      const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
-      return `prompt:${category}:${themeId}:${encoded}`;
+      const migrationResult = await cacheValidator.migrateLegacyCacheData();
+      
+      if (migrationResult.errors.length > 0) {
+        console.warn('Cache migration completed with errors:', migrationResult.errors);
+      } else {
+        console.log(`Cache migration completed: cleaned ${migrationResult.cleanedCount} legacy entries`);
+      }
+      
+      this.migrationCompleted = true;
     } catch (error) {
-      console.warn('Failed to encode cache key, using fallback:', error);
-      return `prompt:${category}:${themeId}:${(normalizedTitle + normalizedDescription).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)}`;
+      console.error('Cache migration failed:', error);
+      // Don't block cache operations, just log the error
+      this.migrationCompleted = true;
     }
   }
 
-  // Get cached prompt (memory first, then database)
+  // Get cached prompt (memory first, then database) with strict validation
   async getCachedPrompt(config: {
     postId?: string;
     title?: string;
@@ -74,6 +83,14 @@ class SimpleCacheManager {
     themeId?: string;
     category?: string;
   }): Promise<string | null> {
+    // Ensure migration is completed
+    await this.ensureMigrationCompleted();
+    
+    // Validate theme ID if provided
+    if (config.themeId) {
+      cacheValidator.validateThemeInCacheOperation(config.themeId, 'getCachedPrompt');
+    }
+    
     const key = this.generatePromptKey(config);
     
     // Clean expired entries
@@ -123,7 +140,7 @@ class SimpleCacheManager {
     return null;
   }
 
-  // Store prompt in both memory and database
+  // Store prompt in both memory and database with strict validation
   async setCachedPrompt(config: {
     postId?: string;
     title?: string;
@@ -131,6 +148,11 @@ class SimpleCacheManager {
     themeId?: string;
     category?: string;
   }, prompt: string): Promise<void> {
+    // Validate theme ID if provided
+    if (config.themeId) {
+      cacheValidator.validateThemeInCacheOperation(config.themeId, 'setCachedPrompt');
+    }
+    
     const key = this.generatePromptKey(config);
     
     // Store in memory immediately
@@ -167,9 +189,11 @@ class SimpleCacheManager {
     }
   }
 
-  // System prompt caching with database lookup by theme_id only
+  // System prompt caching with database lookup by theme_id only with strict validation
   async getSystemPrompt(themeId: string): Promise<any | null> {
-    const key = `system_prompt:${themeId}`;
+    // Validate theme ID format
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getSystemPrompt');
+    const key = `system_prompt:${validatedThemeId}`;
     
     this.cleanExpired(this.systemPromptCache);
     
@@ -206,9 +230,11 @@ class SimpleCacheManager {
     return null;
   }
 
-  // Theme data caching with database lookup by theme ID
+  // Theme data caching with database lookup by theme ID with strict validation  
   async getThemeData(themeId: string): Promise<any | null> {
-    const key = `theme:${themeId}`;
+    // Validate theme ID format
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getThemeData');
+    const key = `theme:${validatedThemeId}`;
     
     this.cleanExpired(this.themeCache);
     
@@ -245,9 +271,10 @@ class SimpleCacheManager {
     return null;
   }
 
-  // Set system prompt in cache
+  // Set system prompt in cache with validation
   setSystemPrompt(themeId: string, data: any): void {
-    const key = `system_prompt:${themeId}`;
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setSystemPrompt');
+    const key = `system_prompt:${validatedThemeId}`;
     this.systemPromptCache.set(key, {
       value: data,
       expires: Date.now() + (4 * 60 * 60 * 1000) // 4 hours
@@ -256,9 +283,10 @@ class SimpleCacheManager {
     console.log(`🧠 System prompt cached: ${key}`);
   }
 
-  // Set theme data in cache
+  // Set theme data in cache with validation
   setThemeData(themeId: string, data: any): void {
-    const key = `theme:${themeId}`;
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setThemeData');
+    const key = `theme:${validatedThemeId}`;
     this.themeCache.set(key, {
       value: data,
       expires: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
@@ -267,9 +295,10 @@ class SimpleCacheManager {
     console.log(`🎨 Theme cached: ${key}`);
   }
 
-  // Visual prompt caching per theme
+  // Visual prompt caching per theme with validation
   async getVisualPromptByTheme(themeId: string): Promise<any | null> {
-    const key = `visual_prompt:${themeId}`;
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getVisualPromptByTheme');
+    const key = `visual_prompt:${validatedThemeId}`;
     
     this.cleanExpired(this.visualPromptCache);
     
@@ -284,7 +313,8 @@ class SimpleCacheManager {
   }
 
   setVisualPromptByTheme(themeId: string, data: any): void {
-    const key = `visual_prompt:${themeId}`;
+    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setVisualPromptByTheme');
+    const key = `visual_prompt:${validatedThemeId}`;
     this.visualPromptCache.set(key, {
       value: data,
       expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
