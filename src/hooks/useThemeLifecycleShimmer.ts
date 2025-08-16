@@ -45,9 +45,13 @@ export const useThemeLifecycleShimmer = ({
     }
   });
 
-  // Helper function to check if a theme is ready (completed status guarantees all posts are generated)
+  // Helper function to check if a theme is ready (both prompt generation and lifecycle must be complete)
   const isThemeReady = (theme: ThemeWithPosts) => {
-    return theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
+    const promptComplete = theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
+    const lifecycleComplete = !theme.lifecycle_status || 
+                             theme.lifecycle_status === SHIMMER_CONSTANTS.LIFECYCLE_STATUS.COMPLETED ||
+                             theme.lifecycle_status === SHIMMER_CONSTANTS.LIFECYCLE_STATUS.READY;
+    return promptComplete && lifecycleComplete;
   };
 
   // Centralized cleanup function

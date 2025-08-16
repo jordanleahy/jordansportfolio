@@ -253,29 +253,46 @@ export const useUnifiedRealtime = ({
     const oldRecord = data.old;
 
     console.log(`🎬 REALTIME: Theme ${eventType}: ${record?.id || oldRecord?.id}`, {
-      status: record?.prompt_generation_status,
-      oldStatus: oldRecord?.prompt_generation_status,
+      promptStatus: record?.prompt_generation_status,
+      oldPromptStatus: oldRecord?.prompt_generation_status,
+      lifecycleStatus: record?.lifecycle_status,
+      oldLifecycleStatus: oldRecord?.lifecycle_status,
       theme: record?.theme_name || oldRecord?.theme_name
     });
     
     if (eventType === 'UPDATE' && record && oldRecord) {
       // Check if prompt_generation_status changed to 'completed'
-      const isStatusComplete = record.prompt_generation_status === 'completed' && 
+      const isPromptComplete = record.prompt_generation_status === 'completed' && 
                               oldRecord.prompt_generation_status !== 'completed';
       
-      if (isStatusComplete) {
-        console.log(`🎉 REALTIME: Theme completion detected for: ${record.theme_name}`);
-        
-        // Directly update themes cache for instant transition
-        queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
-          if (!oldThemes) return oldThemes;
-          return oldThemes.map((theme: any) => 
-            theme.id === record.id ? { ...theme, ...record } : theme
-          );
-        });
-        
+      // Check if lifecycle_status changed to final state
+      const isLifecycleComplete = (record.lifecycle_status === 'completed' || record.lifecycle_status === 'ready') &&
+                                 (oldRecord.lifecycle_status !== 'completed' && oldRecord.lifecycle_status !== 'ready');
+      
+      // Only show completion toast when BOTH statuses indicate full completion
+      const isFullyComplete = record.prompt_generation_status === 'completed' && 
+                             (!record.lifecycle_status || record.lifecycle_status === 'completed' || record.lifecycle_status === 'ready');
+      
+      if (isPromptComplete) {
+        console.log(`📝 REALTIME: Theme prompt generation completed for: ${record.theme_name}`);
+      }
+      
+      if (isLifecycleComplete) {
+        console.log(`🔄 REALTIME: Theme lifecycle completed for: ${record.theme_name}`);
+      }
+      
+      if (isFullyComplete && (isPromptComplete || isLifecycleComplete)) {
+        console.log(`🎉 REALTIME: Theme FULLY completed for: ${record.theme_name}`);
         toast.success(`Theme "${record.theme_name}" generation completed!`);
       }
+      
+      // Always update cache for any status change
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
+        if (!oldThemes) return oldThemes;
+        return oldThemes.map((theme: any) => 
+          theme.id === record.id ? { ...theme, ...record } : theme
+        );
+      });
       
       // Call the theme status update callback for shimmer transitions
       if (onThemeStatusUpdate) {

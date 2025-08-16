@@ -27,6 +27,12 @@ export const SHIMMER_CONSTANTS = {
     COMPLETED: 'completed',
     IN_PROGRESS: 'in_progress',
     FAILED: 'failed',
+  },
+  LIFECYCLE_STATUS: {
+    PENDING: 'pending',
+    GENERATING: 'generating',
+    READY: 'ready',
+    COMPLETED: 'completed',
   }
 } as const;
 
