@@ -20,7 +20,7 @@ export const BusinessModelSlide: React.FC = () => {
           </div>
           <div className="text-left space-y-2">
             <h3 className="text-lg md:text-xl font-semibold text-primary">Paid Tiers</h3>
-            <p className="text-base md:text-lg text-muted-foreground">$25/month for 100 credits with credit-based usage and 15% markup</p>
+            <p className="text-base md:text-lg text-muted-foreground">$25/month for 100 credits with credit-based usage and 400% markup</p>
           </div>
         </div>
         <div className="space-y-6">
