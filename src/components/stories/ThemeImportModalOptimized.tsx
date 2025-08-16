@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
-import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
+import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -47,14 +47,16 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     onOptimisticComplete: (success, categoryName, themeId) => {
       console.log('🎯 Modal onOptimisticComplete:', { success, categoryName, themeId });
       if (success && themeId) {
-        console.log('✅ Theme created successfully, navigating to processing page:', themeId);
-        // Close modal and navigate immediately to show processing screen
-        setShowSuccessMessage(false);
+        console.log('✅ Theme created successfully, staying on dashboard with shimmer');
+        // Close modal and stay on dashboard - shimmer will show until complete
+        setShowSuccessMessage(true);
         setShowErrorMessage(null);
         onOpenChange(false);
         setJsonInput('');
-        navigate(`/stories/id/${themeId}`);
         setCreatedThemeId(themeId);
+        
+        // Auto-close success message after a moment
+        setTimeout(() => setShowSuccessMessage(false), 2000);
       } else if (!success) {
         setShowErrorMessage('Import failed. Please check your data and try again.');
       }
@@ -62,12 +64,9 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Track theme completion status for cleanup only (navigation happens immediately on creation)
-  console.log('🔍 Theme completion tracking setup:', createdThemeId);
-  useThemeCompletionStatus(createdThemeId || undefined, () => {
-    console.log('🎉 Theme processing completed for:', createdThemeId);
-    // Processing completed - just clean up the theme ID state
-    // Navigation already happened when theme was created
+  // Simple completion tracking - no navigation, no toasts, just cleanup when done
+  useSimpleThemeCompletion(createdThemeId || undefined, () => {
+    console.log('🎉 Theme processing completed, cleaning up:', createdThemeId);
     setCreatedThemeId(null);
   });
 

@@ -10,7 +10,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useThemeSEO } from '@/hooks/useThemeSEO';
-import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
+import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
@@ -30,7 +30,7 @@ const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').th
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
-import { ThemeProcessingScreen } from '@/components/stories/ThemeProcessingScreen';
+
 
 export default function ThemeDetail() {
   const { themeId } = useParams<{ themeId: string }>();
@@ -41,8 +41,8 @@ export default function ThemeDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Track theme completion status for gating and toasts
-  const { isCompleted, completionProgress, hasSystemPrompt } = useThemeCompletionStatus(themeId);
+  // Simple completion tracking - redirect incomplete themes to dashboard
+  const { isCompleted } = useSimpleThemeCompletion(themeId);
   
   // Fetch theme and posts for this specific theme ID
   const { theme: themeData, posts = [], hasAnyPosts, isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
@@ -103,32 +103,9 @@ export default function ThemeDetail() {
     return <Navigate to="/stories" replace />;
   }
 
-  // Gate access to incomplete themes
+  // Redirect incomplete themes back to dashboard (shimmer will be shown there)
   if (!isCompleted) {
-    return (
-      <PageLayout>
-        <Helmet>
-          <title>{seoData.title}</title>
-          <meta name="description" content={seoData.description} />
-          <meta property="og:title" content={seoData.ogTitle} />
-          <meta property="og:description" content={seoData.ogDescription} />
-          <meta property="og:image" content={seoData.image} />
-          <meta property="og:url" content={seoData.url} />
-          <meta property="og:type" content={seoData.type} />
-          <meta property="og:site_name" content={seoData.siteName} />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={seoData.ogTitle} />
-          <meta name="twitter:description" content={seoData.ogDescription} />
-          <meta name="twitter:image" content={seoData.image} />
-          <link rel="canonical" href={seoData.url} />
-        </Helmet>
-        <ThemeProcessingScreen 
-          themeName={decodedTheme}
-          completionProgress={completionProgress}
-          hasSystemPrompt={hasSystemPrompt}
-        />
-      </PageLayout>
-    );
+    return <Navigate to="/stories" replace />;
   }
 
   return (

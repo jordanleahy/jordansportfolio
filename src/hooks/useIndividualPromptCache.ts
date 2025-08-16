@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
 import { useParams } from 'react-router-dom';
-import { useThemeCompletionStatus } from '@/hooks/useThemeCompletionStatus';
+import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 
 interface IndividualPromptData {
   prompt: string;
@@ -20,8 +20,8 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   const params = useParams();
   const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
-  // Check theme completion status to validate system prompt availability
-  const { hasSystemPrompt, isCompleted } = useThemeCompletionStatus(themeId);
+  // Check theme completion status - simplified to just check if completed
+  const { isCompleted } = useSimpleThemeCompletion(themeId);
 
   const query = useQuery({
     queryKey: QUERY_KEYS.individualPrompt(postId),
@@ -148,7 +148,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         themeId,
         theme,
         aspectRatio,
-        hasSystemPrompt
+        isCompleted
       });
 
       if (!postId || !themeId) {
@@ -157,10 +157,10 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         throw new Error(errorMsg);
       }
 
-      // Validate that system prompt is ready before proceeding
-      if (!hasSystemPrompt) {
-        const errorMsg = 'Theme system prompt is not ready yet. Please wait for theme completion before generating individual prompts.';
-        console.error('❌ System prompt validation failed:', errorMsg);
+      // Validate that theme is completed before proceeding
+      if (!isCompleted) {
+        const errorMsg = 'Theme is not completed yet. Please wait for theme completion before generating individual prompts.';
+        console.error('❌ Theme completion validation failed:', errorMsg);
         throw new Error(errorMsg);
       }
 
@@ -205,11 +205,11 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       });
     },
     onError: (error) => {
-      const isSystemPromptError = error.message?.includes('system prompt is not ready');
+      const isCompletionError = error.message?.includes('not completed yet');
       toast({
         title: "Error",
-        description: isSystemPromptError ? 
-          "Theme system prompt is not ready yet. Please wait for theme completion." : 
+        description: isCompletionError ? 
+          "Theme is not completed yet. Please wait for theme completion." : 
           "Failed to generate individual prompt",
         variant: "destructive",
       });
@@ -233,7 +233,6 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     isError: query.isError,
     error: query.error,
     hasPrompt,
-    hasSystemPrompt,
     isCompleted,
     updatePrompt: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
