@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { ProcessingResult } from '@/types/themeImportStrict';
@@ -16,7 +16,6 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
   const [pendingSubmissions, setPendingSubmissions] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const submitMutation = useMutation({
     mutationFn: async ({ rawJson, categoryName, idempotencyKey }: { 

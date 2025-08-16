@@ -1,11 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Upload, Loader2, Copy } from 'lucide-react';
 import { useStreamlinedThemeImport } from '@/hooks/useStreamlinedThemeImport';
-import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -21,9 +19,7 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
   const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState<string | null>(null);
-  const [createdThemeId, setCreatedThemeId] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   // Debounce input to prevent rapid submissions
   const debouncedJsonInput = useDebounce(jsonInput, 300);
@@ -36,8 +32,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     onImportComplete: () => {
       setShowSuccessMessage(true);
       onImportComplete?.();
-      // Trigger shimmer in parent component
-      onOptimisticStart?.(jsonInput ? JSON.parse(jsonInput).category || 'New Theme' : 'New Theme');
     },
     onOptimisticStart: categoryName => {
       setShowSuccessMessage(false);
@@ -53,7 +47,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
         setShowErrorMessage(null);
         onOpenChange(false);
         setJsonInput('');
-        setCreatedThemeId(themeId);
         
         // Auto-close success message after a moment
         setTimeout(() => setShowSuccessMessage(false), 2000);
@@ -64,11 +57,6 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Simple completion tracking - no navigation, no toasts, just cleanup when done
-  useSimpleThemeCompletion(createdThemeId || undefined, () => {
-    console.log('🎉 Theme processing completed, cleaning up:', createdThemeId);
-    setCreatedThemeId(null);
-  });
 
   const handleStreamlinedSubmit = useCallback(() => {
     if (!debouncedJsonInput.trim()) return;

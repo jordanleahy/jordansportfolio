@@ -930,9 +930,42 @@ export default function StoriesDashboard() {
           <div className="py-16" />
 
           {isAdmin && <Suspense fallback={<div>Loading...</div>}>
-              <ThemeImportModal open={importModalOpen} onOpenChange={setImportModalOpen} onImportComplete={() => {
-          // Theme import completed
-        }} />
+              <ThemeImportModal 
+                open={importModalOpen} 
+                onOpenChange={setImportModalOpen} 
+                onImportComplete={() => {
+                  // Theme import completed - refresh themes
+                  optimizedSocialMediaService.getAvailableThemes().then(refreshedThemes => {
+                    setAvailableThemes(refreshedThemes);
+                  });
+                }}
+                onOptimisticStart={(categoryName) => {
+                  // Add shimmer theme immediately for optimistic UI
+                  const shimmerTheme: ThemeWithPosts = {
+                    id: 'pending-import-' + Date.now(),
+                    theme_name: categoryName,
+                    description: `Imported theme: ${categoryName}`,
+                    category: categoryName,
+                    post_count: 0,
+                    prompt_completion_count: 0,
+                    total_posts_count: 10, // Assume some posts for shimmer
+                    first_post: {
+                      id: 'pending',
+                      title: 'Generating theme...',
+                      description: `Processing ${categoryName} content`
+                    }
+                  };
+                  setAvailableThemes(prev => [shimmerTheme, ...prev]);
+                }}
+                onOptimisticComplete={(success, categoryName) => {
+                  if (success) {
+                    console.log('✅ Theme import successful:', categoryName);
+                  } else {
+                    // Remove shimmer theme on failure
+                    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-import-')));
+                  }
+                }}
+              />
             </Suspense>}
         </Section>
 
