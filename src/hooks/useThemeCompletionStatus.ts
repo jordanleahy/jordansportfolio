@@ -48,13 +48,14 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
       
       if (data) {
         const themeData = data as ThemeCompletionData;
+        const wasAlreadyCompleted = data.prompt_generation_status === 'completed';
+        
         console.log('Setting fresh theme status:', themeData);
         setThemeStatus(themeData);
         setIsInitialLoad(false);
         
-        // Only redirect if theme was already completed AND we're on initial load from a completion redirect
-        // This prevents immediate redirect when navigating to a processing theme
-        if (data.prompt_generation_status === 'completed' && !hasShownCompletionToast && !isInitialLoad) {
+        // Only redirect if theme was already completed when we first fetched it
+        if (wasAlreadyCompleted && !hasShownCompletionToast) {
           console.log('Theme already completed, triggering redirect');
           setHasShownCompletionToast(true);
           onCompletionRedirect?.();
@@ -101,18 +102,16 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
               !hasShownCompletionToast && 
               themeStatus?.prompt_generation_status !== 'completed') {
             
-            
-            
             // Clear themes cache to refresh the UI immediately when theme status changes
             import('@/services/optimizedSocialMediaService').then(({ optimizedSocialMediaService }) => {
               optimizedSocialMediaService.clearThemesCache();
             });
             
-            // toast({
-            //   title: "Theme Created! 🎉",
-            //   description: `All ${newData.total_posts_count} individual image prompts have been generated successfully.`,
-            //   duration: 5000,
-            // });
+            toast({
+              title: "Theme Created! 🎉",
+              description: `All ${newData.total_posts_count} individual image prompts have been generated successfully.`,
+              duration: 5000,
+            });
             
             setHasShownCompletionToast(true);
             
@@ -128,7 +127,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, themeStatus?.prompt_generation_status, toast, onCompletionRedirect]);
+  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, toast, onCompletionRedirect]);
 
   // Calculate completion progress with proper null handling
   const completionProgress = useMemo(() => {
