@@ -1,8 +1,6 @@
 import React from 'react';
-
 export const LandscapeSlide: React.FC = () => {
-  return (
-    <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
+  return <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         5/14
       </div>
@@ -21,7 +19,7 @@ export const LandscapeSlide: React.FC = () => {
             <div className="space-y-2 text-left">
               <p className="text-lg text-muted-foreground">Passive consumption</p>
               <p className="text-lg text-muted-foreground">Format constraints</p>
-              <p className="text-lg text-muted-foreground">Creator-consumer divide</p>
+              <p className="text-lg text-muted-foreground">Creator consumer divide</p>
               <p className="text-lg text-muted-foreground">Limited by technical skills</p>
             </div>
           </div>
@@ -30,7 +28,7 @@ export const LandscapeSlide: React.FC = () => {
               Story Ship Experience
             </h3>
             <div className="space-y-2 text-left">
-              <p className="text-lg text-foreground font-medium">Active co-creation</p>
+              <p className="text-lg text-foreground font-medium">Active co creation</p>
               <p className="text-lg text-foreground font-medium">Fluid, adaptive narratives</p>
               <p className="text-lg text-foreground font-medium">Everyone becomes a storyteller</p>
               <p className="text-lg text-foreground font-medium">Powered by thought alone</p>
@@ -41,6 +39,5 @@ export const LandscapeSlide: React.FC = () => {
           New markets are emerging at the intersection of thought, visualization, and shared experiences.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
