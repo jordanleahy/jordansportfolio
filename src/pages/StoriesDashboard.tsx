@@ -66,12 +66,33 @@ export default function StoriesDashboard() {
     setPendingTheme(null);
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
   };
+
+  // Simplified state management
+  const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
+
+  // Restore pending theme state on page load/refresh
+  useEffect(() => {
+    if (!user || availableThemes.length === 0) return;
+
+    // Look for themes in generating status
+    const generatingTheme = availableThemes.find(theme => 
+      theme.prompt_generation_status === 'in_progress'
+    );
+
+    if (generatingTheme && !pendingTheme) {
+      console.log('🔄 Found generating theme on refresh, restoring shimmer:', generatingTheme.theme_name);
+      setPendingTheme({
+        theme_id: generatingTheme.id,
+        theme_name: generatingTheme.theme_name,
+        description: generatingTheme.description
+      });
+      setIsGeneratingTheme(true);
+    }
+  }, [availableThemes, user, pendingTheme]);
   const {
     toast
   } = useToast();
 
-  // Simplified state management
-  const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
   const [showHero, setShowHero] = useState(false);
   const [duplicateInfo, setDuplicateInfo] = useState<{
     category: string;
