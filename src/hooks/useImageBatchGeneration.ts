@@ -130,8 +130,9 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
   const [error, setError] = useState<string | null>(null);
   const [cachedPrompts, setCachedPrompts] = useState<Map<string, string>>(new Map());
   
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
   // Function to get existing prompt from post data
   const getExistingPrompt = useCallback(async (request: BulkImageGenerationRequest): Promise<string> => {

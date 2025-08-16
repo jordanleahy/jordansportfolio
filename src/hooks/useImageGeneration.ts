@@ -11,8 +11,9 @@ export const useImageGeneration = () => {
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
   
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
@@ -50,7 +51,8 @@ export const useImageGeneration = () => {
 
       const themeId = postData?.theme_id;
       console.log('Theme resolution debug:', {
-        urlTheme: theme,
+         // ❌ BAD: Using theme name - removed in Phase 1 migration
+         // urlTheme: theme,  // REMOVED - use themeId instead
         fetchedThemeId: themeId,
         postCategory: post.category,
         colorTheme: colorTheme?.name

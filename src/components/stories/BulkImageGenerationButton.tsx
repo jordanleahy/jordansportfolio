@@ -24,9 +24,11 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   
   const creditStatus = getCreditStatus();
   
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
-  const themeId = theme;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // const themeId = theme;  // REMOVED - use post.theme_id instead
+  const themeId = (post as any).theme_id;
   
   const isCurrentlyGenerating = isGenerating(post.id);
   
@@ -84,7 +86,8 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         title: post.title,
         description: post.description,
         category: post.category,
-        theme,
+        // ❌ BAD: Using theme name - removed in Phase 1 migration
+        // theme,  // REMOVED - use themeId instead
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
       };

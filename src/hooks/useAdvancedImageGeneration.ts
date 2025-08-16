@@ -30,8 +30,9 @@ export const useAdvancedImageGeneration = () => {
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
   
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
@@ -117,7 +118,8 @@ export const useAdvancedImageGeneration = () => {
           hasAllColors: !!(colorTheme.primary_color && colorTheme.secondary_color)
         } : null,
         themeId,
-        urlTheme: theme
+         // ❌ BAD: Using theme name - removed in Phase 1 migration
+         // urlTheme: theme  // REMOVED - use themeId instead
       });
 
       const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {

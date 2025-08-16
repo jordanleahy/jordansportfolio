@@ -21,15 +21,17 @@ const aspectRatioOptions: AspectRatioOption[] = [
 ];
 
 export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare', themeId }: BlogVisualPromptProps) => {
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
 
   const config: ImagePromptConfig = {
-    title: theme ? `${theme} Visual Prompt Generator` : `${getCategoryLabel(category)} Visual Prompt Generator`,
+    title: themeId ? `Theme ${themeId} Visual Prompt Generator` : `${getCategoryLabel(category)} Visual Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'visual-prompt-generator',
     category: category,
-    theme,
+    // ❌ BAD: Using theme name - removed in Phase 1 migration
+    // theme,  // REMOVED - use themeId instead
     themeId,
     enableCaching: true,
     aspectRatioOptions,

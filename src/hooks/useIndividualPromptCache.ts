@@ -17,8 +17,9 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   // Check theme completion status - simplified to just check if completed
   const { isCompleted } = useSimpleThemeCompletion(themeId);
@@ -146,13 +147,15 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       console.log('🔄 Regeneration mutation called with:', {
         postId,
         themeId,
-        theme,
+         // ❌ BAD: Using theme name - removed in Phase 1 migration
+         // theme,  // REMOVED - use themeId instead
         aspectRatio,
         isCompleted
       });
 
       if (!postId || !themeId) {
-        const errorMsg = `Missing required data: postId=${postId}, themeId=${themeId}, theme=${theme}`;
+         const errorMsg = `Missing required data: postId=${postId}, themeId=${themeId}`;
+         // ❌ BAD: Using theme name - removed in Phase 1 migration: , theme=${theme}
         console.error('❌ Regeneration failed:', errorMsg);
         throw new Error(errorMsg);
       }

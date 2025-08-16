@@ -27,8 +27,9 @@ export const useOptimizedImageGeneration = () => {
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
   
-  const params = useParams();
-  const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');

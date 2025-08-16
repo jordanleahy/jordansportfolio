@@ -13,7 +13,9 @@ export const useThemeDataPrefetch = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const theme = params.theme ? decodeURIComponent(params.theme) : '';
+    // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+    // const theme = params.theme ? decodeURIComponent(params.theme) : '';
+    const theme = ''; // REMOVED - use themeId instead
     const category = params.category || 'cdi';
     
     // Set basic theme data immediately for fast access
