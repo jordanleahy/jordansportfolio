@@ -35,7 +35,8 @@ export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyChecker
   const { data: categoryPosts = [] } = useQuery({
     queryKey: ['theme-posts-for-consistency', category],
     queryFn: async () => {
-      // First get the theme ID from category name
+      // ❌ BAD: Phase 2 migration incomplete - still using theme name lookup
+      // TODO: Update this component to receive themeId instead of category name
       const { data: theme, error: themeError } = await supabase
         .from('themes')
         .select('id')
@@ -44,6 +45,7 @@ export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyChecker
       
       if (themeError || !theme) return [];
       
+      // ✅ GOOD: Using theme_id for posts query
       const { data, error } = await supabase
         .from('social_media_posts')
         .select('id, title, color_theme_id, status')

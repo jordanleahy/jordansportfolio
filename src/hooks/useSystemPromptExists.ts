@@ -2,13 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Hook to check if a system prompt exists for a given theme (with themeId preference and category fallback)
+ * Hook to check if a system prompt exists for a given themeId (primary) with theme name fallback
+ * ❌ BAD: Phase 2 migration incomplete - still using theme name fallbacks
  */
-export const useSystemPromptExists = (theme: string | null, category?: string | null, themeId?: string | null) => {
+export const useSystemPromptExists = (themeId: string | null, theme?: string | null, category?: string | null) => {
   return useQuery({
-    queryKey: ['system-prompt-exists', theme, category, themeId],
+    queryKey: ['system-prompt-exists', themeId, theme, category],
     queryFn: async () => {
-      // Prefer themeId-based checks if available
+      // ✅ GOOD: Primary themeId-based check (Phase 2 migration)
       if (themeId) {
         const { data: themeIdData, error: themeIdError } = await supabase
           .from('system_prompts')
@@ -18,12 +19,13 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
         
         if (themeIdError) {
           console.error('Error checking theme_id-based system prompt existence:', themeIdError);
-        } else if (themeIdData && themeIdData.length > 0) {
-          return true;
+          return false;
         }
+        
+        return (themeIdData && themeIdData.length > 0);
       }
       
-      // Fallback to theme name/category logic only when themeId is absent
+      // ❌ BAD: Fallback to theme name/category logic (to be removed in Phase 3)
       if (!theme) return false;
       
       // Try to find theme by name to get theme_id, then check for system prompts
@@ -37,6 +39,7 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
       
       if (themeError) {
         console.error('Error finding theme record:', themeError);
+        return false;
       }
       
       // Check for system prompts using theme_id if theme record exists
@@ -49,14 +52,13 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
         
         if (themeIdError) {
           console.error('Error checking theme_id-based system prompt existence:', themeIdError);
+          return false;
         }
         
-        if (themeIdData && themeIdData.length > 0) {
-          return true;
-        }
+        return (themeIdData && themeIdData.length > 0);
       }
       
-      // Final fallback to text-based theme check
+      // ❌ BAD: Final fallback to text-based theme check (legacy)
       const { data: themeData, error: themeTextError } = await supabase
         .from('system_prompts')
         .select('id')
@@ -65,13 +67,10 @@ export const useSystemPromptExists = (theme: string | null, category?: string | 
       
       if (themeTextError) {
         console.error('Error checking theme-based system prompt existence:', themeTextError);
+        return false;
       }
       
-      if (themeData && themeData.length > 0) {
-        return true;
-      }
-
-      return false;
+      return (themeData && themeData.length > 0);
     },
     enabled: !!themeId || !!theme,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
