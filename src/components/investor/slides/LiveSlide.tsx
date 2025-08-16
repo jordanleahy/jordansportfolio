@@ -11,9 +11,14 @@ export const LiveSlide: React.FC = () => {
       </h1>
       <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-4xl leading-relaxed">
         Visit{' '}
-        <span className="text-primary font-semibold">
+        <a 
+          href="https://www.jordanleahy.com/stories" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary font-semibold hover:underline"
+        >
           www.jordanleahy.com/stories
-        </span>
+        </a>
         {' '}to see Story Ship in action.
       </p>
     </div>
