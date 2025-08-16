@@ -31,7 +31,7 @@ export const useSimpleThemeCompletion = (
           .from('themes')
           .select('prompt_generation_status, prompt_completion_count, total_posts_count')
           .eq('id', themeId)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
           console.error('Error checking theme completion:', error);
