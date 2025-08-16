@@ -18,6 +18,6 @@ export const TeamSlide: React.FC = () => {
         
         
       </div>
-      <p className="text-lg md:text-xl text-muted-foreground mt-8 max-w-3xl">Supported by from the fields of neuroscience, digital media, and venture capital.</p>
+      <p className="text-lg md:text-xl text-muted-foreground mt-8 max-w-3xl">Developed by Jordan using an agentic AI foundation. </p>
     </div>;
 };
