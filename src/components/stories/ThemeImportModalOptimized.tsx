@@ -47,7 +47,13 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     onOptimisticComplete: (success, categoryName, themeId) => {
       console.log('🎯 Modal onOptimisticComplete:', { success, categoryName, themeId });
       if (success && themeId) {
-        console.log('✅ Setting createdThemeId:', themeId);
+        console.log('✅ Theme created successfully, navigating to processing page:', themeId);
+        // Close modal and navigate immediately to show processing screen
+        setShowSuccessMessage(false);
+        setShowErrorMessage(null);
+        onOpenChange(false);
+        setJsonInput('');
+        navigate(`/stories/id/${themeId}`);
         setCreatedThemeId(themeId);
       } else if (!success) {
         setShowErrorMessage('Import failed. Please check your data and try again.');
@@ -56,20 +62,13 @@ export const ThemeImportModalOptimized: React.FC<ThemeImportModalOptimizedProps>
     }
   });
 
-  // Track theme completion status and redirect when complete
+  // Track theme completion status for cleanup only (navigation happens immediately on creation)
   console.log('🔍 Theme completion tracking setup:', createdThemeId);
   useThemeCompletionStatus(createdThemeId || undefined, () => {
-    console.log('🚀 Theme completion redirect triggered for:', createdThemeId);
-    if (createdThemeId) {
-      // Close modal and navigate to theme page
-      setShowSuccessMessage(false);
-      setShowErrorMessage(null);
-      onOpenChange(false);
-      setJsonInput('');
-      const themeToNavigate = createdThemeId;
-      setCreatedThemeId(null);
-      navigate(`/stories/id/${themeToNavigate}`);
-    }
+    console.log('🎉 Theme processing completed for:', createdThemeId);
+    // Processing completed - just clean up the theme ID state
+    // Navigation already happened when theme was created
+    setCreatedThemeId(null);
   });
 
   const handleStreamlinedSubmit = useCallback(() => {
