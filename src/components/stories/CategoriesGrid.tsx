@@ -49,7 +49,7 @@ export const CategoriesGrid = ({
             description: theme.first_post.description
           } : undefined}
           onDelete={onDeleteCategory}
-           isShimmer={theme.id.startsWith('pending-') || (theme.prompt_completion_count !== undefined && theme.total_posts_count !== undefined && theme.prompt_completion_count < theme.total_posts_count && theme.theme_name !== 'Generation Failed')}
+           isShimmer={theme.id.startsWith('pending-')}
            isError={theme.theme_name === 'Generation Failed'}
           isSelected={selectedThemes?.has(theme.id)}
           onSelect={() => onThemeSelect?.(theme.id)}
