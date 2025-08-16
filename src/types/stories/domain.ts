@@ -27,6 +27,8 @@ export interface ThemeWithPosts {
   category: string;
   post_count: number;
   prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
+  prompt_completion_count?: number;
+  total_posts_count?: number;
   first_post: {
     id: string;
     title: string;

@@ -248,7 +248,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -322,6 +322,8 @@ export class OptimizedSocialMediaService {
         category: theme.category,
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
+        prompt_completion_count: theme.prompt_completion_count || 0,
+        total_posts_count: theme.total_posts_count || 0,
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
