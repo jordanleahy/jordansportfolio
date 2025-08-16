@@ -49,7 +49,7 @@ export const CompetitiveSlide: React.FC = () => {
         </div>
       </div>
       <p className="text-xl md:text-2xl text-primary font-semibold mt-8">
-        Our proprietary thought-to-narrative engine creates a significant technical moat.
+        Our proprietary thought to narrative engine creates a significant technical moat.
       </p>
     </div>
   );
