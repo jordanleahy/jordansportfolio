@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
+import { useRealtimeShimmerTransition } from '@/hooks/useRealtimeShimmerTransition';
 
 interface ThemeLifecycleShimmerOptions {
   pendingTheme: PendingTheme | null;
@@ -24,6 +25,26 @@ export const useThemeLifecycleShimmer = ({
   const location = useLocation();
   const lastLocationRef = useRef(location.pathname);
 
+  // Enhanced real-time shimmer transition
+  const {
+    transitionState,
+    getTransitionClasses,
+    isThemeTransitioning,
+    hasActiveTransition
+  } = useRealtimeShimmerTransition({
+    themes: availableThemes,
+    pendingTheme,
+    onTransitionComplete: (completedTheme) => {
+      console.log('✅ Shimmer transition completed, auto-navigating to:', completedTheme.id);
+      clearPendingThemeState();
+      
+      // Navigate to completed theme with smooth transition
+      setTimeout(() => {
+        navigate(`/stories/id/${completedTheme.id}`);
+      }, SHIMMER_CONSTANTS.TIMEOUTS.AUTO_NAVIGATION_DELAY);
+    }
+  });
+
   // Helper function to check if a theme is ready (completed status guarantees all posts are generated)
   const isThemeReady = (theme: ThemeWithPosts) => {
     return theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
@@ -35,29 +56,49 @@ export const useThemeLifecycleShimmer = ({
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)));
   };
 
-  // Check for theme completion and auto-dismiss shimmer
+  // Enhanced theme completion detection with stale state cleanup
   useEffect(() => {
-    if (pendingTheme && availableThemes.length > 0) {
-      // Look for a completed theme that matches our pending theme
+    if (!pendingTheme) return;
+
+    if (availableThemes.length > 0) {
+      // Look for completed theme that matches our pending theme
       const completedTheme = availableThemes.find(theme => {
-        // Match by theme_id (most reliable)
         if (pendingTheme.theme_id) {
           return theme.id === pendingTheme.theme_id && isThemeReady(theme);
         }
         return false;
       });
       
-      if (completedTheme) {
-        console.log('✅ Theme completed, auto-dismissing shimmer and navigating:', completedTheme.id);
-        clearPendingThemeState();
+      if (completedTheme && !hasActiveTransition()) {
+        console.log('✅ Theme completed, real-time transition will handle navigation:', completedTheme.id);
+        // Real-time transition hook will handle the rest
+        return;
+      }
+
+      // Cleanup stale pending themes
+      if (pendingTheme.theme_id) {
+        const matchingTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
         
-        // Auto-navigate to the completed theme
-        setTimeout(() => {
-          navigate(`/stories/id/${completedTheme.id}`);
-        }, SHIMMER_CONSTANTS.TIMEOUTS.AUTO_NAVIGATION_DELAY);
+        if (!matchingTheme) {
+          console.log('🧹 Stale pending theme detected (no matching theme found), cleaning up:', pendingTheme.theme_name);
+          clearPendingThemeState();
+        } else if (isThemeReady(matchingTheme)) {
+          console.log('🧹 Stale pending theme detected (theme already completed), cleaning up:', pendingTheme.theme_name);
+          clearPendingThemeState();
+        }
       }
     }
-  }, [pendingTheme, availableThemes, navigate]);
+
+    // Additional cleanup: if no themes are in progress, clear pending theme
+    const hasInProgressThemes = availableThemes.some(theme => 
+      theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.IN_PROGRESS
+    );
+    
+    if (availableThemes.length > 0 && !hasInProgressThemes && pendingTheme) {
+      console.log('🧹 No themes in progress, clearing stale pending theme:', pendingTheme.theme_name);
+      clearPendingThemeState();
+    }
+  }, [pendingTheme, availableThemes, hasActiveTransition]);
 
   // Clear pending theme when user navigates away from stories page
   useEffect(() => {
@@ -67,13 +108,12 @@ export const useThemeLifecycleShimmer = ({
     // If user navigated away from /stories to another page
     if (lastPath === '/stories' && currentPath !== '/stories' && pendingTheme) {
       console.log('🚢 User navigated away from stories, clearing pending theme');
-      
       console.log('Clearing pending theme:', pendingTheme.theme_name);
       clearPendingThemeState();
     }
     
     lastLocationRef.current = currentPath;
-  }, [location.pathname, pendingTheme, setPendingTheme, setAvailableThemes]);
+  }, [location.pathname, pendingTheme]);
 
 
   // Function to manually dismiss shimmer
@@ -98,6 +138,11 @@ export const useThemeLifecycleShimmer = ({
   return {
     dismissShimmer,
     handleThemeClick,
-    shouldShowShimmer: !!pendingTheme
+    shouldShowShimmer: !!pendingTheme,
+    // Enhanced transition features
+    transitionState,
+    getTransitionClasses,
+    isThemeTransitioning,
+    hasActiveTransition
   };
 };

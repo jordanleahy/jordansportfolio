@@ -123,8 +123,15 @@ export default function StoriesDashboard() {
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
-  // Theme lifecycle shimmer management
-  const { dismissShimmer, handleThemeClick, shouldShowShimmer } = useThemeLifecycleShimmer({
+  // Theme lifecycle shimmer management with enhanced transitions
+  const { 
+    dismissShimmer, 
+    handleThemeClick, 
+    shouldShowShimmer,
+    getTransitionClasses,
+    isThemeTransitioning,
+    hasActiveTransition
+  } = useThemeLifecycleShimmer({
     pendingTheme,
     setPendingTheme,
     setAvailableThemes,
@@ -933,7 +940,17 @@ export default function StoriesDashboard() {
                 <Button variant="outline" onClick={() => window.location.reload()}>
                   Retry
                 </Button>
-              </div> : <CategoriesGrid themes={availableThemes} onDeleteCategory={handleDeleteCategory} selectedThemes={selectedThemes} onThemeSelect={handleThemeSelect} isSelectionMode={isSelectionMode} isGeneratingTheme={isGeneratingTheme} onCancelGeneration={cancelThemeGeneration} />}
+              </div> : <CategoriesGrid 
+                themes={availableThemes} 
+                onDeleteCategory={handleDeleteCategory} 
+                selectedThemes={selectedThemes} 
+                onThemeSelect={handleThemeSelect} 
+                isSelectionMode={isSelectionMode} 
+                isGeneratingTheme={isGeneratingTheme} 
+                onCancelGeneration={cancelThemeGeneration}
+                getTransitionClasses={getTransitionClasses}
+                isThemeTransitioning={isThemeTransitioning}
+              />}
           </Section> : <>
             <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
               <header className="mb-6 flex items-center justify-between">

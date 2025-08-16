@@ -10,7 +10,9 @@ export const CategoriesGrid = ({
   onThemeSelect,
   isSelectionMode,
   isGeneratingTheme,
-  onCancelGeneration
+  onCancelGeneration,
+  getTransitionClasses,
+  isThemeTransitioning
 }: CategoriesGridProps) => {
   const hasPendingShimmer = themes.some(t => t.id?.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME));
 
@@ -36,30 +38,39 @@ export const CategoriesGrid = ({
         />
       )}
 
-      {/* Theme cards */}
-      {themes.map((theme) => (
-        <CategoryCard
-          key={theme.id}
-          theme={theme.theme_name}
-          themeId={theme.id}
-          themeDescription={theme.description}
-          category={theme.category}
-          postCount={theme.post_count}
-          imageUrl={theme.first_post?.image_url}
-          firstPostData={theme.first_post ? {
-            title: theme.first_post.title,
-            description: theme.first_post.description
-          } : undefined}
-          onDelete={onDeleteCategory}
-           isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}
-           isError={theme.theme_name === SHIMMER_CONSTANTS.MESSAGES.GENERATION_FAILED}
-          isSelected={selectedThemes?.has(theme.id)}
-          onSelect={() => onThemeSelect?.(theme.id)}
-          isSelectionMode={isSelectionMode}
-          isGeneratingTheme={isGeneratingTheme}
-          onCancelGeneration={onCancelGeneration}
-        />
-      ))}
+      {/* Theme cards with enhanced transitions */}
+      {themes.map((theme) => {
+        const transitionClasses = getTransitionClasses?.(theme.id) || '';
+        const isTransitioning = isThemeTransitioning?.(theme.id) || false;
+        
+        return (
+          <div 
+            key={theme.id}
+            className={`${transitionClasses} ${isTransitioning ? 'animate-scale-in' : ''}`}
+          >
+            <CategoryCard
+              theme={theme.theme_name}
+              themeId={theme.id}
+              themeDescription={theme.description}
+              category={theme.category}
+              postCount={theme.post_count}
+              imageUrl={theme.first_post?.image_url}
+              firstPostData={theme.first_post ? {
+                title: theme.first_post.title,
+                description: theme.first_post.description
+              } : undefined}
+              onDelete={onDeleteCategory}
+              isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}
+              isError={theme.theme_name === SHIMMER_CONSTANTS.MESSAGES.GENERATION_FAILED}
+              isSelected={selectedThemes?.has(theme.id)}
+              onSelect={() => onThemeSelect?.(theme.id)}
+              isSelectionMode={isSelectionMode}
+              isGeneratingTheme={isGeneratingTheme}
+              onCancelGeneration={onCancelGeneration}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

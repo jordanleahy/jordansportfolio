@@ -109,6 +109,15 @@ const config: Config = {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" }
         },
+        "shimmer-fade-out": {
+          "0%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.7", transform: "scale(0.98)" },
+          "100%": { opacity: "0", transform: "scale(0.95)" }
+        },
+        "content-fade-in": {
+          "0%": { opacity: "0", transform: "scale(0.95) translateY(10px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" }
+        },
         "shimmer": {
           "100%": { transform: "translateX(100%)" }
         },
@@ -125,6 +134,8 @@ const config: Config = {
         "slide-in-up": "slide-in-up 0.3s ease-out",
         "fade-in": "fade-in-stagger 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "scale-in": "scale-in 0.2s ease-out",
+        "shimmer-fade-out": "shimmer-fade-out 0.3s ease-out",
+        "content-fade-in": "content-fade-in 0.3s ease-out",
         "shimmer": "shimmer 2s infinite",
         "aurora": "aurora 60s linear infinite",
       }
