@@ -20,7 +20,7 @@ export const ProblemSlide: React.FC = () => {
         <div className="flex items-start space-x-3">
           <span className="text-primary font-bold text-xl">•</span>
           <p className="text-lg md:text-xl text-muted-foreground">
-            <span className="font-semibold text-foreground">Creative barriers</span> limit self-expression to those with technical skills
+            <span className="font-semibold text-foreground">Creative barriers</span> limit self expression to those with technical skills
           </p>
         </div>
         <div className="flex items-start space-x-3">
