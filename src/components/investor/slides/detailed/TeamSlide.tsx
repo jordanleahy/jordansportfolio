@@ -1,4 +1,6 @@
+
 import React from 'react';
+
 export const TeamSlide: React.FC = () => {
   return <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
@@ -12,12 +14,22 @@ export const TeamSlide: React.FC = () => {
       </h2>
       <div className="space-y-8 max-w-4xl">
         <div className="text-left space-y-2">
-          <h3 className="text-xl md:text-2xl font-bold text-primary">Jordan Leahy - Founder/CEO</h3>
+          <h3 className="text-xl md:text-2xl font-bold text-primary">
+            <a 
+              href="https://www.linkedin.com/in/jordanleahy/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              Jordan Leahy
+            </a>
+            {" - Founder/CEO"}
+          </h3>
           <p className="text-lg text-muted-foreground">Former product lead at BCG Digital Ventures, specialized in AI driven user experiences</p>
         </div>
         
         
       </div>
-      <p className="text-lg md:text-xl text-muted-foreground mt-8 max-w-3xl">Developed by Jordan using an agentic AI foundation. </p>
+      <p className="text-lg md:text-xl text-muted-foreground mt-8 max-w-3xl">Developed by Jordan using an agentic AI foundation. </p>
     </div>;
 };
