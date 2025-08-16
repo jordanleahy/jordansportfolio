@@ -166,7 +166,7 @@ export const PostsTableView = memo(({
 
   const handleCellEdit = (postId: string, field: 'title' | 'description', currentValue: string) => {
     setEditingCell({ postId, field });
-    setEditValues({ ...editValues, [`${postId}-${field}`]: currentValue });
+    setEditValues(prev => ({ ...prev, [`${postId}-${field}`]: currentValue }));
   };
 
   const handleCellSave = async (postId: string, field: 'title' | 'description') => {
@@ -363,7 +363,7 @@ export const PostsTableView = memo(({
                     {editingCell?.postId === post.id && editingCell?.field === 'title' ? (
                       <Input
                         value={editValues[`${post.id}-title`] || ''}
-                        onChange={(e) => setEditValues({ ...editValues, [`${post.id}-title`]: e.target.value })}
+                        onChange={(e) => setEditValues(prev => ({ ...prev, [`${post.id}-title`]: e.target.value }))}
                         onBlur={() => handleCellSave(post.id, 'title')}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleCellSave(post.id, 'title');
@@ -397,7 +397,7 @@ export const PostsTableView = memo(({
                     {editingCell?.postId === post.id && editingCell?.field === 'description' ? (
                       <Textarea
                         value={editValues[`${post.id}-description`] || ''}
-                        onChange={(e) => setEditValues({ ...editValues, [`${post.id}-description`]: e.target.value })}
+                        onChange={(e) => setEditValues(prev => ({ ...prev, [`${post.id}-description`]: e.target.value }))}
                         onBlur={() => handleCellSave(post.id, 'description')}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
