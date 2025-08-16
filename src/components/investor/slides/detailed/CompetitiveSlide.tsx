@@ -34,7 +34,7 @@ export const CompetitiveSlide: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6 text-left">
             <p className="text-base md:text-lg text-muted-foreground">Social Platforms</p>
             <p className="text-base md:text-lg text-muted-foreground">User generated content</p>
-            <p className="text-base md:text-lg text-primary font-medium">Prompt to image</p>
+            <p className="text-base md:text-lg text-primary font-medium">Thought generated content</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 text-left">
             <p className="text-base md:text-lg text-muted-foreground">AI Art Tools</p>
