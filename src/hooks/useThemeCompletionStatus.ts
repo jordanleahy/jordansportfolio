@@ -1,6 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useReducer } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface ThemeCompletionData {
   id: string;
@@ -10,59 +11,102 @@ interface ThemeCompletionData {
   visual_prompt_system_prompt_id: string | null;
 }
 
-export const useThemeCompletionStatus = (themeId: string | undefined, onCompletionRedirect?: () => void) => {
-  const [themeStatus, setThemeStatus] = useState<ThemeCompletionData | null>(null);
-  const [hasShownCompletionToast, setHasShownCompletionToast] = useState(false);
-  const [hasShownSystemPromptToast, setHasShownSystemPromptToast] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const { toast } = useToast();
+interface ThemeState {
+  themeStatus: ThemeCompletionData | null;
+  isInitialLoad: boolean;
+}
 
-  // Debug logging
-  console.log('useThemeCompletionStatus - themeId:', themeId);
-  console.log('useThemeCompletionStatus - themeStatus:', themeStatus);
-  console.log('useThemeCompletionStatus - isInitialLoad:', isInitialLoad);
+type ThemeAction = 
+  | { type: 'RESET' }
+  | { type: 'SET_THEME_DATA'; payload: { data: ThemeCompletionData; wasAlreadyCompleted: boolean } }
+  | { type: 'UPDATE_THEME_DATA'; payload: ThemeCompletionData }
+  | { type: 'SET_INITIAL_LOAD_COMPLETE' };
+
+const themeReducer = (state: ThemeState, action: ThemeAction): ThemeState => {
+  switch (action.type) {
+    case 'RESET':
+      return { themeStatus: null, isInitialLoad: true };
+    case 'SET_THEME_DATA':
+      return { themeStatus: action.payload.data, isInitialLoad: false };
+    case 'UPDATE_THEME_DATA':
+      return { ...state, themeStatus: action.payload };
+    case 'SET_INITIAL_LOAD_COMPLETE':
+      return { ...state, isInitialLoad: false };
+    default:
+      return state;
+  }
+};
+
+export const useThemeCompletionStatus = (themeId: string | undefined, onCompletionRedirect?: () => void) => {
+  const [state, dispatch] = useReducer(themeReducer, { themeStatus: null, isInitialLoad: true });
+  const { toast } = useToast();
+  
+  // Use refs to prevent re-renders from toast tracking
+  const hasShownCompletionToastRef = useRef(false);
+  const hasShownSystemPromptToastRef = useRef(false);
+  const initialFetchCacheRef = useRef<string | null>(null);
+  const subscriptionRef = useRef<any>(null);
+
+  // Debounced progress calculation to prevent rapid recalculation
+  const debouncedProgressCalc = useDebouncedCallback((themeStatus: ThemeCompletionData | null) => {
+    if (!themeStatus) return 0;
+    
+    const completedCount = themeStatus.prompt_completion_count || 0;
+    const totalCount = themeStatus.total_posts_count || 0;
+    
+    if (totalCount === 0) return 0;
+    return Math.round((completedCount / totalCount) * 100);
+  }, 100);
 
   useEffect(() => {
     if (!themeId) {
-      setIsInitialLoad(true);
+      dispatch({ type: 'RESET' });
+      hasShownCompletionToastRef.current = false;
+      hasShownSystemPromptToastRef.current = false;
+      initialFetchCacheRef.current = null;
       return;
     }
 
+    // Skip if we already fetched this theme
+    if (initialFetchCacheRef.current === themeId) return;
+
     // Reset state for new theme
-    setThemeStatus(null);
-    setIsInitialLoad(true);
-    setHasShownCompletionToast(false);
-    setHasShownSystemPromptToast(false);
+    dispatch({ type: 'RESET' });
+    hasShownCompletionToastRef.current = false;
+    hasShownSystemPromptToastRef.current = false;
+    initialFetchCacheRef.current = themeId;
+
+    // Clean up existing subscription
+    if (subscriptionRef.current) {
+      supabase.removeChannel(subscriptionRef.current);
+      subscriptionRef.current = null;
+    }
 
     // Initial fetch with fresh data
     const fetchThemeStatus = async () => {
-      console.log('Fetching fresh theme status for themeId:', themeId);
-      
-      const { data, error } = await supabase
-        .from('themes')
-        .select('id, prompt_generation_status, prompt_completion_count, total_posts_count, visual_prompt_system_prompt_id')
-        .eq('id', themeId)
-        .single();
-      
-      console.log('Theme status fetch result:', { data, error });
-      
-      if (data) {
-        const themeData = data as ThemeCompletionData;
-        const wasAlreadyCompleted = data.prompt_generation_status === 'completed';
+      try {
+        const { data, error } = await supabase
+          .from('themes')
+          .select('id, prompt_generation_status, prompt_completion_count, total_posts_count, visual_prompt_system_prompt_id')
+          .eq('id', themeId)
+          .single();
         
-        console.log('Setting fresh theme status:', themeData);
-        setThemeStatus(themeData);
-        setIsInitialLoad(false);
-        
-        // Only redirect if theme was already completed when we first fetched it
-        if (wasAlreadyCompleted && !hasShownCompletionToast) {
-          console.log('Theme already completed, triggering redirect');
-          setHasShownCompletionToast(true);
-          onCompletionRedirect?.();
+        if (data) {
+          const themeData = data as ThemeCompletionData;
+          const wasAlreadyCompleted = data.prompt_generation_status === 'completed';
+          
+          dispatch({ type: 'SET_THEME_DATA', payload: { data: themeData, wasAlreadyCompleted } });
+          
+          // Only redirect if theme was already completed when we first fetched it
+          if (wasAlreadyCompleted && !hasShownCompletionToastRef.current) {
+            hasShownCompletionToastRef.current = true;
+            onCompletionRedirect?.();
+          }
+        } else {
+          dispatch({ type: 'SET_INITIAL_LOAD_COMPLETE' });
         }
-      } else if (error) {
-        console.log('No theme data found or error, assuming new theme');
-        setIsInitialLoad(false);
+      } catch (error) {
+        dispatch({ type: 'SET_INITIAL_LOAD_COMPLETE' });
       }
     };
 
@@ -70,7 +114,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
 
     // Set up real-time subscription for theme status changes
     const channel = supabase
-      .channel('theme-completion-changes')
+      .channel(`theme-completion-${themeId}`)
       .on(
         'postgres_changes',
         {
@@ -86,7 +130,7 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
           // Check if system prompt was just completed 
           if (newData.visual_prompt_system_prompt_id && 
               !oldData.visual_prompt_system_prompt_id && 
-              !hasShownSystemPromptToast) {
+              !hasShownSystemPromptToastRef.current) {
             
             toast({
               title: "System Prompt Ready! 🚀",
@@ -94,13 +138,13 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
               duration: 4000,
             });
             
-            setHasShownSystemPromptToast(true);
+            hasShownSystemPromptToastRef.current = true;
           }
           
           // Check if theme just completed and we haven't shown toast yet
           if (newData.prompt_generation_status === 'completed' && 
-              !hasShownCompletionToast && 
-              themeStatus?.prompt_generation_status !== 'completed') {
+              !hasShownCompletionToastRef.current && 
+              state.themeStatus?.prompt_generation_status !== 'completed') {
             
             // Clear themes cache to refresh the UI immediately when theme status changes
             import('@/services/optimizedSocialMediaService').then(({ optimizedSocialMediaService }) => {
@@ -113,47 +157,39 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
               duration: 5000,
             });
             
-            setHasShownCompletionToast(true);
+            hasShownCompletionToastRef.current = true;
             
             // Redirect to the theme page when completed
             onCompletionRedirect?.();
           }
           
-          setThemeStatus(newData);
+          dispatch({ type: 'UPDATE_THEME_DATA', payload: newData });
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [themeId, hasShownCompletionToast, hasShownSystemPromptToast, toast, onCompletionRedirect]);
+    subscriptionRef.current = channel;
 
-  // Calculate completion progress with proper null handling
+    return () => {
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current);
+        subscriptionRef.current = null;
+      }
+    };
+  }, [themeId, toast, onCompletionRedirect]);
+
+  // Calculate completion progress with debouncing
   const completionProgress = useMemo(() => {
-    if (!themeStatus) return 0;
-    
-    const completedCount = themeStatus.prompt_completion_count || 0;
-    const totalCount = themeStatus.total_posts_count || 0;
-    
-    console.log('Progress calculation:', { completedCount, totalCount });
-    
-    if (totalCount === 0) return 0;
-    
-    const progress = Math.round((completedCount / totalCount) * 100);
-    console.log('Calculated progress:', progress);
-    
-    return progress;
-  }, [themeStatus]);
+    return debouncedProgressCalc(state.themeStatus);
+  }, [state.themeStatus, debouncedProgressCalc]);
 
   // Default to false for new themes or when data is still loading
-  const isCompleted = !isInitialLoad && themeStatus?.prompt_generation_status === 'completed';
-  console.log('Is completed?', isCompleted, 'Status:', themeStatus?.prompt_generation_status, 'Initial load:', isInitialLoad);
+  const isCompleted = !state.isInitialLoad && state.themeStatus?.prompt_generation_status === 'completed';
 
   return {
-    themeStatus,
+    themeStatus: state.themeStatus,
     isCompleted,
-    hasSystemPrompt: !!themeStatus?.visual_prompt_system_prompt_id,
+    hasSystemPrompt: !!state.themeStatus?.visual_prompt_system_prompt_id,
     completionProgress
   };
 };
