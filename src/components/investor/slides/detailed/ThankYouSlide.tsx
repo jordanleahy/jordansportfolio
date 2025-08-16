@@ -1,8 +1,6 @@
 import React from 'react';
-
 export const ThankYouSlide: React.FC = () => {
-  return (
-    <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
+  return <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 text-primary leading-tight">
         Thank You
       </h1>
@@ -18,14 +16,11 @@ export const ThankYouSlide: React.FC = () => {
         </p>
         <p className="text-xl md:text-2xl text-muted-foreground">
           Website:{' '}
-          <span className="text-primary font-semibold">
-            www.storyship.com
-          </span>
+          <span className="text-primary font-semibold">www.jordanleahy.com/stories</span>
         </p>
         <p className="text-lg md:text-xl text-muted-foreground/80 italic mt-12">
           "Every thought deserves to become a story. Every story deserves to be shared."
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
