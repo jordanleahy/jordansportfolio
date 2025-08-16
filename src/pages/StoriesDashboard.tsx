@@ -106,7 +106,8 @@ export default function StoriesDashboard() {
   const { dismissShimmer, handleThemeClick, shouldShowShimmer } = useThemeLifecycleShimmer({
     pendingTheme,
     setPendingTheme,
-    setAvailableThemes
+    setAvailableThemes,
+    availableThemes
   });
 
 

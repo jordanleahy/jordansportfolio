@@ -6,6 +6,7 @@ interface ThemeLifecycleShimmerOptions {
   pendingTheme: PendingTheme | null;
   setPendingTheme: React.Dispatch<React.SetStateAction<PendingTheme | null>>;
   setAvailableThemes: React.Dispatch<React.SetStateAction<ThemeWithPosts[]>>;
+  availableThemes: ThemeWithPosts[];
 }
 
 /**
@@ -15,17 +16,46 @@ interface ThemeLifecycleShimmerOptions {
 export const useThemeLifecycleShimmer = ({
   pendingTheme,
   setPendingTheme,
-  setAvailableThemes
+  setAvailableThemes,
+  availableThemes
 }: ThemeLifecycleShimmerOptions) => {
   const navigate = useNavigate();
   const location = useLocation();
   const lastLocationRef = useRef(location.pathname);
+
+  // Helper function to check if a theme is ready (completed)
+  const isThemeReady = (theme: ThemeWithPosts) => {
+    return theme.prompt_generation_status === 'completed' && 
+           theme.prompt_completion_count === theme.total_posts_count &&
+           theme.post_count > 0;
+  };
 
   // Centralized cleanup function
   const clearPendingThemeState = () => {
     setPendingTheme(null);
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
   };
+
+  // Check for theme completion and auto-dismiss shimmer
+  useEffect(() => {
+    if (pendingTheme && availableThemes.length > 0) {
+      // Look for a completed theme that matches our pending theme description
+      const completedTheme = availableThemes.find(theme => 
+        theme.description === pendingTheme.description && 
+        isThemeReady(theme)
+      );
+      
+      if (completedTheme) {
+        console.log('✅ Theme completed, auto-dismissing shimmer and navigating:', completedTheme.id);
+        clearPendingThemeState();
+        
+        // Auto-navigate to the completed theme
+        setTimeout(() => {
+          navigate(`/stories/id/${completedTheme.id}`);
+        }, 100);
+      }
+    }
+  }, [pendingTheme, availableThemes, navigate]);
 
   // Clear pending theme when user navigates away from stories page
   useEffect(() => {
