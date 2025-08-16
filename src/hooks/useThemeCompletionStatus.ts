@@ -14,18 +14,29 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
   const [themeStatus, setThemeStatus] = useState<ThemeCompletionData | null>(null);
   const [hasShownCompletionToast, setHasShownCompletionToast] = useState(false);
   const [hasShownSystemPromptToast, setHasShownSystemPromptToast] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
 
   // Debug logging
   console.log('useThemeCompletionStatus - themeId:', themeId);
   console.log('useThemeCompletionStatus - themeStatus:', themeStatus);
+  console.log('useThemeCompletionStatus - isInitialLoad:', isInitialLoad);
 
   useEffect(() => {
-    if (!themeId) return;
+    if (!themeId) {
+      setIsInitialLoad(true);
+      return;
+    }
 
-    // Initial fetch
+    // Reset state for new theme
+    setThemeStatus(null);
+    setIsInitialLoad(true);
+    setHasShownCompletionToast(false);
+    setHasShownSystemPromptToast(false);
+
+    // Initial fetch with fresh data
     const fetchThemeStatus = async () => {
-      console.log('Fetching theme status for themeId:', themeId);
+      console.log('Fetching fresh theme status for themeId:', themeId);
       
       const { data, error } = await supabase
         .from('themes')
@@ -37,23 +48,20 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
       
       if (data) {
         const themeData = data as ThemeCompletionData;
-        console.log('Setting theme status:', themeData);
+        console.log('Setting fresh theme status:', themeData);
         setThemeStatus(themeData);
+        setIsInitialLoad(false);
         
-        // Check if theme is already completed on initial fetch
-        if (data.prompt_generation_status === 'completed' && !hasShownCompletionToast) {
-          
-          // toast({
-          //   title: "Theme Created! 🎉",
-          //   description: `All ${data.total_posts_count} individual image prompts have been generated successfully.`,
-          //   duration: 5000,
-          // });
-          
+        // Only redirect if theme was already completed AND we're on initial load from a completion redirect
+        // This prevents immediate redirect when navigating to a processing theme
+        if (data.prompt_generation_status === 'completed' && !hasShownCompletionToast && !isInitialLoad) {
+          console.log('Theme already completed, triggering redirect');
           setHasShownCompletionToast(true);
-          
-          // Redirect immediately if already completed
           onCompletionRedirect?.();
         }
+      } else if (error) {
+        console.log('No theme data found or error, assuming new theme');
+        setIsInitialLoad(false);
       }
     };
 
@@ -139,8 +147,9 @@ export const useThemeCompletionStatus = (themeId: string | undefined, onCompleti
     return progress;
   }, [themeStatus]);
 
-  const isCompleted = themeStatus?.prompt_generation_status === 'completed';
-  console.log('Is completed?', isCompleted, 'Status:', themeStatus?.prompt_generation_status);
+  // Default to false for new themes or when data is still loading
+  const isCompleted = !isInitialLoad && themeStatus?.prompt_generation_status === 'completed';
+  console.log('Is completed?', isCompleted, 'Status:', themeStatus?.prompt_generation_status, 'Initial load:', isInitialLoad);
 
   return {
     themeStatus,
