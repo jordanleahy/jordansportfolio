@@ -4,9 +4,7 @@ export const RoadmapSlide: React.FC = () => {
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         11/14
       </div>
-      <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 text-primary leading-tight">
-        Our Roadmap: Expanding the Journey
-      </h1>
+      <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 text-primary leading-tight">Our Roadmap</h1>
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-8 text-foreground">
         Where we're sailing next:
       </h2>
