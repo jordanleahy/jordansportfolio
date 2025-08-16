@@ -60,6 +60,12 @@ export default function StoriesDashboard() {
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+
+  // Centralized function to clear pending theme state
+  const clearPendingThemeState = () => {
+    setPendingTheme(null);
+    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+  };
   const {
     toast
   } = useToast();
@@ -540,9 +546,7 @@ export default function StoriesDashboard() {
               
               console.log('🚀 Auto-redirecting to theme:', newTheme.id);
               
-              // Clear pending theme since replacement was successful
-              setPendingTheme(null);
-              
+              clearPendingThemeState();
               handleThemeClick(newTheme.id);
               
               return [...filteredThemes, ...additionalThemes];
@@ -581,18 +585,13 @@ export default function StoriesDashboard() {
       // Start the replacement process
       await attemptThemeReplacement();
       
-      // Clear pending theme if replacement was successful
-      if (replacementSuccessful) {
-        console.log('✅ Theme replacement successful, clearing pending state');
-        setPendingTheme(null);
-      } else {
-        console.log('⏳ Theme creation completed, but replacement pending');
-      }
+      // Success check is handled within the replacement logic
+      console.log('🔄 Theme creation completed');
     } catch (error: any) {
       console.error('Theme generation error:', error);
 
       // Transform pending theme to error state instead of removing
-      setPendingTheme(null);
+      clearPendingThemeState();
       setAvailableThemes(prev => prev.map(theme => {
         if (theme.id.startsWith('pending-') && theme.description === themeDescription) {
           return {
@@ -640,8 +639,7 @@ export default function StoriesDashboard() {
       }
 
       // Remove pending theme and reset states
-      setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      clearPendingThemeState();
       setIsGeneratingTheme(false);
       return data;
     } catch (error) {
@@ -694,7 +692,7 @@ export default function StoriesDashboard() {
       });
 
       // Replace pending theme with real data for duplicate case
-      setPendingTheme(null);
+      clearPendingThemeState();
       
       const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
       
@@ -731,7 +729,7 @@ export default function StoriesDashboard() {
         variant: 'destructive'
       });
       // Transform to error state for duplicate case failure
-      setPendingTheme(null);
+      clearPendingThemeState();
       setAvailableThemes(prev => prev.map(theme => {
         if (theme.id.startsWith('pending-')) {
           return {
@@ -1072,8 +1070,7 @@ export default function StoriesDashboard() {
         <DuplicateThemeModal open={!!duplicateInfo} category={duplicateInfo?.category || ''} theme={duplicateInfo?.theme || ''} onCancel={() => {
       setDuplicateInfo(null);
       // Remove the pending shimmer theme if user cancels
-      setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      clearPendingThemeState();
     }} onConfirm={handleConfirmDuplicate} />
       </PageLayout>;
 }

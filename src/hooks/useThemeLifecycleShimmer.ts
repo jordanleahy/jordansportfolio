@@ -20,7 +20,12 @@ export const useThemeLifecycleShimmer = ({
   const navigate = useNavigate();
   const location = useLocation();
   const lastLocationRef = useRef(location.pathname);
-  const [shimmerStartTime] = useState(Date.now());
+
+  // Centralized cleanup function
+  const clearPendingThemeState = () => {
+    setPendingTheme(null);
+    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+  };
 
   // Clear pending theme when user navigates away from stories page
   useEffect(() => {
@@ -31,52 +36,18 @@ export const useThemeLifecycleShimmer = ({
     if (lastPath === '/stories' && currentPath !== '/stories' && pendingTheme) {
       console.log('🚢 User navigated away from stories, clearing pending theme');
       
-      // Use functional updates to avoid race conditions
-      setPendingTheme(prev => {
-        if (prev) {
-          console.log('Clearing pending theme:', prev.theme_name);
-          return null;
-        }
-        return prev;
-      });
-      
-      setAvailableThemes(prev => {
-        const filtered = prev.filter(theme => !theme.id.startsWith('pending-'));
-        if (filtered.length !== prev.length) {
-          console.log('Removed pending themes from list');
-        }
-        return filtered;
-      });
+      console.log('Clearing pending theme:', pendingTheme.theme_name);
+      clearPendingThemeState();
     }
     
     lastLocationRef.current = currentPath;
   }, [location.pathname, pendingTheme, setPendingTheme, setAvailableThemes]);
 
-  // Auto-dismiss shimmer after timeout or when theme has posts
-  useEffect(() => {
-    if (!pendingTheme) return;
-
-    // Set up a timeout to auto-dismiss stale shimmers (5 minutes)
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ Auto-dismissing stale shimmer after timeout');
-      setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearTimeout(timeoutId);
-  }, [pendingTheme, setPendingTheme, setAvailableThemes]);
 
   // Function to manually dismiss shimmer
   const dismissShimmer = () => {
     console.log('❌ User manually dismissed shimmer');
-    setPendingTheme(prev => {
-      if (prev) {
-        console.log('Dismissing pending theme:', prev.theme_name);
-        return null;
-      }
-      return prev;
-    });
-    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+    clearPendingThemeState();
   };
 
   // Function to handle theme card click (navigation)
@@ -84,8 +55,7 @@ export const useThemeLifecycleShimmer = ({
     console.log('🎯 User clicked theme, clearing pending state');
     
     // Clear pending state before navigation to prevent race conditions
-    setPendingTheme(null);
-    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+    clearPendingThemeState();
     
     // Small delay to ensure state updates complete before navigation
     setTimeout(() => {
