@@ -14,7 +14,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
-import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
+
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
@@ -95,32 +95,6 @@ export default function StoriesDashboard() {
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
-  // Track shimmer themes and poll for completion
-  const [activeShimmerThemes, setActiveShimmerThemes] = useState<string[]>([]);
-  
-  // Update active shimmer themes when themes change
-  useEffect(() => {
-    const processing = availableThemes
-      .filter(theme => 
-        !theme.id.startsWith('pending-') && 
-        theme.prompt_completion_count !== undefined && 
-        theme.total_posts_count !== undefined && 
-        theme.prompt_completion_count < theme.total_posts_count
-      )
-      .map(theme => theme.id);
-    
-    setActiveShimmerThemes(processing);
-  }, [availableThemes]);
-
-  // Use simple completion hook for the first processing theme (if any)
-  const firstProcessingTheme = activeShimmerThemes[0];
-  useSimpleThemeCompletion(firstProcessingTheme, () => {
-    console.log('🎉 Theme completed, refreshing themes:', firstProcessingTheme);
-    // Refresh themes when completion is detected
-    optimizedSocialMediaService.getAvailableThemes().then(refreshedThemes => {
-      setAvailableThemes(refreshedThemes);
-    });
-  });
 
   // Enhanced initial load with loading states and error handling
   const [isLoadingThemes, setIsLoadingThemes] = useState(true);
