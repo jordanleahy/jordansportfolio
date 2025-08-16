@@ -502,10 +502,7 @@ export default function StoriesDashboard() {
       }
       
       console.log('✅ Theme generation successful:', data);
-      toast({
-        title: "Theme Created!",
-        description: `Generated "${data.theme}" with ${data.postCount} posts and theme image`
-      });
+      // Note: Success toast will be shown when theme is actually completed via useSimpleThemeCompletion
 
       // Find and replace the pending theme with real data
       setPendingTheme(null);

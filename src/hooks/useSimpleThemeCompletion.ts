@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SimpleThemeCompletion {
   isProcessing: boolean;
@@ -19,6 +20,7 @@ export const useSimpleThemeCompletion = (
   const [isCompleted, setIsCompleted] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!themeId || hasCompletedRef.current) {
@@ -29,7 +31,7 @@ export const useSimpleThemeCompletion = (
       try {
         const { data, error } = await supabase
           .from('themes')
-          .select('prompt_generation_status, prompt_completion_count, total_posts_count')
+          .select('prompt_generation_status, prompt_completion_count, total_posts_count, theme_name')
           .eq('id', themeId)
           .maybeSingle();
 
@@ -52,6 +54,12 @@ export const useSimpleThemeCompletion = (
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
+          
+          // Show success toast when theme is actually completed
+          toast({
+            title: "Theme Created!",
+            description: `"${data.theme_name}" is now ready with all posts completed`
+          });
           
           // Notify completion
           onComplete?.();
