@@ -34,12 +34,8 @@ export const WhyNowSlide: React.FC = () => {
           <div className="space-y-3 text-left">
             <p className="text-lg text-foreground">• First mover in the thought to narrative space</p>
             <p className="text-lg text-foreground">• Built on Agent AI technology without need for large team.</p>
-            <p className="text-lg text-foreground">
-              • Proven user engagement metrics exceeding industry standards
-            </p>
-            <p className="text-lg text-foreground">
-              • Team combining expertise in AI, storytelling, and product development
-            </p>
+            <p className="text-lg text-foreground">• Our content will create unfair user acquisition strategy</p>
+            <p className="text-lg text-foreground">• Expertise in AI, storytelling, and product development</p>
           </div>
         </div>
       </div>
