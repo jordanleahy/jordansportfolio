@@ -51,14 +51,14 @@ class OptimizedCacheManager {
   generatePromptKey(config: {
     title: string;
     description: string;
-    theme?: string;
+    themeId?: string;
     category?: string;
     colorTheme?: any;
   }): string {
     // Normalize and truncate for better cache efficiency
     const normalizedTitle = config.title.toLowerCase().trim().substring(0, 50);
     const normalizedDesc = config.description.toLowerCase().trim().substring(0, 100);
-    const theme = config.theme || 'default';
+    const themeId = config.themeId || 'default';
     const category = config.category || 'general';
     const colorThemeId = config.colorTheme?.id || 'none';
     
@@ -67,17 +67,17 @@ class OptimizedCacheManager {
       const data = encoder.encode(normalizedTitle + normalizedDesc);
       const chars = Array.from(data, byte => String.fromCharCode(byte));
       const encoded = btoa(chars.join('')).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
-      return `prompt:${category}:${theme}:${colorThemeId}:${encoded}`;
+      return `prompt:${category}:${themeId}:${colorThemeId}:${encoded}`;
     } catch (error) {
       console.warn('Failed to encode optimized cache key, using fallback:', error);
-      return `prompt:${category}:${theme}:${colorThemeId}:${(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
+      return `prompt:${category}:${themeId}:${colorThemeId}:${(normalizedTitle + normalizedDesc).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24)}`;
     }
   }
 
   async getCachedPrompt(config: {
     title: string;
     description: string;
-    theme?: string;
+    themeId?: string;
     category?: string;
     colorTheme?: any;
   }): Promise<string | null> {
@@ -142,7 +142,7 @@ class OptimizedCacheManager {
   async setCachedPrompt(config: {
     title: string;
     description: string;
-    theme?: string;
+    themeId?: string;
     category?: string;
     colorTheme?: any;
   }, prompt: string): Promise<void> {
@@ -170,7 +170,7 @@ class OptimizedCacheManager {
       hit_count: 0,
       last_accessed_at: new Date().toISOString(),
       metadata: {
-        theme: config.theme,
+        themeId: config.themeId,
         colorThemeId: config.colorTheme?.id,
         optimized: true
       }
@@ -178,7 +178,7 @@ class OptimizedCacheManager {
   }
 
   // Batch operations for better performance
-  async preloadCommonPrompts(category: string, theme?: string): Promise<void> {
+  async preloadCommonPrompts(category: string, themeId?: string): Promise<void> {
     try {
       const { data, error } = await supabase
         .from('cached_prompts')

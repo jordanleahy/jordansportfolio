@@ -38,13 +38,12 @@ class SimpleCacheManager {
     postId?: string;
     title?: string;
     description?: string;
-    theme?: string;
     themeId?: string;
     category?: string;
   }): string {
     // If postId is provided, use it as the primary key
     if (config.postId) {
-      const themeId = config.themeId || config.theme || 'default';
+      const themeId = config.themeId || 'default';
       const category = config.category || 'general';
       return `prompt:${category}:${themeId}:${config.postId}`;
     }
@@ -52,7 +51,7 @@ class SimpleCacheManager {
     // Fallback to title/description based key for backwards compatibility
     const normalizedTitle = (config.title || '').toLowerCase().trim();
     const normalizedDescription = (config.description || '').toLowerCase().trim().substring(0, 100);
-    const themeId = config.themeId || config.theme || 'default';
+    const themeId = config.themeId || 'default';
     const category = config.category || 'general';
     
     try {
@@ -72,7 +71,6 @@ class SimpleCacheManager {
     postId?: string;
     title?: string;
     description?: string;
-    theme?: string;
     themeId?: string;
     category?: string;
   }): Promise<string | null> {
@@ -130,7 +128,6 @@ class SimpleCacheManager {
     postId?: string;
     title?: string;
     description?: string;
-    theme?: string;
     themeId?: string;
     category?: string;
   }, prompt: string): Promise<void> {
@@ -157,7 +154,6 @@ class SimpleCacheManager {
         hit_count: 0,
         last_accessed_at: new Date().toISOString(),
         metadata: {
-          theme: config.theme,
           themeId: config.themeId,
           postId: config.postId,
           titleLength: config.title?.length || 0,
@@ -210,9 +206,9 @@ class SimpleCacheManager {
     return null;
   }
 
-  // Theme data caching - simplified to use memory only initially  
-  async getThemeData(themeName: string): Promise<any | null> {
-    const key = `theme:${themeName}`;
+  // Theme data caching with database lookup by theme ID
+  async getThemeData(themeId: string): Promise<any | null> {
+    const key = `theme:${themeId}`;
     
     this.cleanExpired(this.themeCache);
     
@@ -223,7 +219,28 @@ class SimpleCacheManager {
       return cached.value;
     }
 
-    // For now, return null and implement database lookup separately to avoid TS issues
+    // Check database for theme by theme_id
+    try {
+      const supabaseModule = await import('@/integrations/supabase/client');
+      const response = await supabaseModule.supabase
+        .from('themes')
+        .select('*')
+        .eq('id', themeId)
+        .maybeSingle();
+
+      if (response.data && !response.error) {
+        console.log(`🎨 Theme database HIT: ${key}`);
+        // Store in memory for next time
+        this.themeCache.set(key, {
+          value: response.data,
+          expires: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
+        });
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Theme database lookup error:', error);
+    }
+
     console.log(`🎨 Theme cache MISS: ${key}`);
     return null;
   }
@@ -240,8 +257,8 @@ class SimpleCacheManager {
   }
 
   // Set theme data in cache
-  setThemeData(themeName: string, data: any): void {
-    const key = `theme:${themeName}`;
+  setThemeData(themeId: string, data: any): void {
+    const key = `theme:${themeId}`;
     this.themeCache.set(key, {
       value: data,
       expires: Date.now() + (2 * 60 * 60 * 1000) // 2 hours
@@ -281,7 +298,6 @@ class SimpleCacheManager {
     postId?: string;
     title?: string;
     description?: string;
-    theme?: string;
     themeId?: string;
     category?: string;
   }): void {

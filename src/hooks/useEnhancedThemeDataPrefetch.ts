@@ -48,9 +48,21 @@ export const useEnhancedThemeDataPrefetch = () => {
         cachedTheme = data;
         resolvedThemeName = data?.theme_name || '';
       } else {
-        // Legacy URL format: /stories/theme/:themeName - fetch theme by name
-        cachedTheme = await cacheManager.getThemeData(themeName);
-        resolvedThemeId = cachedTheme?.id || '';
+        // Legacy URL format: /stories/theme/:themeName - fetch theme by name from database
+        const { data, error } = await supabase
+          .from('themes')
+          .select('*')
+          .eq('theme_name', themeName)
+          .maybeSingle();
+          
+        if (error) throw error;
+        cachedTheme = data;
+        resolvedThemeId = data?.id || '';
+        
+        // Cache the theme data by ID for future use
+        if (data && resolvedThemeId) {
+          cacheManager.setThemeData(resolvedThemeId, data);
+        }
       }
       
       let systemPrompt = null;
