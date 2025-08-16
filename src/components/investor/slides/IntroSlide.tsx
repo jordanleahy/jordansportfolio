@@ -1,6 +1,6 @@
 import React from 'react';
 export const IntroSlide: React.FC = () => {
-  return <div className="h-full flex flex-col justify-center items-center px-4 py-8 text-center">
+  return <div className="h-full flex flex-col justify-center items-center pl-4 pr-16 py-8 text-center">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         2/8
       </div>

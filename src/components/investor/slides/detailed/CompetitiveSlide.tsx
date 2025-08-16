@@ -2,7 +2,7 @@ import React from 'react';
 
 export const CompetitiveSlide: React.FC = () => {
   return (
-    <div className="h-full flex flex-col justify-center items-center px-4 py-8 text-center">
+    <div className="h-full flex flex-col justify-center items-center pl-4 pr-16 py-8 text-center">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         9/14
       </div>
