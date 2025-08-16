@@ -16,7 +16,7 @@ export const RoadmapSlide: React.FC = () => {
           <div className="space-y-2 ml-4">
             <p className="text-lg text-muted-foreground">• Focused on revenue generation.</p>
             <p className="text-lg text-muted-foreground">• Building agents to create and distribute content </p>
-            <p className="text-lg text-muted-foreground">• Community features for collaborative storytelling</p>
+            <p className="text-lg text-muted-foreground">• Targeting SME sales & marketing leaaders</p>
           </div>
         </div>
         
