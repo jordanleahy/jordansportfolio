@@ -491,8 +491,14 @@ export default function StoriesDashboard() {
       }
       
       console.log('✅ Theme saved to database:', data);
+      
+      // Update pending theme with the actual theme_id from the response
+      if (data?.theme_id) {
+        console.log('🔗 Updating pending theme with theme_id:', data.theme_id);
+        setPendingTheme(prev => prev ? { ...prev, theme_id: data.theme_id } : null);
+      }
+      
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
-
       // Theme completion and auto-navigation is now handled by useThemeLifecycleShimmer
       console.log('✅ Theme creation started, shimmer will auto-dismiss when completed');
     } catch (error: any) {

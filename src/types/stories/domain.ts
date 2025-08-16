@@ -89,6 +89,7 @@ export interface StreamingProgress {
 
 // UI types that were previously in theme.ts
 export interface PendingTheme {
+  theme_id?: string;  // Added for precise theme matching
   theme_name: string;
   description: string;
 }

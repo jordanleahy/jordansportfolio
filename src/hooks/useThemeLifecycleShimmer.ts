@@ -39,11 +39,15 @@ export const useThemeLifecycleShimmer = ({
   // Check for theme completion and auto-dismiss shimmer
   useEffect(() => {
     if (pendingTheme && availableThemes.length > 0) {
-      // Look for a completed theme that matches our pending theme description
-      const completedTheme = availableThemes.find(theme => 
-        theme.description === pendingTheme.description && 
-        isThemeReady(theme)
-      );
+      // Look for a completed theme that matches our pending theme
+      const completedTheme = availableThemes.find(theme => {
+        // Primary: Match by theme_id if available (most reliable)
+        if (pendingTheme.theme_id) {
+          return theme.id === pendingTheme.theme_id && isThemeReady(theme);
+        }
+        // Fallback: Match by description (for backward compatibility)
+        return theme.description === pendingTheme.description && isThemeReady(theme);
+      });
       
       if (completedTheme) {
         console.log('✅ Theme completed, auto-dismissing shimmer and navigating:', completedTheme.id);
