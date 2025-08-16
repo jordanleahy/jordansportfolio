@@ -1,7 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Manually trigger system prompt generation for categories that have posts but no system prompt
+ * ❌ BAD: Phase 2 migration incomplete - still using category names
+ * TODO: Update to use themeId-based system prompt generation
  */
 export const triggerSystemPromptGeneration = async (category: string) => {
   console.log('🚀 MANUAL TRIGGER: Starting system prompt generation for category:', category);
@@ -9,7 +10,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
   
   try {
     console.log('🔍 STEP 1: Checking existing posts for category');
-    // Check if posts exist for this theme by getting theme ID first
+    // ❌ BAD: Theme name lookup (Phase 2 migration needed)
     const { data: theme } = await supabase
       .from('themes')
       .select('id')
@@ -21,6 +22,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       return { success: false, error: 'No theme found for this category' };
     }
     
+    // ✅ GOOD: Using theme_id for posts query
     const postsQuery = supabase
       .from('social_media_posts')
       .select('id, title, description')
@@ -35,7 +37,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
     });
     
     console.log('🔍 STEP 2: Checking existing system prompts for category');
-    // Check if a system prompt exists for this category - using theme field instead
+    // ❌ BAD: Legacy theme field check (Phase 2 migration needed)
     const promptsQuery = supabase
       .from('system_prompts')
       .select('id')

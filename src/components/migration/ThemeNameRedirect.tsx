@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
+// ❌ BAD: Phase 2 migration incomplete - using theme name lookup
 import { useThemeByName } from '@/hooks/useOptimizedStories';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 
 /**
- * Migration component that redirects old theme name URLs to new theme ID URLs
+ * ❌ BAD: Migration component - Phase 2 incomplete
+ * TODO: This component uses theme name lookup and should be optimized
  * /stories/theme/:themeName -> /stories/id/:themeId
  */
 export const ThemeNameRedirect = () => {

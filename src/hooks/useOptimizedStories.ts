@@ -5,10 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS, QUERY_CONFIG, getThemeQueryKeys } from '@/constants/queryKeys';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-// Individual category query hook for granular caching
+// ❌ BAD: Individual category query hook - DEPRECATED
 export const useCategoryPosts = (category: string, enabled = true) => {
-  // DEPRECATED: This hook uses category which is being replaced by theme_id
-  // Use useThemePosts instead for new code
+  // ❌ BAD: Phase 2 migration incomplete - still using category names
+  // TODO: Replace all usages with useThemePosts and theme IDs
   return useQuery({
     queryKey: QUERY_KEYS.postsByCategory(category),
     queryFn: async () => {
@@ -63,8 +63,10 @@ export const useThemePosts = (themeId: string, enabled = true) => {
   });
 };
 
-// Theme lookup by name hook - gets theme ID from theme name
+// ❌ BAD: Theme lookup by name hook - MIGRATION NEEDED
 export const useThemeByName = (themeName: string, enabled = true) => {
+  // ❌ BAD: Phase 2 migration incomplete - theme name lookup
+  // TODO: Replace with themeId-based queries where possible
   return useQuery({
     queryKey: ['theme-by-name', themeName],
     queryFn: async () => {
@@ -82,9 +84,11 @@ export const useThemeByName = (themeName: string, enabled = true) => {
   });
 };
 
-// Combined hook for theme details by name - gets theme and posts
+// ❌ BAD: Combined hook for theme details by name - MIGRATION NEEDED
 export const useThemeDetailsByName = (themeName: string, enabled = true) => {
+  // ❌ BAD: Phase 2 migration incomplete - theme name dependency
   const { data: theme, isLoading: isLoadingTheme } = useThemeByName(themeName, enabled);
+  // ✅ GOOD: Using theme_id for posts query
   const { data: posts = [], isLoading: isLoadingPosts, refetch } = useThemePosts(theme?.id || '', !!theme?.id);
 
   return {
