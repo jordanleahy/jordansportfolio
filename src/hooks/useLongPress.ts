@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 
 interface LongPressOptions {
   threshold?: number; // Duration in ms
@@ -8,7 +9,7 @@ interface LongPressOptions {
 }
 
 export function useLongPress({ 
-  threshold = 600, 
+  threshold = SHIMMER_CONSTANTS.TIMEOUTS.LONG_PRESS_THRESHOLD, 
   onLongPress, 
   onPress, 
   onRelease 

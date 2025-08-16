@@ -1,5 +1,7 @@
 import { CategoryCard } from "./CategoryCard";
 import { CategoriesGridProps } from "@/types/stories";
+import { SHIMMER_CONSTANTS } from "@/constants/shimmerConstants";
+import { LAYOUT_CONSTANTS } from "@/constants/layoutConstants";
 
 export const CategoriesGrid = ({ 
   themes, 
@@ -10,21 +12,21 @@ export const CategoriesGrid = ({
   isGeneratingTheme,
   onCancelGeneration
 }: CategoriesGridProps) => {
-  const hasPendingShimmer = themes.some(t => t.id?.startsWith('pending-'));
+  const hasPendingShimmer = themes.some(t => t.id?.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME));
 
   if (themes.length === 0 && !isGeneratingTheme) {
     return null;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className={`grid ${LAYOUT_CONSTANTS.GRID.CATEGORIES} ${LAYOUT_CONSTANTS.SPACING.GRID_GAP}`}>
       {/* Always show a shimmer card while generating, even if no pending item exists */}
       {isGeneratingTheme && !hasPendingShimmer && (
         <CategoryCard
           key="shimmer"
-          theme="Generating theme..."
-          themeId="shimmer-id"
-          themeDescription="Preparing your theme"
+          theme={SHIMMER_CONSTANTS.MESSAGES.GENERATING_THEME}
+          themeId={SHIMMER_CONSTANTS.PREFIXES.SHIMMER_ID}
+          themeDescription={SHIMMER_CONSTANTS.MESSAGES.PREPARING_THEME}
           category=""
           postCount={0}
           isShimmer
@@ -49,8 +51,8 @@ export const CategoriesGrid = ({
             description: theme.first_post.description
           } : undefined}
           onDelete={onDeleteCategory}
-           isShimmer={theme.id.startsWith('pending-')}
-           isError={theme.theme_name === 'Generation Failed'}
+           isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}
+           isError={theme.theme_name === SHIMMER_CONSTANTS.MESSAGES.GENERATION_FAILED}
           isSelected={selectedThemes?.has(theme.id)}
           onSelect={() => onThemeSelect?.(theme.id)}
           isSelectionMode={isSelectionMode}

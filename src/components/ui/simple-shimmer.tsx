@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { LAYOUT_CONSTANTS } from "@/constants/layoutConstants";
 
 interface SimpleShimmerProps {
   aspectRatio?: string;
@@ -7,7 +8,7 @@ interface SimpleShimmerProps {
 }
 
 export const SimpleShimmer = ({ 
-  aspectRatio = "16/9", 
+  aspectRatio = LAYOUT_CONSTANTS.ASPECT_RATIOS.STORY_CARD, 
   className = "",
   variant = 'full' 
 }: SimpleShimmerProps) => {
@@ -15,7 +16,7 @@ export const SimpleShimmer = ({
     return (
       <div 
         className={cn(
-          "w-full h-16 relative overflow-hidden",
+          `w-full ${LAYOUT_CONSTANTS.SIZES.THUMBNAIL_HEIGHT} relative overflow-hidden`,
           "before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite]",
           "before:bg-gradient-to-r before:from-transparent before:via-foreground/30 before:to-transparent",
           className

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
+import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 
 interface ThemeLifecycleShimmerOptions {
   pendingTheme: PendingTheme | null;
@@ -25,13 +26,13 @@ export const useThemeLifecycleShimmer = ({
 
   // Helper function to check if a theme is ready (completed status guarantees all posts are generated)
   const isThemeReady = (theme: ThemeWithPosts) => {
-    return theme.prompt_generation_status === 'completed';
+    return theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
   };
 
   // Centralized cleanup function
   const clearPendingThemeState = () => {
     setPendingTheme(null);
-    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)));
   };
 
   // Check for theme completion and auto-dismiss shimmer
@@ -53,7 +54,7 @@ export const useThemeLifecycleShimmer = ({
         // Auto-navigate to the completed theme
         setTimeout(() => {
           navigate(`/stories/id/${completedTheme.id}`);
-        }, 100);
+        }, SHIMMER_CONSTANTS.TIMEOUTS.AUTO_NAVIGATION_DELAY);
       }
     }
   }, [pendingTheme, availableThemes, navigate]);
