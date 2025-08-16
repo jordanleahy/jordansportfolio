@@ -245,7 +245,17 @@ export default function StoriesDashboard() {
     enabled: !!user,
     userId: user?.id,
     onPostInsert: handlePostInsert,
-    onPostUpdate: handlePostUpdate
+    onPostUpdate: handlePostUpdate,
+    onThemeStatusUpdate: (theme) => {
+      console.log('📡 Dashboard received theme status update:', theme.id, theme.prompt_generation_status);
+      // Theme cache is already updated in the realtime hook for instant transitions
+      if (theme.prompt_generation_status === 'completed') {
+        // Update local state for shimmer handling
+        setAvailableThemes(prev => prev.map(t => 
+          t.id === theme.id ? { ...t, ...theme } : t
+        ));
+      }
+    }
   });
   const handleDeleteCategory = async (category: string) => {
     try {

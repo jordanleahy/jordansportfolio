@@ -13,6 +13,7 @@ export interface UseUnifiedRealtimeOptions {
   onPostUpdate?: (post: SocialMediaPost) => void;
   onPostInsert?: (post: SocialMediaPost) => void;
   onThemeUpdate?: (theme: ColorTheme) => void;
+  onThemeStatusUpdate?: (theme: any) => void;
   onSystemPromptUpdate?: (prompt: any) => void;
   onAgentUpdate?: (agent: any) => void;
   onVendorUpdate?: (vendor: any) => void;
@@ -28,6 +29,7 @@ export const useUnifiedRealtime = ({
   onPostUpdate,
   onPostInsert,
   onThemeUpdate,
+  onThemeStatusUpdate,
   onSystemPromptUpdate,
   onAgentUpdate,
   onVendorUpdate,
@@ -72,6 +74,9 @@ export const useUnifiedRealtime = ({
       switch (table) {
         case 'social_media_posts':
           handleSocialMediaPostUpdate(eventType, data);
+          break;
+        case 'themes':
+          handleThemeStatusUpdate(eventType, data);
           break;
         case 'color_themes':
           handleColorThemeUpdate(eventType, data);
@@ -241,6 +246,48 @@ export const useUnifiedRealtime = ({
         type: 'active' 
       });
     }
+  };
+
+  const handleThemeStatusUpdate = (eventType: string, data: any) => {
+    const record = data.new;
+    const oldRecord = data.old;
+
+    console.log(`🎬 REALTIME: Theme ${eventType}: ${record?.id || oldRecord?.id}`, {
+      status: record?.prompt_generation_status,
+      oldStatus: oldRecord?.prompt_generation_status,
+      theme: record?.theme_name || oldRecord?.theme_name
+    });
+    
+    if (eventType === 'UPDATE' && record && oldRecord) {
+      // Check if prompt_generation_status changed to 'completed'
+      const isStatusComplete = record.prompt_generation_status === 'completed' && 
+                              oldRecord.prompt_generation_status !== 'completed';
+      
+      if (isStatusComplete) {
+        console.log(`🎉 REALTIME: Theme completion detected for: ${record.theme_name}`);
+        
+        // Directly update themes cache for instant transition
+        queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
+          if (!oldThemes) return oldThemes;
+          return oldThemes.map((theme: any) => 
+            theme.id === record.id ? { ...theme, ...record } : theme
+          );
+        });
+        
+        toast.success(`Theme "${record.theme_name}" generation completed!`);
+      }
+      
+      // Call the theme status update callback for shimmer transitions
+      if (onThemeStatusUpdate) {
+        onThemeStatusUpdate(record);
+      }
+    }
+    
+    // Background refetch to ensure consistency
+    queryClient.refetchQueries({ 
+      queryKey: QUERY_KEYS.themes, 
+      type: 'active' 
+    });
   };
 
   const handleColorThemeUpdate = (eventType: string, data: any) => {
