@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +40,11 @@ export default function ThemeDetail() {
   const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Simple completion tracking - redirect incomplete themes to dashboard
   const { isCompleted } = useSimpleThemeCompletion(themeId);
