@@ -341,7 +341,7 @@ export interface ColorThemeSelectorProps {
 }
 
 export interface ColorThemeConsistencyCheckerProps {
-  category: string;
+  themeId: string;
 }
 
 // Watermark Props

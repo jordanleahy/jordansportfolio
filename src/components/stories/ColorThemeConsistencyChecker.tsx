@@ -27,33 +27,26 @@ interface ColorConsistencyReport {
 
 import type { ColorThemeConsistencyCheckerProps } from '@/types/stories/ui';
 
-export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyCheckerProps> = ({ category }) => {
+export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyCheckerProps> = ({ themeId }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<ColorConsistencyReport | null>(null);
   const { data: colorThemes = [] } = useColorThemes();
 
   const { data: categoryPosts = [] } = useQuery({
-    queryKey: ['theme-posts-for-consistency', category],
+    queryKey: ['theme-posts-for-consistency', themeId],
     queryFn: async () => {
-      // ❌ BAD: Phase 2 migration incomplete - still using theme name lookup
-      // TODO: Update this component to receive themeId instead of category name
-      const { data: theme, error: themeError } = await supabase
-        .from('themes')
-        .select('id')
-        .eq('theme_name', category)
-        .single();
+      if (!themeId) return [];
       
-      if (themeError || !theme) return [];
-      
-      // ✅ GOOD: Using theme_id for posts query
+      // ✅ GOOD: Using theme_id directly for posts query
       const { data, error } = await supabase
         .from('social_media_posts')
         .select('id, title, color_theme_id, status')
-        .eq('theme_id', theme.id);
+        .eq('theme_id', themeId);
       
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!themeId
   });
 
   const analyzeColorConsistency = async () => {
@@ -143,17 +136,10 @@ export const ColorThemeConsistencyChecker: React.FC<ColorThemeConsistencyChecker
         recommendations.push(`${colorIssues.length} themes have accessibility or validation issues that need attention`);
       }
 
-      // Look for category-specific recommendations
-      if (category === 'product-management') {
-        const hasProductTheme = colorThemes.some(theme => 
-          theme.name.toLowerCase().includes('product') || 
-          theme.name.toLowerCase().includes('corporate') ||
-          theme.name.toLowerCase().includes('professional')
-        );
-        
-        if (!hasProductTheme) {
-          recommendations.push('Consider creating a dedicated "Product Management" theme with professional blues/grays');
-        }
+      // Look for theme-specific recommendations based on available themes
+      const hasVarietyInThemes = colorThemes.length >= 3;
+      if (!hasVarietyInThemes) {
+        recommendations.push('Consider creating more color theme variations for different content types');
       }
 
       const consistencyScore = Math.round(

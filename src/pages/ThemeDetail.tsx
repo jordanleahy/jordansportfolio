@@ -237,7 +237,7 @@ export default function ThemeDetail() {
         <div className="space-y-8">
           <Suspense fallback={<CalendarSkeletonLoader />}>
             {/* Color Theme Consistency Checker */}
-            <ColorThemeConsistencyChecker category={decodedTheme} />
+            {themeData?.id && <ColorThemeConsistencyChecker themeId={themeData.id} />}
             
             <ProcessingStatesProvider>
               {themeData?.id && hasAnyPosts ? (

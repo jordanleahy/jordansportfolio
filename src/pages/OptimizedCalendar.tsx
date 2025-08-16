@@ -232,7 +232,7 @@ export default function OptimizedCalendar() {
               <TabsContent key={theme.theme_name} value={theme.theme_name} className="space-y-8">
                 <Suspense fallback={<CalendarSkeletonLoader />}>
                   {/* Color Theme Consistency Checker */}
-                   <ColorThemeConsistencyChecker category={theme.theme_name} />
+                   <ColorThemeConsistencyChecker themeId={theme.id} />
                    
                    <ProcessingStatesProvider>
                      <PostsTable 
