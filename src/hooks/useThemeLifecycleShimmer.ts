@@ -23,11 +23,9 @@ export const useThemeLifecycleShimmer = ({
   const location = useLocation();
   const lastLocationRef = useRef(location.pathname);
 
-  // Helper function to check if a theme is ready (completed)
+  // Helper function to check if a theme is ready (completed status guarantees all posts are generated)
   const isThemeReady = (theme: ThemeWithPosts) => {
-    return theme.prompt_generation_status === 'completed' && 
-           theme.prompt_completion_count === theme.total_posts_count &&
-           theme.post_count > 0;
+    return theme.prompt_generation_status === 'completed';
   };
 
   // Centralized cleanup function
