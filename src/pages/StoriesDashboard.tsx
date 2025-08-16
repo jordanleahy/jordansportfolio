@@ -478,9 +478,9 @@ export default function StoriesDashboard() {
         console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
-      if (!data?.success || !data?.theme_id) {
+      if (!data?.success) {
         console.log('❌ Edge function returned failure:', data);
-        throw new Error(data?.error || 'Failed to generate theme - no theme ID returned');
+        throw new Error(data?.error || 'Failed to generate theme');
       }
       
       console.log('✅ Theme saved to database:', data);
