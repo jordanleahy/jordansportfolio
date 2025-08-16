@@ -2,7 +2,7 @@ import React from 'react';
 
 export const RoadmapSlide: React.FC = () => {
   return (
-    <div className="h-full flex flex-col justify-center items-start pl-4 pr-16 py-8 text-left">
+    <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         11/14
       </div>
