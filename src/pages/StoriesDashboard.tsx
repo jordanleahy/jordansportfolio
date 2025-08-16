@@ -493,79 +493,89 @@ export default function StoriesDashboard() {
       
       let replacementSuccessful = false;
       
-      setAvailableThemes(prevThemes => {
-        console.log('🔍 Looking for pending theme to replace...');
+      // Retry logic for theme matching
+      const attemptThemeReplacement = async (attempt = 1, maxAttempts = 3) => {
+        console.log(`🔍 Theme replacement attempt ${attempt}/${maxAttempts}`);
         
-        // Find the pending theme that matches our description
-        const pendingIndex = prevThemes.findIndex(theme => 
-          theme.id.startsWith('pending-') && 
-          theme.description === themeDescription
-        );
-        
-        console.log('📍 Pending theme index:', pendingIndex);
-        
-        if (pendingIndex !== -1) {
-          // Use theme_id from response for more reliable matching
-          const newTheme = refreshedThemes.find(theme => {
-            // Primary match: exact ID from response
-            const matchesId = theme.id === data.theme_id;
-            
-            // Fallback matches for robustness
-            const matchesTheme = theme.theme_name === data.theme;
-            const matchesCategory = theme.category === data.category;
-            const matchesDescription = theme.description && themeDescription && 
-              (theme.description.toLowerCase().includes(themeDescription.toLowerCase()) ||
-               themeDescription.toLowerCase().includes(theme.description.toLowerCase()));
-            
-            console.log('🔍 Checking theme:', {
-              id: theme.id,
-              name: theme.theme_name,
-              category: theme.category,
-              matchesId,
-              matchesTheme,
-              matchesCategory,
-              matchesDescription
-            });
-            
-            // Prioritize ID match, fall back to other criteria
-            return matchesId || matchesTheme || matchesCategory || matchesDescription;
-          });
+        setAvailableThemes(prevThemes => {
+          console.log('🔍 Looking for pending theme to replace...');
           
-          if (newTheme) {
-            console.log('✅ Found matching theme for replacement:', newTheme.id);
-            replacementSuccessful = true;
+          // Find the pending theme that matches our description
+          const pendingIndex = prevThemes.findIndex(theme => 
+            theme.id.startsWith('pending-') && 
+            theme.description === themeDescription
+          );
+          
+          console.log('📍 Pending theme index:', pendingIndex);
+          
+          if (pendingIndex !== -1) {
+            // Simplified matching: ONLY use exact UUID from response
+            const expectedThemeId = data.theme_id;
+            console.log('🎯 Looking for exact theme ID:', expectedThemeId);
             
-            // Replace the pending theme with the real one at the same position
-            const newThemes = [...prevThemes];
-            newThemes[pendingIndex] = newTheme;
+            if (!expectedThemeId) {
+              console.log('❌ No theme_id in response:', data);
+              return prevThemes; // Keep current state if no ID provided
+            }
             
-            // Remove any duplicates from the end and filter out other pending themes
-            const filteredThemes = newThemes.filter((theme, index) => {
-              if (index === pendingIndex) return true; // Keep our replaced theme
-              return !theme.id.startsWith('pending-') && 
-                     !refreshedThemes.some(rt => rt.id === theme.id && rt.id !== newTheme.id);
-            });
+            const newTheme = refreshedThemes.find(theme => theme.id === expectedThemeId);
             
-            // Add any new themes that weren't already in the list
-            const existingIds = new Set(filteredThemes.map(t => t.id));
-            const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
-            
-            // Use the lifecycle hook's navigation handler  
-            console.log('🚀 Auto-redirecting to theme:', newTheme.id);
-            handleThemeClick(newTheme.id);
-            
-            return [...filteredThemes, ...additionalThemes];
+            if (newTheme) {
+              console.log('✅ Found exact theme match:', newTheme.id);
+              replacementSuccessful = true;
+              
+              // Replace the pending theme with the real one at the same position
+              const newThemes = [...prevThemes];
+              newThemes[pendingIndex] = newTheme;
+              
+              // Filter out other pending themes and duplicates
+              const filteredThemes = newThemes.filter((theme, index) => {
+                if (index === pendingIndex) return true; // Keep our replaced theme
+                return !theme.id.startsWith('pending-') && theme.id !== expectedThemeId;
+              });
+              
+              // Add any other new themes
+              const existingIds = new Set(filteredThemes.map(t => t.id));
+              const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
+              
+              console.log('🚀 Auto-redirecting to theme:', newTheme.id);
+              handleThemeClick(newTheme.id);
+              
+              return [...filteredThemes, ...additionalThemes];
+            } else {
+              console.log(`❌ Theme ID ${expectedThemeId} not found in refreshed themes (attempt ${attempt})`);
+              
+              // If we haven't reached max attempts, try refreshing again after a delay
+              if (attempt < maxAttempts) {
+                setTimeout(async () => {
+                  console.log(`⏱️ Retrying theme fetch in 1 second...`);
+                  try {
+                    const retryThemes = await optimizedSocialMediaService.getAvailableThemes();
+                    attemptThemeReplacement(attempt + 1, maxAttempts);
+                  } catch (error) {
+                    console.error('Retry failed:', error);
+                  }
+                }, 1000);
+              }
+              
+              return prevThemes; // Keep current state for now
+            }
           } else {
-            console.log('❌ No matching theme found for replacement');
+            console.log('❌ No pending theme found with description:', themeDescription);
           }
-        } else {
-          console.log('❌ No pending theme found with description:', themeDescription);
-        }
-        
-        // Fallback: just replace with fresh data, removing pending themes
-        console.log('🔄 Using fallback - replacing with fresh data');
-        return refreshedThemes;
-      });
+          
+          // If all else fails, use fresh data
+          if (attempt >= maxAttempts) {
+            console.log('🔄 Max attempts reached, using fallback - replacing with fresh data');
+            return refreshedThemes.filter(theme => !theme.id.startsWith('pending-'));
+          }
+          
+          return prevThemes;
+        });
+      };
+      
+      // Start the replacement process
+      await attemptThemeReplacement();
       
       // DON'T clear pending theme - let user interaction control it
       console.log('🔄 Theme creation completed, keeping shimmer until user interaction');
