@@ -31,6 +31,7 @@ export interface CategoryCardProps {
   onClick?: () => void;
   onDelete?: (category: string) => void;
   isShimmer?: boolean;
+  isError?: boolean;
   isSelected?: boolean;
   onSelect?: () => void;
   isSelectionMode?: boolean;

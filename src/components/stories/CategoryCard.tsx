@@ -2,28 +2,43 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-
-import { FolderOpen, FileText, ArrowRight, Image as ImageIcon, Loader2 } from "lucide-react";
+import { FolderOpen, FileText, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLongPress } from "@/hooks/useLongPress";
+import { useFailedThemeRecovery } from "@/hooks/useFailedThemeRecovery";
 import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
-
 import { CategoryCardProps } from '@/types/stories';
 
-export const ThemeCard = ({ theme, themeId, themeDescription, category, postCount, imageUrl, onClick, isShimmer = false, firstPostData, onDelete, isSelected, onSelect, isSelectionMode, isGeneratingTheme, onCancelGeneration }: CategoryCardProps) => {
+export const ThemeCard = ({ 
+  theme, 
+  themeId, 
+  themeDescription, 
+  category, 
+  postCount, 
+  imageUrl, 
+  onClick, 
+  isShimmer = false, 
+  isError = false,
+  firstPostData, 
+  onDelete, 
+  isSelected, 
+  onSelect, 
+  isSelectionMode, 
+  isGeneratingTheme, 
+  onCancelGeneration 
+}: CategoryCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { retryFailedTheme, deleteFailedTheme, isRetrying } = useFailedThemeRecovery();
+  
   const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [menuCoordinates, setMenuCoordinates] = useState({ x: 0, y: 0 });
   const [isCancelling, setIsCancelling] = useState(false);
-  
-  // Detect error state from theme id
-  const isError = theme?.startsWith?.('error-') || false;
   
   // Sync image URL from props
   useEffect(() => {
@@ -88,6 +103,15 @@ export const ThemeCard = ({ theme, themeId, themeDescription, category, postCoun
     }
   };
 
+  const handleRetryTheme = async () => {
+    if (isRetrying === themeId) return;
+    await retryFailedTheme(themeId, category, theme);
+  };
+
+  const handleDeleteFailedTheme = async () => {
+    await deleteFailedTheme(themeId);
+  };
+
   const handleCheckboxChange = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onSelect) {
@@ -103,9 +127,7 @@ export const ThemeCard = ({ theme, themeId, themeDescription, category, postCoun
         <div className="relative aspect-square">
           <div className="absolute inset-0 bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center">
             <div className="space-y-2 text-center">
-              <div className="h-8 w-8 rounded-full bg-destructive/20 flex items-center justify-center mx-auto">
-                <span className="text-destructive text-sm">✕</span>
-              </div>
+              <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
               <div className="text-xs text-destructive/80">Generation failed</div>
             </div>
           </div>
@@ -116,16 +138,31 @@ export const ThemeCard = ({ theme, themeId, themeDescription, category, postCoun
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-destructive mb-1">Generation Failed</h3>
-              <p className="text-sm text-destructive/70">{firstPostData?.description || themeDescription}</p>
+              <p className="text-sm text-destructive/70">
+                Theme generation encountered an error. You can retry or delete this theme.
+              </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetryTheme}
+                disabled={isRetrying === themeId}
+                className="flex-1 border-primary/30 text-primary hover:bg-primary/10"
+              >
+                {isRetrying === themeId ? 'Retrying...' : 'Retry'}
+              </Button>
+              {onDelete && (
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => onDelete(themeId)}
+                  className="flex-1"
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
