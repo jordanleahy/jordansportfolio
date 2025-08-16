@@ -1,8 +1,6 @@
 import React from 'react';
-
 export const WhyNowSlide: React.FC = () => {
-  return (
-    <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
+  return <div className="h-full flex flex-col justify-center items-start pl-12 pr-16 py-12 text-left">
       <div className="absolute top-8 left-8 text-sm text-muted-foreground font-medium">
         13/14
       </div>
@@ -34,9 +32,7 @@ export const WhyNowSlide: React.FC = () => {
             Our unique position:
           </h2>
           <div className="space-y-3 text-left">
-            <p className="text-lg text-foreground">
-              • First-mover in the thought-to-narrative space
-            </p>
+            <p className="text-lg text-foreground">• First-mover in the thought to narrative space</p>
             <p className="text-lg text-foreground">
               • Proprietary AI technology with multiple patent applications
             </p>
@@ -49,6 +45,5 @@ export const WhyNowSlide: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
