@@ -15,6 +15,7 @@ import { RoadmapSlide } from '@/components/investor/slides/detailed/RoadmapSlide
 import { FundingAskSlide } from '@/components/investor/slides/detailed/FundingAskSlide';
 import { WhyNowSlide } from '@/components/investor/slides/detailed/WhyNowSlide';
 import { ThankYouSlide } from '@/components/investor/slides/detailed/ThankYouSlide';
+import { PublicCollectionsSlide } from '@/components/investor/slides/detailed/PublicCollectionsSlide';
 
 const DetailedInvestorDeck: React.FC = () => {
   const handleSlideChange = (index: number) => {
@@ -52,6 +53,7 @@ const DetailedInvestorDeck: React.FC = () => {
           <FundingAskSlide />
           <WhyNowSlide />
           <ThankYouSlide />
+          <PublicCollectionsSlide />
         </SlideContainer>
       </div>
     </>
