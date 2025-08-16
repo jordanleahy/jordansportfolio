@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Download, Loader2, Upload } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -456,18 +457,36 @@ export const ImagePreviewModal = ({ isOpen, onClose, imageUrl, alt, title, aspec
   }, [isSheetOpen, handleEditSubmit]);
 
   // Dynamically measure bottom sheet height and pad the image area
+  const updateSheetHeight = useDebouncedCallback(
+    (newHeight: number) => {
+      setSheetHeight(prev => {
+        // Only update if change is significant (>5px threshold)
+        if (Math.abs(newHeight - prev) > 5) {
+          return newHeight;
+        }
+        return prev;
+      });
+    },
+    50 // 50ms debounce
+  );
+
   useEffect(() => {
     const el = sheetRef.current;
     if (!isSheetOpen || !el) {
       setSheetHeight(0);
       return;
     }
-    const update = () => setSheetHeight(el.getBoundingClientRect().height);
+    
+    const update = () => {
+      const height = el.getBoundingClientRect().height;
+      updateSheetHeight(height);
+    };
+    
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isSheetOpen]);
+  }, [isSheetOpen, updateSheetHeight]);
 
   const handleDownload = async () => {
     try {
