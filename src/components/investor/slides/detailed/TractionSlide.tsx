@@ -11,8 +11,14 @@ export const TractionSlide: React.FC = () => {
         Our story so far:
       </h2>
       <div className="space-y-4 max-w-4xl text-left">
-        
-        
+        <div className="flex items-start space-x-4">
+          <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2024 Q3:</span>
+          <p className="text-lg text-muted-foreground">Concept validation with focus groups</p>
+        </div>
+        <div className="flex items-start space-x-4">
+          <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2024 Q4:</span>
+          <p className="text-lg text-muted-foreground">AI engine prototype developed</p>
+        </div>
         
         <div className="flex items-start space-x-4">
           <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q2:</span>
