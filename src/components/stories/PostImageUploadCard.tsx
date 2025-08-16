@@ -31,14 +31,16 @@ export const PostImageUploadCard = ({
   onImageGenerated,
   onGenerationStart,
   onGenerationEnd,
-  themeName,
+  // ❌ BAD: Using themeName prop - should use post.theme_id instead
+  // themeName,  // REMOVED - use post.theme_id from the post object
   hasPrompt = true
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   
-  const params = useParams();
-  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
-  const theme = themeName ?? routeTheme;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // const theme = themeName ?? routeTheme;  // REMOVED - use post.theme_id instead
   
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();

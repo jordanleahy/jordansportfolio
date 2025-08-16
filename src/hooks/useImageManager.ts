@@ -12,23 +12,25 @@ import { useParams } from 'react-router-dom';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
-  themeName?: string;
+  // ❌ BAD: Using themeName - should be removed in Phase 1 migration
+  // themeName?: string;  // REMOVED - use post.theme_id instead
 }
 
 interface UseImageManagerReturn {
   handleGenerateImage: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;
 }
 
-export const useImageManager = ({ onPostsChange, themeName }: UseImageManagerProps): UseImageManagerReturn => {
+export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
   const { setProcessing } = useProcessingStatesContext();
   const queryClient = useQueryClient();
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
   
-  const params = useParams();
-  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
-  const theme = themeName ?? routeTheme;
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // const theme = themeName ?? routeTheme;  // REMOVED - use post.theme_id instead
   
   const sanitizeTitle = useCallback((title: string) => {
     return title.toLowerCase()

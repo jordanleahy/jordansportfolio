@@ -21,7 +21,8 @@ import { updateTextWithNewTheme } from '@/utils/colorThemeUtils';
 import type { SystemPromptViewerProps } from '@/types/stories/ui';
 
 export const SystemPromptViewer = ({
-  theme,
+  // ❌ BAD: Using theme name - removed in Phase 1 migration
+  // theme,  // REMOVED - use themeId instead
   themeId,
   isVisible,
   onClose,
@@ -56,7 +57,7 @@ export const SystemPromptViewer = ({
     enabled: isVisible,
     userId: user?.id,
     onSystemPromptUpdate: (data) => {
-      if (data.theme === theme) {
+      if (data.themeId === themeId) {
         setRealtimeUpdateReceived(true);
         // Show update indicator briefly
         setTimeout(() => setRealtimeUpdateReceived(false), 3000);
@@ -109,9 +110,9 @@ export const SystemPromptViewer = ({
   }, [promptData?.prompt]);
 
   const handleRegeneratePrompt = useCallback(async () => {
-    console.log('🔄 Regenerate button clicked - Debug info:', { theme, themeId });
-    if (!theme && !themeId) {
-      console.error('❌ Cannot regenerate: missing theme', { theme, themeId });
+    console.log('🔄 Regenerate button clicked - Debug info:', { themeId });
+    if (!themeId) {
+      console.error('❌ Cannot regenerate: missing themeId', { themeId });
       toast.error('Cannot regenerate: missing theme information');
       return;
     }
@@ -126,7 +127,7 @@ export const SystemPromptViewer = ({
       console.error('❌ Error regenerating system prompt:', error);
       toast.error('Failed to regenerate system prompt');
     }
-  }, [theme, themeId, promptData?.prompt, regeneratePrompt]);
+  }, [themeId, promptData?.prompt, regeneratePrompt]);
 
 
   // Compute diff when in diff view mode

@@ -12,23 +12,25 @@ const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Standard (4:3)", value: "4:3" }
 ];
 
-export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi', theme: propTheme, themeId }: ImagePromptModalProps) => {
-  const params = useParams();
-  const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
-  const theme = propTheme ?? routeTheme;
+export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi', themeId }: ImagePromptModalProps) => {
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete  
+  // const params = useParams();
+  // const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // const theme = propTheme ?? routeTheme;  // REMOVED - use themeId instead
   
   const config: ImagePromptConfig = {
-    title: theme 
-      ? `${theme} Image Prompt Generator`
+    title: themeId 
+      ? `Theme ${themeId} Image Prompt Generator`
       : `${getCategoryLabel(category)} Image Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'visual-prompt-generator',
     category: category,
-    theme: theme,
+    // ❌ BAD: Using theme name - removed in Phase 1 migration
+    // theme: theme,  // REMOVED - use themeId instead
     themeId: themeId,
     enableCaching: true,
     aspectRatioOptions,
-    cacheKeyPrefix: theme ? `theme_${theme.toLowerCase().replace(/\s+/g, '_')}_image` : 'calendar_image'
+    cacheKeyPrefix: themeId ? `theme_${themeId}_image` : 'calendar_image'
   };
 
   const content: ImagePromptContent = {

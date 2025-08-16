@@ -131,8 +131,9 @@ export interface CategoryInputProps {
   disabled?: boolean;
 }
 
-// UI State Types
-export interface PendingTheme {
+// ❌ BAD: PendingTheme using theme_name - migrated to domain.ts with theme_id 
+// This interface is deprecated - use PendingTheme from domain.ts instead
+export interface LegacyPendingTheme {
   theme_name: string;
   description: string;
 }
@@ -166,7 +167,8 @@ export interface ImagePromptModalProps {
   description: string;
   postId: string;
   cachedPrompt?: string | null;
-  theme?: string;
+  // ❌ BAD: Using theme name - should use themeId exclusively  
+  // theme?: string;  // REMOVED - use themeId instead
   themeId?: string;
   category?: string;
 }
@@ -213,7 +215,8 @@ export interface MobilePlanComparisonProps {
 }
 
 export interface SystemPromptViewerProps {
-  theme?: string;
+  // ❌ BAD: Using theme name - should use themeId exclusively
+  // theme?: string;  // REMOVED - use themeId instead
   themeId?: string;
   isVisible: boolean;
   onClose: () => void;
@@ -303,7 +306,8 @@ export interface PostImageUploadCardProps {
   onImageGenerated: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1', imageUrl: string) => void;
   onGenerationStart?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
   onGenerationEnd?: (postId: string, aspectRatio: '16_9' | '9_16' | '3_4' | '4_3' | '1_1') => void;
-  themeName?: string;
+  // ❌ BAD: Using themeName - should use themeId exclusively
+  // themeName?: string;  // REMOVED - use themeId in post.theme_id instead
   hasPrompt?: boolean;
 }
 

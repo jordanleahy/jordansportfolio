@@ -184,15 +184,17 @@ const handleStatusChange = async (postId: string, newStatus: 'draft' | 'schedule
   await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
 };
 
-// Resolve theme from route (if present)
-const params = useParams();
-const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
+// ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+// Resolve theme from route (if present) - THIS SHOULD BE REMOVED
+// const params = useParams();
+// const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
 
-// themeId is now a required prop; no longer derived from posts
+// ✅ GOOD: themeId is now a required prop; no longer derived from posts or routes
 
 const { handleGenerateImage } = useImageManager({
   onPostsChange,
-  themeName,
+  // ❌ BAD: Passing themeName - should be removed in Phase 1
+  // themeName,  // REMOVED - use themeId from props instead
 });
 
 
@@ -1215,7 +1217,6 @@ const { handleGenerateImage } = useImageManager({
         marginLeft: '-2px'
       }} />
           <SystemPromptViewer 
-            theme={category} 
             themeId={themeId}
             isVisible={showSystemPrompt} 
             onClose={() => setShowSystemPrompt(false)} 
