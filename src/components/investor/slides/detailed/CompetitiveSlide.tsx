@@ -12,7 +12,7 @@ export const CompetitiveSlide: React.FC = () => {
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-8 text-foreground">
         How we're charting new territory:
       </h2>
-      <div className="max-w-6xl">
+      <div className="max-w-6xl text-left">
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="text-center space-y-2">
             <h3 className="text-lg md:text-xl font-semibold text-foreground border-b border-border pb-2">
