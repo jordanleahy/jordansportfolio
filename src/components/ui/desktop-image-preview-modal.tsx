@@ -271,42 +271,16 @@ export const DesktopImagePreviewModal = ({
                 </div>
               )}
 
-              {/* File upload area */}
-              <div className="grid grid-cols-1 gap-4">
-                <div
-                  className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center cursor-pointer hover:border-white/50 transition-colors"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-white" />
-                      <ImageIcon className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="text-white text-sm">
-                      Drop images here, paste, or click to upload
-                    </span>
-                  </div>
-                </div>
-
-                <Textarea
-                  ref={textareaRef}
-                  placeholder="Describe how you want to edit the image..."
-                  value={editState.prompt}
-                  onChange={(e) => setEditState(prev => ({ ...prev, prompt: e.target.value }))}
-                  onPaste={handleImagePaste}
-                  className="min-h-20 bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none focus:border-white/40"
-                  disabled={editState.isProcessing}
-                />
-              </div>
+              {/* Edit prompt area */}
+              <Textarea
+                ref={textareaRef}
+                placeholder="Describe how you want to edit the image..."
+                value={editState.prompt}
+                onChange={(e) => setEditState(prev => ({ ...prev, prompt: e.target.value }))}
+                onPaste={handleImagePaste}
+                className="min-h-20 bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none focus:border-white/40"
+                disabled={editState.isProcessing}
+              />
 
                 {/* Action buttons */}
                 <div className="flex justify-end gap-3 pt-2 border-t border-white/10 mt-4">
