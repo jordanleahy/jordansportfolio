@@ -27,7 +27,7 @@ export const DesktopImagePreviewModal = ({
 }: DesktopImagePreviewModalProps) => {
   // Grouped state management for better stability
   const [editState, setEditState] = useState({
-    isSheetOpen: false,
+    isSheetOpen: false, // Always start closed
     prompt: '',
     isProcessing: false
   });
