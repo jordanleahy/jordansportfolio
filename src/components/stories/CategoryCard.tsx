@@ -66,14 +66,24 @@ export const ThemeCard = ({ theme, themeId, themeDescription, category, postCoun
   });
 
   const handleClick = () => {
+    console.log('[CategoryCard] Card clicked:', { themeId, theme, isShimmer, isError, isSelectionMode });
+    
     if (isShimmer || isError) return; // Prevent clicks on shimmer and error cards
     if (isSelectionMode && onSelect) {
       onSelect();
       return;
     }
+    
+    // Validate themeId before navigation
+    if (!themeId || themeId.startsWith('pending-') || themeId === 'shimmer-id') {
+      console.log('[CategoryCard] Invalid themeId, skipping navigation:', themeId);
+      return;
+    }
+    
     if (onClick) {
       onClick();
     } else {
+      console.log('[CategoryCard] Navigating to theme detail:', `/stories/id/${themeId}`);
       navigate(`/stories/id/${themeId}`);
     }
   };
@@ -260,9 +270,18 @@ export const ThemeCard = ({ theme, themeId, themeDescription, category, postCoun
           className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
           onClick={(e) => { 
             e.stopPropagation(); 
+            console.log('[CategoryCard] View Details button clicked:', { themeId, theme });
+            
+            // Validate themeId before navigation
+            if (!themeId || themeId.startsWith('pending-') || themeId === 'shimmer-id') {
+              console.log('[CategoryCard] Invalid themeId for View Details, skipping navigation:', themeId);
+              return;
+            }
+            
             if (onClick) {
               onClick();
             } else {
+              console.log('[CategoryCard] View Details navigating to:', `/stories/id/${themeId}`);
               navigate(`/stories/id/${themeId}`);
             }
           }}

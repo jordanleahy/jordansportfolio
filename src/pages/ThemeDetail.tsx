@@ -47,6 +47,15 @@ export default function ThemeDetail() {
   // Fetch theme and posts for this specific theme ID
   const { theme: themeData, posts = [], hasAnyPosts, isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
   
+  // Debug logging for navigation issues
+  console.log('[ThemeDetail] Component state:', {
+    themeId,
+    isCompleted,
+    hasThemeData: !!themeData,
+    isLoadingPosts,
+    postCount: posts.length
+  });
+  
   // Get theme name for display purposes
   const decodedTheme = themeData?.theme_name || '';
   
@@ -99,12 +108,19 @@ export default function ThemeDetail() {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!themeId || !themeData) {
+  if (!themeId) {
+    console.log('[ThemeDetail] No themeId, redirecting to dashboard');
     return <Navigate to="/stories" replace />;
   }
 
   // Redirect incomplete themes back to dashboard (shimmer will be shown there)
   if (!isCompleted) {
+    console.log('[ThemeDetail] Theme not completed, redirecting to dashboard:', { themeId, isCompleted });
+    return <Navigate to="/stories" replace />;
+  }
+
+  if (!themeData) {
+    console.log('[ThemeDetail] No theme data found, redirecting to dashboard:', { themeId });
     return <Navigate to="/stories" replace />;
   }
 
