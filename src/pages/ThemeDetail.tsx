@@ -103,8 +103,8 @@ export default function ThemeDetail() {
     return <Navigate to="/stories" replace />;
   }
 
-  // Gate access to incomplete themes (unless admin)
-  if (!isCompleted && !isAdmin) {
+  // Gate access to incomplete themes
+  if (!isCompleted) {
     return (
       <PageLayout>
         <Helmet>
