@@ -218,8 +218,9 @@ export const DesktopImagePreviewModal = ({
             )}
           </div>
 
-          {/* Edit Sheet - Floating from bottom with proper height constraints */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 max-h-[60vh] ${editState.isSheetOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+          {/* Edit Sheet - Conditionally rendered to prevent visibility issues */}
+          {editState.isSheetOpen && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-white/10 transition-transform duration-300 max-h-[60vh] animate-in slide-in-from-bottom">
             <div className="flex flex-col h-full max-h-full overflow-hidden">
               <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
                 <h3 className="text-white text-lg font-semibold">Edit Image</h3>
@@ -335,6 +336,7 @@ export const DesktopImagePreviewModal = ({
               </div>
             </div>
           </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
