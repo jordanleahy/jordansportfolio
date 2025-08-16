@@ -11,6 +11,7 @@ import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useThemeSEO } from '@/hooks/useThemeSEO';
 import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
+import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import {
@@ -41,10 +42,29 @@ export default function ThemeDetail() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Scroll to top when component mounts
+  // Scroll to top when component mounts and mark theme as completed
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    // Mark theme as user-completed when they view the detail page
+    if (themeId) {
+      const markThemeCompleted = async () => {
+        try {
+          const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
+            body: {
+              action: 'complete',
+              themeId: themeId
+            }
+          });
+          console.log('Theme marked as completed:', data);
+        } catch (error) {
+          console.error('Failed to mark theme as completed:', error);
+        }
+      };
+      
+      markThemeCompleted();
+    }
+  }, [themeId]);
 
   // Simple completion tracking - redirect incomplete themes to dashboard
   const { isCompleted } = useSimpleThemeCompletion(themeId);

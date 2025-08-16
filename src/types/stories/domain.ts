@@ -29,6 +29,9 @@ export interface ThemeWithPosts {
   prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
   prompt_completion_count?: number;
   total_posts_count?: number;
+  lifecycle_status?: 'pending' | 'generating' | 'ready' | 'completed';
+  user_interaction_required?: boolean;
+  background_processing_complete?: boolean;
   first_post: {
     id: string;
     title: string;

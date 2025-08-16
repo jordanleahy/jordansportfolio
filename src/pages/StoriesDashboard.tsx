@@ -28,6 +28,7 @@ import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
+import { useThemeLifecycleShimmer } from '@/hooks/useThemeLifecycleShimmer';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
@@ -94,6 +95,13 @@ export default function StoriesDashboard() {
 
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
+
+  // Theme lifecycle shimmer management
+  const { dismissShimmer, handleThemeClick, shouldShowShimmer } = useThemeLifecycleShimmer({
+    pendingTheme,
+    setPendingTheme,
+    setAvailableThemes
+  });
 
 
   // Enhanced initial load with loading states and error handling
@@ -453,14 +461,14 @@ export default function StoriesDashboard() {
     console.log('✨ Added pending theme to UI');
     
     try {
-      console.log('📡 Calling edge function...');
+      console.log('📡 Calling theme lifecycle orchestrator...');
       const {
         data,
         error
-      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
+      } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
-          description: themeDescription,
-          stream: false
+          action: 'create',
+          description: themeDescription
         }
       });
       
@@ -536,9 +544,9 @@ export default function StoriesDashboard() {
             const existingIds = new Set(filteredThemes.map(t => t.id));
             const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
             
-            // Automatically redirect to the new theme detail page
+            // Use the lifecycle hook's navigation handler  
             console.log('🚀 Auto-redirecting to theme:', newTheme.id);
-            navigate(`/stories/id/${newTheme.id}`);
+            handleThemeClick(newTheme.id);
             
             return [...filteredThemes, ...additionalThemes];
           } else {
@@ -553,13 +561,8 @@ export default function StoriesDashboard() {
         return refreshedThemes;
       });
       
-      // Only clear pending theme after successful replacement or fallback
-      if (replacementSuccessful) {
-        console.log('✅ Theme replacement successful, clearing pending state');
-      } else {
-        console.log('⚠️ Theme replacement failed, clearing pending state anyway');
-      }
-      setPendingTheme(null);
+      // DON'T clear pending theme - let user interaction control it
+      console.log('🔄 Theme creation completed, keeping shimmer until user interaction');
     } catch (error: any) {
       console.error('Theme generation error:', error);
 
