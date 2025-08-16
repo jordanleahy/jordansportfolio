@@ -175,14 +175,16 @@ export const DesktopImagePreviewModal = ({
 
           {/* Main content area with flexible layout */}
           <div className="flex flex-col flex-1 min-h-0">
-            {/* Image Container */}
-            <div className="flex items-center justify-center flex-1 p-4 min-h-0">
-              <img
-                src={currentImageUrl}
-                alt={alt}
-                className="max-w-full max-h-full object-contain rounded"
-                loading="lazy"
-              />
+            {/* Image Container - Scrollable */}
+            <div className="flex-1 p-4 min-h-0 overflow-auto">
+              <div className="min-h-full flex items-center justify-center">
+                <img
+                  src={currentImageUrl}
+                  alt={alt}
+                  className="block object-contain rounded"
+                  loading="lazy"
+                />
+              </div>
             </div>
 
             {/* Version Thumbnails */}
