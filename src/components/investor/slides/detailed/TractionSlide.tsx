@@ -30,7 +30,7 @@ export const TractionSlide: React.FC = () => {
         </div>
         <div className="flex items-start space-x-4">
           <span className="text-primary font-bold text-lg min-w-[120px]">NOW:</span>
-          <p className="text-lg text-foreground font-medium">34% month-over-month growth with zero marketing spend</p>
+          <p className="text-lg text-foreground font-medium">Awareness and acquisition focused on generating revenue</p>
         </div>
       </div>
     </div>;
