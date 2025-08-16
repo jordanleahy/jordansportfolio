@@ -68,6 +68,7 @@ const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
 const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const StoryShip = lazy(() => import("./pages/StoryShip"));
+const NewInvestorDeck = lazy(() => import("./pages/NewInvestorDeck"));
 const ThemeNameRedirect = lazy(() => import("@/components/migration/ThemeNameRedirect").then(module => ({ default: module.ThemeNameRedirect })));
 
 
@@ -111,6 +112,14 @@ function App() {
                   element={
                     <Suspense fallback={<CalendarSkeletonLoader />}>
                       <StoryShip />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/investor-deck" 
+                  element={
+                    <Suspense fallback={<CalendarSkeletonLoader />}>
+                      <NewInvestorDeck />
                     </Suspense>
                   } 
                 />
