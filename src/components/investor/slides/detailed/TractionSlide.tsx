@@ -26,7 +26,7 @@ export const TractionSlide: React.FC = () => {
         </div>
         <div className="flex items-start space-x-4">
           <span className="text-muted-foreground font-medium text-lg min-w-[120px]">2025 Q3:</span>
-          <p className="text-lg text-muted-foreground">Public beta launch with <span className="text-primary font-semibold">15,000 active users</span></p>
+          <p className="text-lg text-muted-foreground">Built as Agent AI first foundation</p>
         </div>
         <div className="flex items-start space-x-4">
           <span className="text-primary font-bold text-lg min-w-[120px]">NOW:</span>
