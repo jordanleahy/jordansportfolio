@@ -30,12 +30,15 @@ export class CacheValidator {
     title?: string;
     description?: string;
   }): ValidatedCacheConfig {
+    // Allow operations without theme ID for backward compatibility
     if (!config.themeId) {
-      throw new ThemeValidationError(
-        'Theme ID is required for cache operations',
-        'INVALID_THEME_ID',
-        { config }
-      );
+      return {
+        themeId: 'default' as ThemeId,
+        category: config.category || 'general',
+        postId: config.postId,
+        title: config.title,
+        description: config.description
+      };
     }
 
     const validatedThemeId = assertThemeId(config.themeId);

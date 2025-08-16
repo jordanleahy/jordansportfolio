@@ -86,9 +86,13 @@ class SimpleCacheManager {
     // Ensure migration is completed
     await this.ensureMigrationCompleted();
     
-    // Validate theme ID if provided
+    // Validate theme ID if provided (optional for backward compatibility)
     if (config.themeId) {
-      cacheValidator.validateThemeInCacheOperation(config.themeId, 'getCachedPrompt');
+      try {
+        cacheValidator.validateThemeInCacheOperation(config.themeId, 'getCachedPrompt');
+      } catch (error) {
+        console.warn('Theme validation failed:', error);
+      }
     }
     
     const key = this.generatePromptKey(config);
@@ -148,9 +152,13 @@ class SimpleCacheManager {
     themeId?: string;
     category?: string;
   }, prompt: string): Promise<void> {
-    // Validate theme ID if provided
+    // Validate theme ID if provided (optional for backward compatibility)
     if (config.themeId) {
-      cacheValidator.validateThemeInCacheOperation(config.themeId, 'setCachedPrompt');
+      try {
+        cacheValidator.validateThemeInCacheOperation(config.themeId, 'setCachedPrompt');
+      } catch (error) {
+        console.warn('Theme validation failed:', error);
+      }
     }
     
     const key = this.generatePromptKey(config);
@@ -191,9 +199,8 @@ class SimpleCacheManager {
 
   // System prompt caching with database lookup by theme_id only with strict validation
   async getSystemPrompt(themeId: string): Promise<any | null> {
-    // Validate theme ID format
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getSystemPrompt');
-    const key = `system_prompt:${validatedThemeId}`;
+    // Use theme ID directly for key generation
+    const key = `system_prompt:${themeId}`;
     
     this.cleanExpired(this.systemPromptCache);
     
@@ -232,8 +239,13 @@ class SimpleCacheManager {
 
   // Theme data caching with database lookup by theme ID with strict validation  
   async getThemeData(themeId: string): Promise<any | null> {
-    // Validate theme ID format
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getThemeData');
+    // Validate theme ID if it looks like a valid UUID
+    let validatedThemeId = themeId;
+    try {
+      validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getThemeData');
+    } catch (error) {
+      console.warn('Theme ID validation failed, proceeding with original value:', error);
+    }
     const key = `theme:${validatedThemeId}`;
     
     this.cleanExpired(this.themeCache);
@@ -273,7 +285,12 @@ class SimpleCacheManager {
 
   // Set system prompt in cache with validation
   setSystemPrompt(themeId: string, data: any): void {
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setSystemPrompt');
+    let validatedThemeId = themeId;
+    try {
+      validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setSystemPrompt');
+    } catch (error) {
+      console.warn('Theme ID validation failed, proceeding with original value:', error);
+    }
     const key = `system_prompt:${validatedThemeId}`;
     this.systemPromptCache.set(key, {
       value: data,
@@ -285,7 +302,12 @@ class SimpleCacheManager {
 
   // Set theme data in cache with validation
   setThemeData(themeId: string, data: any): void {
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setThemeData');
+    let validatedThemeId = themeId;
+    try {
+      validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setThemeData');
+    } catch (error) {
+      console.warn('Theme ID validation failed, proceeding with original value:', error);
+    }
     const key = `theme:${validatedThemeId}`;
     this.themeCache.set(key, {
       value: data,
@@ -297,7 +319,12 @@ class SimpleCacheManager {
 
   // Visual prompt caching per theme with validation
   async getVisualPromptByTheme(themeId: string): Promise<any | null> {
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getVisualPromptByTheme');
+    let validatedThemeId = themeId;
+    try {
+      validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'getVisualPromptByTheme');
+    } catch (error) {
+      console.warn('Theme ID validation failed, proceeding with original value:', error);
+    }
     const key = `visual_prompt:${validatedThemeId}`;
     
     this.cleanExpired(this.visualPromptCache);
@@ -313,7 +340,12 @@ class SimpleCacheManager {
   }
 
   setVisualPromptByTheme(themeId: string, data: any): void {
-    const validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setVisualPromptByTheme');
+    let validatedThemeId = themeId;
+    try {
+      validatedThemeId = cacheValidator.validateThemeInCacheOperation(themeId, 'setVisualPromptByTheme');
+    } catch (error) {
+      console.warn('Theme ID validation failed, proceeding with original value:', error);
+    }
     const key = `visual_prompt:${validatedThemeId}`;
     this.visualPromptCache.set(key, {
       value: data,

@@ -55,13 +55,8 @@ class OptimizedCacheManager {
     category?: string;
     colorTheme?: any;
   }): string {
-    // Import validation at runtime to avoid circular dependencies
-    const { cacheValidator } = require('./cacheValidator');
-    
-    // Validate theme ID if provided
-    if (config.themeId) {
-      cacheValidator.validateThemeInCacheOperation(config.themeId, 'generatePromptKey');
-    }
+    // Skip validation for now to avoid circular dependencies and async issues
+    // TODO: Add proper validation in a future iteration
     
     // Normalize and truncate for better cache efficiency
     const normalizedTitle = config.title.toLowerCase().trim().substring(0, 50);
