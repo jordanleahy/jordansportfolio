@@ -19,11 +19,10 @@ export const useEnhancedThemeDataPrefetch = () => {
 
   const prefetchThemeData = useCallback(async () => {
     const themeId = params.themeId;
-    const themeName = params.theme ? decodeURIComponent(params.theme) : '';
-    const category = params.category || 'cdi';
+    const category = params.category || 'general';
     
-    // Handle both new themeId route and legacy theme name route
-    if (!themeId && !themeName) {
+    // ✅ GOOD: Only supporting themeId routes now
+    if (!themeId) {
       setThemeData({ themeId: '', theme: '', category });
       return;
     }
@@ -32,50 +31,26 @@ export const useEnhancedThemeDataPrefetch = () => {
     setError(null);
 
     try {
-      let cachedTheme;
-      let resolvedThemeId = themeId;
-      let resolvedThemeName = themeName;
-      
-      if (themeId) {
-        // New URL format: /stories/id/:themeId - fetch theme by ID
-        const { data, error } = await supabase
-          .from('themes')
-          .select('*')
-          .eq('id', themeId)
-          .single();
-          
-        if (error) throw error;
-        cachedTheme = data;
-        resolvedThemeName = data?.theme_name || '';
-      } else {
-        // Legacy URL format: /stories/theme/:themeName - fetch theme by name from database
-        const { data, error } = await supabase
-          .from('themes')
-          .select('*')
-          .eq('theme_name', themeName)
-          .maybeSingle();
-          
-        if (error) throw error;
-        cachedTheme = data;
-        resolvedThemeId = data?.id || '';
+      // ✅ GOOD: Direct themeId lookup only
+      const { data, error } = await supabase
+        .from('themes')
+        .select('*')
+        .eq('id', themeId)
+        .single();
         
-        // Cache the theme data by ID for future use
-        if (data && resolvedThemeId) {
-          cacheManager.setThemeData(resolvedThemeId, data);
-        }
-      }
+      if (error) throw error;
       
       let systemPrompt = null;
-      if (resolvedThemeId) {
-        // Prefetch system prompt if we have theme ID
-        systemPrompt = await cacheManager.getSystemPrompt(resolvedThemeId);
+      if (themeId) {
+        // Prefetch system prompt for the theme
+        systemPrompt = await cacheManager.getSystemPrompt(themeId);
       }
 
       const result: EnhancedThemeData = {
-        themeId: resolvedThemeId,
-        theme: resolvedThemeName,
+        themeId,
+        theme: data?.theme_name || '',
         category,
-        systemPromptId: cachedTheme?.system_prompt_id,
+        systemPromptId: data?.visual_prompt_system_prompt_id,
         systemPrompt
       };
 
@@ -87,7 +62,7 @@ export const useEnhancedThemeDataPrefetch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [params.themeId, params.theme, params.category]);
+  }, [params.themeId, params.category]);
 
   useEffect(() => {
     prefetchThemeData();
