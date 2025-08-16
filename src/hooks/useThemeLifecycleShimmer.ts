@@ -20,6 +20,7 @@ export const useThemeLifecycleShimmer = ({
   const navigate = useNavigate();
   const location = useLocation();
   const lastLocationRef = useRef(location.pathname);
+  const [shimmerStartTime] = useState(Date.now());
 
   // Clear pending theme when user navigates away from stories page
   useEffect(() => {
@@ -50,6 +51,20 @@ export const useThemeLifecycleShimmer = ({
     
     lastLocationRef.current = currentPath;
   }, [location.pathname, pendingTheme, setPendingTheme, setAvailableThemes]);
+
+  // Auto-dismiss shimmer after timeout or when theme has posts
+  useEffect(() => {
+    if (!pendingTheme) return;
+
+    // Set up a timeout to auto-dismiss stale shimmers (5 minutes)
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Auto-dismissing stale shimmer after timeout');
+      setPendingTheme(null);
+      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingTheme, setPendingTheme, setAvailableThemes]);
 
   // Function to manually dismiss shimmer
   const dismissShimmer = () => {

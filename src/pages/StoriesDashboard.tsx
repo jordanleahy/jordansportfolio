@@ -539,6 +539,10 @@ export default function StoriesDashboard() {
               const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
               
               console.log('🚀 Auto-redirecting to theme:', newTheme.id);
+              
+              // Clear pending theme since replacement was successful
+              setPendingTheme(null);
+              
               handleThemeClick(newTheme.id);
               
               return [...filteredThemes, ...additionalThemes];
@@ -577,8 +581,13 @@ export default function StoriesDashboard() {
       // Start the replacement process
       await attemptThemeReplacement();
       
-      // DON'T clear pending theme - let user interaction control it
-      console.log('🔄 Theme creation completed, keeping shimmer until user interaction');
+      // Clear pending theme if replacement was successful
+      if (replacementSuccessful) {
+        console.log('✅ Theme replacement successful, clearing pending state');
+        setPendingTheme(null);
+      } else {
+        console.log('⏳ Theme creation completed, but replacement pending');
+      }
     } catch (error: any) {
       console.error('Theme generation error:', error);
 
