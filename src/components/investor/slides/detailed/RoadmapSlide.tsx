@@ -23,7 +23,7 @@ export const RoadmapSlide: React.FC = () => {
         <div className="text-left space-y-4">
           <h3 className="text-xl md:text-2xl font-bold text-primary">Long-term vision:</h3>
           <div className="space-y-2 ml-4">
-            <p className="text-lg text-muted-foreground">• Thought driven metaverse experiences</p>
+            <p className="text-lg text-muted-foreground">• Unlocking human imagination</p>
             <p className="text-lg text-muted-foreground">• Redefine global consumption of information, especially education</p>
             <p className="text-lg text-muted-foreground">• Defining the new standard for human AI co creation</p>
           </div>
