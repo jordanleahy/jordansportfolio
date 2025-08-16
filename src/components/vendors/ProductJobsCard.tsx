@@ -118,7 +118,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
         </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground">
-            Please <Button variant="link" className="p-0 h-auto" onClick={() => window.location.href = '/auth'}>sign in</Button> to manage job postings.
+            Please <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/auth')}>sign in</Button> to manage job postings.
           </div>
         </CardContent>
       </Card>
