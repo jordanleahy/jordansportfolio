@@ -188,19 +188,44 @@ serve(async (req) => {
         try {
           console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
 
-          // Use internal edge function to generate prompts consistently
+          // Use internal edge function to generate prompts consistently with retry logic
           const invokePayload = {
             postId: post.id,
             themeId: post.theme_id,
             aspectRatio: '1:1'
           };
           
-          const { data: promptResp, error: promptFnError } = await supabase.functions.invoke('generate-image-prompt-dynamic', {
-            body: invokePayload
-          });
+          let promptResp = null;
+          let promptFnError = null;
+          const maxRetries = 3;
+          
+          for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            const result = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+              body: invokePayload
+            });
+            
+            promptResp = result.data;
+            promptFnError = result.error;
+            
+            if (!promptFnError) {
+              break; // Success, exit retry loop
+            }
+            
+            // Check if it's a retryable error (503, timeout, etc.)
+            const isRetryable = promptFnError.message?.includes('Service Unavailable') || 
+                               promptFnError.message?.includes('503') ||
+                               promptFnError.message?.includes('timeout');
+            
+            if (!isRetryable || attempt === maxRetries) {
+              console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id} (attempt ${attempt}/${maxRetries}):`, promptFnError);
+              break;
+            }
+            
+            console.log(`⏳ Retrying post ${post.id} (attempt ${attempt + 1}/${maxRetries}) in 1s...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
 
           if (promptFnError) {
-            console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id}:`, promptFnError);
             return { postId: post.id, success: false, error: promptFnError.message };
           }
 

@@ -493,126 +493,14 @@ export default function StoriesDashboard() {
       console.log('✅ Theme saved to database:', data);
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
 
-      console.log('🔄 Refreshing themes from server...');
-      // Refresh themes from server and merge with pending themes
-      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-      console.log('📊 Refreshed themes count:', refreshedThemes.length);
-      
-      let replacementSuccessful = false;
-      
-      // Retry logic for theme matching
-      const attemptThemeReplacement = async (attempt = 1, maxAttempts = 3) => {
-        console.log(`🔍 Theme replacement attempt ${attempt}/${maxAttempts}`);
-        
-        setAvailableThemes(prevThemes => {
-          console.log('🔍 Looking for pending theme to replace...');
-          
-          // Find the pending theme that matches our description
-          const pendingIndex = prevThemes.findIndex(theme => 
-            theme.id.startsWith('pending-') && 
-            theme.description === themeDescription
-          );
-          
-          console.log('📍 Pending theme index:', pendingIndex);
-          
-          if (pendingIndex !== -1) {
-            // Simplified matching: ONLY use exact UUID from response
-            const expectedThemeId = data.theme_id;
-            console.log('🎯 Looking for exact theme ID:', expectedThemeId);
-            
-            if (!expectedThemeId) {
-              console.log('❌ No theme_id in response:', data);
-              return prevThemes; // Keep current state if no ID provided
-            }
-            
-            const newTheme = refreshedThemes.find(theme => theme.id === expectedThemeId);
-            
-            if (newTheme) {
-              console.log('✅ Found exact theme match:', newTheme.id);
-              replacementSuccessful = true;
-              
-              // Replace the pending theme with the real one at the same position
-              const newThemes = [...prevThemes];
-              newThemes[pendingIndex] = newTheme;
-              
-              // Filter out other pending themes and duplicates
-              const filteredThemes = newThemes.filter((theme, index) => {
-                if (index === pendingIndex) return true; // Keep our replaced theme
-                return !theme.id.startsWith('pending-') && theme.id !== expectedThemeId;
-              });
-              
-              // Add any other new themes
-              const existingIds = new Set(filteredThemes.map(t => t.id));
-              const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
-              
-              console.log('🚀 Auto-redirecting to theme:', newTheme.id);
-              
-              clearPendingThemeState();
-              handleThemeClick(newTheme.id);
-              
-              return [...filteredThemes, ...additionalThemes];
-            } else {
-              console.log(`❌ Theme ID ${expectedThemeId} not found in refreshed themes (attempt ${attempt})`);
-              
-              // If we haven't reached max attempts, try refreshing again after a delay
-              if (attempt < maxAttempts) {
-                setTimeout(async () => {
-                  console.log(`⏱️ Retrying theme fetch in 1 second...`);
-                  try {
-                    const retryThemes = await optimizedSocialMediaService.getAvailableThemes();
-                    attemptThemeReplacement(attempt + 1, maxAttempts);
-                  } catch (error) {
-                    console.error('Retry failed:', error);
-                  }
-                }, 1000);
-              }
-              
-              return prevThemes; // Keep current state for now
-            }
-          } else {
-            console.log('❌ No pending theme found with description:', themeDescription);
-          }
-          
-          // If all else fails, use fresh data
-          if (attempt >= maxAttempts) {
-            console.log('🔄 Max attempts reached, using fallback - replacing with fresh data');
-            return refreshedThemes.filter(theme => !theme.id.startsWith('pending-'));
-          }
-          
-          return prevThemes;
-        });
-      };
-      
-      // Start the replacement process
-      await attemptThemeReplacement();
-      
-      // Success check is handled within the replacement logic
-      console.log('🔄 Theme creation completed');
+      // Theme completion and auto-navigation is now handled by useThemeLifecycleShimmer
+      console.log('✅ Theme creation started, shimmer will auto-dismiss when completed');
     } catch (error: any) {
       console.error('Theme generation error:', error);
-
-      // Transform pending theme to error state instead of removing
-      clearPendingThemeState();
-      setAvailableThemes(prev => prev.map(theme => {
-        if (theme.id.startsWith('pending-') && theme.description === themeDescription) {
-          return {
-            ...theme,
-            id: 'error-' + Date.now(),
-            theme_name: 'Generation Failed',
-            first_post: {
-              ...theme.first_post!,
-              title: 'Error: Generation failed',
-              description: `Failed to generate theme: ${error.message?.slice(0, 100) || 'Unknown error'}`
-            }
-          };
-        }
-        return theme;
-      }));
       
-      // Auto-clear error state after 5 seconds
-      setTimeout(() => {
-        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('error-')));
-      }, 5000);
+      // Simple error handling - just clear pending state
+      clearPendingThemeState();
+      
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate custom theme",

@@ -298,12 +298,10 @@ export class OptimizedSocialMediaService {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Process themes with their post data, prioritizing Day 1 posts
     // Filter out incomplete themes (only show themes where all prompts are completed)
     const completedThemes = themes.filter((theme: any) => 
       theme.prompt_generation_status === 'completed' &&
-      theme.prompt_completion_count === theme.total_posts_count &&
-      theme.theme_name !== 'Generation Failed'
+      theme.prompt_completion_count === theme.total_posts_count
     );
     
     const processedThemes = completedThemes.map((theme: any) => {
