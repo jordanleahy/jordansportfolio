@@ -292,6 +292,12 @@ export class UnifiedRealtimeManager {
   }
 
   private handleDebouncedUpdate(table: string, payload: any): void {
+    // For themes table, process immediately for instant completion notifications
+    if (table === 'themes') {
+      this.processUpdate(table, payload);
+      return;
+    }
+    
     const debounceKey = `${table}_${payload.new?.id || payload.old?.id}`;
     
     // Clear existing timer

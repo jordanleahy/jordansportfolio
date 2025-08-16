@@ -2564,42 +2564,51 @@ export type Database = {
       }
       themes: {
         Row: {
+          background_processing_complete: boolean | null
           category: string
           created_at: string
           description: string | null
           id: string
+          lifecycle_status: string | null
           prompt_completion_count: number | null
           prompt_generation_status: string | null
           theme_name: string
           total_posts_count: number | null
           updated_at: string
           user_id: string
+          user_interaction_required: boolean | null
           visual_prompt_system_prompt_id: string | null
         }
         Insert: {
+          background_processing_complete?: boolean | null
           category: string
           created_at?: string
           description?: string | null
           id?: string
+          lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
           theme_name: string
           total_posts_count?: number | null
           updated_at?: string
           user_id: string
+          user_interaction_required?: boolean | null
           visual_prompt_system_prompt_id?: string | null
         }
         Update: {
+          background_processing_complete?: boolean | null
           category?: string
           created_at?: string
           description?: string | null
           id?: string
+          lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
           theme_name?: string
           total_posts_count?: number | null
           updated_at?: string
           user_id?: string
+          user_interaction_required?: boolean | null
           visual_prompt_system_prompt_id?: string | null
         }
         Relationships: [
