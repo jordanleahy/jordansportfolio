@@ -12,7 +12,7 @@ export const FundingAskSlide: React.FC = () => {
       </h2>
       <div className="space-y-8 max-w-4xl">
         <div className="text-center">
-          <h3 className="text-2xl md:text-3xl font-bold text-primary mb-6 text-left">Raising: $1.5 million Seed @ 6MM Pre</h3>
+          <h3 className="text-2xl md:text-3xl font-bold text-primary mb-6 text-left">Raising: $1.5 million Seed Round</h3>
         </div>
         <div className="text-left">
           <h4 className="text-xl md:text-2xl font-semibold text-foreground mb-4">Use of funds:</h4>
@@ -25,7 +25,10 @@ export const FundingAskSlide: React.FC = () => {
               <span className="text-lg text-muted-foreground">COGS: Technology </span>
               <span className="text-lg font-semibold text-primary">25%</span>
             </div>
-            
+            <div className="flex justify-between items-center">
+              <span className="text-lg text-muted-foreground">User acquisition and marketing</span>
+              <span className="text-lg font-semibold text-primary">20%</span>
+            </div>
             <div className="flex justify-between items-center">
               <span className="text-lg text-muted-foreground">G&A</span>
               <span className="text-lg font-semibold text-primary">15%</span>
