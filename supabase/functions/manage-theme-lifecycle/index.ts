@@ -79,10 +79,9 @@ serve(async (req) => {
         console.error('Failed to update theme lifecycle:', updateError);
       }
 
-      // Start background processing using waitUntil
-      EdgeRuntime.waitUntil(
-        processThemeInBackground(supabase, themeData.theme_id, user.id)
-      );
+      // Start background processing (no waitUntil in Deno, use Promise.resolve)
+      processThemeInBackground(supabase, themeData.theme_id, user.id)
+        .catch(error => console.error('Background processing error:', error));
 
       return new Response(
         JSON.stringify({
@@ -182,48 +181,93 @@ async function processThemeInBackground(supabase: any, themeId: string, userId: 
   try {
     console.log('Starting background processing for theme:', themeId);
     
-    // Wait for all post prompts to be completed
+    // Use shorter intervals and more robust checking
     let processingComplete = false;
     let attempts = 0;
-    const maxAttempts = 60; // 5 minutes max (5 second intervals)
+    const maxAttempts = 40; // 2 minutes max (3 second intervals)
+    const intervalMs = 3000;
     
-    while (!processingComplete && attempts < maxAttempts) {
-      const { data: theme, error } = await supabase
-        .from('themes')
-        .select('prompt_generation_status, prompt_completion_count, total_posts_count')
-        .eq('id', themeId)
-        .single();
-        
-      if (error) {
-        console.error('Error checking theme progress:', error);
-        break;
-      }
-      
-      if (theme.prompt_generation_status === 'completed' && 
-          theme.prompt_completion_count === theme.total_posts_count) {
-        processingComplete = true;
-        console.log('Background processing completed for theme:', themeId);
-        break;
-      }
-      
-      attempts++;
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-    }
+    // Add timeout mechanism
+    const timeoutPromise = new Promise<boolean>((resolve) => {
+      setTimeout(() => resolve(false), 2 * 60 * 1000); // 2 minutes total timeout
+    });
     
-    // Update theme to mark background processing as complete
+    const checkingPromise = new Promise<boolean>(async (resolve) => {
+      while (!processingComplete && attempts < maxAttempts) {
+        try {
+          const { data: theme, error } = await supabase
+            .from('themes')
+            .select('prompt_generation_status, prompt_completion_count, total_posts_count, lifecycle_status')
+            .eq('id', themeId)
+            .single();
+            
+          if (error) {
+            console.error('Error checking theme progress:', error);
+            resolve(false);
+            return;
+          }
+          
+          // Check if theme was marked as completed by user (race condition protection)
+          if (theme.lifecycle_status === 'completed') {
+            console.log('Theme already marked as completed by user:', themeId);
+            resolve(true);
+            return;
+          }
+          
+          if (theme.prompt_generation_status === 'completed' && 
+              theme.prompt_completion_count === theme.total_posts_count &&
+              theme.total_posts_count > 0) {
+            processingComplete = true;
+            console.log('Background processing completed for theme:', themeId);
+            resolve(true);
+            return;
+          }
+          
+          attempts++;
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        } catch (error) {
+          console.error('Error in background processing loop:', error);
+          resolve(false);
+          return;
+        }
+      }
+      resolve(false);
+    });
+    
+    // Race between timeout and completion
+    const completed = await Promise.race([timeoutPromise, checkingPromise]);
+    
+    // Update theme status regardless of completion
+    const finalStatus = completed ? 'ready' : 'generating';
     const { error: updateError } = await supabase
       .from('themes')
       .update({
-        background_processing_complete: true,
-        lifecycle_status: processingComplete ? 'ready' : 'generating'
+        background_processing_complete: completed,
+        lifecycle_status: finalStatus
       })
-      .eq('id', themeId);
+      .eq('id', themeId)
+      .eq('lifecycle_status', 'generating'); // Only update if still generating (avoid race)
       
     if (updateError) {
       console.error('Failed to update background processing status:', updateError);
+    } else {
+      console.log(`Theme ${themeId} background processing finished with status: ${finalStatus}`);
     }
     
   } catch (error) {
     console.error('Background processing error:', error);
+    
+    // Try to mark as failed
+    try {
+      await supabase
+        .from('themes')
+        .update({
+          background_processing_complete: false,
+          lifecycle_status: 'generating'
+        })
+        .eq('id', themeId);
+    } catch (updateError) {
+      console.error('Failed to update theme with error status:', updateError);
+    }
   }
 }

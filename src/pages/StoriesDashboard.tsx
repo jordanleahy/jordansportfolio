@@ -478,9 +478,9 @@ export default function StoriesDashboard() {
         console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
-      if (!data?.success) {
+      if (!data?.success || !data?.theme_id) {
         console.log('❌ Edge function returned failure:', data);
-        throw new Error(data?.error || 'Failed to generate theme');
+        throw new Error(data?.error || 'Failed to generate theme - no theme ID returned');
       }
       
       console.log('✅ Theme saved to database:', data);
@@ -505,8 +505,12 @@ export default function StoriesDashboard() {
         console.log('📍 Pending theme index:', pendingIndex);
         
         if (pendingIndex !== -1) {
-          // Improved matching logic - try multiple criteria
+          // Use theme_id from response for more reliable matching
           const newTheme = refreshedThemes.find(theme => {
+            // Primary match: exact ID from response
+            const matchesId = theme.id === data.theme_id;
+            
+            // Fallback matches for robustness
             const matchesTheme = theme.theme_name === data.theme;
             const matchesCategory = theme.category === data.category;
             const matchesDescription = theme.description && themeDescription && 
@@ -517,12 +521,14 @@ export default function StoriesDashboard() {
               id: theme.id,
               name: theme.theme_name,
               category: theme.category,
+              matchesId,
               matchesTheme,
               matchesCategory,
               matchesDescription
             });
             
-            return matchesTheme || matchesCategory || matchesDescription;
+            // Prioritize ID match, fall back to other criteria
+            return matchesId || matchesTheme || matchesCategory || matchesDescription;
           });
           
           if (newTheme) {

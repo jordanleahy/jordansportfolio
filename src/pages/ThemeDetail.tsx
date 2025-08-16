@@ -47,24 +47,36 @@ export default function ThemeDetail() {
     window.scrollTo(0, 0);
     
     // Mark theme as user-completed when they view the detail page
-    if (themeId) {
-      const markThemeCompleted = async () => {
-        try {
-          const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
-            body: {
-              action: 'complete',
-              themeId: themeId
-            }
-          });
+    if (!themeId) return;
+    
+    let isMounted = true; // Prevent race conditions with unmounting
+    
+    const markThemeCompleted = async () => {
+      try {
+        const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
+          body: {
+            action: 'complete',
+            themeId: themeId
+          }
+        });
+        
+        if (isMounted) {
           console.log('Theme marked as completed:', data);
-        } catch (error) {
+        }
+      } catch (error) {
+        if (isMounted) {
           console.error('Failed to mark theme as completed:', error);
         }
-      };
-      
-      markThemeCompleted();
-    }
-  }, [themeId]);
+      }
+    };
+    
+    markThemeCompleted();
+    
+    // Cleanup function to prevent race conditions
+    return () => {
+      isMounted = false;
+    };
+  }, [themeId]); // Added proper dependency array
 
   // Simple completion tracking - redirect incomplete themes to dashboard
   const { isCompleted } = useSimpleThemeCompletion(themeId);

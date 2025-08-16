@@ -4,7 +4,7 @@ import { PendingTheme, ThemeWithPosts } from '@/types/stories';
 
 interface ThemeLifecycleShimmerOptions {
   pendingTheme: PendingTheme | null;
-  setPendingTheme: (theme: PendingTheme | null) => void;
+  setPendingTheme: React.Dispatch<React.SetStateAction<PendingTheme | null>>;
   setAvailableThemes: React.Dispatch<React.SetStateAction<ThemeWithPosts[]>>;
 }
 
@@ -29,8 +29,23 @@ export const useThemeLifecycleShimmer = ({
     // If user navigated away from /stories to another page
     if (lastPath === '/stories' && currentPath !== '/stories' && pendingTheme) {
       console.log('🚢 User navigated away from stories, clearing pending theme');
-      setPendingTheme(null);
-      setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
+      
+      // Use functional updates to avoid race conditions
+      setPendingTheme(prev => {
+        if (prev) {
+          console.log('Clearing pending theme:', prev.theme_name);
+          return null;
+        }
+        return prev;
+      });
+      
+      setAvailableThemes(prev => {
+        const filtered = prev.filter(theme => !theme.id.startsWith('pending-'));
+        if (filtered.length !== prev.length) {
+          console.log('Removed pending themes from list');
+        }
+        return filtered;
+      });
     }
     
     lastLocationRef.current = currentPath;
@@ -39,16 +54,28 @@ export const useThemeLifecycleShimmer = ({
   // Function to manually dismiss shimmer
   const dismissShimmer = () => {
     console.log('❌ User manually dismissed shimmer');
-    setPendingTheme(null);
+    setPendingTheme(prev => {
+      if (prev) {
+        console.log('Dismissing pending theme:', prev.theme_name);
+        return null;
+      }
+      return prev;
+    });
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
   };
 
   // Function to handle theme card click (navigation)
   const handleThemeClick = (themeId: string) => {
     console.log('🎯 User clicked theme, clearing pending state');
+    
+    // Clear pending state before navigation to prevent race conditions
     setPendingTheme(null);
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-    navigate(`/stories/id/${themeId}`);
+    
+    // Small delay to ensure state updates complete before navigation
+    setTimeout(() => {
+      navigate(`/stories/id/${themeId}`);
+    }, 0);
   };
 
   return {
