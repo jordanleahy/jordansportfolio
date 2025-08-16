@@ -113,9 +113,10 @@ export default function ThemeDetail() {
     return <Navigate to="/stories" replace />;
   }
 
-  // Redirect incomplete themes back to dashboard (shimmer will be shown there)
-  if (!isCompleted) {
-    console.log('[ThemeDetail] Theme not completed, redirecting to dashboard:', { themeId, isCompleted });
+  // Only redirect themes that are still being generated (no posts yet)
+  // Themes with posts should be viewable even if prompt generation isn't complete
+  if (!hasAnyPosts && !isCompleted) {
+    console.log('[ThemeDetail] Theme still generating with no posts, redirecting to dashboard:', { themeId, isCompleted, hasAnyPosts });
     return <Navigate to="/stories" replace />;
   }
 
