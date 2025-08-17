@@ -14,6 +14,7 @@ import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
 import { useToast } from '@/hooks/use-toast';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
   post,
@@ -22,6 +23,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
 }) => {
   const { toast } = useToast();
   const { updatePrompt, isUpdating, refetch } = useIndividualPromptCache(post.id);
+  const { isProcessing } = useProcessingStatesContext();
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,
@@ -78,7 +80,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
           size="sm"
           title="Set aspect ratio"
           className="h-8 w-8 p-0"
-          disabled={isUpdating}
+          disabled={isUpdating || isProcessing(post.id, 'generate')}
         >
           <Image className="h-4 w-4" />
         </Button>
@@ -95,7 +97,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
             key={`aspect-ratio-${option.value}`}
             onClick={() => handleGenerateWithAspectRatio(option.value)}
             className="cursor-pointer text-sm"
-            disabled={isUpdating}
+            disabled={isUpdating || isProcessing(post.id, 'generate')}
           >
             <div className="flex items-center w-full">
               <div className="flex items-center flex-1">

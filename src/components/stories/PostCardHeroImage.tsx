@@ -27,7 +27,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   
   const selectedImage = post.image_1_1_url;
   const selectedAspectRatio = '1:1';
-  const isLoadingOrProcessing = isProcessing || (post.image_1_1_status === 'processing') || isProcessingCtx(post.id, 'generate', '1:1');
+  const isLoadingOrProcessing = isProcessing || (post.image_1_1_status === 'processing') || isProcessingCtx(post.id, 'generate');
 
   return (
     <div className="space-y-4">
@@ -79,11 +79,11 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                   const aspectRatioKey = '1_1';
                   onGenerateImage?.(post.id, aspectRatioKey, post.title, post.description, post.category);
                 }}
-                disabled={isProcessingCtx(post.id, 'generate', '1:1')}
+                disabled={isProcessingCtx(post.id, 'generate')}
                 className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Regenerate image"
               >
-                {isProcessingCtx(post.id, 'generate', '1:1') ? 'Regenerating...' : 'Regenerate'}
+                {isProcessingCtx(post.id, 'generate') ? 'Regenerating...' : 'Regenerate'}
               </button>
             </div>
           </div>
