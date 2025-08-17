@@ -34,12 +34,23 @@ import { PublicCollectionsSection } from '@/components/PublicCollectionsSection'
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
+import { useScrollToElement } from '@/hooks/useScrollToElement';
 import shipImage from '@/assets/story-ship-bg.png';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
+
 export default function StoriesDashboard() {
   console.log('[StoriesDashboard] Component rendering');
+
+  // Initialize scroll hook for smooth scrolling to generating theme
+  const { scrollToElement } = useScrollToElement({
+    targetSelector: '[data-theme-state="generating"]',
+    behavior: 'smooth',
+    block: 'center',
+    delay: 300,
+    respectMotionPreferences: true
+  });
   
   const {
     user,
@@ -513,16 +524,8 @@ export default function StoriesDashboard() {
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
-        // Scroll to the generating theme after DOM updates
-        setTimeout(() => {
-          const generatingElement = document.querySelector('[data-theme-state="generating"]');
-          if (generatingElement) {
-            generatingElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 300);
+        // Scroll to the generating theme using the hook
+        scrollToElement();
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
