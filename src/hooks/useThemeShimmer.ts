@@ -103,21 +103,11 @@ export const useThemeShimmer = ({
     if (completedTheme) {
       console.log('✅ Theme fully completed (including all individual prompts):', completedTheme.theme_name);
       
-      // Add a small delay to ensure UI updates smoothly
-      completionCheckRef.current = setTimeout(() => {
-        clearPendingThemeState();
-        
-        // Navigate to completed theme
-        setTimeout(() => {
-          navigate(`/stories/id/${completedTheme.id}`);
-        }, SHIMMER_CONSTANTS.TIMEOUTS.AUTO_NAVIGATION_DELAY);
-      }, 500);
-    } else {
-      // Clear any pending navigation if theme is not complete
-      if (completionCheckRef.current) {
-        clearTimeout(completionCheckRef.current);
-        completionCheckRef.current = null;
-      }
+      // Clear pending theme immediately - no delay needed
+      clearPendingThemeState();
+      
+      // Navigate to completed theme without delay
+      navigate(`/stories/id/${completedTheme.id}`);
     }
   }, [pendingTheme, availableThemes, themePosts, navigate]);
 

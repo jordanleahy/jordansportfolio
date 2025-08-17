@@ -17,10 +17,8 @@ export const areAllPostPromptsCompleted = (posts: any[]): boolean => {
  * Check if a theme has completed all generation processes
  */
 export const isThemeFullyComplete = (theme: ThemeWithPosts, themePosts?: any[]): boolean => {
-  // Check theme-level completion
-  const themeComplete = theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED &&
-                       (theme.lifecycle_status === SHIMMER_CONSTANTS.LIFECYCLE_STATUS.READY ||
-                        theme.lifecycle_status === SHIMMER_CONSTANTS.LIFECYCLE_STATUS.COMPLETED);
+  // Theme is complete if prompt generation is done
+  const themeComplete = theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
   
   // If posts are provided, also check individual prompt completion
   if (themePosts && themePosts.length > 0) {
@@ -28,6 +26,7 @@ export const isThemeFullyComplete = (theme: ThemeWithPosts, themePosts?: any[]):
     return themeComplete && postsComplete;
   }
   
+  // If no posts provided, just check theme completion
   return themeComplete;
 };
 
