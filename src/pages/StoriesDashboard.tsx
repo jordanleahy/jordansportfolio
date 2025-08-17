@@ -43,9 +43,9 @@ const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImpo
 export default function StoriesDashboard() {
   console.log('[StoriesDashboard] Component rendering');
 
-  // Initialize scroll hook for smooth scrolling to generating theme
+  // Initialize scroll hook for smooth scrolling to newly created theme
   const { scrollToElement } = useScrollToElement({
-    targetSelector: '[data-theme-state="generating"]',
+    targetSelector: '',  // Will be set dynamically
     behavior: 'smooth',
     block: 'start',
     delay: 300,
@@ -524,13 +524,15 @@ export default function StoriesDashboard() {
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
-        // Scroll to the generating theme using the hook
-        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll');
-        console.log('🔍 DASHBOARD: Current DOM state for generating themes:', 
-          document.querySelectorAll('[data-theme-state="generating"]'));
+        // Scroll to the newly created theme using its ID
+        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll to:', pendingTheme.theme_id);
         setTimeout(() => {
-          console.log('🚀 DASHBOARD: Triggering scroll to generating theme');
-          scrollToElement();
+          console.log('🚀 DASHBOARD: Triggering scroll to theme:', pendingTheme.theme_id);
+          const targetSelector = `[data-theme-id="${pendingTheme.theme_id}"]`;
+          const targetElement = document.querySelector(targetSelector);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }, 300);
       }
       

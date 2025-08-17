@@ -228,9 +228,13 @@ export const ThemeCard = ({
   }
 
   return (
-    <Card className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden ${
-      isSelected ? 'ring-2 ring-primary border-primary/50' : ''
-    } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} onClick={handleClick}>
+    <Card 
+      className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden ${
+        isSelected ? 'ring-2 ring-primary border-primary/50' : ''
+      } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} 
+      onClick={handleClick}
+      data-theme-id={themeId}
+    >
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden">
         {/* Display current image */}
