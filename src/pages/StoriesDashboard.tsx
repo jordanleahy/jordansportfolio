@@ -76,6 +76,7 @@ export default function StoriesDashboard() {
 
   // Centralized function to clear pending theme state
   const clearPendingThemeState = () => {
+    console.log('🧹 Clearing pending theme state and removing from availableThemes');
     setPendingTheme(null);
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
   };
@@ -483,9 +484,22 @@ export default function StoriesDashboard() {
       description: themeDescription
     });
     
+    // Add pending theme to availableThemes so DOM element exists for scrolling
+    const pendingThemeObject = {
+      id: themeId,
+      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
+      description: themeDescription,
+      category: 'custom',
+      post_count: 0,
+      lifecycle_status: 'generating' as const,
+      first_post: null
+    };
+    setAvailableThemes(prev => [pendingThemeObject, ...prev]);
+    
     // Start timing from when theme_id is created (DOM element can potentially render)
     console.time('DOM-Update-Timing');
     console.log('⏱️ DOM-Timing: Started timing at theme_id creation:', themeId);
+    console.log('🎯 DOM-Timing: Added pending theme to availableThemes for immediate DOM rendering');
     
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
@@ -530,10 +544,10 @@ export default function StoriesDashboard() {
         
         // Scroll to the newly created theme using its ID (use correct theme_id from API response)
         console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll to:', data.theme_id);
-        console.log('⏱️ DOM-Timing: Starting setTimeout for scroll (300ms delay)');
+        console.log('⏱️ DOM-Timing: Starting setTimeout for scroll (100ms delay - element should exist immediately)');
         setTimeout(() => {
           console.log('🚀 DASHBOARD: Triggering scroll to theme:', data.theme_id);
-          console.log('⏱️ DOM-Timing: Checking for DOM element after 300ms delay');
+          console.log('⏱️ DOM-Timing: Checking for DOM element after 100ms delay');
           const targetSelector = `[data-theme-id="${data.theme_id}"]`;
           const targetElement = document.querySelector(targetSelector);
           if (targetElement) {
@@ -542,20 +556,20 @@ export default function StoriesDashboard() {
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
           } else {
             console.log('❌ DOM-Timing: Element NOT found for:', data.theme_id);
-            console.log('⏱️ DOM-Timing: Testing with longer delay (500ms)...');
+            console.log('⏱️ DOM-Timing: Testing with longer delay (300ms)...');
             setTimeout(() => {
               const retryElement = document.querySelector(targetSelector);
               if (retryElement) {
-                console.log('✅ DOM-Timing: Element found after 500ms total!');
+                console.log('✅ DOM-Timing: Element found after 300ms total!');
                 console.timeEnd('DOM-Update-Timing');
                 retryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
               } else {
-                console.log('❌ DOM-Timing: Element still NOT found after 500ms total');
+                console.log('❌ DOM-Timing: Element still NOT found after 300ms total');
                 console.timeEnd('DOM-Update-Timing');
               }
             }, 200);
           }
-        }, 300);
+        }, 100);
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
