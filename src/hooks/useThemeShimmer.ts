@@ -145,8 +145,7 @@ export const useThemeShimmer = ({
     // Filter out placeholder "pending" themes - only look at real database themes
     console.log('🔍 COMPLETION: About to filter themes...');
     const realThemes = availableThemes.filter(theme => 
-      !theme.id.startsWith('pending-') && 
-      theme.lifecycle_status !== undefined
+      !theme.id.startsWith('pending-')  // Only filter out pending themes, allow themes without lifecycle_status
     );
 
     console.log('🔍 COMPLETION: Filtering themes:', {
