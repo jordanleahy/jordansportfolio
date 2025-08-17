@@ -75,8 +75,8 @@ export const generatePostPDF = async (post: SocialMediaPost) => {
     throw new Error('Failed to create PDF');
   }
 
-  // Generate filename with post title and timestamp
-  const fileName = `${post.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_images_${Date.now()}.pdf`;
+  // Generate filename with post title and JordanLeahy.com
+  const fileName = `${post.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_JordanLeahy.com.pdf`;
   pdf.save(fileName);
 };
 
@@ -138,6 +138,6 @@ export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]) => {
     throw new Error('No valid images found to create PDF');
   }
 
-  const fileName = `social_media_images_${posts.length}_posts_${Date.now()}.pdf`;
+  const fileName = `social_media_images_${posts.length}_posts_JordanLeahy.com.pdf`;
   pdf.save(fileName);
 };
