@@ -483,6 +483,10 @@ export default function StoriesDashboard() {
       description: themeDescription
     });
     
+    // Start timing from when theme_id is created (DOM element can potentially render)
+    console.time('DOM-Update-Timing');
+    console.log('⏱️ DOM-Timing: Started timing at theme_id creation:', themeId);
+    
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
       const {
@@ -524,14 +528,32 @@ export default function StoriesDashboard() {
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
-        // Scroll to the newly created theme using its ID
-        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll to:', pendingTheme.theme_id);
+        // Scroll to the newly created theme using its ID (use correct theme_id from API response)
+        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll to:', data.theme_id);
+        console.log('⏱️ DOM-Timing: Starting setTimeout for scroll (300ms delay)');
         setTimeout(() => {
-          console.log('🚀 DASHBOARD: Triggering scroll to theme:', pendingTheme.theme_id);
-          const targetSelector = `[data-theme-id="${pendingTheme.theme_id}"]`;
+          console.log('🚀 DASHBOARD: Triggering scroll to theme:', data.theme_id);
+          console.log('⏱️ DOM-Timing: Checking for DOM element after 300ms delay');
+          const targetSelector = `[data-theme-id="${data.theme_id}"]`;
           const targetElement = document.querySelector(targetSelector);
           if (targetElement) {
+            console.log('✅ DOM-Timing: Element found! Scrolling to:', data.theme_id);
+            console.timeEnd('DOM-Update-Timing');
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            console.log('❌ DOM-Timing: Element NOT found for:', data.theme_id);
+            console.log('⏱️ DOM-Timing: Testing with longer delay (500ms)...');
+            setTimeout(() => {
+              const retryElement = document.querySelector(targetSelector);
+              if (retryElement) {
+                console.log('✅ DOM-Timing: Element found after 500ms total!');
+                console.timeEnd('DOM-Update-Timing');
+                retryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                console.log('❌ DOM-Timing: Element still NOT found after 500ms total');
+                console.timeEnd('DOM-Update-Timing');
+              }
+            }, 200);
           }
         }, 300);
       }
