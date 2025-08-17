@@ -22,22 +22,6 @@ export const CategoriesGrid = ({
 
   return (
     <div className={`grid ${LAYOUT_CONSTANTS.GRID.CATEGORIES} ${LAYOUT_CONSTANTS.SPACING.GRID_GAP}`}>
-      {/* Always show a shimmer card while generating, even if no pending item exists */}
-      {isGeneratingTheme && !hasPendingShimmer && (
-        <CategoryCard
-          key="shimmer"
-          theme={SHIMMER_CONSTANTS.MESSAGES.GENERATING_THEME}
-          themeId={SHIMMER_CONSTANTS.PREFIXES.SHIMMER_ID}
-          themeDescription={SHIMMER_CONSTANTS.MESSAGES.PREPARING_THEME}
-          category=""
-          postCount={0}
-          isShimmer
-          isSelectionMode={false}
-          isGeneratingTheme={isGeneratingTheme}
-          onCancelGeneration={onCancelGeneration}
-        />
-      )}
-
       {/* Theme cards */}
       {themes.map((theme) => {
         return (
