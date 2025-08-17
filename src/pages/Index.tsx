@@ -10,7 +10,7 @@ import ProjectCardsSection from "@/components/ProjectCardsSection";
 import ContactSection from "@/components/ContactSection";
 import RecentBlogsSection from "@/components/RecentBlogsSection";
 import { PublicCollectionsSection } from "@/components/PublicCollectionsSection";
-import { RealtimeThemeTest } from "@/components/debug/RealtimeThemeTest";
+
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
@@ -74,12 +74,6 @@ const Index = () => {
         <HeroParallaxDemo />
       </Suspense>
       
-      {/* Debug: Realtime Theme Test - Remove in production */}
-      {user && (
-        <div className="py-8 px-4">
-          <RealtimeThemeTest />
-        </div>
-      )}
       
       {/* Portfolio Content */}
       <CompaniesSection />
