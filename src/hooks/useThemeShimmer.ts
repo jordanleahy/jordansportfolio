@@ -190,8 +190,10 @@ export const useThemeShimmer = ({
       }))
     });
     
+    
     console.log('🎯 COMPLETION: Found theme in available themes:', {
       found: !!completedTheme,
+      completedThemeExists: completedTheme !== null && completedTheme !== undefined,
       themeData: completedTheme ? {
         id: completedTheme.id,
         theme_name: completedTheme.theme_name,
@@ -199,7 +201,7 @@ export const useThemeShimmer = ({
         prompt_generation_status: completedTheme.prompt_generation_status,
         prompt_completion_count: completedTheme.prompt_completion_count,
         total_posts_count: completedTheme.total_posts_count
-      } : null
+      } : 'No completed theme found'
     });
 
     // Clear shimmer if theme is completed (either through posts or theme status)
