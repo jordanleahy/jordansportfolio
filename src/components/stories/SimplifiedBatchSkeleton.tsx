@@ -66,11 +66,11 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
         )}
 
         {/* Single shimmer placeholder */}
-        <div className="relative">
+        <div className="relative overflow-hidden rounded-md">
           <Skeleton className="w-full aspect-video animate-pulse" />
           
           {/* Shimmer overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer rounded-md" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
         </div>
 
         {/* Status message */}
