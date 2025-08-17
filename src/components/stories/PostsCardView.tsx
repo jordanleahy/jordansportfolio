@@ -57,7 +57,7 @@ export const PostsCardView = memo(({
   onEditPost
 }: PostsTableViewProps) => {
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
-  const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
+  const { isProcessing: isProcessingCtx, setProcessing, isAnyImageGenerating } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
@@ -316,12 +316,14 @@ export const PostsCardView = memo(({
                           // Start with 1:1 aspect ratio as default
                           onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
                         }}
-                        disabled={isProcessing}
+                        disabled={isProcessing || isAnyImageGenerating()}
                         className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <div className="flex flex-col items-center gap-2">
                           <Sparkles className="h-6 w-6" />
-                          <span>Generate Image</span>
+                          <span>
+                            {isProcessingCtx(post.id, 'generate') ? 'Generating...' : isAnyImageGenerating() ? 'Image Generation in Progress' : 'Generate Image'}
+                          </span>
                         </div>
                       </button>
                     )}
@@ -480,11 +482,11 @@ export const PostsCardView = memo(({
                                     }
                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                                   }}
-                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio)}
+                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio) || (isAnyImageGenerating() && !isProcessingCtx(post.id, 'generate', aspectRatio))}
                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Regenerate image"
                                 >
-                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : 'Regenerate'}
+                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : (isAnyImageGenerating() && !isProcessingCtx(post.id, 'generate', aspectRatio)) ? 'Image Generation in Progress' : 'Regenerate'}
                                 </button>
                               </div>
                             </div>
@@ -504,12 +506,14 @@ export const PostsCardView = memo(({
                               onClick={() => {
                                 onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                               }}
-                              disabled={status === 'processing'}
+                              disabled={status === 'processing' || isAnyImageGenerating()}
                               className="w-full h-full flex flex-col items-center justify-center text-xs text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <div className="flex flex-col items-center gap-1">
                                 <Sparkles className="h-4 w-4" />
-                                <span>{aspectRatio}</span>
+                                <span>
+                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Generating...' : isAnyImageGenerating() ? 'Image Generation in Progress' : aspectRatio}
+                                </span>
                               </div>
                             </button>
                           )}

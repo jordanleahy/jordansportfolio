@@ -22,7 +22,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   onGenerateImage,
   onPreviewImage
 }) => {
-  const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
+  const { isProcessing: isProcessingCtx, isAnyImageGenerating } = useProcessingStatesContext();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   const timer = useImageGenerationTimer();
@@ -30,6 +30,8 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   const selectedImage = post.image_1_1_url;
   const selectedAspectRatio = '1:1';
   const isLoadingOrProcessing = isProcessing || (post.image_1_1_status === 'processing') || isProcessingCtx(post.id, 'generate');
+  const isCurrentPostGenerating = isProcessingCtx(post.id, 'generate');
+  const isAnyOtherGenerating = isAnyImageGenerating() && !isCurrentPostGenerating;
 
   // Handle timer based on processing state
   useEffect(() => {
@@ -100,11 +102,11 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                   const aspectRatioKey = '1_1';
                   onGenerateImage?.(post.id, aspectRatioKey, post.title, post.description, post.category);
                 }}
-                disabled={isProcessingCtx(post.id, 'generate')}
+                disabled={isCurrentPostGenerating || isAnyOtherGenerating}
                 className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Regenerate image"
               >
-                {isProcessingCtx(post.id, 'generate') ? 'Regenerating...' : 'Regenerate'}
+                {isCurrentPostGenerating ? 'Regenerating...' : isAnyOtherGenerating ? 'Image Generation in Progress' : 'Regenerate'}
               </button>
             </div>
           </div>
@@ -114,12 +116,14 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               // Start with 1:1 aspect ratio as default
               onGenerateImage?.(post.id, '1_1', post.title, post.description, post.category);
             }}
-            disabled={isLoadingOrProcessing}
+            disabled={isLoadingOrProcessing || isAnyOtherGenerating}
             className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <div className="flex flex-col items-center gap-2">
               <Sparkles className="h-6 w-6" />
-              <span>Generate Image</span>
+              <span>
+                {isCurrentPostGenerating ? 'Generating...' : isAnyOtherGenerating ? 'Image Generation in Progress' : 'Generate Image'}
+              </span>
             </div>
           </button>
         )}

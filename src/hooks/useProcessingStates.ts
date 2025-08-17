@@ -89,6 +89,14 @@ export const useProcessingStates = () => {
     return isProcessing(postId, 'generate') || isProcessing(postId, 'bulk_generate');
   }, [isProcessing]);
 
+  const isAnyImageGenerating = useCallback((): boolean => {
+    const matches = Array.from(processingStates.entries())
+      .filter(([key, state]) => 
+        (state.operation === 'generate' || state.operation === 'bulk_generate') && 
+        state.isActive
+      );
+    return matches.length > 0;
+  }, [processingStates]);
 
   const clearProcessing = useCallback((postId: string) => {
     setProcessingStates(prev => {
@@ -104,6 +112,7 @@ export const useProcessingStates = () => {
     setBulkProcessing,
     isProcessing,
     isGenerating,
+    isAnyImageGenerating,
     clearProcessing,
   };
 };
