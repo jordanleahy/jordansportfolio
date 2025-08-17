@@ -154,15 +154,16 @@ export const useThemeShimmer = ({
     }, 0);
   };
 
-  // Calculate shimmer visibility using centralized logic
-  const shimmerVisible = shouldShowShimmer(pendingTheme, availableThemes, themePosts);
+  // Calculate shimmer visibility using ultra-simplified logic
+  const shimmerVisible = shouldShowShimmer(pendingTheme, themePosts);
   
-  // Debug logging for shimmer visibility (simplified)
-  console.log('🔍 Shimmer check:', {
+  // Debug logging for ultra-simplified shimmer
+  console.log('✨ SIMPLE SHIMMER CHECK:', {
     hasPendingTheme: !!pendingTheme,
+    themeName: pendingTheme?.theme_name,
     themeId: pendingTheme?.theme_id,
-    postsForTheme: pendingTheme?.theme_id ? themePosts.filter(p => p.theme_id === pendingTheme.theme_id).length : 0,
-    completedPosts: pendingTheme?.theme_id ? themePosts.filter(p => p.theme_id === pendingTheme.theme_id && p.individual_prompt_status === 'completed').length : 0,
+    totalPosts: themePosts.length,
+    completedPosts: themePosts.filter(p => p.individual_prompt_status === 'completed').length,
     shimmerVisible
   });
 

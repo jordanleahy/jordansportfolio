@@ -51,26 +51,25 @@ export const findCompletedTheme = (
 };
 
 /**
- * Check if shimmer should be visible (simplified - only check individual posts)
+ * Ultra-simplified shimmer visibility logic
+ * Show shimmer when user submits text until all individual posts complete
  */
 export const shouldShowShimmer = (
   pendingTheme: PendingTheme | null,
-  availableThemes: ThemeWithPosts[],
   allPosts?: any[]
 ): boolean => {
+  // No pending theme = no shimmer
   if (!pendingTheme) return false;
   
-  // If no theme_id yet, always show shimmer
+  // If no theme_id yet (still generating), always show shimmer
   if (!pendingTheme.theme_id) return true;
   
-  // Find posts for this pending theme
+  // Find posts for this theme
   const themePosts = allPosts?.filter(post => post.theme_id === pendingTheme.theme_id);
   
-  // Show shimmer until ALL individual posts are completed
-  if (themePosts && themePosts.length > 0) {
-    return !areAllPostPromptsCompleted(themePosts);
-  }
+  // If no posts yet, keep showing shimmer (they're still being created)
+  if (!themePosts || themePosts.length === 0) return true;
   
-  // If no posts found yet, keep showing shimmer
-  return true;
+  // Show shimmer until ALL individual posts have completed prompts
+  return !areAllPostPromptsCompleted(themePosts);
 };
