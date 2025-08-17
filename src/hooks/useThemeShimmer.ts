@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
 import { shouldShowShimmer, areAllPostPromptsCompleted } from '@/utils/shimmerUtils';
@@ -23,6 +24,7 @@ export const useThemeShimmer = ({
 }: ThemeShimmerOptions) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const lastLocationRef = useRef(location.pathname);
   const [themePosts, setThemePosts] = useState<any[]>([]);
   const completionCheckRef = useRef<NodeJS.Timeout | null>(null);
@@ -220,6 +222,23 @@ export const useThemeShimmer = ({
       if (completedTheme) {
         navigate(`/stories/id/${completedTheme.id}`);
       }
+    } else if (postsCompleted && !completedTheme && pendingTheme.theme_id) {
+      // Fallback: If posts are completed but theme not found, force refresh themes
+      console.log('🔄 FALLBACK: Posts completed but theme not found - refreshing themes');
+      queryClient.invalidateQueries({ queryKey: ['themes'] });
+      
+      // Set a timeout to check again after refresh
+      setTimeout(() => {
+        const refreshedThemes = queryClient.getQueryData(['themes']) as any[];
+        if (refreshedThemes) {
+          const foundTheme = refreshedThemes.find(theme => theme.id === pendingTheme.theme_id);
+          if (foundTheme) {
+            console.log('✅ FALLBACK: Theme found after refresh - navigating');
+            clearPendingThemeState();
+            navigate(`/stories/id/${foundTheme.id}`);
+          }
+        }
+      }, 1000);
     }
   }, [pendingTheme, themePosts, availableThemes, navigate]);
 
