@@ -14,9 +14,6 @@ interface ComparisonTableProps {
 export const ComparisonTable: React.FC<ComparisonTableProps> = ({ data }) => {
   const { company1, company2 } = data;
 
-  console.log('📊 ComparisonTable - Received data:', { company1, company2 });
-  console.log('🏢 ComparisonTable - Company1 name:', company1?.name);
-  console.log('🏢 ComparisonTable - Company2 name:', company2?.name);
 
   // Add fallbacks for missing data - use dynamic fallbacks
   const safeCompany1 = {

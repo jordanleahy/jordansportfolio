@@ -105,8 +105,8 @@ const CompaniesSection = () => {
                       src={(company as any).logoUrl} 
                       alt={`${company.name} logo`}
                       className="w-full h-full object-contain"
-                      onLoad={() => console.log(`Logo loaded for ${company.name}:`, (company as any).logoUrl)}
-                      onError={() => console.log(`Logo failed to load for ${company.name}:`, (company as any).logoUrl)}
+                      onLoad={() => {/* Logo loaded successfully */}}
+                      onError={() => {/* Logo failed to load */}}
                     />
                   ) : (
                     company.logo

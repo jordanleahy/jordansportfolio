@@ -9,7 +9,7 @@ export const RealtimeThemeTest: React.FC = () => {
   const [realtimeEvents, setRealtimeEvents] = useState<any[]>([]);
 
   const addLog = (message: string) => {
-    console.log(`🧪 TEST: ${message}`);
+    
     setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
 

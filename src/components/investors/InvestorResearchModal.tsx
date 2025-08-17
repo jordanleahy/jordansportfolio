@@ -162,7 +162,7 @@ Research 15-25 high-quality investor records and return them as a clean JSON arr
     setProcessingResult(null);
 
     try {
-      console.log('Processing investor JSON data...');
+      
       
       const { data, error } = await supabase.functions.invoke('process-investor-json', {
         body: { rawJson: importJson }
