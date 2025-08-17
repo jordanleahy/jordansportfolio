@@ -220,12 +220,14 @@ export const useThemeShimmer = ({
     });
 
     // Clear shimmer if theme is completed (either through posts or theme status)
+    console.log('🔄 COMPLETION: Checking completion status...');
     const postsCompleted = currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts);
     const themeCompleted = completedTheme && (
       completedTheme.lifecycle_status === 'ready' || 
       completedTheme.lifecycle_status === 'completed' ||
       completedTheme.prompt_generation_status === 'completed'
     );
+    console.log('✨ COMPLETION: Status calculated successfully');
 
     // Log when post prompts are complete
     if (postsCompleted && currentThemePosts.length > 0) {
