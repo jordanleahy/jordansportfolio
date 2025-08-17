@@ -721,6 +721,7 @@ serve(async (req) => {
 
       return new Response(JSON.stringify({
         success: true,
+        theme_id: themeId,
         category: themeData.category,
         theme: themeData.theme,
         postCount: insertedCount,
