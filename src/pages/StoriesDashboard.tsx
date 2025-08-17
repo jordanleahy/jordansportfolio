@@ -47,7 +47,7 @@ export default function StoriesDashboard() {
   const { scrollToElement } = useScrollToElement({
     targetSelector: '[data-theme-state="generating"]',
     behavior: 'smooth',
-    block: 'center',
+    block: 'start',
     delay: 300,
     respectMotionPreferences: true
   });
