@@ -495,6 +495,9 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     console.log('🚀 Starting theme generation...');
 
+    // Generate a theme_id immediately when creating pending theme
+    const themeId = crypto.randomUUID();
+    
     // Create a pending shimmer theme for optimistic UI
     const shimmerTheme: ThemeWithPosts = {
       id: 'pending-' + Date.now(),
@@ -509,15 +512,16 @@ export default function StoriesDashboard() {
       }
     };
     
-    // Set pending theme BEFORE adding to UI
+    // Set pending theme BEFORE adding to UI - now with real theme_id
     setPendingTheme({
+      theme_id: themeId,  // Include the real theme_id for matching
       theme_name: shimmerTheme.theme_name,
       description: themeDescription
     });
     console.log('🔥 DASHBOARD: Set pending theme state:', {
       theme_name: shimmerTheme.theme_name,
       description: themeDescription,
-      theme_id: undefined
+      theme_id: themeId
     });
 
     // Add shimmer theme to the beginning of the list
@@ -525,7 +529,8 @@ export default function StoriesDashboard() {
     console.log('✨ DASHBOARD: Added pending theme to UI');
     console.log('🎯 DASHBOARD: Pending theme state after setPendingTheme:', {
       theme_name: shimmerTheme.theme_name,
-      description: themeDescription
+      description: themeDescription,
+      theme_id: themeId
     });
     
     try {
