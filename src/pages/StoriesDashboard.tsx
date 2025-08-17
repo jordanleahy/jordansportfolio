@@ -526,7 +526,6 @@ export default function StoriesDashboard() {
 
     // Add shimmer theme to the beginning of the list
     setAvailableThemes(prev => [shimmerTheme, ...prev]);
-    console.log('✨ DASHBOARD: Added pending theme to UI');
     console.log('🎯 DASHBOARD: Pending theme state after setPendingTheme:', {
       theme_name: shimmerTheme.theme_name,
       description: themeDescription,
