@@ -40,14 +40,14 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
     } else if (!isLoadingOrProcessing && timer.isRunning) {
       timer.stopTimer();
     }
-  }, [isLoadingOrProcessing, timer.isRunning, timer.startTimer, timer.stopTimer]);
+  }, [isLoadingOrProcessing, timer.isRunning]);
 
   // Stop timer if image is ready with 20+ seconds remaining
   useEffect(() => {
     if (selectedImage && timer.isRunning && timer.secondsRemaining >= 20) {
       timer.stopTimer();
     }
-  }, [selectedImage, timer.isRunning, timer.secondsRemaining, timer.stopTimer]);
+  }, [selectedImage, timer.isRunning, timer.secondsRemaining]);
 
   return (
     <div className="space-y-4">
