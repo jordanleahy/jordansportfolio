@@ -109,6 +109,18 @@ export const useThemeShimmer = ({
     }
   };
 
+  // Debug effect to check dependencies
+  useEffect(() => {
+    console.log('🔧 COMPLETION EFFECT DEPENDENCIES CHANGED:', {
+      pendingTheme: !!pendingTheme,
+      themePostsLength: themePosts?.length || 0,
+      availableThemesLength: availableThemes?.length || 0,
+      navigateExists: !!navigate
+    });
+  }, [pendingTheme, themePosts, availableThemes, navigate]);
+
+  // Completion check - handle both ID-based and name-based matching
+
   // Completion check - handle both ID-based and name-based matching
   useEffect(() => {
     console.log('🔍 COMPLETION CHECK:', {
