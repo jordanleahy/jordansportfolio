@@ -139,8 +139,7 @@ export default function StoriesDashboard() {
     completionProgress
   } = useThemeShimmer({
     pendingTheme,
-    setPendingTheme,
-    setAvailableThemes
+    setPendingTheme
   });
 
 

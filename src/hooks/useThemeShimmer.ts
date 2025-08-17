@@ -8,7 +8,6 @@ import { shouldShowShimmer, areAllPostPromptsCompleted } from '@/utils/shimmerUt
 interface ThemeShimmerOptions {
   pendingTheme: PendingTheme | null;
   setPendingTheme: React.Dispatch<React.SetStateAction<PendingTheme | null>>;
-  setAvailableThemes: React.Dispatch<React.SetStateAction<ThemeWithPosts[]>>;
 }
 
 /**
@@ -17,8 +16,7 @@ interface ThemeShimmerOptions {
  */
 export const useThemeShimmer = ({
   pendingTheme,
-  setPendingTheme,
-  setAvailableThemes
+  setPendingTheme
 }: ThemeShimmerOptions) => {
   const navigate = useNavigate();
   const location = useLocation();
