@@ -512,6 +512,17 @@ export default function StoriesDashboard() {
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
+        
+        // Scroll to the generating theme after DOM updates
+        setTimeout(() => {
+          const generatingElement = document.querySelector('[data-theme-state="generating"]');
+          if (generatingElement) {
+            generatingElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion

@@ -176,6 +176,9 @@ export const ThemeCard = ({
           className="group overflow-hidden border-border/50 select-none transition-all duration-500" 
           {...longPressHandlers}
           style={{ touchAction: 'manipulation' }}
+          data-theme-state="generating"
+          data-theme-id={themeId}
+          data-scroll-target="theme-card"
         >
           {/* Shimmer Image Section */}
           <div className="relative aspect-square">
