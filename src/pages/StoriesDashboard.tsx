@@ -475,6 +475,7 @@ export default function StoriesDashboard() {
 
     // Generate a theme_id immediately when creating pending theme
     const themeId = crypto.randomUUID();
+    const shimmerThemeId = `pending-${themeId}`;
     
     // Set pending theme for tracking
     setPendingTheme({
@@ -482,6 +483,24 @@ export default function StoriesDashboard() {
       theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
       description: themeDescription
     });
+    
+    // Add shimmer theme to the themes list for UI display
+    const shimmerTheme: ThemeWithPosts = {
+      id: shimmerThemeId,
+      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
+      description: themeDescription,
+      category: 'Custom',
+      post_count: 0,
+      first_post: null,
+      lifecycle_status: 'generating',
+      prompt_generation_status: 'in_progress'
+    };
+    
+    console.log('🎨 DASHBOARD: Adding shimmer theme to UI', { 
+      shimmerThemeId, 
+      originalThemeId: themeId 
+    });
+    setAvailableThemes(prev => [shimmerTheme, ...prev]);
     
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
@@ -519,10 +538,16 @@ export default function StoriesDashboard() {
         });
         
         
-        // Refresh themes to get the new theme
+        // Refresh themes to get the new theme while preserving shimmer
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-        setAvailableThemes(refreshedThemes);
-        console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
+        
+        // Keep the shimmer theme at the top and merge with fresh themes
+        setAvailableThemes(prev => {
+          const shimmerThemes = prev.filter(theme => theme.id.startsWith('pending-'));
+          const freshThemes = refreshedThemes.filter(theme => !theme.id.startsWith('pending-'));
+          return [...shimmerThemes, ...freshThemes];
+        });
+        console.log('🔄 DASHBOARD: Refreshed themes while preserving shimmer');
         
         // Scroll to the generating theme using the hook
         console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll');
