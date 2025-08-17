@@ -58,6 +58,7 @@ serve(async (req: Request): Promise<Response> => {
     switch (event.type) {
       case "user.signed_up":
         await handleSignupEmail(event);
+        await sendAdminNotification(event);
         break;
       case "user.recovery.requested":
         await handlePasswordResetEmail(event);
@@ -163,4 +164,43 @@ async function handlePasswordResetEmail(event: any) {
   });
 
   console.log("Password reset email sent successfully:", emailResponse);
+}
+
+async function sendAdminNotification(event: any) {
+  const { user } = event;
+  const userName = user.user_metadata?.first_name || user.email?.split('@')[0];
+  const signupTime = new Date().toLocaleString();
+  
+  console.log("Sending admin notification for new user:", user.email);
+
+  const emailContent = createEmailTemplate({
+    title: "New User Signup",
+    preheader: "A new user has signed up for your platform",
+    content: `
+      <h2>🎉 New User Registration</h2>
+      <p>A new user has just signed up for your platform!</p>
+      
+      <div class="highlight">
+        <p><strong>User Details:</strong></p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>Email:</strong> ${user.email}</li>
+          <li><strong>Name:</strong> ${userName || 'Not provided'}</li>
+          <li><strong>Signup Time:</strong> ${signupTime}</li>
+          <li><strong>User ID:</strong> ${user.id}</li>
+        </ul>
+      </div>
+      
+      <p>The user will need to confirm their email address before they can fully access the platform.</p>
+    `,
+    footerText: "This is an automated notification from your user registration system."
+  });
+
+  const emailResponse = await resend.emails.send({
+    from: "Jordan Leahy Platform <noreply@jordanleahy.com>",
+    to: ["jordanwilliamleahy@gmail.com"],
+    subject: `New User Signup: ${user.email}`,
+    html: emailContent,
+  });
+
+  console.log("Admin notification sent successfully:", emailResponse);
 }
