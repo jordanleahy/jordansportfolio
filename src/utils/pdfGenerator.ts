@@ -1,217 +1,143 @@
+
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-export const generatePostPDF = async (post: SocialMediaPost): Promise<void> => {
-  try {
-    // Create a temporary container for the PDF content
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '-9999px';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.width = '210mm'; // A4 width
-    tempContainer.style.padding = '20mm';
-    tempContainer.style.backgroundColor = 'white';
-    tempContainer.style.fontFamily = 'Arial, sans-serif';
-    
-    // Get the main image (prefer 1:1, then 4:3, then 16:9)
-    const imageOrder = ['1_1', '4_3', '16_9'] as const;
-    let mainImageUrl = '';
-    
-    for (const aspectKey of imageOrder) {
-      const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
-      if (imageUrl) {
-        mainImageUrl = imageUrl;
-        break;
-      }
-    }
-    
-    // Create PDF content HTML
-    tempContainer.innerHTML = `
-      <div style="max-width: 170mm; margin: 0 auto;">
-        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #1a1a1a;">
-          ${post.title}
-        </h1>
-        
-        ${post.description ? `
-          <p style="font-size: 16px; line-height: 1.6; margin-bottom: 24px; color: #4a4a4a;">
-            ${post.description}
-          </p>
-        ` : ''}
-        
-        ${mainImageUrl ? `
-          <div style="text-align: center; margin: 24px 0;">
-            <img src="${mainImageUrl}" 
-                 style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" 
-                 alt="${post.title}" />
-          </div>
-        ` : ''}
-        
-        ${post.day ? `
-          <div style="margin-top: 24px;">
-            <span style="background: #f3f4f6; padding: 4px 12px; border-radius: 12px; font-size: 14px; color: #6b7280;">
-              Day ${post.day}
-            </span>
-          </div>
-        ` : ''}
-        
-        <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af;">
-          Generated from Social Media Post
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(tempContainer);
-    
-    // Wait for images to load
-    const images = tempContainer.querySelectorAll('img');
-    await Promise.all(Array.from(images).map(img => {
-      return new Promise((resolve, reject) => {
-        if (img.complete) {
-          resolve(img);
-        } else {
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-        }
-      });
-    }));
-    
-    // Generate canvas from the container
-    const canvas = await html2canvas(tempContainer, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff'
-    });
-    
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210; // A4 width in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-    
-    // Clean up
-    document.body.removeChild(tempContainer);
-    
-    // Download the PDF
-    const fileName = `${post.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-    pdf.save(fileName);
-    
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error('Failed to generate PDF');
+export const generatePostPDF = async (post: SocialMediaPost) => {
+  const pdf = new jsPDF();
+  let yPosition = 20;
+  
+  // Only add images, no text content
+  const images = [
+    { url: post.image_1_1_url, label: '1:1 Square' },
+    { url: post.image_16_9_url, label: '16:9 Landscape' },
+    { url: post.image_9_16_url, label: '9:16 Portrait' },
+    { url: post.image_4_3_url, label: '4:3 Standard' },
+    { url: post.image_3_4_url, label: '3:4 Social' }
+  ].filter(img => img.url);
+
+  if (images.length === 0) {
+    throw new Error('No images found to download');
   }
+
+  for (let i = 0; i < images.length; i++) {
+    const image = images[i];
+    
+    try {
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      const imageDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      // Add new page for each image (except the first)
+      if (i > 0) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+
+      // Add small label for the aspect ratio
+      pdf.setFontSize(10);
+      pdf.text(image.label, 20, yPosition);
+      yPosition += 10;
+
+      // Calculate image dimensions to fit on page
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - 40; // 20px margin on each side
+      const maxHeight = pageHeight - yPosition - 20; // Leave space at bottom
+
+      let imgWidth = maxWidth;
+      let imgHeight = maxWidth * 0.75; // Default aspect ratio
+
+      // If image height exceeds page, scale down
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = imgHeight / 0.75;
+      }
+
+      pdf.addImage(imageDataUrl, 'JPEG', 20, yPosition, imgWidth, imgHeight);
+      
+    } catch (error) {
+      console.error(`Failed to add image ${image.label}:`, error);
+      // Add error text instead of image
+      pdf.setFontSize(12);
+      pdf.text(`Failed to load ${image.label} image`, 20, yPosition + 20);
+    }
+  }
+
+  // Generate filename with post title and timestamp
+  const fileName = `${post.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_images_${Date.now()}.pdf`;
+  pdf.save(fileName);
 };
 
-export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]): Promise<void> => {
-  try {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    let isFirstPage = true;
+export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]) => {
+  const pdf = new jsPDF();
+  let isFirstPage = true;
 
-    for (const post of posts) {
-      if (!isFirstPage) {
-        pdf.addPage();
-      }
-      isFirstPage = false;
+  for (const post of posts) {
+    const images = [
+      { url: post.image_1_1_url, label: '1:1 Square' },
+      { url: post.image_16_9_url, label: '16:9 Landscape' },
+      { url: post.image_9_16_url, label: '9:16 Portrait' },
+      { url: post.image_4_3_url, label: '4:3 Standard' },
+      { url: post.image_3_4_url, label: '3:4 Social' }
+    ].filter(img => img.url);
 
-      // Create a temporary container for each post
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.width = '210mm'; // A4 width
-      tempContainer.style.padding = '20mm';
-      tempContainer.style.backgroundColor = 'white';
-      tempContainer.style.fontFamily = 'Arial, sans-serif';
+    if (images.length === 0) continue;
+
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
       
-      // Get the main image (prefer 1:1, then 4:3, then 16:9)
-      const imageOrder = ['1_1', '4_3', '16_9'] as const;
-      let mainImageUrl = '';
-      
-      for (const aspectKey of imageOrder) {
-        const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
-        if (imageUrl) {
-          mainImageUrl = imageUrl;
-          break;
+      try {
+        // Add new page (except for the very first)
+        if (!isFirstPage) {
+          pdf.addPage();
         }
-      }
-      
-      // Create PDF content HTML for this post
-      tempContainer.innerHTML = `
-        <div style="max-width: 170mm; margin: 0 auto;">
-          <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #1a1a1a;">
-            ${post.title}
-          </h1>
-          
-          ${post.description ? `
-            <p style="font-size: 16px; line-height: 1.6; margin-bottom: 24px; color: #4a4a4a;">
-              ${post.description}
-            </p>
-          ` : ''}
-          
-          ${mainImageUrl ? `
-            <div style="text-align: center; margin: 24px 0;">
-              <img src="${mainImageUrl}" 
-                   style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" 
-                   alt="${post.title}" />
-            </div>
-          ` : ''}
-          
-          ${post.day ? `
-            <div style="margin-top: 24px;">
-              <span style="background: #f3f4f6; padding: 4px 12px; border-radius: 12px; font-size: 14px; color: #6b7280;">
-                Day ${post.day}
-              </span>
-            </div>
-          ` : ''}
-        </div>
-      `;
-      
-      document.body.appendChild(tempContainer);
-      
-      // Wait for images to load
-      const images = tempContainer.querySelectorAll('img');
-      await Promise.all(Array.from(images).map(img => {
-        return new Promise((resolve, reject) => {
-          if (img.complete) {
-            resolve(img);
-          } else {
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-          }
+        isFirstPage = false;
+
+        let yPosition = 20;
+
+        // Add post title and image label
+        pdf.setFontSize(14);
+        pdf.text(post.title, 20, yPosition);
+        yPosition += 15;
+        
+        pdf.setFontSize(10);
+        pdf.text(image.label, 20, yPosition);
+        yPosition += 10;
+
+        const response = await fetch(image.url);
+        const blob = await response.blob();
+        const imageDataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
         });
-      }));
-      
-      // Generate canvas from the container
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      });
-      
-      // Add to PDF
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // If the content is too tall for one page, we might need to scale it down
-      const maxHeight = 277; // A4 height minus margins
-      const finalHeight = Math.min(imgHeight, maxHeight);
-      const finalWidth = finalHeight === maxHeight ? (canvas.width * maxHeight) / canvas.height : imgWidth;
-      
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, finalWidth, finalHeight);
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
+
+        // Calculate image dimensions
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const maxWidth = pageWidth - 40;
+        const maxHeight = pageHeight - yPosition - 20;
+
+        let imgWidth = maxWidth;
+        let imgHeight = maxWidth * 0.75;
+
+        if (imgHeight > maxHeight) {
+          imgHeight = maxHeight;
+          imgWidth = imgHeight / 0.75;
+        }
+
+        pdf.addImage(imageDataUrl, 'JPEG', 20, yPosition, imgWidth, imgHeight);
+        
+      } catch (error) {
+        console.error(`Failed to add image for post ${post.title}:`, error);
+      }
     }
-    
-    // Download the PDF
-    const fileName = `social_media_posts_${new Date().toISOString().split('T')[0]}.pdf`;
-    pdf.save(fileName);
-    
-  } catch (error) {
-    console.error('Error generating multiple posts PDF:', error);
-    throw new Error('Failed to generate PDF');
   }
+
+  const fileName = `social_media_images_${posts.length}_posts_${Date.now()}.pdf`;
+  pdf.save(fileName);
 };

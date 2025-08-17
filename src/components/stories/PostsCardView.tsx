@@ -173,7 +173,7 @@ export const PostsCardView = memo(({
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please log in to download PDF",
+        description: "Please log in to download images",
         variant: "destructive"
       });
       return;
@@ -188,16 +188,31 @@ export const PostsCardView = memo(({
       return;
     }
 
-    try {
-      await generateMultiplePostsPDF(posts);
+    // Check if any posts have images
+    const postsWithImages = posts.filter(post => 
+      post.image_1_1_url || post.image_16_9_url || post.image_9_16_url || 
+      post.image_4_3_url || post.image_3_4_url
+    );
+
+    if (postsWithImages.length === 0) {
       toast({
-        title: "PDF Downloaded",
-        description: `${posts.length} posts saved as PDF`
+        title: "No images",
+        description: "No images found to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await generateMultiplePostsPDF(postsWithImages);
+      toast({
+        title: "Images Downloaded",
+        description: `${postsWithImages.length} posts' images saved as PDF`
       });
     } catch (error) {
       toast({
         title: "Download failed",
-        description: "Failed to generate PDF. Please try again.",
+        description: "Failed to generate images PDF. Please try again.",
         variant: "destructive"
       });
     }
@@ -215,7 +230,7 @@ export const PostsCardView = memo(({
             className="gap-2"
           >
             <Download className="h-4 w-4" />
-            Download All as PDF ({posts.length} posts)
+            Download All Images as PDF ({posts.length} posts)
           </Button>
         </div>
       )}
