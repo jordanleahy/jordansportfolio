@@ -38,16 +38,10 @@ export const CategoriesGrid = ({
         />
       )}
 
-      {/* Theme cards with enhanced transitions */}
+      {/* Theme cards */}
       {themes.map((theme) => {
-        const transitionClasses = getTransitionClasses?.(theme.id) || '';
-        const isTransitioning = isThemeTransitioning?.(theme.id) || false;
-        
         return (
-          <div 
-            key={theme.id}
-            className={`${transitionClasses} ${isTransitioning ? 'animate-scale-in' : ''}`}
-          >
+          <div key={theme.id}>
             <CategoryCard
               theme={theme.theme_name}
               themeId={theme.id}

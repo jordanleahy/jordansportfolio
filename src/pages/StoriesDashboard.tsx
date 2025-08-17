@@ -28,9 +28,10 @@ import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
-import { useThemeLifecycleShimmer } from '@/hooks/useThemeLifecycleShimmer';
+import { useThemeShimmer } from '@/hooks/useThemeShimmer';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
+import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import shipImage from '@/assets/story-ship-bg.png';
 
@@ -123,15 +124,13 @@ export default function StoriesDashboard() {
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
-  // Theme lifecycle shimmer management with enhanced transitions
+  // Simplified theme shimmer management
   const { 
     dismissShimmer, 
     handleThemeClick, 
     shouldShowShimmer,
-    getTransitionClasses,
-    isThemeTransitioning,
-    hasActiveTransition
-  } = useThemeLifecycleShimmer({
+    completionProgress
+  } = useThemeShimmer({
     pendingTheme,
     setPendingTheme,
     setAvailableThemes,
@@ -942,6 +941,13 @@ export default function StoriesDashboard() {
             {/* Bulk Actions Toolbar */}
             <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
 
+            {/* Simplified Batch Shimmer */}
+            <SimplifiedBatchSkeleton 
+              isVisible={shouldShowShimmer}
+              completionProgress={completionProgress}
+              className="mb-6"
+            />
+
             {/* Enhanced Themes Grid with Loading States */}
             {isLoadingThemes ? <ThemesSkeleton /> : themesError ? <div className="text-center py-8">
                 <div className="text-muted-foreground mb-4">
@@ -958,8 +964,8 @@ export default function StoriesDashboard() {
                 isSelectionMode={isSelectionMode} 
                 isGeneratingTheme={isGeneratingTheme} 
                 onCancelGeneration={cancelThemeGeneration}
-                getTransitionClasses={getTransitionClasses}
-                isThemeTransitioning={isThemeTransitioning}
+                getTransitionClasses={() => ''}
+                isThemeTransitioning={() => false}
               />}
           </Section> : <>
             <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>

@@ -15,7 +15,7 @@ export interface CategoriesGridProps {
   isSelectionMode?: boolean;
   isGeneratingTheme?: boolean;
   onCancelGeneration?: () => Promise<void>;
-  // Enhanced transition props
+  // Simplified transition props (deprecated)
   getTransitionClasses?: (themeId: string) => string;
   isThemeTransitioning?: (themeId: string) => boolean;
 }
