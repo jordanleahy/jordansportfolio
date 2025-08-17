@@ -260,7 +260,24 @@ export const useUnifiedRealtime = ({
       theme: record?.theme_name || oldRecord?.theme_name
     });
     
-    if (eventType === 'UPDATE' && record && oldRecord) {
+    if (eventType === 'INSERT' && record) {
+      console.log(`🎉 REALTIME: New theme created: ${record.theme_name}`);
+      
+      // Add new theme to cache
+      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
+        if (!oldThemes) return [record];
+        return [...oldThemes, record];
+      });
+      
+      // Call the theme status update callback for shimmer detection
+      if (onThemeStatusUpdate) {
+        onThemeStatusUpdate(record);
+      }
+      
+      // Show toast for new theme creation
+      toast.success(`Theme "${record.theme_name}" created!`);
+      
+    } else if (eventType === 'UPDATE' && record && oldRecord) {
       // Check if prompt_generation_status changed to 'completed'
       const isPromptComplete = record.prompt_generation_status === 'completed' && 
                               oldRecord.prompt_generation_status !== 'completed';
