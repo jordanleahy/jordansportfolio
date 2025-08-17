@@ -1,7 +1,8 @@
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Loader2, X } from 'lucide-react';
 
 interface SimplifiedBatchSkeletonProps {
   isVisible: boolean;
@@ -11,12 +12,14 @@ interface SimplifiedBatchSkeletonProps {
     isComplete: boolean;
   };
   className?: string;
+  onDismiss?: () => void;
 }
 
 export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = ({
   isVisible,
   completionProgress,
-  className = ''
+  className = '',
+  onDismiss
 }) => {
   if (!isVisible) return null;
 
@@ -26,14 +29,24 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
   return (
     <Card className={`w-full border-primary/20 bg-primary/5 ${className}`}>
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-primary">
               {isComplete ? 'Finalizing theme...' : 'Generating posts...'}
             </span>
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
           </div>
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          {onDismiss && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDismiss}
+              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         {/* Simplified progress indicator */}
