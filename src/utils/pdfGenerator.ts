@@ -2,17 +2,30 @@
 import jsPDF from 'jspdf';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
+// Helper function to get image dimensions
+const getImageDimensions = (imageDataUrl: string): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.width, height: img.height });
+    img.onerror = reject;
+    img.src = imageDataUrl;
+  });
+};
+
+// Helper function to convert pixels to PDF points (72 DPI)
+const pixelsToPdfPoints = (pixels: number): number => {
+  return pixels * 0.75; // 1 pixel = 0.75 points at 96 DPI
+};
+
 export const generatePostPDF = async (post: SocialMediaPost) => {
-  const pdf = new jsPDF();
-  let yPosition = 20;
+  let pdf: jsPDF | null = null;
   
-  // Only add images, no text content
   const images = [
-    { url: post.image_1_1_url, label: '1:1 Square' },
-    { url: post.image_16_9_url, label: '16:9 Landscape' },
-    { url: post.image_9_16_url, label: '9:16 Portrait' },
-    { url: post.image_4_3_url, label: '4:3 Standard' },
-    { url: post.image_3_4_url, label: '3:4 Social' }
+    { url: post.image_1_1_url },
+    { url: post.image_16_9_url },
+    { url: post.image_9_16_url },
+    { url: post.image_4_3_url },
+    { url: post.image_3_4_url }
   ].filter(img => img.url);
 
   if (images.length === 0) {
@@ -31,40 +44,35 @@ export const generatePostPDF = async (post: SocialMediaPost) => {
         reader.readAsDataURL(blob);
       });
 
-      // Add new page for each image (except the first)
-      if (i > 0) {
-        pdf.addPage();
-        yPosition = 20;
+      // Get actual image dimensions
+      const { width, height } = await getImageDimensions(imageDataUrl);
+      
+      // Convert pixels to PDF points
+      const pdfWidth = pixelsToPdfPoints(width);
+      const pdfHeight = pixelsToPdfPoints(height);
+
+      // Create PDF with first image dimensions or add new page
+      if (i === 0) {
+        pdf = new jsPDF({
+          unit: 'pt',
+          format: [pdfWidth, pdfHeight]
+        });
+      } else {
+        pdf!.addPage([pdfWidth, pdfHeight]);
       }
 
-      // Add small label for the aspect ratio
-      pdf.setFontSize(10);
-      pdf.text(image.label, 20, yPosition);
-      yPosition += 10;
-
-      // Calculate image dimensions to fit on page
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const maxWidth = pageWidth - 40; // 20px margin on each side
-      const maxHeight = pageHeight - yPosition - 20; // Leave space at bottom
-
-      let imgWidth = maxWidth;
-      let imgHeight = maxWidth * 0.75; // Default aspect ratio
-
-      // If image height exceeds page, scale down
-      if (imgHeight > maxHeight) {
-        imgHeight = maxHeight;
-        imgWidth = imgHeight / 0.75;
-      }
-
-      pdf.addImage(imageDataUrl, 'JPEG', 20, yPosition, imgWidth, imgHeight);
+      // Add image at (0,0) with exact dimensions - no margins, no text
+      pdf!.addImage(imageDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       
     } catch (error) {
-      console.error(`Failed to add image ${image.label}:`, error);
-      // Add error text instead of image
-      pdf.setFontSize(12);
-      pdf.text(`Failed to load ${image.label} image`, 20, yPosition + 20);
+      console.error(`Failed to add image:`, error);
+      // Skip failed images instead of adding error text
+      continue;
     }
+  }
+
+  if (!pdf) {
+    throw new Error('Failed to create PDF');
   }
 
   // Generate filename with post title and timestamp
@@ -73,41 +81,22 @@ export const generatePostPDF = async (post: SocialMediaPost) => {
 };
 
 export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]) => {
-  const pdf = new jsPDF();
+  let pdf: jsPDF | null = null;
   let isFirstPage = true;
 
   for (const post of posts) {
     const images = [
-      { url: post.image_1_1_url, label: '1:1 Square' },
-      { url: post.image_16_9_url, label: '16:9 Landscape' },
-      { url: post.image_9_16_url, label: '9:16 Portrait' },
-      { url: post.image_4_3_url, label: '4:3 Standard' },
-      { url: post.image_3_4_url, label: '3:4 Social' }
+      { url: post.image_1_1_url },
+      { url: post.image_16_9_url },
+      { url: post.image_9_16_url },
+      { url: post.image_4_3_url },
+      { url: post.image_3_4_url }
     ].filter(img => img.url);
 
     if (images.length === 0) continue;
 
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-      
+    for (const image of images) {
       try {
-        // Add new page (except for the very first)
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
-        isFirstPage = false;
-
-        let yPosition = 20;
-
-        // Add post title and image label
-        pdf.setFontSize(14);
-        pdf.text(post.title, 20, yPosition);
-        yPosition += 15;
-        
-        pdf.setFontSize(10);
-        pdf.text(image.label, 20, yPosition);
-        yPosition += 10;
-
         const response = await fetch(image.url);
         const blob = await response.blob();
         const imageDataUrl = await new Promise<string>((resolve) => {
@@ -116,26 +105,37 @@ export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]) => {
           reader.readAsDataURL(blob);
         });
 
-        // Calculate image dimensions
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const maxWidth = pageWidth - 40;
-        const maxHeight = pageHeight - yPosition - 20;
+        // Get actual image dimensions
+        const { width, height } = await getImageDimensions(imageDataUrl);
+        
+        // Convert pixels to PDF points
+        const pdfWidth = pixelsToPdfPoints(width);
+        const pdfHeight = pixelsToPdfPoints(height);
 
-        let imgWidth = maxWidth;
-        let imgHeight = maxWidth * 0.75;
-
-        if (imgHeight > maxHeight) {
-          imgHeight = maxHeight;
-          imgWidth = imgHeight / 0.75;
+        // Create PDF with first image dimensions or add new page
+        if (isFirstPage) {
+          pdf = new jsPDF({
+            unit: 'pt',
+            format: [pdfWidth, pdfHeight]
+          });
+          isFirstPage = false;
+        } else {
+          pdf!.addPage([pdfWidth, pdfHeight]);
         }
 
-        pdf.addImage(imageDataUrl, 'JPEG', 20, yPosition, imgWidth, imgHeight);
+        // Add image at (0,0) with exact dimensions - no margins, no text
+        pdf!.addImage(imageDataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
         
       } catch (error) {
         console.error(`Failed to add image for post ${post.title}:`, error);
+        // Skip failed images instead of adding error text
+        continue;
       }
     }
+  }
+
+  if (!pdf) {
+    throw new Error('No valid images found to create PDF');
   }
 
   const fileName = `social_media_images_${posts.length}_posts_${Date.now()}.pdf`;
