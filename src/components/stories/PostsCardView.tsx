@@ -230,7 +230,7 @@ export const PostsCardView = memo(({
             className="gap-2"
           >
             <Download className="h-4 w-4" />
-            Download All Images as PDF ({posts.length} posts)
+            Linked Slideshow
           </Button>
         </div>
       )}
