@@ -507,11 +507,16 @@ export default function StoriesDashboard() {
       theme_name: shimmerTheme.theme_name,
       description: themeDescription
     });
+    console.log('🔥 DASHBOARD: Set pending theme state:', {
+      theme_name: shimmerTheme.theme_name,
+      description: themeDescription,
+      theme_id: undefined
+    });
 
     // Add shimmer theme to the beginning of the list
     setAvailableThemes(prev => [shimmerTheme, ...prev]);
-    console.log('✨ Added pending theme to UI');
-    console.log('🎯 Pending theme state:', {
+    console.log('✨ DASHBOARD: Added pending theme to UI');
+    console.log('🎯 DASHBOARD: Pending theme state after setPendingTheme:', {
       theme_name: shimmerTheme.theme_name,
       description: themeDescription
     });
@@ -543,16 +548,21 @@ export default function StoriesDashboard() {
       
       // Update pending theme with the actual theme_id from the response
       if (data?.theme_id) {
-        console.log('🔗 Updating pending theme with theme_id:', data.theme_id);
-        console.log('🎯 Theme generation successful, theme_id:', data.theme_id);
-        setPendingTheme(prev => prev ? { ...prev, theme_id: data.theme_id } : null);
+        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.theme_id);
+        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.theme_id);
+        setPendingTheme(prev => {
+          const updated = prev ? { ...prev, theme_id: data.theme_id } : null;
+          console.log('📝 DASHBOARD: Updated pending theme state:', updated);
+          return updated;
+        });
         
         // Remove shimmer theme from available themes since real theme will be fetched
-        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)));
+        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
         
         // Refresh themes to get the new theme
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
         setAvailableThemes(refreshedThemes);
+        console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion

@@ -29,23 +29,40 @@ export const useThemeShimmer = ({
 
   // Fetch posts for the pending theme to check individual completion
   useEffect(() => {
+    console.log('🔍 SHIMMER: Fetching posts effect triggered', {
+      pendingTheme: pendingTheme ? {
+        theme_id: pendingTheme.theme_id,
+        theme_name: pendingTheme.theme_name
+      } : null
+    });
+    
     if (!pendingTheme?.theme_id) {
+      console.log('❌ SHIMMER: No pending theme or theme_id, clearing posts');
       setThemePosts([]);
       return;
     }
 
     const fetchThemePosts = async () => {
       try {
+        console.log('📡 SHIMMER: Fetching posts for theme_id:', pendingTheme.theme_id);
         const { data: posts } = await supabase
           .from('social_media_posts')
           .select('id, individual_prompt_status, theme_id')
           .eq('theme_id', pendingTheme.theme_id);
         
+        console.log('📊 SHIMMER: Posts fetched:', {
+          count: posts?.length || 0,
+          posts: posts?.map(p => ({
+            id: p.id,
+            status: p.individual_prompt_status
+          }))
+        });
+        
         if (posts) {
           setThemePosts(posts);
         }
       } catch (error) {
-        console.error('Error fetching theme posts:', error);
+        console.error('❌ SHIMMER: Error fetching theme posts:', error);
       }
     };
 
@@ -151,10 +168,15 @@ export const useThemeShimmer = ({
   
   console.log('✨ SHIMMER CHECK:', {
     hasPendingTheme: !!pendingTheme,
-    themeId: pendingTheme?.theme_id,
+    pendingThemeObject: pendingTheme ? {
+      theme_id: pendingTheme.theme_id,
+      theme_name: pendingTheme.theme_name,
+      description: pendingTheme.description
+    } : null,
     totalPosts: themePosts.length,
     completedPosts: themePosts.filter(p => p.individual_prompt_status === 'completed').length,
-    shimmerVisible
+    shimmerVisible,
+    shouldShowShimmerResult: shouldShowShimmer(pendingTheme, themePosts)
   });
 
   return {
