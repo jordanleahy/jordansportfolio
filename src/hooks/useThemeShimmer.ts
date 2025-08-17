@@ -161,9 +161,8 @@ export const useThemeShimmer = ({
       completedTheme = realThemes.find(theme => theme.id === pendingTheme.theme_id);
       console.log('🔍 COMPLETION: Searching by theme_id:', pendingTheme.theme_id, 'found:', !!completedTheme);
       
-      if (completedTheme) {
-        currentThemePosts = themePosts.filter(post => post.theme_id === completedTheme.id);
-      }
+      // Always filter posts by theme_id, regardless of whether theme is found
+      currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
     } else {
       console.log('🔍 COMPLETION: No theme_id provided - cannot search for theme');
     }
