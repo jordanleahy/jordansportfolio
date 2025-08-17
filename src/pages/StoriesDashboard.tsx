@@ -72,31 +72,6 @@ export default function StoriesDashboard() {
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
 
-  // Restore pending theme state on page load/refresh
-  useEffect(() => {
-    if (!user || availableThemes.length === 0) return;
-
-    // Look for themes in generating status - check both prompt status and lifecycle status
-    const generatingTheme = availableThemes.find(theme => 
-      theme.prompt_generation_status === 'in_progress' ||
-      theme.lifecycle_status === 'generating' ||
-      theme.lifecycle_status === 'pending'
-    );
-
-    if (generatingTheme && !pendingTheme) {
-      console.log('🔄 Found generating theme on refresh, restoring shimmer:', generatingTheme.theme_name);
-      setPendingTheme({
-        theme_id: generatingTheme.id,
-        theme_name: generatingTheme.theme_name,
-        description: generatingTheme.description
-      });
-      setIsGeneratingTheme(true);
-    } else if (pendingTheme && !generatingTheme) {
-      // Don't immediately clear pending themes - let the shimmer hook handle completion logic
-      // The shimmer hook will clear when the theme is actually completed
-      console.log('⏳ Waiting for theme generation to complete, letting shimmer hook handle state');
-    }
-  }, [availableThemes, user, pendingTheme]);
   const {
     toast
   } = useToast();
@@ -490,38 +465,11 @@ export default function StoriesDashboard() {
     // Generate a theme_id immediately when creating pending theme
     const themeId = crypto.randomUUID();
     
-    // Create a pending shimmer theme for optimistic UI
-    const shimmerTheme: ThemeWithPosts = {
-      id: 'pending-' + Date.now(),
-      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
-      description: themeDescription,
-      category: themeDescription.slice(0, 50),
-      post_count: 0,
-      first_post: {
-        id: 'pending',
-        title: 'Generating theme...',
-        description: themeDescription
-      }
-    };
-    
-    // Set pending theme BEFORE adding to UI - now with real theme_id
+    // Set pending theme for tracking
     setPendingTheme({
-      theme_id: themeId,  // Include the real theme_id for matching
-      theme_name: shimmerTheme.theme_name,
+      theme_id: themeId,
+      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
       description: themeDescription
-    });
-    console.log('🔥 DASHBOARD: Set pending theme state:', {
-      theme_name: shimmerTheme.theme_name,
-      description: themeDescription,
-      theme_id: themeId
-    });
-
-    // Add shimmer theme to the beginning of the list
-    setAvailableThemes(prev => [shimmerTheme, ...prev]);
-    console.log('🎯 DASHBOARD: Pending theme state after setPendingTheme:', {
-      theme_name: shimmerTheme.theme_name,
-      description: themeDescription,
-      theme_id: themeId
     });
     
     try {
@@ -559,8 +507,6 @@ export default function StoriesDashboard() {
           return updated;
         });
         
-        // Remove shimmer theme from available themes since real theme will be fetched
-        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
         
         // Refresh themes to get the new theme
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
