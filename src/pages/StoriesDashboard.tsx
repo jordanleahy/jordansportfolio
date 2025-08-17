@@ -92,15 +92,9 @@ export default function StoriesDashboard() {
       });
       setIsGeneratingTheme(true);
     } else if (pendingTheme && !generatingTheme) {
-      // Only clear pending theme if it has a theme_id and we can't find it
-      // Don't clear if theme_id is undefined (still being created) - let the shimmer hook handle completion
-      if (pendingTheme.theme_id) {
-        console.log('🧹 No generating themes found for theme_id, clearing pending state');
-        clearPendingThemeState();
-        setIsGeneratingTheme(false);
-      } else {
-        console.log('⏳ Theme still being created (no theme_id yet), letting shimmer hook handle completion check');
-      }
+      // Don't immediately clear pending themes - let the shimmer hook handle completion logic
+      // The shimmer hook will clear when the theme is actually completed
+      console.log('⏳ Waiting for theme generation to complete, letting shimmer hook handle state');
     }
   }, [availableThemes, user, pendingTheme]);
   const {
