@@ -39,14 +39,15 @@ export const InstantLoadingIndicator: React.FC<InstantLoadingIndicatorProps> = (
 
   return (
     <div className={cn(
-      "flex items-center gap-2 text-sm text-muted-foreground",
-      "animate-in fade-in-0 duration-200",
+      "inline-flex items-center gap-2 text-sm text-white",
+      "bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2",
+      "animate-in fade-in-0 duration-200 shadow-lg",
       className
     )}>
       <Loader2 className="h-4 w-4 animate-spin" />
       <span>{getProgressMessage()}</span>
       {!showTimer && elapsedTime > 3000 && (
-        <span className="text-xs">
+        <span className="text-xs opacity-80">
           ({Math.floor(elapsedTime / 1000)}s)
         </span>
       )}
