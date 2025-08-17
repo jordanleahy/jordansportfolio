@@ -76,9 +76,11 @@ export default function StoriesDashboard() {
   useEffect(() => {
     if (!user || availableThemes.length === 0) return;
 
-    // Look for themes in generating status (in_progress only, not completed)
+    // Look for themes in generating status - check both prompt status and lifecycle status
     const generatingTheme = availableThemes.find(theme => 
-      theme.prompt_generation_status === 'in_progress'
+      theme.prompt_generation_status === 'in_progress' ||
+      theme.lifecycle_status === 'generating' ||
+      theme.lifecycle_status === 'pending'
     );
 
     if (generatingTheme && !pendingTheme) {
@@ -90,10 +92,15 @@ export default function StoriesDashboard() {
       });
       setIsGeneratingTheme(true);
     } else if (pendingTheme && !generatingTheme) {
-      // Clear pending theme if no generating theme found
-      console.log('🧹 No generating themes found, clearing pending state');
-      clearPendingThemeState();
-      setIsGeneratingTheme(false);
+      // Only clear pending theme if it has a theme_id and we can't find it
+      // Don't clear if theme_id is undefined (still being created)
+      if (pendingTheme.theme_id) {
+        console.log('🧹 No generating themes found for theme_id, clearing pending state');
+        clearPendingThemeState();
+        setIsGeneratingTheme(false);
+      } else {
+        console.log('⏳ Theme still being created (no theme_id yet), keeping pending state');
+      }
     }
   }, [availableThemes, user, pendingTheme]);
   const {
