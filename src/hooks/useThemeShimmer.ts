@@ -128,22 +128,35 @@ export const useThemeShimmer = ({
     let completedTheme: any = null;
     let currentThemePosts: any[] = [];
 
+    // Filter out placeholder "pending" themes - only look at real database themes
+    const realThemes = availableThemes.filter(theme => 
+      !theme.id.startsWith('pending-') && 
+      theme.lifecycle_status !== undefined
+    );
+
+    console.log('🔍 COMPLETION: Filtering themes:', {
+      totalThemes: availableThemes.length,
+      realThemes: realThemes.length,
+      pendingThemes: availableThemes.filter(t => t.id.startsWith('pending-')).length
+    });
+
     // Try to find completed theme by ID first
     if (pendingTheme.theme_id) {
-      completedTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
+      completedTheme = realThemes.find(theme => theme.id === pendingTheme.theme_id);
       currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
       console.log('🔍 COMPLETION: Searching by theme_id:', pendingTheme.theme_id);
     } else {
-      // If no theme_id, try to match by theme name or description
+      // If no theme_id, try to match by theme name or description in real themes only
       const searchTerm = pendingTheme.theme_name.toLowerCase();
-      completedTheme = availableThemes.find(theme => 
+      completedTheme = realThemes.find(theme => 
         theme.theme_name.toLowerCase().includes(searchTerm) ||
         searchTerm.includes(theme.category?.toLowerCase() || '') ||
         (theme.description && theme.description.toLowerCase().includes(searchTerm))
       );
       console.log('🔍 COMPLETION: Searching by name/description:', {
         searchTerm,
-        foundTheme: completedTheme?.theme_name
+        foundTheme: completedTheme?.theme_name,
+        searchingInRealThemes: realThemes.length
       });
       
       if (completedTheme) {
