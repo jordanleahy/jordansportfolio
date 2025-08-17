@@ -111,16 +111,60 @@ export const useThemeShimmer = ({
 
   // Completion check - only individual posts matter
   useEffect(() => {
-    if (!pendingTheme || !pendingTheme.theme_id) return;
+    console.log('🔍 COMPLETION CHECK:', {
+      hasPendingTheme: !!pendingTheme,
+      pendingThemeId: pendingTheme?.theme_id,
+      pendingThemeName: pendingTheme?.theme_name,
+      totalThemePosts: themePosts.length,
+      availableThemesCount: availableThemes.length
+    });
+
+    if (!pendingTheme || !pendingTheme.theme_id) {
+      console.log('❌ COMPLETION: No pending theme or theme_id, skipping completion check');
+      return;
+    }
 
     const currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
+    console.log('📊 COMPLETION: Current theme posts:', {
+      themeId: pendingTheme.theme_id,
+      postsForTheme: currentThemePosts.length,
+      allPosts: currentThemePosts.map(p => ({
+        id: p.id,
+        status: p.individual_prompt_status
+      }))
+    });
     
-    if (currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts)) {
-      console.log('✅ All individual posts completed for theme:', pendingTheme.theme_name);
-      
-      const completedTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
+    // Also check if the theme itself is completed in availableThemes
+    const completedTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
+    console.log('🎯 COMPLETION: Found theme in available themes:', {
+      found: !!completedTheme,
+      themeData: completedTheme ? {
+        id: completedTheme.id,
+        lifecycle_status: completedTheme.lifecycle_status,
+        prompt_generation_status: completedTheme.prompt_generation_status,
+        prompt_completion_count: completedTheme.prompt_completion_count,
+        total_posts_count: completedTheme.total_posts_count
+      } : null
+    });
+
+    // Clear shimmer if theme is completed (either through posts or theme status)
+    const postsCompleted = currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts);
+    const themeCompleted = completedTheme && (
+      completedTheme.lifecycle_status === 'ready' || 
+      completedTheme.lifecycle_status === 'completed' ||
+      completedTheme.prompt_generation_status === 'completed'
+    );
+
+    console.log('⭐ COMPLETION STATUS:', {
+      postsCompleted,
+      themeCompleted,
+      shouldClear: postsCompleted || themeCompleted
+    });
+    
+    if (postsCompleted || themeCompleted) {
+      console.log('✅ Theme completed - clearing shimmer and navigating');
+      clearPendingThemeState();
       if (completedTheme) {
-        clearPendingThemeState();
         navigate(`/stories/id/${completedTheme.id}`);
       }
     }
