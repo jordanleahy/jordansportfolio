@@ -525,7 +525,13 @@ export default function StoriesDashboard() {
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
         // Scroll to the generating theme using the hook
-        scrollToElement();
+        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll');
+        console.log('🔍 DASHBOARD: Current DOM state for generating themes:', 
+          document.querySelectorAll('[data-theme-state="generating"]'));
+        setTimeout(() => {
+          console.log('🚀 DASHBOARD: Triggering scroll to generating theme');
+          scrollToElement();
+        }, 300);
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
