@@ -218,6 +218,7 @@ export class OptimizedSocialMediaService {
     category: string;
     post_count: number;
     prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
+    lifecycle_status?: 'pending' | 'generating' | 'ready' | 'completed';
     first_post: {
       id: string;
       title: string;
@@ -248,7 +249,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count, lifecycle_status')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -298,13 +299,14 @@ export class OptimizedSocialMediaService {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Filter out incomplete themes (only show themes where all prompts are completed)
-    const completedThemes = themes.filter((theme: any) => 
-      theme.prompt_generation_status === 'completed' &&
-      theme.prompt_completion_count === theme.total_posts_count
+    // Include completed themes AND generating themes (for shimmer)
+    const visibleThemes = themes.filter((theme: any) => 
+      theme.prompt_generation_status === 'completed' ||
+      theme.lifecycle_status === 'generating' ||
+      theme.lifecycle_status === 'pending'
     );
     
-    const processedThemes = completedThemes.map((theme: any) => {
+    const processedThemes = visibleThemes.map((theme: any) => {
       const posts = postsByTheme[theme.id] || [];
       
       // Find Day 1 post first, then fall back to earliest post with image
@@ -327,6 +329,7 @@ export class OptimizedSocialMediaService {
         category: theme.category,
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
+        lifecycle_status: theme.lifecycle_status,
         prompt_completion_count: theme.prompt_completion_count || 0,
         total_posts_count: theme.total_posts_count || 0,
         first_post: firstPost ? {
