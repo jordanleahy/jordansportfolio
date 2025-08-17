@@ -14,24 +14,20 @@ export const areAllPostPromptsCompleted = (posts: any[]): boolean => {
 };
 
 /**
- * Check if a theme has completed all generation processes
+ * Check if a theme has completed all individual post prompts (simplified)
  */
 export const isThemeFullyComplete = (theme: ThemeWithPosts, themePosts?: any[]): boolean => {
-  // Theme is complete if prompt generation is done
-  const themeComplete = theme.prompt_generation_status === SHIMMER_CONSTANTS.STATUS.COMPLETED;
-  
-  // If posts are provided, also check individual prompt completion
+  // Only check individual post completion - ignore theme-level status
   if (themePosts && themePosts.length > 0) {
-    const postsComplete = areAllPostPromptsCompleted(themePosts);
-    return themeComplete && postsComplete;
+    return areAllPostPromptsCompleted(themePosts);
   }
   
-  // If no posts provided, just check theme completion
-  return themeComplete;
+  // If no posts provided, can't be complete
+  return false;
 };
 
 /**
- * Find the completed theme that matches a pending theme
+ * Find the completed theme that matches a pending theme (simplified)
  */
 export const findCompletedTheme = (
   pendingTheme: PendingTheme | null, 
@@ -43,14 +39,19 @@ export const findCompletedTheme = (
   const matchingTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
   if (!matchingTheme) return null;
   
-  // Get posts for this specific theme if allPosts provided
+  // Get posts for this specific theme
   const themePosts = allPosts?.filter(post => post.theme_id === matchingTheme.id);
   
-  return isThemeFullyComplete(matchingTheme, themePosts) ? matchingTheme : null;
+  // Only check if all individual posts are completed
+  if (themePosts && themePosts.length > 0) {
+    return areAllPostPromptsCompleted(themePosts) ? matchingTheme : null;
+  }
+  
+  return null;
 };
 
 /**
- * Check if shimmer should be visible based on pending theme and completion state
+ * Check if shimmer should be visible (simplified - only check individual posts)
  */
 export const shouldShowShimmer = (
   pendingTheme: PendingTheme | null,
@@ -59,6 +60,17 @@ export const shouldShowShimmer = (
 ): boolean => {
   if (!pendingTheme) return false;
   
-  const completedTheme = findCompletedTheme(pendingTheme, availableThemes, allPosts);
-  return !completedTheme;
+  // If no theme_id yet, always show shimmer
+  if (!pendingTheme.theme_id) return true;
+  
+  // Find posts for this pending theme
+  const themePosts = allPosts?.filter(post => post.theme_id === pendingTheme.theme_id);
+  
+  // Show shimmer until ALL individual posts are completed
+  if (themePosts && themePosts.length > 0) {
+    return !areAllPostPromptsCompleted(themePosts);
+  }
+  
+  // If no posts found yet, keep showing shimmer
+  return true;
 };

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
-import { shouldShowShimmer, findCompletedTheme } from '@/utils/shimmerUtils';
+import { shouldShowShimmer, findCompletedTheme, areAllPostPromptsCompleted } from '@/utils/shimmerUtils';
 
 interface ThemeShimmerOptions {
   pendingTheme: PendingTheme | null;
@@ -94,22 +94,27 @@ export const useThemeShimmer = ({
     }
   };
 
-  // Main completion check logic
+  // Simplified completion check - only individual posts matter
   useEffect(() => {
-    if (!pendingTheme) return;
+    if (!pendingTheme || !pendingTheme.theme_id) return;
 
-    const completedTheme = findCompletedTheme(pendingTheme, availableThemes, themePosts);
+    // Find posts for this pending theme
+    const currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
     
-    if (completedTheme) {
-      console.log('✅ Theme fully completed (including all individual prompts):', completedTheme.theme_name);
+    // Check if ALL individual posts are completed
+    if (currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts)) {
+      console.log('✅ All individual posts completed for theme:', pendingTheme.theme_name);
       
-      // Clear pending theme immediately - no delay needed
-      clearPendingThemeState();
+      // Find the theme in available themes
+      const completedTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
       
-      // Navigate to completed theme without delay
-      navigate(`/stories/id/${completedTheme.id}`);
+      if (completedTheme) {
+        // Clear pending theme and navigate
+        clearPendingThemeState();
+        navigate(`/stories/id/${completedTheme.id}`);
+      }
     }
-  }, [pendingTheme, availableThemes, themePosts, navigate]);
+  }, [pendingTheme, themePosts, availableThemes, navigate]);
 
   // Clear pending theme when user navigates away from stories page
   useEffect(() => {
@@ -152,14 +157,13 @@ export const useThemeShimmer = ({
   // Calculate shimmer visibility using centralized logic
   const shimmerVisible = shouldShowShimmer(pendingTheme, availableThemes, themePosts);
   
-  // Debug logging for shimmer visibility
-  console.log('🔍 Shimmer visibility check:', {
-    pendingTheme: !!pendingTheme,
-    pendingThemeId: pendingTheme?.theme_id,
-    availableThemesCount: availableThemes.length,
-    themePostsCount: themePosts.length,
-    shimmerVisible,
-    completedPosts: themePosts.filter(post => post.individual_prompt_status === 'completed').length
+  // Debug logging for shimmer visibility (simplified)
+  console.log('🔍 Shimmer check:', {
+    hasPendingTheme: !!pendingTheme,
+    themeId: pendingTheme?.theme_id,
+    postsForTheme: pendingTheme?.theme_id ? themePosts.filter(p => p.theme_id === pendingTheme.theme_id).length : 0,
+    completedPosts: pendingTheme?.theme_id ? themePosts.filter(p => p.theme_id === pendingTheme.theme_id && p.individual_prompt_status === 'completed').length : 0,
+    shimmerVisible
   });
 
   return {

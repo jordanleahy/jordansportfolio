@@ -33,6 +33,7 @@ import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
+import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
 
 // Lazy load components
@@ -543,7 +544,15 @@ export default function StoriesDashboard() {
       // Update pending theme with the actual theme_id from the response
       if (data?.theme_id) {
         console.log('🔗 Updating pending theme with theme_id:', data.theme_id);
+        console.log('🎯 Theme generation successful, theme_id:', data.theme_id);
         setPendingTheme(prev => prev ? { ...prev, theme_id: data.theme_id } : null);
+        
+        // Remove shimmer theme from available themes since real theme will be fetched
+        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)));
+        
+        // Refresh themes to get the new theme
+        const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+        setAvailableThemes(refreshedThemes);
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
