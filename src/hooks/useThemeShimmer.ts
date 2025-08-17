@@ -193,6 +193,15 @@ export const useThemeShimmer = ({
       completedTheme.prompt_generation_status === 'completed'
     );
 
+    // Log when post prompts are complete
+    if (postsCompleted && currentThemePosts.length > 0) {
+      console.log('🎯 POST PROMPTS COMPLETE:', {
+        themeId: completedTheme?.id,
+        completedPosts: currentThemePosts.length,
+        allPostsComplete: true
+      });
+    }
+
     console.log('⭐ COMPLETION STATUS:', {
       postsCompleted,
       themeCompleted,
