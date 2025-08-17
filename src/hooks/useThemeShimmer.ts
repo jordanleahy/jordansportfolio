@@ -9,7 +9,6 @@ interface ThemeShimmerOptions {
   pendingTheme: PendingTheme | null;
   setPendingTheme: React.Dispatch<React.SetStateAction<PendingTheme | null>>;
   setAvailableThemes: React.Dispatch<React.SetStateAction<ThemeWithPosts[]>>;
-  availableThemes: ThemeWithPosts[];
 }
 
 /**
@@ -19,8 +18,7 @@ interface ThemeShimmerOptions {
 export const useThemeShimmer = ({
   pendingTheme,
   setPendingTheme,
-  setAvailableThemes,
-  availableThemes
+  setAvailableThemes
 }: ThemeShimmerOptions) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -116,10 +114,9 @@ export const useThemeShimmer = ({
     console.log('🔧 COMPLETION EFFECT DEPENDENCIES CHANGED:', {
       pendingTheme: !!pendingTheme,
       themePostsLength: themePosts?.length || 0,
-      availableThemesLength: availableThemes?.length || 0,
       navigateExists: !!navigate
     });
-  }, [pendingTheme, themePosts, availableThemes, navigate]);
+  }, [pendingTheme, themePosts, navigate]);
 
   // Simplified completion check - focus only on post completion
   useEffect(() => {

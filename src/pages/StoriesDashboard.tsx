@@ -140,8 +140,7 @@ export default function StoriesDashboard() {
   } = useThemeShimmer({
     pendingTheme,
     setPendingTheme,
-    setAvailableThemes,
-    availableThemes
+    setAvailableThemes
   });
 
 
