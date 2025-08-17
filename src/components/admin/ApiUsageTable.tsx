@@ -193,9 +193,23 @@ export const ApiUsageTable = ({ data, onViewDetails, isLoading }: ApiUsageTableP
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className={`text-sm font-medium ${getCostColorClass(record.estimated_cost)}`}>
-                    {formatCurrency(record.estimated_cost)}
-                  </span>
+                  <div className="space-y-1">
+                    <span className={`text-sm font-medium ${getCostColorClass(record.estimated_cost)}`}>
+                      {formatCurrency(record.estimated_cost)}
+                    </span>
+                    {record.actual_cost !== undefined && record.openai_synced && (
+                      <div className="text-xs text-muted-foreground">
+                        Actual: {formatCurrency(record.actual_cost)}
+                      </div>
+                    )}
+                    {record.openai_synced && (
+                      <div className="text-xs">
+                        <Badge variant="outline" className="text-xs py-0 px-1">
+                          {record.sync_status === 'synced' ? '✓ Synced' : 'Pending'}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   {record.response_time_ms && (
@@ -275,8 +289,20 @@ export const ApiUsageTable = ({ data, onViewDetails, isLoading }: ApiUsageTableP
                 </div>
                 <div>
                   <span className="text-muted-foreground">Cost:</span>
-                  <div className={`font-medium ${getCostColorClass(record.estimated_cost)}`}>
-                    {formatCurrency(record.estimated_cost)}
+                  <div className="space-y-1">
+                    <div className={`font-medium ${getCostColorClass(record.estimated_cost)}`}>
+                      {formatCurrency(record.estimated_cost)}
+                    </div>
+                    {record.actual_cost !== undefined && record.openai_synced && (
+                      <div className="text-xs text-muted-foreground">
+                        Actual: {formatCurrency(record.actual_cost)}
+                      </div>
+                    )}
+                    {record.openai_synced && (
+                      <Badge variant="outline" className="text-xs py-0 px-1">
+                        {record.sync_status === 'synced' ? '✓ Synced' : 'Pending'}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>

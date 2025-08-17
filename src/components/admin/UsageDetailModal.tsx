@@ -158,7 +158,7 @@ export const UsageDetailModal = ({ record, open, onOpenChange }: UsageDetailModa
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Cost</span>
                 </div>
-                <div className="ml-6 space-y-1">
+                <div className="ml-6 space-y-2">
                   <p className={`text-lg font-bold ${getCostColorClass(record.estimated_cost)}`}>
                     Estimated: {formatCurrency(record.estimated_cost)}
                   </p>
@@ -166,6 +166,18 @@ export const UsageDetailModal = ({ record, open, onOpenChange }: UsageDetailModa
                     <p className="text-sm text-muted-foreground">
                       Actual: {formatCurrency(record.actual_cost)}
                     </p>
+                  )}
+                  {record.openai_synced && (
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={record.sync_status === 'synced' ? 'default' : 'secondary'}>
+                        {record.sync_status === 'synced' ? '✓ OpenAI Synced' : 'Sync Pending'}
+                      </Badge>
+                      {record.openai_timestamp && (
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(record.openai_timestamp), 'MMM dd, HH:mm')}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
