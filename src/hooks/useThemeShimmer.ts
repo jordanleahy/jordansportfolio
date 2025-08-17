@@ -137,10 +137,13 @@ export const useThemeShimmer = ({
       return;
     }
 
+    console.log('🎯 COMPLETION: Starting theme search...');
+
     let completedTheme: any = null;
     let currentThemePosts: any[] = [];
 
     // Filter out placeholder "pending" themes - only look at real database themes
+    console.log('🔍 COMPLETION: About to filter themes...');
     const realThemes = availableThemes.filter(theme => 
       !theme.id.startsWith('pending-') && 
       theme.lifecycle_status !== undefined
