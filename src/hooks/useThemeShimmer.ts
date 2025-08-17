@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
-import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
-import { shouldShowShimmer, findCompletedTheme, areAllPostPromptsCompleted } from '@/utils/shimmerUtils';
+import { shouldShowShimmer, areAllPostPromptsCompleted } from '@/utils/shimmerUtils';
 
 interface ThemeShimmerOptions {
   pendingTheme: PendingTheme | null;
@@ -81,11 +80,10 @@ export const useThemeShimmer = ({
     };
   }, [pendingTheme?.theme_id]);
 
-  // Centralized cleanup function
+  // Simple cleanup function
   const clearPendingThemeState = () => {
     console.log('🧹 Clearing pending theme state');
     setPendingTheme(null);
-    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)));
     setThemePosts([]);
     
     if (completionCheckRef.current) {
@@ -94,22 +92,17 @@ export const useThemeShimmer = ({
     }
   };
 
-  // Simplified completion check - only individual posts matter
+  // Completion check - only individual posts matter
   useEffect(() => {
     if (!pendingTheme || !pendingTheme.theme_id) return;
 
-    // Find posts for this pending theme
     const currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
     
-    // Check if ALL individual posts are completed
     if (currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts)) {
       console.log('✅ All individual posts completed for theme:', pendingTheme.theme_name);
       
-      // Find the theme in available themes
       const completedTheme = availableThemes.find(theme => theme.id === pendingTheme.theme_id);
-      
       if (completedTheme) {
-        // Clear pending theme and navigate
         clearPendingThemeState();
         navigate(`/stories/id/${completedTheme.id}`);
       }
@@ -154,13 +147,10 @@ export const useThemeShimmer = ({
     }, 0);
   };
 
-  // Calculate shimmer visibility using ultra-simplified logic
   const shimmerVisible = shouldShowShimmer(pendingTheme, themePosts);
   
-  // Debug logging for ultra-simplified shimmer
-  console.log('✨ SIMPLE SHIMMER CHECK:', {
+  console.log('✨ SHIMMER CHECK:', {
     hasPendingTheme: !!pendingTheme,
-    themeName: pendingTheme?.theme_name,
     themeId: pendingTheme?.theme_id,
     totalPosts: themePosts.length,
     completedPosts: themePosts.filter(p => p.individual_prompt_status === 'completed').length,
@@ -171,7 +161,6 @@ export const useThemeShimmer = ({
     dismissShimmer,
     handleThemeClick,
     shouldShowShimmer: shimmerVisible,
-    // Simplified progress tracking
     completionProgress: {
       total: themePosts.length,
       completed: themePosts.filter(post => post.individual_prompt_status === 'completed').length,
