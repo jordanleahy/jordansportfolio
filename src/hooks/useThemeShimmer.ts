@@ -143,8 +143,25 @@ export const useThemeShimmer = ({
     // Try to find completed theme by ID first
     if (pendingTheme.theme_id) {
       completedTheme = realThemes.find(theme => theme.id === pendingTheme.theme_id);
-      currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
-      console.log('🔍 COMPLETION: Searching by theme_id:', pendingTheme.theme_id);
+      console.log('🔍 COMPLETION: Searching by theme_id:', pendingTheme.theme_id, 'found:', !!completedTheme);
+      
+      // If not found by ID, try searching by name/description as fallback
+      if (!completedTheme) {
+        const searchTerm = pendingTheme.theme_name.toLowerCase();
+        completedTheme = realThemes.find(theme => 
+          theme.theme_name.toLowerCase().includes(searchTerm) ||
+          searchTerm.includes(theme.category?.toLowerCase() || '') ||
+          (theme.description && theme.description.toLowerCase().includes(searchTerm))
+        );
+        console.log('🔍 COMPLETION: ID search failed, trying name/description:', {
+          searchTerm,
+          foundTheme: completedTheme?.theme_name
+        });
+      }
+      
+      if (completedTheme) {
+        currentThemePosts = themePosts.filter(post => post.theme_id === completedTheme.id);
+      }
     } else {
       // If no theme_id, try to match by theme name or description in real themes only
       const searchTerm = pendingTheme.theme_name.toLowerCase();
