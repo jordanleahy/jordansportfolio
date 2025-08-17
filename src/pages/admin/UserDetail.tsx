@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { useSubscriptionTiers } from "@/hooks/useSubscriptionStatus";
+import { useApiUsageData } from "@/hooks/useApiUsageQueries";
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
@@ -72,6 +73,17 @@ export default function AdminUserDetail() {
     enabled: validId,
     refetchOnWindowFocus: false,
     staleTime: 30_000,
+  });
+
+  // API Usage Data Hook - for detailed API call tracking
+  const {
+    data: apiUsageData,
+    isLoading: apiUsageLoading,
+    error: apiUsageError
+  } = useApiUsageData({
+    userId: validId ? id : undefined,
+    startDate: from.split('T')[0], // Convert ISO to YYYY-MM-DD format
+    endDate: to.split('T')[0]
   });
 
   const title = data?.user?.full_name ? `${data.user.full_name} - Usage` : 'User Usage';
