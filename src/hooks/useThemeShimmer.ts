@@ -151,6 +151,16 @@ export const useThemeShimmer = ({
 
   // Calculate shimmer visibility using centralized logic
   const shimmerVisible = shouldShowShimmer(pendingTheme, availableThemes, themePosts);
+  
+  // Debug logging for shimmer visibility
+  console.log('🔍 Shimmer visibility check:', {
+    pendingTheme: !!pendingTheme,
+    pendingThemeId: pendingTheme?.theme_id,
+    availableThemesCount: availableThemes.length,
+    themePostsCount: themePosts.length,
+    shimmerVisible,
+    completedPosts: themePosts.filter(post => post.individual_prompt_status === 'completed').length
+  });
 
   return {
     dismissShimmer,

@@ -500,6 +500,8 @@ export default function StoriesDashboard() {
         description: themeDescription
       }
     };
+    
+    // Set pending theme BEFORE adding to UI
     setPendingTheme({
       theme_name: shimmerTheme.theme_name,
       description: themeDescription
@@ -508,6 +510,10 @@ export default function StoriesDashboard() {
     // Add shimmer theme to the beginning of the list
     setAvailableThemes(prev => [shimmerTheme, ...prev]);
     console.log('✨ Added pending theme to UI');
+    console.log('🎯 Pending theme state:', {
+      theme_name: shimmerTheme.theme_name,
+      description: themeDescription
+    });
     
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
