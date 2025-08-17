@@ -14,6 +14,9 @@ import { ArrowLeft, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { useSubscriptionTiers } from "@/hooks/useSubscriptionStatus";
 import { useApiUsageData } from "@/hooks/useApiUsageQueries";
+import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
+import { UsageDetailModal } from "@/components/admin/UsageDetailModal";
+import type { ApiUsageRecord } from "@/types/apiUsage";
 
 interface UsageDetailResponse {
   user: { user_id: string; email: string | null; full_name: string | null; created_at: string } | null;
@@ -53,6 +56,8 @@ export default function AdminUserDetail() {
   const [selectedTierName, setSelectedTierName] = useState<string>("");
   const { data: tiers = [] } = useSubscriptionTiers();
   const [saving, setSaving] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<ApiUsageRecord | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { from, to } = useMemo(() => {
     const to = new Date();
@@ -382,7 +387,7 @@ export default function AdminUserDetail() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle>Recent Generations</CardTitle>
           </CardHeader>
@@ -427,6 +432,30 @@ export default function AdminUserDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Detailed API Call History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Detailed API Call History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ApiUsageTable
+              data={apiUsageData?.data || []}
+              isLoading={apiUsageLoading}
+              onViewDetails={(record) => {
+                setSelectedRecord(record);
+                setModalOpen(true);
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Usage Detail Modal */}
+        <UsageDetailModal
+          record={selectedRecord}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+        />
       </main>
     </PageLayout>
   );
