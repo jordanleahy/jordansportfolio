@@ -7,17 +7,30 @@ interface InstantLoadingIndicatorProps {
   message?: string;
   elapsedTime?: number;
   className?: string;
+  timerSeconds?: number;
+  showTimer?: boolean;
+  isTimerExpired?: boolean;
 }
 
 export const InstantLoadingIndicator: React.FC<InstantLoadingIndicatorProps> = ({
   isVisible,
   message = "Generating...",
   elapsedTime = 0,
-  className
+  className,
+  timerSeconds,
+  showTimer = false,
+  isTimerExpired = false
 }) => {
   if (!isVisible) return null;
 
   const getProgressMessage = () => {
+    if (showTimer && timerSeconds !== undefined) {
+      if (isTimerExpired) {
+        return `${message} (Processing...)`;
+      }
+      return `${message} (${timerSeconds}s)`;
+    }
+    
     if (elapsedTime < 2000) return message;
     if (elapsedTime < 5000) return "Processing your request...";
     if (elapsedTime < 8000) return "Almost there...";
@@ -32,7 +45,7 @@ export const InstantLoadingIndicator: React.FC<InstantLoadingIndicatorProps> = (
     )}>
       <Loader2 className="h-4 w-4 animate-spin" />
       <span>{getProgressMessage()}</span>
-      {elapsedTime > 3000 && (
+      {!showTimer && elapsedTime > 3000 && (
         <span className="text-xs">
           ({Math.floor(elapsedTime / 1000)}s)
         </span>

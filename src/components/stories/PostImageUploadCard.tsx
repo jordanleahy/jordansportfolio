@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
+import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ export const PostImageUploadCard = ({
   hasPrompt = true
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const timer = useImageGenerationTimer();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -44,6 +46,22 @@ export const PostImageUploadCard = ({
   
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
+
+  // Handle timer based on generation state
+  useEffect(() => {
+    if (isGenerating && !timer.isRunning) {
+      timer.startTimer();
+    } else if (!isGenerating && timer.isRunning) {
+      timer.stopTimer();
+    }
+  }, [isGenerating, timer]);
+
+  // Stop timer if image is ready with 20+ seconds remaining
+  useEffect(() => {
+    if (imageUrl && timer.isRunning && timer.secondsRemaining >= 20) {
+      timer.stopTimer();
+    }
+  }, [imageUrl, timer]);
   
   // Debug effect to track state changes
   useEffect(() => {
@@ -290,11 +308,23 @@ export const PostImageUploadCard = ({
         if (shouldShowShimmer) {
           console.log('🎨 IMAGE_GEN: Rendering shimmer for', type);
           return (
-            <SimpleShimmer 
-              aspectRatio={aspectRatio.replace(':', '/')} 
-              variant="full"
-              className="w-full h-16"
-            />
+            <div className="relative">
+              <SimpleShimmer 
+                aspectRatio={aspectRatio.replace(':', '/')} 
+                variant="full"
+                className="w-full h-16"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <InstantLoadingIndicator 
+                  isVisible={true}
+                  message="Generating..."
+                  className="text-white drop-shadow-sm"
+                  timerSeconds={timer.secondsRemaining}
+                  showTimer={timer.isRunning}
+                  isTimerExpired={timer.isExpired}
+                />
+              </div>
+            </div>
           );
         } else if (imageUrl) {
           console.log('🎨 IMAGE_GEN: Rendering existing image for', type, ':', imageUrl);

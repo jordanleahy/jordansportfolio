@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,17 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   const { toast } = useToast();
   const { updatePrompt, isUpdating, refetch } = useIndividualPromptCache(post.id);
   const { isProcessing } = useProcessingStatesContext();
+  const timer = useImageGenerationTimer();
+
+  // Handle timer based on processing state
+  useEffect(() => {
+    const isCurrentlyProcessing = isProcessing(post.id, 'generate');
+    if (isCurrentlyProcessing && !timer.isRunning) {
+      timer.startTimer();
+    } else if (!isCurrentlyProcessing && timer.isRunning) {
+      timer.stopTimer();
+    }
+  }, [isProcessing, post.id, timer]);
 
   const aspectRatioOptions = ASPECT_RATIO_CONFIGS.map(config => ({
     value: config.key,

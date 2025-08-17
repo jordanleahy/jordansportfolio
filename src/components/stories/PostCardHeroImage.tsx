@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
+import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardHeroImageProps {
@@ -24,10 +25,27 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   const { isProcessing: isProcessingCtx } = useProcessingStatesContext();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
+  const timer = useImageGenerationTimer();
   
   const selectedImage = post.image_1_1_url;
   const selectedAspectRatio = '1:1';
   const isLoadingOrProcessing = isProcessing || (post.image_1_1_status === 'processing') || isProcessingCtx(post.id, 'generate');
+
+  // Handle timer based on processing state
+  useEffect(() => {
+    if (isLoadingOrProcessing && !timer.isRunning) {
+      timer.startTimer();
+    } else if (!isLoadingOrProcessing && timer.isRunning) {
+      timer.stopTimer();
+    }
+  }, [isLoadingOrProcessing, timer]);
+
+  // Stop timer if image is ready with 20+ seconds remaining
+  useEffect(() => {
+    if (selectedImage && timer.isRunning && timer.secondsRemaining >= 20) {
+      timer.stopTimer();
+    }
+  }, [selectedImage, timer]);
 
   return (
     <div className="space-y-4">
@@ -49,6 +67,9 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                   isVisible={true}
                   message={selectedImage ? "Regenerating..." : "Generating..."}
                   className="text-white drop-shadow-sm"
+                  timerSeconds={timer.secondsRemaining}
+                  showTimer={timer.isRunning}
+                  isTimerExpired={timer.isExpired}
                 />
               </div>
             </div>
