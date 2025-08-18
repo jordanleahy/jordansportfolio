@@ -28,8 +28,8 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
 
   return (
     <Card className={`w-full border-primary/20 bg-primary/5 ${className}`}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
             <span className="text-sm font-medium text-primary">
@@ -51,7 +51,7 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
 
         {/* Simplified progress indicator */}
         {total > 0 && (
-          <div className="mb-4">
+          <div className="mb-3">
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
               <span>Progress: {completed}/{total} posts</span>
               <span>{Math.round(progressPercentage)}%</span>
@@ -67,14 +67,14 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
 
         {/* Single shimmer placeholder */}
         <div className="relative overflow-hidden rounded-md">
-          <Skeleton className="w-full aspect-video animate-pulse" />
+          <Skeleton className="w-full h-20 animate-pulse" />
           
           {/* Shimmer overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-shimmer" />
         </div>
 
         {/* Status message */}
-        <div className="mt-4 text-center">
+        <div className="mt-3 text-center">
           <p className="text-xs text-muted-foreground">
             {total === 0 && 'Preparing posts...'}
             {total > 0 && completed === 0 && 'Starting post generation...'}
