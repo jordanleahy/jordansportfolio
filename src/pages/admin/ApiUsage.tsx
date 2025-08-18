@@ -28,11 +28,18 @@ import { ApiUsageTable } from "@/components/admin/ApiUsageTable";
 import { UsageDetailModal } from "@/components/admin/UsageDetailModal";
 import { OpenAIUsageSync } from "@/components/admin/OpenAIUsageSync";
 import { UsageCharts } from "@/components/admin/UsageCharts";
+import { ExportColumnsSelector } from "@/components/admin/ExportColumnsSelector";
 import { 
   useApiUsageData, 
   useAdminUsageSummary, 
   useUsageFilters 
 } from "@/hooks/useApiUsageQueries";
+import { 
+  useAvailableFunctions, 
+  useAvailableCategories, 
+  useDataDateRange, 
+  useExportSchema 
+} from "@/hooks/useDynamicFilters";
 import { ApiUsageRecord } from "@/types/apiUsage";
 
 export default function ApiUsage() {
@@ -41,6 +48,8 @@ export default function ApiUsage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [aggregating, setAggregating] = useState(false);
+  const [showExportSelector, setShowExportSelector] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const { filters, updateFilter, clearFilters } = useUsageFilters();
   
@@ -50,6 +59,12 @@ export default function ApiUsage() {
     currentPage
   );
   const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useAdminUsageSummary();
+  
+  // Dynamic filter data
+  const { data: availableFunctions } = useAvailableFunctions();
+  const { data: availableCategories } = useAvailableCategories();
+  const { data: dateRange } = useDataDateRange();
+  const { data: exportSchema } = useExportSchema();
 
   const handleRefresh = async () => {
     try {
@@ -60,8 +75,9 @@ export default function ApiUsage() {
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async (selectedColumns?: string[]) => {
     try {
+      setIsExporting(true);
       toast.info("Preparing export...");
       const maxRows = 5000;
       const pageSize = 1000;
@@ -93,30 +109,15 @@ export default function ApiUsage() {
         from += pageSize;
       }
 
-      const cols = [
-        'created_at','user_id','user_email','function_name','model_used','request_type','prompt_tokens','completion_tokens','total_tokens','image_size','image_quality','estimated_cost','actual_cost','success','response_time_ms','openai_request_id','correlation_id'
+      const cols = selectedColumns || exportSchema?.defaultColumns || [
+        'created_at','user_id','function_name','model_used','request_type','estimated_cost','success'
       ];
       const header = cols.join(',');
       const lines = all.map((r: any) => {
-        const vals = [
-          r.created_at,
-          r.user_id,
-          r.user_email || '',
-          r.function_name,
-          r.model_used || '',
-          r.request_type || '',
-          r.prompt_tokens ?? '',
-          r.completion_tokens ?? '',
-          r.total_tokens ?? '',
-          r.image_size || '',
-          r.image_quality || '',
-          r.estimated_cost ?? '',
-          r.actual_cost ?? '',
-          r.success ?? '',
-          r.response_time_ms ?? '',
-          r.openai_request_id || '',
-          r.correlation_id || (r.request_metadata?.correlation_id ?? ''),
-        ];
+        const vals = cols.map(col => {
+          const value = r[col];
+          return value ?? '';
+        });
         return vals.map(v => typeof v === 'string' ? '"' + v.replace(/"/g, '""') + '"' : String(v)).join(',');
       });
 
@@ -128,10 +129,13 @@ export default function ApiUsage() {
       a.download = `api-usage-export-${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`Exported ${all.length} rows`);
+      toast.success(`Exported ${all.length} rows with ${cols.length} columns`);
+      setShowExportSelector(false);
     } catch (e: any) {
       console.error('Export failed:', e);
       toast.error('Export failed');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -154,9 +158,13 @@ export default function ApiUsage() {
         updateFilter('startDate', format(startOfDay(subDays(now, 30)), 'yyyy-MM-dd'));
         updateFilter('endDate', format(endOfDay(now), 'yyyy-MM-dd'));
         break;
+      case 'quarter':
+        updateFilter('startDate', format(startOfDay(subDays(now, 90)), 'yyyy-MM-dd'));
+        updateFilter('endDate', format(endOfDay(now), 'yyyy-MM-dd'));
+        break;
       case 'all':
-        updateFilter('startDate', undefined);
-        updateFilter('endDate', undefined);
+        updateFilter('startDate', dateRange?.earliest);
+        updateFilter('endDate', dateRange?.latest);
         break;
     }
   };
@@ -206,7 +214,7 @@ export default function ApiUsage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${aggregating ? 'animate-spin' : ''}`} />
             Rebuild Aggregates
           </Button>
-          <Button variant="outline" onClick={handleExport}>
+          <Button variant="outline" onClick={() => setShowExportSelector(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -283,10 +291,18 @@ export default function ApiUsage() {
                         <SelectValue placeholder="Select range" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="week">Last 7 days</SelectItem>
-                        <SelectItem value="month">Last 30 days</SelectItem>
-                        <SelectItem value="all">All time</SelectItem>
+                        {dateRange?.suggestedRanges.map(range => (
+                          <SelectItem key={range.value} value={range.value}>
+                            {range.label}
+                          </SelectItem>
+                        )) || (
+                          <>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="week">Last 7 days</SelectItem>
+                            <SelectItem value="month">Last 30 days</SelectItem>
+                            <SelectItem value="all">All time</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -300,10 +316,11 @@ export default function ApiUsage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">All functions</SelectItem>
-                        <SelectItem value="visual-prompt-generator">Visual Prompt Generator</SelectItem>
-                        <SelectItem value="generate-image-gpt">Image Generation</SelectItem>
-                        <SelectItem value="generate-blog-content">Blog Content</SelectItem>
-                        <SelectItem value="sync-openai-usage">OpenAI Sync</SelectItem>
+                        {availableFunctions?.map(func => (
+                          <SelectItem key={func.name} value={func.name}>
+                            {func.name} ({func.count})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -407,6 +424,29 @@ export default function ApiUsage() {
         open={!!selectedRecord}
         onOpenChange={(open) => !open && setSelectedRecord(null)}
       />
+
+      {/* Export Columns Selector */}
+      {showExportSelector && exportSchema && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background rounded-lg shadow-lg max-w-md w-full mx-4">
+            <ExportColumnsSelector
+              allColumns={exportSchema.allColumns}
+              defaultColumns={exportSchema.defaultColumns}
+              onExport={handleExport}
+              isExporting={isExporting}
+            />
+            <div className="p-4 border-t">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowExportSelector(false)}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </PageLayout>
   );
