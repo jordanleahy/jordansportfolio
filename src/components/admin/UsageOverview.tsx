@@ -27,8 +27,8 @@ export function UsageOverview() {
       if (error) throw error;
       return data as UsageOverviewResponse;
     },
-    refetchOnWindowFocus: false,
-    staleTime: 60_000, // 1 minute
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Force fresh data
   });
 
   if (isLoading) {
