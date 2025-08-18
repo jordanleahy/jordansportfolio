@@ -50,7 +50,8 @@ serve(async (req: Request) => {
     const { data: allTimeData, error: allTimeError } = await supabaseAdmin
       .from('api_usage_tracking')
       .select('estimated_cost, created_at, user_id')
-      .eq('request_type', 'image_generation');
+      .eq('request_type', 'image_generation')
+      .limit(100000);
     
     if (allTimeError) {
       console.error('AllTime error:', allTimeError);
