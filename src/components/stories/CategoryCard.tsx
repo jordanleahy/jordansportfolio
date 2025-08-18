@@ -170,18 +170,12 @@ export const ThemeCard = ({
   }
 
   if (isShimmer) {
-    // Extract real theme ID from prefixed ID for data-theme-id attribute
-    const realThemeId = themeId.startsWith('pending-') ? themeId.replace('pending-', '') : themeId;
-    
     return (
       <>
         <Card 
           className="group overflow-hidden border-border/50 select-none transition-all duration-500" 
           {...longPressHandlers}
           style={{ touchAction: 'manipulation' }}
-          data-theme-state="generating"
-          data-theme-id={realThemeId}
-          data-scroll-target="theme-card"
         >
           {/* Shimmer Image Section */}
           <div className="relative aspect-square">
@@ -231,13 +225,9 @@ export const ThemeCard = ({
   }
 
   return (
-    <Card 
-      className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden ${
-        isSelected ? 'ring-2 ring-primary border-primary/50' : ''
-      } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} 
-      onClick={handleClick}
-      data-theme-id={themeId}
-    >
+    <Card className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-border/50 hover:border-primary/20 overflow-hidden ${
+      isSelected ? 'ring-2 ring-primary border-primary/50' : ''
+    } ${isSelectionMode ? 'hover:ring-1 hover:ring-primary/50' : ''}`} onClick={handleClick}>
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden">
         {/* Display current image */}

@@ -34,23 +34,12 @@ import { PublicCollectionsSection } from '@/components/PublicCollectionsSection'
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
-import { useScrollToElement } from '@/hooks/useScrollToElement';
 import shipImage from '@/assets/story-ship-bg.png';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
-
 export default function StoriesDashboard() {
   console.log('[StoriesDashboard] Component rendering');
-
-  // Initialize scroll hook for smooth scrolling to newly created theme
-  const { scrollToElement } = useScrollToElement({
-    targetSelector: '',  // Will be set dynamically
-    behavior: 'smooth',
-    block: 'start',
-    delay: 300,
-    respectMotionPreferences: true
-  });
   
   const {
     user,
@@ -76,7 +65,6 @@ export default function StoriesDashboard() {
 
   // Centralized function to clear pending theme state
   const clearPendingThemeState = () => {
-    console.log('🧹 Clearing pending theme state and removing from availableThemes');
     setPendingTheme(null);
     setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
   };
@@ -484,32 +472,6 @@ export default function StoriesDashboard() {
       description: themeDescription
     });
     
-    // Add pending theme to availableThemes with proper "pending-" prefix for shimmer rendering
-    const pendingThemeObject = {
-      id: "pending-" + themeId,
-      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
-      description: themeDescription,
-      category: 'custom',
-      post_count: 0,
-      lifecycle_status: 'generating' as const,
-      first_post: null,
-      prompt_completion_count: 0,
-      total_posts_count: 0
-    };
-    
-    // Use functional update to prevent infinite renders
-    setAvailableThemes(prev => {
-      // Only add if not already present
-      const alreadyExists = prev.some(theme => theme.id === pendingThemeObject.id);
-      if (alreadyExists) return prev;
-      return [pendingThemeObject, ...prev];
-    });
-    
-    // Start timing from when theme_id is created (DOM element can potentially render)
-    console.time('DOM-Update-Timing');
-    console.log('⏱️ DOM-Timing: Started timing at theme_id creation:', themeId);
-    console.log('🎯 DOM-Timing: Added pending theme to availableThemes for immediate DOM rendering');
-    
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
       const {
@@ -550,11 +512,6 @@ export default function StoriesDashboard() {
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
-        
-        // Simple scroll to bottom where shimmer appears
-        setTimeout(() => {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
