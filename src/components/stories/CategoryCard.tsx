@@ -170,9 +170,6 @@ export const ThemeCard = ({
   }
 
   if (isShimmer) {
-    // Extract real theme ID from prefixed ID for data-theme-id attribute
-    const realThemeId = themeId.startsWith('pending-') ? themeId.replace('pending-', '') : themeId;
-    
     return (
       <>
         <Card 
@@ -180,7 +177,7 @@ export const ThemeCard = ({
           {...longPressHandlers}
           style={{ touchAction: 'manipulation' }}
           data-theme-state="generating"
-          data-theme-id={realThemeId}
+          data-theme-id={themeId}
           data-scroll-target="theme-card"
         >
           {/* Shimmer Image Section */}
