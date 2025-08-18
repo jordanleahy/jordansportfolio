@@ -9,10 +9,10 @@ import { ActionButton } from '@/components/ui/action-button';
 import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
-import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
+
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
-import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
 import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
@@ -21,7 +21,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
+import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
+import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicator';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey, AspectRatio } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
@@ -58,8 +59,8 @@ export const PostsCardView = memo(({
   onEditPost
 }: PostsTableViewProps) => {
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
-  const { isProcessing: isProcessingCtx, setProcessing, isAnyImageGenerating } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
+  const { setProcessing } = useProcessingStatesContext();
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
   const { user } = useAuth();
@@ -67,25 +68,20 @@ export const PostsCardView = memo(({
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const isMobile = useIsMobile();
   const { isAdmin: isUserAdmin } = useUserRole();
-  const timer = useImageGenerationTimer();
+  
+  const {
+    timer,
+    isProcessing: isProcessingCtx,
+    isGenerating: isGeneratingCtx,
+    isAnyImageGenerating,
+    getRegenerateButtonText,
+    getLoadingMessage,
+    isButtonDisabled
+  } = useUnifiedRegenerateStates();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  // Timer management for image generation
-  useEffect(() => {
-    const isAnyRegenerating = posts.some(post => 
-      isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio) || 
-      ['16:9', '4:3', '3:4', '9:16'].some(aspect => 
-        isProcessingCtx(post.id, 'generate', aspect as AspectRatio)
-      )
-    );
-    
-    if (isAnyRegenerating && !timer.isRunning) {
-      timer.startTimer();
-    } else if (!isAnyRegenerating && timer.isRunning) {
-      timer.stopTimer();
-    }
-  }, [posts, isProcessingCtx, timer]);
+  // Timer is now auto-managed by useUnifiedRegenerateStates
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts(prev => {
@@ -117,8 +113,6 @@ export const PostsCardView = memo(({
     console.log('🔄 Regenerate prompt started for post:', post.id);
     setInstantLoading(post.id, true);
     setProcessing(post.id, 'regenerate_prompt', true);
-    timer.startTimer();
-    console.log('⏱️ Timer started for prompt regeneration - 90 seconds countdown');
     
     try {
       await onGenerateImagePrompt(post);
@@ -128,10 +122,8 @@ export const PostsCardView = memo(({
     } finally {
       setInstantLoading(post.id, false);
       setProcessing(post.id, 'regenerate_prompt', false);
-      timer.stopTimer();
-      console.log('⏹️ Timer stopped for post:', post.id);
     }
-  }, [onGenerateImagePrompt, setInstantLoading, setProcessing, timer]);
+  }, [onGenerateImagePrompt, setInstantLoading, setProcessing]);
 
   const handleInstantImagePromptGeneration = useCallback((post: SocialMediaPost) => {
     setInstantLoading(post.id, true);
@@ -318,11 +310,11 @@ export const PostsCardView = memo(({
                               
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
-                            disabled={isProcessingCtx(post.id, 'generate', '1:1')}
+                            disabled={isButtonDisabled(post.id, '1:1')}
                             className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Regenerate image"
                           >
-                            {isProcessingCtx(post.id, 'generate', '1:1') ? 'Regenerating...' : 'Regenerate'}
+                            {getRegenerateButtonText(post.id, '1:1', !!post.image_1_1_url)}
                           </button>
                         </div>
                       </div>
@@ -330,10 +322,10 @@ export const PostsCardView = memo(({
                       <div className="relative w-full h-full">
                         <SimpleShimmer className="w-full h-full" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <InstantLoadingIndicator 
+                          <UnifiedLoadingIndicator 
                             isVisible={true}
-                            message={post.image_1_1_url ? "Regenerating..." : "Generating..."}
-                            className="text-white drop-shadow-sm"
+                            variant="overlay"
+                            message={getLoadingMessage(!!post.image_1_1_url)}
                             timerSeconds={timer.secondsRemaining}
                             showTimer={timer.isRunning}
                             isTimerExpired={timer.isExpired}
@@ -512,11 +504,11 @@ export const PostsCardView = memo(({
                                     }
                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                                   }}
-                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio) || (isAnyImageGenerating() && !isProcessingCtx(post.id, 'generate', aspectRatio))}
+                                  disabled={isButtonDisabled(post.id, aspectRatio)}
                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Regenerate image"
                                 >
-                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : (isAnyImageGenerating() && !isProcessingCtx(post.id, 'generate', aspectRatio)) ? 'Image Generation in Progress' : 'Regenerate'}
+                                  {getRegenerateButtonText(post.id, aspectRatio, !!imageUrl)}
                                 </button>
                               </div>
                             </div>
@@ -524,10 +516,11 @@ export const PostsCardView = memo(({
                             <div className="relative w-full h-full">
                               <SimpleShimmer className="w-full h-full" aspectRatio={aspectRatio} />
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <InstantLoadingIndicator 
+                                <UnifiedLoadingIndicator 
                                   isVisible={true}
-                                  message={imageUrl ? "Regenerating..." : "Generating..."}
-                                  className="text-white drop-shadow-sm text-xs"
+                                  variant="overlay"
+                                  size="sm"
+                                  message={getLoadingMessage(!!imageUrl)}
                                   timerSeconds={timer.secondsRemaining}
                                   showTimer={timer.isRunning}
                                   isTimerExpired={timer.isExpired}
@@ -571,11 +564,11 @@ export const PostsCardView = memo(({
                       {post.status}
                     </Badge>
                     <BlogStatusBadge postId={post.id} blogStatus={blogStatuses[post.id]} />
-                    <InstantLoadingIndicator 
+                    <UnifiedLoadingIndicator 
                       isVisible={isInstantGenerating(post.id)}
+                      variant="inline"
+                      size="sm"
                       message="Generating..."
-                      elapsedTime={getElapsedTime(post.id)}
-                      className="text-xs"
                     />
                   </div>
                 )}
@@ -599,14 +592,16 @@ export const PostsCardView = memo(({
                         }
                         onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
                       }}
-                      disabled={isProcessingCtx(post.id, 'generate', '1:1')}
+                      disabled={isButtonDisabled(post.id, '1:1')}
                       className="w-full"
                     >
                       {isProcessingCtx(post.id, 'generate', '1:1') ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                          Regenerating...
-                        </>
+                        <UnifiedLoadingIndicator 
+                          isVisible={true}
+                          variant="button"
+                          message="Regenerating..."
+                          icon="refresh"
+                        />
                       ) : (
                         <>
                           <RefreshCw className="h-4 w-4 mr-2" />
