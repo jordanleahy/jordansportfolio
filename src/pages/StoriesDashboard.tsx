@@ -551,12 +551,13 @@ export default function StoriesDashboard() {
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
-        // Scroll to shimmer card (uses "pending-" prefix)
-        const shimmerTargetId = "pending-" + data.theme_id;
-        const shimmerElement = document.querySelector(`[data-theme-id="${data.theme_id}"]`);
-        if (shimmerElement) {
-          shimmerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        // Scroll to the shimmer card after DOM update
+        requestAnimationFrame(() => {
+          const shimmerElement = document.querySelector(`[data-theme-state="generating"][data-theme-id="${data.theme_id}"]`);
+          if (shimmerElement) {
+            shimmerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
