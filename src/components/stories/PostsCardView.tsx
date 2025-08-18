@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
@@ -21,8 +21,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import type { AspectRatioKey } from '@/types/bulkImageGeneration';
+import type { AspectRatioKey, AspectRatio } from '@/types/bulkImageGeneration';
 import type { PostsTableViewProps } from '@/types/stories/ui';
 
 const getStatusColor = (status: string) => {
@@ -66,8 +67,25 @@ export const PostsCardView = memo(({
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
   const isMobile = useIsMobile();
   const { isAdmin: isUserAdmin } = useUserRole();
+  const timer = useImageGenerationTimer();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
+
+  // Timer management for image generation
+  useEffect(() => {
+    const isAnyRegenerating = posts.some(post => 
+      isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio) || 
+      ['16:9', '4:3', '3:4', '9:16'].some(aspect => 
+        isProcessingCtx(post.id, 'generate', aspect as AspectRatio)
+      )
+    );
+    
+    if (isAnyRegenerating && !timer.isRunning) {
+      timer.startTimer();
+    } else if (!isAnyRegenerating && timer.isRunning) {
+      timer.stopTimer();
+    }
+  }, [posts, isProcessingCtx, timer]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts(prev => {
@@ -98,6 +116,7 @@ export const PostsCardView = memo(({
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
     setInstantLoading(post.id, true);
     setProcessing(post.id, 'regenerate_prompt', true);
+    timer.startTimer();
     
     try {
       await onGenerateImagePrompt(post);
@@ -106,8 +125,9 @@ export const PostsCardView = memo(({
     } finally {
       setInstantLoading(post.id, false);
       setProcessing(post.id, 'regenerate_prompt', false);
+      timer.stopTimer();
     }
-  }, [onGenerateImagePrompt, setInstantLoading, setProcessing]);
+  }, [onGenerateImagePrompt, setInstantLoading, setProcessing, timer]);
 
   const handleInstantImagePromptGeneration = useCallback((post: SocialMediaPost) => {
     setInstantLoading(post.id, true);
@@ -307,6 +327,9 @@ export const PostsCardView = memo(({
                             isVisible={true}
                             message="Regenerating..."
                             className="text-white drop-shadow-sm"
+                            timerSeconds={timer.secondsRemaining}
+                            showTimer={timer.isRunning}
+                            isTimerExpired={timer.isExpired}
                           />
                         </div>
                       </div>
@@ -498,6 +521,9 @@ export const PostsCardView = memo(({
                                   isVisible={true}
                                   message="Regenerating..."
                                   className="text-white drop-shadow-sm text-xs"
+                                  timerSeconds={timer.secondsRemaining}
+                                  showTimer={timer.isRunning}
+                                  isTimerExpired={timer.isExpired}
                                 />
                               </div>
                             </div>
