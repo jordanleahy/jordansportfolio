@@ -486,7 +486,7 @@ export default function StoriesDashboard() {
     
     // Add pending theme to availableThemes so DOM element exists for scrolling
     const pendingThemeObject = {
-      id: themeId,
+      id: "pending-" + themeId,
       theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
       description: themeDescription,
       category: 'custom',
