@@ -320,12 +320,6 @@ export const PostsCardView = memo(({
                               const aspectRatioKey = '1_1';
                               console.log('🎯 Starting image regeneration for aspect ratio:', aspectRatioKey);
                               
-                              // Set processing state before starting regeneration
-                              setProcessing(post.id, 'generate', true, '1:1' as AspectRatio);
-                              timer.startTimer();
-                              console.log('⏱️ Timer started - 90 seconds countdown initiated');
-                              console.log('🔧 Processing state set for post:', post.id, 'aspect:', '1:1');
-                              
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
                             disabled={isProcessingCtx(post.id, 'generate', '1:1')}
@@ -338,34 +332,16 @@ export const PostsCardView = memo(({
                       </div>
                     ) : (isProcessing || isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio)) ? (
                       <div className="relative w-full h-full">
-                        {(() => {
-                          console.log('🎯 PROCESSING STATE CHECK:', {
-                            postId: post.id,
-                            isProcessing,
-                            isProcessingCtx_result: isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio),
-                            overall_condition: isProcessing || isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio)
-                          });
-                          return null;
-                        })()}
                         <SimpleShimmer className="w-full h-full" />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <InstantLoadingIndicator 
                             isVisible={true}
-                            message="Regenerating..."
+                            message={post.image_1_1_url ? "Regenerating..." : "Generating..."}
                             className="text-white drop-shadow-sm"
                             timerSeconds={timer.secondsRemaining}
                             showTimer={timer.isRunning}
                             isTimerExpired={timer.isExpired}
                           />
-                          {/* Debug logging */}
-                          {(() => {
-                            console.log('🎯 Loading indicator shown with timer:', {
-                              isRunning: timer.isRunning,
-                              secondsRemaining: timer.secondsRemaining,
-                              isExpired: timer.isExpired
-                            });
-                            return null;
-                          })()}
                         </div>
                       </div>
                     ) : (
@@ -554,7 +530,7 @@ export const PostsCardView = memo(({
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <InstantLoadingIndicator 
                                   isVisible={true}
-                                  message="Regenerating..."
+                                  message={imageUrl ? "Regenerating..." : "Generating..."}
                                   className="text-white drop-shadow-sm text-xs"
                                   timerSeconds={timer.secondsRemaining}
                                   showTimer={timer.isRunning}
