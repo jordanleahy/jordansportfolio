@@ -331,8 +331,17 @@ export const PostsCardView = memo(({
                           </button>
                         </div>
                       </div>
-                    ) : (isProcessing || isProcessingCtx(post.id, 'generate', '1:1')) ? (
+                    ) : (isProcessing || isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio)) ? (
                       <div className="relative w-full h-full">
+                        {(() => {
+                          console.log('🎯 PROCESSING STATE CHECK:', {
+                            postId: post.id,
+                            isProcessing,
+                            isProcessingCtx_result: isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio),
+                            overall_condition: isProcessing || isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio)
+                          });
+                          return null;
+                        })()}
                         <SimpleShimmer className="w-full h-full" />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <InstantLoadingIndicator 
