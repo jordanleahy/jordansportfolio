@@ -920,13 +920,6 @@ export default function StoriesDashboard() {
             {/* Bulk Actions Toolbar */}
             <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
 
-            {/* Simplified Batch Shimmer */}
-            <SimplifiedBatchSkeleton 
-              isVisible={shouldShowShimmer}
-              completionProgress={completionProgress}
-              className="mb-6"
-            />
-
             {/* Enhanced Themes Grid with Loading States */}
             {isLoadingThemes ? <ThemesSkeleton /> : themesError ? <div className="text-center py-8">
                 <div className="text-muted-foreground mb-4">
