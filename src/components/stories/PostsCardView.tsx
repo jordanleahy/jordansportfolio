@@ -319,8 +319,13 @@ export const PostsCardView = memo(({
                               // Always regenerate as 1:1 for square container
                               const aspectRatioKey = '1_1';
                               console.log('🎯 Starting image regeneration for aspect ratio:', aspectRatioKey);
+                              
+                              // Set processing state before starting regeneration
+                              setProcessing(post.id, 'generate', true, '1:1' as AspectRatio);
                               timer.startTimer();
                               console.log('⏱️ Timer started - 90 seconds countdown initiated');
+                              console.log('🔧 Processing state set for post:', post.id, 'aspect:', '1:1');
+                              
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
                             disabled={isProcessingCtx(post.id, 'generate', '1:1')}
