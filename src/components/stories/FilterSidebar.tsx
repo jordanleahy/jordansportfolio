@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { getCategoryLabel } from '@/constants/categoryConstants';
 
 interface FilterSidebarProps {
   selectedCategories: Set<string>;
@@ -128,8 +129,11 @@ export function FilterSidebar({
                     className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-foreground group-hover:text-foreground truncate block">
-                      {category.name}
+                    <span 
+                      className="text-sm text-foreground group-hover:text-foreground truncate block"
+                      title={getCategoryLabel(category.name)}
+                    >
+                      {getCategoryLabel(category.name)}
                     </span>
                   </div>
                   <Badge variant="outline" className="text-xs shrink-0">
