@@ -471,6 +471,17 @@ export default function StoriesDashboard() {
       theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
       description: themeDescription
     });
+
+    // Smooth scroll to cards section after setting pending theme
+    requestAnimationFrame(() => {
+      const cardsSection = document.getElementById('cards');
+      if (cardsSection) {
+        cardsSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    });
     
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
