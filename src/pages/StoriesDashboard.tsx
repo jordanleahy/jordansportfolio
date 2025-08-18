@@ -21,6 +21,8 @@ import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
 import { ThemesSkeleton } from '@/components/stories/ThemesSkeleton';
 import { BulkActionsToolbar } from '@/components/stories/BulkActionsToolbar';
 import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteConfirmationDialog';
+import { StoriesGridLayout } from '@/components/stories/StoriesGridLayout';
+import { useStoriesFilters } from '@/hooks/useStoriesFilters';
 import { ThemeWithPosts, PendingTheme } from '@/types/stories';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import { Helmet } from 'react-helmet-async';
@@ -116,6 +118,19 @@ export default function StoriesDashboard() {
     pendingTheme,
     setPendingTheme
   });
+
+  // Stories filtering
+  const {
+    filteredThemes,
+    selectedCategories,
+    searchQuery,
+    availableCategories,
+    setSelectedCategories,
+    setSearchQuery,
+    clearFilters,
+    selectAllCategories,
+    hasActiveFilters
+  } = useStoriesFilters({ themes: availableThemes });
 
 
   // Enhanced initial load with loading states and error handling
@@ -921,7 +936,7 @@ export default function StoriesDashboard() {
         </Section>
 
         {/* Second Section: Authenticated users see their themes; guests see Featured Posts */}
-        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
+        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12 sticky top-0 z-10 bg-background" fluid>
             <header className="mb-6 flex items-center justify-end gap-4">
               <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
                 Refresh
@@ -946,17 +961,28 @@ export default function StoriesDashboard() {
                 <Button variant="outline" onClick={() => window.location.reload()}>
                   Retry
                 </Button>
-              </div> : <CategoriesGrid 
-                themes={availableThemes} 
-                onDeleteCategory={handleDeleteCategory} 
-                selectedThemes={selectedThemes} 
-                onThemeSelect={handleThemeSelect} 
-                isSelectionMode={isSelectionMode} 
-                isGeneratingTheme={isGeneratingTheme} 
-                onCancelGeneration={cancelThemeGeneration}
-                getTransitionClasses={() => ''}
-                isThemeTransitioning={() => false}
-              />}
+              </div> : <StoriesGridLayout
+                selectedCategories={selectedCategories}
+                searchQuery={searchQuery}
+                availableCategories={availableCategories}
+                onCategoriesChange={setSelectedCategories}
+                onSearchChange={setSearchQuery}
+                onClearFilters={clearFilters}
+                onSelectAllCategories={selectAllCategories}
+                hasActiveFilters={hasActiveFilters}
+              >
+                <CategoriesGrid 
+                  themes={filteredThemes} 
+                  onDeleteCategory={handleDeleteCategory} 
+                  selectedThemes={selectedThemes} 
+                  onThemeSelect={handleThemeSelect} 
+                  isSelectionMode={isSelectionMode} 
+                  isGeneratingTheme={isGeneratingTheme} 
+                  onCancelGeneration={cancelThemeGeneration}
+                  getTransitionClasses={() => ''}
+                  isThemeTransitioning={() => false}
+                />
+              </StoriesGridLayout>}
           </Section> : <>
             <Section id="featured" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
               <header className="mb-6 flex items-center justify-between">
