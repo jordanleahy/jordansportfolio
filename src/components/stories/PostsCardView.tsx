@@ -80,10 +80,14 @@ export const PostsCardView = memo(({
       )
     );
     
+    console.log('🔍 Timer useEffect - isAnyRegenerating:', isAnyRegenerating, 'timer.isRunning:', timer.isRunning);
+    
     if (isAnyRegenerating && !timer.isRunning) {
       timer.startTimer();
+      console.log('⏱️ Timer started from useEffect');
     } else if (!isAnyRegenerating && timer.isRunning) {
       timer.stopTimer();
+      console.log('⏹️ Timer stopped from useEffect');
     }
   }, [posts, isProcessingCtx, timer]);
 
@@ -114,18 +118,22 @@ export const PostsCardView = memo(({
   };
 
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
+    console.log('🔄 Regenerate prompt started for post:', post.id);
     setInstantLoading(post.id, true);
     setProcessing(post.id, 'regenerate_prompt', true);
     timer.startTimer();
+    console.log('⏱️ Timer started for prompt regeneration - 90 seconds countdown');
     
     try {
       await onGenerateImagePrompt(post);
+      console.log('✅ Prompt regeneration completed for post:', post.id);
     } catch (error) {
-      console.error('Failed to regenerate prompt:', error);
+      console.error('❌ Failed to regenerate prompt:', error);
     } finally {
       setInstantLoading(post.id, false);
       setProcessing(post.id, 'regenerate_prompt', false);
       timer.stopTimer();
+      console.log('⏹️ Timer stopped for post:', post.id);
     }
   }, [onGenerateImagePrompt, setInstantLoading, setProcessing, timer]);
 
@@ -298,6 +306,7 @@ export const PostsCardView = memo(({
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
+                              console.log('🔄 Regenerate button clicked for post:', post.id);
                               const creditStatus = getCreditStatus();
                               if (!creditStatus.hasCredits) {
                                 toast({
@@ -309,6 +318,9 @@ export const PostsCardView = memo(({
                               }
                               // Always regenerate as 1:1 for square container
                               const aspectRatioKey = '1_1';
+                              console.log('🎯 Starting image regeneration for aspect ratio:', aspectRatioKey);
+                              timer.startTimer();
+                              console.log('⏱️ Timer started - 90 seconds countdown initiated');
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
                             disabled={isProcessingCtx(post.id, 'generate', '1:1')}
@@ -331,6 +343,15 @@ export const PostsCardView = memo(({
                             showTimer={timer.isRunning}
                             isTimerExpired={timer.isExpired}
                           />
+                          {/* Debug logging */}
+                          {(() => {
+                            console.log('🎯 Loading indicator shown with timer:', {
+                              isRunning: timer.isRunning,
+                              secondsRemaining: timer.secondsRemaining,
+                              isExpired: timer.isExpired
+                            });
+                            return null;
+                          })()}
                         </div>
                       </div>
                     ) : (
