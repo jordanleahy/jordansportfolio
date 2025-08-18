@@ -35,6 +35,10 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span className="text-sm font-medium text-primary">
               {isComplete ? 'Finalizing theme...' : 'Curating your illustrations...'}
+              <br />
+              <span className="text-xs text-muted-foreground font-normal">
+                This could take 30 seconds to 5 minutes depending on the complexity of the request
+              </span>
             </span>
           </div>
           {onDismiss && (
