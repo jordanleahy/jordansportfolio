@@ -53,7 +53,7 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
         {total > 0 && (
           <div className="mb-3">
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Progress: {completed}/{total} posts</span>
+              <span>Progress {completed}/{total} illustrations</span>
               <span>{Math.round(progressPercentage)}%</span>
             </div>
             <div className="w-full bg-muted rounded-full h-2">
