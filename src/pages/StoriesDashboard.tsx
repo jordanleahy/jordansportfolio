@@ -551,59 +551,12 @@ export default function StoriesDashboard() {
         setAvailableThemes(refreshedThemes);
         console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
         
-        // Scroll to the newly created theme using its ID (use correct theme_id from API response)
-        console.log('🎯 DASHBOARD: Theme generated successfully, initiating scroll to:', data.theme_id);
-        console.log('⏱️ DOM-Timing: Starting setTimeout for scroll (100ms delay - element should exist immediately)');
-        
-        // Debug: Check what elements actually exist in DOM before scrolling
-        console.log('🔍 DEBUG: Checking all theme cards in DOM before scroll...');
-        const allThemeCards = document.querySelectorAll('[data-theme-id]');
-        console.log('🔍 DEBUG: Found theme cards:', Array.from(allThemeCards).map(el => ({
-          id: el.getAttribute('data-theme-id'),
-          element: el.tagName,
-          visible: (el as HTMLElement).offsetHeight > 0
-        })));
-        
-        setTimeout(() => {
-          console.log('🚀 DASHBOARD: Triggering scroll to theme:', data.theme_id);
-          console.log('⏱️ DOM-Timing: Checking for DOM element after 100ms delay');
-          const targetSelector = `[data-theme-id="${data.theme_id}"]`;
-          const targetElement = document.querySelector(targetSelector);
-          
-          // Additional debugging
-          console.log('🔍 DEBUG: Target selector:', targetSelector);
-          console.log('🔍 DEBUG: All elements with data-theme-id after delay:', 
-            Array.from(document.querySelectorAll('[data-theme-id]')).map(el => el.getAttribute('data-theme-id'))
-          );
-          
-          if (targetElement) {
-            console.log('✅ DOM-Timing: Element found! Scrolling to:', data.theme_id);
-            console.timeEnd('DOM-Update-Timing');
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            console.log('❌ DOM-Timing: Element NOT found for:', data.theme_id);
-            console.log('⏱️ DOM-Timing: Testing with longer delay (300ms)...');
-            setTimeout(() => {
-              const retryElement = document.querySelector(targetSelector);
-              console.log('🔍 DEBUG: All elements on retry:', 
-                Array.from(document.querySelectorAll('[data-theme-id]')).map(el => el.getAttribute('data-theme-id'))
-              );
-              if (retryElement) {
-                console.log('✅ DOM-Timing: Element found after 300ms total!');
-                console.timeEnd('DOM-Update-Timing');
-                retryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } else {
-                console.log('❌ DOM-Timing: Element still NOT found after 300ms total');
-                console.log('🔍 DEBUG: Final check - all available IDs:', 
-                  Array.from(document.querySelectorAll('[id], [data-theme-id]')).map(el => 
-                    el.id || el.getAttribute('data-theme-id')
-                  ).filter(Boolean)
-                );
-                console.timeEnd('DOM-Update-Timing');
-              }
-            }, 200);
-          }
-        }, 100);
+        // Scroll to shimmer card (uses "pending-" prefix)
+        const shimmerTargetId = "pending-" + data.theme_id;
+        const shimmerElement = document.querySelector(`[data-theme-id="${data.theme_id}"]`);
+        if (shimmerElement) {
+          shimmerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
       
       // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
