@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ThemeWithPosts } from '@/types/stories';
+import { getCategoryIndustry, groupCategoriesByIndustry } from '@/constants/categoryConstants';
 
 interface UseStoriesFiltersProps {
   themes: ThemeWithPosts[];
@@ -8,17 +9,21 @@ interface UseStoriesFiltersProps {
 interface UseStoriesFiltersReturn {
   filteredThemes: ThemeWithPosts[];
   selectedCategories: Set<string>;
+  selectedIndustries: Set<string>;
   searchQuery: string;
   availableCategories: Array<{ name: string; count: number }>;
   setSelectedCategories: (categories: Set<string>) => void;
+  setSelectedIndustries: (industries: Set<string>) => void;
   setSearchQuery: (query: string) => void;
   clearFilters: () => void;
   selectAllCategories: () => void;
+  selectIndustryCategories: (industryId: string) => void;
   hasActiveFilters: boolean;
 }
 
 export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStoriesFiltersReturn {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+  const [selectedIndustries, setSelectedIndustries] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
   // Extract unique categories with counts
@@ -35,13 +40,21 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [themes]);
 
-  // Filter themes based on selected categories and search query
+  // Filter themes based on selected categories, industries, and search query
   const filteredThemes = useMemo(() => {
     let filtered = themes;
 
     // Filter by selected categories
     if (selectedCategories.size > 0) {
       filtered = filtered.filter(theme => selectedCategories.has(theme.category));
+    }
+
+    // Filter by selected industries (if no specific categories selected)
+    if (selectedIndustries.size > 0 && selectedCategories.size === 0) {
+      filtered = filtered.filter(theme => {
+        const industryId = getCategoryIndustry(theme.category);
+        return selectedIndustries.has(industryId);
+      });
     }
 
     // Filter by search query
@@ -55,14 +68,15 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
     }
 
     return filtered;
-  }, [themes, selectedCategories, searchQuery]);
+  }, [themes, selectedCategories, selectedIndustries, searchQuery]);
 
   // Check if any filters are active
-  const hasActiveFilters = selectedCategories.size > 0 || searchQuery.trim().length > 0;
+  const hasActiveFilters = selectedCategories.size > 0 || selectedIndustries.size > 0 || searchQuery.trim().length > 0;
 
   // Clear all filters
   const clearFilters = () => {
     setSelectedCategories(new Set());
+    setSelectedIndustries(new Set());
     setSearchQuery('');
   };
 
@@ -70,6 +84,19 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
   const selectAllCategories = () => {
     const allCategories = new Set(availableCategories.map(cat => cat.name));
     setSelectedCategories(allCategories);
+    setSelectedIndustries(new Set()); // Clear industry selection when selecting all categories
+  };
+
+  // Select all categories in a specific industry
+  const selectIndustryCategories = (industryId: string) => {
+    const industryGroups = groupCategoriesByIndustry(availableCategories);
+    const industryCategories = industryGroups.get(industryId) || [];
+    const categoryNames = new Set(industryCategories.map(cat => cat.name));
+    
+    // Add to selected categories
+    const newSelected = new Set([...selectedCategories, ...categoryNames]);
+    setSelectedCategories(newSelected);
+    setSelectedIndustries(new Set()); // Clear industry selection when selecting specific categories
   };
 
   // Persist filter state in sessionStorage
@@ -77,22 +104,30 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
     try {
       const filterState = {
         selectedCategories: Array.from(selectedCategories),
+        selectedIndustries: Array.from(selectedIndustries),
         searchQuery
       };
       sessionStorage.setItem('stories-filters', JSON.stringify(filterState));
     } catch (error) {
       console.warn('Failed to persist filter state:', error);
     }
-  }, [selectedCategories, searchQuery]);
+  }, [selectedCategories, selectedIndustries, searchQuery]);
 
   // Restore filter state from sessionStorage
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('stories-filters');
       if (stored) {
-        const { selectedCategories: storedCategories, searchQuery: storedQuery } = JSON.parse(stored);
+        const { 
+          selectedCategories: storedCategories, 
+          selectedIndustries: storedIndustries,
+          searchQuery: storedQuery 
+        } = JSON.parse(stored);
         if (storedCategories) {
           setSelectedCategories(new Set(storedCategories));
+        }
+        if (storedIndustries) {
+          setSelectedIndustries(new Set(storedIndustries));
         }
         if (storedQuery) {
           setSearchQuery(storedQuery);
@@ -106,12 +141,15 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
   return {
     filteredThemes,
     selectedCategories,
+    selectedIndustries,
     searchQuery,
     availableCategories,
     setSelectedCategories,
+    setSelectedIndustries,
     setSearchQuery,
     clearFilters,
     selectAllCategories,
+    selectIndustryCategories,
     hasActiveFilters
   };
 }

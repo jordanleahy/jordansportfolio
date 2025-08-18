@@ -1,34 +1,43 @@
-import React from 'react';
-import { Search, X, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, X, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { getCategoryLabel } from '@/constants/categoryConstants';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { getCategoryLabel, INDUSTRIES, groupCategoriesByIndustry } from '@/constants/categoryConstants';
+import { iconMap, IconName } from '@/utils/iconMap';
 
 interface FilterSidebarProps {
   selectedCategories: Set<string>;
+  selectedIndustries: Set<string>;
   searchQuery: string;
   availableCategories: Array<{ name: string; count: number }>;
   onCategoriesChange: (categories: Set<string>) => void;
+  onIndustriesChange: (industries: Set<string>) => void;
   onSearchChange: (query: string) => void;
   onClearFilters: () => void;
   onSelectAllCategories: () => void;
+  onSelectIndustryCategories: (industryId: string) => void;
   hasActiveFilters: boolean;
 }
 
 export function FilterSidebar({
   selectedCategories,
+  selectedIndustries,
   searchQuery,
   availableCategories,
   onCategoriesChange,
+  onIndustriesChange,
   onSearchChange,
   onClearFilters,
   onSelectAllCategories,
+  onSelectIndustryCategories,
   hasActiveFilters
 }: FilterSidebarProps) {
+  const [expandedIndustries, setExpandedIndustries] = useState<Set<string>>(new Set(['healthcare', 'technology']));
   const handleCategoryToggle = (category: string) => {
     const newSelected = new Set(selectedCategories);
     if (newSelected.has(category)) {
@@ -38,6 +47,28 @@ export function FilterSidebar({
     }
     onCategoriesChange(newSelected);
   };
+
+  const handleIndustryToggle = (industryId: string) => {
+    const newSelected = new Set(selectedIndustries);
+    if (newSelected.has(industryId)) {
+      newSelected.delete(industryId);
+    } else {
+      newSelected.add(industryId);
+    }
+    onIndustriesChange(newSelected);
+  };
+
+  const toggleIndustryExpanded = (industryId: string) => {
+    const newExpanded = new Set(expandedIndustries);
+    if (newExpanded.has(industryId)) {
+      newExpanded.delete(industryId);
+    } else {
+      newExpanded.add(industryId);
+    }
+    setExpandedIndustries(newExpanded);
+  };
+
+  const industryGroups = groupCategoriesByIndustry(availableCategories);
 
   return (
     <div className="hidden md:block w-[280px] h-full bg-background border-r border-border">
@@ -74,6 +105,11 @@ export function FilterSidebar({
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-foreground">Active Filters</h4>
             <div className="flex flex-wrap gap-1">
+              {selectedIndustries.size > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {selectedIndustries.size} Industries
+                </Badge>
+              )}
               {selectedCategories.size > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   {selectedCategories.size} Categories
@@ -90,10 +126,10 @@ export function FilterSidebar({
 
         <Separator />
 
-        {/* Categories */}
+        {/* Industries & Categories */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-foreground">Categories</h4>
+            <h4 className="text-sm font-medium text-foreground">Industries & Categories</h4>
             <div className="flex gap-1">
               <Button
                 variant="ghost"
@@ -103,11 +139,14 @@ export function FilterSidebar({
               >
                 All
               </Button>
-              {selectedCategories.size > 0 && (
+              {(selectedCategories.size > 0 || selectedIndustries.size > 0) && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onCategoriesChange(new Set())}
+                  onClick={() => {
+                    onCategoriesChange(new Set());
+                    onIndustriesChange(new Set());
+                  }}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   None
@@ -118,29 +157,90 @@ export function FilterSidebar({
 
           <ScrollArea className="h-[calc(100vh-400px)] pr-4">
             <div className="space-y-2">
-              {availableCategories.map((category) => (
-                <label
-                  key={category.name}
-                  className="flex items-center space-x-3 cursor-pointer group hover:bg-muted/50 rounded-md p-2 transition-colors"
-                >
-                  <Checkbox
-                    checked={selectedCategories.has(category.name)}
-                    onCheckedChange={() => handleCategoryToggle(category.name)}
-                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <span 
-                      className="text-sm text-foreground group-hover:text-foreground truncate block"
-                      title={getCategoryLabel(category.name)}
-                    >
-                      {getCategoryLabel(category.name)}
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs shrink-0">
-                    {category.count}
-                  </Badge>
-                </label>
-              ))}
+              {INDUSTRIES.map((industry) => {
+                const industryCategories = industryGroups.get(industry.id) || [];
+                const totalCount = industryCategories.reduce((sum, cat) => sum + cat.count, 0);
+                const isExpanded = expandedIndustries.has(industry.id);
+                const IconComponent = iconMap[industry.icon as IconName];
+                
+                if (totalCount === 0) return null;
+
+                return (
+                  <Collapsible 
+                    key={industry.id} 
+                    open={isExpanded}
+                    onOpenChange={() => toggleIndustryExpanded(industry.id)}
+                  >
+                    <div className="space-y-1">
+                      {/* Industry Header */}
+                      <div className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                        <Checkbox
+                          checked={selectedIndustries.has(industry.id)}
+                          onCheckedChange={() => handleIndustryToggle(industry.id)}
+                          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        />
+                        <CollapsibleTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="flex-1 justify-start gap-2 text-sm font-medium text-foreground h-auto p-0"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <IconComponent className="h-4 w-4" />
+                            <span className="flex-1 text-left">{industry.name}</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <div className="flex gap-1">
+                          <Badge variant="outline" className="text-xs">
+                            {totalCount}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onSelectIndustryCategories(industry.id)}
+                            className="text-xs text-muted-foreground hover:text-foreground h-6 px-2"
+                          >
+                            Select All
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Industry Categories */}
+                      <CollapsibleContent>
+                        <div className="ml-6 space-y-1">
+                          {industryCategories.map((category) => (
+                            <label
+                              key={category.name}
+                              className="flex items-center space-x-3 cursor-pointer group hover:bg-muted/30 rounded-md p-2 transition-colors"
+                            >
+                              <Checkbox
+                                checked={selectedCategories.has(category.name)}
+                                onCheckedChange={() => handleCategoryToggle(category.name)}
+                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <span 
+                                  className="text-sm text-muted-foreground group-hover:text-foreground truncate block"
+                                  title={getCategoryLabel(category.name)}
+                                >
+                                  {getCategoryLabel(category.name)}
+                                </span>
+                              </div>
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                {category.count}
+                              </Badge>
+                            </label>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </div>
+                  </Collapsible>
+                );
+              })}
             </div>
           </ScrollArea>
         </div>

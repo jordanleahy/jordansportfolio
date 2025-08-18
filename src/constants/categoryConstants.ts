@@ -154,6 +154,132 @@ export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
   'ballet-3-year-olds': 'Ballet for 3-Year-Olds'
 };
 
+// Industry grouping system
+export const INDUSTRIES = [
+  {
+    id: 'healthcare',
+    name: 'Healthcare & Medical',
+    icon: 'Activity',
+    description: 'Medical, healthcare, and clinical categories'
+  },
+  {
+    id: 'technology',
+    name: 'Technology & AI',
+    icon: 'Brain',
+    description: 'AI, technology, and software development'
+  },
+  {
+    id: 'business',
+    name: 'Business & Strategy',
+    icon: 'TrendingUp',
+    description: 'Business strategy, finance, and operations'
+  },
+  {
+    id: 'design',
+    name: 'Design & UX',
+    icon: 'Eye',
+    description: 'Design, user experience, and creative work'
+  },
+  {
+    id: 'operations',
+    name: 'Operations & Management',
+    icon: 'Users',
+    description: 'Operations, project management, and processes'
+  },
+  {
+    id: 'legal',
+    name: 'Legal & Compliance',
+    icon: 'Shield',
+    description: 'Legal, compliance, and risk management'
+  },
+  {
+    id: 'education',
+    name: 'Education & Learning',
+    icon: 'Lightbulb',
+    description: 'Education, training, and skill development'
+  },
+  {
+    id: 'other',
+    name: 'Other',
+    icon: 'FileText',
+    description: 'Miscellaneous and uncategorized'
+  }
+] as const;
+
+// Category to industry mapping
+export const CATEGORY_INDUSTRY_MAP: Record<string, string> = {
+  // Healthcare & Medical
+  'cdi': 'healthcare',
+  'healthcare-coding': 'healthcare',
+  'medical-devices': 'healthcare',
+  'pharmaceuticals': 'healthcare',
+  'telemedicine': 'healthcare',
+  'hospital-operations': 'healthcare',
+  'patient-care': 'healthcare',
+  'adult-autism-neurodevelopment': 'healthcare',
+  'alzheimers-disease': 'healthcare',
+  'atrial-fibrillation': 'healthcare',
+  'clinical-ai-competitors': 'healthcare',
+  
+  // Technology & AI
+  'coding ai': 'technology',
+  'ai agents': 'technology',
+  'machine-learning': 'technology',
+  'cybersecurity': 'technology',
+  'cloud-computing': 'technology',
+  'data-analytics': 'technology',
+  'blockchain': 'technology',
+  'iot': 'technology',
+  'ai-agent-ux-patterns': 'technology',
+  
+  // Business & Strategy
+  'business-strategy': 'business',
+  'financial-planning': 'business',
+  'market-research': 'business',
+  'sales-enablement': 'business',
+  'customer-success': 'business',
+  'marketing-automation': 'business',
+  'brand-management': 'business',
+  'competitive-analysis': 'business',
+  
+  // Design & UX
+  'product_designer': 'design',
+  'ux-research': 'design',
+  'design-systems': 'design',
+  'user-interface': 'design',
+  'user-testing': 'design',
+  'prototyping': 'design',
+  
+  // Operations & Management
+  'product_manager': 'operations',
+  'project-management': 'operations',
+  'process-optimization': 'operations',
+  'quality-assurance': 'operations',
+  'supply-chain': 'operations',
+  'human-resources': 'operations',
+  'training-development': 'operations',
+  'change-management': 'operations',
+  
+  // Legal & Compliance
+  'contracts': 'legal',
+  'legal-tech': 'legal',
+  'regulatory-compliance': 'legal',
+  'data-privacy': 'legal',
+  'risk-management': 'legal',
+  'contract-management': 'legal',
+  'intellectual-property': 'legal',
+  
+  // Education & Learning
+  'educational-technology': 'education',
+  'e-learning': 'education',
+  'corporate-training': 'education',
+  'skill-development': 'education',
+  'knowledge-management': 'education',
+  'ballet-3-year-olds': 'education',
+  
+  // Default to 'other' for unmapped categories
+};
+
 // Helper functions for category management
 export const getCategoryLabel = (category: string): string => {
   // Check for explicit mapping first
@@ -189,6 +315,41 @@ export const getCategoryLabel = (category: string): string => {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(' ');
+};
+
+// Get industry for a category
+export const getCategoryIndustry = (category: string): string => {
+  return CATEGORY_INDUSTRY_MAP[category] || 'other';
+};
+
+// Get industry info by ID
+export const getIndustryById = (industryId: string) => {
+  return INDUSTRIES.find(industry => industry.id === industryId);
+};
+
+// Group categories by industry
+export const groupCategoriesByIndustry = (categories: Array<{ name: string; count: number }>) => {
+  const industryGroups = new Map<string, Array<{ name: string; count: number }>>();
+  
+  // Initialize all industries
+  INDUSTRIES.forEach(industry => {
+    industryGroups.set(industry.id, []);
+  });
+  
+  // Group categories by industry
+  categories.forEach(category => {
+    const industryId = getCategoryIndustry(category.name);
+    const group = industryGroups.get(industryId) || [];
+    group.push(category);
+    industryGroups.set(industryId, group);
+  });
+  
+  // Sort categories within each industry
+  industryGroups.forEach((categories, industryId) => {
+    categories.sort((a, b) => a.name.localeCompare(b.name));
+  });
+  
+  return industryGroups;
 };
 
 export const isKnownCategory = (category: string): boolean => {

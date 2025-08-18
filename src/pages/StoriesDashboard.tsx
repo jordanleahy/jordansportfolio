@@ -123,12 +123,15 @@ export default function StoriesDashboard() {
   const {
     filteredThemes,
     selectedCategories,
+    selectedIndustries,
     searchQuery,
     availableCategories,
     setSelectedCategories,
+    setSelectedIndustries,
     setSearchQuery,
     clearFilters,
     selectAllCategories,
+    selectIndustryCategories,
     hasActiveFilters
   } = useStoriesFilters({ themes: availableThemes });
 
@@ -963,12 +966,15 @@ export default function StoriesDashboard() {
                 </Button>
               </div> : <StoriesGridLayout
                 selectedCategories={selectedCategories}
+                selectedIndustries={selectedIndustries}
                 searchQuery={searchQuery}
                 availableCategories={availableCategories}
                 onCategoriesChange={setSelectedCategories}
+                onIndustriesChange={setSelectedIndustries}
                 onSearchChange={setSearchQuery}
                 onClearFilters={clearFilters}
                 onSelectAllCategories={selectAllCategories}
+                onSelectIndustryCategories={selectIndustryCategories}
                 hasActiveFilters={hasActiveFilters}
               >
                 <CategoriesGrid 
