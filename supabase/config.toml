@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.duplicate-public-collection]
 verify_jwt = true
+
+[functions.aggregate-api-usage]
+verify_jwt = true
