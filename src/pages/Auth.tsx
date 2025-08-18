@@ -28,7 +28,7 @@ const Auth = () => {
 
   // Generate SEO metadata for auth page
   const authSEO = generateSEOMetadata({
-    title: "Sign In - Job Watcher",
+    title: "Log in",
     description: "Sign in to access Job Watcher and track your dream jobs. Secure authentication for healthcare technology professionals.",
     image: "/og-default.png",
     url: "/auth",
