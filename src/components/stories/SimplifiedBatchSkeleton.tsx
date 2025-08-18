@@ -32,10 +32,10 @@ export const SimplifiedBatchSkeleton: React.FC<SimplifiedBatchSkeletonProps> = (
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span className="text-sm font-medium text-primary">
               {isComplete ? 'Finalizing theme...' : 'Curating your illustrations...'}
             </span>
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
           </div>
           {onDismiss && (
             <Button
