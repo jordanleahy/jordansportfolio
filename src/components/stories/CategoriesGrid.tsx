@@ -22,26 +22,6 @@ export const CategoriesGrid = ({
 
   return (
     <div className={`grid ${LAYOUT_CONSTANTS.GRID.CATEGORIES} ${LAYOUT_CONSTANTS.SPACING.GRID_GAP}`}>
-      {/* Inline shimmer card when generating */}
-      {isGeneratingTheme && !hasPendingShimmer && (
-        <div className="relative">
-          <CategoryCard
-            theme="Generating posts..."
-            themeId={`${SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME}inline-shimmer`}
-            themeDescription="Creating your custom theme with AI-generated content"
-            category="Generation"
-            postCount={0}
-            isShimmer={true}
-            isError={false}
-            isSelected={false}
-            onSelect={() => {}}
-            isSelectionMode={false}
-            isGeneratingTheme={isGeneratingTheme}
-            onCancelGeneration={onCancelGeneration}
-          />
-        </div>
-      )}
-      
       {/* Theme cards */}
       {themes.map((theme) => {
         return (
