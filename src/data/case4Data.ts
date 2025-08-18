@@ -44,7 +44,7 @@ export const case4Data: CaseStudyData = {
       description: "Senior UX Designer",
       items: [
         "Prior authorization workflow research",
-        "Multi-stakeholder user journey mapping", 
+        "Mapped prescriber & non prescriber user journeys", 
         "AI assisted interface design",
         "Insurance integration UX strategy"
       ]
