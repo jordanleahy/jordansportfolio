@@ -74,44 +74,6 @@ export const UsageCharts = () => {
         </CardContent>
       </Card>
 
-      {/* Capability breakdown charts */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Capability Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Chat Completions</div>
-            <ChartContainer config={{ text_generation_cost: { label: "Chat", color: "hsl(var(--primary))" }}} className="h-28">
-              <BarChart data={chartData.daily_costs}>
-                <XAxis dataKey="date" hide />
-                <YAxis hide />
-                <Bar dataKey="text_generation_cost" fill="var(--color-text_generation_cost)" radius={[4,4,0,0]} />
-              </BarChart>
-            </ChartContainer>
-          </div>
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Images</div>
-            <ChartContainer config={{ image_generation_cost: { label: "Images", color: "hsl(var(--accent))" }}} className="h-28">
-              <BarChart data={chartData.daily_costs}>
-                <XAxis dataKey="date" hide />
-                <YAxis hide />
-                <Bar dataKey="image_generation_cost" fill="var(--color-image_generation_cost)" radius={[4,4,0,0]} />
-              </BarChart>
-            </ChartContainer>
-          </div>
-          <div className="space-y-2">
-            <div className="text-xs text-muted-foreground">Image Prompts</div>
-            <ChartContainer config={{ image_prompt_cost: { label: "Prompts", color: "hsl(var(--secondary))" }}} className="h-28">
-              <BarChart data={chartData.daily_costs}>
-                <XAxis dataKey="date" hide />
-                <YAxis hide />
-                <Bar dataKey="image_prompt_cost" fill="var(--color-image_prompt_cost)" radius={[4,4,0,0]} />
-              </BarChart>
-            </ChartContainer>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
