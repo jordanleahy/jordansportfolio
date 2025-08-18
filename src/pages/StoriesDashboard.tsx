@@ -555,7 +555,19 @@ export default function StoriesDashboard() {
         requestAnimationFrame(() => {
           const shimmerElement = document.querySelector(`[data-theme-state="generating"][data-theme-id="${data.theme_id}"]`);
           if (shimmerElement) {
+            console.log('✅ SCROLL: Found shimmer card, scrolling to:', data.theme_id);
             shimmerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            console.log('⚠️ SCROLL: Shimmer card not found, retrying in 100ms');
+            setTimeout(() => {
+              const retryElement = document.querySelector(`[data-theme-state="generating"][data-theme-id="${data.theme_id}"]`);
+              if (retryElement) {
+                console.log('✅ SCROLL: Found shimmer on retry, scrolling to:', data.theme_id);
+                retryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                console.log('❌ SCROLL: Shimmer card still not found after retry');
+              }
+            }, 100);
           }
         });
       }
