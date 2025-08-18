@@ -80,14 +80,10 @@ export const PostsCardView = memo(({
       )
     );
     
-    console.log('🔍 Timer useEffect - isAnyRegenerating:', isAnyRegenerating, 'timer.isRunning:', timer.isRunning);
-    
     if (isAnyRegenerating && !timer.isRunning) {
       timer.startTimer();
-      console.log('⏱️ Timer started from useEffect');
     } else if (!isAnyRegenerating && timer.isRunning) {
       timer.stopTimer();
-      console.log('⏹️ Timer stopped from useEffect');
     }
   }, [posts, isProcessingCtx, timer]);
 
@@ -318,7 +314,7 @@ export const PostsCardView = memo(({
                               }
                               // Always regenerate as 1:1 for square container
                               const aspectRatioKey = '1_1';
-                              console.log('🎯 Starting image regeneration for aspect ratio:', aspectRatioKey);
+                              const visualAspectRatio = '1:1' as AspectRatio;
                               
                               onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
                             }}
