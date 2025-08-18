@@ -30,6 +30,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
+import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import Library from "./pages/Library";
 
 import { AgentDetail } from "./pages/agents/AgentDetail";
@@ -220,9 +221,9 @@ function App() {
                     </AdminRoute>
                   } 
                 />
-                <Route path="/cases/case1" element={<Case1 />} />
-                <Route path="/cases/case3" element={<Case3 />} />
-                <Route path="/cases/case4" element={<Case4 />} />
+                <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
+                <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
+                <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />

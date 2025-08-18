@@ -2,9 +2,33 @@
 import React from "react";
 import { HeroParallax } from "@/components/ui/hero-parallax";
 import { getStorageImageUrl } from "@/utils/storageImageUpload";
+import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
+import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
 export default function HeroParallaxDemo() {
-  return <HeroParallax products={products} />;
+  const { 
+    showPasswordModal, 
+    handleCaseStudyNavigation, 
+    handleAuthentication, 
+    handleCloseModal 
+  } = useCaseStudyAuth();
+
+  // Update products to use the authentication handler instead of direct links
+  const productsWithAuth = products.map(product => ({
+    ...product,
+    onClick: () => handleCaseStudyNavigation(product.link)
+  }));
+
+  return (
+    <>
+      <HeroParallax products={productsWithAuth} />
+      <CaseStudyPasswordModal
+        isOpen={showPasswordModal}
+        onClose={handleCloseModal}
+        onAuthenticate={handleAuthentication}
+      />
+    </>
+  );
 }
 
 export const products = [

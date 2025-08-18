@@ -15,6 +15,7 @@ export const HeroParallax = ({
     title: string;
     link: string;
     thumbnail: string;
+    onClick?: () => void;
   }[];
 }) => {
   const firstRow = products.slice(0, 5);
@@ -123,9 +124,18 @@ export const ProductCard = ({
     title: string;
     link: string;
     thumbnail: string;
+    onClick?: () => void;
   };
   translate: MotionValue<number>;
 }) => {
+  const handleClick = () => {
+    if (product.onClick) {
+      product.onClick();
+    } else {
+      window.open(product.link, '_blank');
+    }
+  };
+
   return (
     <motion.div
       style={{
@@ -135,7 +145,8 @@ export const ProductCard = ({
         y: -20,
       }}
       key={product.title}
-      className="group/product h-96 w-[30rem] relative shrink-0 group-hover/product:shadow-2xl"
+      className="group/product h-96 w-[30rem] relative shrink-0 group-hover/product:shadow-2xl cursor-pointer"
+      onClick={handleClick}
     >
       <img
         src={product.thumbnail}

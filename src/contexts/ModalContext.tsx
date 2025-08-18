@@ -4,6 +4,9 @@ interface ModalContextType {
   isSettingsOpen: boolean;
   openSettings: () => void;
   closeSettings: () => void;
+  isCaseStudyPasswordOpen: boolean;
+  openCaseStudyPassword: () => void;
+  closeCaseStudyPassword: () => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -22,14 +25,21 @@ interface ModalProviderProps {
 
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCaseStudyPasswordOpen, setIsCaseStudyPasswordOpen] = useState(false);
 
   const openSettings = () => setIsSettingsOpen(true);
   const closeSettings = () => setIsSettingsOpen(false);
+  
+  const openCaseStudyPassword = () => setIsCaseStudyPasswordOpen(true);
+  const closeCaseStudyPassword = () => setIsCaseStudyPasswordOpen(false);
 
   const value = {
     isSettingsOpen,
     openSettings,
     closeSettings,
+    isCaseStudyPasswordOpen,
+    openCaseStudyPassword,
+    closeCaseStudyPassword,
   };
 
   return (

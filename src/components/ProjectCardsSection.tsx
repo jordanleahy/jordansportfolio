@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
+import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
 const projects = [
   {
@@ -39,76 +40,92 @@ const projects = [
 ];
 
 const ProjectCardsSection = () => {
+  const { 
+    showPasswordModal, 
+    handleCaseStudyNavigation, 
+    handleAuthentication, 
+    handleCloseModal 
+  } = useCaseStudyAuth();
+
   return (
-    <section id="case-studies" className="py-24 px-4 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
-          <p className="text-muted-foreground text-lg">
-            Case studies showcasing healthcare design innovation
-          </p>
-        </motion.div>
-        
-        <div className="grid lg:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -8, rotate: -1 }}
-            >
-              <Link to={project.path}>
-                <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-accent/20 hover:border-accent">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="p-3 rounded-lg bg-accent/10 mb-4">
-                      <project.icon className="h-6 w-6 text-accent" />
+    <>
+      <section id="case-studies" className="py-24 px-4 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
+            <p className="text-muted-foreground text-lg">
+              Case studies showcasing healthcare design innovation
+            </p>
+          </motion.div>
+          
+          <div className="grid lg:grid-cols-2 gap-8">
+            {projects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -8, rotate: -1 }}
+              >
+                <Card 
+                  className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-accent/20 hover:border-accent"
+                  onClick={() => handleCaseStudyNavigation(project.path)}
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="p-3 rounded-lg bg-accent/10 mb-4">
+                        <project.icon className="h-6 w-6 text-accent" />
+                      </div>
+                      <motion.div
+                        whileHover={{ x: 4 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                      </motion.div>
                     </div>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-                    </motion.div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <p className="text-card-foreground mb-4 leading-relaxed">
-                    {project.description}
-                  </p>
+                    <div>
+                      <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
+                    </div>
+                  </CardHeader>
                   
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <Button variant="outline" className="w-full">
-                    View Case Study
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
+                  <CardContent className="pt-0">
+                    <p className="text-card-foreground mb-4 leading-relaxed">
+                      {project.description}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {project.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    
+                    <Button variant="outline" className="w-full">
+                      View Case Study
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
                 </Card>
-              </Link>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      
+      <CaseStudyPasswordModal
+        isOpen={showPasswordModal}
+        onClose={handleCloseModal}
+        onAuthenticate={handleAuthentication}
+      />
+    </>
   );
 };
 
