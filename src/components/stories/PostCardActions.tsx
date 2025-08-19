@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2, Mic, Share } from 'lucide-react';
+import { Copy, Trash2, Mic, Share, Volume2 } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardActionsProps {
@@ -8,7 +8,9 @@ interface PostCardActionsProps {
   onCopy: (post: SocialMediaPost) => void;
   onDelete: (postId: string) => void;
   onStoryTelling: () => void;
+  onVoiceover?: () => void;
   showStoryTelling?: boolean;
+  showVoiceover?: boolean;
 }
 
 export const PostCardActions: React.FC<PostCardActionsProps> = ({
@@ -16,7 +18,9 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
   onCopy,
   onDelete,
   onStoryTelling,
-  showStoryTelling = true
+  onVoiceover,
+  showStoryTelling = true,
+  showVoiceover = true
 }) => {
   const handleShare = async () => {
     if (navigator.share) {
@@ -45,6 +49,17 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       >
         <Share className="h-4 w-4" />
       </Button>
+      {showVoiceover && onVoiceover && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onVoiceover}
+          className="h-8 w-8 p-0"
+          title="Generate Voiceover Script"
+        >
+          <Volume2 className="h-4 w-4" />
+        </Button>
+      )}
       {showStoryTelling && (
         <Button
           variant="ghost"

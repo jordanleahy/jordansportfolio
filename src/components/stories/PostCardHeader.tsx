@@ -15,7 +15,9 @@ interface PostCardHeaderProps {
   onDelete: (postId: string) => void;
   onStatusChange: (postId: string, status: string) => void;
   onStoryTelling: () => void;
+  onVoiceover?: () => void;
   showStoryTelling?: boolean;
+  showVoiceover?: boolean;
   isAdminSectionOpen?: boolean;
   onToggleAdminSection?: () => void;
 }
@@ -39,7 +41,9 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
   onDelete,
   onStatusChange,
   onStoryTelling,
+  onVoiceover,
   showStoryTelling = false,
+  showVoiceover = true,
   isAdminSectionOpen = false,
   onToggleAdminSection
 }) => {
@@ -85,7 +89,9 @@ export const PostCardHeader: React.FC<PostCardHeaderProps> = ({
             onCopy={onCopy}
             onDelete={onDelete}
             onStoryTelling={onStoryTelling}
+            onVoiceover={onVoiceover}
             showStoryTelling={showStoryTelling}
+            showVoiceover={showVoiceover}
           />
         </div>
       </div>
