@@ -29,7 +29,6 @@ import {
 // Lazy load components
 const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
-import { ProcessingStatesProvider } from '@/contexts/ProcessingStatesContext';
 import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
 
 
@@ -306,21 +305,19 @@ export default function ThemeDetail() {
             {/* Color Theme Consistency Checker */}
             {themeData?.id && <ColorThemeConsistencyChecker themeId={themeData.id} />}
             
-            <ProcessingStatesProvider>
-              {themeData?.id && hasAnyPosts ? (
-                <PostsTable 
-                  themeId={themeData.id}
-                  posts={posts as any}
-                  onPostsChange={handlePostsChange}
-                  isAdmin={isAdmin}
-                  category={decodedTheme}
-                  selectedThemeId={selectedThemeId}
-                  onThemeChange={setSelectedThemeId}
-                />
-              ) : (
-                <LibraryCollectionsFallback />
-              )}
-            </ProcessingStatesProvider>
+            {themeData?.id && hasAnyPosts ? (
+              <PostsTable 
+                themeId={themeData.id}
+                posts={posts as any}
+                onPostsChange={handlePostsChange}
+                isAdmin={isAdmin}
+                category={decodedTheme}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={setSelectedThemeId}
+              />
+            ) : (
+              <LibraryCollectionsFallback />
+            )}
           </Suspense>
         </div>
       </div>
