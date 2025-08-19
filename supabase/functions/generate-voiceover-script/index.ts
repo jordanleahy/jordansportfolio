@@ -103,9 +103,9 @@ serve(async (req) => {
     // First try to get the specific tone, then fall back to any available prompt
     let { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text, category')
+      .select('prompt_text, name')
       .eq('agent_id', agent.id)
-      .eq('category', tone)
+      .eq('name', tone)
       .eq('is_active', true)
       .order('updated_at', { ascending: false })
       .limit(1)
@@ -118,7 +118,7 @@ serve(async (req) => {
       // Try to get any available prompt as fallback
       const { data: fallbackData } = await supabase
         .from('system_prompts')
-        .select('prompt_text, category')
+        .select('prompt_text, name')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
         .order('updated_at', { ascending: false })
@@ -126,14 +126,14 @@ serve(async (req) => {
         .single();
       
       if (fallbackData) {
-        console.log('Using fallback prompt:', fallbackData.category, 'instead of:', tone);
+        console.log('Using fallback prompt:', fallbackData.name, 'instead of:', tone);
         selectedPrompt = fallbackData;
       } else {
         throw new Error(`No system prompts available. Agent may not be properly configured.`);
       }
     }
 
-    console.log('Using system prompt for tone:', selectedPrompt.category);
+    console.log('Using system prompt for tone:', selectedPrompt.name);
 
     // Prepare the user prompt
     const userPrompt = `Content Type: ${content_type}
