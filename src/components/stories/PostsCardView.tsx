@@ -346,7 +346,8 @@ export const PostsCardView = memo(({
                     ) : (isProcessing || isProcessingCtx(post.id, 'generate', '1:1' as AspectRatio)) ? (
                       <div className="relative w-full h-full">
                         <SimpleShimmer className="w-full h-full" />
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        {/* Fixed position loading indicator to prevent jumping */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                           <UnifiedLoadingIndicator 
                             isVisible={true}
                             variant="overlay"
