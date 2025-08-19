@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
+import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
 import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicator';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey, AspectRatio } from '@/types/bulkImageGeneration';
@@ -70,18 +70,55 @@ export const PostsCardView = memo(({
   const { isAdmin: isUserAdmin } = useUserRole();
   
   const {
-    timer,
-    isProcessing: isProcessingCtx,
-    isGenerating: isGeneratingCtx,
-    isAnyImageGenerating,
-    getRegenerateButtonText,
-    getLoadingMessage,
-    isButtonDisabled
-  } = useUnifiedRegenerateStates();
+    isRunning,
+    secondsRemaining,
+    isExpired,
+    startTimer,
+    stopTimer,
+    resetTimer
+  } = useImageGenerationTimer();
+  
+  const { isProcessing: isProcessingCtx, isGenerating: isGeneratingCtx, isAnyImageGenerating } = useProcessingStatesContext();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  // Timer is now auto-managed by useUnifiedRegenerateStates
+  // Manual helper functions for button text and loading states
+  const getRegenerateButtonText = useCallback((
+    postId: string,
+    aspectRatio?: AspectRatio,
+    hasExistingImage?: boolean
+  ): string => {
+    if (isProcessingCtx(postId, 'generate', aspectRatio)) {
+      return 'Regenerating...';
+    }
+    if (isAnyImageGenerating() && !isProcessingCtx(postId, 'generate', aspectRatio)) {
+      return 'Image Generation in Progress';
+    }
+    return hasExistingImage ? 'Regenerate' : 'Generate';
+  }, [isProcessingCtx, isAnyImageGenerating]);
+
+  const getLoadingMessage = useCallback((hasExistingImage?: boolean): string => {
+    return hasExistingImage ? "Regenerating..." : "Generating...";
+  }, []);
+
+  const isButtonDisabled = useCallback((
+    postId: string,
+    aspectRatio?: AspectRatio
+  ): boolean => {
+    return isProcessingCtx(postId, 'generate', aspectRatio) || 
+           (isAnyImageGenerating() && !isProcessingCtx(postId, 'generate', aspectRatio));
+  }, [isProcessingCtx, isAnyImageGenerating]);
+
+  // Auto-manage timer based on processing states
+  useEffect(() => {
+    const hasActiveGeneration = isAnyImageGenerating();
+    
+    if (hasActiveGeneration && !isRunning) {
+      startTimer();
+    } else if (!hasActiveGeneration && isRunning) {
+      stopTimer();
+    }
+  }, [isAnyImageGenerating, isRunning, startTimer, stopTimer]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts(prev => {
@@ -326,9 +363,9 @@ export const PostsCardView = memo(({
                             isVisible={true}
                             variant="overlay"
                             message={getLoadingMessage(!!post.image_1_1_url)}
-                            timerSeconds={timer.secondsRemaining}
-                            showTimer={timer.isRunning}
-                            isTimerExpired={timer.isExpired}
+                            timerSeconds={secondsRemaining}
+                            showTimer={isRunning}
+                            isTimerExpired={isExpired}
                           />
                         </div>
                       </div>
@@ -521,9 +558,9 @@ export const PostsCardView = memo(({
                                   variant="overlay"
                                   size="sm"
                                   message={getLoadingMessage(!!imageUrl)}
-                                  timerSeconds={timer.secondsRemaining}
-                                  showTimer={timer.isRunning}
-                                  isTimerExpired={timer.isExpired}
+                                   timerSeconds={secondsRemaining}
+                                   showTimer={isRunning}
+                                   isTimerExpired={isExpired}
                                 />
                               </div>
                             </div>
