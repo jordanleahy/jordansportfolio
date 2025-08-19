@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ImageHoverOverlay } from '@/components/ui/image-hover-overlay';
@@ -79,32 +79,66 @@ export const PostsCardView = memo(({
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  // Manual helper functions for button text and loading states
-  const getRegenerateButtonText = useCallback((
-    postId: string,
-    aspectRatio?: AspectRatio,
-    hasExistingImage?: boolean
-  ): string => {
-    if (isProcessingCtx(postId, 'generate', aspectRatio)) {
-      return 'Regenerating...';
-    }
-    if (isAnyImageGenerating() && !isProcessingCtx(postId, 'generate', aspectRatio)) {
-      return 'Image Generation in Progress';
-    }
-    return hasExistingImage ? 'Regenerate' : 'Generate';
-  }, [isProcessingCtx, isAnyImageGenerating]);
+  // Memoized state calculations for performance optimization
+  const regenerateStates = useMemo(() => {
+    const states = new Map();
+    posts.forEach(post => {
+      const aspectRatio = '1:1' as AspectRatio;
+      const isCurrentProcessing = isProcessingCtx(post.id, 'generate', aspectRatio);
+      const isOtherGenerating = isAnyImageGenerating() && !isCurrentProcessing;
+      
+      states.set(post.id, {
+        isProcessing: isCurrentProcessing,
+        isDisabled: isCurrentProcessing || isOtherGenerating,
+        buttonText: isCurrentProcessing 
+          ? 'Regenerating...' 
+          : isOtherGenerating 
+            ? 'Image Generation in Progress'
+            : post.image_1_1_url ? 'Regenerate' : 'Generate',
+        loadingMessage: post.image_1_1_url ? "Regenerating..." : "Generating..."
+      });
+    });
+    return states;
+  }, [posts, isProcessingCtx, isAnyImageGenerating]);
 
-  const getLoadingMessage = useCallback((hasExistingImage?: boolean): string => {
-    return hasExistingImage ? "Regenerating..." : "Generating...";
-  }, []);
+  // Debounced regenerate handler to prevent rapid clicks
+  const [regenerateClickDebounce, setRegenerateClickDebounce] = useState<Set<string>>(new Set());
+  
+  const handleRegenerateImage = useCallback(async (
+    post: SocialMediaPost, 
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    
+    // Prevent rapid clicking
+    if (regenerateClickDebounce.has(post.id)) return;
+    
+    setRegenerateClickDebounce(prev => new Set(prev).add(post.id));
+    
+    // Clear debounce after 1 second
+    setTimeout(() => {
+      setRegenerateClickDebounce(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(post.id);
+        return newSet;
+      });
+    }, 1000);
 
-  const isButtonDisabled = useCallback((
-    postId: string,
-    aspectRatio?: AspectRatio
-  ): boolean => {
-    return isProcessingCtx(postId, 'generate', aspectRatio) || 
-           (isAnyImageGenerating() && !isProcessingCtx(postId, 'generate', aspectRatio));
-  }, [isProcessingCtx, isAnyImageGenerating]);
+    console.log('🔄 Regenerate button clicked for post:', post.id);
+    const creditStatus = getCreditStatus();
+    if (!creditStatus.hasCredits) {
+      toast({
+        title: "Credit limit reached",
+        description: getBlockingMessage(creditStatus),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Always use AspectRatioKey format for consistency
+    const aspectRatioKey = '1_1';
+    onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
+  }, [regenerateClickDebounce, getCreditStatus, getBlockingMessage, toast, onGenerateImage]);
 
   // Timer is now auto-managed by ImageGenerationTimerContext
 
@@ -317,29 +351,12 @@ export const PostsCardView = memo(({
                         {/* Regenerate button overlay */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                           <button
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              console.log('🔄 Regenerate button clicked for post:', post.id);
-                              const creditStatus = getCreditStatus();
-                              if (!creditStatus.hasCredits) {
-                                toast({
-                                  title: "Credit limit reached",
-                                  description: getBlockingMessage(creditStatus),
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              // Always regenerate as 1:1 for square container
-                              const aspectRatioKey = '1_1';
-                              const visualAspectRatio = '1:1' as AspectRatio;
-                              
-                              onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
-                            }}
-                            disabled={isButtonDisabled(post.id, '1:1')}
+                            onClick={(e) => handleRegenerateImage(post, e)}
+                            disabled={regenerateStates.get(post.id)?.isDisabled}
                             className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Regenerate image"
                           >
-                            {getRegenerateButtonText(post.id, '1:1', !!post.image_1_1_url)}
+                            {regenerateStates.get(post.id)?.buttonText}
                           </button>
                         </div>
                       </div>
@@ -351,7 +368,7 @@ export const PostsCardView = memo(({
                           <UnifiedLoadingIndicator 
                             isVisible={true}
                             variant="overlay"
-                            message={getLoadingMessage(!!post.image_1_1_url)}
+                            message={regenerateStates.get(post.id)?.loadingMessage}
                             timerSeconds={secondsRemaining}
                             showTimer={isRunning}
                             isTimerExpired={isExpired}
@@ -364,14 +381,12 @@ export const PostsCardView = memo(({
                           // Start with 1:1 aspect ratio as default
                           onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
                         }}
-                        disabled={isProcessing || isAnyImageGenerating()}
+                        disabled={regenerateStates.get(post.id)?.isDisabled}
                         className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <div className="flex flex-col items-center gap-2">
                           <Sparkles className="h-6 w-6" />
-                          <span>
-                            {isProcessingCtx(post.id, 'generate') ? 'Generating...' : isAnyImageGenerating() ? 'Image Generation in Progress' : 'Generate Image'}
-                          </span>
+                          <span>{regenerateStates.get(post.id)?.buttonText}</span>
                         </div>
                       </button>
                     )}
@@ -532,11 +547,11 @@ export const PostsCardView = memo(({
                                     }
                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
                                   }}
-                                  disabled={isButtonDisabled(post.id, aspectRatio)}
+                                  disabled={isProcessingCtx(post.id, 'generate', aspectRatio) || isAnyImageGenerating()}
                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Regenerate image"
                                 >
-                                  {getRegenerateButtonText(post.id, aspectRatio, !!imageUrl)}
+                                  {isProcessingCtx(post.id, 'generate', aspectRatio) ? 'Regenerating...' : imageUrl ? 'Regenerate' : 'Generate'}
                                 </button>
                               </div>
                             </div>
@@ -548,7 +563,7 @@ export const PostsCardView = memo(({
                                   isVisible={true}
                                   variant="overlay"
                                   size="sm"
-                                  message={getLoadingMessage(!!imageUrl)}
+                                  message={imageUrl ? "Regenerating..." : "Generating..."}
                                    timerSeconds={secondsRemaining}
                                    showTimer={isRunning}
                                    isTimerExpired={isExpired}
@@ -620,7 +635,7 @@ export const PostsCardView = memo(({
                         }
                         onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
                       }}
-                      disabled={isButtonDisabled(post.id, '1:1')}
+                      disabled={regenerateStates.get(post.id)?.isDisabled}
                       className="w-full"
                     >
                       {isProcessingCtx(post.id, 'generate', '1:1') ? (
