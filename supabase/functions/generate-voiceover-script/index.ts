@@ -100,10 +100,12 @@ serve(async (req) => {
     }
 
     // Get the system prompt for the tone from the system_prompts table
-    const { data: systemPromptData, error: promptError } = await supabase
+    // First try to get the specific tone, then fall back to any available prompt
+    let { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text')
+      .select('prompt_text, category')
       .eq('agent_id', agent.id)
+      .eq('category', tone)
       .eq('is_active', true)
       .order('updated_at', { ascending: false })
       .limit(1)
@@ -112,13 +114,14 @@ serve(async (req) => {
     let selectedPrompt = systemPromptData;
     
     if (promptError || !selectedPrompt) {
-      console.error('Tone not supported:', tone);
+      console.log('Specific tone not found, trying fallback. Requested tone:', tone);
       // Try to get any available prompt as fallback
       const { data: fallbackData } = await supabase
         .from('system_prompts')
         .select('prompt_text, category')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
+        .order('updated_at', { ascending: false })
         .limit(1)
         .single();
       
