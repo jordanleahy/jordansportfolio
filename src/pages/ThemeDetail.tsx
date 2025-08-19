@@ -14,7 +14,6 @@ import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Trash2, Download } from 'lucide-react';
-import { generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,6 +152,9 @@ export default function ThemeDetail() {
       return;
     }
 
+    // Dynamic import to avoid build issues
+    const { generateMultiplePostsPDF } = await import('@/utils/pdfGenerator');
+    
     // Check if any posts have images
     const postsWithImages = posts.filter(post => 
       post.image_1_1_url || post.image_16_9_url || post.image_9_16_url || 
