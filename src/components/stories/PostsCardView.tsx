@@ -420,16 +420,25 @@ export const PostsCardView = memo(({
                           size="sm"
                         />
 
-                        {user && (
-                          <ActionButton
-                            icon={<Download className="h-4 w-4" />}
-                            onClick={() => handleDownloadPDF(post)}
-                            title="Download as PDF"
-                            size="sm"
-                          />
-                        )}
-                       
-                        {isAdmin && (
+                         {user && (
+                           <ActionButton
+                             icon={<Download className="h-4 w-4" />}
+                             onClick={() => handleDownloadPDF(post)}
+                             title="Download as PDF"
+                             size="sm"
+                           />
+                         )}
+
+                         {user && (
+                           <ActionButton
+                             icon={<Mic className="h-4 w-4" />}
+                             onClick={() => onGenerateVoiceoverScript(post)}
+                             title="Generate voiceover script"
+                             size="sm"
+                           />
+                         )}
+                        
+                         {isAdmin && (
                           <ActionButton
                             icon={<RefreshCw className="h-4 w-4" />}
                             onClick={() => handleRegeneratePrompt(post)}
@@ -449,20 +458,13 @@ export const PostsCardView = memo(({
                              size="sm"
                            />
                            
-                           <ActionButton
-                             icon={<Lightbulb className="h-4 w-4" />}
-                             onClick={() => handleInstantImagePromptGeneration(post)}
-                             title="Generate image prompt"
-                             loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
-                             size="sm"
-                           />
-                           
-                           <ActionButton
-                             icon={<Mic className="h-4 w-4" />}
-                             onClick={() => onGenerateVoiceoverScript(post)}
-                             title="Generate voiceover script"
-                             size="sm"
-                           />
+                            <ActionButton
+                              icon={<Lightbulb className="h-4 w-4" />}
+                              onClick={() => handleInstantImagePromptGeneration(post)}
+                              title="Generate image prompt"
+                              loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
+                              size="sm"
+                            />
                          </>
                        )}
                         
