@@ -261,9 +261,9 @@ export const PostsCardView = memo(({
 
   return (
     <div className="space-y-4">
-      {/* Download All Button */}
+      {/* Download All Button - Desktop/Tablet Only */}
       {user && posts.length > 1 && (
-        <div className="flex justify-end p-6 pb-0">
+        <div className="hidden md:flex justify-end p-6 pb-0">
           <Button
             onClick={handleDownloadAllPDF}
             variant="outline"

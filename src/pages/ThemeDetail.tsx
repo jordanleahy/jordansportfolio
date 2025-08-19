@@ -13,7 +13,8 @@ import { useThemeSEO } from '@/hooks/useThemeSEO';
 import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Download } from 'lucide-react';
+import { generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,6 +134,55 @@ export default function ThemeDetail() {
     refetch();
   };
 
+  const handleDownloadAllPDF = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to download images",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (posts.length === 0) {
+      toast({
+        title: "No posts",
+        description: "No posts available to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if any posts have images
+    const postsWithImages = posts.filter(post => 
+      post.image_1_1_url || post.image_16_9_url || post.image_9_16_url || 
+      post.image_4_3_url || post.image_3_4_url
+    );
+
+    if (postsWithImages.length === 0) {
+      toast({
+        title: "No images",
+        description: "No images found to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await generateMultiplePostsPDF(postsWithImages);
+      toast({
+        title: "Images Downloaded",
+        description: `${postsWithImages.length} posts' images saved as PDF`
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to generate images PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading || isLoadingPosts) {
     return (
       <PageLayout>
@@ -231,6 +281,21 @@ export default function ThemeDetail() {
           <p className="text-sm text-muted-foreground">
             Theme: {decodedTheme}
           </p>
+          
+          {/* Mobile-only LinkedIn Slideshow Button */}
+          {user && posts && posts.length > 1 && (
+            <div className="md:hidden mt-4">
+              <Button
+                onClick={handleDownloadAllPDF}
+                variant="outline"
+                size="sm"
+                className="gap-2 w-full"
+              >
+                <Download className="h-4 w-4" />
+                LinkedIn Slideshow
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Content */}
