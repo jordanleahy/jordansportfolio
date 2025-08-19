@@ -8,11 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { ArrowLeft, Calendar, Tag, Lightbulb, Mic, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Lightbulb, Mic, Image as ImageIcon, Share, Copy, Trash2 } from 'lucide-react';
 import { useColorTheme } from '@/hooks/useColorThemes';
 import { ImagePreviewModal } from '@/components/stories/ImagePreviewModal';
 import { VoiceoverScriptModal } from '@/components/voiceover/VoiceoverScriptModal';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
+import { ActionButton } from '@/components/ui/action-button';
+import { usePostActions } from '@/hooks/usePostActions';
+import { useToast } from '@/hooks/use-toast';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 export default function PostDetail() {
@@ -29,6 +32,13 @@ export default function PostDetail() {
     generateHeroImage, 
     creditStatus 
   } = useImageGeneration();
+
+  // Post actions and notifications
+  const { handleCopyContent, handleDeletePost } = usePostActions(() => {
+    // Refetch post data after changes
+    refetchPost();
+  });
+  const { toast } = useToast();
 
   // Fetch the specific post
   const { 
@@ -80,6 +90,67 @@ export default function PostDetail() {
       navigate(`/stories/theme/${encodeURIComponent(post.category)}`);
     } else {
       navigate('/stories');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!post) return;
+    
+    const shareText = `${post.title}\n\n${post.description}`;
+    const shareUrl = window.location.href;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        // User cancelled the share or an error occurred
+        console.log('Share cancelled or failed:', error);
+      }
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      try {
+        await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+        toast({
+          title: "Content copied",
+          description: "Post content and link copied to clipboard",
+        });
+      } catch (error) {
+        toast({
+          title: "Share failed",
+          description: "Unable to share or copy content",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!post) return;
+    await handleCopyContent(post);
+  };
+
+  const handleDelete = async () => {
+    if (!post) return;
+    
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        await handleDeletePost(post.id);
+        toast({
+          title: "Post deleted",
+          description: "The post has been successfully deleted",
+        });
+        handleBackClick(); // Navigate back after deletion
+      } catch (error) {
+        toast({
+          title: "Delete failed",
+          description: "Unable to delete the post",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -322,14 +393,30 @@ export default function PostDetail() {
 
               {/* Actions */}
               <div className="flex gap-2 pt-6 border-t">
-                <Button
-                  variant="outline"
+                <ActionButton
+                  icon={<Mic className="h-4 w-4" />}
                   onClick={() => setShowVoiceoverModal(true)}
-                  className="gap-2"
-                >
-                  <Mic className="h-4 w-4" />
-                  Generate Voiceover
-                </Button>
+                  title="Generate Voiceover"
+                  variant="outline"
+                />
+                <ActionButton
+                  icon={<Share className="h-4 w-4" />}
+                  onClick={handleShare}
+                  title="Share Post"
+                  variant="outline"
+                />
+                <ActionButton
+                  icon={<Copy className="h-4 w-4" />}
+                  onClick={handleCopy}
+                  title="Copy Content"
+                  variant="outline"
+                />
+                <ActionButton
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={handleDelete}
+                  title="Delete Post"
+                  variant="outline"
+                />
               </div>
             </CardContent>
           </Card>
