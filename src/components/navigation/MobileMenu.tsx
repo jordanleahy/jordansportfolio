@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { NavigationItem, getNavigationItems } from "@/config/navigationConfig";
-import { useModal } from "@/contexts/ModalContext";
 
 interface MobileMenuProps {
   user: any;
@@ -13,7 +12,6 @@ interface MobileMenuProps {
 
 export const MobileMenu = ({ user, isAdmin, onSignOut }: MobileMenuProps) => {
   const location = useLocation();
-  const { openSettings } = useModal();
   
   const menuItems = getNavigationItems(user, isAdmin).filter(item => item.showInMobile);
   
@@ -73,20 +71,6 @@ export const MobileMenu = ({ user, isAdmin, onSignOut }: MobileMenuProps) => {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 
-                if (item.isModal && item.userInfo) {
-                  return (
-                    <SheetClose key={item.label} asChild>
-                      <button
-                        onClick={openSettings}
-                        className={mobileNavItemStyles}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </button>
-                    </SheetClose>
-                  );
-                }
-
                 return (
                   <SheetClose key={item.href} asChild>
                     <Link

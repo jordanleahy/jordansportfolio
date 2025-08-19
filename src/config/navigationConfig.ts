@@ -1,4 +1,4 @@
-import { BookOpen, Database, FileText, Home, Target, User, Settings, BarChart3, Building2, Calendar, Heart, TrendingUp, GitCompare, Activity, Sparkles, ChartBar, LucideIcon } from "lucide-react";
+import { BookOpen, Database, FileText, Home, Target, User, Settings, BarChart3, Building2, Calendar, Heart, TrendingUp, GitCompare, Activity, Sparkles, ChartBar, CreditCard, LucideIcon } from "lucide-react";
 
 export interface NavigationItem {
   href: string;
@@ -20,8 +20,9 @@ export const navigationConfig: NavigationItem[] = [
   { href: "/library", label: "Library", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: User, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
-  // Authenticated user items
-  { href: "settings", label: "Settings", icon: User, accessLevel: 'authenticated', showInMobile: true, isModal: true, userInfo: true },
+  // Authenticated user items - mobile only
+  { href: "/billing", label: "Plans & Billing", icon: CreditCard, accessLevel: 'authenticated', showInMobile: true },
+  { href: "/account", label: "Account", icon: User, accessLevel: 'authenticated', showInMobile: true },
 
   // Admin-only items
   { href: "/sec", label: "Funded Startups", icon: Database, accessLevel: 'admin', showInMobile: true },

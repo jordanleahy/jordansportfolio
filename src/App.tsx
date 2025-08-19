@@ -60,6 +60,8 @@ const Subscription = lazy(() => import("./pages/Subscription"));
 const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminUserDetail = lazy(() => import("./pages/admin/UserDetail"));
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import BillingPage from "./pages/BillingPage";
+import AccountPage from "./pages/AccountPage";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -251,6 +253,8 @@ function App() {
                 />
                 <Route path="/subscription-success" element={<SubscriptionSuccess />} />
                 <Route path="/subscription-status" element={<SubscriptionSuccess />} />
+                <Route path="/billing" element={<BillingPage />} />
+                <Route path="/account" element={<AccountPage />} />
                 <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
                 <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />

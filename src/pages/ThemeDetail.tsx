@@ -171,7 +171,7 @@ export default function ThemeDetail() {
     }
 
     try {
-      await generateMultiplePostsPDF(postsWithImages);
+      await generateMultiplePostsPDF(postsWithImages as any);
       toast({
         title: "Images Downloaded",
         description: `${postsWithImages.length} posts' images saved as PDF`
