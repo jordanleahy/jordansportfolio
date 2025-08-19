@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useImageVersions = (imageUrl: string, aspectRatio?: string) => {
   const [imageVersions, setImageVersions] = useState<Array<{id: string, url: string, prompt?: string, version_number: number}>>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchVersionsFromDatabase = async (postId: string, currentAspectRatio: string) => {
     try {
@@ -63,11 +64,37 @@ export const useImageVersions = (imageUrl: string, aspectRatio?: string) => {
 
   const currentImageUrl = imageVersions[currentVersionIndex]?.url || imageUrl;
 
+  const goToNextVersion = useCallback(() => {
+    if (currentVersionIndex < imageVersions.length - 1) {
+      setCurrentVersionIndex(currentVersionIndex + 1);
+    }
+  }, [currentVersionIndex, imageVersions.length]);
+
+  const goToPreviousVersion = useCallback(() => {
+    if (currentVersionIndex > 0) {
+      setCurrentVersionIndex(currentVersionIndex - 1);
+    }
+  }, [currentVersionIndex]);
+
+  const goToVersion = useCallback((index: number) => {
+    if (index >= 0 && index < imageVersions.length) {
+      setIsLoading(true);
+      setCurrentVersionIndex(index);
+      // Simulate loading delay for smooth transition
+      setTimeout(() => setIsLoading(false), 150);
+    }
+  }, [imageVersions.length]);
+
   return {
     imageVersions,
     currentVersionIndex,
     setCurrentVersionIndex,
     currentImageUrl,
-    fetchVersionsFromDatabase
+    fetchVersionsFromDatabase,
+    goToNextVersion,
+    goToPreviousVersion,
+    goToVersion,
+    isLoading,
+    hasMultipleVersions: imageVersions.length > 1
   };
 };
