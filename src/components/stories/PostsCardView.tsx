@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
+import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
 import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicator';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey, AspectRatio } from '@/types/bulkImageGeneration';
@@ -72,11 +72,8 @@ export const PostsCardView = memo(({
   const {
     isRunning,
     secondsRemaining,
-    isExpired,
-    startTimer,
-    stopTimer,
-    resetTimer
-  } = useImageGenerationTimer();
+    isExpired
+  } = useImageGenerationTimerContext();
   
   const { isProcessing: isProcessingCtx, isGenerating: isGeneratingCtx, isAnyImageGenerating } = useProcessingStatesContext();
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
@@ -109,16 +106,7 @@ export const PostsCardView = memo(({
            (isAnyImageGenerating() && !isProcessingCtx(postId, 'generate', aspectRatio));
   }, [isProcessingCtx, isAnyImageGenerating]);
 
-  // Auto-manage timer based on processing states
-  useEffect(() => {
-    const hasActiveGeneration = isAnyImageGenerating();
-    
-    if (hasActiveGeneration && !isRunning) {
-      startTimer();
-    } else if (!hasActiveGeneration && isRunning) {
-      stopTimer();
-    }
-  }, [isAnyImageGenerating, isRunning, startTimer, stopTimer]);
+  // Timer is now auto-managed by ImageGenerationTimerContext
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts(prev => {

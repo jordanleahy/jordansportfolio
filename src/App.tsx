@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProcessingStatesProvider } from "@/contexts/ProcessingStatesContext";
+import { ImageGenerationTimerProvider } from "@/contexts/ImageGenerationTimerContext";
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
@@ -105,6 +107,8 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <ProcessingStatesProvider>
+                <ImageGenerationTimerProvider>
                 <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
@@ -277,6 +281,8 @@ function App() {
                 />
                 <Route path="*" element={<NotFound />} />
                 </Routes>
+                </ImageGenerationTimerProvider>
+              </ProcessingStatesProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
