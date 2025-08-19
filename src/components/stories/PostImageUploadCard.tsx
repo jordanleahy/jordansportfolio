@@ -4,7 +4,7 @@ import { Sparkles, Loader2, ChevronDown, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
-import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
+import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +37,7 @@ export const PostImageUploadCard = ({
   hasPrompt = true
 }: PostImageUploadCardProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const timer = useImageGenerationTimer();
+  const timer = useImageGenerationTimerContext();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -47,21 +47,7 @@ export const PostImageUploadCard = ({
   const { toast: toastHook } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
 
-  // Handle timer based on generation state
-  useEffect(() => {
-    if (isGenerating && !timer.isRunning) {
-      timer.startTimer();
-    } else if (!isGenerating && timer.isRunning) {
-      timer.stopTimer();
-    }
-  }, [isGenerating, timer]);
-
-  // Stop timer if image is ready with 20+ seconds remaining
-  useEffect(() => {
-    if (imageUrl && timer.isRunning && timer.secondsRemaining >= 20) {
-      timer.stopTimer();
-    }
-  }, [imageUrl, timer]);
+  // Timer is now managed automatically by ImageGenerationTimerContext
   
   // Debug effect to track state changes
   useEffect(() => {

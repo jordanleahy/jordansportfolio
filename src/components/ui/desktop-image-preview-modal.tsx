@@ -7,7 +7,7 @@ import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
 import { useReferenceImage } from "@/hooks/useReferenceImage";
 import { useImageEdit } from "@/hooks/useImageEdit";
-import { useImageGenerationTimer } from "@/hooks/useImageGenerationTimer";
+import { useImageGenerationTimerContext } from "@/contexts/ImageGenerationTimerContext";
 
 interface DesktopImagePreviewModalProps {
   isOpen: boolean;
@@ -65,14 +65,12 @@ export const DesktopImagePreviewModal = ({
     setCurrentVersionIndex
   );
 
-  // Timer for edit processing
+  // Timer for edit processing (centrally managed)
   const { 
     isRunning: isTimerRunning, 
     secondsRemaining, 
-    isExpired: isTimerExpired,
-    startTimer, 
-    stopTimer 
-  } = useImageGenerationTimer();
+    isExpired: isTimerExpired
+  } = useImageGenerationTimerContext();
 
   // Clean up edit state when modal closes
   useEffect(() => {
@@ -123,13 +121,11 @@ export const DesktopImagePreviewModal = ({
     if (!editState.prompt.trim()) return;
 
     setEditState(prev => ({ ...prev, isProcessing: true }));
-    startTimer();
 
     handleEditSubmit(
       editState.prompt,
       referenceImageAnalysis,
       () => {
-        stopTimer();
         setEditState({ isSheetOpen: false, prompt: '', isProcessing: false });
         clearReferenceImage();
       }

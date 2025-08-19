@@ -5,7 +5,7 @@ import { ImageIcon, Sparkles } from 'lucide-react';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
-import { useImageGenerationTimer } from '@/hooks/useImageGenerationTimer';
+import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardHeroImageProps {
@@ -25,7 +25,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   const { isProcessing: isProcessingCtx, isAnyImageGenerating } = useProcessingStatesContext();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
-  const timer = useImageGenerationTimer();
+  const timer = useImageGenerationTimerContext();
   
   const selectedImage = post.image_1_1_url;
   const selectedAspectRatio = '1:1';
@@ -33,21 +33,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   const isCurrentPostGenerating = isProcessingCtx(post.id, 'generate');
   const isAnyOtherGenerating = isAnyImageGenerating() && !isCurrentPostGenerating;
 
-  // Handle timer based on processing state
-  useEffect(() => {
-    if (isLoadingOrProcessing && !timer.isRunning) {
-      timer.startTimer();
-    } else if (!isLoadingOrProcessing && timer.isRunning) {
-      timer.stopTimer();
-    }
-  }, [isLoadingOrProcessing, timer]);
-
-  // Stop timer if image is ready with 20+ seconds remaining
-  useEffect(() => {
-    if (selectedImage && timer.isRunning && timer.secondsRemaining >= 20) {
-      timer.stopTimer();
-    }
-  }, [selectedImage, timer]);
+  // Timer is now managed automatically by ImageGenerationTimerContext
 
   return (
     <div className="space-y-4">

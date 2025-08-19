@@ -15,7 +15,7 @@ import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
 import { useReferenceImage } from "@/hooks/useReferenceImage";
 import { useImageEdit } from "@/hooks/useImageEdit";
-import { useImageGenerationTimer } from "@/hooks/useImageGenerationTimer";
+import { useImageGenerationTimerContext } from "@/contexts/ImageGenerationTimerContext";
 
 interface MobileImagePreviewModalProps {
   isOpen: boolean;
@@ -68,14 +68,12 @@ export const MobileImagePreviewModal = ({
     undefined
   );
 
-  // Timer for edit processing
+  // Timer for edit processing (centrally managed)
   const { 
     isRunning: isTimerRunning, 
     secondsRemaining, 
-    isExpired: isTimerExpired,
-    startTimer, 
-    stopTimer 
-  } = useImageGenerationTimer();
+    isExpired: isTimerExpired
+  } = useImageGenerationTimerContext();
 
   // Mobile-specific state
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -114,9 +112,7 @@ export const MobileImagePreviewModal = ({
   };
 
   const onSubmitEdit = async () => {
-    startTimer();
     await handleEditSubmit(prompt, referenceImageAnalysis, () => {
-      stopTimer();
       setPrompt("");
       clearReferenceImage();
       setSheetOpen(false);
