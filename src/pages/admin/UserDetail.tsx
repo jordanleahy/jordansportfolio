@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -56,6 +57,7 @@ export default function AdminUserDetail() {
   const [selectedTierName, setSelectedTierName] = useState<string>("");
   const { data: tiers = [] } = useSubscriptionTiers();
   const [saving, setSaving] = useState(false);
+  const [assigningTier, setAssigningTier] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ApiUsageRecord | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -90,6 +92,39 @@ export default function AdminUserDetail() {
       setSelectedTierName("");
     }
   }, [data?.subscription?.tier?.name]);
+
+  // Debounced tier assignment function
+  const debouncedAssignTier = useDebouncedCallback(async (tierName: string) => {
+    if (!id || !tierName || tierName === data?.subscription?.tier?.name) return;
+    
+    try {
+      setAssigningTier(true);
+      console.log('[AdminUserDetail] Auto-assigning tier:', {
+        selectedTierName: tierName,
+        currentTier: data?.subscription?.tier?.name,
+        userId: id
+      });
+
+      const { data: resp, error } = await supabase.functions.invoke('admin-set-subscription', {
+        body: { userId: id, tierName }
+      });
+      
+      if (error) throw error;
+      
+      console.log('[AdminUserDetail] Tier assignment successful:', resp);
+      toast.success(`Subscription updated to ${tierName}`);
+      refetch();
+    } catch (err: any) {
+      console.error('[AdminUserDetail] Tier assignment failed:', err);
+      toast.error(err?.message || 'Failed to assign subscription');
+      // Revert dropdown to previous value on error
+      if (data?.subscription?.tier?.name) {
+        setSelectedTierName(data.subscription.tier.name);
+      }
+    } finally {
+      setAssigningTier(false);
+    }
+  }, 1000);
 
   // API Usage Data Hook - for detailed API call tracking
   const {
@@ -151,7 +186,11 @@ export default function AdminUserDetail() {
           <div className="flex items-center gap-2">
             <Menu className="h-5 w-5 text-muted-foreground" />
             <h1 className="text-2xl font-bold">{data?.user?.full_name || 'User'}</h1>
-            {saving && <span className="text-xs text-muted-foreground">Saving…</span>}
+            {(saving || assigningTier) && (
+              <span className="text-xs text-muted-foreground">
+                {assigningTier ? 'Updating subscription...' : 'Saving…'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -173,61 +212,42 @@ export default function AdminUserDetail() {
           </div>
         </header>
 
-        {/* Admin: Assign Subscription Tier */}
+        {/* Admin: Subscription Tier Management */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Admin: Assign Subscription Tier</CardTitle>
+            <CardTitle>Subscription Tier Management</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
               <div className="flex-1">
-                <label className="block text-sm mb-1">Tier</label>
+                <label className="block text-sm mb-1">
+                  Current Tier {assigningTier && <span className="text-muted-foreground">(updating...)</span>}
+                </label>
                 <Select 
                   value={selectedTierName} 
                   onValueChange={(v) => {
                     console.log('[AdminUserDetail] Dropdown value changed:', v);
                     setSelectedTierName(v);
+                    debouncedAssignTier(v);
                   }}
+                  disabled={assigningTier}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={assigningTier ? "opacity-60" : ""}>
                     <SelectValue placeholder={isLoading ? "Loading..." : "Select a tier"} />
                   </SelectTrigger>
                   <SelectContent>
                     {tiers?.map((t: any) => (
-                      <SelectItem key={t.id} value={t.name}>{t.name}</SelectItem>
+                      <SelectItem key={t.id} value={t.name}>
+                        {t.name}
+                        {data?.subscription?.tier?.name === t.name && " (current)"}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Changes are saved automatically
+                </p>
               </div>
-              <Button
-                onClick={async () => {
-                  try {
-                    if (!id) return;
-                    const tierNameToUse = selectedTierName || data?.subscription?.tier?.name;
-                    console.log('[AdminUserDetail] Assigning tier:', { 
-                      selectedTierName, 
-                      currentTier: data?.subscription?.tier?.name,
-                      finalTier: tierNameToUse 
-                    });
-                    if (!tierNameToUse) {
-                      toast.error('Please select a tier');
-                      return;
-                    }
-                    const { data: resp, error } = await supabase.functions.invoke('admin-set-subscription', {
-                      body: { userId: id, tierName: tierNameToUse }
-                    });
-                    if (error) throw error;
-                    console.log('[AdminUserDetail] Tier assignment successful:', resp);
-                    toast.success('Subscription assigned');
-                    refetch();
-                  } catch (err: any) {
-                    console.error('[AdminUserDetail] Tier assignment failed:', err);
-                    toast.error(err?.message || 'Failed to assign subscription');
-                  }
-                }}
-              >
-                Assign Tier
-              </Button>
               <Button
                 variant="outline"
                 onClick={async () => {
