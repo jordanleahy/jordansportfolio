@@ -32,7 +32,11 @@ export const FinalProductSection = ({ data }: FinalProductSectionProps) => {
         <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm">
           <iframe
             src={data.prototypeUrl}
-            className="w-full h-[600px] border-0"
+            className="w-full border-0"
+            style={{ 
+              border: "1px solid rgba(0, 0, 0, 0.1)",
+              height: "450px"
+            }}
             allowFullScreen
             title="Interactive Prototype"
             loading="lazy"
