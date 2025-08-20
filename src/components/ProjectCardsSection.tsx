@@ -115,6 +115,16 @@ const ProjectCardsSection = () => {
                     </div>
                   )}
                   
+                  {project.id === "case3" && (
+                    <div className="px-6 pb-4">
+                      <img 
+                        src="/lovable-uploads/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png"
+                        alt="Denial and Appeal Resolution interface showing appeal management workflow"
+                        className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                      />
+                    </div>
+                  )}
+                  
                   <CardContent className="pt-0">
                     <p className="text-card-foreground mb-4 leading-relaxed">
                       {project.description}
