@@ -266,7 +266,7 @@ export default function PublicSharedCollection() {
                 className="flex-1 md:flex-none"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
-                {duplicateCollection.isPending ? 'Saving...' : 'Save'}
+                {duplicateCollection.isPending ? 'Saving Images...' : 'Save Images'}
               </Button>
             )}
             {user && items.length > 0 && (
