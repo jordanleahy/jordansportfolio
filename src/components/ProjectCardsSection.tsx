@@ -95,6 +95,16 @@ const ProjectCardsSection = () => {
                     </div>
                   </CardHeader>
                   
+                  {project.id === "case1" && (
+                    <div className="px-6 pb-4">
+                      <img 
+                        src="/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png"
+                        alt="Inpatient Revenue Cycle Management dashboard showing CDI validation interface"
+                        className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                      />
+                    </div>
+                  )}
+                  
                   {project.id === "case4" && (
                     <div className="px-6 pb-4">
                       <img 
