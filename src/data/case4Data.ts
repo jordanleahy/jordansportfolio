@@ -12,6 +12,13 @@ export const case4Data: CaseStudyData = {
   timelineDetails: "May 2022 - Nov 2022",
   tags: ["Prior Authorization", "Healthcare Workflow", "AI Automation", "Insurance Integration"],
   
+  // Final Product Section
+  finalProduct: {
+    title: "Final Product",
+    prototypeUrl: "https://www.figma.com/proto/XYAGRKZoa2LHlurcKHQxjC/PrescriberPoint?page-id=2107%3A83847&node-id=2107-92057&viewport=7768%2C-4633%2C0.63&t=FZX9p4skWQeSFJii-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2107%3A92057&show-proto-sidebar=1",
+    description: "Experience the complete prior authorization workflow from formulary analysis to automated submission."
+  },
+  
   // Problem Section
   problemTitle: "The Challenge",
   problemDescription: "Drug prior authorization processes create significant delays in patient care, with healthcare providers spending countless hours navigating complex insurance requirements and formulary rules for prescription medications.",

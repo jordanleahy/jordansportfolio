@@ -48,6 +48,12 @@ export interface FigmaPresentation {
   description?: string;
 }
 
+export interface FinalProduct {
+  title: string;
+  prototypeUrl: string;
+  description?: string;
+}
+
 export interface CaseStudyData {
   // Hero Section
   title: string;
@@ -59,6 +65,9 @@ export interface CaseStudyData {
   timeline: string;
   timelineDetails?: string;
   tags: string[];
+  
+  // Final Product Section
+  finalProduct: FinalProduct;
   
   // Figma Presentation (optional)
   figmaPresentation?: FigmaPresentation;

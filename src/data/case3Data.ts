@@ -12,6 +12,13 @@ export const case3Data: CaseStudyData = {
   timelineDetails: "January - May 2025",
   tags: ["Denial Management", "Appeals", "Revenue Cycle", "Healthcare AI"],
   
+  // Final Product Section
+  finalProduct: {
+    title: "Final Product",
+    prototypeUrl: "https://www.figma.com/proto/XYAGRKZoa2LHlurcKHQxjC/PrescriberPoint?page-id=2107%3A83847&node-id=2107-92057&viewport=7768%2C-4633%2C0.63&t=FZX9p4skWQeSFJii-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2107%3A92057&show-proto-sidebar=1",
+    description: "Explore the intelligent denial management platform that transforms appeal processing workflows."
+  },
+  
   // Problem Section
   problemTitle: "The Challenge",
   problemDescription: "Healthcare practices face an average 15% claim denial rate, with manual appeal processes taking 45-60 days per case. Small practices often lack dedicated staff to handle complex appeals, resulting in $20B spent tyring to overturn denials.",
