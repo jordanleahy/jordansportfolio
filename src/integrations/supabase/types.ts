@@ -3064,6 +3064,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_stuck_image_generations: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      complete_image_generation: {
+        Args: {
+          p_aspect_ratio: string
+          p_image_url?: string
+          p_post_id: string
+          p_status: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       detect_dependency_cycle: {
         Args: { p_source_agent_id: string; p_target_agent_id: string }
         Returns: boolean
@@ -3300,6 +3314,10 @@ export type Database = {
       refresh_offerings_view: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      try_start_image_generation: {
+        Args: { p_aspect_ratio: string; p_post_id: string; p_user_id: string }
+        Returns: Json
       }
       update_cache_hit: {
         Args: { cache_key_param: string }

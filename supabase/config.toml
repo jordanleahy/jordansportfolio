@@ -1,5 +1,11 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
+[functions.cleanup-stuck-generations]
+verify_jwt = false
+
+[functions.generate-image-with-concurrency-control]
+verify_jwt = true
+
 [functions.manage-theme-lifecycle]
 verify_jwt = true
 
