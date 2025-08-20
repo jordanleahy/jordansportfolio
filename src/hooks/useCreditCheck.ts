@@ -19,9 +19,11 @@ export const useCreditCheck = () => {
   const { checkAndEnforceUsage } = useUsageEnforcement();
 
   const getCreditStatus = (): CreditStatus => {
+    // During loading, be conservative and assume no credits to prevent unwanted button states
     if (isLoading || !data) {
+      console.log('[useCreditCheck] Loading state - no credits assumed', { isLoading, hasData: !!data });
       return {
-        hasCredits: true,
+        hasCredits: false, // FIXED: Conservative default - no credits during loading
         remainingDaily: 0,
         remainingMonthly: 0,
         dailyLimit: 0,
@@ -48,6 +50,17 @@ export const useCreditCheck = () => {
     else if (remainingMonthly <= 0) blockingLimit = 'monthly';
     
     const hasCredits = remainingDaily > 0 && remainingMonthly > 0;
+
+    // Debug logging for QA
+    console.log('[useCreditCheck] Credit status calculated', {
+      hasCredits,
+      remainingDaily,
+      remainingMonthly,
+      dailyUsed,
+      monthlyUsed,
+      blockingLimit,
+      subscriptionTier: subscriptionTier || 'free'
+    });
 
     return {
       hasCredits,

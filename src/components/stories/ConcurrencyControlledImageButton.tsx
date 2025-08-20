@@ -32,6 +32,21 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
 
   const creditStatus = getCreditStatus();
 
+  // Debug logging for QA
+  useEffect(() => {
+    console.log('[ConcurrencyControlledImageButton] Credit status update', {
+      postId: post.id,
+      aspectRatio,
+      creditStatus: {
+        hasCredits: creditStatus.hasCredits,
+        isLoading: creditStatus.isLoading,
+        blockingLimit: creditStatus.blockingLimit,
+        remainingDaily: creditStatus.remainingDaily,
+        remainingMonthly: creditStatus.remainingMonthly
+      }
+    });
+  }, [creditStatus.hasCredits, creditStatus.isLoading, creditStatus.blockingLimit, post.id, aspectRatio]);
+
   // Check initial status and setup real-time updates
   useEffect(() => {
     let channel: any = null;
