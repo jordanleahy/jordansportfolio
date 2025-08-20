@@ -29,30 +29,14 @@ export const FinalProductSection = ({ data }: FinalProductSectionProps) => {
           )}
         </div>
 
-        <div className="space-y-6">
-          <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm">
-            <iframe
-              src={data.prototypeUrl}
-              className="w-full h-[600px] border-0"
-              allowFullScreen
-              title="Interactive Prototype"
-              loading="lazy"
-            />
-          </div>
-          
-          <div className="flex justify-center">
-            <Button asChild variant="outline" size="lg">
-              <a 
-                href={data.prototypeUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2"
-              >
-                View Full Prototype
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
+        <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm">
+          <iframe
+            src={data.prototypeUrl}
+            className="w-full h-[600px] border-0"
+            allowFullScreen
+            title="Interactive Prototype"
+            loading="lazy"
+          />
         </div>
       </motion.div>
     </Section>
