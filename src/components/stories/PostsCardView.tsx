@@ -268,26 +268,23 @@ export const PostsCardView = memo(({
       return;
     }
 
-    // Check if any posts have images
-    const postsWithImages = posts.filter(post => 
-      post.image_1_1_url || post.image_16_9_url || post.image_9_16_url || 
-      post.image_4_3_url || post.image_3_4_url
-    );
+    // Check if any posts have 1:1 images for LinkedIn slideshow
+    const postsWithImages = posts.filter(post => post.image_1_1_url);
 
     if (postsWithImages.length === 0) {
       toast({
-        title: "No images",
-        description: "No images found to download",
+        title: "No square images",
+        description: "No square (1:1) images found for LinkedIn slideshow",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      await generateMultiplePostsPDF(postsWithImages);
+      await generateMultiplePostsPDF(postsWithImages, ['1_1']);
       toast({
-        title: "Images Downloaded",
-        description: `${postsWithImages.length} posts' images saved as PDF`
+        title: "LinkedIn Slideshow Downloaded",
+        description: `${postsWithImages.length} square images saved as PDF for LinkedIn`
       });
     } catch (error) {
       toast({

@@ -80,18 +80,23 @@ export const generatePostPDF = async (post: SocialMediaPost) => {
   pdf.save(fileName);
 };
 
-export const generateMultiplePostsPDF = async (posts: SocialMediaPost[]) => {
+export const generateMultiplePostsPDF = async (posts: SocialMediaPost[], aspectRatiosToInclude?: string[]) => {
   let pdf: jsPDF | null = null;
   let isFirstPage = true;
 
   for (const post of posts) {
-    const images = [
-      { url: post.image_1_1_url },
-      { url: post.image_16_9_url },
-      { url: post.image_9_16_url },
-      { url: post.image_4_3_url },
-      { url: post.image_3_4_url }
+    let images = [
+      { url: post.image_1_1_url, aspectRatio: '1_1' },
+      { url: post.image_16_9_url, aspectRatio: '16_9' },
+      { url: post.image_9_16_url, aspectRatio: '9_16' },
+      { url: post.image_4_3_url, aspectRatio: '4_3' },
+      { url: post.image_3_4_url, aspectRatio: '3_4' }
     ].filter(img => img.url);
+
+    // Filter by specific aspect ratios if provided
+    if (aspectRatiosToInclude && aspectRatiosToInclude.length > 0) {
+      images = images.filter(img => aspectRatiosToInclude.includes(img.aspectRatio));
+    }
 
     if (images.length === 0) continue;
 
