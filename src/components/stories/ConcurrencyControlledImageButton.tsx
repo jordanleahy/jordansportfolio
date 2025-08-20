@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Image, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useConcurrencyControlledImageGeneration } from '@/hooks/useConcurrencyControlledImageGeneration';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import { useToast } from '@/hooks/use-toast';
@@ -24,9 +25,12 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
   variant = 'default'
 }) => {
   const { generateImage, checkImageStatus, canGenerateImage, isGenerating } = useConcurrencyControlledImageGeneration();
+  const { getCreditStatus } = useCreditCheck();
   const [currentStatus, setCurrentStatus] = useState<string>('none');
   const [canGenerate, setCanGenerate] = useState(true);
   const { toast } = useToast();
+
+  const creditStatus = getCreditStatus();
 
   // Check initial status and setup real-time updates
   useEffect(() => {
@@ -113,6 +117,22 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
   };
 
   const getButtonContent = () => {
+    if (creditStatus.isLoading) {
+      return (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          Loading...
+        </>
+      );
+    }
+
+    if (!creditStatus.hasCredits) {
+      if (creditStatus.blockingLimit === 'daily') {
+        return "Daily limit reached";
+      }
+      return "Upgrade to Continue";
+    }
+
     if (isGenerating || currentStatus === 'generating') {
       return (
         <>
@@ -158,13 +178,21 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
     return variant;
   };
 
+  const isButtonDisabled = disabled || 
+    !canGenerate || 
+    isGenerating || 
+    currentStatus === 'generating' || 
+    !creditStatus.hasCredits ||
+    creditStatus.isLoading;
+
   return (
     <Button
       onClick={handleGenerate}
-      disabled={disabled || !canGenerate || isGenerating || currentStatus === 'generating'}
+      disabled={isButtonDisabled}
       size={size}
       variant={getButtonVariant()}
       className="transition-all duration-200"
+      title={!creditStatus.hasCredits ? (creditStatus.blockingLimit === 'daily' ? 'Daily limit reached' : 'Monthly limit reached - upgrade to continue') : undefined}
     >
       {getButtonContent()}
     </Button>
