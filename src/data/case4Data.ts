@@ -35,7 +35,7 @@ export const case4Data: CaseStudyData = {
       ]
     }
   ],
-  problemIframeUrl: "https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FuiKgkTGt1ph8tng3i3s55w%2FPrior-Authorization%3Fnode-id%3D1-14531%26t%3D0kRaLrPkqfV0LF8t-1",
+  problemIframeUrl: "https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/design/uiKgkTGt1ph8tng3i3s55w/Prior-Authorization?node-id=1-14531&t=0kRaLrPkqfV0LF8t-1",
   problemIframeTitle: "Prior Authorization Design System - Figma",
 
   // Team Section

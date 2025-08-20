@@ -44,8 +44,9 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
               <iframe
                 src={iframeUrl}
                 title={iframeTitle || "Embedded content"}
-                className="w-full h-96 border border-border rounded-lg shadow-sm"
+                className="w-full h-[600px] border border-border rounded-lg shadow-sm"
                 loading="lazy"
+                allowFullScreen
               />
             </div>
           )}
