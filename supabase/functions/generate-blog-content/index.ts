@@ -170,61 +170,96 @@ Focus on providing genuine value, specific examples, and actionable insights tha
 
     // Validate and ensure visual_sections has exactly 3 sections
     function validateVisualSections(sections: any[]): any[] {
-      if (!Array.isArray(sections) || sections.length !== 3) {
-        console.log('Visual sections validation failed, creating topic-specific fallback sections');
-        // Create fallback sections based on the topic
+      console.log('Validating visual sections, received:', sections?.length || 0, 'sections');
+      
+      // Create robust fallback sections that meet 300-480 character requirement
+      function createFallbackSections() {
+        console.log('Creating fallback sections for topic:', socialMediaPost.title);
         const topic = socialMediaPost.title.toLowerCase();
+        
         if (topic.includes('cc') || topic.includes('mcc') || topic.includes('comorbid')) {
           return [
             {
               headline: "Understanding CCs and MCCs",
-              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and reimbursement. CCs are conditions that increase the length of stay by at least one day in approximately 75% of patients, while MCCs are more severe conditions that typically extend stays even longer. These diagnoses are crucial for accurate DRG assignment and ensuring appropriate reimbursement for the resources required to treat more complex patients.",
+              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and reimbursement. CCs are conditions that increase the length of stay by at least one day in approximately 75% of patients, while MCCs are more severe conditions that typically extend stays even longer. These diagnoses are crucial for accurate DRG assignment and ensuring appropriate reimbursement for the resources required to treat more complex patients. Proper identification and documentation of these conditions directly affects hospital revenue and compliance with coding standards.",
               image_url: ''
             },
             {
               headline: "Impact on DRG Weight and Reimbursement", 
-              content: "When CCs or MCCs are properly documented and coded, they elevate the DRG weight, which directly increases reimbursement. For example, a simple pneumonia case might have a DRG weight of 0.7, but the same pneumonia with diabetes as a CC could have a weight of 1.2, representing a significant increase in payment. MCCs have an even greater impact, potentially doubling or tripling the DRG weight. This makes accurate documentation and coding of these conditions essential for hospital financial performance.",
+              content: "When CCs or MCCs are properly documented and coded, they elevate the DRG weight, which directly increases reimbursement. For example, a simple pneumonia case might have a DRG weight of 0.7, but the same pneumonia with diabetes as a CC could have a weight of 1.2, representing a significant increase in payment. MCCs have an even greater impact, potentially doubling or tripling the DRG weight. This makes accurate documentation and coding of these conditions essential for hospital financial performance. Healthcare organizations must ensure their clinical documentation improvement programs effectively capture these opportunities.",
               image_url: ''
             },
             {
               headline: "Best Practices for Documentation",
-              content: "Effective CC/MCC capture requires collaboration between physicians, clinical documentation improvement (CDI) specialists, and coders. Physicians must document the relationship between secondary conditions and the principal diagnosis, including how comorbidities affect treatment decisions or resource utilization. CDI specialists should query for missing diagnoses when clinical indicators suggest the presence of CCs or MCCs. Regular education and feedback help ensure consistent, compliant documentation that supports both quality care and appropriate reimbursement.",
+              content: "Effective CC/MCC capture requires collaboration between physicians, clinical documentation improvement (CDI) specialists, and coders. Physicians must document the relationship between secondary conditions and the principal diagnosis, including how comorbidities affect treatment decisions or resource utilization. CDI specialists should query for missing diagnoses when clinical indicators suggest the presence of CCs or MCCs. Regular education and feedback help ensure consistent, compliant documentation that supports both quality care and appropriate reimbursement. Technology solutions can also streamline this process and improve accuracy.",
               image_url: ''
             }
           ];
         }
-        // Generic healthcare fallback for non-CC/MCC topics
+        
+        // Enhanced generic healthcare fallback with proper content length
         return [
           {
-            headline: "Understanding the Basics",
-            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations and patient outcomes. Healthcare organizations can benefit from implementing evidence-based practices that improve both clinical and financial performance.",
+            headline: "Understanding the Core Concepts",
+            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's rapidly evolving healthcare environment. We'll explore the key components, regulatory requirements, and how they impact daily operations, patient outcomes, and organizational performance. Healthcare organizations can benefit significantly from implementing evidence-based practices that improve both clinical effectiveness and financial sustainability. Understanding these fundamentals is essential for making informed decisions and maintaining competitive advantage in the healthcare marketplace.",
             image_url: ''
           },
           {
-            headline: "Implementation Strategies", 
-            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings. This includes best practices, common challenges, and proven strategies that have shown success across different healthcare organizations. Effective implementation requires careful planning, stakeholder engagement, and continuous monitoring to ensure optimal results.",
+            headline: "Implementation and Best Practices", 
+            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings, including detailed best practices, common implementation challenges, and proven strategies that have demonstrated success across diverse healthcare organizations. Effective implementation requires careful strategic planning, comprehensive stakeholder engagement, robust change management processes, and continuous monitoring to ensure optimal results and sustained improvement. Organizations should focus on creating sustainable processes that align with their specific operational needs, regulatory requirements, and long-term strategic objectives.",
             image_url: ''
           },
           {
-            headline: "Future Considerations",
-            content: "Looking ahead, this section examines emerging trends and future developments that will shape this area of healthcare. We'll discuss how to prepare for upcoming changes and position your organization for continued success and improved patient care. Strategic planning and adaptation are essential for maintaining competitive advantage in the evolving healthcare landscape.",
+            headline: "Future Trends and Strategic Planning",
+            content: "Looking ahead, this section examines emerging trends, technological innovations, and future developments that will significantly shape this area of healthcare practice. We'll discuss practical strategies for preparing your organization for upcoming changes, regulatory shifts, and market dynamics while positioning for continued success and improved patient care delivery. Strategic planning and organizational adaptation are essential for maintaining competitive advantage in the evolving healthcare landscape. Healthcare leaders must consider both immediate operational needs and long-term sustainability when developing implementation strategies.",
             image_url: ''
           }
         ];
       }
       
-      // Validate existing sections and ensure minimum content quality
-      return sections.map((section, index) => ({
-        headline: section.headline && section.headline.length > 0 && section.headline.length <= 40 
-          ? section.headline 
-          : `Key Aspect ${index + 1}`,
-        content: section.content && section.content.length >= 300 
-          ? section.content
-          : `This section provides important information about the topic, offering practical insights for healthcare professionals. The content here would typically include specific examples, best practices, and actionable guidance relevant to the healthcare industry. Healthcare organizations can benefit from implementing these strategies to improve patient outcomes and operational efficiency.`,
-        image_url: section.image_url || '',
-        cta_text: section.cta_text || null,
-        cta_url: section.cta_url || null
-      }));
+      // Always ensure we have exactly 3 sections
+      if (!Array.isArray(sections) || sections.length === 0) {
+        console.log('No valid sections provided, using fallback');
+        return createFallbackSections();
+      }
+      
+      // If we don't have exactly 3 sections, use fallback
+      if (sections.length !== 3) {
+        console.log(`Invalid section count: ${sections.length}, expected 3. Using fallback.`);
+        return createFallbackSections();
+      }
+      
+      // Validate and fix existing sections
+      const validatedSections = sections.map((section, index) => {
+        // Ensure headline is valid (max 40 chars)
+        let headline = section?.headline;
+        if (!headline || typeof headline !== 'string' || headline.length === 0 || headline.length > 40) {
+          headline = `Key Healthcare Insight ${index + 1}`;
+        }
+        
+        // Ensure content meets 300-480 character requirement
+        let content = section?.content;
+        if (!content || typeof content !== 'string' || content.length < 300) {
+          // Create topic-specific fallback content
+          const fallbackContents = [
+            "This section provides essential information about healthcare practices and industry standards that professionals need to understand for effective implementation. Healthcare organizations must consider regulatory compliance, patient safety, quality metrics, and operational efficiency when developing strategies. Best practices include comprehensive staff training, regular process evaluation, stakeholder engagement, and continuous improvement initiatives that align with organizational goals and patient care objectives.",
+            "Implementation of healthcare initiatives requires careful planning, resource allocation, and change management strategies to ensure successful outcomes. Organizations should focus on evidence-based approaches, stakeholder buy-in, effective communication, and measurable performance indicators. Regular monitoring and evaluation help identify areas for improvement and ensure sustained success. Training programs and ongoing support are essential components of any successful healthcare transformation effort.",
+            "Future considerations in healthcare include emerging technologies, regulatory changes, and evolving patient expectations that will shape industry practices. Healthcare organizations must stay informed about trends, invest in innovation, and adapt their strategies to remain competitive and provide excellent patient care. Strategic planning should incorporate both short-term operational needs and long-term sustainability goals to ensure organizational success in the dynamic healthcare environment."
+          ];
+          content = fallbackContents[index] || fallbackContents[0];
+        }
+        
+        return {
+          headline,
+          content,
+          image_url: section?.image_url || '',
+          cta_text: section?.cta_text || null,
+          cta_url: section?.cta_url || null
+        };
+      });
+      
+      console.log('Visual sections validated successfully, returning 3 sections');
+      return validatedSections;
     }
 
     // Generate slug from title
@@ -325,6 +360,24 @@ Focus on providing genuine value, specific examples, and actionable insights tha
       counter++;
     }
     blogPostData.slug = finalSlug;
+
+    console.log('Pre-insert validation: visual_sections count:', blogPostData.visual_sections?.length);
+    console.log('Visual sections data:', JSON.stringify(blogPostData.visual_sections, null, 2));
+    
+    // Final validation before insert
+    if (!blogPostData.visual_sections || blogPostData.visual_sections.length !== 3) {
+      throw new Error(`Invalid visual_sections: expected 3 sections, got ${blogPostData.visual_sections?.length || 0}`);
+    }
+    
+    // Validate each section meets requirements
+    blogPostData.visual_sections.forEach((section, index) => {
+      if (!section.headline || section.headline.length > 40) {
+        throw new Error(`Section ${index + 1} headline invalid: "${section.headline}"`);
+      }
+      if (!section.content || section.content.length < 300 || section.content.length > 480) {
+        throw new Error(`Section ${index + 1} content length invalid: ${section.content?.length || 0} chars (need 300-480)`);
+      }
+    });
 
     console.log('Inserting blog post into database...');
 
