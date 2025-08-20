@@ -1,7 +1,7 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +79,17 @@ export default function AdminUserDetail() {
     refetchOnWindowFocus: false,
     staleTime: 30_000,
   });
+
+  // Update selected tier when subscription data loads
+  useEffect(() => {
+    if (data?.subscription?.tier?.name) {
+      console.log('[AdminUserDetail] Setting dropdown to current subscription tier:', data.subscription.tier.name);
+      setSelectedTierName(data.subscription.tier.name);
+    } else {
+      console.log('[AdminUserDetail] No subscription tier found, clearing dropdown');
+      setSelectedTierName("");
+    }
+  }, [data?.subscription?.tier?.name]);
 
   // API Usage Data Hook - for detailed API call tracking
   const {
@@ -171,9 +182,15 @@ export default function AdminUserDetail() {
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
               <div className="flex-1">
                 <label className="block text-sm mb-1">Tier</label>
-                <Select defaultValue={data?.subscription?.tier?.name || undefined} onValueChange={(v) => setSelectedTierName(v)}>
+                <Select 
+                  value={selectedTierName} 
+                  onValueChange={(v) => {
+                    console.log('[AdminUserDetail] Dropdown value changed:', v);
+                    setSelectedTierName(v);
+                  }}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a tier" />
+                    <SelectValue placeholder={isLoading ? "Loading..." : "Select a tier"} />
                   </SelectTrigger>
                   <SelectContent>
                     {tiers?.map((t: any) => (
@@ -187,6 +204,11 @@ export default function AdminUserDetail() {
                   try {
                     if (!id) return;
                     const tierNameToUse = selectedTierName || data?.subscription?.tier?.name;
+                    console.log('[AdminUserDetail] Assigning tier:', { 
+                      selectedTierName, 
+                      currentTier: data?.subscription?.tier?.name,
+                      finalTier: tierNameToUse 
+                    });
                     if (!tierNameToUse) {
                       toast.error('Please select a tier');
                       return;
@@ -195,10 +217,11 @@ export default function AdminUserDetail() {
                       body: { userId: id, tierName: tierNameToUse }
                     });
                     if (error) throw error;
+                    console.log('[AdminUserDetail] Tier assignment successful:', resp);
                     toast.success('Subscription assigned');
                     refetch();
                   } catch (err: any) {
-                    console.error(err);
+                    console.error('[AdminUserDetail] Tier assignment failed:', err);
                     toast.error(err?.message || 'Failed to assign subscription');
                   }
                 }}
