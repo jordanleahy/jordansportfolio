@@ -103,7 +103,6 @@ export const EDGE_FUNCTIONS = {
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE_GPT: 'generate-image-gpt',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
-  GENERIC_BLOG: 'generic-blog',
   PROCESS_AND_IMPORT_THEME: 'process-and-import-theme',
   PROCESS_FUNDING_JSON: 'process-funding-json',
   PROCESS_INVESTOR_JSON: 'process-investor-json',
