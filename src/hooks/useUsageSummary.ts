@@ -88,7 +88,7 @@ export const useUsageSummary = () => {
           .from('api_usage_tracking')
           .select('estimated_cost, success')
           .eq('user_id', user.id)
-          .eq('request_type', 'gpt_image_generation')
+          .eq('request_type', 'image_generation')
           .gte('created_at', startOfMonth.toISOString())
           .eq('success', true);
 
@@ -99,7 +99,7 @@ export const useUsageSummary = () => {
           .from('api_usage_tracking')
           .select('estimated_cost, success')
           .eq('user_id', user.id)
-          .eq('request_type', 'gpt_image_generation')
+          .eq('request_type', 'image_generation')
           .gte('created_at', startOfDay.toISOString())
           .eq('success', true);
 
