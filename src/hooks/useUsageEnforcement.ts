@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export type UsageType = 'gpt_image_generation';
+export type UsageType = 'image_generation';
 
 interface UsageCheckResult {
   allowed: boolean;

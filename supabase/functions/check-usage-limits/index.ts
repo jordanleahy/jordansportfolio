@@ -46,7 +46,7 @@ const corsHeaders = {
 };
 
 interface UsageCheckRequest {
-  usage_type: 'gpt_image_generation';
+  usage_type: 'image_generation';
   amount?: number;
 }
 
@@ -91,8 +91,8 @@ serve(async (req) => {
     console.log(`Checking GPT image usage limits for user ${userId}, amount: ${amount}`);
 
     // Validate usage type
-    if (usage_type !== 'gpt_image_generation') {
-      throw new Error(`Invalid usage type: ${usage_type}. Only 'gpt_image_generation' is supported.`);
+    if (usage_type !== 'image_generation') {
+      throw new Error(`Invalid usage type: ${usage_type}. Only 'image_generation' is supported.`);
     }
 
     // Handle role-based tier assignment for admin and regular users

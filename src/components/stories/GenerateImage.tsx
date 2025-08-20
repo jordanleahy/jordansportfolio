@@ -104,7 +104,7 @@ export const GenerateImage = ({
     }
 
     // Enforce usage limits
-    const usageCheck = await enforceUsage('gpt_image_generation', 1);
+    const usageCheck = await enforceUsage('image_generation', 1);
     if (!usageCheck.allowed) {
       console.log('🚫 IMAGE_GEN: Usage check failed');
       return; // Toast already shown by enforceUsage

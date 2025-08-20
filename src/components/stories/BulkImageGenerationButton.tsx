@@ -70,7 +70,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
     }
 
     // Enforce usage limits (will show toast if limit exceeded)
-    const usageCheck = await enforceUsage('gpt_image_generation', 4); // 4 images for bulk generation
+    const usageCheck = await enforceUsage('image_generation', 4); // 4 images for bulk generation
     if (!usageCheck.allowed) {
       return; // Toast already shown by enforceUsage
     }

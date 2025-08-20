@@ -24,7 +24,7 @@ export const useImageGeneration = () => {
     onPostsChange?: () => void
   ) => {
     // Enforce usage before starting generation
-    const enforcement = await enforceUsage('gpt_image_generation', 1);
+    const enforcement = await enforceUsage('image_generation', 1);
     if (!enforcement.allowed) {
       toast({
         title: 'Limit reached',

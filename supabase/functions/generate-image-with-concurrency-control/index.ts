@@ -150,7 +150,7 @@ serve(async (req) => {
     // Check usage limits before proceeding with generation
     try {
       const { data: usageCheck, error: usageError } = await supabase.functions.invoke('check-usage-limits', {
-        body: { usage_type: 'gpt_image_generation', amount: 1 }
+        body: { usage_type: 'image_generation', amount: 1 }
       });
 
       if (usageError) {
