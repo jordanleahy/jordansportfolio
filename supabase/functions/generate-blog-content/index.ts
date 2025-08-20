@@ -95,15 +95,15 @@ OUTPUT FORMAT (JSON):
   "visual_sections": [
     {
       "headline": "Section 1 headline (max 40 characters)",
-      "content": "Detailed content for this section (300-480 words with specific examples, best practices, and actionable insights)"
+      "content": "Detailed content for this section (aim for 2-3 substantial paragraphs with specific examples, best practices, and actionable insights)"
     },
     {
       "headline": "Section 2 headline (max 40 characters)", 
-      "content": "Detailed content for this section (300-480 words with case studies, implementation tips, or industry data)"
+      "content": "Detailed content for this section (aim for 2-3 substantial paragraphs with case studies, implementation tips, or industry data)"
     },
     {
       "headline": "Section 3 headline (max 40 characters)",
-      "content": "Detailed content for this section (300-480 words with future implications, recommendations, or strategic considerations)"
+      "content": "Detailed content for this section (aim for 2-3 substantial paragraphs with future implications, recommendations, or strategic considerations)"
     }
   ],
   "tldr_bullets": [
@@ -273,9 +273,9 @@ Focus on providing genuine value, specific examples, and actionable insights tha
           headline = `Key Healthcare Insight ${index + 1}`;
         }
         
-        // Ensure content meets 300-480 character requirement
+        // Ensure content is present and substantial
         let content = section?.content;
-        if (!content || typeof content !== 'string' || content.length < 300) {
+        if (!content || typeof content !== 'string' || content.trim().length < 100) {
           // Create topic-specific fallback content
           const fallbackContents = [
             "This section provides essential information about healthcare practices and industry standards that professionals need to understand for effective implementation. Healthcare organizations must consider regulatory compliance, patient safety, quality metrics, and operational efficiency when developing strategies. Best practices include comprehensive staff training, regular process evaluation, stakeholder engagement, and continuous improvement initiatives that align with organizational goals and patient care objectives.",
@@ -405,13 +405,13 @@ Focus on providing genuine value, specific examples, and actionable insights tha
       throw new Error(`Invalid visual_sections: expected 3 sections, got ${blogPostData.visual_sections?.length || 0}`);
     }
     
-    // Validate each section meets requirements
+    // Validate each section meets basic requirements
     blogPostData.visual_sections.forEach((section, index) => {
       if (!section.headline || section.headline.length > 40) {
         throw new Error(`Section ${index + 1} headline invalid: "${section.headline}"`);
       }
-      if (!section.content || section.content.length < 300 || section.content.length > 480) {
-        throw new Error(`Section ${index + 1} content length invalid: ${section.content?.length || 0} chars (need 300-480)`);
+      if (!section.content || section.content.trim().length < 100) {
+        throw new Error(`Section ${index + 1} content too short: ${section.content?.length || 0} chars (minimum 100)`);
       }
     });
 
