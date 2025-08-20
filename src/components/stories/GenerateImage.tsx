@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ import { toast } from 'sonner';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { GenerateImageProps } from '@/types/stories/ui';
+import type { AspectRatio } from '@/types/bulkImageGeneration';
 import { useParams } from 'react-router-dom';
 
 export const GenerateImage = ({ 
@@ -38,6 +40,7 @@ export const GenerateImage = ({
 }: GenerateImageProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const timer = useImageGenerationTimerContext();
+  const { setProcessing } = useProcessingStatesContext();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -110,6 +113,9 @@ export const GenerateImage = ({
     try {
       console.log('🎨 IMAGE_GEN: Starting generation for post', post.id, 'ratio', type, 'setting status to \'uploading\'');
       setIsGenerating(true);
+      
+      // Register with global processing state for timer
+      setProcessing(post.id, 'generate', true, aspectRatio as AspectRatio);
       
       // Notify parent immediately that generation has started
       if (onGenerationStart) {
@@ -213,6 +219,10 @@ export const GenerateImage = ({
       toast.error(error instanceof Error ? error.message : 'Failed to generate image');
     } finally {
       console.log('🎨 IMAGE_GEN: Cleanup - setting isGenerating to false');
+      
+      // Clear global processing state 
+      setProcessing(post.id, 'generate', false, aspectRatio as AspectRatio);
+      
       setIsGenerating(false);
       if (onGenerationEnd) {
         try {
