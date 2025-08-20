@@ -16,6 +16,25 @@ export const CreditStatus: React.FC<CreditStatusProps> = ({
   const { data: subscriptionTier, isLoading: tierLoading } = useSubscriptionTier();
   const creditStatus = getCreditStatus();
 
+  // Log credit status updates for QA
+  React.useEffect(() => {
+    console.log('[CreditStatus] Status updated', {
+      subscriptionTier,
+      creditStatus: {
+        hasCredits: creditStatus.hasCredits,
+        remainingDaily: creditStatus.remainingDaily,
+        remainingMonthly: creditStatus.remainingMonthly,
+        dailyUsed: creditStatus.dailyUsed,
+        monthlyUsed: creditStatus.monthlyUsed,
+        dailyLimit: creditStatus.dailyLimit,
+        monthlyLimit: creditStatus.monthlyLimit,
+        blockingLimit: creditStatus.blockingLimit
+      },
+      isLoading: creditStatus.isLoading || tierLoading,
+      timestamp: new Date().toISOString()
+    });
+  }, [creditStatus, subscriptionTier, tierLoading]);
+
   if (creditStatus.isLoading || tierLoading) {
     return (
       <Badge variant="secondary" className={className}>

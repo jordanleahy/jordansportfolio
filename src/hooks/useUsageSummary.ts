@@ -35,7 +35,16 @@ export const useUsageSummary = () => {
   const query = useQuery<UsageSummaryData>({
     queryKey: QUERY_KEYS.usageSummary,
     queryFn: async () => {
-      if (!user?.id) return DEFAULTS;
+      const queryStart = Date.now();
+      console.log('[useUsageSummary] Starting usage summary fetch', { 
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
+      
+      if (!user?.id) {
+        console.log('[useUsageSummary] No user ID, returning defaults');
+        return DEFAULTS;
+      }
 
       try {
         // Get user subscription and tier details
@@ -51,6 +60,19 @@ export const useUsageSummary = () => {
 
         const tier = subscription?.tier;
         const subscriptionTier = tier?.name?.toLowerCase() || 'free';
+        
+        console.log('[useUsageSummary] Subscription data fetched', {
+          userId: user.id,
+          hasSubscription: !!subscription,
+          tier: tier ? {
+            id: tier.id,
+            name: tier.name,
+            daily_limit: tier.max_gpt_images_daily,
+            monthly_limit: tier.max_gpt_images_monthly
+          } : null,
+          subscriptionTier,
+          timestamp: new Date().toISOString()
+        });
         
         // Get usage limits from subscription tier - use Free Plan defaults if no tier assigned
         const monthlyLimit = tier?.max_gpt_images_monthly ?? 30; // Default to Free Plan monthly limit
@@ -90,6 +112,14 @@ export const useUsageSummary = () => {
         const monthlyRemaining = Math.max(0, monthlyLimit - monthlyUsed);
         const dailyRemaining = Math.max(0, dailyLimit - dailyUsed);
 
+        console.log('[useUsageSummary] Usage calculations', {
+          userId: user.id,
+          limits: { dailyLimit, monthlyLimit },
+          usage: { dailyUsed, monthlyUsed },
+          remaining: { dailyRemaining, monthlyRemaining },
+          timestamp: new Date().toISOString()
+        });
+
         // Calculate totals
         const totalCredits = monthlyLimit;
         const usedCredits = monthlyUsed;
@@ -125,9 +155,28 @@ export const useUsageSummary = () => {
           timestamp: new Date().toISOString(),
         };
 
+        const queryTime = Date.now() - queryStart;
+        console.log('[useUsageSummary] Query completed successfully', {
+          userId: user.id,
+          queryTimeMs: queryTime,
+          result: {
+            subscriptionTier: result.subscriptionTier,
+            totalCredits: result.totals.totalCredits,
+            usedCredits: result.totals.usedCredits,
+            remainingCredits: result.totals.remainingCredits
+          },
+          timestamp: new Date().toISOString()
+        });
+        
         return result;
       } catch (err: any) {
-        console.error('Error fetching usage summary:', err);
+        const queryTime = Date.now() - queryStart;
+        console.error('[useUsageSummary] Query error', {
+          userId: user.id,
+          queryTimeMs: queryTime,
+          error: err.message || err,
+          timestamp: new Date().toISOString()
+        });
         return DEFAULTS;
       }
     },
@@ -150,7 +199,12 @@ export const useUsageSummary = () => {
           table: 'api_usage_tracking',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        (payload) => {
+          console.log('[useUsageSummary] Real-time usage update received', {
+            userId: user.id,
+            payload: payload.new,
+            timestamp: new Date().toISOString()
+          });
           // Immediately refetch when new usage is recorded
           query.refetch();
         }
