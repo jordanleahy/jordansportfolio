@@ -35,10 +35,10 @@ const Auth = () => {
     type: "website"
   });
 
-  // Redirect authenticated users to main page
+  // Redirect authenticated users to stories page
   useEffect(() => {
     if (user) {
-      window.location.href = '/';
+      window.location.href = '/stories';
     }
   }, [user]);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
-      const redirectUrl = `https://www.jordanleahy.com/`;
+      const redirectUrl = `https://www.jordanleahy.com/stories`;
       
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,

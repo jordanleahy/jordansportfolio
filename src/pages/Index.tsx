@@ -26,12 +26,10 @@ const Index = () => {
     type: "website"
   });
 
-  // All authenticated users can access stories page
-  // Only redirect if user explicitly wants to stay on portfolio view
-  // Commenting out redirect to let users choose between index and stories
-  // if (!loading && user) {
-  //   return <Navigate to="/stories" replace />;
-  // }
+  // All authenticated users are redirected to stories page
+  if (!loading && user) {
+    return <Navigate to="/stories" replace />;
+  }
 
   // Show loading state while checking auth
   if (loading) {
