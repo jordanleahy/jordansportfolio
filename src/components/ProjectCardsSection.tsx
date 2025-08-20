@@ -100,7 +100,7 @@ const ProjectCardsSection = () => {
                       <img 
                         src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png"
                         alt="Drug Prior Authorization interface showing workflow steps"
-                        className="w-full h-48 object-cover rounded-lg border border-border/50"
+                        className="w-full aspect-video object-cover rounded-lg border border-border/50"
                       />
                     </div>
                   )}
