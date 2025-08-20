@@ -41,7 +41,6 @@ import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
-import { TorchDentalCoverLetter } from "./components/portfolio/TorchDentalCoverLetter";
 
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
 import WorkReportPage from "./pages/WorkReportPage";
@@ -231,7 +230,6 @@ function App() {
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
-                <Route path="/cover-letter/torch-dental" element={<TorchDentalCoverLetter />} />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
