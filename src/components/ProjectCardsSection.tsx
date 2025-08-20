@@ -58,7 +58,7 @@ const ProjectCardsSection = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold mb-4 text-foreground">Featured Projects</h2>
+            <h2 className="text-3xl font-bold mb-4 text-foreground">Case Studies</h2>
             <p className="text-muted-foreground text-lg">
               Case studies showcasing healthcare design innovation
             </p>
