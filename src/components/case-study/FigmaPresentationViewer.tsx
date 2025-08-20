@@ -19,7 +19,6 @@ export const FigmaPresentationViewer = ({
       className="space-y-6"
     >
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">{title}</h2>
         <p className="text-muted-foreground">
           Interactive Figma prototype showcasing the user experience design process
         </p>
