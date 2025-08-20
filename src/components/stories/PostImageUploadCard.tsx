@@ -232,21 +232,23 @@ export const PostImageUploadCard = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-        <span className="text-sm font-medium text-center sm:text-left">{label}</span>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">{label}</span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-8 w-full justify-center"
               disabled={isUploading || isGenerating}
             >
               {(isUploading || isGenerating) ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
-                <ChevronDown className="h-4 w-4" />
+                <Sparkles className="h-4 w-4 mr-2" />
               )}
+              {(isUploading || isGenerating) ? 'Generating...' : 'Generate AI'}
+              {!(isUploading || isGenerating) && <ChevronDown className="h-4 w-4 ml-2" />}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
@@ -296,9 +298,9 @@ export const PostImageUploadCard = ({
           return (
             <div className="relative">
               <SimpleShimmer 
-                aspectRatio={aspectRatio.replace(':', '/')} 
+                aspectRatio="1/1" 
                 variant="full"
-                className="w-full h-16"
+                className="w-full"
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <InstantLoadingIndicator 
