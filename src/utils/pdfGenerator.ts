@@ -80,7 +80,7 @@ export const generatePostPDF = async (post: SocialMediaPost) => {
   pdf.save(fileName);
 };
 
-export const generateMultiplePostsPDF = async (posts: SocialMediaPost[], aspectRatiosToInclude?: string[]) => {
+export const generateMultiplePostsPDF = async (posts: SocialMediaPost[], aspectRatiosToInclude?: string[], themeTitle?: string) => {
   let pdf: jsPDF | null = null;
   let isFirstPage = true;
 
@@ -143,6 +143,11 @@ export const generateMultiplePostsPDF = async (posts: SocialMediaPost[], aspectR
     throw new Error('No valid images found to create PDF');
   }
 
-  const fileName = `social_media_images_${posts.length}_posts_JordanLeahy.com.pdf`;
+  // Use theme title in filename if provided, otherwise fallback to generic name
+  const baseFileName = themeTitle 
+    ? `${themeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${posts.length}_posts`
+    : `social_media_images_${posts.length}_posts`;
+  
+  const fileName = `${baseFileName}_JordanLeahy.com.pdf`;
   pdf.save(fileName);
 };

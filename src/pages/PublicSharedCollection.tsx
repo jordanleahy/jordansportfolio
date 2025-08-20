@@ -226,7 +226,7 @@ export default function PublicSharedCollection() {
         theme_id: null
       }));
 
-      await generateMultiplePostsPDF(postsForPDF);
+      await generateMultiplePostsPDF(postsForPDF, undefined, theme?.theme_name || collection?.title || `${handle}_collection`);
     } catch (error) {
       console.error('PDF generation failed:', error);
     }

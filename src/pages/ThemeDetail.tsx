@@ -167,7 +167,7 @@ export default function ThemeDetail() {
     }
 
     try {
-      await generateMultiplePostsPDF(postsWithImages as any, ['1_1']);
+      await generateMultiplePostsPDF(postsWithImages as any, ['1_1'], themeData?.theme_name || decodedTheme);
       toast({
         title: "LinkedIn Slideshow Downloaded",
         description: `${postsWithImages.length} square images saved as PDF for LinkedIn`

@@ -281,7 +281,7 @@ export const PostsCardView = memo(({
     }
 
     try {
-      await generateMultiplePostsPDF(postsWithImages, ['1_1']);
+      await generateMultiplePostsPDF(postsWithImages, ['1_1'], themeData?.theme);
       toast({
         title: "LinkedIn Slideshow Downloaded",
         description: `${postsWithImages.length} square images saved as PDF for LinkedIn`
