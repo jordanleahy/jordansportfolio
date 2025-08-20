@@ -114,13 +114,13 @@ const Subscription: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 text-accent">✓</div>
                   <span className="text-foreground">
-                    {tiers?.find(t => t.name === 'Free Plan' && t.price_cents === 0)?.max_gpt_images_daily || 5} Daily Credits
+                    {tiers?.find(t => t.name === 'Free Plan' && t.price_cents === 0)?.max_gpt_images_daily} Daily Credits
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 text-accent">✓</div>
                   <span className="text-foreground">
-                    {tiers?.find(t => t.name === 'Free Plan' && t.price_cents === 0)?.max_gpt_images_monthly || 30} Monthly Credits
+                    {tiers?.find(t => t.name === 'Free Plan' && t.price_cents === 0)?.max_gpt_images_monthly} Monthly Credits
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

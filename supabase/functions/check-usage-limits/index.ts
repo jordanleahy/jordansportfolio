@@ -238,26 +238,9 @@ serve(async (req) => {
 
     const tier = subscription.tier as any;
 
-    // Determine limits with special handling:
-    // - If tier provides explicit daily/monthly, use them
-    // - Otherwise, if price is 0 (Free), use free defaults
-    // - Admin tier should rely on explicit values (set to high limits)
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const freeDailyLimit = 5;
-
-    const hasExplicitDaily = typeof tier?.max_gpt_images_daily === 'number' && tier.max_gpt_images_daily !== null;
-    const hasExplicitMonthly = typeof tier?.max_gpt_images_monthly === 'number' && tier.max_gpt_images_monthly !== null;
-
-    const isFreePriced = (tier?.price_cents ?? 0) === 0;
-    const isAdminTier = (tier?.name ?? '').toLowerCase() === 'admin';
-
-    const dailyLimit = hasExplicitDaily
-      ? tier.max_gpt_images_daily
-      : (isFreePriced && !isAdminTier ? freeDailyLimit : (tier?.max_gpt_images || 0));
-
-    const monthlyLimit = hasExplicitMonthly
-      ? tier.max_gpt_images_monthly
-      : (isFreePriced && !isAdminTier ? freeDailyLimit * daysInMonth : (tier?.max_gpt_images || 0));
+    // Get daily and monthly limits directly from tier (all users now have proper tier assignments)
+    const dailyLimit = tier?.max_gpt_images_daily || 0;
+    const monthlyLimit = tier?.max_gpt_images_monthly || 0;
     
     // Count current usage from api_usage_tracking
     // Monthly usage: count successful image generations within billing period
