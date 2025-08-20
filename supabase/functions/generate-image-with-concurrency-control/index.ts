@@ -145,7 +145,73 @@ serve(async (req) => {
       );
     }
 
-    console.log('🔒 CONCURRENCY_CONTROL: Lock acquired, starting generation');
+    console.log('🔒 CONCURRENCY_CONTROL: Lock acquired, checking usage limits');
+
+    // Check usage limits before proceeding with generation
+    try {
+      const { data: usageCheck, error: usageError } = await supabase.functions.invoke('check-usage-limits', {
+        body: { usage_type: 'gpt_image_generation', amount: 1 }
+      });
+
+      if (usageError) {
+        console.error('🔒 CONCURRENCY_CONTROL: Usage check error:', usageError);
+        // Mark as failed and release lock
+        await supabase.rpc('complete_image_generation', {
+          p_post_id: postId,
+          p_aspect_ratio: normalizedAspectRatio,
+          p_user_id: userId,
+          p_status: 'failed'
+        });
+        
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to check usage limits', details: usageError.message }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        );
+      }
+
+      if (!usageCheck?.allowed) {
+        console.log('🔒 CONCURRENCY_CONTROL: Usage limit exceeded', {
+          remaining: usageCheck?.remaining,
+          limit: usageCheck?.limit,
+          message: usageCheck?.message
+        });
+        
+        // Mark as failed and release lock
+        await supabase.rpc('complete_image_generation', {
+          p_post_id: postId,
+          p_aspect_ratio: normalizedAspectRatio,
+          p_user_id: userId,
+          p_status: 'failed'
+        });
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Usage limit exceeded',
+            message: usageCheck?.message || 'You have exceeded your usage limits',
+            remaining: usageCheck?.remaining || 0,
+            limit: usageCheck?.limit || 0
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
+        );
+      }
+
+      console.log('🔒 CONCURRENCY_CONTROL: Usage limits passed, starting generation');
+    } catch (limitError) {
+      console.error('🔒 CONCURRENCY_CONTROL: Limit check failed:', limitError);
+      // Mark as failed and release lock
+      await supabase.rpc('complete_image_generation', {
+        p_post_id: postId,
+        p_aspect_ratio: normalizedAspectRatio,
+        p_user_id: userId,
+        p_status: 'failed'
+      });
+      
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to verify usage limits' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
 
     try {
       const sizeMap: Record<string, string> = {
@@ -214,6 +280,31 @@ serve(async (req) => {
 
       if (!response.ok) {
         console.error('🔒 CONCURRENCY_CONTROL: OpenAI API error', response.status);
+        
+        // Track failed usage
+        try {
+          await supabase
+            .from('api_usage_tracking')
+            .insert({
+              user_id: userId,
+              function_name: 'generate-image-with-concurrency-control',
+              request_type: 'image_generation',
+              model_used: 'gpt-image-1',
+              success: false,
+              estimated_cost: 0,
+              image_size: size,
+              image_quality: 'high',
+              response_time_ms: Date.now() - startTime,
+              error_message: `OpenAI API error: ${response.status}`,
+              request_metadata: {
+                post_id: postId,
+                aspect_ratio: normalizedAspectRatio,
+                prompt_length: prompt.length
+              }
+            });
+        } catch (trackingError) {
+          console.error('🔒 CONCURRENCY_CONTROL: Failed to track failed usage:', trackingError);
+        }
         
         // Mark as failed in database
         await supabase.rpc('complete_image_generation', {
@@ -298,6 +389,33 @@ serve(async (req) => {
 
       if (!updateResult) {
         console.warn('🔒 CONCURRENCY_CONTROL: Failed to update database with completion status');
+      }
+
+      // Track successful usage
+      try {
+        await supabase
+          .from('api_usage_tracking')
+          .insert({
+            user_id: userId,
+            function_name: 'generate-image-with-concurrency-control',
+            request_type: 'image_generation',
+            model_used: 'gpt-image-1',
+            success: true,
+            estimated_cost: estimatedCost,
+            image_size: size,
+            image_quality: 'high',
+            response_time_ms: processingTimeMs,
+            request_metadata: {
+              post_id: postId,
+              aspect_ratio: normalizedAspectRatio,
+              seed: finalSeed,
+              prompt_length: prompt.length
+            }
+          });
+        console.log('🔒 CONCURRENCY_CONTROL: Usage tracked successfully');
+      } catch (trackingError) {
+        console.error('🔒 CONCURRENCY_CONTROL: Failed to track usage:', trackingError);
+        // Don't fail the whole request for tracking errors, just log them
       }
 
       console.log('🔒 CONCURRENCY_CONTROL: Generation complete', {
