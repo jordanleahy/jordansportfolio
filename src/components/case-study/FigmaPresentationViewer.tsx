@@ -26,16 +26,13 @@ export const FigmaPresentationViewer = ({
       </div>
 
       <Card className="overflow-hidden">
-        <div className="relative bg-muted/30 p-4">
-          
-          <div className="bg-background rounded border aspect-video">
-            <iframe
-              src={presentationUrl}
-              className="w-full h-full rounded"
-              allowFullScreen
-              title="Use Case Presentation"
-            />
-          </div>
+        <div className="bg-background rounded border aspect-video">
+          <iframe
+            src={presentationUrl}
+            className="w-full h-full rounded"
+            allowFullScreen
+            title="Use Case Presentation"
+          />
         </div>
 
         <div className="p-6 bg-background">
