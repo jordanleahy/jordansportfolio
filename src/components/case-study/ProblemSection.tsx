@@ -6,9 +6,11 @@ interface ProblemSectionProps {
   title: string;
   description: string;
   challenges: Challenge[];
+  iframeUrl?: string;
+  iframeTitle?: string;
 }
 
-export const ProblemSection = ({ title, description, challenges }: ProblemSectionProps) => {
+export const ProblemSection = ({ title, description, challenges, iframeUrl, iframeTitle }: ProblemSectionProps) => {
   return (
     <section className="py-12 px-4 bg-muted/30">
       <div className="max-w-4xl mx-auto">
@@ -19,7 +21,7 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
         >
           <h2 className="text-3xl font-bold mb-6">{title}</h2>
           <p className="text-lg leading-relaxed text-muted-foreground mb-6">{description}</p>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
             {challenges.map((challenge, index) => (
               <div key={index} className="space-y-6">
                 <Card className="p-6">
@@ -36,6 +38,17 @@ export const ProblemSection = ({ title, description, challenges }: ProblemSectio
               </div>
             ))}
           </div>
+          
+          {iframeUrl && (
+            <div className="w-full">
+              <iframe
+                src={iframeUrl}
+                title={iframeTitle || "Embedded content"}
+                className="w-full h-96 border border-border rounded-lg shadow-sm"
+                loading="lazy"
+              />
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

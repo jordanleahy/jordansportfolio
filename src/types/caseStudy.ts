@@ -67,6 +67,8 @@ export interface CaseStudyData {
   problemTitle: string;
   problemDescription: string;
   challenges: Challenge[];
+  problemIframeUrl?: string;
+  problemIframeTitle?: string;
   
   // Team Section
   teamMembers: TeamMember[];

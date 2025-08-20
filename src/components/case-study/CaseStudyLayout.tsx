@@ -50,6 +50,8 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         title={data.problemTitle}
         description={data.problemDescription}
         challenges={data.challenges}
+        iframeUrl={data.problemIframeUrl}
+        iframeTitle={data.problemIframeTitle}
       />
       
       <TeamSection teamMembers={data.teamMembers} />
