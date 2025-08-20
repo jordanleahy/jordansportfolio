@@ -178,15 +178,18 @@ Focus on providing genuine value, specific examples, and actionable insights tha
           return [
             {
               headline: "Understanding CCs and MCCs",
-              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and reimbursement. CCs are conditions that increase the length of stay by at least one day in approximately 75% of patients, while MCCs are more severe conditions that typically extend stays even longer. These diagnoses are crucial for accurate DRG assignment and ensuring appropriate reimbursement for the resources required to treat more complex patients."
+              content: "Complications or Comorbidities (CCs) and Major Complications or Comorbidities (MCCs) are secondary diagnoses that significantly impact patient care complexity and reimbursement. CCs are conditions that increase the length of stay by at least one day in approximately 75% of patients, while MCCs are more severe conditions that typically extend stays even longer. These diagnoses are crucial for accurate DRG assignment and ensuring appropriate reimbursement for the resources required to treat more complex patients.",
+              image_url: null
             },
             {
               headline: "Impact on DRG Weight and Reimbursement", 
-              content: "When CCs or MCCs are properly documented and coded, they elevate the DRG weight, which directly increases reimbursement. For example, a simple pneumonia case might have a DRG weight of 0.7, but the same pneumonia with diabetes as a CC could have a weight of 1.2, representing a significant increase in payment. MCCs have an even greater impact, potentially doubling or tripling the DRG weight. This makes accurate documentation and coding of these conditions essential for hospital financial performance."
+              content: "When CCs or MCCs are properly documented and coded, they elevate the DRG weight, which directly increases reimbursement. For example, a simple pneumonia case might have a DRG weight of 0.7, but the same pneumonia with diabetes as a CC could have a weight of 1.2, representing a significant increase in payment. MCCs have an even greater impact, potentially doubling or tripling the DRG weight. This makes accurate documentation and coding of these conditions essential for hospital financial performance.",
+              image_url: null
             },
             {
               headline: "Best Practices for Documentation",
-              content: "Effective CC/MCC capture requires collaboration between physicians, clinical documentation improvement (CDI) specialists, and coders. Physicians must document the relationship between secondary conditions and the principal diagnosis, including how comorbidities affect treatment decisions or resource utilization. CDI specialists should query for missing diagnoses when clinical indicators suggest the presence of CCs or MCCs. Regular education and feedback help ensure consistent, compliant documentation that supports both quality care and appropriate reimbursement."
+              content: "Effective CC/MCC capture requires collaboration between physicians, clinical documentation improvement (CDI) specialists, and coders. Physicians must document the relationship between secondary conditions and the principal diagnosis, including how comorbidities affect treatment decisions or resource utilization. CDI specialists should query for missing diagnoses when clinical indicators suggest the presence of CCs or MCCs. Regular education and feedback help ensure consistent, compliant documentation that supports both quality care and appropriate reimbursement.",
+              image_url: null
             }
           ];
         }
@@ -194,15 +197,18 @@ Focus on providing genuine value, specific examples, and actionable insights tha
         return [
           {
             headline: "Understanding the Basics",
-            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations and patient outcomes."
+            content: "This section provides foundational knowledge about the healthcare topic, helping professionals understand the core concepts and why they matter in today's healthcare environment. We'll explore the key components and how they impact daily operations and patient outcomes.",
+            image_url: null
           },
           {
             headline: "Implementation Strategies", 
-            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings. This includes best practices, common challenges, and proven strategies that have shown success across different healthcare organizations."
+            content: "Here we dive into practical approaches for implementing these concepts in real-world healthcare settings. This includes best practices, common challenges, and proven strategies that have shown success across different healthcare organizations.",
+            image_url: null
           },
           {
             headline: "Future Considerations",
-            content: "Looking ahead, this section examines emerging trends and future developments that will shape this area of healthcare. We'll discuss how to prepare for upcoming changes and position your organization for continued success and improved patient care."
+            content: "Looking ahead, this section examines emerging trends and future developments that will shape this area of healthcare. We'll discuss how to prepare for upcoming changes and position your organization for continued success and improved patient care.",
+            image_url: null
           }
         ];
       }
