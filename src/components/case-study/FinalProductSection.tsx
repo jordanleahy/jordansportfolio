@@ -28,20 +28,20 @@ export const FinalProductSection = ({ data }: FinalProductSectionProps) => {
             </p>
           )}
         </div>
-
-        <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm" style={{ aspectRatio: "1.78 / 1" }}>
-          <iframe
-            src={data.prototypeUrl}
-            className="w-full h-full border-0"
-            style={{ 
-              border: "1px solid rgba(0, 0, 0, 0.1)"
-            }}
-            allowFullScreen
-            title="Interactive Prototype"
-            loading="lazy"
-          />
-        </div>
       </motion.div>
+
+      <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm mt-8" style={{ aspectRatio: "1.78 / 1" }}>
+        <iframe
+          src={data.prototypeUrl}
+          className="w-full h-full border-0"
+          style={{ 
+            border: "1px solid rgba(0, 0, 0, 0.1)"
+          }}
+          allowFullScreen
+          title="Interactive Prototype"
+          loading="lazy"
+        />
+      </div>
     </Section>
   );
 };
