@@ -19,10 +19,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import type { PostImageUploadCardProps } from '@/types/stories/ui';
+import type { GenerateImageProps } from '@/types/stories/ui';
 import { useParams } from 'react-router-dom';
 
-export const PostImageUploadCard = ({ 
+export const GenerateImage = ({ 
   post,
   type,
   label,
@@ -35,7 +35,7 @@ export const PostImageUploadCard = ({
   // ❌ BAD: Using themeName prop - should use post.theme_id instead
   // themeName,  // REMOVED - use post.theme_id from the post object
   hasPrompt = true
-}: PostImageUploadCardProps) => {
+}: GenerateImageProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const timer = useImageGenerationTimerContext();
   

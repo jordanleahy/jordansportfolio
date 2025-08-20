@@ -5,7 +5,7 @@ import { BlogPostButton } from './BlogPostButton';
 import { IndividualPromptViewer } from './IndividualPromptViewer';
 
 import { BulkImageGenerationButton } from './BulkImageGenerationButton';
-import { PostImageUploadCard } from './PostImageUploadCard';
+import { GenerateImage } from './GenerateImage';
 import VideoUploadCard from './VideoUploadCard';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -172,7 +172,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
 
           {/* Primary card - 1:1 Square (default/cheapest) */}
           <div className="mb-3">
-            <PostImageUploadCard
+            <GenerateImage
               post={post}
               type="1_1"
               label="Square (1:1) - Default"
@@ -188,7 +188,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
 
           {/* Additional formats - responsive grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-            <PostImageUploadCard
+            <GenerateImage
               post={post}
               type="16_9"
               label="Landscape (16:9)"
@@ -200,7 +200,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onGenerationEnd={handleImageGenerationEnd}
               hasPrompt={hasPrompt}
             />
-            <PostImageUploadCard
+            <GenerateImage
               post={post}
               type="9_16"
               label="Portrait (9:16)"
@@ -212,7 +212,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
               onGenerationEnd={handleImageGenerationEnd}
               hasPrompt={hasPrompt}
             />
-            <PostImageUploadCard
+            <GenerateImage
               post={post}
               type="3_4"
               label="Social (3:4)"
@@ -228,7 +228,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
 
           {/* Bottom row - 1 column */}
           <div className="grid grid-cols-1 gap-3">
-            <PostImageUploadCard
+            <GenerateImage
               post={post}
               type="4_3"
               label="Standard (4:3)"

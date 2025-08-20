@@ -299,7 +299,7 @@ export interface VideoUploadCardProps {
   onVideoRemove: () => void;
 }
 
-export interface PostImageUploadCardProps {
+export interface GenerateImageProps {
   post: SocialMediaPost;
   type: '16_9' | '9_16' | '3_4' | '4_3' | '1_1';
   label: string;

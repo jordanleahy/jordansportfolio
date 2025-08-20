@@ -36,7 +36,7 @@ Frontend (React + TS):
   - src/hooks/useUsageEnforcement.ts — Usage limit checks and alerting
   - src/hooks/useCreditCheck.ts — Exposes credit status and wraps enforcement
 - UI Components
-  - src/components/stories/PostImageUploadCard.tsx — Uploads and AI-generate entry point
+  - src/components/stories/GenerateImage.tsx — Uploads and AI-generate entry point
   - src/components/stories/SingleAspectRatioSelector.tsx — Per-aspect ratio generation controls
   - src/components/stories/BulkImageGenerationButton.tsx — Bulk generate action and progress
   - src/components/stories/BulkGenerationThumbnails.tsx — Preview of bulk outputs
@@ -89,7 +89,7 @@ External APIs via Edge Functions:
 
 ## Flow 1 — Single Image Generation (Hero/Per-Aspect)
 
-Primary entry points: PostImageUploadCard.tsx, SingleAspectRatioSelector.tsx, useImageGeneration.ts/useImageManager.ts.
+Primary entry points: GenerateImage.tsx, SingleAspectRatioSelector.tsx, useImageGeneration.ts/useImageManager.ts.
 
 Event-by-event sequence:
 1) User Action
@@ -270,7 +270,7 @@ Failure Modes and Handling:
 
 ## Flow 3 — Manual/Alternative Upload Paths
 
-Primary entry points: PostImageUploadCard.tsx + imageUpload/storageImageUpload.
+Primary entry points: GenerateImage.tsx + imageUpload/storageImageUpload.
 
 Event-by-event sequence:
 1) User selects/inputs an image (or FE pulls from a URL using storageImageUpload.uploadImageToStorage)
@@ -479,7 +479,7 @@ B) Example Payloads
 
 C) Related Files Index
 - Hooks: useImageGeneration.ts, useImageManager.ts, useImageBatchGeneration.ts, useUsageEnforcement.ts, useCreditCheck.ts
-- UI: PostImageUploadCard.tsx, SingleAspectRatioSelector.tsx, BulkImageGenerationButton.tsx, BulkGenerationThumbnails.tsx
+- UI: GenerateImage.tsx, SingleAspectRatioSelector.tsx, BulkImageGenerationButton.tsx, BulkGenerationThumbnails.tsx
 - Utils: imageUpload.ts, storageImageUpload.ts
 - Edge Functions: generate-image-prompt-dynamic, generate-image-gpt, generate-all-images-optimized, streaming-image-pipeline, check-usage-limits, get-usage-summary, send-usage-alert
 
