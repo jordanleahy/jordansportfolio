@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
-import { supabase } from '@/integrations/supabase/client';
+import { BlogService } from '@/services/blogService';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 export const usePostActions = (onPostsChange: () => void) => {
@@ -61,21 +61,7 @@ export const usePostActions = (onPostsChange: () => void) => {
   const handleCreateBlogPost = useCallback(async (post: SocialMediaPost) => {
     setCreatingBlogIds(prev => new Set(prev).add(post.id));
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Please log in to create blog posts');
-      }
-
-      const response = await supabase.functions.invoke('generic-blog', {
-        body: { socialMediaPost: post },
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      });
-
-      if (response.error) {
-        throw response.error;
-      }
-
-      const { blogPost, redirectUrl } = response.data;
+      const { blog_post: blogPost, redirect_url: redirectUrl } = await BlogService.generateBlogFromSocialPost(post);
       toast({
         title: "Blog post created",
         description: "A draft blog post has been created. Redirecting to editor..."
@@ -84,7 +70,7 @@ export const usePostActions = (onPostsChange: () => void) => {
       setTimeout(() => {
         if (redirectUrl) {
           navigate(redirectUrl);
-        } else {
+        } else if (blogPost) {
           navigate(`/blog-editor/${blogPost.id}`);
         }
       }, 1000);

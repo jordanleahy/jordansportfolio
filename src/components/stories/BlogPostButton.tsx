@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { NotebookPen, Eye, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useBlogStatus } from '@/hooks/useBlogStatus';
+import { BlogService } from '@/services/blogService';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { BlogPostButtonProps } from '@/types/stories/ui';
 
@@ -30,35 +30,19 @@ export const BlogPostButton = ({ post }: BlogPostButtonProps) => {
         }, 500);
       } else {
         // Create new blog post
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          throw new Error('Please log in to create blog posts');
-        }
-
-        const response = await supabase.functions.invoke('generic-blog', {
-          body: { socialMediaPost: post, checkExisting: false },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (response.error) {
-          throw response.error;
-        }
-
-        const { blogPost, redirectUrl, message, imagePromptGeneration } = response.data;
+        const response = await BlogService.generateBlogFromSocialPost(post, false);
+        
+        const { blog_post: blogPost, redirect_url: redirectUrl, message } = response;
         
         toast({
           title: "Blog post created",
-          description: imagePromptGeneration === 'in_progress' 
-            ? "Draft created! Visual prompts are being generated automatically..."
-            : "A draft blog post has been created. Redirecting to editor...",
+          description: "A draft blog post has been created. Redirecting to editor...",
         });
 
         setTimeout(() => {
           if (redirectUrl) {
             navigate(redirectUrl);
-          } else {
+          } else if (blogPost) {
             navigate(`/blog-editor/${blogPost.id}`);
           }
         }, 1000);

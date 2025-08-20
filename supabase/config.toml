@@ -42,9 +42,6 @@ verify_jwt = true
 [functions.generate-voiceover-script]
 verify_jwt = true
 
-[functions.generic-blog]
-verify_jwt = true
-
 [functions.process-and-import-theme]
 verify_jwt = true
 
