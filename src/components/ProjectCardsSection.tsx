@@ -95,6 +95,16 @@ const ProjectCardsSection = () => {
                     </div>
                   </CardHeader>
                   
+                  {project.id === "case4" && (
+                    <div className="px-6 pb-4">
+                      <img 
+                        src="/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png"
+                        alt="Drug Prior Authorization interface showing workflow steps"
+                        className="w-full h-48 object-cover rounded-lg border border-border/50"
+                      />
+                    </div>
+                  )}
+                  
                   <CardContent className="pt-0">
                     <p className="text-card-foreground mb-4 leading-relaxed">
                       {project.description}
