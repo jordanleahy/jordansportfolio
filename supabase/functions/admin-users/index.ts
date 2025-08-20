@@ -65,7 +65,7 @@ serve(async (req: Request) => {
 
     const usageMap = new Map<string, { totalImages: number; totalCost: number }>();
     for (const row of usageRows || []) {
-      const isImageOp = (row as any).request_type === 'image_generation'
+      const isImageOp = (row as any).request_type === 'gpt_image_generation'
         || String((row as any).function_name || '').includes('image');
       if (!isImageOp) continue;
       const uid = (row as any).user_id as string;

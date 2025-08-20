@@ -3,7 +3,7 @@ export interface ApiUsageRecord {
   user_id: string;
   function_name: string;
   model_used: string;
-  request_type: 'text_generation' | 'image_generation' | 'image_prompt';
+  request_type: 'text_generation' | 'gpt_image_generation' | 'image_prompt';
   tokens_used?: number;
   image_size?: string;
   image_quality?: string;

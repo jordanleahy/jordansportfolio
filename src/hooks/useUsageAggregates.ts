@@ -98,7 +98,7 @@ export function useAggregatedChartData(filters: UsageFilters = {}): { data?: Usa
           case "text_generation":
             entry.text_generation_cost += cost;
             break;
-          case "image_generation":
+          case "gpt_image_generation":
             entry.image_generation_cost += cost;
             break;
           case "image_prompt":
