@@ -75,10 +75,10 @@ const Index = () => {
       
       {/* Portfolio Content */}
       <CompaniesSection />
-      <RecentBlogsSection />
       <ProjectCardsSection />
       <TestimonialsSection />
       <ContactSection />
+      <RecentBlogsSection />
     </AppLayout>
   );
 };
