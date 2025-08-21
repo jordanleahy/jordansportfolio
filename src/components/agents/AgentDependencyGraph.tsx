@@ -17,7 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAgentsWithRelationships } from '@/hooks/useAgentRelationships';
-import { Zap, ZapOff, AlertTriangle, Play } from 'lucide-react';
+import { Zap, ZapOff, AlertTriangle, Play, RotateCcw, Grid, GitBranch } from 'lucide-react';
+import dagre from 'dagre';
 
 const AgentNode = ({ data }: { data: any }) => {
   const { agent } = data;
@@ -78,18 +79,97 @@ const nodeTypes = {
   agentNode: AgentNode,
 };
 
+type LayoutType = 'hierarchical' | 'grid' | 'force';
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[], layoutType: LayoutType) => {
+  switch (layoutType) {
+    case 'hierarchical':
+      return getHierarchicalLayout(nodes, edges);
+    case 'force':
+      return getForceLayout(nodes, edges);
+    case 'grid':
+    default:
+      return getGridLayout(nodes);
+  }
+};
+
+const getHierarchicalLayout = (nodes: Node[], edges: Edge[]) => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  dagreGraph.setGraph({ 
+    rankdir: 'TB',
+    nodesep: 100,
+    ranksep: 150,
+    marginx: 50,
+    marginy: 50
+  });
+
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, { width: 280, height: 180 });
+  });
+
+  edges.forEach(edge => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  const layoutedNodes = nodes.map(node => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    return {
+      ...node,
+      position: {
+        x: nodeWithPosition.x - 140,
+        y: nodeWithPosition.y - 90,
+      },
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
+const getForceLayout = (nodes: Node[], edges: Edge[]) => {
+  // Simple force-directed layout simulation
+  const layoutedNodes = nodes.map((node, index) => {
+    const angle = (index / nodes.length) * 2 * Math.PI;
+    const radius = Math.max(200, nodes.length * 50);
+    return {
+      ...node,
+      position: {
+        x: Math.cos(angle) * radius + 400,
+        y: Math.sin(angle) * radius + 300,
+      },
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
+const getGridLayout = (nodes: Node[]) => {
+  const layoutedNodes = nodes.map((node, index) => ({
+    ...node,
+    position: { 
+      x: (index % 3) * 350, 
+      y: Math.floor(index / 3) * 250 
+    },
+  }));
+
+  return { nodes: layoutedNodes, edges: [] };
+};
+
 export const AgentDependencyGraph = () => {
   const { data: agentsWithRelationships, isLoading } = useAgentsWithRelationships();
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [layoutType, setLayoutType] = useState<LayoutType>('hierarchical');
 
   // Convert agents to nodes and dependencies to edges
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
     if (!agentsWithRelationships) return { nodes: [], edges: [] };
 
-    const nodes: Node[] = agentsWithRelationships.map((agent, index) => ({
+    const nodes: Node[] = agentsWithRelationships.map((agent) => ({
       id: agent.id,
       type: 'agentNode',
-      position: { x: (index % 4) * 300, y: Math.floor(index / 4) * 200 },
+      position: { x: 0, y: 0 }, // Will be updated by layout algorithm
       data: { agent },
       selected: selectedAgent === agent.id,
     }));
@@ -105,20 +185,27 @@ export const AgentDependencyGraph = () => {
           animated: dep.is_required,
           style: { 
             stroke: dep.is_required ? '#ef4444' : '#64748b',
-            strokeWidth: dep.is_required ? 2 : 1,
+            strokeWidth: dep.is_required ? 3 : 2,
           },
           markerEnd: {
             type: MarkerType.ArrowClosed,
             color: dep.is_required ? '#ef4444' : '#64748b',
           },
-          label: dep.relationship_type,
-          labelStyle: { fontSize: 10, fontWeight: 'bold' },
+          label: dep.is_required ? 'Required' : 'Optional',
+          labelStyle: { 
+            fontSize: 11, 
+            fontWeight: 'bold',
+            fill: dep.is_required ? '#ef4444' : '#64748b'
+          },
         });
       });
     });
 
-    return { nodes, edges };
-  }, [agentsWithRelationships, selectedAgent]);
+    console.log('Generated edges:', edges.length);
+    console.log('Generated nodes:', nodes.length);
+
+    return getLayoutedElements(nodes, edges, layoutType);
+  }, [agentsWithRelationships, selectedAgent, layoutType]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -218,7 +305,38 @@ export const AgentDependencyGraph = () => {
       {/* Dependency Graph */}
       <Card>
         <CardHeader>
-          <CardTitle>Dependency Graph</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Dependency Graph</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLayoutType('hierarchical')}
+                className={layoutType === 'hierarchical' ? 'bg-primary text-primary-foreground' : ''}
+              >
+                <GitBranch className="w-4 h-4 mr-1" />
+                Hierarchical
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLayoutType('force')}
+                className={layoutType === 'force' ? 'bg-primary text-primary-foreground' : ''}
+              >
+                <RotateCcw className="w-4 h-4 mr-1" />
+                Force
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLayoutType('grid')}
+                className={layoutType === 'grid' ? 'bg-primary text-primary-foreground' : ''}
+              >
+                <Grid className="w-4 h-4 mr-1" />
+                Grid
+              </Button>
+            </div>
+          </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="w-4 h-0.5 bg-red-500"></div>
@@ -228,10 +346,13 @@ export const AgentDependencyGraph = () => {
               <div className="w-4 h-0.5 bg-gray-500"></div>
               <span>Optional Dependencies</span>
             </div>
+            <div className="text-xs">
+              Edges: {initialEdges.length} | Nodes: {initialNodes.length}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-96 border rounded-lg bg-background">
+          <div className="h-[600px] border rounded-lg bg-background">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -242,10 +363,20 @@ export const AgentDependencyGraph = () => {
               nodeTypes={nodeTypes}
               connectionMode={ConnectionMode.Loose}
               fitView
+              fitViewOptions={{
+                padding: 0.1,
+                minZoom: 0.1,
+                maxZoom: 1.5,
+              }}
               attributionPosition="top-right"
+              defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
             >
               <Controls />
-              <Background />
+              <Background 
+                gap={20}
+                size={1}
+                color="hsl(var(--muted))"
+              />
             </ReactFlow>
           </div>
         </CardContent>
