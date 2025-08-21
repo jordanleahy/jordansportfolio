@@ -835,7 +835,7 @@ export default function StoriesDashboard() {
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/80 z-[1]" />
             <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-8 py-12 text-center w-[95vw] md:w-[700px] mx-auto bg-background/20 backdrop-blur-md border border-white/20 shadow-2xl rounded-full">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Instant Infographics</h1>
-              <p className="text-base md:text-xl text-foreground font-semibold">Every Thought is a Visual Journey</p>
+              <p className="text-base md:text-xl text-foreground font-semibold">Prompt Your Visualization</p>
               <div className="w-full text-center">
                 <TypewriterInput 
                   aria-label="Describe your theme" 
