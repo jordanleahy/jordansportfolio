@@ -57,6 +57,7 @@ import { AdminLayout } from "./components/layouts/AdminLayout";
 // Lazy load use case components
 const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
 const UseCaseForm = lazy(() => import("./pages/admin/UseCaseForm"));
+const UseCasePreview = lazy(() => import("./pages/admin/UseCasePreview"));
 
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
@@ -246,6 +247,18 @@ function App() {
                       <AdminLayout>
                         <Suspense fallback={<div>Loading...</div>}>
                           <UseCaseForm />
+                        </Suspense>
+                      </AdminLayout>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/use-cases/:id/preview" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <UseCasePreview />
                         </Suspense>
                       </AdminLayout>
                     </AdminRoute>
