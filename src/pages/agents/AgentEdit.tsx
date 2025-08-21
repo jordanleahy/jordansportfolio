@@ -28,7 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Settings, Zap, Shield, Code, Copy, BarChart3, Lock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useOpenAIAgent, useUpdateAgent, useDeleteAgent, useCreateAgent } from '@/hooks/useOpenAIAgents';
 import { AgentStatus, CreateAgentData } from '@/types/openaiAgent';
@@ -36,6 +36,7 @@ import { AgentDeleteModal } from '@/components/agents/AgentDeleteModal';
 import { SystemPromptsTab } from '@/components/agents/SystemPromptsTab';
 import { useModelOptionsForForm } from '@/hooks/useAgentModelOptions';
 import { useCategoryOptions } from '@/hooks/useAgentCategories';
+import { AGENT_NAMES } from '@/constants/agentConstants';
 import { toast } from 'sonner';
 
 const agentSchema = z.object({
@@ -322,15 +323,30 @@ export const AgentEdit = () => {
                     <FormField
                       control={form.control}
                       name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Agent Name *</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const isSystemPromptGenerator = agent?.name === AGENT_NAMES.SYSTEM_PROMPT_GENERATOR;
+                        return (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              Agent Name *
+                              {isSystemPromptGenerator && <Lock className="h-4 w-4 text-muted-foreground" />}
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                disabled={isSystemPromptGenerator}
+                                className={isSystemPromptGenerator ? "bg-muted text-muted-foreground" : ""}
+                              />
+                            </FormControl>
+                            {isSystemPromptGenerator && (
+                              <FormDescription>
+                                This system agent name cannot be changed as it's referenced throughout the application.
+                              </FormDescription>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
                     <FormField
                       control={form.control}
