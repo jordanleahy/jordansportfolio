@@ -65,7 +65,7 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                       )}
                     </div>
                     {step.image && (
-                      <div className="mb-4 md:mb-0 md:w-80 md:flex-shrink-0 md:order-2">
+                      <div className="md:w-80 md:flex-shrink-0 md:order-2">
                         <img 
                           src={step.image}
                           alt={`${step.title} illustration`}
