@@ -21,21 +21,15 @@ export const processData = {
       images: [
         {
           src: "/lovable-uploads/501c3cff-f1e5-4d47-8fa5-671c09117479.png",
-          alt: "Medical chart data and sepsis indicators",
-          caption: "Real patient chart data showing sepsis indicators and clinical measurements",
-          title: "User Interviews"
+          alt: "Medical chart data and sepsis indicators"
         },
         {
           src: "/lovable-uploads/91deabc2-53c5-49b2-b4a0-c44a0d9b11fb.png",
-          alt: "Interview notes and insights",
-          caption: "Key insights from CDI specialist interviews",
-          title: "Sailboat Workshop"
+          alt: "Interview notes and insights"
         },
         {
           src: "/lovable-uploads/d4638b48-af10-4652-8131-380efea63079.png",
-          alt: "Sepsis diagnosis denial statistics",
-          caption: "Industry data showing sepsis as top denied diagnosis affecting CDI workflows",
-          title: "Industry Problem"
+          alt: "Sepsis diagnosis denial statistics"
         }
       ]
     },
@@ -52,15 +46,11 @@ export const processData = {
       images: [
         {
           src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
-          alt: "Dashboard wireframes",
-          caption: "Initial dashboard concepts and wireframes",
-          title: "Dashboard Concepts"
+          alt: "Dashboard wireframes"
         },
         {
           src: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
-          alt: "Workshop documentation",
-          caption: "Sepsis workshop findings and ideation results",
-          title: "Workshop Findings"
+          alt: "Workshop documentation"
         }
       ]
     },
