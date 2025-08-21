@@ -24,7 +24,7 @@ export const ReflectionSection = ({ title, reflections }: ReflectionSectionProps
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {reflections.map((reflection, index) => {
             const iconKey = reflection.type === 'success' ? 'CheckCircle' : 
-                           reflection.type === 'challenge' ? 'AlertTriangle' : 'Lightbulb';
+                           reflection.type === 'challenge' ? 'AlertCircle' : 'Lightbulb';
             const IconComponent = iconMap[iconKey as keyof typeof iconMap];
             
             const gradientClass = reflection.type === 'success' ? 'from-green-500/10 to-emerald-500/10' :
