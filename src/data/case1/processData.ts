@@ -42,6 +42,12 @@ export const processData = {
           alt: "Sepsis triggers configuration interface",
           caption: "Configuration interface showing sepsis trigger rules and logic parameters",
           title: "Sepsis Triggers & Logic"
+        },
+        {
+          src: "/lovable-uploads/8c08e2a1-d493-459e-b384-868e5ccdfd67.png",
+          alt: "Current SmarterDx sepsis review interface",
+          caption: "The existing SmarterDx interface showing sepsis diagnosis review workflow with clinical indicators",
+          title: "Current UX"
         }
       ]
     },
