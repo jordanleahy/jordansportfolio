@@ -223,6 +223,11 @@ export const ImageThumbnails: React.FC<ImageThumbnailsProps> = ({
   return (
     <>
       <div className={cn("relative w-full", className)}>
+        {/* Title */}
+        <h4 className="text-sm font-medium text-muted-foreground mb-3">
+          Sepsis Rule Based Triggers
+        </h4>
+
         {/* Left Arrow */}
         {showLeftArrow && (
           <Button
