@@ -43,7 +43,7 @@ export default function AdminUseCases() {
   const handleFilterChange = (key: keyof UseCaseFilters, value: string | undefined) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value || undefined
+      [key]: value === 'all' || !value ? undefined : value
     }));
   };
 
@@ -132,12 +132,12 @@ export default function AdminUseCases() {
           </div>
           
           <div className="flex gap-2">
-            <Select value={filters.category || ''} onValueChange={(value) => handleFilterChange('category', value)}>
+            <Select value={filters.category || 'all'} onValueChange={(value) => handleFilterChange('category', value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map(category => (
                   <SelectItem key={category} value={category}>
                     {category}
@@ -146,12 +146,12 @@ export default function AdminUseCases() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.industry || ''} onValueChange={(value) => handleFilterChange('industry', value)}>
+            <Select value={filters.industry || 'all'} onValueChange={(value) => handleFilterChange('industry', value)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Industries</SelectItem>
+                <SelectItem value="all">All Industries</SelectItem>
                 {industries.map(industry => (
                   <SelectItem key={industry} value={industry}>
                     {industry}
@@ -160,12 +160,12 @@ export default function AdminUseCases() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.status || ''} onValueChange={(value) => handleFilterChange('status', value as UseCaseStatus)}>
+            <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value as UseCaseStatus)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>

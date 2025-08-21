@@ -38,8 +38,8 @@ const useCaseSchema = z.object({
   complexity: z.enum(['simple', 'medium', 'complex']).default('medium'),
   target_audience: z.string().optional(),
   business_value: z.string().optional(),
-  technical_requirements: z.array(z.string()).default([]),
-  tags: z.array(z.string()).default([]),
+  technical_requirements: z.array(z.object({ value: z.string() })).default([]),
+  tags: z.array(z.object({ value: z.string() })).default([]),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   featured: z.boolean().default(false),
   sort_order: z.number().default(0),
@@ -67,20 +67,20 @@ export default function UseCaseForm() {
       complexity: 'medium',
       target_audience: '',
       business_value: '',
-      technical_requirements: [] as string[],
-      tags: [] as string[],
+      technical_requirements: [],
+      tags: [],
       status: 'draft',
       featured: false,
       sort_order: 0,
     },
   });
 
-  const { fields: techReqFields, append: appendTechReq, remove: removeTechReq } = useFieldArray({
+  const { fields: techReqFields, append: appendTechReq, remove: removeTechReq } = useFieldArray<UseCaseFormData>({
     control: form.control,
     name: 'technical_requirements',
   });
 
-  const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
+  const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray<UseCaseFormData>({
     control: form.control,
     name: 'tags',
   });
@@ -95,8 +95,8 @@ export default function UseCaseForm() {
         complexity: useCase.complexity,
         target_audience: useCase.target_audience || '',
         business_value: useCase.business_value || '',
-        technical_requirements: useCase.technical_requirements || [],
-        tags: useCase.tags || [],
+        technical_requirements: useCase.technical_requirements?.map(req => ({ value: req })) || [],
+        tags: useCase.tags?.map(tag => ({ value: tag })) || [],
         status: useCase.status,
         featured: useCase.featured,
         sort_order: useCase.sort_order,
@@ -106,11 +106,18 @@ export default function UseCaseForm() {
 
   const onSubmit = async (data: UseCaseFormData) => {
     try {
+      // Transform the data to match the expected format
+      const transformedData = {
+        ...data,
+        technical_requirements: data.technical_requirements.map(req => req.value),
+        tags: data.tags.map(tag => tag.value),
+      };
+
       if (isEdit && id) {
-        await update.mutateAsync({ id, ...data } as UpdateUseCase);
+        await update.mutateAsync({ id, ...transformedData } as UpdateUseCase);
         toast.success('Use case updated successfully');
       } else {
-        await create.mutateAsync(data as CreateUseCase);
+        await create.mutateAsync(transformedData as CreateUseCase);
         toast.success('Use case created successfully');
       }
       navigate('/admin/use-cases');
@@ -311,7 +318,7 @@ export default function UseCaseForm() {
                         <div key={field.id} className="flex gap-2">
                           <Input
                             placeholder="Enter requirement..."
-                            {...form.register(`technical_requirements.${index}`)}
+                            {...form.register(`technical_requirements.${index}.value` as const)}
                           />
                           <Button
                             type="button"
@@ -326,7 +333,7 @@ export default function UseCaseForm() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => appendTechReq('')}
+                        onClick={() => appendTechReq({ value: '' })}
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         Add Requirement
@@ -341,7 +348,7 @@ export default function UseCaseForm() {
                         <div key={field.id} className="flex gap-2">
                           <Input
                             placeholder="Enter tag..."
-                            {...form.register(`tags.${index}`)}
+                            {...form.register(`tags.${index}.value` as const)}
                           />
                           <Button
                             type="button"
@@ -356,7 +363,7 @@ export default function UseCaseForm() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => appendTag('')}
+                        onClick={() => appendTag({ value: '' })}
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         Add Tag
