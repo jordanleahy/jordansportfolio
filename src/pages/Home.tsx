@@ -1,11 +1,11 @@
-import { PageLayout } from "@/components/layout/PageLayout";
+import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Home = () => {
   const { user } = useAuth();
 
   return (
-    <PageLayout>
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-foreground mb-6">
@@ -21,7 +21,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </AppLayout>
   );
 };
 

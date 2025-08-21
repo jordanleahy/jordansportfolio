@@ -14,7 +14,7 @@ import { BlogPost, BlogPostInput, VisualSectionInput } from "@/types/blog";
 import { useToast } from "@/hooks/use-toast";
 import { useBlogPost, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost } from "@/hooks/useBlogQueries";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { PageLayout } from '@/components/layout/PageLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { BlogVisualPrompt } from "@/components/blog/BlogVisualPrompt";
 import { useSocialMediaPost } from "@/hooks/useSocialMediaPost";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
@@ -369,7 +369,7 @@ const BlogEditor = () => {
   }
 
   return (
-    <PageLayout>
+    <AppLayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Status and Actions */}
         <div className="mb-6 p-4 border rounded-lg bg-card">
@@ -1027,7 +1027,7 @@ const BlogEditor = () => {
           />
         )}
       </div>
-    </PageLayout>
+    </AppLayout>
   );
 };
 
