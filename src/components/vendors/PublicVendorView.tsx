@@ -1,7 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ExternalLink, Building, Calendar, DollarSign, Users, Target, Sparkles, Lightbulb, Home } from 'lucide-react';
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,11 +38,11 @@ export default function PublicVendorView() {
   };
 
   if (isLoading) {
-    return <AppLayout>
+    return <PageLayout>
         <div className="container mx-auto py-8 px-4">
           <div className="text-center">Loading vendor details...</div>
         </div>
-      </AppLayout>;
+      </PageLayout>;
   }
 
   if (error || !vendor || vendor.status !== 'published') {
@@ -109,7 +109,7 @@ export default function PublicVendorView() {
         <meta name="twitter:image" content="https://jordanleahy.com/og-default.png" />
       </Helmet>
 
-      <AppLayout>
+      <PageLayout>
         <div className="container mx-auto py-8 px-4 space-y-8">
           {/* Breadcrumb Navigation */}
           <Breadcrumb>
@@ -309,6 +309,6 @@ export default function PublicVendorView() {
           </div>
 
         </div>
-      </AppLayout>
+      </PageLayout>
     </>;
 }

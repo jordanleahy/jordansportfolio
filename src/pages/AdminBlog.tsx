@@ -11,7 +11,7 @@ import { useAdminAllBlogPosts, useAdminDraftBlogPosts, useDeleteBlogPost } from 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -331,7 +331,7 @@ const AdminBlog = () => {
   };
 
   return (
-    <AppLayout>
+    <PageLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header with Add Button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -411,7 +411,7 @@ const AdminBlog = () => {
             contentType="blog_post"
           />
         )}
-    </AppLayout>
+    </PageLayout>
   );
 };
 

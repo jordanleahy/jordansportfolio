@@ -1,5 +1,5 @@
 import { EnhancedAgentsTable } from '@/components/agents/EnhancedAgentsTable';
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -32,7 +32,7 @@ const Agents = () => {
   };
 
   return (
-    <AppLayout>
+    <PageLayout>
       <div className="container mx-auto px-4 pt-6 space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -41,13 +41,13 @@ const Agents = () => {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleGenerateTodayReport} disabled={generating}>
-              {generating ? 'Generating…' : 'Generate Today\'s Work Report'}
+              {generating ? 'Generating…' : 'Generate Today’s Work Report'}
             </Button>
           </div>
         </div>
         <EnhancedAgentsTable />
       </div>
-    </AppLayout>
+    </PageLayout>
   );
 };
 

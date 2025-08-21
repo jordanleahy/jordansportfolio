@@ -1,10 +1,10 @@
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Helmet } from 'react-helmet-async';
 
 export default function ChartTypeCoverageCost() {
   return (
-    <AppLayout>
+    <PageLayout>
       <Helmet>
         <title>Chart Type Coverage, Automation & Cost Analysis</title>
         <meta 
@@ -483,6 +483,6 @@ export default function ChartTypeCoverageCost() {
           </Card>
         </div>
       </div>
-    </AppLayout>
+    </PageLayout>
   );
 }

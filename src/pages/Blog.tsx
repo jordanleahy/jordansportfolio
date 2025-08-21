@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { usePublishedBlogPosts, usePrefetchBlogPost } from "@/hooks/useBlogQueries";
 import { useUserRole } from "@/hooks/useUserRole";
 import type { BlogPost } from "@/types/blog";
-import AppLayout from "@/components/layout/AppLayout";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 
@@ -42,20 +42,20 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <AppLayout>
+      <PageLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
             <p className="mt-4 text-muted-foreground">Loading blog posts...</p>
           </div>
         </div>
-      </AppLayout>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <PageLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center space-y-4 max-w-md mx-auto px-4">
             <FileText className="h-12 w-12 text-destructive mx-auto" />
@@ -68,14 +68,14 @@ const Blog = () => {
             </Button>
           </div>
         </div>
-      </AppLayout>
+      </PageLayout>
     );
   }
 
   // Empty state when no published blogs exist
   if (blogPosts.length === 0) {
     return (
-      <AppLayout>
+      <PageLayout>
         {/* Hero Section */}
         <section className="py-16 px-4 pt-24">
           <div className="max-w-4xl mx-auto">
@@ -134,7 +134,7 @@ const Blog = () => {
             </div>
           </div>
         </section>
-      </AppLayout>
+      </PageLayout>
     );
   }
 
@@ -154,7 +154,7 @@ const Blog = () => {
         <meta name="twitter:description" content={blogSEO.ogDescription} />
         <meta name="twitter:image" content={blogSEO.image} />
       </Helmet>
-      <AppLayout>
+      <PageLayout>
 
       {/* Featured Post */}
       {featuredPost && (
@@ -329,7 +329,7 @@ const Blog = () => {
           </div>
         </div>
       </section>
-      </AppLayout>
+      </PageLayout>
     </>
   );
 };

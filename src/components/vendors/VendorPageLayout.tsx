@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export const VendorPageLayout: React.FC<VendorPageLayoutProps> = ({
   className = "container mx-auto py-8 px-4"
 }) => {
   return (
-    <AppLayout showNavigation={showNavigation}>
+    <PageLayout showNavigation={showNavigation}>
       <div className={className}>
         {title && (
           <div className="space-y-2 mb-6">
@@ -53,6 +53,6 @@ export const VendorPageLayout: React.FC<VendorPageLayoutProps> = ({
           children
         )}
       </div>
-    </AppLayout>
+    </PageLayout>
   );
 };

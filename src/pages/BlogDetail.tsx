@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AppLayout from '@/components/layout/AppLayout';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { Badge } from "@/components/ui/badge";
 
 // Lazy load heavy BlogTemplate component
@@ -33,7 +33,7 @@ const BlogDetail = () => {
 
   if (loading) {
     return (
-      <AppLayout>
+      <PageLayout>
         <div className="max-w-6xl mx-auto px-4 py-8">
           <Card className="p-8">
             <div className="space-y-6">
@@ -46,13 +46,13 @@ const BlogDetail = () => {
             </div>
           </Card>
         </div>
-      </AppLayout>
+      </PageLayout>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <PageLayout>
         <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-4 max-w-md mx-auto px-4">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
@@ -68,7 +68,7 @@ const BlogDetail = () => {
           </div>
         </div>
         </div>
-      </AppLayout>
+      </PageLayout>
     );
   }
 
@@ -77,7 +77,7 @@ const BlogDetail = () => {
   }
 
   return (
-    <AppLayout>
+    <PageLayout>
       {isPreview && (
         <div className="bg-orange-100 dark:bg-orange-950 border-b border-orange-200 dark:border-orange-800 py-3">
           <div className="max-w-6xl mx-auto px-4 flex items-center gap-2 text-orange-800 dark:text-orange-200">
@@ -99,7 +99,7 @@ const BlogDetail = () => {
         }>
           <BlogTemplate post={post} />
         </Suspense>
-    </AppLayout>
+    </PageLayout>
   );
 };
 
