@@ -11,6 +11,8 @@ import {
   Connection,
   ConnectionMode,
   MarkerType,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,37 +43,63 @@ const AgentNode = ({ data }: { data: any }) => {
   };
 
   return (
-    <Card className="w-64 border-2 bg-card">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
-          {getDependencyStatusIcon()}
-        </div>
-        <CardTitle className="text-sm font-medium truncate">{agent.name}</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-          {agent.purpose}
-        </p>
-        <div className="flex flex-wrap gap-1 mb-2">
-          {agent.tags?.slice(0, 2).map((tag: string, idx: number) => (
-            <Badge key={idx} variant="secondary" className="text-xs px-1 py-0">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-        {agent.dependencies?.length > 0 && (
-          <div className="text-xs text-muted-foreground">
-            Depends on: {agent.dependencies.length} agent{agent.dependencies.length !== 1 ? 's' : ''}
+    <div className="relative">
+      {/* Input handles on the left */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ 
+          background: 'hsl(var(--primary))', 
+          width: 8, 
+          height: 8,
+          border: '2px solid hsl(var(--background))'
+        }}
+      />
+      
+      {/* Output handles on the right */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ 
+          background: 'hsl(var(--primary))', 
+          width: 8, 
+          height: 8,
+          border: '2px solid hsl(var(--background))'
+        }}
+      />
+
+      <Card className="w-64 border-2 bg-card">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
+            {getDependencyStatusIcon()}
           </div>
-        )}
-        {agent.blocked_by?.length > 0 && (
-          <div className="text-xs text-red-600 font-medium">
-            Blocked by: {agent.blocked_by.join(', ')}
+          <CardTitle className="text-sm font-medium truncate">{agent.name}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+            {agent.purpose}
+          </p>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {agent.tags?.slice(0, 2).map((tag: string, idx: number) => (
+              <Badge key={idx} variant="secondary" className="text-xs px-1 py-0">
+                {tag}
+              </Badge>
+            ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+          {agent.dependencies?.length > 0 && (
+            <div className="text-xs text-muted-foreground">
+              Depends on: {agent.dependencies.length} agent{agent.dependencies.length !== 1 ? 's' : ''}
+            </div>
+          )}
+          {agent.blocked_by?.length > 0 && (
+            <div className="text-xs text-red-600 font-medium">
+              Blocked by: {agent.blocked_by.join(', ')}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
