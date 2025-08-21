@@ -106,7 +106,16 @@ export function VendorsTableView({
                 <TableRow 
                   key={vendor.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onVendorClick?.(vendor)}
+                  onClick={() => {
+                    console.log('🔥 [VendorsTableView] Row clicked:', {
+                      vendorId: vendor.id,
+                      vendorName: vendor.company_name,
+                      vendorSlug: vendor.slug,
+                      onVendorClickExists: !!onVendorClick,
+                      timestamp: new Date().toISOString()
+                    });
+                    onVendorClick?.(vendor);
+                  }}
                 >
                   <TableCell>
                     <div>

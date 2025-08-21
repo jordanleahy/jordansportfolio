@@ -62,12 +62,41 @@ export function VendorsCardGrid({
   }, [sortField, sortDirection]);
   
   const handleVendorClick = useCallback((vendor: Vendor) => {
+    console.log('🚀 [VendorsCardGrid] handleVendorClick called:', {
+      vendorId: vendor.id,
+      vendorName: vendor.company_name,
+      vendorSlug: vendor.slug,
+      slugname,
+      currentUrl: window.location.href,
+      timestamp: new Date().toISOString()
+    });
+
     if (slugname) {
-      console.log('Navigating to vendor:', vendor.company_name, 'with slug:', vendor.slug, 'category:', slugname);
       const vendorDetailUrl = `/admin/vendors/${slugname}/${vendor.slug}`;
-      navigate(vendorDetailUrl);
+      console.log('🎯 [VendorsCardGrid] Navigating with slugname:', {
+        from: window.location.href,
+        to: vendorDetailUrl,
+        slugname,
+        vendorSlug: vendor.slug,
+        navigateFunction: !!navigate
+      });
+      
+      try {
+        navigate(vendorDetailUrl);
+        console.log('✅ [VendorsCardGrid] Navigation triggered successfully');
+      } catch (error) {
+        console.error('❌ [VendorsCardGrid] Navigation failed:', error);
+      }
     } else if (onVendorClick) {
+      console.log('🔄 [VendorsCardGrid] Using onVendorClick callback:', {
+        onVendorClickExists: !!onVendorClick
+      });
       onVendorClick(vendor);
+    } else {
+      console.warn('⚠️ [VendorsCardGrid] No navigation method available:', {
+        slugname,
+        onVendorClickExists: !!onVendorClick
+      });
     }
   }, [slugname, navigate, onVendorClick]);
   
