@@ -169,7 +169,7 @@ export const ImageThumbnails: React.FC<ImageThumbnailsProps> = ({
           <button
             key={index}
             onClick={() => openLightbox(index)}
-            className="relative w-32 h-32 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105"
+            className="relative w-32 h-24 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105"
           >
             <img
               src={image.src}
