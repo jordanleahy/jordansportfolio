@@ -62,11 +62,11 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                         <div className="mt-4">
                           <MediaThumbnails media={step.media} />
                         </div>
-                      ) : step.images && step.images.length > 0 && (
+                      ) : step.images && step.images.length > 0 ? (
                         <div className="mt-4">
                           <ImageThumbnails images={step.images} />
                         </div>
-                      )}
+                      ) : null}
                     </div>
                     {step.image && (
                       <div className="mb-4 md:mb-0 md:w-80 md:flex-shrink-0 md:order-2">
