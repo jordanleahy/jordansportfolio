@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { ProcessStep } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
+import { ImageThumbnails } from "@/components/ui/lightbox";
 
 interface ProcessSectionProps {
   title: string;
@@ -56,6 +57,11 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                           "{step.quote.text}"
                           <footer className="text-sm mt-1">— {step.quote.author}</footer>
                         </blockquote>
+                      )}
+                      {step.images && step.images.length > 0 && (
+                        <div className="mt-4">
+                          <ImageThumbnails images={step.images} />
+                        </div>
                       )}
                     </div>
                     {step.image && (

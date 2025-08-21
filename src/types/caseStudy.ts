@@ -8,6 +8,11 @@ export interface ProcessStep {
     author: string;
   };
   image?: string;
+  images?: Array<{
+    src: string;
+    alt: string;
+    caption?: string;
+  }>;
 }
 
 export interface Challenge {
@@ -20,6 +25,11 @@ export interface Feature {
   icon: string;
   title: string;
   description: string;
+  images?: Array<{
+    src: string;
+    alt: string;
+    caption?: string;
+  }>;
 }
 
 export interface TeamMember {
@@ -27,6 +37,11 @@ export interface TeamMember {
   title: string;
   description: string;
   items: string[];
+  images?: Array<{
+    src: string;
+    alt: string;
+    caption?: string;
+  }>;
 }
 
 export interface Reflection {

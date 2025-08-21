@@ -17,7 +17,19 @@ export const processData = {
         text: "Every minute matters for CDI teams during inpatient stays. We need tools that help us validate diagnoses with confidence and speed.",
         author: "Internal CDS, Inpatient Documentation Team"
       },
-      image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png"
+      image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
+      images: [
+        {
+          src: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
+          alt: "Clinical research workflow diagram",
+          caption: "Clinical research and discovery workflow mapping"
+        },
+        {
+          src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
+          alt: "Interview notes and insights",
+          caption: "Key insights from CDI specialist interviews"
+        }
+      ]
     },
     {
       icon: "Lightbulb",
@@ -28,7 +40,19 @@ export const processData = {
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
       ],
-      image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png"
+      image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
+      images: [
+        {
+          src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
+          alt: "Dashboard wireframes",
+          caption: "Initial dashboard concepts and wireframes"
+        },
+        {
+          src: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
+          alt: "Workshop documentation",
+          caption: "Sepsis workshop findings and ideation results"
+        }
+      ]
     },
     {
       icon: "Target",

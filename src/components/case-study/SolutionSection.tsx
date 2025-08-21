@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Feature } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
+import { ImageThumbnails } from "@/components/ui/lightbox";
 
 interface SolutionSectionProps {
   title: string;
@@ -41,6 +42,11 @@ export const SolutionSection = ({ title, features }: SolutionSectionProps) => {
                     <div>
                       <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
                       <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                      {feature.images && feature.images.length > 0 && (
+                        <div className="mt-4">
+                          <ImageThumbnails images={feature.images} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>

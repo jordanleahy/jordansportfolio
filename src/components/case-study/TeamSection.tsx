@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { TeamMember } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
+import { ImageThumbnails } from "@/components/ui/lightbox";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -47,6 +48,11 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                           </li>
                         ))}
                       </ul>
+                      {member.images && member.images.length > 0 && (
+                        <div className="mt-4">
+                          <ImageThumbnails images={member.images} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>
