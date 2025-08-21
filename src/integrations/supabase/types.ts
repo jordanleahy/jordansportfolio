@@ -2621,6 +2621,66 @@ export type Database = {
           },
         ]
       }
+      use_cases: {
+        Row: {
+          business_value: string | null
+          category: string | null
+          complexity: Database["public"]["Enums"]["use_case_complexity"] | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          featured: boolean | null
+          id: string
+          industry: string | null
+          sort_order: number | null
+          status: Database["public"]["Enums"]["use_case_status"] | null
+          tags: string[] | null
+          target_audience: string | null
+          technical_requirements: string[] | null
+          title: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          business_value?: string | null
+          category?: string | null
+          complexity?: Database["public"]["Enums"]["use_case_complexity"] | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          featured?: boolean | null
+          id?: string
+          industry?: string | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["use_case_status"] | null
+          tags?: string[] | null
+          target_audience?: string | null
+          technical_requirements?: string[] | null
+          title: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          business_value?: string | null
+          category?: string | null
+          complexity?: Database["public"]["Enums"]["use_case_complexity"] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          featured?: boolean | null
+          id?: string
+          industry?: string | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["use_case_status"] | null
+          tags?: string[] | null
+          target_audience?: string | null
+          technical_requirements?: string[] | null
+          title?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3346,6 +3406,8 @@ export type Database = {
       detection_method: "manual" | "voice_pattern" | "hybrid"
       event_status: "upcoming" | "in-progress" | "completed" | "cancelled"
       post_status: "draft" | "scheduled" | "published" | "deleted"
+      use_case_complexity: "simple" | "medium" | "complex"
+      use_case_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3478,6 +3540,8 @@ export const Constants = {
       detection_method: ["manual", "voice_pattern", "hybrid"],
       event_status: ["upcoming", "in-progress", "completed", "cancelled"],
       post_status: ["draft", "scheduled", "published", "deleted"],
+      use_case_complexity: ["simple", "medium", "complex"],
+      use_case_status: ["draft", "published", "archived"],
     },
   },
 } as const
