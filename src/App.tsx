@@ -53,6 +53,10 @@ import Investors from "./pages/Investors";
 import { AdminComparisons } from "./pages/admin/AdminComparisons";
 import { ComparisonForm } from "./pages/admin/ComparisonForm";
 
+// Lazy load use case components
+const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
+const UseCaseForm = lazy(() => import("./pages/admin/UseCaseForm"));
+
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
 const SubscriptionAnalytics = lazy(() => import("./pages/admin/SubscriptionAnalytics"));
@@ -207,6 +211,38 @@ function App() {
                 <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
                 <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                
+                {/* Use Cases Admin Routes */}
+                <Route 
+                  path="/admin/use-cases" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <AdminUseCases />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/use-cases/new" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <UseCaseForm />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/use-cases/:id/edit" 
+                  element={
+                    <AdminRoute>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <UseCaseForm />
+                      </Suspense>
+                    </AdminRoute>
+                  } 
+                />
                 <Route 
                   path="/admin/api-usage" 
                   element={
