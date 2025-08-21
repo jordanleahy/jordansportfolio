@@ -9,7 +9,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import ContactSection from "@/components/ContactSection";
 import RecentBlogsSection from "@/components/RecentBlogsSection";
-import { PublicCollectionsSection } from "@/components/PublicCollectionsSection";
+
 
 
 // Lazy load heavy HeroParallax component
@@ -79,7 +79,6 @@ const Index = () => {
       <ProjectCardsSection />
       <TestimonialsSection />
       <ContactSection />
-      <PublicCollectionsSection />
     </AppLayout>
   );
 };
