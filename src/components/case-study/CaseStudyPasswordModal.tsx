@@ -53,7 +53,7 @@ export const CaseStudyPasswordModal: React.FC<CaseStudyPasswordModalProps> = ({
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
             <Lock className="w-6 h-6 text-primary" />
           </div>
-          <DialogTitle className="text-2xl">Problem Statement to Production Assets</DialogTitle>
+          <DialogTitle className="text-2xl text-center">Problem Statement to Figma Production Assets</DialogTitle>
           
         </DialogHeader>
         
