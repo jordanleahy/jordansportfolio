@@ -47,7 +47,7 @@ export const processData = {
           src: "/lovable-uploads/8c08e2a1-d493-459e-b384-868e5ccdfd67.png",
           alt: "Current SmarterDx sepsis review interface",
           caption: "The existing SmarterDx interface showing sepsis diagnosis review workflow with clinical indicators",
-          title: "Current UX"
+          title: "Legacy UX"
         }
       ]
     },
