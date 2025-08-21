@@ -52,7 +52,6 @@ import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
 import { AdminComparisons } from "./pages/admin/AdminComparisons";
 import { ComparisonForm } from "./pages/admin/ComparisonForm";
-import { AdminLayout } from "./components/layouts/AdminLayout";
 
 // Lazy load use case components
 const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
@@ -213,17 +212,15 @@ function App() {
                 <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 
-                {/* Use Cases Admin Routes */}
+                 {/* Use Cases Admin Routes */}
                 <Route path="/admin/case-studies" element={<Navigate to="/admin/use-cases" replace />} />
                 <Route 
                   path="/admin/use-cases" 
                   element={
                     <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <AdminUseCases />
-                        </Suspense>
-                      </AdminLayout>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <AdminUseCases />
+                      </Suspense>
                     </AdminRoute>
                   } 
                 />
@@ -231,11 +228,9 @@ function App() {
                   path="/admin/use-cases/new" 
                   element={
                     <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <UseCaseForm />
-                        </Suspense>
-                      </AdminLayout>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <UseCaseForm />
+                      </Suspense>
                     </AdminRoute>
                   } 
                 />
@@ -243,11 +238,9 @@ function App() {
                   path="/admin/use-cases/:id/edit" 
                   element={
                     <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <UseCaseForm />
-                        </Suspense>
-                      </AdminLayout>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <UseCaseForm />
+                      </Suspense>
                     </AdminRoute>
                   } 
                 />
