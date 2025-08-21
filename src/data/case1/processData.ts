@@ -22,12 +22,14 @@ export const processData = {
         {
           src: "/lovable-uploads/a8ed26c0-7989-47c4-8296-498b7969c911.png",
           alt: "Medical chart data and sepsis indicators",
-          caption: "Real patient chart data showing sepsis indicators and clinical measurements"
+          caption: "Real patient chart data showing sepsis indicators and clinical measurements",
+          title: "Patient Chart Analysis"
         },
         {
           src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
           alt: "Interview notes and insights",
-          caption: "Key insights from CDI specialist interviews"
+          caption: "Key insights from CDI specialist interviews",
+          title: "CDI Interview Insights"
         }
       ]
     },
@@ -45,12 +47,14 @@ export const processData = {
         {
           src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
           alt: "Dashboard wireframes",
-          caption: "Initial dashboard concepts and wireframes"
+          caption: "Initial dashboard concepts and wireframes",
+          title: "Dashboard Concepts"
         },
         {
           src: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
           alt: "Workshop documentation",
-          caption: "Sepsis workshop findings and ideation results"
+          caption: "Sepsis workshop findings and ideation results",
+          title: "Workshop Findings"
         }
       ]
     },

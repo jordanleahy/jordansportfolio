@@ -8,6 +8,7 @@ interface Image {
   src: string;
   alt: string;
   caption?: string;
+  title?: string;
 }
 
 interface LightboxProps {
@@ -169,14 +170,19 @@ export const ImageThumbnails: React.FC<ImageThumbnailsProps> = ({
           <button
             key={index}
             onClick={() => openLightbox(index)}
-            className="relative w-32 h-24 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105"
+            className="relative w-32 h-24 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105 group"
           >
             <img
               src={image.src}
               alt={image.alt}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            {image.title && (
+              <div className="absolute bottom-1 left-1 right-1 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                {image.title}
+              </div>
+            )}
           </button>
         ))}
       </div>
