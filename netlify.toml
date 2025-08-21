@@ -119,11 +119,12 @@
   to = "/index.html"
   status = 200
 
-# Allow ACME challenges to pass through (for Let's Encrypt SSL)
+# Allow ACME challenges to return 404 naturally (for Let's Encrypt SSL)
 [[redirects]]
   from = "/.well-known/acme-challenge/*"
-  to = "/.well-known/acme-challenge/:splat"
-  status = 200
+  to = "/404.html"
+  status = 404
+  force = false
 
 # Main SPA redirect rules for other routes (catch-all)
 [[redirects]]
