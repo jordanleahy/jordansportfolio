@@ -41,7 +41,7 @@ export const processData = {
           src: "/lovable-uploads/4ec5e14a-89d2-4442-8d3b-4c6af58ade2b.png",
           alt: "Sepsis triggers configuration interface",
           caption: "Configuration interface showing sepsis trigger rules and logic parameters",
-          title: "Sepsis Triggers & Logic"
+          title: "Triggers & Logic"
         },
         {
           src: "/lovable-uploads/8c08e2a1-d493-459e-b384-868e5ccdfd67.png",
