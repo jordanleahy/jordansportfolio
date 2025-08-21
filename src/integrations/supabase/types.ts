@@ -2625,59 +2625,137 @@ export type Database = {
         Row: {
           business_value: string | null
           category: string | null
+          challenges: Json | null
           complexity: Database["public"]["Enums"]["use_case_complexity"] | null
           created_at: string | null
           created_by: string | null
+          cta_title: string | null
           description: string
           featured: boolean | null
+          features: Json | null
+          figma_presentation_enabled: boolean | null
+          figma_presentation_title: string | null
+          figma_presentation_url: string | null
+          final_product_description: string | null
+          hero_image: string | null
+          hero_image_alt: string | null
           id: string
           industry: string | null
+          outcomes_title: string | null
+          problem_description: string | null
+          problem_title: string | null
+          process_steps: Json | null
+          process_title: string | null
+          prototype_url: string | null
+          reflection_title: string | null
+          reflections: Json | null
+          role: string | null
+          role_details: string | null
+          slug: string | null
+          solution_title: string | null
           sort_order: number | null
           status: Database["public"]["Enums"]["use_case_status"] | null
           tags: string[] | null
           target_audience: string | null
+          team_members: Json | null
           technical_requirements: string[] | null
+          timeline_details: string | null
+          timeline_value: string | null
           title: string
           updated_at: string | null
           updated_by: string | null
+          user_feedback: Json | null
+          visual_artifacts: Json | null
         }
         Insert: {
           business_value?: string | null
           category?: string | null
+          challenges?: Json | null
           complexity?: Database["public"]["Enums"]["use_case_complexity"] | null
           created_at?: string | null
           created_by?: string | null
+          cta_title?: string | null
           description: string
           featured?: boolean | null
+          features?: Json | null
+          figma_presentation_enabled?: boolean | null
+          figma_presentation_title?: string | null
+          figma_presentation_url?: string | null
+          final_product_description?: string | null
+          hero_image?: string | null
+          hero_image_alt?: string | null
           id?: string
           industry?: string | null
+          outcomes_title?: string | null
+          problem_description?: string | null
+          problem_title?: string | null
+          process_steps?: Json | null
+          process_title?: string | null
+          prototype_url?: string | null
+          reflection_title?: string | null
+          reflections?: Json | null
+          role?: string | null
+          role_details?: string | null
+          slug?: string | null
+          solution_title?: string | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["use_case_status"] | null
           tags?: string[] | null
           target_audience?: string | null
+          team_members?: Json | null
           technical_requirements?: string[] | null
+          timeline_details?: string | null
+          timeline_value?: string | null
           title: string
           updated_at?: string | null
           updated_by?: string | null
+          user_feedback?: Json | null
+          visual_artifacts?: Json | null
         }
         Update: {
           business_value?: string | null
           category?: string | null
+          challenges?: Json | null
           complexity?: Database["public"]["Enums"]["use_case_complexity"] | null
           created_at?: string | null
           created_by?: string | null
+          cta_title?: string | null
           description?: string
           featured?: boolean | null
+          features?: Json | null
+          figma_presentation_enabled?: boolean | null
+          figma_presentation_title?: string | null
+          figma_presentation_url?: string | null
+          final_product_description?: string | null
+          hero_image?: string | null
+          hero_image_alt?: string | null
           id?: string
           industry?: string | null
+          outcomes_title?: string | null
+          problem_description?: string | null
+          problem_title?: string | null
+          process_steps?: Json | null
+          process_title?: string | null
+          prototype_url?: string | null
+          reflection_title?: string | null
+          reflections?: Json | null
+          role?: string | null
+          role_details?: string | null
+          slug?: string | null
+          solution_title?: string | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["use_case_status"] | null
           tags?: string[] | null
           target_audience?: string | null
+          team_members?: Json | null
           technical_requirements?: string[] | null
+          timeline_details?: string | null
+          timeline_value?: string | null
           title?: string
           updated_at?: string | null
           updated_by?: string | null
+          user_feedback?: Json | null
+          visual_artifacts?: Json | null
         }
         Relationships: []
       }
