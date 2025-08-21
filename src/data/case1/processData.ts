@@ -17,7 +17,7 @@ export const processData = {
         text: "Every minute matters for CDI teams during inpatient stays. We need tools that help us validate diagnoses with confidence and speed.",
         author: "Internal CDS, Inpatient Documentation Team"
       },
-      image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
+      image: "/lovable-uploads/5ac89588-71e2-42c1-b095-07ffc78b1d36.png",
       images: [
         {
           src: "/lovable-uploads/501c3cff-f1e5-4d47-8fa5-671c09117479.png",
