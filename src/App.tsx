@@ -334,6 +334,11 @@ function App() {
                 {/* Public Library of shared collections */}
                 <Route path="/library" element={<Library />} />
 
+                {/* Admin Vendors */}
+                <Route path="/admin/vendors" element={<AdminRoute><AdminLayout><VendorsIndex /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/vendors/:slugname" element={<AdminRoute><AdminLayout><Vendors /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/vendors/:slugname/:vendorSlug" element={<AdminRoute><AdminLayout><VendorDetail /></AdminLayout></AdminRoute>} />
+
                 {/* Admin Users */}
                 <Route 
                   path="/admin/users" 
