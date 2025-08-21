@@ -323,6 +323,8 @@ export default function CaseStudyForm() {
       // Remove form-specific fields that don't exist in database
       delete (transformedData as any).user_feedback_quote;
       delete (transformedData as any).user_feedback_author;
+      delete (transformedData as any).design_artifacts;
+      delete (transformedData as any).process_documentation;
 
       if (isEdit && id) {
         await update.mutateAsync({ id, ...transformedData } as UpdateUseCase);
