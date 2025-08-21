@@ -26,7 +26,7 @@ export const processData = {
           title: "User Interviews"
         },
         {
-          src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
+          src: "/lovable-uploads/91deabc2-53c5-49b2-b4a0-c44a0d9b11fb.png",
           alt: "Interview notes and insights",
           caption: "Key insights from CDI specialist interviews",
           title: "Sailboat Workshop"
