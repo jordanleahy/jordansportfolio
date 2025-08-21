@@ -30,13 +30,11 @@ export const FinalProductSection = ({ data }: FinalProductSectionProps) => {
         </div>
       </motion.div>
 
-      <div className="flex justify-center mt-8 overflow-x-auto">
-        <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm" style={{ width: "1440px", height: "1024px" }}>
+      <div className="max-w-7xl mx-auto mt-8 px-4">
+        <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm w-full" style={{ aspectRatio: "1440/1024" }}>
           <iframe
             src={data.prototypeUrl}
-            width="1440"
-            height="1024"
-            className="border-0"
+            className="w-full h-full border-0"
             style={{ 
               border: "1px solid rgba(0, 0, 0, 0.1)"
             }}
