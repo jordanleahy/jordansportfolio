@@ -67,50 +67,21 @@ export function VendorsCardGrid({
       vendorName: vendor.company_name,
       vendorSlug: vendor.slug,
       slugname,
-      companyType: vendor.company_type,
       currentUrl: window.location.href,
       timestamp: new Date().toISOString()
     });
 
-    if (slugname) {
-      // We're in a specific category context
-      const vendorDetailUrl = `/admin/vendors/${slugname}/${vendor.slug}`;
-      console.log('🎯 [VendorsCardGrid] Navigating with category context:', {
-        from: window.location.href,
-        to: vendorDetailUrl,
-        slugname,
-        vendorSlug: vendor.slug
-      });
-      
-      navigate(vendorDetailUrl);
-    } else {
-      // We're on the base vendors page, use a default category based on company type
-      const getDefaultCategory = (companyType: string): string => {
-        const type = companyType.toLowerCase();
-        if (type.includes('healthcare') || type.includes('medical')) return 'healthcare';
-        if (type.includes('financial') || type.includes('fintech')) return 'fintech';
-        if (type.includes('ai') || type.includes('artificial intelligence')) return 'ai';
-        if (type.includes('cybersecurity') || type.includes('security')) return 'cybersecurity';
-        if (type.includes('education') || type.includes('edtech')) return 'edtech';
-        if (type.includes('hr') || type.includes('human resources')) return 'hrtech';
-        if (type.includes('saas') || type.includes('software')) return 'saas';
-        return 'rcm'; // Default fallback
-      };
-
-      const categorySlug = getDefaultCategory(vendor.company_type);
-      const vendorDetailUrl = `/admin/vendors/${categorySlug}/${vendor.slug}`;
-      
-      console.log('🎯 [VendorsCardGrid] Navigating from base page with inferred category:', {
-        from: window.location.href,
-        to: vendorDetailUrl,
-        inferredCategory: categorySlug,
-        companyType: vendor.company_type,
-        vendorSlug: vendor.slug
-      });
-      
-      navigate(vendorDetailUrl);
-    }
-  }, [slugname, navigate, onVendorClick]);
+    // Always use the simplified URL structure
+    const vendorDetailUrl = `/admin/vendors/${vendor.slug}`;
+    
+    console.log('🎯 [VendorsCardGrid] Navigating with simplified URL:', {
+      from: window.location.href,
+      to: vendorDetailUrl,
+      vendorSlug: vendor.slug
+    });
+    
+    navigate(vendorDetailUrl);
+  }, [navigate]);
   
   const sortedVendors = useMemo(() => 
     sortVendors(vendors, sortField, sortDirection),

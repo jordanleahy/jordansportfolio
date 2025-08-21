@@ -184,7 +184,7 @@ export default function VendorDetail() {
     slugname: category,
     vendorSlug
   } = useParams<{
-    slugname: string;
+    slugname?: string;
     vendorSlug: string;
   }>();
   const navigate = useNavigate();
@@ -260,16 +260,20 @@ export default function VendorDetail() {
       }
     }
   };
-  if (!category || !vendorSlug) {
-    console.log('Missing required params, redirecting to 404');
+  if (!vendorSlug) {
+    console.log('Missing vendorSlug param, redirecting to 404');
     return <Navigate to="/404" replace />;
   }
 
   // Check if category exists, if not, use a default fallback
-  const categoryConfig = VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES] || {
-    title: `${category.charAt(0).toUpperCase() + category.slice(1)} Companies`,
-    description: `Analysis of ${category} vendors, their capabilities, funding, and market positioning for competitive intelligence research.`
-  };
+  const categoryConfig = category && VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES] ? 
+    VENDOR_CATEGORIES[category as keyof typeof VENDOR_CATEGORIES] : 
+    {
+      title: category ? `${category.charAt(0).toUpperCase() + category.slice(1)} Companies` : "All Vendors",
+      description: category ? 
+        `Analysis of ${category} vendors, their capabilities, funding, and market positioning for competitive intelligence research.` :
+        "Comprehensive vendor analysis and market intelligence research."
+    };
   if (isLoading) {
     return <PageLayout>
         <div className="container mx-auto py-8 px-4">
@@ -920,9 +924,19 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
+                  <Link to="/admin/vendors" className="text-sm">Vendors</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
+              {category && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link to={`/admin/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-sm font-medium">{vendor.company_name}</BreadcrumbPage>

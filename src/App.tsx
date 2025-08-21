@@ -250,6 +250,18 @@ function App() {
                     </AdminRoute>
                   } 
                 />
+                {/* New simplified vendor detail route */}
+                <Route 
+                  path="/admin/vendors/:vendorSlug" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <VendorDetail />
+                      </AdminLayout>
+                    </AdminRoute>
+                  } 
+                />
+                {/* Category-based vendor routes for backward compatibility */}
                 <Route 
                   path="/admin/vendors/:slugname" 
                   element={
