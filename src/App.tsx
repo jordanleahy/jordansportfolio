@@ -52,6 +52,7 @@ import RCMCompanies from "./pages/RCMCompanies";
 import Investors from "./pages/Investors";
 import { AdminComparisons } from "./pages/admin/AdminComparisons";
 import { ComparisonForm } from "./pages/admin/ComparisonForm";
+import { AdminLayout } from "./components/layouts/AdminLayout";
 
 // Lazy load use case components
 const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
@@ -208,9 +209,9 @@ function App() {
                 
                 <Route path="/comparisons" element={<ComparisonIndex />} />
                 <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
-                <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
-                <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
-                <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                <Route path="/admin/comparisons" element={<AdminRoute><AdminLayout><AdminComparisons /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/comparisons/new" element={<AdminRoute><AdminLayout><ComparisonForm /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><AdminLayout><ComparisonForm /></AdminLayout></AdminRoute>} />
                 
                  {/* Use Cases Admin Routes */}
                 <Route path="/admin/case-studies" element={<Navigate to="/admin/use-cases" replace />} />
@@ -218,9 +219,11 @@ function App() {
                   path="/admin/use-cases" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AdminUseCases />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <AdminUseCases />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -228,9 +231,11 @@ function App() {
                   path="/admin/use-cases/new" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <UseCaseForm />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <UseCaseForm />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -238,9 +243,11 @@ function App() {
                   path="/admin/use-cases/:id/edit" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <UseCaseForm />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <UseCaseForm />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -248,9 +255,11 @@ function App() {
                   path="/admin/api-usage" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                        <ApiUsage />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                          <ApiUsage />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -258,9 +267,11 @@ function App() {
                   path="/admin/seed-analytics" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                        <SeedAnalytics />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                          <SeedAnalytics />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -274,9 +285,11 @@ function App() {
                   path="/admin/subscription-analytics" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <SubscriptionAnalytics />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <SubscriptionAnalytics />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -304,9 +317,11 @@ function App() {
                   path="/admin/users" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AdminUsers />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <AdminUsers />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
@@ -314,9 +329,11 @@ function App() {
                   path="/admin/users/:id" 
                   element={
                     <AdminRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AdminUserDetail />
-                      </Suspense>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <AdminUserDetail />
+                        </Suspense>
+                      </AdminLayout>
                     </AdminRoute>
                   } 
                 />
