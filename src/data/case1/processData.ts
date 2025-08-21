@@ -20,9 +20,9 @@ export const processData = {
       image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
       images: [
         {
-          src: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
-          alt: "Clinical research workflow diagram",
-          caption: "Clinical research and discovery workflow mapping"
+          src: "/lovable-uploads/a8ed26c0-7989-47c4-8296-498b7969c911.png",
+          alt: "Medical chart data and sepsis indicators",
+          caption: "Real patient chart data showing sepsis indicators and clinical measurements"
         },
         {
           src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
