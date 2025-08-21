@@ -30,6 +30,12 @@ export const processData = {
           alt: "Interview notes and insights",
           caption: "Key insights from CDI specialist interviews",
           title: "Sailboat Workshop"
+        },
+        {
+          src: "/lovable-uploads/d4638b48-af10-4652-8131-380efea63079.png",
+          alt: "Sepsis diagnosis denial statistics",
+          caption: "Industry data showing sepsis as top denied diagnosis affecting CDI workflows",
+          title: "Industry Problem"
         }
       ]
     },
