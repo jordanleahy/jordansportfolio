@@ -76,18 +76,6 @@ export const SystemPromptsTab = ({
     return [...new Set(legacyCategories)].filter(Boolean); // Remove any undefined/null categories
   }, [systemPrompts]);
 
-  // Group Visual Prompt Generator categories by domain
-  const groupedCategories = useMemo(() => {
-    return {
-      'Healthcare & Medical': ['cdi', 'contracts', 'healthcare-coding', 'medical-devices', 'pharmaceuticals', 'telemedicine', 'hospital-operations', 'patient-care'],
-      'Technology & AI': ['coding ai', 'ai agents', 'cybersecurity', 'cloud-computing', 'data-analytics', 'machine-learning', 'blockchain', 'iot'],
-      'Product & Design': ['product_manager', 'product_designer', 'ux-research', 'design-systems', 'user-interface', 'prototyping', 'user-testing'],
-      'Business & Finance': ['business-strategy', 'financial-planning', 'market-research', 'sales-enablement', 'customer-success', 'marketing-automation', 'brand-management', 'competitive-analysis'],
-      'Operations & Management': ['project-management', 'process-optimization', 'quality-assurance', 'supply-chain', 'human-resources', 'training-development', 'change-management'],
-      'Legal & Compliance': ['legal-tech', 'regulatory-compliance', 'data-privacy', 'risk-management', 'contract-management', 'intellectual-property'],
-      'Education & Learning': ['educational-technology', 'e-learning', 'corporate-training', 'skill-development', 'knowledge-management']
-    };
-  }, [systemPrompts]);
 
   // Update agent's supported categories when active categories change
   useEffect(() => {
@@ -190,33 +178,6 @@ export const SystemPromptsTab = ({
           </div>
         </div>
 
-        {/* Visual Prompt Generator Categories - Comprehensive View */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium">Visual Prompt Generator Categories</h4>
-            
-          </div>
-          
-          {Object.entries(groupedCategories).map(([domain, categories]) => <div key={domain} className="space-y-2">
-              <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {domain}
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {categories.map(category => {
-              const hasPrompt = systemPrompts.some(p => p.category === category);
-              return <div key={category} className={`flex items-center justify-between p-3 rounded-lg border ${hasPrompt ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' : 'bg-muted/30 border-dashed'}`}>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={hasPrompt ? "default" : "outline"} className="text-xs">
-                          {getCategoryLabel(category)}
-                        </Badge>
-                        {hasPrompt && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
-                      </div>
-                      
-                    </div>;
-            })}
-              </div>
-            </div>)}
-        </div>
 
         {/* Database System Prompts */}
         <div className="space-y-4">
