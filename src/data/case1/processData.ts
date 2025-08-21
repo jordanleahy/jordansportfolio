@@ -29,7 +29,7 @@ export const processData = {
           src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
           alt: "Interview notes and insights",
           caption: "Key insights from CDI specialist interviews",
-          title: "CDI Interview Insights"
+          title: "Sailboat Workshop"
         }
       ]
     },
