@@ -10,40 +10,43 @@ interface FinalProductSectionProps {
 
 export const FinalProductSection = ({ data }: FinalProductSectionProps) => {
   return (
-    <div className="py-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="space-y-8"
-      >
-        <div className="text-center space-y-4 max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-foreground">
+    <section className="py-20 px-4">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
             {data.title}
           </h2>
           {data.description && (
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {data.description}
             </p>
           )}
-        </div>
-      </motion.div>
+        </motion.div>
 
-      <div className="max-w-7xl mx-auto mt-8 px-4">
-        <div className="relative bg-card border rounded-lg overflow-hidden shadow-sm w-full" style={{ aspectRatio: "1440/1024" }}>
-          <iframe
-            src={data.prototypeUrl}
-            className="w-full h-full border-0"
-            style={{ 
-              border: "1px solid rgba(0, 0, 0, 0.1)"
-            }}
-            allowFullScreen
-            title="Interactive Prototype"
-            loading="lazy"
-          />
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative"
+        >
+          <div className="bg-card border rounded-2xl overflow-hidden shadow-xl" style={{ aspectRatio: "16/10" }}>
+            <iframe
+              src={data.prototypeUrl}
+              className="w-full h-full border-0"
+              allowFullScreen
+              title="Interactive Prototype"
+              loading="lazy"
+            />
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
