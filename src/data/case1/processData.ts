@@ -36,6 +36,12 @@ export const processData = {
           alt: "Sepsis diagnosis denial statistics",
           caption: "Industry data showing sepsis as top denied diagnosis affecting CDI workflows",
           title: "Industry Problem"
+        },
+        {
+          src: "/lovable-uploads/c17bf285-dc04-4b79-bd11-3647cf6eb5d8.png",
+          alt: "Sepsis triggers configuration interface",
+          caption: "Configuration interface showing sepsis trigger rules and logic parameters",
+          title: "Sepsis Triggers & Logic"
         }
       ]
     },
