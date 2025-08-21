@@ -15,22 +15,17 @@ import { Suspense, lazy, useState } from "react";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
-// Lazy load heavy admin components
-const SEC = lazy(() => import("./pages/SEC"));
-const AdminBlog = lazy(() => import("./pages/AdminBlog"));
-const Agents = lazy(() => import("./pages/Agents"));
-const Vendors = lazy(() => import("./pages/Vendors"));
-const VendorsIndex = lazy(() => import("./pages/VendorsIndex"));
-const VendorDetail = lazy(() => import("./pages/VendorDetail"));
-const DataDictionary = lazy(() => import("./pages/sec/DataDictionary"));
-const WorkReportPage = lazy(() => import("./pages/WorkReportPage"));
-const WorkReportDetailPage = lazy(() => import("./pages/WorkReportDetailPage"));
-
+import SEC from "./pages/SEC";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import BlogEditor from "./pages/BlogEditor";
+import AdminBlog from "./pages/AdminBlog";
 import CompanyPortfolio from "./pages/CompanyPortfolio";
+import Agents from "./pages/Agents";
 import AscertainToTheMoon from "./pages/AscertainToTheMoon";
+import Vendors from "./pages/Vendors";
+import VendorsIndex from "./pages/VendorsIndex";
+import VendorDetail from "./pages/VendorDetail";
 import PublicVendorView from "./components/vendors/PublicVendorView";
 import PublicSharedCollection from "./pages/PublicSharedCollection";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -40,14 +35,16 @@ import Case4 from "./pages/cases/Case4";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import Library from "./pages/Library";
 
-// Lazy load agent components
-const AgentDetail = lazy(() => import("./pages/agents/AgentDetail").then(module => ({ default: module.AgentDetail })));
-const AgentEdit = lazy(() => import("./pages/agents/AgentEdit").then(module => ({ default: module.AgentEdit })));
-
+import { AgentDetail } from "./pages/agents/AgentDetail";
+import { AgentEdit } from "./pages/agents/AgentEdit";
+import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
+import WorkReportPage from "./pages/WorkReportPage";
+import WorkReportDetailPage from "./pages/WorkReportDetailPage";
 
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
@@ -61,7 +58,6 @@ import { AdminLayout } from "./components/layouts/AdminLayout";
 const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
 const UseCaseForm = lazy(() => import("./pages/admin/UseCaseForm"));
 const UseCasePreview = lazy(() => import("./pages/admin/UseCasePreview"));
-const PublicUseCase = lazy(() => import("./pages/cases/PublicUseCase"));
 
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
@@ -93,7 +89,7 @@ function App() {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1 * 60 * 1000, // 1 minute for dynamic data
+        staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -182,48 +178,13 @@ function App() {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 
-                <Route 
-                  path="/sec" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <ErrorBoundary>
-                          <Suspense fallback={<div>Loading...</div>}>
-                            <SEC />
-                          </Suspense>
-                        </ErrorBoundary>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/sec/data-dictionary" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <DataDictionary />
-                        </Suspense>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
+                <Route path="/sec" element={<AdminRoute><SEC /></AdminRoute>} />
+                <Route path="/sec/data-dictionary" element={<AdminRoute><DataDictionary /></AdminRoute>} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/blog-editor" element={<BlogEditor />} />
                 <Route path="/blog-editor/:id" element={<BlogEditor />} />
-                <Route 
-                  path="/admin-blog" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <AdminBlog />
-                        </Suspense>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
+                <Route path="/admin-blog" element={<AdminRoute><AdminBlog /></AdminRoute>} />
                 <Route 
                   path="/jobs" 
                   element={
@@ -235,52 +196,14 @@ function App() {
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-                <Route 
-                  path="/agents" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <Agents />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/agents/:id" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AgentDetail />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/agents/:id/edit" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AgentEdit />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/agents/new" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <AgentEdit />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
+                 <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
+                 <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
+                 <Route path="/agents/:id/edit" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
+                 <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
-                
-                {/* Redirect legacy vendor routes to admin */}
-                <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
-                <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors/:slugname" replace />} />
-                <Route path="/vendors/:slugname/:vendorSlug" element={<Navigate to="/admin/vendors/:slugname/:vendorSlug" replace />} />
+                <Route path="/vendors" element={<AdminRoute><VendorsIndex /></AdminRoute>} />
+                <Route path="/vendors/:slugname" element={<AdminRoute><Vendors /></AdminRoute>} />
+                <Route path="/vendors/:slugname/:vendorSlug" element={<AdminRoute><VendorDetail /></AdminRoute>} />
                 <Route path="/public/vendors/:category/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/public/collections/:handle/:id" element={<ErrorBoundary><PublicSharedCollection /></ErrorBoundary>} />
                 <Route path="/homehealth" element={<HomeHealth />} />
@@ -368,14 +291,6 @@ function App() {
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
-                <Route 
-                  path="/cases/:slug" 
-                  element={
-                    <Suspense fallback={<div>Loading...</div>}>
-                      <PublicUseCase />
-                    </Suspense>
-                  } 
-                />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
@@ -403,78 +318,12 @@ function App() {
                 <Route path="/subscription-status" element={<SubscriptionSuccess />} />
                 <Route path="/billing" element={<BillingPage />} />
                 <Route path="/account" element={<AccountPage />} />
-                <Route 
-                  path="/work-report" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <WorkReportPage />
-                        </Suspense>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/work-report/:date" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <WorkReportDetailPage />
-                        </Suspense>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
+                <Route path="/work-report" element={<AdminRoute><WorkReportPage /></AdminRoute>} />
+                <Route path="/work-report/:date" element={<AdminRoute><WorkReportDetailPage /></AdminRoute>} />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
 
                 {/* Public Library of shared collections */}
                 <Route path="/library" element={<Library />} />
-
-                {/* Admin Vendors */}
-                <Route 
-                  path="/admin/vendors" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <ErrorBoundary>
-                          <Suspense fallback={<div>Loading...</div>}>
-                            <VendorsIndex />
-                          </Suspense>
-                        </ErrorBoundary>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/vendors/:slugname" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <ErrorBoundary>
-                          <Suspense fallback={<div>Loading...</div>}>
-                            <Vendors />
-                          </Suspense>
-                        </ErrorBoundary>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/vendors/:slugname/:vendorSlug" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <ErrorBoundary>
-                          <Suspense fallback={<div>Loading...</div>}>
-                            <VendorDetail />
-                          </Suspense>
-                        </ErrorBoundary>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
 
                 {/* Admin Users */}
                 <Route 
