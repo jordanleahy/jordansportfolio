@@ -10,7 +10,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <ModalProvider>
       <div className="min-h-screen">
-        <main className="p-6">
+        <main>
           {children}
         </main>
       </div>
