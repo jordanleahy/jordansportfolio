@@ -35,6 +35,7 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="p-8">
+                  {/* Main content section */}
                   <div className="flex flex-col md:flex-row md:gap-8">
                     <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 w-12 h-12 flex items-center justify-center md:self-start">
                       <IconComponent className="h-6 w-6 text-primary" />
@@ -58,23 +59,25 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                           <footer className="text-sm mt-1">— {step.quote.author}</footer>
                         </blockquote>
                       )}
-                      {step.images && step.images.length > 0 && (
-                        <div className="mt-4">
-                          <ImageThumbnails images={step.images} />
-                        </div>
-                      )}
                     </div>
                     {step.image && (
                       <div className="md:w-80 md:flex-shrink-0 md:order-2">
                         <img 
                           src={step.image}
                           alt={`${step.title} illustration`}
-                          className="w-full rounded-lg shadow-lg"
+                          className="w-full max-h-96 object-cover rounded-lg shadow-lg"
                           loading="lazy"
                         />
                       </div>
                     )}
                   </div>
+                  
+                  {/* Thumbnails section - full width below main content */}
+                  {step.images && step.images.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <ImageThumbnails images={step.images} />
+                    </div>
+                  )}
                 </Card>
               </motion.div>
             );
