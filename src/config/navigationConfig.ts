@@ -20,7 +20,33 @@ export interface NavigationItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  accessLevel?: 'public' | 'authenticated' | 'admin';
+  showInDesktop?: boolean;
+  showInMobile?: boolean;
+  showInQuickAccess?: boolean;
+  isModal?: boolean;
+  userInfo?: boolean;
 }
+
+export const navigationConfig: NavigationItem[] = [
+  // Public items
+  { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/about", label: "About", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+
+  // Admin-only items
+  { href: "/admin/use-cases", label: "Use Cases", icon: Target, accessLevel: 'admin', showInMobile: true },
+];
+
+export const getNavigationItems = (user: any, isAdmin: boolean): NavigationItem[] => {
+  return navigationConfig.filter(item => {
+    if (item.accessLevel === 'public') return true;
+    if (item.accessLevel === 'authenticated') return !!user;
+    if (item.accessLevel === 'admin') return user && isAdmin;
+    return false;
+  });
+};
 
 export const getAdminItems = (): NavigationItem[] => {
   return [
