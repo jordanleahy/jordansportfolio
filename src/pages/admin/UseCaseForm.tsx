@@ -124,6 +124,8 @@ const caseStudySchema = z.object({
 
 type CaseStudyFormData = z.infer<typeof caseStudySchema>;
 
+export type { CaseStudyFormData };
+
 export default function CaseStudyForm() {
   const navigate = useNavigate();
   const { id } = useParams();

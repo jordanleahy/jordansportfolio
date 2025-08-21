@@ -1,5 +1,6 @@
 import React from 'react';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
+import type { CaseStudyFormData } from '@/pages/admin/UseCaseForm';
 import { Plus, X, Users, Lightbulb, CheckCircle, AlertCircle, BookOpen, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,53 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface CaseStudyFormData {
-  // Team section
-  team_members?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-    items: Array<{ value: string }>;
-  }>;
-
-  // Process section
-  process_title?: string;
-  process_steps?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-    items?: Array<{ value: string }>;
-    quote_text?: string;
-    quote_author?: string;
-    image?: string;
-  }>;
-
-  // Solution section
-  solution_title?: string;
-  features?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-  }>;
-
-  // Outcomes section
-  outcomes_title?: string;
-  user_feedback_quote?: string;
-  user_feedback_author?: string;
-
-  // Reflection section
-  reflection_title?: string;
-  reflections?: Array<{
-    type: 'success' | 'challenge' | 'learning';
-    title: string;
-    items: Array<{ value: string }>;
-  }>;
-
-  // Visual assets
-  design_artifacts?: Array<{ value: string }>;
-  process_documentation?: Array<{ value: string }>;
-}
 
 export const TeamSection = ({ form }: { form: UseFormReturn<CaseStudyFormData> }) => {
   const { fields, append, remove } = useFieldArray({

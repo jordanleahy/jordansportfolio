@@ -1,5 +1,5 @@
-import React from 'react';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
+import type { CaseStudyFormData } from '@/pages/admin/UseCaseForm';
 import { Plus, X, Upload, Image as ImageIcon, Users, Target, Lightbulb, CheckCircle, AlertCircle, BookOpen, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,99 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface CaseStudyFormData {
-  // Basic fields
-  title: string;
-  description: string;
-  category?: string;
-  industry?: string;
-  complexity: 'simple' | 'medium' | 'complex';
-  target_audience?: string;
-  business_value?: string;
-  technical_requirements: Array<{ value: string }>;
-  tags: Array<{ value: string }>;
-  status: 'draft' | 'published' | 'archived';
-  featured: boolean;
-  sort_order: number;
-
-  // Hero section
-  hero_image?: string;
-  hero_image_alt?: string;
-  role?: string;
-  role_details?: string;
-  timeline_value?: string;
-  timeline_details?: string;
-
-  // Figma integration
-  figma_presentation_enabled?: boolean;
-  figma_presentation_url?: string;
-  figma_presentation_title?: string;
-
-  // Final product
-  prototype_url?: string;
-  final_product_description?: string;
-
-  // Problem section
-  problem_title?: string;
-  problem_description?: string;
-  challenges?: Array<{
-    type: 'problem' | 'need';
-    title: string;
-    items: Array<{ value: string }>;
-  }>;
-
-  // Team section
-  team_members?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-    items: Array<{ value: string }>;
-  }>;
-
-  // Process section
-  process_title?: string;
-  process_steps?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-    items?: Array<{ value: string }>;
-    quote_text?: string;
-    quote_author?: string;
-    image?: string;
-  }>;
-
-  // Solution section
-  solution_title?: string;
-  features?: Array<{
-    icon: string;
-    title: string;
-    description: string;
-  }>;
-
-  // Outcomes section
-  outcomes_title?: string;
-  user_feedback_quote?: string;
-  user_feedback_author?: string;
-
-  // Reflection section
-  reflection_title?: string;
-  reflections?: Array<{
-    type: 'success' | 'challenge' | 'learning';
-    title: string;
-    items: Array<{ value: string }>;
-  }>;
-
-  // Visual assets
-  design_artifacts?: Array<{ value: string }>;
-  process_documentation?: Array<{ value: string }>;
-
-  // CTA
-  cta_title?: string;
-
-  // Public URL
-  slug?: string;
-}
 
 interface FormSectionProps {
   form: UseFormReturn<CaseStudyFormData>;

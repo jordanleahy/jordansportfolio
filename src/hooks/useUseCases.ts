@@ -52,7 +52,24 @@ export const useUseCases = (filters?: UseCaseFilters) => {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as UseCase[];
+      
+      // Transform database Json fields to TypeScript types
+      return (data || []).map(item => ({
+        ...item,
+        challenges: (Array.isArray(item.challenges) ? item.challenges : []) as any[],
+        team_members: (Array.isArray(item.team_members) ? item.team_members : []) as any[],
+        process_steps: (Array.isArray(item.process_steps) ? item.process_steps : []) as any[],
+        features: (Array.isArray(item.features) ? item.features : []) as any[],
+        reflections: (Array.isArray(item.reflections) ? item.reflections : []) as any[],
+        visual_artifacts: item.visual_artifacts && typeof item.visual_artifacts === 'object' 
+          ? item.visual_artifacts as { designArtifacts: string[]; processDocumentation: string[] }
+          : { designArtifacts: [], processDocumentation: [] },
+        user_feedback: item.user_feedback && typeof item.user_feedback === 'object'
+          ? item.user_feedback as { quote: string; author: string }
+          : undefined,
+        technical_requirements: Array.isArray(item.technical_requirements) ? item.technical_requirements : [],
+        tags: Array.isArray(item.tags) ? item.tags : [],
+      })) as UseCase[];
     },
   });
 };
@@ -65,10 +82,28 @@ export const useUseCase = (id: string) => {
         .from('use_cases')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      return data as UseCase;
+      if (!data) return null;
+      
+      // Transform database Json fields to TypeScript types
+      return {
+        ...data,
+        challenges: (Array.isArray(data.challenges) ? data.challenges : []) as any[],
+        team_members: (Array.isArray(data.team_members) ? data.team_members : []) as any[],
+        process_steps: (Array.isArray(data.process_steps) ? data.process_steps : []) as any[],
+        features: (Array.isArray(data.features) ? data.features : []) as any[],
+        reflections: (Array.isArray(data.reflections) ? data.reflections : []) as any[],
+        visual_artifacts: data.visual_artifacts && typeof data.visual_artifacts === 'object' 
+          ? data.visual_artifacts as { designArtifacts: string[]; processDocumentation: string[] }
+          : { designArtifacts: [], processDocumentation: [] },
+        user_feedback: data.user_feedback && typeof data.user_feedback === 'object'
+          ? data.user_feedback as { quote: string; author: string }
+          : undefined,
+        technical_requirements: Array.isArray(data.technical_requirements) ? data.technical_requirements : [],
+        tags: Array.isArray(data.tags) ? data.tags : [],
+      } as UseCase;
     },
     enabled: !!id,
   });
