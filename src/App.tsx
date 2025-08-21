@@ -231,7 +231,6 @@ function App() {
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
                  <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
                  <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
-                 <Route path="/agents/:id/edit" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 {/* Vendor routes - redirect to admin namespace */}
