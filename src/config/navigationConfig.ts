@@ -51,19 +51,9 @@ export const getNavigationItems = (user: any, isAdmin: boolean): NavigationItem[
 export const getAdminItems = (): NavigationItem[] => {
   return [
     {
-      href: "/admin/stories",
-      label: "Stories",
-      icon: BookOpen,
-    },
-    {
-      href: "/admin/companies",
-      label: "Company Profiles",
-      icon: Building2,
-    },
-    {
-      href: "/admin/investors", 
-      label: "Investors",
-      icon: TrendingUp,
+      href: "/sec",
+      label: "SEC Filings",
+      icon: FileBarChart,
     },
     {
       href: "/admin/vendors",
@@ -81,39 +71,34 @@ export const getAdminItems = (): NavigationItem[] => {
       icon: Target,
     },
     {
-      href: "/admin/blogs",
+      href: "/admin-blog",
       label: "Blog Posts",
       icon: FileText,
     },
     {
-      href: "/admin/events",
-      label: "Events",
-      icon: Calendar,
-    },
-    {
-      href: "/admin/color-themes",
-      label: "Color Themes",
-      icon: Palette,
-    },
-    {
-      href: "/admin/case-studies",
-      label: "Case Studies",
-      icon: Briefcase,
-    },
-    {
-      href: "/admin/agents",
+      href: "/agents",
       label: "AI Agents",
       icon: Bot,
     },
     {
-      href: "/admin/work-summary",
-      label: "Work Summary",
+      href: "/work-report",
+      label: "Work Reports",
       icon: FileBarChart,
     },
     {
       href: "/admin/api-usage",
       label: "API Usage",
       icon: BarChart3,
+    },
+    {
+      href: "/admin/users",
+      label: "Users",
+      icon: TrendingUp,
+    },
+    {
+      href: "/investors",
+      label: "Investors",
+      icon: TrendingUp,
     }
   ];
 };
