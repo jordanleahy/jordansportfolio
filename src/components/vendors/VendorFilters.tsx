@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { type Vendor, type VendorFiltersState } from '@/types/vendor';
+import { extractFilterOptions } from '@/utils/vendorUtils';
 
 interface VendorFiltersProps {
   filters: VendorFiltersState;
@@ -47,11 +48,8 @@ export function VendorFilters({ filters, onFiltersChange, vendors }: VendorFilte
     setIsOpen(open);
   };
 
-  // Extract unique values for filter options
-  const companyTypes = [...new Set(vendors.map(v => v.company_type))];
-  const allServices = [...new Set(vendors.flatMap(v => v.core_services))];
-  const allCustomers = [...new Set(vendors.flatMap(v => v.customers))];
-  const allSpecialties = [...new Set(vendors.flatMap(v => v.specialties))];
+  // Extract unique filter options using utility function
+  const { companyTypes, allServices, allCustomers, allSpecialties } = extractFilterOptions(vendors);
 
   const hasActiveFilters = Object.values(filters).some(value => 
     Array.isArray(value) ? value.length > 0 : value

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Building, Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { type Vendor, type VendorFiltersState } from '@/types/vendor';
 import { EditableVendorCard } from './EditableVendorCard';
 import { VendorFilters } from './VendorFilters';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
 import { ViewToggle, type ViewMode } from './ViewToggle';
 import { VendorsTableView } from './VendorsTableView';
+import { sortVendors } from '@/utils/vendorUtils';
 
 interface VendorsCardGridProps {
   vendors: Vendor[];
@@ -50,43 +49,19 @@ export function VendorsCardGrid({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   
-  // Use the user from props if available, otherwise get from local state
-  const [localUser, setLocalUser] = useState<any>(null);
-  const currentUser = propUser !== undefined ? propUser : localUser;
-
-  // Check authentication status only if no user prop is provided
-  useEffect(() => {
-    if (propUser === undefined) {
-      const checkAuth = async () => {
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
-        setLocalUser(user);
-      };
-      checkAuth();
-      const {
-        data: {
-          subscription
-        }
-      } = supabase.auth.onAuthStateChange((event, session) => {
-        setLocalUser(session?.user ?? null);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [propUser]);
+  // Use the user from props directly (auth is handled by parent)
+  const currentUser = propUser;
   
-  const handleSort = (field: SortField) => {
+  const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('asc');
     }
-  };
+  }, [sortField, sortDirection]);
   
-  const handleVendorClick = (vendor: Vendor) => {
+  const handleVendorClick = useCallback((vendor: Vendor) => {
     if (slugname) {
       console.log('Navigating to vendor:', vendor.company_name, 'with slug:', vendor.slug, 'category:', slugname);
       const vendorDetailUrl = `/vendors/${slugname}/${vendor.slug}`;
@@ -94,21 +69,12 @@ export function VendorsCardGrid({
     } else if (onVendorClick) {
       onVendorClick(vendor);
     }
-  };
+  }, [slugname, navigate, onVendorClick]);
   
-  const sortedVendors = [...vendors].sort((a, b) => {
-    let aVal: any = a[sortField];
-    let bVal: any = b[sortField];
-    if (typeof aVal === 'string') {
-      aVal = aVal.toLowerCase();
-      bVal = bVal.toLowerCase();
-    }
-    if (sortDirection === 'asc') {
-      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-    } else {
-      return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-    }
-  });
+  const sortedVendors = useMemo(() => 
+    sortVendors(vendors, sortField, sortDirection),
+    [vendors, sortField, sortDirection]
+  );
   
   return <div className="space-y-6">
       {/* Toolbar with Filters, Sort Controls, View Toggle and Add Vendor */}

@@ -5,40 +5,31 @@ import { VendorPageLayout } from '@/components/vendors/VendorPageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { VendorDeleteDialog } from '@/components/vendors/VendorDeleteDialog';
-import { useVendorPageProvider } from '@/hooks/useVendorPageProvider';
-import { useVendorActionsProvider } from '@/hooks/useVendorActionsProvider';
-import { useVendorFiltersProvider } from '@/hooks/useVendorFiltersProvider';
+import { useVendorsPageOptimized } from '@/hooks/useVendorsPageOptimized';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
 
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Use the new provider hooks
+  // Use the optimized provider hook
   const {
     user,
     isLoadingAuth,
     allVendors,
+    filteredVendors,
     isLoadingVendors,
     vendorsError,
-    refetchVendors,
+    filters,
+    setFilters,
     handleVendorAdded,
-    handleVendorSaved
-  } = useVendorPageProvider();
-
-  const {
+    handleVendorSaved,
+    handleDeleteVendor,
     deleteModalOpen,
     setDeleteModalOpen,
     vendorToDelete,
-    handleDeleteVendor,
     confirmDeleteVendor
-  } = useVendorActionsProvider(refetchVendors);
-
-  const {
-    filters,
-    setFilters,
-    filteredVendors
-  } = useVendorFiltersProvider(allVendors);
+  } = useVendorsPageOptimized();
 
   // Validate category
   if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {

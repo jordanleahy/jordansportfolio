@@ -1,86 +1,41 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VendorPageLayout } from '@/components/vendors/VendorPageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { VendorDeleteDialog } from '@/components/vendors/VendorDeleteDialog';
-import { useVendorPageProvider } from '@/hooks/useVendorPageProvider';
-import { useVendorActionsProvider } from '@/hooks/useVendorActionsProvider';
-import { useVendorFiltersProvider } from '@/hooks/useVendorFiltersProvider';
-import { VENDOR_CATEGORIES, type VendorCategory } from '@/types/vendor';
+import { useVendorsPageOptimized } from '@/hooks/useVendorsPageOptimized';
+import { getVendorCategory } from '@/utils/vendorUtils';
 
 export default function VendorsIndex() {
   const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Use the new provider hooks
+  // Use the optimized provider hook
   const {
     user,
     isLoadingAuth,
     allVendors,
+    filteredVendors,
     isLoadingVendors,
     vendorsError,
-    refetchVendors,
+    filters,
+    setFilters,
     handleVendorAdded,
-    handleVendorSaved
-  } = useVendorPageProvider();
-
-  const {
+    handleVendorSaved,
+    handleDeleteVendor,
     deleteModalOpen,
     setDeleteModalOpen,
     vendorToDelete,
-    handleDeleteVendor,
     confirmDeleteVendor
-  } = useVendorActionsProvider(refetchVendors);
+  } = useVendorsPageOptimized();
 
-  const {
-    filters,
-    setFilters,
-    filteredVendors
-  } = useVendorFiltersProvider(allVendors);
-
-  // Helper function to determine vendor category
-  const getVendorCategory = (vendor: any): VendorCategory => {
-    const services = vendor.core_services?.join(' ').toLowerCase() || '';
-    const specialties = vendor.specialties?.join(' ').toLowerCase() || '';
-    const description = vendor.description?.toLowerCase() || '';
-    const companyType = vendor.company_type?.toLowerCase() || '';
-    
-    if (services.includes('revenue cycle') || services.includes('rcm') || specialties.includes('revenue cycle')) {
-      return 'rcm';
-    }
-    if (services.includes('healthcare') || specialties.includes('healthcare') || description.includes('healthcare')) {
-      return 'healthcare';
-    }
-    if (services.includes('fintech') || services.includes('financial') || specialties.includes('fintech')) {
-      return 'fintech';
-    }
-    if (services.includes('saas') || companyType.includes('saas') || description.includes('software as a service')) {
-      return 'saas';
-    }
-    if (services.includes('ai') || services.includes('artificial intelligence') || specialties.includes('ai')) {
-      return 'ai';
-    }
-    if (services.includes('cybersecurity') || services.includes('security') || specialties.includes('cybersecurity')) {
-      return 'cybersecurity';
-    }
-    if (services.includes('education') || services.includes('edtech') || specialties.includes('education')) {
-      return 'edtech';
-    }
-    if (services.includes('hr') || services.includes('human resources') || specialties.includes('hr')) {
-      return 'hrtech';
-    }
-
-    // Default to healthcare for most companies
-    return 'healthcare';
-  };
-
-  const handleVendorClick = (vendor: any) => {
+  const handleVendorClick = useCallback((vendor: any) => {
     const category = getVendorCategory(vendor);
     const vendorDetailUrl = `/vendors/${category}/${vendor.slug}`;
     navigate(vendorDetailUrl);
-  };
+  }, [navigate]);
 
   return (
     <VendorPageLayout

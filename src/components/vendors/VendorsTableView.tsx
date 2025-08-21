@@ -1,6 +1,4 @@
-
-import { useState } from 'react';
-import { format } from 'date-fns';
+import { useState, useMemo } from 'react';
 import { 
   Table, TableBody, TableCell, TableHead, 
   TableHeader, TableRow 
@@ -11,6 +9,7 @@ import { ExternalLink, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { type Vendor } from '@/types/vendor';
 import { useAuth } from '@/contexts/AuthContext';
+import { sortVendors, formatDate } from '@/utils/vendorUtils';
 
 interface VendorsTableViewProps {
   vendors: Vendor[];
@@ -49,30 +48,10 @@ export function VendorsTableView({
     }
   };
 
-  const sortedVendors = [...vendors].sort((a, b) => {
-    let aVal: any = a[sortField];
-    let bVal: any = b[sortField];
-    
-    if (sortField === 'updated_at') {
-      // Convert date strings to Date objects for proper comparison
-      aVal = new Date(aVal);
-      bVal = new Date(bVal);
-    } else if (typeof aVal === 'string') {
-      aVal = aVal.toLowerCase();
-      bVal = bVal.toLowerCase();
-    }
-
-    if (sortDirection === 'asc') {
-      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-    } else {
-      return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-    }
-  });
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return format(date, 'MMM d, yyyy');
-  };
+  const sortedVendors = useMemo(() => 
+    sortVendors(vendors, sortField, sortDirection),
+    [vendors, sortField, sortDirection]
+  );
 
   return (
     <Card>
@@ -122,8 +101,7 @@ export function VendorsTableView({
               {sortedVendors.map((vendor) => (
                 <TableRow 
                   key={vendor.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onVendorClick?.(vendor)}
+                  className="hover:bg-muted/50"
                 >
                   <TableCell>
                     <div>
@@ -142,14 +120,19 @@ export function VendorsTableView({
                   <TableCell>{formatDate(vendor.updated_at)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onVendorClick?.(vendor)}
+                        className="text-primary hover:text-primary/80"
+                      >
+                        View Details
+                      </Button>
                       {onDeleteClick && user && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteClick(vendor);
-                          }}
+                          onClick={() => onDeleteClick(vendor)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -159,10 +142,7 @@ export function VendorsTableView({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(vendor.website_url, '_blank');
-                          }}
+                          onClick={() => window.open(vendor.website_url, '_blank')}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
