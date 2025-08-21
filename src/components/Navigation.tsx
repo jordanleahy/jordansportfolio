@@ -99,12 +99,16 @@ const Navigation = () => {
                   <>
                     {isAdmin && <AdminDropdown navLinkStyles={navLinkStyles} />}
 
-                    <NavLink
-                      item={{ href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'authenticated' }}
-                      className={navLinkStyles}
-                      onMouseEnter={() => handleMouseEnter('/stories')}
-                      onFocus={() => handleFocus('/stories')}
-                    />
+                    {publicNavItems.map((item) => (
+                      <NavLink
+                        key={item.href}
+                        item={item}
+                        className={navLinkStyles}
+                        onClick={(e) => handleAnchorClick(e, item.href)}
+                        onMouseEnter={() => handleMouseEnter(item.href)}
+                        onFocus={() => handleFocus(item.href)}
+                      />
+                    ))}
 
                     <UserDropdown
                       user={user}
