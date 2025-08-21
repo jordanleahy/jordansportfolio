@@ -64,7 +64,7 @@ export function VendorsCardGrid({
   const handleVendorClick = useCallback((vendor: Vendor) => {
     if (slugname) {
       console.log('Navigating to vendor:', vendor.company_name, 'with slug:', vendor.slug, 'category:', slugname);
-      const vendorDetailUrl = `/vendors/${slugname}/${vendor.slug}`;
+      const vendorDetailUrl = `/admin/vendors/${slugname}/${vendor.slug}`;
       navigate(vendorDetailUrl);
     } else if (onVendorClick) {
       onVendorClick(vendor);
