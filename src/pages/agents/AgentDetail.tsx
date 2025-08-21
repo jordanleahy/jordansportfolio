@@ -163,120 +163,25 @@ export const AgentDetail = () => {
               </CardContent>
             </Card>
 
-            {/* Visual Prompt Generator Specific Sections */}
-            {isVisualPromptGenerator && (
-              <>
-                {/* Core Functionality */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                      <Palette className="h-4 w-4 md:h-5 md:w-5" />
-                      Core Functionality
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-start gap-3">
-                        <Image className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-medium text-sm">Professional Image Prompts</h4>
-                          <p className="text-xs text-muted-foreground">Creates detailed prompts for AI image generators</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Layers className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-medium text-sm">Vector Illustration Style</h4>
-                          <p className="text-xs text-muted-foreground">Consistent modern design approach</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-medium text-sm">Aspect Ratio Management</h4>
-                          <p className="text-xs text-muted-foreground">Optimized for different platform requirements</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Palette className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-medium text-sm">Professional Color Palettes</h4>
-                          <p className="text-xs text-muted-foreground">Industry-appropriate color schemes</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Category Specializations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                      <Users className="h-4 w-4 md:h-5 md:w-5" />
-                      Category Specializations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {agent.supported_categories?.map((category, index) => (
-                        <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                          <h4 className="font-medium text-sm capitalize mb-1">{category.replace(/_/g, ' ')}</h4>
-                          <p className="text-xs text-muted-foreground">
-                            {category === 'healthcare' && 'Medical and clinical visualization'}
-                            {category === 'contracts' && 'Legal and compliance imagery'}
-                            {category === 'design' && 'Creative and artistic content'}
-                            {category === 'product_management' && 'Business and strategy visuals'}
-                            {!['healthcare', 'contracts', 'design', 'product_management'].includes(category) && 'Professional industry content'}
-                          </p>
-                        </div>
-                      )) || (
-                        <div className="col-span-2 text-sm text-muted-foreground">
-                          No specific categories configured
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Performance Characteristics */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                      <BarChart3 className="h-4 w-4 md:h-5 md:w-5" />
-                      Performance Characteristics
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <Zap className="h-5 w-5 text-primary mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground">Average Response</p>
-                        <p className="font-semibold text-sm">1-3 seconds</p>
-                      </div>
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600 mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground">Success Rate</p>
-                        <p className="font-semibold text-sm">&gt;98%</p>
-                      </div>
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
-                        <Target className="h-5 w-5 text-blue-600 mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground">Quality Score</p>
-                        <p className="font-semibold text-sm">High</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Key Features:</h4>
-                      <ul className="text-xs text-muted-foreground space-y-1">
-                        <li>• Prompt caching for faster generation</li>
-                        <li>• Category-specific templates</li>
-                        <li>• Style inheritance across projects</li>
-                        <li>• Real-time performance monitoring</li>
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-
-              </>
+            {/* Supported Categories */}
+            {agent.supported_categories && agent.supported_categories.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <Users className="h-4 w-4 md:h-5 md:w-5" />
+                    Supported Categories
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {agent.supported_categories.map((category, index) => (
+                      <Badge key={index} variant="outline" className="text-xs capitalize">
+                        {category.replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Schedule & Timing */}
