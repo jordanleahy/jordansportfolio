@@ -98,7 +98,7 @@ Event-by-event sequence:
 2) Credit & Usage Checks
    - useCreditCheck.getCreditStatus(): calculates daily/monthly remaining, blocking limits.
    - If blocked: UI toast indicates reason; abort.
-   - useCreditCheck.enforceUsage('gpt_image_generation', amount)
+   - useCreditCheck.enforceUsage('image_generation', amount)
      - Calls useUsageEnforcement.checkAndEnforceUsage() → supabase.functions.invoke('check-usage-limits')
      - If FunctionsFetchError or service down → user-facing toast: “Usage service temporarily unavailable.”
      - If approaching ≥80% usage → checkAndEnforceUsage triggers send-usage-alert (best-effort; non-blocking)
@@ -148,7 +148,7 @@ sequenceDiagram
     UI-->>User: Toast: No credits / limit reached
     note over UI: Abort
   else Has credits
-    UI->>CC: enforceUsage('gpt_image_generation', 1)
+    UI->>CC: enforceUsage('image_generation', 1)
     CC->>UE: checkAndEnforceUsage()
     UE->>SB: invoke('check-usage-limits')
     SB-->>UE: {allowed, remaining, limit}
@@ -195,7 +195,7 @@ Event-by-event sequence:
 
 2) Credit & Usage Enforcement
    - Uses useCreditCheck.getCreditStatus(); if no credits → toast + disable
-   - enforceUsage('gpt_image_generation', 4) (maps to 4 images for common ratios)
+   - enforceUsage('image_generation', 4) (maps to 4 images for common ratios)
    - If not allowed → return early (toast already displayed by enforceUsage)
 
 3) Prompt Caching + Request Preparation
@@ -233,7 +233,7 @@ sequenceDiagram
   alt No credits
     UI-->>User: Toast: No credits
   else Has credits
-    UI->>CC: enforceUsage('gpt_image_generation', 4)
+    UI->>CC: enforceUsage('image_generation', 4)
     CC->>UE: checkAndEnforceUsage()
     UE->>SB: invoke('check-usage-limits')
     SB-->>UE: {allowed}
@@ -292,7 +292,7 @@ Failure Modes:
   - Invokes check-usage-limits edge function
   - When usage ≥80% of limit, attempts send-usage-alert email (best-effort)
   - Handles FunctionsFetchError distinctly (service unavailable toast)
-- Bulk path uses enforceUsage('gpt_image_generation', 4) to account for multiple images
+- Bulk path uses enforceUsage('image_generation', 4) to account for multiple images
 - Recommended: standardize amount across flows (1 for single image; 4 for bulk; 1 per aspect for selector)
 
 Hardening:
@@ -474,7 +474,7 @@ A) Aspect Ratio Configuration
 
 B) Example Payloads
 - BulkImageGenerationRequest: { postId, title, description, category?, theme?, context?, colorThemeId? }
-- check-usage-limits Request: { usage_type: 'gpt_image_generation', amount: number }
+- check-usage-limits Request: { usage_type: 'image_generation', amount: number }
 - check-usage-limits Response: { allowed: boolean; remaining: number; limit: number; usage_type: string; message?: string }
 
 C) Related Files Index
