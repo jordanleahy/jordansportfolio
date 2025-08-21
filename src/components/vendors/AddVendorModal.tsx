@@ -314,6 +314,22 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
 
+      // Check for existing vendor with same slug
+      const { data: existingVendor } = await supabase
+        .from('vendors')
+        .select('company_name, website_url, slug')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (existingVendor) {
+        toast({
+          title: "Vendor Already Exists",
+          description: `A vendor with the domain "${domain}" already exists as "${existingVendor.company_name}". Please check if this is a duplicate or use a different website URL.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create basic vendor record
       const insertData = {
         company_name: companyName.charAt(0).toUpperCase() + companyName.slice(1),
@@ -358,7 +374,36 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
 
       if (error) {
         console.error("Database insert error:", error);
-        throw error;
+        
+        // Check if it's a unique constraint violation
+        if (error.code === '23505') {
+          if (error.message.includes('vendors_slug_key')) {
+            toast({
+              title: "Duplicate Vendor",
+              description: `A vendor with this website domain already exists in the system. Please verify this isn't a duplicate or contact support if this is a different company.`,
+              variant: "destructive",
+            });
+          } else if (error.message.includes('vendors_website_url_key')) {
+            toast({
+              title: "Website Already Registered",
+              description: `This website URL is already registered in the system. Please check for existing vendors or use a different URL.`,
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Duplicate Entry",
+              description: `This vendor information conflicts with an existing entry. Please review your input or contact support.`,
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to add vendor: ${error.message}`,
+            variant: "destructive",
+          });
+        }
+        return;
       }
 
       toast({
@@ -370,11 +415,21 @@ BEGIN RESEARCH AND EXTRACTION FOR: ${websiteUrl}`;
       handleClose();
     } catch (error) {
       console.error("Error inserting vendor:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add vendor. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Handle network or other errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast({
+          title: "Connection Error",
+          description: "Unable to connect to the database. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
