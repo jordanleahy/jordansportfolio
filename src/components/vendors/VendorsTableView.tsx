@@ -105,7 +105,8 @@ export function VendorsTableView({
               {sortedVendors.map((vendor) => (
                 <TableRow 
                   key={vendor.id}
-                  className="hover:bg-muted/50"
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onVendorClick?.(vendor)}
                 >
                   <TableCell>
                     <div>
@@ -124,19 +125,14 @@ export function VendorsTableView({
                   <TableCell>{formatDate(vendor.updated_at)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onVendorClick?.(vendor)}
-                        className="text-primary hover:text-primary/80"
-                      >
-                        View Details
-                      </Button>
                       {onDeleteClick && user && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => onDeleteClick(vendor)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteClick(vendor);
+                          }}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -146,7 +142,10 @@ export function VendorsTableView({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => window.open(vendor.website_url, '_blank')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(vendor.website_url, '_blank');
+                          }}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
