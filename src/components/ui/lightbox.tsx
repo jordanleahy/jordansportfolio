@@ -103,8 +103,8 @@ export const Lightbox: React.FC<LightboxProps> = ({
             
             {/* Caption */}
             {currentImage.caption && (
-              <div className="mt-4 text-center">
-                <p className="text-white text-sm max-w-2xl">{currentImage.caption}</p>
+              <div className="mt-8 text-center">
+                <p className="text-white text-sm max-w-2xl mb-8">{currentImage.caption}</p>
               </div>
             )}
             
