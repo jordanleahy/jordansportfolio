@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 
 interface Image {
   src: string;
@@ -155,37 +156,124 @@ export const ImageThumbnails: React.FC<ImageThumbnailsProps> = ({
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const openLightbox = (index: number) => {
     setSelectedIndex(index);
     setLightboxOpen(true);
   };
 
+  const checkScrollPosition = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+  }, []);
+
+  const scrollLeft = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const scrollAmount = container.clientWidth * 0.8;
+    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  }, []);
+
+  const scrollRight = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const scrollAmount = container.clientWidth * 0.8;
+    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  }, []);
+
+  const { ref: swipeRef } = useSwipeGestures({
+    onSwipeLeft: scrollRight,
+    onSwipeRight: scrollLeft,
+    threshold: 50,
+    velocityThreshold: 0.3
+  });
+
+  useEffect(() => {
+    checkScrollPosition();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollPosition);
+      window.addEventListener('resize', checkScrollPosition);
+      
+      return () => {
+        container.removeEventListener('scroll', checkScrollPosition);
+        window.removeEventListener('resize', checkScrollPosition);
+      };
+    }
+  }, [checkScrollPosition]);
+
+  useEffect(() => {
+    // Sync refs for swipe and scroll container
+    if (swipeRef.current && scrollContainerRef.current) {
+      swipeRef.current = scrollContainerRef.current;
+    }
+  }, [swipeRef]);
+
   if (!images || images.length === 0) return null;
 
   return (
     <>
-      <div className={cn("flex gap-2 flex-wrap", className)}>
-        {images.map((image, index) => (
-          <button
-            key={index}
-            onClick={() => openLightbox(index)}
-            className="relative w-32 h-24 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105 group"
+      <div className={cn("relative w-full", className)}>
+        {/* Left Arrow */}
+        {showLeftArrow && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background shadow-lg"
+            onClick={scrollLeft}
           >
-            <img
-              src={image.src}
-              alt={image.alt}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-            {image.title && (
-              <div className="absolute bottom-1 left-1 right-1 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                {image.title}
-              </div>
-            )}
-          </button>
-        ))}
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Right Arrow */}
+        {showRightArrow && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background shadow-lg"
+            onClick={scrollRight}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Scrollable Container */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-2 overflow-x-auto scrollbar-hide w-full px-1 py-2"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {images.map((image, index) => (
+            <button
+              key={index}
+              onClick={() => openLightbox(index)}
+              className="relative flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden border border-border hover:border-primary transition-all duration-200 hover:scale-105 group"
+            >
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              {image.title && (
+                <div className="absolute bottom-1 left-1 right-1 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                  {image.title}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       <Lightbox
