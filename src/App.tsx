@@ -212,7 +212,8 @@ function App() {
                 <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 <Route path="/admin/comparisons/:id/edit" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                 
-                {/* Use Cases Admin Routes */}
+                 {/* Use Cases Admin Routes */}
+                <Route path="/admin/case-studies" element={<Navigate to="/admin/use-cases" replace />} />
                 <Route 
                   path="/admin/use-cases" 
                   element={
