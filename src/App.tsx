@@ -58,6 +58,7 @@ import { AdminLayout } from "./components/layouts/AdminLayout";
 const AdminUseCases = lazy(() => import("./pages/admin/AdminUseCases"));
 const UseCaseForm = lazy(() => import("./pages/admin/UseCaseForm"));
 const UseCasePreview = lazy(() => import("./pages/admin/UseCasePreview"));
+const PublicUseCase = lazy(() => import("./pages/cases/PublicUseCase"));
 
 // Lazy load API Usage component
 const ApiUsage = lazy(() => import("./pages/admin/ApiUsage"));
@@ -291,6 +292,14 @@ function App() {
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
+                <Route 
+                  path="/cases/:slug" 
+                  element={
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <PublicUseCase />
+                    </Suspense>
+                  } 
+                />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
