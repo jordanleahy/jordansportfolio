@@ -12,6 +12,15 @@ export interface ProcessStep {
     src: string;
     alt: string;
     caption?: string;
+    title?: string;
+  }>;
+  media?: Array<{
+    type: 'image' | 'iframe';
+    src: string;
+    alt: string;
+    caption?: string;
+    title?: string;
+    thumbnailSrc?: string;
   }>;
 }
 
