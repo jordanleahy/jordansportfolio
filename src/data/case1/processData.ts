@@ -38,7 +38,7 @@ export const processData = {
           title: "Industry Problem"
         },
         {
-          src: "/lovable-uploads/c17bf285-dc04-4b79-bd11-3647cf6eb5d8.png",
+          src: "/lovable-uploads/e56cd4ad-0580-4397-8f75-e84e8b83cb07.png",
           alt: "Sepsis triggers configuration interface",
           caption: "Configuration interface showing sepsis trigger rules and logic parameters",
           title: "Sepsis Triggers & Logic"
