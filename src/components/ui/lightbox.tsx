@@ -264,10 +264,10 @@ export const ImageThumbnails: React.FC<ImageThumbnailsProps> = ({
                 alt={image.alt}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               {image.title && (
-                <div className="absolute bottom-1 left-1 right-1 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                <div className="absolute bottom-1 left-1 right-1 text-white text-xs font-medium drop-shadow-sm transition-all duration-200 group-hover:font-semibold z-10">
                   {image.title}
                 </div>
               )}
