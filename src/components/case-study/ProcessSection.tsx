@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { ProcessStep } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
-import { ImageThumbnails, MediaThumbnails } from "@/components/ui/lightbox";
+import { ImageThumbnails } from "@/components/ui/lightbox";
 
 interface ProcessSectionProps {
   title: string;
@@ -58,15 +58,11 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                           <footer className="text-sm mt-1">— {step.quote.author}</footer>
                         </blockquote>
                       )}
-                      {step.media && step.media.length > 0 ? (
-                        <div className="mt-4">
-                          <MediaThumbnails media={step.media} />
-                        </div>
-                      ) : step.images && step.images.length > 0 ? (
+                      {step.images && step.images.length > 0 && (
                         <div className="mt-4">
                           <ImageThumbnails images={step.images} />
                         </div>
-                      ) : null}
+                      )}
                     </div>
                     {step.image && (
                       <div className="mb-4 md:mb-0 md:w-80 md:flex-shrink-0 md:order-2">

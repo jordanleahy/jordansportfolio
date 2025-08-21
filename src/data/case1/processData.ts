@@ -43,17 +43,14 @@ export const processData = {
         "Hosted sepsis workshop"
       ],
       image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
-      media: [
+      images: [
         {
-          type: "iframe",
-          src: "https://embed.figma.com/design/svURk5CpuhhkJ4IR3cXh2L/SmarterDx-Website-Content?node-id=8-1872&embed-host=share",
-          alt: "Figma Design Presentation",
-          caption: "Interactive Figma presentation showing the complete design process and user flows",
-          title: "Figma Design Process",
-          thumbnailSrc: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png"
+          src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
+          alt: "Dashboard wireframes",
+          caption: "Initial dashboard concepts and wireframes",
+          title: "Dashboard Concepts"
         },
         {
-          type: "image",
           src: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
           alt: "Workshop documentation",
           caption: "Sepsis workshop findings and ideation results",
