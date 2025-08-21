@@ -20,7 +20,7 @@ export const processData = {
       image: "/lovable-uploads/8babb6cd-acf6-42ee-83c8-f2bad75762bc.png",
       images: [
         {
-          src: "/lovable-uploads/e2835d2a-bf5b-4e83-9378-b4850e07fe77.png",
+          src: "/lovable-uploads/501c3cff-f1e5-4d47-8fa5-671c09117479.png",
           alt: "Medical chart data and sepsis indicators",
           caption: "Real patient chart data showing sepsis indicators and clinical measurements",
           title: "Patient Chart Analysis"
