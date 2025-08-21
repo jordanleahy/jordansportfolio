@@ -186,12 +186,6 @@ export const SystemPromptsTab = ({
                 <div className="flex items-start justify-between mb-2">
                   
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => {
-                window.open(`/stories`, '_blank');
-              }}>
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
                     <Button variant="outline" size="sm" onClick={() => handleCopyPrompt(dbPrompt.prompt_text || '')} disabled={!dbPrompt.prompt_text?.trim()} className="gap-2">
                       <Copy className="h-4 w-4" />
                       Copy Prompt
