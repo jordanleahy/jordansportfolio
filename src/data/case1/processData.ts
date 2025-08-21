@@ -59,21 +59,6 @@ export const processData = {
         "Real-time data visualization concepts",
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
-      ],
-      image: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
-      images: [
-        {
-          src: "/lovable-uploads/1301a9f1-c906-4800-a572-38f921f717bf.png",
-          alt: "Dashboard wireframes",
-          caption: "Initial dashboard concepts and wireframes",
-          title: "Dashboard Concepts"
-        },
-        {
-          src: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
-          alt: "Workshop documentation",
-          caption: "Sepsis workshop findings and ideation results",
-          title: "Workshop Findings"
-        }
       ]
     },
     {
