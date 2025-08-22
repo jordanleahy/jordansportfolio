@@ -30,10 +30,6 @@ export default function CofactorProposal() {
                 <Calendar className="w-4 h-4 mr-2" />
                 3 Weeks
               </Badge>
-              <Badge variant="outline" className="text-lg px-4 py-2">
-                <Target className="w-4 h-4 mr-2" />
-                90% Commitment
-              </Badge>
             </div>
           </div>
 
@@ -286,7 +282,7 @@ export default function CofactorProposal() {
                   <div>
                     <h4 className="font-semibold text-lg mb-2">Investment</h4>
                     <div className="text-3xl font-bold text-primary">$15,000</div>
-                    <p className="text-sm text-muted-foreground mt-1">3 weeks • 90% time commitment</p>
+                    <p className="text-sm text-muted-foreground mt-1">3 weeks</p>
                   </div>
                   
                   <div>
