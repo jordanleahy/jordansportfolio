@@ -1,4 +1,5 @@
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Section } from '@/components/layout/Section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -8,34 +9,30 @@ import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, Trending
 export default function CofactorProposal() {
   return (
     <PageLayout>
-      <div className="w-full py-8">
-        <div className="w-full space-y-12">
-          {/* Hero Section */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
-                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                <div className="relative text-center py-16 px-8">
-                  <div className="space-y-6">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
-                      3-Week Design Sprint
-                    </h1>
-                    <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
-                      Transform CoFactorAI's Product Direction
-                    </h2>
-                    <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                      Strategic AI-powered design sprint to optimize user experience, validate product direction, 
-                      and create a comprehensive roadmap for growth with your medical professional users.
-                    </p>
-                  </div>
-                </div>
+      <div className="space-y-12 py-8">
+        {/* Hero Section */}
+        <Section maxWidth="6xl" fluid>
+          <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="relative text-center py-16 px-8">
+              <div className="space-y-6">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
+                  3-Week Design Sprint
+                </h1>
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
+                  Transform CoFactorAI's Product Direction
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
+                  and create a comprehensive roadmap for growth with your medical professional users.
+                </p>
               </div>
             </div>
-          </section>
+          </div>
+        </Section>
 
-          {/* Project Timeline */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
+        {/* Project Timeline */}
+        <Section maxWidth="6xl" fluid>
               <div className="space-y-8">
                 <div className="text-center space-y-4">
                   <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
@@ -205,14 +202,12 @@ export default function CofactorProposal() {
                 </div>
               </CardContent>
             </Card>
-               </div>
-             </div>
-           </div>
-          </section>
+              </div>
+            </div>
+        </Section>
 
-          {/* Tools & Technology */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
+        {/* Tools & Technology */}
+        <Section maxWidth="6xl" fluid>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -239,14 +234,12 @@ export default function CofactorProposal() {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
+              </CardContent>
+            </Card>
+        </Section>
 
-          {/* Deliverables */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
+        {/* Deliverables */}
+        <Section maxWidth="6xl" fluid>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -285,14 +278,12 @@ export default function CofactorProposal() {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
+              </CardContent>
+            </Card>
+        </Section>
 
-          {/* Pricing & Terms */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
+        {/* Pricing & Terms */}
+        <Section maxWidth="6xl" fluid>
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
                   <CardTitle className="flex items-center gap-3 text-2xl">
@@ -340,31 +331,28 @@ export default function CofactorProposal() {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
+              </CardContent>
+            </Card>
+        </Section>
 
-          {/* CTA Section */}
-          <section className="w-full px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center space-y-6 py-8">
-                <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" className="text-lg px-8">
-                    Start the Engagement
-                  </Button>
-                  <Button variant="outline" size="lg" className="text-lg px-8">
-                    Schedule a Discussion
-                  </Button>
-                </div>
-              </div>
+        {/* CTA Section */}
+        <Section maxWidth="6xl" fluid>
+          <div className="text-center space-y-6 py-8">
+            <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-8">
+                Start the Engagement
+              </Button>
+              <Button variant="outline" size="lg" className="text-lg px-8">
+                Schedule a Discussion
+              </Button>
             </div>
-          </section>
-        </div>
+          </div>
+        </Section>
+
       </div>
     </PageLayout>
   );
