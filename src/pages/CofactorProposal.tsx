@@ -14,7 +14,7 @@ export default function CofactorProposal() {
         <Section maxWidth="6xl" fluid className="min-h-[80vh]" style={{backgroundImage: 'url(/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
           <div className="relative overflow-hidden rounded-2xl">
             
-              <div className="space-y-6 relative text-center py-16 px-8">
+              <div className="space-y-6 relative text-center py-16 px-8 flex flex-col justify-center h-full">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
                   3-Week Design Sprint
                 </h1>
