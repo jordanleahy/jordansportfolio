@@ -12,8 +12,8 @@ export default function CofactorProposal() {
       <div>
         {/* Hero Section */}
         <Section maxWidth="6xl" fluid className="min-h-[80vh]">
-          <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="relative overflow-hidden rounded-2xl">
+            
               <div className="space-y-6 relative text-center py-16 px-8">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
                   3-Week Design Sprint
