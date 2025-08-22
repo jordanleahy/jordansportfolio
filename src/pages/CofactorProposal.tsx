@@ -6,9 +6,57 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HeroImage } from '@/components/ui/hero-image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { CofactorPasswordModal } from '@/components/CofactorPasswordModal';
+import { useState, useEffect } from 'react';
 export default function CofactorProposal() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const auth = sessionStorage.getItem('cofactorAuth');
+    if (auth === 'true') {
+      setIsAuthenticated(true);
+    } else {
+      setShowPasswordModal(true);
+    }
+  }, []);
+
+  const handleAuthenticate = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowPasswordModal(false);
+    // Optionally redirect or show a message
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <CofactorPasswordModal
+          isOpen={showPasswordModal}
+          onClose={handleCloseModal}
+          onAuthenticate={handleAuthenticate}
+        />
+        <PageLayout>
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <Lock className="w-12 h-12 mx-auto text-muted-foreground" />
+              <h2 className="text-2xl font-semibold">Access Required</h2>
+              <p className="text-muted-foreground">This proposal requires password authentication.</p>
+              <Button onClick={() => setShowPasswordModal(true)}>
+                Enter Password
+              </Button>
+            </div>
+          </div>
+        </PageLayout>
+      </>
+    );
+  }
+
   return <PageLayout>
       <div>
         {/* Hero Section */}
