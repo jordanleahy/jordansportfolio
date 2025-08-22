@@ -47,8 +47,8 @@ const Navigation = () => {
   const navLinkStyles = "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50";
 
   // Get navigation items based on user state
-  const publicNavItems = getNavigationItems(null, false).filter(item => item.showInDesktop);
-  const authenticatedNavItems = getNavigationItems(user, false).filter(item => item.showInDesktop);
+  const publicNavItems = getNavigationItems(null, false, false).filter(item => item.showInDesktop);
+  const authenticatedNavItems = getNavigationItems(user, isAdmin, true).filter(item => item.showInDesktop);
 
   const handleSignOut = async () => {
     await signOut();
@@ -99,7 +99,7 @@ const Navigation = () => {
                   <>
                     {isAdmin && <AdminDropdown navLinkStyles={navLinkStyles} />}
 
-                    {publicNavItems.map((item) => (
+                    {authenticatedNavItems.map((item) => (
                       <NavLink
                         key={item.href}
                         item={item}

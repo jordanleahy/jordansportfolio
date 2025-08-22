@@ -29,22 +29,39 @@ export interface NavigationItem {
 }
 
 export const navigationConfig: NavigationItem[] = [
-  // Public items
+  // Public items (marketing routes)
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
+  // Authenticated items
+  { href: "/home", label: "Dashboard", icon: Home, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
+  { href: "/stories", label: "My Stories", icon: BookOpen, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
+  { href: "/account", label: "Account", icon: Target, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
+
   // Admin-only items
   { href: "/admin/use-cases", label: "Use Cases", icon: Target, accessLevel: 'admin', showInMobile: true },
 ];
 
-export const getNavigationItems = (user: any, isAdmin: boolean): NavigationItem[] => {
+export const getNavigationItems = (user: any, isAdmin: boolean, hideMarketingRoutes: boolean = false): NavigationItem[] => {
+  const marketingRoutes = ['/', '/about', '/blog'];
+  
   return navigationConfig.filter(item => {
-    if (item.accessLevel === 'public') return true;
-    if (item.accessLevel === 'authenticated') return !!user;
-    if (item.accessLevel === 'admin') return user && isAdmin;
-    return false;
+    // Filter by access level
+    let hasAccess = false;
+    if (item.accessLevel === 'public') hasAccess = true;
+    if (item.accessLevel === 'authenticated') hasAccess = !!user;
+    if (item.accessLevel === 'admin') hasAccess = user && isAdmin;
+    
+    if (!hasAccess) return false;
+    
+    // For authenticated users, hide marketing routes if requested
+    if (hideMarketingRoutes && user && item.accessLevel === 'public' && marketingRoutes.includes(item.href)) {
+      return false;
+    }
+    
+    return true;
   });
 };
 

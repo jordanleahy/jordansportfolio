@@ -13,7 +13,7 @@ interface MobileMenuProps {
 export const MobileMenu = ({ user, isAdmin, onSignOut }: MobileMenuProps) => {
   const location = useLocation();
   
-  const menuItems = getNavigationItems(user, isAdmin).filter(item => item.showInMobile);
+  const menuItems = getNavigationItems(user, isAdmin, !!user).filter(item => item.showInMobile);
   
   const mobileNavItemStyles = "flex items-center gap-3 py-3 px-4 text-base font-medium rounded-lg transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/20";
 
