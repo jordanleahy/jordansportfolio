@@ -71,6 +71,7 @@ import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import BillingPage from "./pages/BillingPage";
 import AccountPage from "./pages/AccountPage";
 import CofactorProposal from "./pages/CofactorProposal";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -397,6 +398,7 @@ function App() {
                 <Route path="/billing" element={<BillingPage />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/cofactor-proposal" element={<CofactorProposal />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route 
                   path="/work-report" 
                   element={
