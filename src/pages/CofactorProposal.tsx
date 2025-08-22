@@ -319,6 +319,13 @@ export default function CofactorProposal() {
                     </div>
                     
                     <div>
+                      <div>
+                        <h4 className="font-semibold mb-3">Target Dates</h4>
+                        <div className="bg-muted/50 rounded-lg p-4 text-sm mb-6">
+                          <p className="font-medium">Mon, September 1st to Mon Sep 22nd</p>
+                        </div>
+                      </div>
+                      
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <Shield className="w-5 h-5" />
                         Satisfaction Policy
