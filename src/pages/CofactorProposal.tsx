@@ -21,9 +21,7 @@ export default function CofactorProposal() {
                   Team Alignment & Design Workshop
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
-                  and create a comprehensive roadmap for growth with your medical professional users.
-                </p>
+              </p>
               </div>
             </div>
           </HeroImage>
@@ -205,7 +203,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Tools & Technology */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#FE6F21' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
@@ -239,7 +237,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Deliverables */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#1E1919' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
@@ -286,7 +284,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Pricing & Terms */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#3E89F4' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
@@ -396,22 +394,6 @@ export default function CofactorProposal() {
                     </AccordionTrigger>
                     <AccordionContent>
                       If using all day with new code base, roughly $10-$30 per day.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger className="text-left">
-                      Do we need a bimutual NDA?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Yes
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-4">
-                    <AccordionTrigger className="text-left">
-                      Do we need a contract?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Yes
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
