@@ -37,7 +37,7 @@ export default function CofactorProposal() {
                   Timeline
                 </h2>
                   <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                    A comprehensive 3-week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis
+                    A 3 week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis.
                   </p>
                 </div>
           <div className="grid gap-8 lg:gap-12">
