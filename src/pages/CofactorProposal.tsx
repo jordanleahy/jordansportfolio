@@ -254,7 +254,7 @@ export default function CofactorProposal() {
                       </div>
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
-                        <span className="text-sm">User testing recordings & notes (5 sessions)</span>
+                        <span className="text-sm">User testing recordings & notes</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
