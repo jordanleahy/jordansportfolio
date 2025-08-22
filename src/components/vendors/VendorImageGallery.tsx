@@ -257,7 +257,10 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
     ));
   };
 
-  const hasChanges = JSON.stringify(images) !== JSON.stringify(vendor.vendor_images || []);
+  const hasChanges = 
+    JSON.stringify(images) !== JSON.stringify(vendor.vendor_images || []) ||
+    socialLogoUrl !== ((vendor as any).social_logo_url || '') ||
+    landscapeLogoUrl !== ((vendor as any).landscape_logo_url || '');
 
   return (
     <>
