@@ -6,57 +6,9 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HeroImage } from '@/components/ui/hero-image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle, Lock } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { CofactorPasswordModal } from '@/components/CofactorPasswordModal';
-import { useState, useEffect } from 'react';
 export default function CofactorProposal() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-
-  useEffect(() => {
-    // Check if user is already authenticated
-    const auth = sessionStorage.getItem('cofactorAuth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    } else {
-      setShowPasswordModal(true);
-    }
-  }, []);
-
-  const handleAuthenticate = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowPasswordModal(false);
-    // Optionally redirect or show a message
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <>
-        <CofactorPasswordModal
-          isOpen={showPasswordModal}
-          onClose={handleCloseModal}
-          onAuthenticate={handleAuthenticate}
-        />
-        <PageLayout>
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <Lock className="w-12 h-12 mx-auto text-muted-foreground" />
-              <h2 className="text-2xl font-semibold">Access Required</h2>
-              <p className="text-muted-foreground">This proposal requires password authentication.</p>
-              <Button onClick={() => setShowPasswordModal(true)}>
-                Enter Password
-              </Button>
-            </div>
-          </div>
-        </PageLayout>
-      </>
-    );
-  }
-
   return <PageLayout>
       <div>
         {/* Hero Section */}
@@ -71,7 +23,8 @@ export default function CofactorProposal() {
                   Team Alignment & Design Workshop
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                  A 3 week product alignment engagement focused on CDI features such as query innovation.
+                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
+                  and create a comprehensive roadmap for growth with your medical professional users.
                 </p>
               </div>
             </div>
@@ -104,7 +57,7 @@ export default function CofactorProposal() {
                   <div className="flex flex-col md:flex-row md:items-start gap-3">
                     <Badge variant="outline" className="md:shrink-0 self-start">Day 1-2</Badge>
                     <div className="flex-1">
-                      <h4 className="font-semibold">Kick-off & Alignment</h4>
+                      <h4 className="font-semibold">CDI Innovation</h4>
                       <p className="text-sm text-muted-foreground">Confirm objectives, success criteria, view map, team roles</p>
                       <p className="text-xs text-primary font-medium mt-1">Ask: Up to two 45 minute meetings</p>
                     </div>
@@ -254,7 +207,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Tools & Technology */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#FF9601' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
@@ -288,7 +241,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Deliverables */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#1E1919' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
@@ -335,7 +288,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Pricing & Terms */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#3E89F4' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
@@ -445,22 +398,6 @@ export default function CofactorProposal() {
                     </AccordionTrigger>
                     <AccordionContent>
                       If using all day with new code base, roughly $10-$30 per day.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger className="text-left">
-                      Do we need to sign a bi-mutual NDA?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Yes
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-4">
-                    <AccordionTrigger className="text-left">
-                      Do we need a contract?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Yes
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
