@@ -8,37 +8,43 @@ import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, Trending
 export default function CofactorProposal() {
   return (
     <PageLayout>
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-6xl mx-auto space-y-12">
+      <div className="w-full py-8">
+        <div className="w-full space-y-12">
           {/* Hero Section */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            <div className="relative text-center py-16 px-8">
-              <div className="space-y-6">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
-                  3-Week Design Sprint
-                </h1>
-                <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
-                  Transform CoFactorAI's Product Direction
-                </h2>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
-                  and create a comprehensive roadmap for growth with your medical professional users.
-                </p>
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
+                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                <div className="relative text-center py-16 px-8">
+                  <div className="space-y-6">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
+                      3-Week Design Sprint
+                    </h1>
+                    <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
+                      Transform CoFactorAI's Product Direction
+                    </h2>
+                    <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                      Strategic AI-powered design sprint to optimize user experience, validate product direction, 
+                      and create a comprehensive roadmap for growth with your medical professional users.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Project Timeline */}
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                Sprint Calendar & Timeline
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                A comprehensive 3-week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis
-              </p>
-            </div>
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="space-y-8">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    Sprint Calendar & Timeline
+                  </h2>
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    A comprehensive 3-week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis
+                  </p>
+                </div>
           <div className="grid gap-8 lg:gap-12">
             {/* Week 1 */}
             <Card className="overflow-hidden">
@@ -199,147 +205,165 @@ export default function CofactorProposal() {
                 </div>
               </CardContent>
             </Card>
+               </div>
+             </div>
            </div>
-          </div>
+          </section>
 
           {/* Tools & Technology */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <Lightbulb className="w-6 h-6" />
-                Tools & Technology
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-3">Primary Tools</h4>
-                  <div className="space-y-2">
-                    <Badge variant="secondary">Lovable - AI Prototyping</Badge>
-                    <Badge variant="secondary">Miro - Workshop Collaboration</Badge>
-                    <Badge variant="secondary">Video Recording - User Testing</Badge>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-3">Data & Testing</h4>
-                  <div className="space-y-2">
-                    <Badge variant="outline">Synthetic Query Data</Badge>
-                    <Badge variant="outline">Real-world Input Simulation</Badge>
-                    <Badge variant="outline">5 User Testing Sessions</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Deliverables */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <CheckCircle className="w-6 h-6" />
-                Deliverables
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">High-fidelity prototype built with AI design tools</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">User testing recordings & notes (5 sessions)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">How Might We board & decision map</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Product Direction Playbook</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Final presentation deck with recommendations</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Workshop collaboration materials</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pricing & Terms */}
-          <Card className="border-2 border-primary/20">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <TrendingUp className="w-6 h-6" />
-                Investment & Terms
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Investment</h4>
-                    <div className="text-3xl font-bold text-primary">$15,000</div>
-                    <p className="text-sm text-muted-foreground mt-1">3 weeks</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-2">Payment Terms</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">50%</Badge>
-                        <span>Upon signing</span>
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Lightbulb className="w-6 h-6" />
+                    Tools & Technology
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Primary Tools</h4>
+                      <div className="space-y-2">
+                        <Badge variant="secondary">Lovable - AI Prototyping</Badge>
+                        <Badge variant="secondary">Miro - Workshop Collaboration</Badge>
+                        <Badge variant="secondary">Video Recording - User Testing</Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">50%</Badge>
-                        <span>Upon final report delivery</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-3">Data & Testing</h4>
+                      <div className="space-y-2">
+                        <Badge variant="outline">Synthetic Query Data</Badge>
+                        <Badge variant="outline">Real-world Input Simulation</Badge>
+                        <Badge variant="outline">5 User Testing Sessions</Badge>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Satisfaction Policy
-                  </h4>
-                  <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                    <p>
-                      If you are truly not satisfied with the final deliverable which will target our aligned 
-                      objectives and success criteria, the final payment will be void.
-                    </p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Terms: Due upon receipt
-                    </p>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          {/* Deliverables */}
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <CheckCircle className="w-6 h-6" />
+                    Deliverables
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">High-fidelity prototype built with AI design tools</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">User testing recordings & notes (5 sessions)</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">How Might We board & decision map</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">Product Direction Playbook</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">Final presentation deck with recommendations</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm">Workshop collaboration materials</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          {/* Pricing & Terms */}
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <Card className="border-2 border-primary/20">
+                <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <TrendingUp className="w-6 h-6" />
+                    Investment & Terms
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-lg mb-2">Investment</h4>
+                        <div className="text-3xl font-bold text-primary">$15,000</div>
+                        <p className="text-sm text-muted-foreground mt-1">3 weeks</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold mb-2">Payment Terms</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">50%</Badge>
+                            <span>Upon signing</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">50%</Badge>
+                            <span>Upon final report delivery</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Shield className="w-5 h-5" />
+                        Satisfaction Policy
+                      </h4>
+                      <div className="bg-muted/50 rounded-lg p-4 text-sm">
+                        <p>
+                          If you are truly not satisfied with the final deliverable which will target our aligned 
+                          objectives and success criteria, the final payment will be void.
+                        </p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Terms: Due upon receipt
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
 
           {/* CTA Section */}
-          <div className="text-center space-y-6 py-8">
-            <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8">
-                Start the Engagement
-              </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8">
-                Schedule a Discussion
-              </Button>
+          <section className="w-full px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center space-y-6 py-8">
+                <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button size="lg" className="text-lg px-8">
+                    Start the Engagement
+                  </Button>
+                  <Button variant="outline" size="lg" className="text-lg px-8">
+                    Schedule a Discussion
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </PageLayout>
