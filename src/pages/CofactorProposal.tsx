@@ -68,7 +68,7 @@ export default function CofactorProposal() {
                     <div className="flex-1">
                       <h4 className="font-semibold">Team Recruitment</h4>
                       <p className="text-sm text-muted-foreground">Recruit sprint team (5-7 participants), schedule workshop & user tests</p>
-                      <p className="text-xs text-primary font-medium mt-1">Ask: Who will participate from CoFactorAI and which MD/PA will participate</p>
+                      <p className="text-xs text-primary font-medium mt-1">Ask: Who will participate from CoFactorAI and how can we get a physician and physician advisor?</p>
                     </div>
                   </div>
                   
