@@ -71,8 +71,7 @@ export default function CofactorProposal() {
                   Team Alignment & Design Workshop
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
-                  and create a comprehensive roadmap for growth with your medical professional users.
+                  A 3 week product alignment engagement focused on CDI features such as query innovation.
                 </p>
               </div>
             </div>
