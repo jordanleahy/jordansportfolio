@@ -9,7 +9,7 @@ import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, Trending
 export default function CofactorProposal() {
   return (
     <PageLayout>
-      <div className="space-y-12 py-8">
+      <div>
         {/* Hero Section */}
         <Section maxWidth="6xl" fluid>
           <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
