@@ -33,9 +33,9 @@ export default function CofactorProposal() {
         <Section maxWidth="6xl" fluid>
               <div className="space-y-8 max-w-[900px] mx-auto">
                 <div className="text-center space-y-4">
-                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                    Sprint Calendar & Timeline
-                  </h2>
+                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Timeline
+                </h2>
                   <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                     A comprehensive 3-week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis
                   </p>
