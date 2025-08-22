@@ -105,7 +105,6 @@ export default function StoriesDashboard() {
     errors?: string[];
   } | null>(null);
 
-
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
