@@ -163,7 +163,7 @@ export default function CofactorProposal() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h5 className="font-medium mb-2">Wednesday – Prototype</h5>
-                      <p className="text-sm text-muted-foreground">Build high-fidelity clickable prototype using AI-powered UI design</p>
+                      <p className="text-sm text-muted-foreground">Jordan at minimum will create prototype for user testing. Recommend Cameron join as well.</p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h5 className="font-medium mb-2">Thursday – Test & Learn</h5>
