@@ -167,7 +167,7 @@ export default function CofactorProposal() {
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">
                       <h5 className="font-medium mb-2">Thursday – Test & Learn</h5>
-                      <p className="text-sm text-muted-foreground">Run 5 user tests and capture insights</p>
+                      <p className="text-sm text-muted-foreground">User test against as many MDs as possible</p>
                     </div>
                   </div>
                 </div>
