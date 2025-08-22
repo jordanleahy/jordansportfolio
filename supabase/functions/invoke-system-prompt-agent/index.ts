@@ -10,6 +10,7 @@ const AGENT_NAMES = {
   BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
   COVER_LETTER_GENERATOR: 'Cover Letter Generator',
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
+  ABC_LEARNING_AGENT: 'ABC Learning Agent',
 } as const;
 
 const SYSTEM_PROMPT_CATEGORIES = {
@@ -485,7 +486,20 @@ Please generate a detailed, professional system prompt following the established
       let targetAgentName = null;
       
       // Route based on theme first, then category context
-      if (actualTheme?.toLowerCase().includes('visual') || 
+      // Check for ABC/Alphabet learning content first
+      if (actualTheme?.toLowerCase().includes('abc') || 
+          actualTheme?.toLowerCase().includes('alphabet') ||
+          actualTheme?.toLowerCase().includes('letter') ||
+          contextCategory?.includes('abc-learning') ||
+          contextCategory?.includes('alphabet-flashcards') ||
+          contextCategory?.includes('preschool-alphabet') ||
+          description?.toLowerCase().includes('abc') ||
+          description?.toLowerCase().includes('alphabet') ||
+          description?.toLowerCase().includes('letter learning')) {
+        targetAgentName = AGENT_NAMES.ABC_LEARNING_AGENT;
+      }
+      // Visual content routing
+      else if (actualTheme?.toLowerCase().includes('visual') || 
           ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(actualTheme) ||
           ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(contextCategory) ||
           description?.toLowerCase().includes('visual') || 

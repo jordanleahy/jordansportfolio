@@ -148,6 +148,9 @@ export const DEFAULT_CATEGORY_LABELS: Record<string, string> = {
   'corporate-training': 'Corporate Training',
   'skill-development': 'Skill Development',
   'knowledge-management': 'Knowledge Management',
+  'abc-learning': 'ABC Learning',
+  'alphabet-flashcards': 'Alphabet Flashcards',
+  'preschool-alphabet': 'Preschool Alphabet',
   
   // Specific Examples from UI
   'buoyancy-for-prescriptions': 'Buoyancy for Prescriptions',
@@ -275,6 +278,9 @@ export const CATEGORY_INDUSTRY_MAP: Record<string, string> = {
   'corporate-training': 'education',
   'skill-development': 'education',
   'knowledge-management': 'education',
+  'abc-learning': 'education',
+  'alphabet-flashcards': 'education',
+  'preschool-alphabet': 'education',
   'ballet-3-year-olds': 'education',
   
   // Default to 'other' for unmapped categories
