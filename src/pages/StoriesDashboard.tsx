@@ -1055,8 +1055,10 @@ export default function StoriesDashboard() {
             </Section>
           </>}
 
-        {/* Public Collections Section */}
-        <PublicCollectionsSection />
+        {/* Public Collections Section - Desktop only */}
+        <div className="hidden md:block">
+          <PublicCollectionsSection />
+        </div>
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
