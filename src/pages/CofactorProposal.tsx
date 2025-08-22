@@ -250,7 +250,7 @@ export default function CofactorProposal() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
-                        <span className="text-sm">High-fidelity prototype built with AI design tools</span>
+                        <span className="text-sm">React front-end application with dummy data in Lovable</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
