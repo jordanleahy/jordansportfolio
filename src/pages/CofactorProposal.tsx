@@ -364,12 +364,6 @@ export default function CofactorProposal() {
             </div>
             
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <HelpCircle className="w-6 h-6" />
-                  Questions & Answers
-                </CardTitle>
-              </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
