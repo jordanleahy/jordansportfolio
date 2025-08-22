@@ -11,7 +11,7 @@ export default function CofactorProposal() {
     <PageLayout>
       <div>
         {/* Hero Section */}
-        <Section maxWidth="6xl" fluid>
+        <Section maxWidth="6xl" fluid className="min-h-[80vh]">
           <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="relative text-center py-16 px-8">
