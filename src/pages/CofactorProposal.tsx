@@ -191,7 +191,7 @@ export default function CofactorProposal() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-primary" />
-                    <span>Create Product Direction Playbook</span>
+                    <span>Create a list of PRDs</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-primary" />
