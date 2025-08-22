@@ -359,7 +359,7 @@ export default function CofactorProposal() {
           <div className="space-y-8 max-w-[900px] mx-auto">
             <div className="text-center space-y-4">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                Frequently Asked Questions
+                FAQ
               </h2>
             </div>
             
