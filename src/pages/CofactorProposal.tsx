@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { HeroImage } from '@/components/ui/hero-image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CofactorProposal() {
   return (
@@ -313,14 +314,37 @@ export default function CofactorProposal() {
                       
                       <div>
                         <h4 className="font-semibold mb-2">Payment Terms</h4>
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-3 text-sm">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">50%</Badge>
-                            <span>Upon signing</span>
+                            <span>Upon signing ($6,750)</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">50%</Badge>
                             <span>Upon final report delivery</span>
+                          </div>
+                          
+                          <div className="pt-2">
+                            <Button 
+                              onClick={async () => {
+                                try {
+                                  const { data, error } = await supabase.functions.invoke('create-payment', {
+                                    body: { paymentType: 'downpayment' }
+                                  });
+                                  
+                                  if (error) throw error;
+                                  
+                                  if (data?.url) {
+                                    window.open(data.url, '_blank');
+                                  }
+                                } catch (error) {
+                                  console.error('Payment error:', error);
+                                }
+                              }}
+                              className="w-full"
+                            >
+                              Pay 50% Downpayment ($6,750)
+                            </Button>
                           </div>
                         </div>
                       </div>
