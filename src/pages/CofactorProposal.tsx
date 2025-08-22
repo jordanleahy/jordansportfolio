@@ -19,7 +19,7 @@ export default function CofactorProposal() {
                   Query Innovation
                 </h1>
                 <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
-                  Transform CoFactorAI's Product Direction
+                  Team Alignment & Design Workshop
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
                   Strategic AI-powered design sprint to optimize user experience, validate product direction, 
