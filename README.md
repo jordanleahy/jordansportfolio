@@ -60,6 +60,22 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Image Generation Pipeline
+
+This project includes a sophisticated AI-powered image generation system that transforms text input into high-quality images using OpenAI's models and specialized AI agents.
+
+**📖 Documentation:**
+- [Complete Image Generation Pipeline Guide](docs/IMAGE_GENERATION_PIPELINE.md) - Comprehensive developer guide
+- [Technical Audit & Hardening](docs/text-to-photos-audit-and-hardening.md) - Detailed technical analysis
+- [Agent Documentation](docs/agents/) - Individual agent specifications
+
+**🚀 Key Features:**
+- Single and bulk image generation workflows
+- AI agent ecosystem for content optimization
+- Real-time progress tracking and status updates
+- Intelligent caching and performance optimization
+- Comprehensive error handling and monitoring
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/265639ae-98fe-47f5-888f-bed563c20e8d) and click on Share -> Publish.
