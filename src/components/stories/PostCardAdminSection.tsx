@@ -161,14 +161,6 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
         <div id="photos-section" className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Image Generation</h4>
           
-          {/* Reference Image */}
-          <div className="mb-4">
-            <img 
-              src="/lovable-uploads/2a5cd48f-398c-4b72-893e-fe8f28261daf.png" 
-              alt="Image generation reference" 
-              className="w-full max-w-md rounded-lg border"
-            />
-          </div>
 
           {/* Primary card - 1:1 Square (default/cheapest) */}
           <div className="mb-3">
