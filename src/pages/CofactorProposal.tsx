@@ -53,7 +53,6 @@ export default function CofactorProposal() {
                   <div className="flex flex-col md:flex-row md:items-start gap-3">
                     <Badge variant="outline" className="md:shrink-0 self-start">Day 1-2</Badge>
                     <div className="flex-1">
-                      <div className="block md:hidden text-xs text-muted-foreground uppercase tracking-wide mb-1">Day 1-2</div>
                       <h4 className="font-semibold">Kick-off & Alignment</h4>
                       <p className="text-sm text-muted-foreground">Confirm objectives, success criteria, view map, team roles</p>
                       <p className="text-xs text-primary font-medium mt-1">Ask: Up to two 45 minute meetings</p>
@@ -76,7 +75,6 @@ export default function CofactorProposal() {
                   <div className="flex flex-col md:flex-row md:items-start gap-3">
                     <Badge variant="outline" className="md:shrink-0 self-start">Day 5</Badge>
                     <div className="flex-1">
-                      <div className="block md:hidden text-xs text-muted-foreground uppercase tracking-wide mb-1">Day 5</div>
                       <h4 className="font-semibold">Expert Input Collection</h4>
                       <p className="text-sm text-muted-foreground">Participant interviews, prior research, share sprint primer</p>
                       <p className="text-xs text-primary font-medium mt-1">Ask: 30 minute interview with each participant</p>
