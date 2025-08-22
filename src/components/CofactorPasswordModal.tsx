@@ -29,13 +29,13 @@ export const CofactorPasswordModal: React.FC<CofactorPasswordModalProps> = ({
     if (password === 'chicago') {
       // Store authentication in session storage
       sessionStorage.setItem('cofactorAuth', 'true');
-      onAuthenticate();
-      onClose();
       setPassword('');
       toast({
         title: "Access Granted",
         description: "Welcome to the Query Innovation proposal."
       });
+      onAuthenticate();
+      onClose();
     } else {
       toast({
         title: "Access Denied",
