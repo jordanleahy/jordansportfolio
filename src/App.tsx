@@ -35,6 +35,7 @@ import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
+import { CofactorRouteWrapper } from "./components/cofactor/CofactorRouteWrapper";
 import Library from "./pages/Library";
 
 import { AgentDetail } from "./pages/agents/AgentDetail";
@@ -396,7 +397,11 @@ function App() {
                 <Route path="/subscription-status" element={<SubscriptionSuccess />} />
                 <Route path="/billing" element={<BillingPage />} />
                 <Route path="/account" element={<AccountPage />} />
-                <Route path="/cofactor-proposal" element={<CofactorProposal />} />
+                <Route path="/cofactor-proposal" element={
+                  <CofactorRouteWrapper>
+                    <CofactorProposal />
+                  </CofactorRouteWrapper>
+                } />
                 <Route 
                   path="/work-report" 
                   element={
