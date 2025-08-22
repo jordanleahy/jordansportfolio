@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { HeroImage } from '@/components/ui/hero-image';
 import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield } from 'lucide-react';
 
 export default function CofactorProposal() {
@@ -11,10 +12,15 @@ export default function CofactorProposal() {
     <PageLayout>
       <div>
         {/* Hero Section */}
-        <Section maxWidth="6xl" fluid className="min-h-[80vh] p-0 flex items-center" style={{backgroundImage: 'url(/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
-          <div className="relative overflow-hidden rounded-2xl w-full">
-            
-              <div className="space-y-6 relative text-center py-16 px-8 flex flex-col justify-center">
+        <Section maxWidth="6xl" fluid className="min-h-[80vh] p-0">
+          <HeroImage
+            src="/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png"
+            alt="Query Innovation - Team Alignment & Design Workshop"
+            className="min-h-[80vh] rounded-2xl"
+            priority={true}
+          >
+            <div className="flex items-center justify-center min-h-[80vh] px-8">
+              <div className="space-y-6 text-center py-16 max-w-6xl mx-auto">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
                   Query Innovation
                 </h1>
@@ -26,7 +32,8 @@ export default function CofactorProposal() {
                   and create a comprehensive roadmap for growth with your medical professional users.
                 </p>
               </div>
-          </div>
+            </div>
+          </HeroImage>
         </Section>
 
         {/* Project Timeline */}
