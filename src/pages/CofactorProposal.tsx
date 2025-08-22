@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HeroImage } from '@/components/ui/hero-image';
-import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
 
 export default function CofactorProposal() {
   return (
@@ -348,6 +349,49 @@ export default function CofactorProposal() {
                       </div>
                     </div>
                   </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Section>
+
+        {/* FAQ Section */}
+        <Section maxWidth="6xl" fluid>
+          <div className="space-y-8 max-w-[900px] mx-auto">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Common questions about the workshop approach and tools
+              </p>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <HelpCircle className="w-6 h-6" />
+                  Questions & Answers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="text-left">
+                      Is Lovable the only prototyping tool we can use?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      No, but I have found very strong success with this tool in building front applications quickly and is preferred choice.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger className="text-left">
+                      How much will Lovable cost?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      If using all day with new code base, roughly $10-$30 per day.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </CardContent>
             </Card>
           </div>
