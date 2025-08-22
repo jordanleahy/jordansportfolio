@@ -361,9 +361,6 @@ export default function CofactorProposal() {
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                 Frequently Asked Questions
               </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Common questions about the workshop approach and tools
-              </p>
             </div>
             
             <Card>
