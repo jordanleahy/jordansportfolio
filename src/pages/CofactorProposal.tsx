@@ -396,6 +396,22 @@ export default function CofactorProposal() {
                       If using all day with new code base, roughly $10-$30 per day.
                     </AccordionContent>
                   </AccordionItem>
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger className="text-left">
+                      Do we need a bimutual NDA?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Yes
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger className="text-left">
+                      Do we need a contract?
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Yes
+                    </AccordionContent>
+                  </AccordionItem>
                 </Accordion>
               </CardContent>
             </Card>
