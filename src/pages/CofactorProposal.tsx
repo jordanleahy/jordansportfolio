@@ -11,10 +11,10 @@ export default function CofactorProposal() {
     <PageLayout>
       <div>
         {/* Hero Section */}
-        <Section maxWidth="6xl" fluid className="min-h-[80vh] py-0" style={{backgroundImage: 'url(/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
-          <div className="relative overflow-hidden rounded-2xl h-full flex">
+        <Section maxWidth="6xl" fluid className="min-h-[80vh] p-0 flex items-center" style={{backgroundImage: 'url(/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+          <div className="relative overflow-hidden rounded-2xl w-full">
             
-              <div className="space-y-6 relative text-center py-16 px-8 flex flex-col justify-center flex-1">
+              <div className="space-y-6 relative text-center py-16 px-8 flex flex-col justify-center">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
                   3-Week Design Sprint
                 </h1>
