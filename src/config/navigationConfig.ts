@@ -37,7 +37,6 @@ export const navigationConfig: NavigationItem[] = [
 
   // Authenticated items
   { href: "/home", label: "Dashboard", icon: Home, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
-  { href: "/stories", label: "My Stories", icon: BookOpen, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
   { href: "/account", label: "Account", icon: Target, accessLevel: 'authenticated', showInDesktop: true, showInMobile: true },
 
   // Admin-only items
