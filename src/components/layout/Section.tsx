@@ -27,7 +27,7 @@ export const Section: React.FC<SectionProps> = ({
   return (
     <section
       {...props}
-      className={cn(fluid ? 'w-full px-4' : 'container mx-auto px-4', !fluid && maxWidthClasses[maxWidth], className)}
+      className={cn(fluid ? 'w-full px-4 py-8' : 'container mx-auto px-4 py-8', !fluid && maxWidthClasses[maxWidth], className)}
     >
       {children}
     </section>
