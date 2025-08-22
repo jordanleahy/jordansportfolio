@@ -93,7 +93,7 @@ export default function CofactorProposal() {
                   <div className="w-8 h-8 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center font-bold">2</div>
                   Week 2 – Design Sprint Workshop (4 Days)
                 </CardTitle>
-                <p className="text-muted-foreground">Intensive design sprint with AI-powered prototyping and user testing</p>
+                <p className="text-muted-foreground">Time boxed design sprint supported by AI design prototyping and testing</p>
               </CardHeader>
               <CardContent className="p-6">
                 {/* Monday Detailed Agenda */}
