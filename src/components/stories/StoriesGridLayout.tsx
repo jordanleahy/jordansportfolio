@@ -1,5 +1,6 @@
 import React from 'react';
 import { FilterSidebar } from './FilterSidebar';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface StoriesGridLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,11 @@ interface StoriesGridLayoutProps {
   onSelectAllCategories: () => void;
   onSelectIndustryCategories: (industryId: string) => void;
   hasActiveFilters: boolean;
+  // Mobile tabs props
+  showMobileTabs?: boolean;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
+  publicContent?: React.ReactNode;
 }
 
 export function StoriesGridLayout({
@@ -28,8 +34,40 @@ export function StoriesGridLayout({
   onClearFilters,
   onSelectAllCategories,
   onSelectIndustryCategories,
-  hasActiveFilters
+  hasActiveFilters,
+  showMobileTabs = false,
+  currentTab = 'mystories',
+  onTabChange,
+  publicContent
 }: StoriesGridLayoutProps) {
+  
+  // Mobile tabs view
+  if (showMobileTabs) {
+    return (
+      <div className="w-full md:hidden">
+        <Tabs value={currentTab} onValueChange={onTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="mystories" className="text-sm">My Stories</TabsTrigger>
+            <TabsTrigger value="public" className="text-sm">Public</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="mystories" className="mt-0">
+            <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+              {children}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="public" className="mt-0">
+            <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+              {publicContent}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
+
+  // Desktop view with sidebar
   return (
     <div className="flex w-full">
       {/* Filter Sidebar - Desktop Only */}
@@ -49,7 +87,7 @@ export function StoriesGridLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 md:pl-4">
-        <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto hidden md:block">
           {children}
         </div>
       </div>

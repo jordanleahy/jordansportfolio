@@ -105,6 +105,9 @@ export default function StoriesDashboard() {
     errors?: string[];
   } | null>(null);
 
+  // Mobile tabs state
+  const [currentMobileTab, setCurrentMobileTab] = useState('mystories');
+
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
@@ -976,6 +979,27 @@ export default function StoriesDashboard() {
                 onSelectAllCategories={selectAllCategories}
                 onSelectIndustryCategories={selectIndustryCategories}
                 hasActiveFilters={hasActiveFilters}
+                showMobileTabs={true}
+                currentTab={currentMobileTab}
+                onTabChange={setCurrentMobileTab}
+                publicContent={
+                  isLoadingFeatured ? <ThemesSkeleton /> : featuredError ? (
+                    <div className="text-center py-8">
+                      <div className="text-muted-foreground mb-4">⚠️ Failed to load featured collections: {featuredError.message}</div>
+                      <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {featuredCollections.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground col-span-full">No featured collections yet.</div>
+                      ) : (
+                        featuredCollections.map((collection) => (
+                          <CollectionCard key={collection.id} collection={collection} />
+                        ))
+                      )}
+                    </div>
+                  )
+                }
               >
                 <CategoriesGrid 
                   themes={filteredThemes} 
