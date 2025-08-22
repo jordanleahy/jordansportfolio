@@ -16,9 +16,7 @@ export default function CofactorProposal() {
           <HeroImage src="/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png" alt="Query Innovation - Team Alignment & Design Workshop" className="min-h-[80vh] rounded-2xl" priority={true}>
             <div className="flex items-center justify-center min-h-[80vh] px-8">
               <div className="space-y-6 text-center py-16 max-w-6xl mx-auto">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
-                  Query Innovation
-                </h1>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">CDI Innovation</h1>
                 <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
                   Team Alignment & Design Workshop
                 </h2>
