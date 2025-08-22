@@ -35,7 +35,6 @@ export const CofactorPasswordModal: React.FC<CofactorPasswordModalProps> = ({
         description: "Welcome to the Query Innovation proposal."
       });
       onAuthenticate();
-      onClose();
     } else {
       toast({
         title: "Access Denied",
