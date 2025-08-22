@@ -299,7 +299,7 @@ export default function CofactorProposal() {
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold text-lg mb-2">Investment</h4>
-                        <div className="text-3xl font-bold text-primary">$15,000</div>
+                        <div className="text-3xl font-bold text-primary">$13,500</div>
                         <p className="text-sm text-muted-foreground mt-1">3 weeks</p>
                       </div>
                       
