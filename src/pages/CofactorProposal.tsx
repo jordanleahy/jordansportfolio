@@ -65,7 +65,6 @@ export default function CofactorProposal() {
                   <div className="flex flex-col md:flex-row md:items-start gap-3">
                     <Badge variant="outline" className="md:shrink-0 self-start">Day 3-4</Badge>
                     <div className="flex-1">
-                      <div className="block md:hidden text-xs text-muted-foreground uppercase tracking-wide mb-1">Day 3-4</div>
                       <h4 className="font-semibold">Team Recruitment</h4>
                       <p className="text-sm text-muted-foreground">Recruit sprint team (5-7 participants), schedule workshop & user tests</p>
                       <p className="text-xs text-primary font-medium mt-1">Ask: Who will participate from CoFactorAI and which MD/PA will participate</p>
