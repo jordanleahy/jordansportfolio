@@ -8,19 +8,12 @@ import { HeroImage } from '@/components/ui/hero-image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-
 export default function CofactorProposal() {
-  return (
-    <PageLayout>
+  return <PageLayout>
       <div>
         {/* Hero Section */}
         <Section maxWidth="6xl" fluid className="min-h-[80vh] p-0">
-          <HeroImage
-            src="/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png"
-            alt="Query Innovation - Team Alignment & Design Workshop"
-            className="min-h-[80vh] rounded-2xl"
-            priority={true}
-          >
+          <HeroImage src="/lovable-uploads/908f3567-ba5a-43c2-be9a-bd4900137ceb.png" alt="Query Innovation - Team Alignment & Design Workshop" className="min-h-[80vh] rounded-2xl" priority={true}>
             <div className="flex items-center justify-center min-h-[80vh] px-8">
               <div className="space-y-6 text-center py-16 max-w-6xl mx-auto">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
@@ -248,7 +241,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Deliverables */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#1E1919' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
@@ -276,7 +269,8 @@ export default function CofactorProposal() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
-                        <span className="text-sm">Product Direction Playbook</span>
+                        <span className="text-sm">Create a list of PRDs
+                    </span>
                       </div>
                       <div className="flex items-center gap-3">
                         <CheckCircle className="w-4 h-4 text-primary" />
@@ -294,7 +288,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Pricing & Terms */}
-        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#438CF5' }}>
+        <Section maxWidth="6xl" fluid>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
@@ -325,24 +319,24 @@ export default function CofactorProposal() {
                           </div>
                           
                           <div className="pt-2">
-                            <Button 
-                              onClick={async () => {
-                                try {
-                                  const { data, error } = await supabase.functions.invoke('create-payment', {
-                                    body: { paymentType: 'downpayment' }
-                                  });
-                                  
-                                  if (error) throw error;
-                                  
-                                  if (data?.url) {
-                                    window.open(data.url, '_blank');
-                                  }
-                                } catch (error) {
-                                  console.error('Payment error:', error);
-                                }
-                              }}
-                              className="w-full"
-                            >
+                            <Button onClick={async () => {
+                          try {
+                            const {
+                              data,
+                              error
+                            } = await supabase.functions.invoke('create-payment', {
+                              body: {
+                                paymentType: 'downpayment'
+                              }
+                            });
+                            if (error) throw error;
+                            if (data?.url) {
+                              window.open(data.url, '_blank');
+                            }
+                          } catch (error) {
+                            console.error('Payment error:', error);
+                          }
+                        }} className="w-full">
                               Pay 50% Downpayment ($6,750)
                             </Button>
                           </div>
@@ -413,6 +407,5 @@ export default function CofactorProposal() {
         </Section>
 
       </div>
-    </PageLayout>
-  );
+    </PageLayout>;
 }
