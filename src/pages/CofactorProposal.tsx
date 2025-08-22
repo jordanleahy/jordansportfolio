@@ -16,7 +16,7 @@ export default function CofactorProposal() {
             
               <div className="space-y-6 relative text-center py-16 px-8 flex flex-col justify-center">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
-                  Query Innovation Alignment
+                  Query Innovation
                 </h1>
                 <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
                   Transform CoFactorAI's Product Direction
