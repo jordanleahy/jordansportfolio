@@ -82,11 +82,8 @@ export const CofactorPasswordModal: React.FC<CofactorPasswordModalProps> = ({
             </button>
           </div>
           
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!password || isLoading} className="flex-1">
+          <div className="pt-2">
+            <Button type="submit" disabled={!password || isLoading} className="w-full">
               {isLoading ? "Verifying..." : "Access Proposal"}
             </Button>
           </div>
