@@ -203,7 +203,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Tools & Technology */}
-        <Section maxWidth="6xl" fluid>
+        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#FE6F21' }}>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
