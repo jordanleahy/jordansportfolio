@@ -139,7 +139,7 @@ export default function CofactorProposal() {
                     <div className="space-y-3 text-sm">
                       <div className="flex gap-3">
                         <Badge variant="outline" className="shrink-0">9:15-10:45</Badge>
-                        <span>AI Design Generation (Lovable, Cursor)</span>
+                        <span>AI Design Generation (Lovable is preferred choice excellent for this use case)</span>
                       </div>
                       <div className="flex gap-3">
                         <Badge variant="outline" className="shrink-0">11:00-12:30</Badge>
