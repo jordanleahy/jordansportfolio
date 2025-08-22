@@ -57,7 +57,7 @@ export const CofactorPasswordModal: React.FC<CofactorPasswordModalProps> = ({
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
             <Lock className="w-6 h-6 text-primary" />
           </div>
-          <DialogTitle className="text-2xl text-center">Query Innovation Proposal</DialogTitle>
+          <DialogTitle className="text-2xl text-center">Password</DialogTitle>
           <DialogDescription className="text-center">
             This proposal is password protected. Please enter the access code to continue.
           </DialogDescription>
