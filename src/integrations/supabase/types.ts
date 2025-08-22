@@ -3318,6 +3318,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      insert_abc_learning_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       insert_blog_agent: {
         Args: Record<PropertyKey, never>
         Returns: undefined
