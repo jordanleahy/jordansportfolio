@@ -206,6 +206,7 @@ export default function CofactorProposal() {
 
         {/* Tools & Technology */}
         <Section maxWidth="6xl" fluid>
+          <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -234,10 +235,12 @@ export default function CofactorProposal() {
                   </div>
               </CardContent>
             </Card>
+          </div>
         </Section>
 
         {/* Deliverables */}
         <Section maxWidth="6xl" fluid>
+          <div className="space-y-8 max-w-[900px] mx-auto">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -278,10 +281,12 @@ export default function CofactorProposal() {
                   </div>
               </CardContent>
             </Card>
+          </div>
         </Section>
 
         {/* Pricing & Terms */}
         <Section maxWidth="6xl" fluid>
+          <div className="space-y-8 max-w-[900px] mx-auto">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
                   <CardTitle className="flex items-center gap-3 text-2xl">
@@ -331,10 +336,12 @@ export default function CofactorProposal() {
                   </div>
               </CardContent>
             </Card>
+          </div>
         </Section>
 
         {/* CTA Section */}
         <Section maxWidth="6xl" fluid>
+          <div className="space-y-8 max-w-[900px] mx-auto">
           <div className="text-center space-y-6 py-8">
             <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -348,6 +355,7 @@ export default function CofactorProposal() {
                 Schedule a Discussion
               </Button>
             </div>
+          </div>
           </div>
         </Section>
 
