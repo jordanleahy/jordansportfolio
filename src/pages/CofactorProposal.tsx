@@ -11,29 +11,78 @@ export default function CofactorProposal() {
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Hero Section */}
-          <div className="text-center space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                3-Week Design Sprint Engagement
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Strategic partnership proposal for CoFactorAI product direction and user experience optimization
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <Badge variant="default" className="text-lg px-4 py-2">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                $15,000
-              </Badge>
-              <Badge variant="secondary" className="text-lg px-4 py-2">
-                <Calendar className="w-4 h-4 mr-2" />
-                3 Weeks
-              </Badge>
+          <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-2xl border">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="relative text-center py-16 px-8 space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
+                  3-Week Design Sprint
+                </h1>
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90">
+                  Transform CoFactorAI's Product Direction
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                  Strategic AI-powered design sprint to optimize user experience, validate product direction, 
+                  and create a comprehensive roadmap for growth with your medical professional users.
+                </p>
+              </div>
+              
+              <div className="flex flex-wrap justify-center gap-6 mt-10">
+                <Badge variant="default" className="text-xl px-6 py-3 shadow-lg">
+                  <TrendingUp className="w-5 h-5 mr-3" />
+                  $15,000 Investment
+                </Badge>
+                <Badge variant="secondary" className="text-xl px-6 py-3 shadow-lg">
+                  <Calendar className="w-5 h-5 mr-3" />
+                  3 Week Timeline
+                </Badge>
+                <Badge variant="outline" className="text-xl px-6 py-3 shadow-lg border-primary/30">
+                  <Users className="w-5 h-5 mr-3" />
+                  Expert-Led Process
+                </Badge>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-6 justify-center mt-12">
+                <Button size="lg" className="text-lg px-10 py-4 h-auto shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <CheckCircle className="w-5 h-5 mr-3" />
+                  Start the Engagement
+                </Button>
+                <Button variant="outline" size="lg" className="text-lg px-10 py-4 h-auto border-primary/30 hover:border-primary/60 transition-all duration-300">
+                  <Calendar className="w-5 h-5 mr-3" />
+                  Schedule a Discussion
+                </Button>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+                <div className="text-center space-y-2">
+                  <Brain className="w-8 h-8 mx-auto text-primary" />
+                  <h3 className="font-semibold">AI-Powered Design</h3>
+                  <p className="text-sm text-muted-foreground">Leverage cutting-edge AI tools for rapid prototyping</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <Target className="w-8 h-8 mx-auto text-primary" />
+                  <h3 className="font-semibold">User-Centered Focus</h3>
+                  <p className="text-sm text-muted-foreground">Real user testing with medical professionals</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <TrendingUp className="w-8 h-8 mx-auto text-primary" />
+                  <h3 className="font-semibold">Actionable Outcomes</h3>
+                  <p className="text-sm text-muted-foreground">Clear roadmap and product direction playbook</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Week Breakdown */}
+          {/* Project Timeline */}
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Sprint Calendar & Timeline
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                A comprehensive 3-week structured approach combining strategic alignment, intensive design sprinting, and actionable synthesis
+              </p>
+            </div>
           <div className="grid gap-8 lg:gap-12">
             {/* Week 1 */}
             <Card className="overflow-hidden">
@@ -194,6 +243,7 @@ export default function CofactorProposal() {
                 </div>
               </CardContent>
             </Card>
+           </div>
           </div>
 
           {/* Tools & Technology */}
