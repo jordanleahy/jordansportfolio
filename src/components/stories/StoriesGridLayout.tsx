@@ -52,13 +52,13 @@ export function StoriesGridLayout({
           </TabsList>
           
           <TabsContent value="mystories" className="mt-0">
-            <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="categories-grid-scroll min-h-[calc(100vh-300px)] overflow-y-auto">
               {children}
             </div>
           </TabsContent>
           
           <TabsContent value="public" className="mt-0">
-            <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="categories-grid-scroll min-h-[calc(100vh-300px)] overflow-y-auto">
               {publicContent}
             </div>
           </TabsContent>
@@ -87,7 +87,7 @@ export function StoriesGridLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 md:pl-4">
-        <div className="categories-grid-scroll max-h-[calc(100vh-200px)] overflow-y-auto hidden md:block">
+        <div className="categories-grid-scroll min-h-[calc(100vh-300px)] overflow-y-auto hidden md:block">
           {children}
         </div>
       </div>
