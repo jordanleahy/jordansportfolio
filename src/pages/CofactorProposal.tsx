@@ -412,26 +412,6 @@ export default function CofactorProposal() {
           </div>
         </Section>
 
-        {/* CTA Section */}
-        <Section maxWidth="6xl" fluid>
-          <div className="space-y-8 max-w-[900px] mx-auto">
-          <div className="text-center space-y-6 py-8">
-            <h2 className="text-2xl font-bold">Ready to Transform CoFactorAI's Product Direction?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8">
-                Start the Engagement
-              </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8">
-                Schedule a Discussion
-              </Button>
-            </div>
-          </div>
-          </div>
-        </Section>
-
       </div>
     </PageLayout>
   );
