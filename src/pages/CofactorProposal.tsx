@@ -6,57 +6,9 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { HeroImage } from '@/components/ui/hero-image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle, CreditCard } from 'lucide-react';
-import { useState } from 'react';
+import { Clock, Calendar, CheckCircle, Users, Target, Brain, Lightbulb, TrendingUp, Shield, HelpCircle } from 'lucide-react';
 
 export default function CofactorProposal() {
-  const { toast } = useToast();
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-
-  const handlePayment = async () => {
-    try {
-      setIsProcessingPayment(true);
-      
-      console.log('Initiating payment for $6,750');
-      
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          customerEmail: '', // Guest checkout - no email required
-          customerName: ''
-        }
-      });
-
-      if (error) {
-        console.error('Payment error:', error);
-        throw error;
-      }
-
-      if (data?.url) {
-        console.log('Opening payment URL in new tab:', data.url);
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
-        
-        toast({
-          title: "Payment Started",
-          description: "Stripe checkout opened in a new tab. Complete your payment there.",
-        });
-      } else {
-        throw new Error('No payment URL received');
-      }
-    } catch (error) {
-      console.error('Error starting payment:', error);
-      toast({
-        title: "Payment Error",
-        description: "Unable to start payment process. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
-
   return (
     <PageLayout>
       <div>
@@ -444,29 +396,14 @@ export default function CofactorProposal() {
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Let's collaborate to create a user-centered product strategy that drives growth and delivers exceptional value to your medical professional users.
             </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    size="lg" 
-                    className="text-lg px-8"
-                    onClick={handlePayment}
-                    disabled={isProcessingPayment}
-                  >
-                    {isProcessingPayment ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        Pay $6,750 - Start Workshop
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="outline" size="lg" className="text-lg px-8">
-                    Schedule a Discussion
-                  </Button>
-                </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-8">
+                Start the Engagement
+              </Button>
+              <Button variant="outline" size="lg" className="text-lg px-8">
+                Schedule a Discussion
+              </Button>
+            </div>
           </div>
           </div>
         </Section>

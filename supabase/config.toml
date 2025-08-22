@@ -1,8 +1,5 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
-[functions.create-payment]
-verify_jwt = false
-
 [functions.cleanup-stuck-generations]
 verify_jwt = false
 
