@@ -286,7 +286,7 @@ export default function CofactorProposal() {
         </Section>
 
         {/* Pricing & Terms */}
-        <Section maxWidth="6xl" fluid>
+        <Section maxWidth="6xl" fluid style={{ backgroundColor: '#3E89F4' }}>
           <div className="space-y-8 max-w-[900px] mx-auto">
               <Card className="border-2 border-primary/20">
                 <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
