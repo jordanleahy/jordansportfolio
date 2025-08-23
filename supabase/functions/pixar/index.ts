@@ -114,7 +114,8 @@ Respond with a brief, focused description of the person's permanent characterist
         n: 1,
         size: '1024x1024',
         quality: 'high',
-        output_format: 'png'
+        output_format: 'png',
+        background: 'transparent'
       }),
     });
 
