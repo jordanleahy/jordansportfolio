@@ -98,10 +98,10 @@ const ProjectCardsSection = () => {
                   {project.id === "case1" && (
                     <div className="px-6 pb-4">
                       <img 
-                        src="/lovable-uploads/38782aae-0331-42b1-9a12-23633a890934.png"
-                        alt="Clinical decision support interface showing UTI diagnosis validation with DRG codes and patient assessment"
+                        src="/lovable-uploads/94645942-c8fe-4408-a81b-37d80b01c845.png"
+                        alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
                         className="w-full aspect-video object-cover rounded-lg border border-border/50"
-                        key="case1-image-refresh"
+                        key="case1-image-updated"
                       />
                     </div>
                   )}
