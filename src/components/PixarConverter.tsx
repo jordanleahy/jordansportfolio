@@ -24,6 +24,28 @@ export const PixarConverter: React.FC = () => {
     clearReferenceImage
   } = useReferenceImage();
 
+  const handleInputPaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
+    // Convert HTMLInputElement event to HTMLTextAreaElement event type for compatibility
+    const textAreaEvent = e as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
+    await handleImagePaste(textAreaEvent);
+  };
+
+  const enhancePrompt = (userPrompt: string): string => {
+    const trimmedPrompt = userPrompt.trim().toLowerCase();
+    
+    // Detect minimal prompts and enhance them
+    if (trimmedPrompt === 'pixar' || trimmedPrompt === 'disney' || trimmedPrompt === 'animated' || trimmedPrompt === 'cartoon') {
+      return 'as a cheerful Disney Pixar animated character with large expressive eyes in a magical, colorful setting';
+    }
+    
+    // If prompt is very short (less than 10 characters), add context
+    if (trimmedPrompt.length < 10 && trimmedPrompt.length > 0) {
+      return `as a Disney Pixar character ${userPrompt.trim()} with large expressive eyes in a vibrant, magical scene`;
+    }
+    
+    return userPrompt.trim();
+  };
+
   const generatePixarImage = async () => {
     if (!referenceImage) {
       toast.error('Please upload an image first');
@@ -43,11 +65,15 @@ export const PixarConverter: React.FC = () => {
       
       // Extract base64 data from the reference image
       const base64Data = referenceImage.split(',')[1];
+      
+      // Enhance the prompt if it's minimal
+      const enhancedPrompt = enhancePrompt(prompt);
+      console.log('📝 Enhanced prompt:', enhancedPrompt);
 
       const { data, error } = await supabase.functions.invoke('pixar', {
         body: {
           image: base64Data,
-          prompt: prompt.trim()
+          prompt: enhancedPrompt
         }
       });
 
@@ -177,15 +203,22 @@ export const PixarConverter: React.FC = () => {
                 <Label htmlFor="prompt">Your Pixar Vision</Label>
                 <Input
                   id="prompt"
-                  placeholder="e.g., as a princess in a magical castle, as a superhero flying through clouds, sitting in a garden with flowers"
+                  placeholder="Type 'pixar' or describe your vision (you can also paste an image here)"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
+                  onPaste={handleInputPaste}
                 />
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Example prompts:</p>
+                <p className="text-sm text-muted-foreground">Quick options or detailed prompts:</p>
                 <div className="grid gap-1 text-xs">
+                  <button
+                    className="text-left text-primary hover:underline"
+                    onClick={() => setPrompt('pixar')}
+                  >
+                    • Just type "pixar" for automatic magic ✨
+                  </button>
                   <button
                     className="text-left text-primary hover:underline"
                     onClick={() => setPrompt('as a princess in a magical castle with sparkling lights')}
