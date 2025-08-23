@@ -46,7 +46,7 @@ export const useImageEdit = (
 
       if (error) {
         console.error('❌ Enhancement agent error:', error);
-        toast.error('Failed to enhance prompt, using original input');
+        toast.error('We are in beta and have hit a bug. Please check your connection and try again.');
         return userInput;
       }
 
@@ -94,7 +94,7 @@ export const useImageEdit = (
         }
       });
       
-      if (error) throw error;
+      if (error) throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       const newUrl = (data as any)?.url as string | undefined;
       if (newUrl) {
         if (postId && user?.id && fetchVersionsFromDatabase) {
@@ -124,7 +124,7 @@ export const useImageEdit = (
       } else if (errorMessage.includes('rate limit')) {
         toast.error('Rate limit exceeded. Please wait a moment and try again.');
       } else {
-        toast.error('Edit failed. Please try again with different wording.');
+        toast.error('We are in beta and have hit a bug. Please check your connection and try again.');
       }
     } finally {
       setIsProcessing(false);

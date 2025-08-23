@@ -133,8 +133,8 @@ export const useAdvancedImageGeneration = () => {
       promptTime = Date.now() - promptStart;
       
       if (promptError) {
-        updateStep('Prompt Generation', 'error', `Failed: ${promptError.message}`);
-        throw new Error(`Failed to generate prompt: ${promptError.message}`);
+        updateStep('Prompt Generation', 'error', `Failed: We are in beta and have hit a bug. Please check your connection and try again.`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       // Check for slow prompt generation
@@ -173,8 +173,8 @@ export const useAdvancedImageGeneration = () => {
       imageTime = Date.now() - imageStart;
       
       if (imageError) {
-        updateStep('Image Generation', 'error', `Failed: ${imageError.message}`);
-        throw new Error(`Failed to generate image: ${imageError.message}`);
+        updateStep('Image Generation', 'error', `Failed: We are in beta and have hit a bug. Please check your connection and try again.`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       // Check for slow image generation
@@ -216,8 +216,8 @@ export const useAdvancedImageGeneration = () => {
         .upload(fileName, file);
 
       if (uploadError) {
-        updateStep('Image Upload', 'error', `Upload failed: ${uploadError.message}`);
-        throw new Error(`Failed to upload image: ${uploadError.message}`);
+        updateStep('Image Upload', 'error', `Upload failed: We are in beta and have hit a bug. Please check your connection and try again.`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const { data: urlData } = supabase.storage
@@ -312,7 +312,7 @@ export const useAdvancedImageGeneration = () => {
       
       toast({
         title: "Generation failed",
-        description: error instanceof Error ? error.message : "Failed to generate hero image. Please try again.",
+        description: "We are in beta and have hit a bug. Please check your connection and try again.",
         variant: "destructive"
       });
     } finally {

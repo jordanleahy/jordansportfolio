@@ -81,7 +81,7 @@ export const useBulkSingleAspectGeneration = () => {
       });
 
       if (error) {
-        throw new Error(error.message || 'Bulk generation failed');
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const response: BulkSingleAspectResponse = data;

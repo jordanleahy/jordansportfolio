@@ -132,7 +132,7 @@ export const ReferenceImageAnalyzer: React.FC<ReferenceImageAnalyzerProps> = ({
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to analyze image');
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const { analysis: analysisData, extractedCharacteristics } = response.data;
@@ -149,7 +149,7 @@ export const ReferenceImageAnalyzer: React.FC<ReferenceImageAnalyzerProps> = ({
       console.error('Error analyzing image:', error);
       toast({
         title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Failed to analyze reference image. Please try again.",
+        description: "We are in beta and have hit a bug. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {

@@ -67,7 +67,7 @@ export const useImageGeneration = () => {
       });
 
       if (promptError) {
-        throw new Error(`Failed to generate prompt: ${promptError.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
       
       // Try different possible response structures
@@ -93,7 +93,7 @@ export const useImageGeneration = () => {
       });
 
       if (imageError) {
-        throw new Error(`Failed to generate image: ${imageError.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const base64Image = imageData?.image;
@@ -117,7 +117,7 @@ export const useImageGeneration = () => {
         .upload(fileName, file);
 
       if (uploadError) {
-        throw new Error(`Failed to upload image: ${uploadError.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       // Get public URL
@@ -174,7 +174,7 @@ export const useImageGeneration = () => {
       console.error('Error generating hero image:', error);
       toast({
         title: "Generation failed",
-        description: error instanceof Error ? error.message : "Failed to generate hero image. Please try again.",
+        description: "We are in beta and have hit a bug. Please check your connection and try again.",
         variant: "destructive"
       });
     } finally {

@@ -308,7 +308,7 @@ export const ProductJobsCard: React.FC<ProductJobsCardProps> = ({ vendorId, vend
       console.error('Error generating cover letter:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate cover letter",
+        description: "We are in beta and have hit a bug. Please check your connection and try again.",
         variant: "destructive"
       });
     }

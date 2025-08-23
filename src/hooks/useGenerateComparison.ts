@@ -69,7 +69,7 @@ export const useGenerateComparison = () => {
 
       if (error) {
         console.error('❌ [Frontend] Edge function error:', error);
-        throw new Error(error.message || 'Failed to generate comparison');
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       console.log('📥 [Frontend] Edge function response:', data);

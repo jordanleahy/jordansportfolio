@@ -237,7 +237,7 @@ export const useBulkImageGeneration = (): OptimizedBulkGenerationHook => {
       clearInterval(progressInterval);
 
       if (functionError) {
-        throw new Error(functionError.message || 'Batch generation failed');
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       if (!data.success) {

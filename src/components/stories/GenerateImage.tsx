@@ -136,7 +136,7 @@ export const GenerateImage = ({
 
       if (promptResponse.error) {
         console.error('🚫 IMAGE_GEN: Prompt generation failed:', promptResponse.error);
-        throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const generatedPrompt = promptResponse.data?.generatedPrompt;
@@ -162,7 +162,7 @@ export const GenerateImage = ({
 
       if (imageResponse.error) {
         console.error('🚫 IMAGE_GEN: Image generation failed:', imageResponse.error);
-        throw new Error(`Failed to generate image: ${imageResponse.error.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
 
       const base64Image = imageResponse.data?.image;
@@ -191,7 +191,7 @@ export const GenerateImage = ({
       
       if (!uploadResult.success || !uploadResult.url) {
         console.error('🚫 IMAGE_GEN: Upload failed:', uploadResult.error);
-        throw new Error(uploadResult.error || 'Failed to upload generated image');
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
       console.log('✅ IMAGE_GEN: Upload successful:', uploadResult.url);
 
@@ -205,7 +205,7 @@ export const GenerateImage = ({
 
       if (updateError) {
         console.error('🚫 IMAGE_GEN: Database update failed:', updateError);
-        throw new Error(`Failed to update post: ${updateError.message}`);
+        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
       }
       console.log('✅ IMAGE_GEN: Database updated successfully');
 
@@ -216,7 +216,7 @@ export const GenerateImage = ({
 
     } catch (error) {
       console.error('🎨 IMAGE_GENERATION: Error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate image');
+      toast.error("We are in beta and have hit a bug. Please check your connection and try again.");
     } finally {
       console.log('🎨 IMAGE_GEN: Cleanup - setting isGenerating to false');
       
