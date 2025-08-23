@@ -169,7 +169,7 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ portfolio 
       
     } catch (error: any) {
       console.error('Error regenerating cover letter:', error);
-      toast.error("We are in beta and have hit a bug. Please check your connection and try again.");
+      toast.error(`Failed to regenerate: ${error.message}`);
     } finally {
       setIsRegenerating(false);
     }

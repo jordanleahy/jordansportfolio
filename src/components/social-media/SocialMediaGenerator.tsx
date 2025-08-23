@@ -126,11 +126,11 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
       });
 
       if (error) {
-        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
+        throw error;
       }
 
       if (!data.success) {
-        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
+        throw new Error(data.error || 'Failed to generate social media content');
       }
 
       // Update results, replacing any existing results for the same platforms
@@ -156,7 +156,7 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
       console.error('Error generating social media content:', error);
       toast({
         title: "Generation failed",
-        description: "We are in beta and have hit a bug. Please check your connection and try again.",
+        description: error.message || "Failed to generate social media content. Please try again.",
         variant: "destructive"
       });
     } finally {

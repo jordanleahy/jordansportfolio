@@ -85,7 +85,7 @@ export const OpenAIUsageSync = () => {
       console.error('Sync error:', error);
       toast({
         title: 'Sync Failed',
-        description: "We are in beta and have hit a bug. Please check your connection and try again.",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
         variant: 'destructive',
       });
     } finally {

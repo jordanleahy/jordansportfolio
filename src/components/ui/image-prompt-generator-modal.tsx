@@ -68,7 +68,7 @@ export const ImagePromptGeneratorModal = ({
       });
 
       if (error) {
-        throw new Error("We are in beta and have hit a bug. Please check your connection and try again.");
+        throw new Error(error.message || 'Failed to generate prompt');
       }
 
       const prompt = data?.generatedPrompt;
@@ -96,7 +96,7 @@ export const ImagePromptGeneratorModal = ({
       console.error('Error generating prompt:', error);
       toast({
         title: "Generation Failed",
-        description: "We are in beta and have hit a bug. Please check your connection and try again.",
+        description: error instanceof Error ? error.message : "Failed to generate prompt. Please try again.",
         variant: "destructive",
       });
     } finally {
