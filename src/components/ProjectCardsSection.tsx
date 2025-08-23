@@ -98,7 +98,7 @@ const ProjectCardsSection = () => {
                   {project.id === "case1" && (
                     <div className="px-6 pb-4">
                       <img 
-                        src="/lovable-uploads/938c6e64-5349-4bfe-bd5d-d4fdedb9f0b2.png"
+                        src="/lovable-uploads/38782aae-0331-42b1-9a12-23633a890934.png"
                         alt="Clinical decision support interface showing UTI diagnosis validation with DRG codes and patient assessment"
                         className="w-full aspect-video object-cover rounded-lg border border-border/50"
                         key="case1-image-refresh"
