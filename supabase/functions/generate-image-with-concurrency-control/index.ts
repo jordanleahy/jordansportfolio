@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { appendSafeSpaceRules } from '../_shared/safeSpace.ts';
 
 interface ImageGenerationRequest {
   postId: string;
@@ -258,10 +259,21 @@ serve(async (req) => {
         finalSeed = rawSeed % 4294967295;
       }
 
+      console.log('🔒 CONCURRENCY_CONTROL: Starting OpenAI generation', {
+        postId,
+        aspectRatio: normalizedAspectRatio,
+        size,
+        seed: finalSeed
+      });
+
+      // Apply safe space rules to the prompt
+      const enhancedPrompt = appendSafeSpaceRules(prompt, normalizedAspectRatio);
+      console.log('🛡️ SAFE_SPACE: Applied safe space rules for', normalizedAspectRatio);
+
       // OpenAI request
       const openAIRequestBody = {
         model: 'gpt-image-1',
-        prompt: prompt,
+        prompt: enhancedPrompt,
         size: size,
         quality: 'high',
         output_format: 'jpeg',

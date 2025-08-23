@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, calculateImageGenerationCost } from '../_shared/openai-attribution.ts';
+import { appendSafeSpaceRules } from '../_shared/safeSpace.ts';
 
 // Type definitions for request/response
 interface ImageGenerationRequest {
@@ -177,10 +178,14 @@ serve(async (req) => {
 
     console.log('🎨 IMAGE_GENERATION: Starting with prompt:', prompt.substring(0, 100) + '...', finalSeed ? `(seed: ${finalSeed})` : '', `(correlation: ${correlationId})`);
 
+    // Apply safe space rules to the prompt
+    const enhancedPrompt = appendSafeSpaceRules(prompt, normalizedAspectRatio);
+    console.log('🛡️ SAFE_SPACE: Applied safe space rules for', normalizedAspectRatio);
+
     // OpenAI request body without metadata (not supported by image generation API)
     const openAIRequestBody = {
       model: 'gpt-image-1',
-      prompt: prompt,
+      prompt: enhancedPrompt,
       size: size,
       quality: 'high',
       output_format: 'jpeg',
