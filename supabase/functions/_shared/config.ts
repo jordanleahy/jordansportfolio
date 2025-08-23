@@ -97,7 +97,7 @@ export const EDGE_FUNCTIONS = {
   USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
-  GENERATE_IMAGE_PROMPT_DYNAMIC: 'generate-image-prompt-dynamic',
+  
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
   GENERATE_CUSTOM_THEME: 'generate-custom-theme',
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',

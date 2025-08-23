@@ -30,7 +30,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Removed unused getSafeSpaceRule() function - logic moved inline for better letter positioning
+// Safe space rules are now handled by safeSpace.ts in image generation functions
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -298,11 +298,7 @@ Theme: ${systemPromptData.theme || usedIdentifier}
 - Do not default to basic vector templates
 - Generate specific, detailed prompts based on the comprehensive guidelines in your system instructions`;
 
-    // Add aspect ratio context for system prompt to handle
-    if (requestedAspectRatio) {
-      userMessage += `\nRequested Aspect Ratio: ${requestedAspectRatio}
-Note: Apply the composition guidelines and safe space rules specified in your system instructions for this aspect ratio.`;
-    }
+    // Aspect ratio will be handled by safeSpace.ts during image generation
 
     // Add color theme instructions if provided
     if (colorTheme) {

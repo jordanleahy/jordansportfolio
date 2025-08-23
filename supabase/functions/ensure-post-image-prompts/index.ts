@@ -200,7 +200,7 @@ serve(async (req) => {
           const maxRetries = 3;
           
           for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            const result = await supabase.functions.invoke('generate-image-prompt-dynamic', {
+            const result = await supabase.functions.invoke('visual-prompt-generator', {
               body: invokePayload
             });
             
