@@ -3,6 +3,7 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useToast } from '@/hooks/use-toast';
 import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
@@ -23,6 +24,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
   onPreviewImage
 }) => {
   const { isProcessing: isProcessingCtx, isAnyImageGenerating } = useProcessingStatesContext();
+  const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const { toast } = useToast();
   const timer = useImageGenerationTimerContext();
@@ -88,11 +90,11 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                   const aspectRatioKey = '1_1';
                   onGenerateImage?.(post.id, aspectRatioKey, post.title, post.description, post.category);
                 }}
-                disabled={isCurrentPostGenerating || isAnyOtherGenerating}
+                disabled={isButtonDisabled(post.id, '1:1' as any)}
                 className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Regenerate image"
+                title={getCooldownMessage() || "Regenerate image"}
               >
-                {isCurrentPostGenerating ? 'Regenerating...' : isAnyOtherGenerating ? 'Image Generation in Progress' : 'Regenerate'}
+                {getRegenerateButtonText(post.id, '1:1' as any, true)}
               </button>
             </div>
           </div>
@@ -102,13 +104,13 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
               // Start with 1:1 aspect ratio as default
               onGenerateImage?.(post.id, '1_1', post.title, post.description, post.category);
             }}
-            disabled={isLoadingOrProcessing || isAnyOtherGenerating}
+            disabled={isButtonDisabled(post.id, '1:1' as any)}
             className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <div className="flex flex-col items-center gap-2">
               <Sparkles className="h-6 w-6" />
               <span>
-                {isCurrentPostGenerating ? 'Generating...' : isAnyOtherGenerating ? 'Image Generation in Progress' : 'Generate Image'}
+                {getRegenerateButtonText(post.id, '1:1' as any, false)}
               </span>
             </div>
           </button>

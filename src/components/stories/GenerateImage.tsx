@@ -6,6 +6,7 @@ import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicat
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +42,7 @@ export const GenerateImage = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const timer = useImageGenerationTimerContext();
   const { setProcessing } = useProcessingStatesContext();
+  const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -90,6 +92,19 @@ export const GenerateImage = ({
         description: getBlockingMessage(creditStatus),
         variant: "destructive"
       });
+      return;
+    }
+
+    // Check cooldown using unified state
+    if (isButtonDisabled(post.id, aspectRatio as AspectRatio)) {
+      const cooldownMsg = getCooldownMessage();
+      if (cooldownMsg) {
+        toastHook({
+          title: "Generation Cooldown Active",
+          description: cooldownMsg,
+          variant: "default"
+        });
+      }
       return;
     }
     
@@ -250,15 +265,18 @@ export const GenerateImage = ({
               variant="outline"
               size="sm"
               className="h-8 w-full justify-center"
-              disabled={isUploading || isGenerating}
+              disabled={isGenerating || isUploading}
             >
               {(isUploading || isGenerating) ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
-              {(isUploading || isGenerating) ? 'Generating...' : 'Generate AI'}
-              {!(isUploading || isGenerating) && <ChevronDown className="h-4 w-4 ml-2" />}
+              {(isUploading || isGenerating) ? 'Generating...' : 
+               isButtonDisabled(post.id, aspectRatio as AspectRatio) ? 
+               getRegenerateButtonText(post.id, aspectRatio as AspectRatio, !!imageUrl) :
+               'Generate AI'}
+              {!(isUploading || isGenerating) && !isButtonDisabled(post.id, aspectRatio as AspectRatio) && <ChevronDown className="h-4 w-4 ml-2" />}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg z-50">
@@ -269,16 +287,17 @@ export const GenerateImage = ({
                   <div>
                     <DropdownMenuItem
                       onClick={handleGenerateImage}
-                      disabled={isGenerating || isUploading || !creditStatus.hasCredits || creditStatus.isLoading || !hasPrompt}
-                      className={`cursor-pointer ${!creditStatus.hasCredits || !hasPrompt ? 'opacity-50' : ''}`}
+                      disabled={isGenerating || isUploading || !creditStatus.hasCredits || creditStatus.isLoading || !hasPrompt || isButtonDisabled(post.id, aspectRatio as AspectRatio)}
+                      className={`cursor-pointer ${!creditStatus.hasCredits || !hasPrompt || isButtonDisabled(post.id, aspectRatio as AspectRatio) ? 'opacity-50' : ''}`}
                       title={
                         !hasPrompt ? "Generate individual prompt first" :
-                        !creditStatus.hasCredits ? getBlockingMessage(creditStatus) : 
+                        !creditStatus.hasCredits ? getBlockingMessage(creditStatus) :
+                        isButtonDisabled(post.id, aspectRatio as AspectRatio) ? getCooldownMessage() :
                         "Generate with AI"
                       }
                     >
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Generate ({aspectRatio})
+                      {getRegenerateButtonText(post.id, aspectRatio as AspectRatio, !!imageUrl)}
                     </DropdownMenuItem>
                   </div>
                 </TooltipTrigger>

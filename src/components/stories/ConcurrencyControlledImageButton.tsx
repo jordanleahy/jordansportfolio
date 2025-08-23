@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Image, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useConcurrencyControlledImageGeneration } from '@/hooks/useConcurrencyControlledImageGeneration';
+import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
@@ -25,6 +26,7 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
   variant = 'default'
 }) => {
   const { generateImage, checkImageStatus, canGenerateImage, isGenerating } = useConcurrencyControlledImageGeneration();
+  const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage, cooldown } = useUnifiedRegenerateStates();
   const { getCreditStatus } = useCreditCheck();
   const [currentStatus, setCurrentStatus] = useState<string>('none');
   const [canGenerate, setCanGenerate] = useState(true);
@@ -148,6 +150,11 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
       return "Upgrade to Continue";
     }
 
+    // Use unified cooldown logic
+    if (cooldown.isActive) {
+      return `Generate in ${cooldown.secondsRemaining}s`;
+    }
+
     if (isGenerating || currentStatus === 'generating') {
       return (
         <>
@@ -193,21 +200,32 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
     return variant;
   };
 
-  const isButtonDisabled = disabled || 
+  const isButtonDisabledLocal = disabled || 
     !canGenerate || 
     isGenerating || 
     currentStatus === 'generating' || 
     !creditStatus.hasCredits ||
-    creditStatus.isLoading;
+    creditStatus.isLoading ||
+    cooldown.isActive; // Add cooldown to disabled logic
+
+  const getTooltipText = () => {
+    if (!creditStatus.hasCredits) {
+      return creditStatus.blockingLimit === 'daily' ? 'Daily limit reached' : 'Monthly limit reached - upgrade to continue';
+    }
+    if (cooldown.isActive) {
+      return getCooldownMessage();
+    }
+    return undefined;
+  };
 
   return (
     <Button
       onClick={handleGenerate}
-      disabled={isButtonDisabled}
+      disabled={isButtonDisabledLocal}
       size={size}
       variant={getButtonVariant()}
       className="transition-all duration-200"
-      title={!creditStatus.hasCredits ? (creditStatus.blockingLimit === 'daily' ? 'Daily limit reached' : 'Monthly limit reached - upgrade to continue') : undefined}
+      title={getTooltipText()}
     >
       {getButtonContent()}
     </Button>

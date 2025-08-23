@@ -13,6 +13,7 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
 import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
@@ -66,6 +67,7 @@ export const PostsCardView = memo(({
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { setProcessing } = useProcessingStatesContext();
+  const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
   const { themeData } = useEnhancedThemeDataPrefetch();
   const { generateWithCache } = useCachedPromptGeneration();
   const { user } = useAuth();
@@ -84,27 +86,20 @@ export const PostsCardView = memo(({
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  // Memoized state calculations for performance optimization
+  // Memoized state calculations for performance optimization with cooldown support
   const regenerateStates = useMemo(() => {
     const states = new Map();
     posts.forEach(post => {
       const aspectRatio = '1:1' as AspectRatio;
-      const isCurrentProcessing = isProcessingCtx(post.id, 'generate', aspectRatio);
-      const isOtherGenerating = isAnyImageGenerating() && !isCurrentProcessing;
-      
       states.set(post.id, {
-        isProcessing: isCurrentProcessing,
-        isDisabled: isCurrentProcessing || isOtherGenerating,
-        buttonText: isCurrentProcessing 
-          ? 'Regenerating...' 
-          : isOtherGenerating 
-            ? 'Image Generation in Progress'
-            : post.image_1_1_url ? 'Regenerate' : 'Generate',
+        isProcessing: isProcessingCtx(post.id, 'generate', aspectRatio),
+        isDisabled: isButtonDisabled(post.id, aspectRatio),
+        buttonText: getRegenerateButtonText(post.id, aspectRatio, !!post.image_1_1_url),
         loadingMessage: post.image_1_1_url ? "Regenerating..." : "Generating..."
       });
     });
     return states;
-  }, [posts, isProcessingCtx, isAnyImageGenerating]);
+  }, [posts, isProcessingCtx, isButtonDisabled, getRegenerateButtonText]);
 
   // Debounced regenerate handler to prevent rapid clicks
   const [regenerateClickDebounce, setRegenerateClickDebounce] = useState<Set<string>>(new Set());
@@ -140,10 +135,23 @@ export const PostsCardView = memo(({
       return;
     }
 
+    // Check cooldown using unified state
+    if (isButtonDisabled(post.id, '1:1' as AspectRatio)) {
+      const cooldownMsg = getCooldownMessage();
+      if (cooldownMsg) {
+        toast({
+          title: "Generation Cooldown Active",
+          description: cooldownMsg,
+          variant: "default"
+        });
+      }
+      return;
+    }
+
     // Always use AspectRatioKey format for consistency
     const aspectRatioKey = '1_1';
     onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
-  }, [regenerateClickDebounce, getCreditStatus, getBlockingMessage, toast, onGenerateImage]);
+  }, [regenerateClickDebounce, getCreditStatus, getBlockingMessage, toast, onGenerateImage, isButtonDisabled, getCooldownMessage]);
 
   // Timer is now auto-managed by ImageGenerationTimerContext
 
