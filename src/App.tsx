@@ -72,6 +72,7 @@ import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import BillingPage from "./pages/BillingPage";
 import AccountPage from "./pages/AccountPage";
 import CofactorProposal from "./pages/CofactorProposal";
+import { PixarConverter } from "./components/PixarConverter";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -235,6 +236,7 @@ function App() {
                  <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
+                <Route path="/pixar" element={<PixarConverter />} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
                 <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors" replace />} />
