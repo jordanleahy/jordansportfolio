@@ -30,23 +30,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to get aspect ratio-specific safe space rules
-function getSafeSpaceRule(aspectRatio: string): string {
-  switch (aspectRatio) {
-    case '16:9':
-      return 'CRITICAL SAFE SPACE: Maintain 15-20% margins on left and right sides, 10% margins on top and bottom. Keep all workflow elements well within safe boundaries to prevent edge-touching content.';
-    case '9:16':
-      return 'CRITICAL SAFE SPACE: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room and proper spacing.';
-    case '1:1':
-      return 'CRITICAL SAFE SPACE: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed with proper spacing from edges.';
-    case '4:3':
-      return 'CRITICAL SAFE SPACE: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing and balanced composition.';
-    case '3:4':
-      return 'CRITICAL SAFE SPACE: Maintain 10-12% margins on top and bottom, 8% margins on left and right sides. Optimize for social media viewing with proper edge spacing.';
-    default:
-      return 'Maintain 80% safe zone - keep important elements in central 80% of frame';
-  }
-}
+// Removed unused getSafeSpaceRule() function - logic moved inline for better letter positioning
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -329,8 +313,8 @@ Theme: ${systemPromptData.theme || usedIdentifier}
         safeSpaceRules = 'CRITICAL: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room.';
         negativePrompts = 'No elements touching top/bottom edges, maintain vertical breathing room, no cramped vertical layouts';
       } else if (requestedAspectRatio === '1:1') {
-        safeSpaceRules = 'CRITICAL: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed.';
-        negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements';
+        safeSpaceRules = 'CRITICAL: Maintain balanced 18-20% margins on all sides, especially TOP MARGIN for letter-based content. Letters must be centered with generous breathing room from top edge. Keep central composition well-framed with extra vertical spacing.';
+        negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements, NEVER allow letters to touch or get close to the top edge, no cramped letter positioning';
       } else if (requestedAspectRatio === '4:3') {
         safeSpaceRules = 'CRITICAL: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing.';
         negativePrompts = 'No cramped compositions, no elements touching frame borders, maintain horizontal balance';
