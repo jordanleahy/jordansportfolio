@@ -101,6 +101,7 @@ const ProjectCardsSection = () => {
                         src="/lovable-uploads/938c6e64-5349-4bfe-bd5d-d4fdedb9f0b2.png"
                         alt="Clinical decision support interface showing UTI diagnosis validation with DRG codes and patient assessment"
                         className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                        key="case1-image-refresh"
                       />
                     </div>
                   )}
