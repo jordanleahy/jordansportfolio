@@ -97,12 +97,19 @@ const ProjectCardsSection = () => {
                   
                   {project.id === "case1" && (
                     <div className="px-6 pb-4">
-                      <img 
-                        src="/lovable-uploads/94645942-c8fe-4408-a81b-37d80b01c845.png"
-                        alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
-                        className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
-                        key="case1-image-updated"
-                      />
+                      <div className="relative group/image">
+                        <img 
+                          src="/lovable-uploads/94645942-c8fe-4408-a81b-37d80b01c845.png"
+                          alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                          key="case1-image-updated"
+                        />
+                        <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <p className="text-white text-sm font-medium text-center px-4">
+                            Click and enter password for case details
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   
