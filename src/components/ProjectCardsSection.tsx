@@ -100,7 +100,7 @@ const ProjectCardsSection = () => {
                       <img 
                         src="/lovable-uploads/94645942-c8fe-4408-a81b-37d80b01c845.png"
                         alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
-                        className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[2px]"
+                        className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                         key="case1-image-updated"
                       />
                     </div>
