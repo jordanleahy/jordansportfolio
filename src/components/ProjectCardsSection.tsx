@@ -11,7 +11,7 @@ const projects = [
     id: "case1",
     title: "Inpatient Revenue Cycle Management",
     company: "Healthcare Analytics",
-    description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
+    description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",

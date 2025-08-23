@@ -36,7 +36,7 @@ export const ascertainCoverLetterContent: CoverLetterContent = {
 export const healthcareProjectsData: ProjectData[] = [
   {
     title: "Inpatient Revenue Cycle Management",
-    description: "Designed an AI-powered CDI dashboard to help CDS specialists review and validate pre-bill diagnoses.",
+    description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     link: "/cases/case1",
     iconColor: "bg-blue-600",
