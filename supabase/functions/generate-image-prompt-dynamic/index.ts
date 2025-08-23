@@ -55,7 +55,7 @@ function getSafeSpaceRule(aspectRatio: string): string {
     case '9:16':
       return 'CRITICAL SAFE SPACE: Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides. Ensure vertical breathing room and proper spacing.';
     case '1:1':
-      return 'CRITICAL SAFE SPACE: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed with proper spacing from edges.';
+      return 'CRITICAL SAFE SPACE: Maintain balanced 18-20% margins on all sides, especially TOP MARGIN for letter-based content. Letters must be centered with generous breathing room from top edge. Keep central composition well-framed with extra vertical spacing.';
     case '4:3':
       return 'CRITICAL SAFE SPACE: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing and balanced composition.';
     case '3:4':
@@ -395,8 +395,8 @@ Theme: ${systemPromptData.theme || theme || usedIdentifier}
         negativePrompts = 'No elements touching top/bottom edges, maintain vertical breathing room, no cramped vertical layouts';
       } else if (requestedAspectRatio === '1:1') {
         orientationHint = 'balanced square format';
-        safeSpaceRules = 'CRITICAL: Maintain balanced 12-15% margins on all sides. Keep central composition well-framed.';
-        negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements';
+        safeSpaceRules = 'CRITICAL: Maintain balanced 18-20% margins on all sides, especially TOP MARGIN for letter-based content. Letters must be centered with generous breathing room from top edge. Keep central composition well-framed with extra vertical spacing.';
+        negativePrompts = 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements, NEVER allow letters to touch or get close to the top edge, no cramped letter positioning';
       } else if (requestedAspectRatio === '4:3') {
         orientationHint = 'standard landscape format';
         safeSpaceRules = 'CRITICAL: Maintain 12% margins on left and right, 10% margins on top and bottom. Ensure proper horizontal spacing.';
