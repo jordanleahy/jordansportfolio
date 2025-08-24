@@ -210,9 +210,9 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       });
 
-      // Generate system prompt in background using resolved category
+      // Generate system prompt in background using theme ID
       EdgeRuntime.waitUntil(
-        generateSystemPromptBackground(supabase, resolvedCategory, user.id)
+        generateSystemPromptBackground(supabase, createdTheme.id, user.id)
           .then((promptResult) => {
             console.log('📝 SYSTEM PROMPT RESULT:', {
               success: promptResult?.success || false,
@@ -459,20 +459,20 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
   return validated;
 }
 
-async function generateSystemPromptBackground(supabase: any, category: string, userId: string): Promise<{ success: boolean; error?: string }> {
+async function generateSystemPromptBackground(supabase: any, themeId: string, userId: string): Promise<{ success: boolean; error?: string }> {
   console.log('🔄 BACKGROUND TASK: Starting system prompt generation check');
   console.log('📋 BACKGROUND PARAMS:', {
-    category,
+    themeId,
     userId,
     timestamp: new Date().toISOString()
   });
   
   try {
-    console.log('🔍 CHECKING: Existing system prompts for category');
+    console.log('🔍 CHECKING: Existing system prompts for theme');
     const { data: existingPrompts, error: checkError } = await supabase
       .from('system_prompts')
       .select('id')
-      .eq('category', category)
+      .eq('theme_id', themeId)
       .eq('user_id', userId)
       .limit(1);
 
@@ -496,8 +496,8 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
     const invokeResult = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: { 
         category: 'system_prompt_generation',
-        theme: category,
-        description: `Generated content for ${category} category`,
+        theme_id: themeId,
+        description: `Generated content for theme ${themeId}`,
         user_id: userId
       }
     });
@@ -519,7 +519,7 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
   } catch (error) {
     console.error('💥 BACKGROUND GENERATION ERROR:', {
       error: error.message,
-      category,
+      themeId,
       userId,
       timestamp: new Date().toISOString()
     });
