@@ -13,14 +13,26 @@ const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 serve(async (req) => {
+  console.log('🚀 manage-theme-lifecycle function started');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Check environment variables
+  console.log('🔧 Environment check:', {
+    hasSupabaseUrl: !!supabaseUrl,
+    hasSupabaseKey: !!supabaseKey?.slice(0, 20) + '...'
+  });
+
   try {
+    console.log('📥 Parsing request body...');
     const { action, description, themeId, referenceImageData } = await req.json();
+    console.log('✅ Request parsed successfully');
+    
     const authHeader = req.headers.get('Authorization');
+    console.log('🔐 Auth header present:', !!authHeader);
 
     console.log(`🎨 Theme lifecycle action: ${action}`, { description, themeId, hasReferenceImage: !!referenceImageData });
 
@@ -252,10 +264,17 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Error in manage-theme-lifecycle:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined
+    });
     return new Response(
       JSON.stringify({ 
         error: 'Failed to process theme lifecycle action',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
