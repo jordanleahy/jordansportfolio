@@ -330,37 +330,54 @@ Data: ${JSON.stringify(rawData)}
 
 Return only valid JSON:`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-5-mini',
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_completion_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json();
-  const aiResponse = result.choices[0].message.content.trim();
+  // Create AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
 
   try {
-    const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
-    return JSON.parse(cleanJson);
-  } catch (parseError) {
-    throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_completion_tokens: 1500, // Reduced for faster processing
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    const aiResponse = result.choices[0].message.content.trim();
+
+    try {
+      const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
+      return JSON.parse(cleanJson);
+    } catch (parseError) {
+      throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
+    }
+
+  } catch (fetchError) {
+    clearTimeout(timeoutId);
+    if (fetchError.name === 'AbortError') {
+      console.error('⏱️ OpenAI API timeout during theme processing');
+      throw new Error('Theme processing timed out. Please try again.');
+    }
+    throw fetchError;
   }
 }
 
