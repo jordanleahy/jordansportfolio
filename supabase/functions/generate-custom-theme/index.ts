@@ -119,7 +119,7 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-mini',
+          model: 'gpt-5-mini-2025-08-07',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
