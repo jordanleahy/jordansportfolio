@@ -30,7 +30,9 @@ serve(async (req) => {
         
         let characterData = null;
         
-        // First check if we have reference image data
+        // Check if we have reference image data first
+        console.log('🔍 Checking for reference image data...', { hasReferenceImage: !!referenceImageData });
+        
         if (referenceImageData) {
           console.log('🎭 Theme includes visual seed from character:', referenceImageData.characterId);
           console.log('🎨 Visual characteristics:', referenceImageData.analysis?.extractedCharacteristics);
@@ -40,9 +42,11 @@ serve(async (req) => {
           };
         } else {
           // Call structure-theme-input to detect character references in description
-          console.log('🔍 Analyzing description for character references...');
+          console.log('🔍 No reference image data, analyzing description for character references...');
+          console.log('📝 Description to analyze:', description);
           
           try {
+            console.log('📡 Calling structure-theme-input function...');
             const { data: structureData, error: structureError } = await supabase.functions.invoke(
               'structure-theme-input',
               {
@@ -50,6 +54,8 @@ serve(async (req) => {
                 headers: authHeader ? { Authorization: authHeader } : {}
               }
             );
+
+            console.log('📡 Structure function response:', { data: structureData, error: structureError });
 
             if (structureError) {
               console.error('❌ Error calling structure-theme-input:', structureError);
@@ -61,9 +67,11 @@ serve(async (req) => {
               };
             } else {
               console.log('📝 No character reference detected in description');
+              console.log('📝 Structure data details:', structureData);
             }
           } catch (error) {
             console.error('❌ Error during character detection:', error);
+            console.error('❌ Error stack:', error.stack);
           }
         }
         
