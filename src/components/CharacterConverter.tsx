@@ -27,7 +27,7 @@ interface GenerationResult {
 export const CharacterConverter: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [vectorPrompt, setVectorPrompt] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState<'pixar' | 'vector'>('pixar');
+  const [selectedStyle, setSelectedStyle] = useState<'3d' | 'vector'>('3d');
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [saveAsCharacter, setSaveAsCharacter] = useState(false);
   const [characterName, setCharacterName] = useState('');
@@ -59,7 +59,7 @@ export const CharacterConverter: React.FC = () => {
     await handleImagePaste(textAreaEvent);
   };
 
-  const enhancePrompt = (userPrompt: string, style: 'pixar' | 'vector'): string => {
+  const enhancePrompt = (userPrompt: string, style: '3d' | 'vector'): string => {
     const trimmedPrompt = userPrompt.trim().toLowerCase();
     
     if (style === 'vector') {
@@ -74,26 +74,26 @@ export const CharacterConverter: React.FC = () => {
       
       return userPrompt.trim();
     } else {
-      // Pixar-specific enhancements
-      if (trimmedPrompt === 'pixar' || trimmedPrompt === 'disney' || trimmedPrompt === 'animated' || trimmedPrompt === 'cartoon') {
-        return 'as a cheerful Disney Pixar animated character with large expressive eyes in a magical, colorful setting';
+      // 3D character-specific enhancements
+      if (trimmedPrompt === '3d' || trimmedPrompt === 'character' || trimmedPrompt === 'animated' || trimmedPrompt === 'cartoon') {
+        return 'as a cheerful 3D animated character with large expressive eyes in a magical, colorful setting';
       }
       
       if (trimmedPrompt.length < 10 && trimmedPrompt.length > 0) {
-        return `as a Disney Pixar character ${userPrompt.trim()} with large expressive eyes in a vibrant, magical scene`;
+        return `as a 3D animated character ${userPrompt.trim()} with large expressive eyes in a vibrant, magical scene`;
       }
       
       return userPrompt.trim();
     }
   };
 
-  const generatePixarImage = async () => {
+  const generateCharacterImage = async () => {
     if (!referenceImage && !selectedCharacterId) {
       toast.error('Please upload an image or select an existing character');
       return;
     }
 
-    const activePrompt = selectedStyle === 'pixar' ? prompt : vectorPrompt;
+    const activePrompt = selectedStyle === '3d' ? prompt : vectorPrompt;
     if (!activePrompt.trim()) {
       toast.error(`Please enter a ${selectedStyle} prompt`);
       return;
@@ -104,7 +104,7 @@ export const CharacterConverter: React.FC = () => {
     setValidationError(null);
 
     try {
-      console.log('🎭 Starting Pixar conversion...');
+      console.log('🎭 Starting character conversion...');
       
       // Extract base64 data from the reference image
       const base64Data = referenceImage ? referenceImage.split(',')[1] : null;
@@ -126,20 +126,20 @@ export const CharacterConverter: React.FC = () => {
 
       if (error) {
         console.error('❌ Edge function error:', error);
-        toast.error('Failed to generate Pixar image');
+        toast.error('Failed to generate character image');
         return;
       }
 
       if (data.success) {
-        console.log('✅ Pixar image generated successfully');
+        console.log('✅ Character image generated successfully');
         setGeneratedImage(data.imageUrl);
         setCharacterAnalysis(data.characterAnalysis);
         setGenerationResult(data);
         
         if (data.characterId && saveAsCharacter) {
-          toast.success(`Character saved and ${selectedStyle === 'pixar' ? 'Pixar' : 'Vector'} image generated!`);
+          toast.success(`Character saved and ${selectedStyle === '3d' ? '3D' : 'Vector'} image generated!`);
         } else {
-          toast.success('Pixar image generated! Click download to save.');
+          toast.success('Character image generated! Click download to save.');
         }
         
         // Auto-download the image
@@ -154,10 +154,10 @@ export const CharacterConverter: React.FC = () => {
         });
         toast.error('Image validation failed');
       } else {
-        toast.error(data.error || 'Failed to generate Pixar image');
+        toast.error(data.error || 'Failed to generate character image');
       }
     } catch (error) {
-      console.error('❌ Error generating Pixar image:', error);
+      console.error('❌ Error generating character image:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setIsGenerating(false);
@@ -192,7 +192,7 @@ export const CharacterConverter: React.FC = () => {
     }
     
     if (issueSet.has('not_human')) {
-      return 'Please use a photo of a human person for Pixar character conversion.';
+      return 'Please use a photo of a human person for character conversion.';
     }
 
     return 'Photo is not suitable for character creation. Please try a clear, well-lit photo with one person\'s face prominently visible.';
@@ -200,13 +200,13 @@ export const CharacterConverter: React.FC = () => {
 
   const retryGeneration = () => {
     setValidationError(null);
-    generatePixarImage();
+    generateCharacterImage();
   };
 
-  const downloadImage = (imageData: string, style?: 'pixar' | 'vector') => {
+  const downloadImage = (imageData: string, style?: '3d' | 'vector') => {
     try {
       const activePrompt = style === 'vector' ? vectorPrompt : prompt;
-      const stylePrefix = style === 'vector' ? 'vector' : 'pixar';
+      const stylePrefix = style === 'vector' ? 'vector' : '3d';
       const link = document.createElement('a');
       link.href = imageData;
       link.download = `${stylePrefix}-${activePrompt.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.png`;
@@ -228,7 +228,7 @@ export const CharacterConverter: React.FC = () => {
             Character Art Converter
           </h1>
           <p className="text-muted-foreground text-lg">
-            Transform any person into a Disney Pixar character or flat vector illustration
+            Transform any person into a 3D animated character or flat vector illustration
           </p>
         </div>
 
@@ -351,21 +351,21 @@ export const CharacterConverter: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Art Style</CardTitle>
-                <CardDescription>Choose between 3D Pixar or flat vector illustration</CardDescription>
+                <CardDescription>Choose between 3D animated or flat vector illustration</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
                   <button
-                    onClick={() => setSelectedStyle('pixar')}
+                    onClick={() => setSelectedStyle('3d')}
                     className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
-                      selectedStyle === 'pixar'
+                      selectedStyle === '3d'
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <div className="text-center">
-                      <h3 className="font-medium">3D Pixar Style</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Disney-style animated character</p>
+                      <h3 className="font-medium">3D Animated Style</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Cheerful animated character</p>
                     </div>
                   </button>
                   <button
@@ -424,24 +424,24 @@ export const CharacterConverter: React.FC = () => {
               </Card>
             )}
 
-            {/* Pixar Prompt */}
-            {selectedStyle === 'pixar' && (
+            {/* 3D Character Prompt */}
+            {selectedStyle === '3d' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Wand2 className="w-5 h-5" />
-                    Pixar Prompt
+                    3D Character Prompt
                   </CardTitle>
                   <CardDescription>
-                    Describe how you want the character to appear in 3D Pixar style
+                    Describe how you want the character to appear in 3D animated style
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prompt">Your Pixar Vision</Label>
+                    <Label htmlFor="prompt">Your Character Vision</Label>
                     <Input
                       id="prompt"
-                      placeholder="Type 'pixar' or describe your vision (you can also paste an image here)"
+                      placeholder="Type '3d' or describe your vision (you can also paste an image here)"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       onPaste={handleInputPaste}
@@ -453,9 +453,9 @@ export const CharacterConverter: React.FC = () => {
                     <div className="grid gap-1 text-xs">
                       <button
                         className="text-left text-primary hover:underline"
-                        onClick={() => setPrompt('pixar')}
+                        onClick={() => setPrompt('3d')}
                       >
-                        • Just type "pixar" for automatic magic ✨
+                        • Just type "3d" for automatic magic ✨
                       </button>
                       <button
                         className="text-left text-primary hover:underline"
@@ -528,7 +528,7 @@ export const CharacterConverter: React.FC = () => {
 
             {/* Generate Button */}
             <Button
-              onClick={generatePixarImage}
+              onClick={generateCharacterImage}
               disabled={(!referenceImage && !selectedCharacterId) || (!prompt.trim() && !vectorPrompt.trim()) || isGenerating}
               className="w-full"
               size="lg"
@@ -536,12 +536,12 @@ export const CharacterConverter: React.FC = () => {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating {selectedStyle === 'pixar' ? 'Pixar Magic' : 'Vector Art'}...
+                  Generating {selectedStyle === '3d' ? '3D Character' : 'Vector Art'}...
                 </>
               ) : (
                 <>
                   <Wand2 className="w-4 h-4 mr-2" />
-                  Create {selectedStyle === 'pixar' ? 'Pixar Character' : 'Vector Illustration'}
+                  Create {selectedStyle === '3d' ? '3D Character' : 'Vector Illustration'}
                 </>
               )}
             </Button>
@@ -554,7 +554,7 @@ export const CharacterConverter: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="w-5 h-5" />
-                Generated {selectedStyle === 'pixar' ? 'Pixar Character' : 'Vector Illustration'}
+                Generated {selectedStyle === '3d' ? '3D Character' : 'Vector Illustration'}
                 {generationResult?.characterId && (
                   <Badge variant="outline" className="ml-2">
                     <Save className="w-3 h-3 mr-1" />
@@ -572,7 +572,7 @@ export const CharacterConverter: React.FC = () => {
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
                   <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                  <p className="text-lg font-medium">Creating your {selectedStyle === 'pixar' ? 'Pixar character' : 'vector illustration'}...</p>
+                  <p className="text-lg font-medium">Creating your {selectedStyle === '3d' ? '3D character' : 'vector illustration'}...</p>
                   <p className="text-sm text-muted-foreground">This usually takes 10-15 seconds</p>
                 </div>
               ) : generatedImage ? (
@@ -580,7 +580,7 @@ export const CharacterConverter: React.FC = () => {
                   <div>
                     <img
                       src={generatedImage}
-                      alt={`Generated ${selectedStyle === 'pixar' ? 'Pixar character' : 'vector illustration'}`}
+                      alt={`Generated ${selectedStyle === '3d' ? '3D character' : 'vector illustration'}`}
                       className="w-full rounded-lg shadow-lg border"
                     />
                     <Button
@@ -589,7 +589,7 @@ export const CharacterConverter: React.FC = () => {
                       className="gap-2 w-full mt-4"
                     >
                       <Download className="w-4 h-4" />
-                      Download {selectedStyle === 'pixar' ? 'Pixar Image' : 'Vector Image'}
+                      Download {selectedStyle === '3d' ? '3D Character' : 'Vector Image'}
                     </Button>
                   </div>
                   <div className="space-y-4">
