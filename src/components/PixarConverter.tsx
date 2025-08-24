@@ -7,12 +7,18 @@ import { useReferenceImage } from '@/hooks/useReferenceImage';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload, Wand2, Download, Loader2 } from 'lucide-react';
+import { ErrorBanner } from '@/components/common/ErrorBanner';
 
 export const PixarConverter: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [characterAnalysis, setCharacterAnalysis] = useState<string>('');
+  const [validationError, setValidationError] = useState<{
+    message: string;
+    issues: string[];
+    faceCount?: number;
+  } | null>(null);
 
   const {
     referenceImage,
@@ -59,6 +65,7 @@ export const PixarConverter: React.FC = () => {
 
     setIsGenerating(true);
     setGeneratedImage(null);
+    setValidationError(null);
 
     try {
       console.log('🎭 Starting Pixar conversion...');
@@ -91,6 +98,15 @@ export const PixarConverter: React.FC = () => {
         
         // Auto-download the image
         setTimeout(() => downloadImage(data.imageData), 1000);
+      } else if (data.validationError) {
+        // Handle validation errors with specific messaging
+        const errorMessage = getValidationErrorMessage(data.issues, data.faceCount);
+        setValidationError({
+          message: errorMessage,
+          issues: data.issues || [],
+          faceCount: data.faceCount
+        });
+        toast.error('Image validation failed');
       } else {
         toast.error(data.error || 'Failed to generate Pixar image');
       }
@@ -100,6 +116,45 @@ export const PixarConverter: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const getValidationErrorMessage = (issues: string[], faceCount?: number): string => {
+    if (!issues || issues.length === 0) {
+      return 'Image validation failed. Please try a different photo.';
+    }
+
+    const issueSet = new Set(issues);
+    
+    if (issueSet.has('multiple_faces')) {
+      return `Multiple faces detected (${faceCount || 'several'}). Please crop the photo to focus on one person.`;
+    }
+    
+    if (issueSet.has('no_face')) {
+      return 'No face clearly visible. Please use a photo with a clear view of a person\'s face.';
+    }
+    
+    if (issueSet.has('poor_quality')) {
+      return 'Image quality too low. Please use a clearer, well-lit photo with good resolution.';
+    }
+    
+    if (issueSet.has('face_too_small')) {
+      return 'Face is too small in the image. Please use a closer photo where the face is more prominent.';
+    }
+    
+    if (issueSet.has('unclear_features')) {
+      return 'Facial features are unclear. Please use a sharper photo with better lighting.';
+    }
+    
+    if (issueSet.has('not_human')) {
+      return 'Please use a photo of a human person for Pixar character conversion.';
+    }
+
+    return 'Photo is not suitable for character creation. Please try a clear, well-lit photo with one person\'s face prominently visible.';
+  };
+
+  const retryGeneration = () => {
+    setValidationError(null);
+    generatePixarImage();
   };
 
   const downloadImage = (imageData: string) => {
@@ -128,6 +183,17 @@ export const PixarConverter: React.FC = () => {
             Transform any person into a Disney Pixar-style animated character
           </p>
         </div>
+
+        {/* Validation Error Banner */}
+        {validationError && (
+          <div className="mb-6">
+            <ErrorBanner
+              message={validationError.message}
+              onDismiss={() => setValidationError(null)}
+              onRetry={retryGeneration}
+            />
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Upload Section */}
