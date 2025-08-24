@@ -688,6 +688,86 @@ export type Database = {
           },
         ]
       }
+      character_generations: {
+        Row: {
+          character_id: string
+          created_at: string
+          enhanced_prompt: string
+          generated_image_url: string
+          id: string
+          style: string
+          user_id: string
+          user_prompt: string
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          enhanced_prompt: string
+          generated_image_url: string
+          id?: string
+          style: string
+          user_id: string
+          user_prompt: string
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          enhanced_prompt?: string
+          generated_image_url?: string
+          id?: string
+          style?: string
+          user_id?: string
+          user_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_generations_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      characters: {
+        Row: {
+          character_description: string
+          character_name: string | null
+          created_at: string
+          id: string
+          image_hash: string
+          original_image_url: string
+          sample_image_url: string
+          style: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          character_description: string
+          character_name?: string | null
+          created_at?: string
+          id?: string
+          image_hash: string
+          original_image_url: string
+          sample_image_url: string
+          style?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          character_description?: string
+          character_name?: string | null
+          created_at?: string
+          id?: string
+          image_hash?: string
+          original_image_url?: string
+          sample_image_url?: string
+          style?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       color_themes: {
         Row: {
           accent_color: string

@@ -3,24 +3,45 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useReferenceImage } from '@/hooks/useReferenceImage';
+import { useCharacters } from '@/hooks/useCharacters';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Upload, Wand2, Download, Loader2 } from 'lucide-react';
+import { Upload, Wand2, Download, Loader2, Save } from 'lucide-react';
 import { ErrorBanner } from '@/components/common/ErrorBanner';
+
+interface GenerationResult {
+  success: boolean;
+  imageUrl: string;
+  characterAnalysis: string;
+  enhancedPrompt: string;
+  style: string;
+  characterId?: string;
+  characterName?: string;
+  existingCharacter?: boolean;
+}
 
 export const PixarConverter: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [vectorPrompt, setVectorPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState<'pixar' | 'vector'>('pixar');
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [saveAsCharacter, setSaveAsCharacter] = useState(false);
+  const [characterName, setCharacterName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [characterAnalysis, setCharacterAnalysis] = useState<string>('');
+  const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
   const [validationError, setValidationError] = useState<{
     message: string;
     issues: string[];
     faceCount?: number;
   } | null>(null);
+
+  const { data: characters = [] } = useCharacters();
 
   const {
     referenceImage,
@@ -67,8 +88,8 @@ export const PixarConverter: React.FC = () => {
   };
 
   const generatePixarImage = async () => {
-    if (!referenceImage) {
-      toast.error('Please upload an image first');
+    if (!referenceImage && !selectedCharacterId) {
+      toast.error('Please upload an image or select an existing character');
       return;
     }
 
@@ -86,7 +107,7 @@ export const PixarConverter: React.FC = () => {
       console.log('🎭 Starting Pixar conversion...');
       
       // Extract base64 data from the reference image
-      const base64Data = referenceImage.split(',')[1];
+      const base64Data = referenceImage ? referenceImage.split(',')[1] : null;
       
       // Enhance the prompt if it's minimal
       const enhancedPrompt = enhancePrompt(activePrompt, selectedStyle);
@@ -96,7 +117,10 @@ export const PixarConverter: React.FC = () => {
         body: {
           image: base64Data,
           prompt: enhancedPrompt,
-          style: selectedStyle
+          style: selectedStyle,
+          characterId: selectedCharacterId,
+          saveAsCharacter: saveAsCharacter && !selectedCharacterId,
+          characterName: characterName || null
         }
       });
 
@@ -108,12 +132,18 @@ export const PixarConverter: React.FC = () => {
 
       if (data.success) {
         console.log('✅ Pixar image generated successfully');
-        setGeneratedImage(data.imageData);
+        setGeneratedImage(data.imageUrl);
         setCharacterAnalysis(data.characterAnalysis);
-        toast.success('Pixar image generated! Click download to save.');
+        setGenerationResult(data);
+        
+        if (data.characterId && saveAsCharacter) {
+          toast.success(`Character saved and ${selectedStyle === 'pixar' ? 'Pixar' : 'Vector'} image generated!`);
+        } else {
+          toast.success('Pixar image generated! Click download to save.');
+        }
         
         // Auto-download the image
-        setTimeout(() => downloadImage(data.imageData, selectedStyle), 1000);
+        setTimeout(() => downloadImage(data.imageUrl, selectedStyle), 1000);
       } else if (data.validationError) {
         // Handle validation errors with specific messaging
         const errorMessage = getValidationErrorMessage(data.issues, data.faceCount);
@@ -219,13 +249,52 @@ export const PixarConverter: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="w-5 h-5" />
-                Upload Image
+                Upload Image or Select Character
               </CardTitle>
               <CardDescription>
-                Upload, drag & drop, or paste an image of a person
+                Upload a new image or select an existing character
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Existing Characters Selection */}
+              {characters.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium mb-3">Select Existing Character</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {characters.map((character) => (
+                      <div
+                        key={character.id}
+                        className={`border rounded-lg p-2 cursor-pointer transition-colors ${
+                          selectedCharacterId === character.id 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => setSelectedCharacterId(character.id)}
+                      >
+                        <img 
+                          src={character.sample_image_url} 
+                          alt={character.character_name || 'Character'}
+                          className="w-full h-16 object-cover rounded"
+                        />
+                        <p className="text-xs mt-1 truncate">
+                          {character.character_name || 'Unnamed'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedCharacterId && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedCharacterId(null)}
+                      className="mt-3 w-full"
+                      size="sm"
+                    >
+                      Clear Selection
+                    </Button>
+                  )}
+                </div>
+              )}
+
               <div
                 className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
                 onDrop={handleDrop}
@@ -254,7 +323,12 @@ export const PixarConverter: React.FC = () => {
                   <div className="space-y-4">
                     <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Click to upload, drag & drop, or paste</p>
+                      <p className="text-sm font-medium">
+                        {selectedCharacterId 
+                          ? 'Or upload a new photo to create a different character'
+                          : 'Click to upload, drag & drop, or paste'
+                        }
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
                     </div>
                   </div>
@@ -310,6 +384,45 @@ export const PixarConverter: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Character Saving Options */}
+            {referenceImage && !selectedCharacterId && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Save Character</CardTitle>
+                  <CardDescription>Save this person as a reusable character</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="save-character"
+                      checked={saveAsCharacter}
+                      onCheckedChange={(checked) => setSaveAsCharacter(checked === true)}
+                    />
+                    <Label htmlFor="save-character" className="text-sm font-medium">
+                      Save as reusable character
+                    </Label>
+                  </div>
+                  
+                  {saveAsCharacter && (
+                    <div className="space-y-2">
+                      <Label htmlFor="character-name" className="text-sm">Character Name (optional)</Label>
+                      <Input
+                        id="character-name"
+                        value={characterName}
+                        onChange={(e) => setCharacterName(e.target.value)}
+                        placeholder="e.g., Sarah, Business Professional"
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Saved characters can be reused for consistent results across different styles and prompts
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Pixar Prompt */}
             {selectedStyle === 'pixar' && (
@@ -416,7 +529,7 @@ export const PixarConverter: React.FC = () => {
             {/* Generate Button */}
             <Button
               onClick={generatePixarImage}
-              disabled={!referenceImage || (!prompt.trim() && !vectorPrompt.trim()) || isGenerating}
+              disabled={(!referenceImage && !selectedCharacterId) || (!prompt.trim() && !vectorPrompt.trim()) || isGenerating}
               className="w-full"
               size="lg"
             >
@@ -442,6 +555,12 @@ export const PixarConverter: React.FC = () => {
               <CardTitle className="flex items-center gap-2">
                 <Download className="w-5 h-5" />
                 Generated {selectedStyle === 'pixar' ? 'Pixar Character' : 'Vector Illustration'}
+                {generationResult?.characterId && (
+                  <Badge variant="outline" className="ml-2">
+                    <Save className="w-3 h-3 mr-1" />
+                    Saved Character
+                  </Badge>
+                )}
               </CardTitle>
               {characterAnalysis && (
                 <CardDescription>
@@ -457,23 +576,40 @@ export const PixarConverter: React.FC = () => {
                   <p className="text-sm text-muted-foreground">This usually takes 10-15 seconds</p>
                 </div>
               ) : generatedImage ? (
-                <div className="space-y-4">
-                  <div className="flex justify-center">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
                     <img
                       src={generatedImage}
                       alt={`Generated ${selectedStyle === 'pixar' ? 'Pixar character' : 'vector illustration'}`}
-                      className="max-w-full max-h-96 rounded-lg shadow-lg border"
+                      className="w-full rounded-lg shadow-lg border"
                     />
-                  </div>
-                  <div className="flex justify-center">
                     <Button
                       onClick={() => downloadImage(generatedImage, selectedStyle)}
                       size="lg"
-                      className="gap-2"
+                      className="gap-2 w-full mt-4"
                     >
                       <Download className="w-4 h-4" />
                       Download {selectedStyle === 'pixar' ? 'Pixar Image' : 'Vector Image'}
                     </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">Character Analysis</h3>
+                      <p className="text-sm text-muted-foreground">{characterAnalysis}</p>
+                    </div>
+                    {generationResult?.existingCharacter && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800">
+                          ✅ Used existing character for consistent results
+                        </p>
+                      </div>
+                    )}
+                    {generationResult?.characterName && (
+                      <div>
+                        <h4 className="font-medium">Character Name</h4>
+                        <p className="text-sm text-muted-foreground">{generationResult.characterName}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : null}
