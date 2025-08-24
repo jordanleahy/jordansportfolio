@@ -138,8 +138,49 @@ serve(async (req) => {
 
           console.log('✅ Theme created successfully:', creationResult);
 
+          // Now import the theme into the database
+          console.log('📁 Importing theme into database...');
+          
+          const { data: importResult, error: importError } = await supabase.functions.invoke(
+            'process-and-import-theme',
+            {
+              body: {
+                themeData: creationResult.themeData,
+                characterId: characterData?.characterId || null,
+                visualSeed: characterData?.visualSeed || null
+              },
+              headers: authHeader ? { Authorization: authHeader } : {}
+            }
+          );
+
+          if (importError) {
+            console.error('❌ Error importing theme:', importError);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Failed to import theme into database',
+                details: importError
+              }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (!importResult?.success) {
+            console.error('❌ Theme import failed:', importResult);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Theme import unsuccessful',
+                details: importResult
+              }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          console.log('✅ Theme imported successfully:', importResult);
+          
           // If we have character data, update the theme with character reference
-          if (characterData && creationResult.themeData) {
+          if (characterData && importResult.themeId) {
             console.log('📝 Updating theme with character reference...');
             
             const { error: updateError } = await supabase
@@ -150,7 +191,7 @@ serve(async (req) => {
                 has_character_reference: true,
                 updated_at: new Date().toISOString()
               })
-              .eq('id', creationResult.themeData.id);
+              .eq('id', importResult.themeId);
 
             if (updateError) {
               console.error('❌ Failed to update theme with character data:', updateError);
@@ -162,8 +203,8 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({
               success: true,
-              message: 'Theme creation initiated',
-              themeId: creationResult.themeData?.id || newThemeId,
+              message: 'Theme created and imported successfully',
+              themeId: importResult.themeId || creationResult.themeData?.id || newThemeId,
               characterId: characterData?.characterId || null,
               visualSeed: characterData?.visualSeed || null
             }),
