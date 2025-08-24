@@ -8,7 +8,8 @@ import {
   CreditCard,
   Check,
   Info,
-  X
+  X,
+  Palette
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { AccountForm } from '@/components/forms/AccountForm';
+import { CharacterManagement } from '@/components/admin/CharacterManagement';
 
 export const SettingsModal: React.FC = () => {
   const { isSettingsOpen, closeSettings } = useModal();
@@ -126,6 +128,17 @@ export const SettingsModal: React.FC = () => {
                 >
                   <User className="h-4 w-4" />
                   Account
+                </button>
+                <button
+                  onClick={() => setActiveSection('characters')}
+                  className={`flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-sm ${
+                    activeSection === 'characters' 
+                      ? 'bg-background text-foreground font-medium' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  }`}
+                >
+                  <Palette className="h-4 w-4" />
+                  Characters
                 </button>
               </div>
             </div>
@@ -262,6 +275,8 @@ export const SettingsModal: React.FC = () => {
                 </div>
               </>
             )}
+
+            {activeSection === 'characters' && <CharacterManagement />}
           </div>
         </div>
       </DialogContent>

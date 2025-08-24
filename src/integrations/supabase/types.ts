@@ -688,6 +688,104 @@ export type Database = {
           },
         ]
       }
+      character_generations: {
+        Row: {
+          character_id: string
+          character_type: string | null
+          created_at: string
+          enhanced_prompt: string
+          generated_image_url: string
+          id: string
+          seed: string | null
+          style: string
+          user_id: string
+          user_prompt: string
+        }
+        Insert: {
+          character_id: string
+          character_type?: string | null
+          created_at?: string
+          enhanced_prompt: string
+          generated_image_url: string
+          id?: string
+          seed?: string | null
+          style: string
+          user_id: string
+          user_prompt: string
+        }
+        Update: {
+          character_id?: string
+          character_type?: string | null
+          created_at?: string
+          enhanced_prompt?: string
+          generated_image_url?: string
+          id?: string
+          seed?: string | null
+          style?: string
+          user_id?: string
+          user_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_generations_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      characters: {
+        Row: {
+          character_description: string
+          character_name: string | null
+          character_type: string | null
+          created_at: string
+          id: string
+          image_hash: string
+          original_image_url: string
+          original_photo_hash: string | null
+          sample_image_url: string
+          seed: string | null
+          style: string
+          style_prompt: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          character_description: string
+          character_name?: string | null
+          character_type?: string | null
+          created_at?: string
+          id?: string
+          image_hash: string
+          original_image_url: string
+          original_photo_hash?: string | null
+          sample_image_url: string
+          seed?: string | null
+          style?: string
+          style_prompt?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          character_description?: string
+          character_name?: string | null
+          character_type?: string | null
+          created_at?: string
+          id?: string
+          image_hash?: string
+          original_image_url?: string
+          original_photo_hash?: string | null
+          sample_image_url?: string
+          seed?: string | null
+          style?: string
+          style_prompt?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       color_themes: {
         Row: {
           accent_color: string
@@ -2568,10 +2666,13 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          has_character_reference: boolean | null
           id: string
           lifecycle_status: string | null
           prompt_completion_count: number | null
           prompt_generation_status: string | null
+          reference_character_analysis: Json | null
+          reference_character_id: string | null
           theme_name: string
           total_posts_count: number | null
           updated_at: string
@@ -2584,10 +2685,13 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          reference_character_analysis?: Json | null
+          reference_character_id?: string | null
           theme_name: string
           total_posts_count?: number | null
           updated_at?: string
@@ -2600,10 +2704,13 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          reference_character_analysis?: Json | null
+          reference_character_id?: string | null
           theme_name?: string
           total_posts_count?: number | null
           updated_at?: string
@@ -2612,6 +2719,13 @@ export type Database = {
           visual_prompt_system_prompt_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "themes_reference_character_id_fkey"
+            columns: ["reference_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "themes_visual_prompt_system_prompt_id_fkey"
             columns: ["visual_prompt_system_prompt_id"]
