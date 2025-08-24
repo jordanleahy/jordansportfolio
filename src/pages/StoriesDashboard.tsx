@@ -4,11 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useReferenceImage } from '@/hooks/useReferenceImage';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TypewriterInput } from '@/components/ui/typewriter-input';
-import { Loader2, Sparkles, Users, MessageSquareText, Send, Image as ImageIcon, X } from 'lucide-react';
+import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
 import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
@@ -65,17 +64,6 @@ export default function StoriesDashboard() {
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-
-  // Reference image functionality
-  const {
-    referenceImage,
-    referenceImageAnalysis,
-    createdCharacterId,
-    handleImagePaste,
-    handleDragOver,
-    handleDrop,
-    clearReferenceImage
-  } = useReferenceImage();
 
   // Centralized function to clear pending theme state
   const clearPendingThemeState = () => {
@@ -521,11 +509,7 @@ export default function StoriesDashboard() {
       } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
           action: 'create',
-          description: themeDescription,
-          referenceImageData: referenceImageAnalysis ? {
-            analysis: referenceImageAnalysis,
-            characterId: createdCharacterId
-          } : null
+          description: themeDescription
         }
       });
       
@@ -873,54 +857,11 @@ export default function StoriesDashboard() {
                       handleGenerateCustomTheme();
                     }
                   }}
-                  onPaste={async (e) => {
-                    const textAreaEvent = e as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
-                    await handleImagePaste(textAreaEvent);
-                  }}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                   disabled={isGeneratingTheme} 
                   typingSpeed={80}
                   deletingSpeed={40}
                   pauseDuration={2000}
                 />
-                
-                {/* Reference Image Preview */}
-                {referenceImage && (
-                  <div className="mt-4 p-4 bg-background/60 backdrop-blur-sm rounded-2xl border border-border/30">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0">
-                        <img 
-                          src={referenceImage} 
-                          alt="Reference" 
-                          className="w-16 h-16 object-cover rounded-lg border border-border/30"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium text-foreground">Reference Image Added</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearReferenceImage}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        {referenceImageAnalysis && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            Colors: {referenceImageAnalysis.extractedCharacteristics?.colors?.join(', ') || 'Analyzing...'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>

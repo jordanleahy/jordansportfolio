@@ -18,36 +18,24 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
   const queryClient = useQueryClient();
 
   const submitMutation = useMutation({
-    mutationFn: async ({ rawJson, categoryName, idempotencyKey, characterData }: { 
+    mutationFn: async ({ rawJson, categoryName, idempotencyKey }: { 
       rawJson: string; 
       categoryName: string;
       idempotencyKey: string;
-      characterData?: {
-        reference_character_id: string;
-        reference_character_analysis: any;
-        has_character_reference: boolean;
-      };
     }): Promise<ProcessingResult & { categoryName: string; duplicate?: boolean }> => {
       console.log('🚀 FRONTEND: Starting streamlined theme import');
       console.log('📋 IMPORT DETAILS:', {
         categoryName,
         dataLength: rawJson.length,
         idempotencyKey,
-        hasCharacterReference: !!characterData?.has_character_reference,
         timestamp: new Date().toISOString()
       });
-      
-      // Parse rawJson and add character data if present
-      const parsedJson = JSON.parse(rawJson);
-      if (characterData) {
-        Object.assign(parsedJson, characterData);
-      }
       
       // Call the combined edge function
       console.log('📡 CALLING: process-and-import-theme edge function');
       const response = await supabase.functions.invoke('process-and-import-theme', {
         body: { 
-          rawJson: parsedJson,
+          rawJson: JSON.parse(rawJson),
           idempotencyKey
         }
       });
@@ -205,19 +193,7 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
       const finalJsonString = JSON.stringify(data.data);
       categoryName = data.data.category || data.data.theme || categoryName;
 
-      // Pass through character reference data if detected
-      const characterData = data.data.character_analysis ? {
-        reference_character_id: data.data.character_analysis.id,
-        reference_character_analysis: data.data.character_analysis,
-        has_character_reference: true
-      } : undefined;
-
-      submitMutation.mutate({ 
-        rawJson: finalJsonString, 
-        categoryName, 
-        idempotencyKey,
-        characterData 
-      });
+      submitMutation.mutate({ rawJson: finalJsonString, categoryName, idempotencyKey });
     } catch (err) {
       setIsProcessing(false);
       // Clear pending submission

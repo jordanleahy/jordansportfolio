@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -125,40 +125,13 @@ serve(async (req) => {
         console.log('⚠️ CATEGORY: Not provided in JSON, using default:', resolvedCategory);
       }
 
-      // Extract character reference data from request body if present
-      let characterData = {};
-      if (requestBody.reference_character_id) {
-        characterData = {
-          reference_character_id: requestBody.reference_character_id,
-          reference_character_analysis: requestBody.reference_character_analysis || null,
-          has_character_reference: requestBody.has_character_reference || false
-        };
-        console.log('🎭 CHARACTER REFERENCE FROM REQUEST:', {
-          characterId: requestBody.reference_character_id,
-          hasAnalysis: !!requestBody.reference_character_analysis,
-          timestamp: new Date().toISOString()
-        });
-      } else if (rawJson.reference_character_id) {
-        characterData = {
-          reference_character_id: rawJson.reference_character_id,
-          reference_character_analysis: rawJson.reference_character_analysis || null,
-          has_character_reference: rawJson.has_character_reference || false
-        };
-        console.log('🎭 CHARACTER REFERENCE FROM JSON:', {
-          characterId: rawJson.reference_character_id,
-          hasAnalysis: !!rawJson.reference_character_analysis,
-          timestamp: new Date().toISOString()
-        });
-      }
-
       const { data: createdTheme, error: themeError } = await supabase
         .from('themes')
         .insert({
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
           description: aiResult.cleanedData.theme_description || null,
-          category: resolvedCategory,
-          ...characterData
+          category: resolvedCategory
         })
         .select('id')
         .single();
@@ -210,9 +183,9 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       });
 
-      // Generate system prompt in background using theme ID
+      // Generate system prompt in background using resolved category
       EdgeRuntime.waitUntil(
-        generateSystemPromptBackground(supabase, createdTheme.id, user.id)
+        generateSystemPromptBackground(supabase, resolvedCategory, user.id)
           .then((promptResult) => {
             console.log('📝 SYSTEM PROMPT RESULT:', {
               success: promptResult?.success || false,
@@ -330,54 +303,37 @@ Data: ${JSON.stringify(rawData)}
 
 Return only valid JSON:`;
 
-  // Create AbortController for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-5-mini',
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_completion_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  const aiResponse = result.choices[0].message.content.trim();
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-mini',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_completion_tokens: 1500, // Reduced for faster processing
-      }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-    }
-
-    const result = await response.json();
-    const aiResponse = result.choices[0].message.content.trim();
-
-    try {
-      const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
-      return JSON.parse(cleanJson);
-    } catch (parseError) {
-      throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
-    }
-
-  } catch (fetchError) {
-    clearTimeout(timeoutId);
-    if (fetchError.name === 'AbortError') {
-      console.error('⏱️ OpenAI API timeout during theme processing');
-      throw new Error('Theme processing timed out. Please try again.');
-    }
-    throw fetchError;
+    const cleanJson = aiResponse.replace(/^```json\s*|\s*```$/g, '');
+    return JSON.parse(cleanJson);
+  } catch (parseError) {
+    throw new Error(`Failed to parse AI response as JSON: ${parseError.message}`);
   }
 }
 
@@ -459,20 +415,20 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
   return validated;
 }
 
-async function generateSystemPromptBackground(supabase: any, themeId: string, userId: string): Promise<{ success: boolean; error?: string }> {
+async function generateSystemPromptBackground(supabase: any, category: string, userId: string): Promise<{ success: boolean; error?: string }> {
   console.log('🔄 BACKGROUND TASK: Starting system prompt generation check');
   console.log('📋 BACKGROUND PARAMS:', {
-    themeId,
+    category,
     userId,
     timestamp: new Date().toISOString()
   });
   
   try {
-    console.log('🔍 CHECKING: Existing system prompts for theme');
+    console.log('🔍 CHECKING: Existing system prompts for category');
     const { data: existingPrompts, error: checkError } = await supabase
       .from('system_prompts')
       .select('id')
-      .eq('theme_id', themeId)
+      .eq('category', category)
       .eq('user_id', userId)
       .limit(1);
 
@@ -496,8 +452,8 @@ async function generateSystemPromptBackground(supabase: any, themeId: string, us
     const invokeResult = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: { 
         category: 'system_prompt_generation',
-        theme_id: themeId,
-        description: `Generated content for theme ${themeId}`,
+        theme: category,
+        description: `Generated content for ${category} category`,
         user_id: userId
       }
     });
@@ -519,7 +475,7 @@ async function generateSystemPromptBackground(supabase: any, themeId: string, us
   } catch (error) {
     console.error('💥 BACKGROUND GENERATION ERROR:', {
       error: error.message,
-      themeId,
+      category,
       userId,
       timestamp: new Date().toISOString()
     });

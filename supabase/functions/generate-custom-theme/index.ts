@@ -100,58 +100,35 @@ Output: {"category": "ai-healthcare", "theme": "AI in Healthcare", "description"
 User: "Marketing tips for small business"
 Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...8-12 posts for practical coverage...]}`;
 
-    // Limit description length to prevent excessively long AI responses
-    const truncatedDescription = description.length > 500 ? description.substring(0, 500) + '...' : description;
-    console.log('📝 [generate-custom-theme] Using description (truncated if needed):', truncatedDescription);
-
     console.log('🤖 [generate-custom-theme] Calling OpenAI API');
-    
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Generate a social media theme for: ${description}` }
+        ],
+        max_completion_tokens: 3000,
+      }),
+    });
 
-    let generatedContent;
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-5-mini-2025-08-07',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
-          ],
-          max_completion_tokens: 2000, // Reduced from 3000 to speed up response
-        }),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
+    console.log('📥 [generate-custom-theme] OpenAI response status:', response.status);
 
-      console.log('📥 [generate-custom-theme] OpenAI response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
-        throw new Error(`OpenAI API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      generatedContent = data.choices[0].message.content.trim();
-
-      console.log('📄 [generate-custom-theme] Generated content:', generatedContent);
-
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      if (fetchError.name === 'AbortError') {
-        console.error('⏱️ [generate-custom-theme] OpenAI API timeout after 25 seconds');
-        throw new Error('Theme generation timed out. Please try with a shorter description.');
-      }
-      throw fetchError;
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
+
+    const data = await response.json();
+    const generatedContent = data.choices[0].message.content.trim();
+
+    console.log('📄 [generate-custom-theme] Generated content:', generatedContent);
 
     // Parse and validate the JSON
     console.log('🔍 [generate-custom-theme] Parsing generated JSON');

@@ -107,11 +107,7 @@ export class ThemeService {
     return theme;
   }
 
-  async createTheme(theme: CreateTheme & { 
-    reference_character_id?: string; 
-    reference_character_analysis?: any;
-    has_character_reference?: boolean;
-  }): Promise<Theme> {
+  async createTheme(theme: CreateTheme): Promise<Theme> {
     const startTime = Date.now();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
@@ -119,8 +115,7 @@ export class ThemeService {
     logger.setContext('createTheme', user.id);
     logger.info('Starting theme creation', { 
       theme_name: theme.theme_name, 
-      category: theme.category,
-      has_character_reference: theme.has_character_reference || false
+      category: theme.category 
     });
 
     // Always create the theme - no duplicate checks
@@ -131,9 +126,6 @@ export class ThemeService {
       .insert({
         ...theme,
         user_id: user.id,
-        reference_character_id: theme.reference_character_id || null,
-        reference_character_analysis: theme.reference_character_analysis || null,
-        has_character_reference: theme.has_character_reference || false,
       })
       .select()
       .single();
@@ -159,7 +151,6 @@ export class ThemeService {
       themeId: createdTheme.id,
       theme_name: createdTheme.theme_name,
       category: createdTheme.category,
-      has_character_reference: createdTheme.has_character_reference,
       totalDuration: `${totalDuration}ms`
     });
 

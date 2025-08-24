@@ -20,7 +20,6 @@ interface ThemeImportData {
   category?: string; // 1-100 optional
   theme: string; // 1-200
   theme_description?: string; // <=1000
-  referenced_character?: string; // character name if detected
   posts: ThemePost[]; // 1-100
 }
 
@@ -63,7 +62,6 @@ SCHEMA:
   "category": "string (1-100, optional)",
   "theme": "string (1-200, required)",
   "theme_description": "string (<=1000, optional)",
-  "referenced_character": "string (character name if detected, optional)",
   "posts": [
     {
       "day": number (1-365, optional),
@@ -74,18 +72,13 @@ SCHEMA:
   ]
 }
 
-CHARACTER DETECTION:
-- Look for patterns like "by [Name]", "with [Name]", "featuring [Name]"
-- Extract character name if present (e.g., "by DanDan" → "DanDan")
-- Remove character reference from theme title if found
-
 REQUIREMENTS:
 - posts length: 1-100 max
 - Trim whitespace, remove empty strings
 - If category missing: set to "general"
 - If status missing/invalid: set to "draft"
 - If day missing: auto-increment starting at 1
-- Map any fields like description → story_description
+- Map any fields like description -> story_description
 - NEVER include markdown, explanations, or keys not in schema.
 `;
 
@@ -125,7 +118,7 @@ REQUIREMENTS:
       return json({ success: false, errors: ["Model did not return valid JSON"], warnings: [] }, 500);
     }
 
-    const { data, errors, warnings } = await validateAndCoerce(parsed);
+    const { data, errors, warnings } = validateAndCoerce(parsed);
     const success = errors.length === 0;
     return json({ success, data: success ? data : undefined, errors, warnings }, success ? 200 : 400);
   } catch (e) {
@@ -143,7 +136,7 @@ function json(obj: any, status = 200) {
 async function tryNormalizeLocal(input: string): Promise<ProcessingResult | null> {
   try {
     const maybe = JSON.parse(input);
-    const { data, errors, warnings } = await validateAndCoerce(maybe);
+    const { data, errors, warnings } = validateAndCoerce(maybe);
     if (errors.length === 0) {
       return { success: true, data, errors, warnings };
     }
@@ -153,7 +146,7 @@ async function tryNormalizeLocal(input: string): Promise<ProcessingResult | null
   }
 }
 
-async function validateAndCoerce(obj: any): Promise<{ data?: ThemeImportData; errors: string[]; warnings: string[] }> {
+function validateAndCoerce(obj: any): { data?: ThemeImportData; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -164,7 +157,6 @@ async function validateAndCoerce(obj: any): Promise<{ data?: ThemeImportData; er
     category: undefined,
     theme: "",
     theme_description: undefined,
-    referenced_character: undefined,
     posts: [],
   };
 
@@ -194,42 +186,6 @@ async function validateAndCoerce(obj: any): Promise<{ data?: ThemeImportData; er
   if (obj?.theme_description != null) {
     const d = String(obj.theme_description);
     out.theme_description = d.length > 1000 ? (warnings.push("theme_description truncated to 1000 chars"), d.slice(0, 1000)) : d;
-  }
-
-  // Handle character reference detection and lookup
-  let characterAnalysis: any = null;
-  if (obj?.referenced_character) {
-    const characterName = String(obj.referenced_character).trim();
-    if (characterName) {
-      out.referenced_character = characterName;
-      
-      // Look up character in database
-      try {
-        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
-        const { data: character, error } = await supabase
-          .from('characters')
-          .select('id, character_description')
-          .ilike('character_name', `%${characterName}%`)
-          .limit(1)
-          .maybeSingle();
-          
-        if (character && !error) {
-          characterAnalysis = {
-            id: character.id,
-            description: character.character_description
-          };
-          warnings.push(`Character "${characterName}" found and will be applied to theme visual generation`);
-        } else {
-          warnings.push(`Character "${characterName}" not found in database`);
-        }
-      } catch (dbError) {
-        warnings.push(`Unable to lookup character "${characterName}": ${dbError}`);
-      }
-    }
   }
 
   // posts array (required 1-100)
@@ -291,11 +247,6 @@ async function validateAndCoerce(obj: any): Promise<{ data?: ThemeImportData; er
   if (out.posts.length === 0) {
     // Ensure type stability
     delete (out as any).posts;
-  }
-
-  // Store character analysis in the data for later use
-  if (characterAnalysis) {
-    (out as any).character_analysis = characterAnalysis;
   }
 
   return { data: out, errors, warnings };
