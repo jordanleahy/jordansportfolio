@@ -23,7 +23,7 @@ serve(async (req) => {
       );
     }
 
-    const { image, prompt } = await req.json();
+    const { image, prompt, style = 'pixar' } = await req.json();
 
     if (!image || !prompt) {
       return new Response(
@@ -32,7 +32,8 @@ serve(async (req) => {
       );
     }
 
-    console.log('🎭 Starting Pixar conversion process...');
+    console.log('🎭 Starting character conversion process...');
+    console.log('🎨 Style:', style);
     console.log('📝 User prompt:', prompt);
 
     // Combined analysis and validation in one call for efficiency
@@ -147,12 +148,18 @@ Respond with a brief, focused description of the person's permanent characterist
     const characterDescription = analysisResult;
     console.log('✅ Character analysis completed:', characterDescription);
 
-    // Create Pixar-style prompt combining character analysis with user's request
-    const pixarPrompt = `Pixar 3D animated character: ${characterDescription}, ${prompt}. Large expressive eyes (1.5x normal size), soft rounded facial features, warm studio lighting, high-quality 3D render in Disney Pixar movie animation style, vibrant colors, child-friendly appearance, professional animation quality, detailed textures, glossy finish typical of Pixar films.`;
+    // Create style-appropriate prompt combining character analysis with user's request
+    let finalPrompt: string;
+    
+    if (style === 'vector') {
+      finalPrompt = `Flat vector illustration: ${characterDescription}, ${prompt}. Clean geometric shapes, bold flat colors with minimal gradients, simple clean lines, modern graphic design aesthetic, professional vector art quality, minimalist approach focusing on essential features, contemporary flat design principles, clean background with subtle geometric patterns, ultra high resolution with crisp scalable vector appearance.`;
+    } else {
+      finalPrompt = `Pixar 3D animated character: ${characterDescription}, ${prompt}. Large expressive eyes (1.5x normal size), soft rounded facial features, warm studio lighting, high-quality 3D render in Disney Pixar movie animation style, vibrant colors, child-friendly appearance, professional animation quality, detailed textures, glossy finish typical of Pixar films.`;
+    }
 
-    console.log('🎨 Generated Pixar prompt:', pixarPrompt.substring(0, 200) + '...');
+    console.log('🎨 Generated prompt:', finalPrompt.substring(0, 200) + '...');
 
-    // Generate the Pixar image
+    // Generate the image
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -161,12 +168,12 @@ Respond with a brief, focused description of the person's permanent characterist
       },
       body: JSON.stringify({
         model: 'gpt-image-1',
-        prompt: pixarPrompt,
+        prompt: finalPrompt,
         n: 1,
         size: '1024x1024',
         quality: 'high',
         output_format: 'png',
-        background: 'transparent'
+        background: style === 'vector' ? 'transparent' : 'opaque'
       }),
     });
 
@@ -174,13 +181,13 @@ Respond with a brief, focused description of the person's permanent characterist
       const error = await imageResponse.text();
       console.error('❌ Image generation error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to generate Pixar image' }),
+        JSON.stringify({ error: `Failed to generate ${style} image` }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const imageData = await imageResponse.json();
-    console.log('✅ Pixar image generated successfully');
+    console.log(`✅ ${style === 'pixar' ? 'Pixar' : 'Vector'} image generated successfully`);
 
     // Since gpt-image-1 returns base64, we need to handle the response properly
     const generatedImage = imageData.data[0];
@@ -190,15 +197,16 @@ Respond with a brief, focused description of the person's permanent characterist
         success: true,
         imageData: generatedImage.b64_json ? `data:image/png;base64,${generatedImage.b64_json}` : generatedImage.url,
         characterAnalysis: characterDescription,
-        pixarPrompt: pixarPrompt
+        generatedPrompt: finalPrompt,
+        style: style
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('❌ Error in Pixar conversion:', error);
+    console.error('❌ Error in character conversion:', error);
     return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred during Pixar conversion', details: error.message }),
+      JSON.stringify({ error: 'An unexpected error occurred during character conversion', details: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
