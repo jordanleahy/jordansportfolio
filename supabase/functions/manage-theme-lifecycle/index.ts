@@ -100,16 +100,87 @@ serve(async (req) => {
         
         const newThemeId = crypto.randomUUID();
         
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: 'Theme creation initiated',
-            themeId: newThemeId,
-            characterId: characterData?.characterId || null,
-            visualSeed: characterData?.visualSeed || null
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        // Now call the actual theme creation pipeline with character data
+        console.log('📡 Calling theme creation pipeline with character data...');
+        
+        try {
+          const { data: creationResult, error: creationError } = await supabase.functions.invoke(
+            'generate-custom-theme',
+            {
+              body: { description },
+              headers: authHeader ? { Authorization: authHeader } : {}
+            }
+          );
+
+          if (creationError) {
+            console.error('❌ Error calling theme creation:', creationError);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Failed to create theme',
+                details: creationError
+              }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          if (!creationResult?.success) {
+            console.error('❌ Theme creation failed:', creationResult);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Theme creation unsuccessful',
+                details: creationResult
+              }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          console.log('✅ Theme created successfully:', creationResult);
+
+          // If we have character data, update the theme with character reference
+          if (characterData && creationResult.themeData) {
+            console.log('📝 Updating theme with character reference...');
+            
+            const { error: updateError } = await supabase
+              .from('themes')
+              .update({
+                reference_character_id: characterData.characterId,
+                reference_character_analysis: characterData.visualSeed,
+                has_character_reference: true,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', creationResult.themeData.id);
+
+            if (updateError) {
+              console.error('❌ Failed to update theme with character data:', updateError);
+            } else {
+              console.log('✅ Theme updated with character reference');
+            }
+          }
+          
+          return new Response(
+            JSON.stringify({
+              success: true,
+              message: 'Theme creation initiated',
+              themeId: creationResult.themeData?.id || newThemeId,
+              characterId: characterData?.characterId || null,
+              visualSeed: characterData?.visualSeed || null
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+          
+        } catch (error) {
+          console.error('❌ Error during theme creation pipeline:', error);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Failed to create theme pipeline',
+              details: error.message
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
 
       case 'complete':
         console.log('✅ Marking theme as completed:', themeId);
