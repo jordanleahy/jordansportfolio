@@ -1,7 +1,7 @@
 # Image Generation Pipeline - Complete Developer Guide
 
-**Version:** 2.0  
-**Last Updated:** 2025-08-22  
+**Version:** 2.1  
+**Last Updated:** 2025-08-24  
 **Audience:** Developers, Engineers, Technical Team
 
 ---
@@ -245,16 +245,37 @@ graph TD
 - `visual_content`, `blog_content`, `cover_letters`
 - Dynamic category mapping and routing
 
+**Query Patterns:**
+- **By Theme**: Query `system_prompts` using `theme_id` foreign key
+- **By Agent**: Query `system_prompts` using `agent_id` foreign key
+- **Category Logic**: Categories are stored in `themes` table, not `system_prompts`
+
 **Implementation:**
 ```typescript
 // Edge Function: invoke-system-prompt-agent
 export interface SystemPromptRequest {
-  category: string;
+  themeId?: string;        // Primary: Query by theme relationship
+  agentId?: string;        // Alternative: Query by agent relationship
+  category?: string;       // Context only: Used for agent routing
   theme?: string;
-  themeId?: string;
   title?: string;
   description?: string;
 }
+
+// Query Pattern Examples:
+// 1. Theme-specific prompts
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('theme_id', themeId)
+  .single();
+
+// 2. Agent-specific prompts  
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('agent_id', agentId)
+  .single();
 ```
 
 ### Visual Prompt Generator
@@ -503,6 +524,74 @@ interface ProcessingStatesContextType {
 | `success` | BOOLEAN | Success status |
 | `created_at` | TIMESTAMP | Request timestamp |
 
+#### `system_prompts`
+**AI-generated system prompts with proper relationships**
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | UUID | Primary key |
+| `prompt_text` | TEXT | Generated prompt content |
+| `theme_id` | UUID | **Foreign key to themes** |
+| `agent_id` | UUID | **Foreign key to openai_agents** |
+| `user_id` | UUID | User identifier |
+| `created_at` | TIMESTAMP | Creation timestamp |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+**Important:** The `category` field is stored in the `themes` table, not in `system_prompts`.
+
+#### `themes`
+**Theme definitions and categories**
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | UUID | Primary key |
+| `theme_name` | TEXT | Theme display name |
+| `category` | TEXT | **Content category** |
+| `description` | TEXT | Theme description |
+| `user_id` | UUID | User identifier |
+| `created_at` | TIMESTAMP | Creation timestamp |
+
+#### `openai_agents`
+**AI agent configurations**
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `id` | UUID | Primary key |
+| `name` | TEXT | Agent name |
+| `supported_categories` | TEXT[] | Categories handled by agent |
+| `user_id` | UUID | User identifier |
+
+### Database Relationship Fixes (2025-08-24)
+
+**Problem:** Several edge functions were incorrectly querying `system_prompts.category` (which doesn't exist).
+
+**Solution:** Updated query patterns to use proper foreign key relationships:
+
+```typescript
+// ❌ OLD (Incorrect): Querying non-existent column
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('category', category);  // ❌ category column doesn't exist
+
+// ✅ NEW (Correct): Query by theme relationship
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('theme_id', themeId);   // ✅ Uses proper foreign key
+
+// ✅ NEW (Correct): Query by agent relationship
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('agent_id', agentId);   // ✅ Uses proper foreign key
+```
+
+**Updated Functions:**
+- `process-and-import-theme`: Now queries by `theme_id`
+- `input-triage`: Now finds agent first, then queries by `agent_id`
+- `vendor-analysis`: Now finds agent first, then queries by `agent_id`
+
 ### Storage Buckets
 
 #### Image Storage Configuration
@@ -707,6 +796,6 @@ await trackOpenAIUsage({
 
 ---
 
-**Last Updated:** 2025-08-22  
-**Version:** 2.0  
+**Last Updated:** 2025-08-24  
+**Version:** 2.1  
 **Maintainer:** Engineering Team
