@@ -141,15 +141,23 @@ serve(async (req) => {
           // Now import the theme into the database
           console.log('📁 Importing theme into database...');
           
+          const importRequestBody = {
+            rawJson: creationResult.themeData,
+            reference_character_id: characterData?.characterId || null,
+            reference_character_analysis: characterData?.visualSeed || null,
+            has_character_reference: !!characterData
+          };
+
+          console.log('📦 Import request body:', {
+            hasRawJson: !!importRequestBody.rawJson,
+            hasCharacterData: !!characterData,
+            timestamp: new Date().toISOString()
+          });
+
           const { data: importResult, error: importError } = await supabase.functions.invoke(
             'process-and-import-theme',
             {
-              body: {
-                rawJson: creationResult.themeData,
-                reference_character_id: characterData?.characterId || null,
-                reference_character_analysis: characterData?.visualSeed || null,
-                has_character_reference: !!characterData
-              },
+              body: importRequestBody,
               headers: authHeader ? { Authorization: authHeader } : {}
             }
           );
