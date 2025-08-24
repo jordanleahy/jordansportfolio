@@ -110,6 +110,7 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
 
+    let generatedContent;
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -139,7 +140,7 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
       }
 
       const data = await response.json();
-      const generatedContent = data.choices[0].message.content.trim();
+      generatedContent = data.choices[0].message.content.trim();
 
       console.log('📄 [generate-custom-theme] Generated content:', generatedContent);
 
