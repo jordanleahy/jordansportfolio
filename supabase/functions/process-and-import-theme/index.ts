@@ -125,13 +125,29 @@ serve(async (req) => {
         console.log('⚠️ CATEGORY: Not provided in JSON, using default:', resolvedCategory);
       }
 
+      // Extract character reference data from rawJson if present
+      let characterData = {};
+      if (rawJson.reference_character_id) {
+        characterData = {
+          reference_character_id: rawJson.reference_character_id,
+          reference_character_analysis: rawJson.reference_character_analysis || null,
+          has_character_reference: rawJson.has_character_reference || false
+        };
+        console.log('🎭 CHARACTER REFERENCE:', {
+          characterId: rawJson.reference_character_id,
+          hasAnalysis: !!rawJson.reference_character_analysis,
+          timestamp: new Date().toISOString()
+        });
+      }
+
       const { data: createdTheme, error: themeError } = await supabase
         .from('themes')
         .insert({
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
           description: aiResult.cleanedData.theme_description || null,
-          category: resolvedCategory
+          category: resolvedCategory,
+          ...characterData
         })
         .select('id')
         .single();

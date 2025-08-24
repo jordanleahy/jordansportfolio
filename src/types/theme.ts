@@ -6,12 +6,25 @@ export interface Theme {
   category: string;
   created_at: string;
   updated_at: string;
+  visual_prompt_system_prompt_id?: string;
+  prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
+  prompt_completion_count?: number;
+  total_posts_count?: number;
+  lifecycle_status?: 'pending' | 'generating' | 'ready' | 'completed';
+  user_interaction_required?: boolean;
+  background_processing_complete?: boolean;
+  reference_character_id?: string;
+  reference_character_analysis?: any;
+  has_character_reference?: boolean;
 }
 
 export interface CreateTheme {
   theme_name: string;
   description?: string;
   category: string;
+  reference_character_id?: string;
+  reference_character_analysis?: any;
+  has_character_reference?: boolean;
 }
 
 export interface UpdateTheme extends Partial<CreateTheme> {

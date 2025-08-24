@@ -2648,10 +2648,13 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          has_character_reference: boolean | null
           id: string
           lifecycle_status: string | null
           prompt_completion_count: number | null
           prompt_generation_status: string | null
+          reference_character_analysis: Json | null
+          reference_character_id: string | null
           theme_name: string
           total_posts_count: number | null
           updated_at: string
@@ -2664,10 +2667,13 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          reference_character_analysis?: Json | null
+          reference_character_id?: string | null
           theme_name: string
           total_posts_count?: number | null
           updated_at?: string
@@ -2680,10 +2686,13 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          reference_character_analysis?: Json | null
+          reference_character_id?: string | null
           theme_name?: string
           total_posts_count?: number | null
           updated_at?: string
@@ -2692,6 +2701,13 @@ export type Database = {
           visual_prompt_system_prompt_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "themes_reference_character_id_fkey"
+            columns: ["reference_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "themes_visual_prompt_system_prompt_id_fkey"
             columns: ["visual_prompt_system_prompt_id"]

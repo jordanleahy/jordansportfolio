@@ -152,7 +152,10 @@ serve(async (req) => {
         themes!social_media_posts_theme_id_fkey(
           visual_prompt_system_prompt_id,
           theme_name,
-          category
+          category,
+          reference_character_id,
+          reference_character_analysis,
+          has_character_reference
         )
       `)
       .eq('id', postId)
@@ -314,7 +317,7 @@ Color Theme Instructions:
 - Color Instructions: ${colorTheme.color_instructions}`;
     }
 
-    // Add reference image analysis if provided
+    // Add reference image analysis if provided (from request parameter)
     if (referenceAnalysis) {
       userMessage += `
 
@@ -328,6 +331,24 @@ Apply these visual characteristics from the reference image:
 - Lighting: ${referenceAnalysis.lighting?.quality || 'N/A'}
 
 Incorporate these characteristics naturally into the generated prompt while maintaining the theme requirements.`;
+    }
+
+    // Add character analysis if theme has character reference
+    if (themeData && themeData.has_character_reference && themeData.reference_character_analysis) {
+      const charAnalysis = themeData.reference_character_analysis;
+      userMessage += `
+
+Character Reference Visual Seed:
+Apply the visual characteristics of this character to all elements in the image:
+- Character Description: ${charAnalysis.description || 'N/A'}
+- Character ID: ${themeData.reference_character_id}
+
+Ensure the generated image maintains the visual identity and aesthetic established by this character while adapting it to the specific content requirements.`;
+      
+      logger.info('Character reference applied', {
+        characterId: themeData.reference_character_id,
+        hasDescription: !!charAnalysis.description
+      });
     }
 
     logger.info('Preparing OpenAI request', {
