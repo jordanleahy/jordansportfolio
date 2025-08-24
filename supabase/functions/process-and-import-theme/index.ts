@@ -125,15 +125,26 @@ serve(async (req) => {
         console.log('⚠️ CATEGORY: Not provided in JSON, using default:', resolvedCategory);
       }
 
-      // Extract character reference data from rawJson if present
+      // Extract character reference data from request body if present
       let characterData = {};
-      if (rawJson.reference_character_id) {
+      if (requestBody.reference_character_id) {
+        characterData = {
+          reference_character_id: requestBody.reference_character_id,
+          reference_character_analysis: requestBody.reference_character_analysis || null,
+          has_character_reference: requestBody.has_character_reference || false
+        };
+        console.log('🎭 CHARACTER REFERENCE FROM REQUEST:', {
+          characterId: requestBody.reference_character_id,
+          hasAnalysis: !!requestBody.reference_character_analysis,
+          timestamp: new Date().toISOString()
+        });
+      } else if (rawJson.reference_character_id) {
         characterData = {
           reference_character_id: rawJson.reference_character_id,
           reference_character_analysis: rawJson.reference_character_analysis || null,
           has_character_reference: rawJson.has_character_reference || false
         };
-        console.log('🎭 CHARACTER REFERENCE:', {
+        console.log('🎭 CHARACTER REFERENCE FROM JSON:', {
           characterId: rawJson.reference_character_id,
           hasAnalysis: !!rawJson.reference_character_analysis,
           timestamp: new Date().toISOString()

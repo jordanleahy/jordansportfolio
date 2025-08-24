@@ -145,9 +145,10 @@ serve(async (req) => {
             'process-and-import-theme',
             {
               body: {
-                themeData: creationResult.themeData,
-                characterId: characterData?.characterId || null,
-                visualSeed: characterData?.visualSeed || null
+                rawJson: creationResult.themeData,
+                reference_character_id: characterData?.characterId || null,
+                reference_character_analysis: characterData?.visualSeed || null,
+                has_character_reference: !!characterData
               },
               headers: authHeader ? { Authorization: authHeader } : {}
             }
