@@ -24,7 +24,7 @@ interface GenerationResult {
   existingCharacter?: boolean;
 }
 
-export const PixarConverter: React.FC = () => {
+export const CharacterConverter: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [vectorPrompt, setVectorPrompt] = useState('');
   const [selectedStyle, setSelectedStyle] = useState<'pixar' | 'vector'>('pixar');
@@ -113,7 +113,7 @@ export const PixarConverter: React.FC = () => {
       const enhancedPrompt = enhancePrompt(activePrompt, selectedStyle);
       console.log('📝 Enhanced prompt:', enhancedPrompt);
 
-      const { data, error } = await supabase.functions.invoke('pixar', {
+      const { data, error } = await supabase.functions.invoke('character', {
         body: {
           image: base64Data,
           prompt: enhancedPrompt,
