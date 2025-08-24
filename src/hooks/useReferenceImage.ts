@@ -1,11 +1,14 @@
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useReferenceImage = () => {
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [referenceImageAnalysis, setReferenceImageAnalysis] = useState<any>(null);
+  const [createdCharacterId, setCreatedCharacterId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const processReferenceImage = async (file: File) => {
     console.log('🔄 Processing reference image:', { name: file.name, size: file.size, type: file.type });
@@ -34,6 +37,37 @@ export const useReferenceImage = () => {
           } else {
             console.log('✅ Reference image analysis completed:', data);
             setReferenceImageAnalysis(data);
+            
+            // Immediately create character record with visual seed
+            if (user && data.extractedCharacteristics) {
+              try {
+                console.log('🎭 Creating character from visual seed...');
+                const characterResponse = await supabase
+                  .from('characters')
+                  .insert({
+                    user_id: user.id,
+                    original_image_url: base64,
+                    sample_image_url: base64,
+                    character_description: `Visual seed: ${data.extractedCharacteristics.colors?.join(', ') || 'analyzed image'} - ${data.extractedCharacteristics.style || 'visual style'}`,
+                    character_name: `Seed ${new Date().toLocaleTimeString()}`,
+                    image_hash: crypto.randomUUID(), // Simple hash replacement
+                    style: 'vector' // Default style
+                  })
+                  .select()
+                  .single();
+
+                if (characterResponse.error) {
+                  console.error('❌ Failed to create character:', characterResponse.error);
+                } else {
+                  console.log('✅ Character created from visual seed:', characterResponse.data.id);
+                  setCreatedCharacterId(characterResponse.data.id);
+                  toast.success('Visual seed saved as character');
+                }
+              } catch (error) {
+                console.error('❌ Error creating character:', error);
+              }
+            }
+            
             toast.success('Reference image analyzed successfully');
           }
         } catch (error) {
@@ -115,11 +149,13 @@ export const useReferenceImage = () => {
   const clearReferenceImage = () => {
     setReferenceImage(null);
     setReferenceImageAnalysis(null);
+    setCreatedCharacterId(null);
   };
 
   return {
     referenceImage,
     referenceImageAnalysis,
+    createdCharacterId,
     fileInputRef,
     processReferenceImage,
     handleImagePaste,

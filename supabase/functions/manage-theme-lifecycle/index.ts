@@ -13,19 +13,30 @@ serve(async (req) => {
   }
 
   try {
-    const { action, description, themeId } = await req.json();
+    const { action, description, themeId, referenceImageData } = await req.json();
 
-    console.log(`🎨 Theme lifecycle action: ${action}`, { description, themeId });
+    console.log(`🎨 Theme lifecycle action: ${action}`, { description, themeId, hasReferenceImage: !!referenceImageData });
 
     // Placeholder implementation for theme lifecycle management
     switch (action) {
       case 'create':
         console.log('📝 Creating theme with description:', description);
+        
+        // Log reference image data if present
+        if (referenceImageData) {
+          console.log('🎭 Theme includes visual seed from character:', referenceImageData.characterId);
+          console.log('🎨 Visual characteristics:', referenceImageData.analysis?.extractedCharacteristics);
+        }
+        
+        const themeId = crypto.randomUUID();
+        
         return new Response(
           JSON.stringify({
             success: true,
             message: 'Theme creation initiated',
-            themeId: crypto.randomUUID()
+            themeId,
+            characterId: referenceImageData?.characterId || null,
+            visualSeed: referenceImageData?.analysis?.extractedCharacteristics || null
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );

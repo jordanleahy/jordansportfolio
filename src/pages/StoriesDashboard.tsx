@@ -70,6 +70,7 @@ export default function StoriesDashboard() {
   const {
     referenceImage,
     referenceImageAnalysis,
+    createdCharacterId,
     handleImagePaste,
     handleDragOver,
     handleDrop,
@@ -520,7 +521,11 @@ export default function StoriesDashboard() {
       } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
           action: 'create',
-          description: themeDescription
+          description: themeDescription,
+          referenceImageData: referenceImageAnalysis ? {
+            analysis: referenceImageAnalysis,
+            characterId: createdCharacterId
+          } : null
         }
       });
       
