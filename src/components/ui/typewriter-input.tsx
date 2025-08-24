@@ -10,6 +10,9 @@ interface TypewriterInputProps extends Omit<React.ComponentProps<"input">, "plac
   typingSpeed?: number;
   deletingSpeed?: number;
   pauseDuration?: number;
+  onPaste?: (e: React.ClipboardEvent<HTMLInputElement>) => void;
+  onDragOver?: (e: React.DragEvent<HTMLInputElement>) => void;
+  onDrop?: (e: React.DragEvent<HTMLInputElement>) => void;
 }
 
 const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>(
@@ -26,6 +29,9 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
     value,
     onFocus,
     onBlur,
+    onPaste,
+    onDragOver,
+    onDrop,
     ...props 
   }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
@@ -71,6 +77,9 @@ const TypewriterInput = React.forwardRef<HTMLInputElement, TypewriterInputProps>
           value={value}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onPaste={onPaste}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
           ref={ref}
           {...props}
         />
