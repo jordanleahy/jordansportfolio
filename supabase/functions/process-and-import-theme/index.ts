@@ -185,7 +185,7 @@ serve(async (req) => {
 
       // Generate system prompt in background using resolved category
       EdgeRuntime.waitUntil(
-        generateSystemPromptBackground(supabase, resolvedCategory, user.id)
+        generateSystemPromptBackground(supabase, resolvedCategory, user.id, createdTheme.id)
           .then((promptResult) => {
             console.log('📝 SYSTEM PROMPT RESULT:', {
               success: promptResult?.success || false,
@@ -415,7 +415,7 @@ function validateThemeFields(data: any, fixes: string[], warnings: string[], err
   return validated;
 }
 
-async function generateSystemPromptBackground(supabase: any, category: string, userId: string): Promise<{ success: boolean; error?: string }> {
+async function generateSystemPromptBackground(supabase: any, category: string, userId: string, themeId: string): Promise<{ success: boolean; error?: string }> {
   console.log('🔄 BACKGROUND TASK: Starting system prompt generation check');
   console.log('📋 BACKGROUND PARAMS:', {
     category,
@@ -424,11 +424,11 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
   });
   
   try {
-    console.log('🔍 CHECKING: Existing system prompts for category');
+    console.log('🔍 CHECKING: Existing system prompts for theme_id');
     const { data: existingPrompts, error: checkError } = await supabase
       .from('system_prompts')
       .select('id')
-      .eq('category', category)
+      .eq('theme_id', themeId)
       .eq('user_id', userId)
       .limit(1);
 

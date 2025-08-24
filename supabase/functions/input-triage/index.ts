@@ -67,11 +67,23 @@ serve(async (req) => {
 
     console.log('User authenticated:', user.id);
 
-    // Get the triage agent's system prompt
+    // Get the triage agent's system prompt by finding the agent first
+    const { data: triageAgent, error: agentError } = await supabase
+      .from('openai_agents')
+      .select('id')
+      .eq('name', 'Triage Orchestra Agent')
+      .eq('user_id', user.id)
+      .single();
+
+    if (agentError || !triageAgent) {
+      console.error('Triage agent not found:', agentError);
+      throw new Error('Triage Orchestra Agent not found. Please ensure the agent is properly configured.');
+    }
+
     const { data: systemPrompt, error: promptError } = await supabase
       .from('system_prompts')
       .select('prompt_text')
-      .eq('category', 'input_triage')
+      .eq('agent_id', triageAgent.id)
       .eq('user_id', user.id)
       .single();
 

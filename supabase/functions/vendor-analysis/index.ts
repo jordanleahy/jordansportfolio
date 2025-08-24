@@ -105,11 +105,18 @@ serve(async (req) => {
       analysisConfidence = 'high';
     }
 
-    // Step 2: Get system prompt for vendor analysis
+    // Step 2: Get system prompt for vendor analysis by finding the agent first
+    const { data: vendorAgent } = await supabase
+      .from('openai_agents')
+      .select('id')
+      .eq('name', 'Vendor Analysis Agent')
+      .limit(1)
+      .maybeSingle();
+
     const { data: systemPrompt } = await supabase
       .from('system_prompts')
       .select('prompt_text')
-      .eq('category', 'vendor_analysis')
+      .eq('agent_id', vendorAgent?.id)
       .limit(1)
       .maybeSingle();
 
