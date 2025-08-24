@@ -236,7 +236,8 @@ function App() {
                  <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
-                <Route path="/pixar" element={<PixarConverter />} />
+                <Route path="/character" element={<PixarConverter />} />
+                <Route path="/pixar" element={<Navigate to="/character" replace />} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
                 <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors" replace />} />
