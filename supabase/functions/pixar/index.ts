@@ -35,109 +35,8 @@ serve(async (req) => {
     console.log('🎭 Starting Pixar conversion process...');
     console.log('📝 User prompt:', prompt);
 
-    // Step 1: Validate photo quality and suitability
-    console.log('🔍 Validating photo quality...');
-    const validationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert photo validator for character creation. Analyze this image and determine if it's suitable for Pixar character conversion.
-
-Return a JSON object with this exact structure:
-{
-  "isValid": boolean,
-  "confidence": number (0-100),
-  "faceCount": number,
-  "primaryFaceDetected": boolean,
-  "issues": [array of specific issue strings],
-  "validationMessage": "specific message for user"
-}
-
-Validation criteria:
-- Must have exactly one clearly visible human face (faceCount = 1)
-- Face must be well-lit and in focus
-- Image quality must be sufficient to see facial features
-- Face should take up reasonable portion of image
-- No multiple faces competing for attention
-
-Common issues to detect:
-- "multiple_faces": More than one face detected
-- "no_face": No human face clearly visible  
-- "poor_quality": Blurry, dark, or low resolution
-- "face_too_small": Face is too small in frame
-- "unclear_features": Cannot distinguish facial features clearly
-- "not_human": Subject is not a human person`
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Please validate this image for Pixar character conversion:'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${image}`
-                }
-              }
-            ]
-          }
-        ],
-        max_completion_tokens: 300,
-        response_format: { type: 'json_object' }
-      }),
-    });
-
-    if (!validationResponse.ok) {
-      const error = await validationResponse.text();
-      console.error('❌ Validation API error:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to validate image' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const validationData = await validationResponse.json();
-    let validation;
-    try {
-      validation = JSON.parse(validationData.choices[0].message.content);
-    } catch (parseError) {
-      console.error('Failed to parse validation JSON:', parseError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to validate image format' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('📊 Validation result:', validation);
-
-    // Check if image is valid for processing
-    if (!validation.isValid) {
-      console.log('❌ Image validation failed:', validation.issues);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Image validation failed',
-          validationError: true,
-          issues: validation.issues,
-          validationMessage: validation.validationMessage,
-          faceCount: validation.faceCount,
-          confidence: validation.confidence
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('✅ Photo validation passed, proceeding with character analysis...');
-
-    // Step 2: Analyze the person in the image to extract key features
+    // Combined analysis and validation in one call for efficiency
+    console.log('🔍 Analyzing and validating image...');
     const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -149,9 +48,18 @@ Common issues to detect:
         messages: [
           {
             role: 'system',
-            content: `You are an expert at analyzing people in photos to extract their core physical characteristics for character creation. Focus ONLY on permanent facial features and ignore clothing, backgrounds, and accessories.
+            content: `You are an expert at analyzing people in photos for Pixar character creation. 
 
-Analyze this person and extract:
+First, validate if this image is suitable:
+- Must have exactly one clearly visible human face
+- Face must be well-lit and in focus
+- Image quality must be sufficient to see facial features
+- Face should take up reasonable portion of image
+
+If the image is NOT suitable, respond with: "VALIDATION_FAILED: [reason]"
+Where [reason] is one of: MULTIPLE_FACES, NO_FACE, POOR_QUALITY, FACE_TOO_SMALL, UNCLEAR_FEATURES, NOT_HUMAN
+
+If the image IS suitable, analyze the person and extract:
 1. Age group (child/teen/adult)
 2. Face shape (oval/round/square/heart)
 3. Eye color and shape
@@ -160,8 +68,7 @@ Analyze this person and extract:
 6. Notable facial features
 7. Expression/personality traits visible
 
-Ignore: clothing, accessories, background, seasonal context.
-
+Focus ONLY on permanent facial features and ignore clothing, backgrounds, and accessories.
 Respond with a brief, focused description of the person's permanent characteristics.`
           },
           {
@@ -169,7 +76,7 @@ Respond with a brief, focused description of the person's permanent characterist
             content: [
               {
                 type: 'text',
-                text: 'Please analyze this person and describe their key physical characteristics for character creation:'
+                text: 'Please analyze this person for Pixar character creation:'
               },
               {
                 type: 'image_url',
@@ -180,10 +87,9 @@ Respond with a brief, focused description of the person's permanent characterist
             ]
           }
         ],
-        max_completion_tokens: 300
+        max_completion_tokens: 400
       }),
     });
-
     if (!analysisResponse.ok) {
       const error = await analysisResponse.text();
       console.error('❌ Analysis API error:', error);
@@ -194,8 +100,51 @@ Respond with a brief, focused description of the person's permanent characterist
     }
 
     const analysisData = await analysisResponse.json();
-    const characterDescription = analysisData.choices[0].message.content;
+    const analysisResult = analysisData.choices[0].message.content;
     
+    console.log('📊 Analysis result:', analysisResult);
+
+    // Check if validation failed
+    if (analysisResult.startsWith('VALIDATION_FAILED:')) {
+      const reason = analysisResult.replace('VALIDATION_FAILED: ', '');
+      console.log('❌ Image validation failed:', reason);
+      
+      let userMessage = 'Image validation failed. Please try a different photo.';
+      let issues = [reason.toLowerCase()];
+      
+      switch (reason) {
+        case 'MULTIPLE_FACES':
+          userMessage = 'Multiple faces detected. Please crop the photo to focus on one person.';
+          break;
+        case 'NO_FACE':
+          userMessage = 'No face clearly visible. Please use a photo with a clear view of a person\'s face.';
+          break;
+        case 'POOR_QUALITY':
+          userMessage = 'Image quality too low. Please use a clearer, well-lit photo with good resolution.';
+          break;
+        case 'FACE_TOO_SMALL':
+          userMessage = 'Face is too small in the image. Please use a closer photo where the face is more prominent.';
+          break;
+        case 'UNCLEAR_FEATURES':
+          userMessage = 'Facial features are unclear. Please use a sharper photo with better lighting.';
+          break;
+        case 'NOT_HUMAN':
+          userMessage = 'Please use a photo of a human person for Pixar character conversion.';
+          break;
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Image validation failed',
+          validationError: true,
+          issues: issues,
+          validationMessage: userMessage
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const characterDescription = analysisResult;
     console.log('✅ Character analysis completed:', characterDescription);
 
     // Create Pixar-style prompt combining character analysis with user's request
