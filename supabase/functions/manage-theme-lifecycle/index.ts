@@ -30,7 +30,7 @@ serve(async (req) => {
         
         let characterData = null;
         
-        // Check if we have reference image data first
+        // First check if we have reference image data
         console.log('🔍 Checking for reference image data...', { hasReferenceImage: !!referenceImageData });
         
         if (referenceImageData) {
@@ -41,37 +41,60 @@ serve(async (req) => {
             visualSeed: referenceImageData.analysis?.extractedCharacteristics
           };
         } else {
-          // Call structure-theme-input to detect character references in description
+          // Detect character references directly in description text
           console.log('🔍 No reference image data, analyzing description for character references...');
           console.log('📝 Description to analyze:', description);
           
-          try {
-            console.log('📡 Calling structure-theme-input function...');
-            const { data: structureData, error: structureError } = await supabase.functions.invoke(
-              'structure-theme-input',
-              {
-                body: { description },
-                headers: authHeader ? { Authorization: authHeader } : {}
-              }
-            );
-
-            console.log('📡 Structure function response:', { data: structureData, error: structureError });
-
-            if (structureError) {
-              console.error('❌ Error calling structure-theme-input:', structureError);
-            } else if (structureData?.success && structureData?.hasCharacterReference) {
-              console.log('✅ Character reference detected:', structureData.characterData);
-              characterData = {
-                characterId: structureData.characterData?.character_id,
-                visualSeed: structureData.characterData?.analysis
-              };
-            } else {
-              console.log('📝 No character reference detected in description');
-              console.log('📝 Structure data details:', structureData);
+          // Look for patterns like "by [Name]", "with [Name]", "featuring [Name]"
+          const characterPatterns = [
+            /\bby\s+([A-Za-z][A-Za-z0-9]*)\b/i,
+            /\bwith\s+([A-Za-z][A-Za-z0-9]*)\b/i,
+            /\bfeaturing\s+([A-Za-z][A-Za-z0-9]*)\b/i,
+            /\bfrom\s+([A-Za-z][A-Za-z0-9]*)\b/i
+          ];
+          
+          let detectedCharacterName = null;
+          let matchedPattern = null;
+          
+          for (const pattern of characterPatterns) {
+            const match = description.match(pattern);
+            if (match && match[1]) {
+              detectedCharacterName = match[1].trim();
+              matchedPattern = match[0];
+              console.log('✅ Character pattern detected:', { pattern: matchedPattern, name: detectedCharacterName });
+              break;
             }
-          } catch (error) {
-            console.error('❌ Error during character detection:', error);
-            console.error('❌ Error stack:', error.stack);
+          }
+          
+          if (detectedCharacterName) {
+            try {
+              console.log('🔍 Looking up character in database:', detectedCharacterName);
+              
+              const { data: character, error } = await supabase
+                .from('characters')
+                .select('id, character_name, character_description, sample_image_url')
+                .ilike('character_name', `%${detectedCharacterName}%`)
+                .limit(1)
+                .maybeSingle();
+              
+              if (character && !error) {
+                console.log('✅ Character found in database:', character);
+                characterData = {
+                  characterId: character.id,
+                  visualSeed: {
+                    character_name: character.character_name,
+                    description: character.character_description,
+                    sample_image_url: character.sample_image_url
+                  }
+                };
+              } else {
+                console.log('❌ Character not found in database:', detectedCharacterName, error);
+              }
+            } catch (dbError) {
+              console.error('❌ Database lookup error:', dbError);
+            }
+          } else {
+            console.log('📝 No character patterns detected in description');
           }
         }
         
