@@ -39,6 +39,7 @@ import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
 import BookHighlightsResults from '@/components/BookHighlights/BookHighlightsResults';
 import { useBookHighlights } from '@/hooks/useBookHighlights';
+import { useInputTriage } from '@/hooks/useInputTriage';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -461,7 +462,10 @@ export default function StoriesDashboard() {
       setDeleteProgress(null);
     }
   };
-  // Check if input is a book research request
+  // AI-powered input triage to determine the best processing route
+  const { analyzeInput, isAnalyzing: isTriaging } = useInputTriage();
+  
+  // Check if input is a book research request (fallback for when triage fails)
   const isBookResearchRequest = (description: string) => {
     const bookKeywords = ['book', 'highlights', 'quotes', 'author', 'reading', 'literature', 'chapter'];
     const lowerDesc = description.toLowerCase();
@@ -491,14 +495,70 @@ export default function StoriesDashboard() {
       return;
     }
 
-    // Check if this is a book research request
-    if (isBookResearchRequest(themeDescription)) {
-      console.log('🔍 Detected book research request:', themeDescription);
-      setShowBookHighlights(true);
-      await researchBook(themeDescription);
-      setCustomThemeDescription('');
-      return;
+    console.log('🔍 Analyzing input with AI triage:', themeDescription);
+    
+    try {
+      // Use AI-powered triage to determine the best route
+      const triageResult = await analyzeInput({
+        input: themeDescription,
+        onRouteDecision: (result) => {
+          console.log('🎯 Triage decision:', result);
+        }
+      });
+
+      if (!triageResult) {
+        // Fallback to simple keyword detection if triage fails
+        console.log('⚠️ Triage failed, using fallback logic');
+        if (isBookResearchRequest(themeDescription)) {
+          setShowBookHighlights(true);
+          await researchBook(themeDescription);
+          setCustomThemeDescription('');
+          return;
+        }
+        // Continue with theme generation as fallback
+        await proceedWithThemeGeneration(themeDescription);
+        return;
+      }
+
+      // Route based on AI triage decision
+      switch (triageResult.primary_route) {
+        case 'book_research':
+          console.log('📚 Routing to book research');
+          setShowBookHighlights(true);
+          await researchBook(themeDescription);
+          setCustomThemeDescription('');
+          return;
+          
+        case 'vendor_analysis':
+          console.log('🏢 Routing to vendor analysis');
+          toast({
+            title: 'Vendor Analysis',
+            description: 'Company research functionality coming soon!',
+          });
+          return;
+          
+        case 'theme_structuring':
+        default:
+          console.log('🎨 Routing to theme generation');
+          await proceedWithThemeGeneration(themeDescription);
+          return;
+      }
+      
+    } catch (error) {
+      console.error('❌ Error in triage analysis:', error);
+      // Fallback to simple logic on error
+      if (isBookResearchRequest(themeDescription)) {
+        setShowBookHighlights(true);
+        await researchBook(themeDescription);
+        setCustomThemeDescription('');
+        return;
+      }
+      await proceedWithThemeGeneration(themeDescription);
     }
+  };
+
+  // Extract theme generation logic into separate function
+  const proceedWithThemeGeneration = async (themeDescription: string) => {
     
     setIsGeneratingTheme(true);
     console.log('🚀 Starting theme generation...');
