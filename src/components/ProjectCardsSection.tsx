@@ -31,7 +31,7 @@ const projects = [
     id: "case4",
     title: "Reduced speciality drug PA response time from 3 days to 5 minutes.",
     company: "Digital Health Platform",
-    description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
+    description: "I designed an AI powered drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, and reauthorization dates, drafts the letter, and sends it to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
