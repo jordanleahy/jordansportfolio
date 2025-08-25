@@ -86,9 +86,9 @@ const ProjectCardsSection = () => {
               >
                 <Card 
                   className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
-                    project.id === 'case2' ? 'cursor-default' : 'cursor-pointer'
+                    project.id === 'case2' || project.id === 'case3' ? 'cursor-default' : 'cursor-pointer'
                   }`}
-                  onClick={project.id === 'case2' ? undefined : () => handleCaseStudyNavigation(project.path)}
+                  onClick={project.id === 'case2' || project.id === 'case3' ? undefined : () => handleCaseStudyNavigation(project.path)}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -185,10 +185,10 @@ const ProjectCardsSection = () => {
                     <Button 
                       variant="outline" 
                       className="w-full" 
-                      disabled={project.id === 'case2'}
+                      disabled={project.id === 'case2' || project.id === 'case3'}
                     >
-                      {project.id === 'case2' ? 'Coming Soon' : 'View Case Study'}
-                      {project.id !== 'case2' && <ArrowRight className="ml-2 h-4 w-4" />}
+                      {project.id === 'case2' || project.id === 'case3' ? 'Coming Soon' : 'View Case Study'}
+                      {project.id !== 'case2' && project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   </CardContent>
                 </Card>
