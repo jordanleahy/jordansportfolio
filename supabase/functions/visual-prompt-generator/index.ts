@@ -11,7 +11,8 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 interface VisualPromptRequest {
   category: string;
   context: string;
-  theme: string;
+  themeId?: string;
+  theme?: string;
   description: string;
   aspect_ratio?: string;
 }
@@ -24,7 +25,10 @@ serve(async (req) => {
   try {
     console.log('🎨 Starting visual prompt generation...');
     
-    const { category, context, theme, description, aspect_ratio = '1:1' }: VisualPromptRequest = await req.json();
+    const { category, context, theme, themeId, description, aspect_ratio = '1:1' }: VisualPromptRequest = await req.json();
+    
+    // Use theme or themeId, preferring theme if both are provided
+    const themeValue = theme || themeId || 'default';
     
     if (!category || !context) {
       return new Response(JSON.stringify({ 
@@ -73,7 +77,7 @@ Focus on:
 
     const promptRequest = `${systemPrompt}
 
-Theme: ${theme}
+Theme: ${themeValue}
 Context: ${context}
 Description: ${description}
 Aspect Ratio: ${aspect_ratio}
@@ -89,7 +93,7 @@ Generate a detailed visual prompt that will create an engaging, professional ima
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5-2025-08-07',
         messages: [
           { role: 'system', content: 'You are a professional visual prompt generator. Create detailed, specific prompts for image generation.' },
           { role: 'user', content: promptRequest }
@@ -109,9 +113,10 @@ Generate a detailed visual prompt that will create an engaging, professional ima
 
     return new Response(JSON.stringify({
       success: true,
-      image_prompt: imagePrompt,
+      generatedPrompt: imagePrompt,
+      image_prompt: imagePrompt, // Backward compatibility
       category,
-      theme,
+      theme: themeValue,
       aspect_ratio
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
