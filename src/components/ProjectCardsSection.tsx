@@ -18,6 +18,16 @@ const projects = [
     path: "/cases/case1"
   },
   {
+    id: "case2",
+    title: "Better design for unstructured notes",
+    company: "Healthcare EMR Solutions",
+    description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
+    tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates"],
+    icon: FileText,
+    color: "bg-orange-500",
+    path: "/cases/case2"
+  },
+  {
     id: "case4",
     title: "Drug Prior Auth and Validation",
     company: "Digital Health Platform",
@@ -103,6 +113,23 @@ const ProjectCardsSection = () => {
                           alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                           key="case1-image-updated"
+                        />
+                        <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <p className="text-white text-sm font-medium text-center px-4">
+                            Click and enter password for case details
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {project.id === "case2" && (
+                    <div className="px-6 pb-4">
+                      <div className="relative group/image">
+                        <img 
+                          src="/lovable-uploads/228845b7-f999-4555-8cb2-3df1d9f15016.png"
+                          alt="EMR unstructured notes interface showing duplicative and copy-pasted content that affects ICD-10 coding accuracy"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                           <p className="text-white text-sm font-medium text-center px-4">
