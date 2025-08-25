@@ -25,6 +25,7 @@ const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 import CompanyPortfolio from "./pages/CompanyPortfolio";
 import Agents from "./pages/Agents";
 import AscertainToTheMoon from "./pages/AscertainToTheMoon";
+import BookHighlights from "./pages/BookHighlights";
 import Vendors from "./pages/Vendors";
 import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
@@ -237,6 +238,7 @@ function App() {
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
+                <Route path="/book-highlights" element={<ProtectedRoute><BookHighlights /></ProtectedRoute>} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
                 <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors" replace />} />
