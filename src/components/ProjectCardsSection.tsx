@@ -127,8 +127,8 @@ const ProjectCardsSection = () => {
                     <div className="px-6 pb-4">
                       <div className="relative group/image">
                         <img 
-                          src="/lovable-uploads/228845b7-f999-4555-8cb2-3df1d9f15016.png"
-                          alt="EMR unstructured notes interface showing duplicative and copy-pasted content that affects ICD-10 coding accuracy"
+                          src="/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
+                          alt="Clinical decision support interface showing encounter notes, diagnosis codes, and ICD-10 coding suggestions for metabolic encephalopathy and other conditions"
                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
