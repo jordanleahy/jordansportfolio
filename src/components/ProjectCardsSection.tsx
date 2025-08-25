@@ -115,11 +115,18 @@ const ProjectCardsSection = () => {
                   
                   {project.id === "case4" && (
                      <div className="px-6 pb-4">
-                       <img 
-                         src="/lovable-uploads/866199b0-8a85-4f7b-957a-f215fd29176b.png"
-                         alt="Drug Prior Authorization interface showing workflow steps"
-                         className="w-full aspect-video object-cover rounded-lg border border-border/50"
-                       />
+                       <div className="relative group/image">
+                         <img 
+                           src="/lovable-uploads/866199b0-8a85-4f7b-957a-f215fd29176b.png"
+                           alt="Drug Prior Authorization interface showing workflow steps"
+                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                         />
+                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                           <p className="text-white text-sm font-medium text-center px-4">
+                             Click and enter password for case details
+                           </p>
+                         </div>
+                       </div>
                      </div>
                   )}
                   
