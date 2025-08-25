@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText, Palette } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
@@ -46,6 +46,16 @@ const projects = [
     icon: FileText,
     color: "bg-purple-500",
     path: "/cases/case3"
+  },
+  {
+    id: "case5",
+    title: "Improving front end delivery and reduce technical debt with new design system",
+    company: "Healthcare",
+    description: "I built out a token based design language system based on Material UI (MUI) to ensure a cohesive product and improve front end delivery times",
+    tags: ["#Design System", "#Frontend", "#MUI", "#Tokens", "#Technical Debt"],
+    icon: Palette,
+    color: "bg-indigo-500",
+    path: "/cases/case5"
   }
 ];
 
