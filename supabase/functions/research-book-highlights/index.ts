@@ -101,7 +101,7 @@ serve(async (req) => {
     // Step 2: Research book using OpenAI with improved prompt
     const researchPrompt = `You are a Book Research & Content Creation Agent. For this request: "${user_input}"
 
-    Please identify the book and extract 5-8 key concepts, quotes, or principles that would make excellent social media content.
+    Please identify the book and extract the most valuable key concepts, quotes, or principles that would make excellent social media content. Determine the optimal number based on the book's core teachings - some books may have 3-4 major concepts while others might have 8-10 key insights.
 
     Focus on:
     1. Core concepts and frameworks from the book
