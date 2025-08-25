@@ -75,8 +75,11 @@ serve(async (req) => {
       });
     }
 
+    // Let highlightRecord be accessible in catch block
+    let highlightRecord: any = null;
+
     // Step 1: Create initial record
-    const { data: highlightRecord, error: insertError } = await supabase
+    const { data: initialRecord, error: insertError } = await supabase
       .from('verified_book_highlights')
       .insert({
         user_id,
@@ -96,6 +99,7 @@ serve(async (req) => {
       });
     }
 
+    highlightRecord = initialRecord;
     console.log('✅ Created initial record:', highlightRecord.id);
 
     // Step 2: Research book using OpenAI with improved prompt
@@ -136,26 +140,40 @@ serve(async (req) => {
       }
     }`;
 
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          { role: 'system', content: 'You are a book research and content creation specialist. Always return valid JSON optimized for social media content creation.' },
-          { role: 'user', content: researchPrompt }
-        ],
-        max_completion_tokens: 4000,
+    console.log('🤖 Making OpenAI research request...');
+    
+    const openAIResponse = await Promise.race([
+      fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-2025-08-07',
+          messages: [
+            { role: 'system', content: 'You are a book research and content creation specialist. Always return valid JSON optimized for social media content creation.' },
+            { role: 'user', content: researchPrompt }
+          ],
+          max_completion_tokens: 4000,
+        }),
       }),
-    });
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('OpenAI request timeout after 45 seconds')), 45000)
+      )
+    ]) as Response;
 
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error('❌ OpenAI API error:', openAIResponse.status, errorText);
+      throw new Error(`OpenAI API error: ${openAIResponse.status} - ${errorText}`);
+    }
+    
     const openAIData = await openAIResponse.json();
     console.log('📚 OpenAI research completed');
 
     if (!openAIData.choices?.[0]?.message?.content) {
+      console.error('❌ No content in OpenAI response:', JSON.stringify(openAIData, null, 2));
       throw new Error('No research results from OpenAI');
     }
 
@@ -339,6 +357,23 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Error in research-book-highlights:', error);
+    
+    // Update the record to failed status if we have highlightRecord
+    if (highlightRecord?.id) {
+      try {
+        await supabase
+          .from('verified_book_highlights')
+          .update({
+            processing_status: 'failed',
+            verification_confidence: 'Error occurred during processing'
+          })
+          .eq('id', highlightRecord.id);
+        console.log('🔄 Updated failed record status');
+      } catch (updateError) {
+        console.error('❌ Failed to update record status:', updateError);
+      }
+    }
+    
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false 

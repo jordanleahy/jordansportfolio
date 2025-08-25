@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useBookHighlightRecovery } from './useBookHighlightRecovery';
 
 interface BookHighlightRecord {
   id: string;
@@ -31,6 +32,7 @@ export const useBookHighlights = () => {
   const [processingStatus, setProcessingStatus] = useState('');
   const [currentResults, setCurrentResults] = useState<BookHighlightRecord | null>(null);
   const [userHighlights, setUserHighlights] = useState<BookHighlightRecord[]>([]);
+  const { recoverStuckHighlights, isRecovering } = useBookHighlightRecovery();
 
   const researchBook = async (userInput: string): Promise<BookHighlightRecord | null> => {
     if (!userInput.trim()) {
@@ -62,7 +64,18 @@ export const useBookHighlights = () => {
 
       if (error) {
         console.error('Research error:', error);
-        toast.error('Failed to research book highlights. Please try again.');
+        
+        // If there's a processing timeout or stuck error, suggest recovery
+        if (error.message?.includes('timeout') || error.message?.includes('stuck')) {
+          toast.error('Research timed out. You can try the recovery option to fix stuck processes.', {
+            action: {
+              label: 'Recover',
+              onClick: () => recoverStuckHighlights()
+            }
+          });
+        } else {
+          toast.error('Failed to research book highlights. Please try again.');
+        }
         return null;
       }
 
@@ -157,6 +170,8 @@ export const useBookHighlights = () => {
     researchBook,
     fetchUserHighlights,
     deleteHighlight,
-    clearCurrentResults
+    clearCurrentResults,
+    recoverStuckHighlights,
+    isRecovering
   };
 };
