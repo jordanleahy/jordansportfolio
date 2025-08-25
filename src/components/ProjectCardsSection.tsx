@@ -11,7 +11,7 @@ const projects = [
     id: "case1",
     title: "Improved clinical primary diagnosis by 60%.",
     company: "Healthcare Analytics",
-    description: "I designed a second pass UX/UI that help CDS specialist view ICD-10 specific UI to help identify the correct primary diagnosis that yield that highest revenue.",
+    description: "I designed a second-pass UX/UI that enables CDS specialists to review ICD-10–specific interfaces and more easily identify the correct primary diagnosis that maximizes revenue.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
