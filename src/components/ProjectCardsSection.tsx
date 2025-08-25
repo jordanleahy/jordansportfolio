@@ -94,12 +94,12 @@ const ProjectCardsSection = () => {
                 viewport={{ once: true }}
                 whileHover={{ y: -8, rotate: -1 }}
               >
-                <Card 
-                  className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
-                    project.id === 'case2' || project.id === 'case3' ? 'cursor-default' : 'cursor-pointer'
-                  }`}
-                  onClick={project.id === 'case2' || project.id === 'case3' ? undefined : () => handleCaseStudyNavigation(project.path)}
-                >
+                 <Card 
+                   className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
+                     project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? 'cursor-default' : 'cursor-pointer'
+                   }`}
+                   onClick={project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? undefined : () => handleCaseStudyNavigation(project.path)}
+                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                       <div className="p-3 rounded-lg bg-accent/10 mb-4">
