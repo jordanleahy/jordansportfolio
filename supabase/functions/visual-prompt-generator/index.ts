@@ -89,7 +89,7 @@ Generate a detailed visual prompt that will create an engaging, professional ima
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: 'You are a professional visual prompt generator. Create detailed, specific prompts for image generation.' },
           { role: 'user', content: promptRequest }
