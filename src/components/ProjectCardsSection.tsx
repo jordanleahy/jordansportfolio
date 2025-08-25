@@ -209,14 +209,14 @@ const ProjectCardsSection = () => {
                       ))}
                     </div>
                     
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      disabled={project.id === 'case2' || project.id === 'case3'}
-                    >
-                      {project.id === 'case2' || project.id === 'case3' ? 'Coming Soon' : 'View Case Study'}
-                      {project.id !== 'case2' && project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
-                    </Button>
+                     <Button 
+                       variant="outline" 
+                       className="w-full" 
+                       disabled={project.id === 'case2' || project.id === 'case3' || project.id === 'case5'}
+                     >
+                       {project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? 'Coming Soon' : 'View Case Study'}
+                       {project.id !== 'case2' && project.id !== 'case3' && project.id !== 'case5' && <ArrowRight className="ml-2 h-4 w-4" />}
+                     </Button>
                   </CardContent>
                 </Card>
               </motion.div>
