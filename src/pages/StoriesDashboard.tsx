@@ -37,9 +37,6 @@ import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSke
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
-import BookHighlightsResults from '@/components/BookHighlights/BookHighlightsResults';
-import { useBookHighlights } from '@/hooks/useBookHighlights';
-import { useInputTriage } from '@/hooks/useInputTriage';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -101,15 +98,6 @@ export default function StoriesDashboard() {
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-  
-  // Book highlights state
-  const [showBookHighlights, setShowBookHighlights] = useState(false);
-  const { 
-    researchBook, 
-    isProcessing: isResearching, 
-    currentResults: bookResults, 
-    clearCurrentResults 
-  } = useBookHighlights();
   const [deleteProgress, setDeleteProgress] = useState<{
     completed: number;
     total: number;
@@ -462,104 +450,33 @@ export default function StoriesDashboard() {
       setDeleteProgress(null);
     }
   };
-  // AI-powered input triage to determine the best processing route
-  const { analyzeInput, isAnalyzing: isTriaging } = useInputTriage();
-  
-  // Check if input is a book research request (fallback for when triage fails)
-  const isBookResearchRequest = (description: string) => {
-    const bookKeywords = ['book', 'highlights', 'quotes', 'author', 'reading', 'literature', 'chapter'];
-    const lowerDesc = description.toLowerCase();
-    return bookKeywords.some(keyword => lowerDesc.includes(keyword)) || 
-           lowerDesc.includes('research') || 
-           lowerDesc.match(/^[\w\s]+\s+by\s+[\w\s]+$/); // Pattern like "Atomic Habits by James Clear"
-  };
-
   const handleGenerateCustomTheme = async () => {
-    const themeDescription = customThemeDescription.trim();
-    console.log('🎯 DASHBOARD: Starting theme generation with description:', themeDescription);
+    console.log('🎯 handleGenerateCustomTheme called');
     
-    if (!themeDescription) {
+    if (!customThemeDescription.trim()) {
+      console.log('❌ No theme description provided');
       toast({
-        title: "Description required",
-        description: "Please enter a theme description to continue"
+        title: "Description Required",
+        description: "Please describe the theme you want to create",
+        variant: "destructive"
       });
       return;
     }
+    const themeDescription = customThemeDescription.trim();
+    console.log('📝 Theme description:', themeDescription);
     
     if (!user) {
+      console.log('❌ No user found');
       toast({
-        title: 'Sign in required',
-        description: 'Please sign in to generate themes.'
+        title: "Sign in required",
+        description: "Please sign in to generate themes."
       });
       navigate('/auth');
       return;
     }
-
-    console.log('🔍 Analyzing input with AI triage:', themeDescription);
     
-    try {
-      // Use AI-powered triage to determine the best route
-      const triageResult = await analyzeInput({
-        input: themeDescription,
-        onRouteDecision: (result) => {
-          console.log('🎯 Triage decision:', result);
-        }
-      });
-
-      if (!triageResult) {
-        // Fallback to simple keyword detection if triage fails
-        console.log('⚠️ Triage failed, using fallback logic');
-        if (isBookResearchRequest(themeDescription)) {
-          setShowBookHighlights(true);
-          await researchBook(themeDescription);
-          setCustomThemeDescription('');
-          return;
-        }
-        // Continue with theme generation as fallback
-        await proceedWithThemeGeneration(themeDescription);
-        return;
-      }
-
-      // Route based on AI triage decision
-      switch (triageResult.primary_route) {
-        case 'book_research':
-          console.log('📚 Routing to book research');
-          setShowBookHighlights(true);
-          await researchBook(themeDescription);
-          setCustomThemeDescription('');
-          return;
-          
-        case 'vendor_analysis':
-          console.log('🏢 Routing to vendor analysis');
-          toast({
-            title: 'Vendor Analysis',
-            description: 'Company research functionality coming soon!',
-          });
-          return;
-          
-        case 'theme_structuring':
-        default:
-          console.log('🎨 Routing to theme generation');
-          await proceedWithThemeGeneration(themeDescription);
-          return;
-      }
-      
-    } catch (error) {
-      console.error('❌ Error in triage analysis:', error);
-      // Fallback to simple logic on error
-      if (isBookResearchRequest(themeDescription)) {
-        setShowBookHighlights(true);
-        await researchBook(themeDescription);
-        setCustomThemeDescription('');
-        return;
-      }
-      await proceedWithThemeGeneration(themeDescription);
-    }
-  };
-
-  // Extract theme generation logic into separate function
-  const proceedWithThemeGeneration = async (themeDescription: string) => {
-    
+    console.log('✅ User found:', user.id);
+    setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
     console.log('🚀 Starting theme generation...');
 
@@ -926,22 +843,21 @@ export default function StoriesDashboard() {
                     "patient education for diabetes",
                     "patient education for sepsis", 
                     "patient education for UTI",
-                    "Atomic Habits by James Clear",
-                    "highlights from The Lean Startup",
-                    "book quotes about productivity"
+                    "patient education for resp failure",
+                    "patient education for heart attack"
                   ]}
-                  fallbackPlaceholder="Describe your theme or research a book... (e.g., 'AI applications in healthcare' or 'Atomic Habits by James Clear')"
+                  fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
                   className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
                   value={customThemeDescription} 
                   onChange={e => setCustomThemeDescription(e.target.value)} 
                   onKeyDown={e => {
-                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme && !isResearching) {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
                       console.log('⌨️ Enter key pressed - triggering theme generation');
                       e.preventDefault();
                       handleGenerateCustomTheme();
                     }
                   }}
-                  disabled={isGeneratingTheme || isResearching}
+                  disabled={isGeneratingTheme} 
                   typingSpeed={80}
                   deletingSpeed={40}
                   pauseDuration={2000}
@@ -955,18 +871,13 @@ export default function StoriesDashboard() {
                   {customThemeDescription.trim() && (
                     <Button 
                       onClick={handleGenerateCustomTheme}
-                      disabled={isGeneratingTheme || isResearching}
+                      disabled={isGeneratingTheme}
                       className="w-full"
                     >
                       {isGeneratingTheme ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Generating...
-                        </>
-                      ) : isResearching ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Researching...
                         </>
                       ) : (
                         <>
@@ -1027,35 +938,8 @@ export default function StoriesDashboard() {
             </Suspense>}
         </Section>
 
-        {/* Book Highlights Results Section */}
-        {showBookHighlights && (bookResults || isResearching) && (
-          <Section id="book-highlights" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12" fluid>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-foreground">Book Research Results</h2>
-              <Button variant="outline" onClick={() => {
-                setShowBookHighlights(false);
-                clearCurrentResults();
-              }}>
-                Close
-              </Button>
-            </div>
-            <BookHighlightsResults 
-              bookTitle={bookResults?.book_title || ''}
-              bookAuthor={bookResults?.book_author || ''}
-              quotes={bookResults?.verified_quotes || []}
-              visualPrompts={bookResults?.visual_prompts || []}
-              imageUrls={bookResults?.image_urls || []}
-              verificationConfidence={bookResults?.verification_confidence || 'medium'}
-              onNewSearch={() => {
-                setShowBookHighlights(false);
-                clearCurrentResults();
-              }}
-            />
-          </Section>
-        )}
-
         {/* Second Section: Authenticated users see their themes; guests see Featured Posts */}
-        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-MT-16 mb-12 sticky top-0 z-10 bg-background" fluid>
+        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12 sticky top-0 z-10 bg-background" fluid>
             <header className="mb-6 flex items-center justify-end gap-4">
               <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
                 Refresh

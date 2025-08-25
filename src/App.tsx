@@ -25,8 +25,6 @@ const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 import CompanyPortfolio from "./pages/CompanyPortfolio";
 import Agents from "./pages/Agents";
 import AscertainToTheMoon from "./pages/AscertainToTheMoon";
-import BookHighlights from "./pages/BookHighlights";
-import { BookQuoteTestPage } from "./pages/BookQuoteTestPage";
 import Vendors from "./pages/Vendors";
 import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
@@ -237,7 +235,6 @@ function App() {
                  <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
                  <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
-                <Route path="/book-quote-test" element={<ProtectedRoute><BookQuoteTestPage /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
                 {/* Vendor routes - redirect to admin namespace */}
