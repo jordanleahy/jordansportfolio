@@ -15,6 +15,7 @@ interface VisualPromptRequest {
   theme?: string;
   description: string;
   aspect_ratio?: string;
+  aspectRatio?: string; // Support both parameter names for compatibility
 }
 
 serve(async (req) => {
@@ -25,10 +26,12 @@ serve(async (req) => {
   try {
     console.log('🎨 Starting visual prompt generation...');
     
-    const { category, context, theme, themeId, description, aspect_ratio = '1:1' }: VisualPromptRequest = await req.json();
+    const { category, context, theme, themeId, description, aspect_ratio, aspectRatio }: VisualPromptRequest = await req.json();
     
     // Use theme or themeId, preferring theme if both are provided
     const themeValue = theme || themeId || 'default';
+    // Support both aspect_ratio parameter names for compatibility
+    const aspectRatioValue = aspect_ratio || aspectRatio || '1:1';
     
     if (!category || !context) {
       return new Response(JSON.stringify({ 
@@ -80,7 +83,7 @@ Focus on:
 Theme: ${themeValue}
 Context: ${context}
 Description: ${description}
-Aspect Ratio: ${aspect_ratio}
+Aspect Ratio: ${aspectRatioValue}
 
 Generate a detailed visual prompt that will create an engaging, professional image.`;
 
@@ -117,7 +120,7 @@ Generate a detailed visual prompt that will create an engaging, professional ima
       image_prompt: imagePrompt, // Backward compatibility
       category,
       theme: themeValue,
-      aspect_ratio
+      aspect_ratio: aspectRatioValue
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
