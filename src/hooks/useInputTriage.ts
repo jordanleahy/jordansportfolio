@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface TriageResponse {
-  primary_route: 'vendor_analysis' | 'theme_structuring';
+  primary_route: 'vendor_analysis' | 'theme_structuring' | 'book_research';
   confidence: number;
   reasoning: string;
   secondary_route?: string | null;
@@ -13,6 +13,7 @@ export interface TriageResponse {
     contains_theme_data: boolean;
     is_research_request: boolean;
     is_content_creation: boolean;
+    is_book_research: boolean;
   };
   suggested_preprocessing?: string | null;
 }
@@ -155,6 +156,8 @@ export const useInputTriage = () => {
         return 'Company Research & Analysis';
       case 'theme_structuring':
         return 'Content Creation & Themes';
+      case 'book_research':
+        return 'Book Research & Highlights';
       default:
         return 'Unknown Route';
     }

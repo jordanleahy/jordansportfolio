@@ -17,7 +17,7 @@ interface TriageRequest {
 }
 
 interface TriageResponse {
-  primary_route: 'vendor_analysis' | 'theme_structuring';
+  primary_route: 'vendor_analysis' | 'theme_structuring' | 'book_research';
   confidence: number;
   reasoning: string;
   secondary_route?: string | null;
@@ -26,6 +26,7 @@ interface TriageResponse {
     contains_theme_data: boolean;
     is_research_request: boolean;
     is_content_creation: boolean;
+    is_book_research: boolean;
   };
   suggested_preprocessing?: string | null;
 }
@@ -143,14 +144,15 @@ serve(async (req) => {
           contains_company_names: false,
           contains_theme_data: false,
           is_research_request: false,
-          is_content_creation: true
+          is_content_creation: true,
+          is_book_research: false
         },
         suggested_preprocessing: null
       };
     }
 
     // Validate the response structure
-    if (!parsedResult.primary_route || !['vendor_analysis', 'theme_structuring'].includes(parsedResult.primary_route)) {
+    if (!parsedResult.primary_route || !['vendor_analysis', 'theme_structuring', 'book_research'].includes(parsedResult.primary_route)) {
       console.warn('Invalid primary_route, defaulting to theme_structuring');
       parsedResult.primary_route = 'theme_structuring';
       parsedResult.confidence = Math.min(parsedResult.confidence || 0.3, 0.3);
@@ -182,7 +184,8 @@ serve(async (req) => {
         contains_company_names: false,
         contains_theme_data: false,
         is_research_request: false,
-        is_content_creation: true
+        is_content_creation: true,
+        is_book_research: false
       },
       suggested_preprocessing: null
     };

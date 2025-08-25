@@ -23,10 +23,12 @@ interface BookIdentification {
   edition?: string;
   isbn?: string;
   confidence: 'high' | 'medium' | 'low';
+  category?: string;
 }
 
 interface VerifiedQuote {
   quote_text: string;
+  concept_title?: string;
   confidence: 'high' | 'medium' | 'low';
   sources: Array<{
     source_type: string;
@@ -35,6 +37,7 @@ interface VerifiedQuote {
   }>;
   page_reference?: string;
   context: string;
+  social_media_description?: string;
 }
 
 interface BookResearchResponse {
@@ -95,36 +98,41 @@ serve(async (req) => {
 
     console.log('✅ Created initial record:', highlightRecord.id);
 
-    // Step 2: Research book using OpenAI
-    const researchPrompt = `You are a Book Research & Verification Agent. Research and verify book quotes for this request: "${user_input}"
+    // Step 2: Research book using OpenAI with improved prompt
+    const researchPrompt = `You are a Book Research & Content Creation Agent. For this request: "${user_input}"
 
-    Please follow these steps:
-    1. Identify the specific book from the user's request
-    2. Find 5-10 key quotes or highlights from that book
-    3. Provide confidence scores based on source verification
-    4. Include source references where possible
+    Please identify the book and extract 5-8 key concepts, quotes, or principles that would make excellent social media content.
 
-    Return your response as a valid JSON object matching this structure:
+    Focus on:
+    1. Core concepts and frameworks from the book
+    2. Memorable quotes that inspire action
+    3. Key principles that can be shared as standalone insights
+    4. Practical takeaways that provide value
+
+    Return a valid JSON object with this structure:
     {
       "book_identification": {
         "title": "Book Title",
         "author": "Author Name", 
         "publication_year": 2024,
-        "confidence": "high"
+        "confidence": "high",
+        "category": "business"
       },
       "verified_quotes": [
         {
-          "quote_text": "The actual quote text",
+          "quote_text": "The core concept or quote",
+          "concept_title": "Short title for this concept (e.g., 'The Hedgehog Concept')",
           "confidence": "high",
-          "sources": [{"source_type": "publisher", "url": "https://example.com", "title": "Source"}],
-          "context": "Context around the quote"
+          "sources": [{"source_type": "book", "url": "", "title": "Book Title"}],
+          "context": "Brief explanation of why this concept matters",
+          "social_media_description": "Expanded description suitable for social media post (100-200 words)"
         }
       ],
       "research_metadata": {
-        "total_sources_checked": 5,
+        "total_sources_checked": 1,
         "research_confidence": "high", 
         "research_timestamp": "${new Date().toISOString()}",
-        "verification_notes": "Research notes"
+        "verification_notes": "Book research completed for content creation"
       }
     }`;
 
@@ -135,9 +143,9 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-2025-08-07',
         messages: [
-          { role: 'system', content: 'You are a book research specialist. Always return valid JSON.' },
+          { role: 'system', content: 'You are a book research and content creation specialist. Always return valid JSON optimized for social media content creation.' },
           { role: 'user', content: researchPrompt }
         ],
         max_completion_tokens: 4000,
@@ -159,7 +167,74 @@ serve(async (req) => {
       throw new Error('Invalid research response format');
     }
 
-    // Step 3: Generate visual prompts for each quote
+    // Step 3: Create theme for the book concepts
+    console.log('🎨 Creating theme and social media posts...');
+    const themeName = `${researchResults.book_identification.title} Key Concepts`;
+    const themeDescription = `Key concepts, quotes, and insights from "${researchResults.book_identification.title}" by ${researchResults.book_identification.author}. Transform your understanding with these powerful principles.`;
+    const bookCategory = researchResults.book_identification.category || 'business';
+
+    const { data: createdTheme, error: themeError } = await supabase
+      .from('themes')
+      .insert({
+        user_id,
+        theme_name: themeName,
+        description: themeDescription,
+        category: bookCategory,
+        lifecycle_status: 'ready',
+        prompt_generation_status: 'not_started',
+        user_interaction_required: false,
+        background_processing_complete: true
+      })
+      .select()
+      .single();
+
+    if (themeError) {
+      console.error('❌ Error creating theme:', themeError);
+      throw themeError;
+    }
+
+    console.log('✅ Created theme:', createdTheme.id);
+
+    // Step 4: Create social media posts for each concept
+    const socialMediaPosts = [];
+    for (let i = 0; i < researchResults.verified_quotes.length; i++) {
+      const quote = researchResults.verified_quotes[i];
+      const postTitle = quote.concept_title || `Concept ${i + 1}`;
+      const postDescription = quote.social_media_description || `${quote.context}\n\n"${quote.quote_text}"`;
+
+      const { data: createdPost, error: postError } = await supabase
+        .from('social_media_posts')
+        .insert({
+          user_id,
+          theme_id: createdTheme.id,
+          title: postTitle,
+          description: postDescription,
+          category: bookCategory,
+          day: i + 1,
+          status: 'draft',
+          individual_prompt_status: 'not_started'
+        })
+        .select()
+        .single();
+
+      if (postError) {
+        console.warn(`⚠️ Warning: Could not create post ${i + 1}:`, postError);
+      } else {
+        socialMediaPosts.push(createdPost);
+        console.log(`✅ Created social media post: ${postTitle}`);
+      }
+    }
+
+    // Update theme with post count
+    await supabase
+      .from('themes')
+      .update({
+        total_posts_count: socialMediaPosts.length,
+        prompt_generation_status: 'not_started'
+      })
+      .eq('id', createdTheme.id);
+
+    // Step 5: Generate visual prompts for the book highlights (for the highlight record)
     console.log('🎨 Generating visual prompts...');
     const visualPrompts: string[] = [];
     const imageUrls: string[] = [];
@@ -245,8 +320,19 @@ serve(async (req) => {
       success: true,
       data: updatedRecord,
       research_results: researchResults,
+      theme_created: {
+        id: createdTheme.id,
+        name: createdTheme.theme_name,
+        posts_count: socialMediaPosts.length
+      },
+      social_media_posts: socialMediaPosts.map(post => ({
+        id: post.id,
+        title: post.title,
+        day: post.day
+      })),
       visual_count: visualPrompts.filter(p => p).length,
-      image_count: imageUrls.filter(url => url).length
+      image_count: imageUrls.filter(url => url).length,
+      message: `Successfully created "${createdTheme.theme_name}" theme with ${socialMediaPosts.length} social media posts ready for image generation`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
