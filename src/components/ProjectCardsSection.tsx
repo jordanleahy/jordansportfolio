@@ -85,8 +85,10 @@ const ProjectCardsSection = () => {
                 whileHover={{ y: -8, rotate: -1 }}
               >
                 <Card 
-                  className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-accent/20 hover:border-accent"
-                  onClick={() => handleCaseStudyNavigation(project.path)}
+                  className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
+                    project.id === 'case2' ? 'cursor-default' : 'cursor-pointer'
+                  }`}
+                  onClick={project.id === 'case2' ? undefined : () => handleCaseStudyNavigation(project.path)}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -180,9 +182,13 @@ const ProjectCardsSection = () => {
                       ))}
                     </div>
                     
-                    <Button variant="outline" className="w-full">
-                      View Case Study
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      disabled={project.id === 'case2'}
+                    >
+                      {project.id === 'case2' ? 'Coming Soon' : 'View Case Study'}
+                      {project.id !== 'case2' && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   </CardContent>
                 </Card>
