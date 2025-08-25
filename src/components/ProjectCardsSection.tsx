@@ -39,7 +39,7 @@ const projects = [
   },
   {
     id: "case3",
-    title: "Denial and Appeal Resolution",
+    title: "Reduce appeal drafting process by 20 minutes.",
     company: "Revenue Cycle Solutions",
     description: "Designed a denial and appeal resolution application for managing denials, including the drafting of templates and sending to payer.",
     tags: ["#Appeals", "#Research", "#UX"],
