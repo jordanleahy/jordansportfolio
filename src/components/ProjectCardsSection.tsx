@@ -11,7 +11,7 @@ const projects = [
     id: "case1",
     title: "Improved clinical primary diagnosis by 60%.",
     company: "Healthcare Analytics",
-    description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
+    description: "I designed a second pass UX/UI that help CDS specialist view ICD-10 specific UI to help identify the correct primary diagnosis that yield that highest revenue.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
