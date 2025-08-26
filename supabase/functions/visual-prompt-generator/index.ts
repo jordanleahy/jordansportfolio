@@ -15,7 +15,6 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface VisualPromptRequest {
-  category: string;
   context: string;
   themeId: string;
   theme?: string;
@@ -32,21 +31,44 @@ serve(async (req) => {
   try {
     console.log('🎨 Starting visual prompt generation...');
     
-    const { category, context, theme, themeId, description, aspect_ratio, aspectRatio }: VisualPromptRequest = await req.json();
+    const { context, theme, themeId, description, aspect_ratio, aspectRatio }: VisualPromptRequest = await req.json();
     
     // Use theme or themeId, preferring theme if both are provided
     const themeValue = theme || themeId || 'default';
     // Support both aspect_ratio parameter names for compatibility
     const aspectRatioValue = aspect_ratio || aspectRatio || '1:1';
     
-    if (!category || !context || !themeId) {
+    if (!context || !themeId) {
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: category, context, and themeId are required',
+        error: 'Missing required fields: context and themeId are required',
         success: false 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Look up theme to get category
+    console.log(`🔍 Looking up theme for theme_id: ${themeId}`);
+    let category = 'default';
+    
+    try {
+      const { data: themeData, error: themeError } = await supabase
+        .from('themes')
+        .select('category')
+        .eq('id', themeId)
+        .single();
+      
+      if (themeError) {
+        console.warn('⚠️ Error retrieving theme:', themeError);
+      } else if (themeData) {
+        category = themeData.category;
+        console.log(`✅ Retrieved category "${category}" from theme_id: ${themeId}`);
+      } else {
+        console.log(`⚠️ No theme found for theme_id: ${themeId}, using default category`);
+      }
+    } catch (dbError) {
+      console.warn('⚠️ Database error retrieving theme:', dbError);
     }
 
     // Retrieve system prompt from database
