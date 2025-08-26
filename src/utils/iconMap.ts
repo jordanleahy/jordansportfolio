@@ -11,7 +11,12 @@ import {
   Shield,
   BarChart3,
   Activity,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  Layout,
+  BarChart,
+  Settings,
+  Zap
 } from "lucide-react";
 
 export const iconMap = {
@@ -27,7 +32,12 @@ export const iconMap = {
   Shield,
   BarChart3,
   Activity,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  Layout,
+  BarChart,
+  Settings,
+  Zap
 } as const;
 
 export type IconName = keyof typeof iconMap;
