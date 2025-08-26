@@ -307,6 +307,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       title: post.title,
       description: post.description,
       theme_id: themeId,
+      category: themeData.category,
       user_id: userId,
       status: 'draft' as const
     }));
