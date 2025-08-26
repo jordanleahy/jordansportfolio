@@ -218,7 +218,7 @@ serve(async (req) => {
     // Use order by to get the most recent one and handle multiple records gracefully
       const { data: systemPromptData, error: systemPromptError } = await supabase
         .from('system_prompts')
-        .select('prompt_text')
+        .select('id, prompt_text, agent_name, category, theme_id')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
@@ -388,8 +388,9 @@ Please generate a detailed, professional system prompt following the established
       console.log('🔍 STEP 0: Checking for existing system prompts for theme_id:', theme_id);
       const existingPromptsQuery = supabase
         .from('system_prompts')
-        .select('id, created_at, theme')
-        .eq('user_id', user_id);
+        .select('id, prompt_text, agent_name, category, theme_id, created_at')
+        .eq('user_id', user_id)
+        .eq('is_active', true);
 
       // Use theme_id if provided, otherwise fall back to theme name
       if (theme_id) {
