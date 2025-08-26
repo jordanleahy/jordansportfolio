@@ -49,7 +49,7 @@ const projects = [
   },
   {
     id: "case5",
-    title: "Health system key data customization for system",
+    title: "Reduce customer success tickets by 32% by creating configurable data dashboards.",
     company: "Healthcare Data",
     description: "I redesigned healthy system and hospital financial and clinical intelligence interface to be mobile responsive and customizable",
     tags: ["#Healthcare Data", "#Dashboard Design", "#Mobile Responsive", "#Healthcare Analytics"],

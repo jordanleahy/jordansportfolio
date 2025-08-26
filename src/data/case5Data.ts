@@ -2,7 +2,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 
 export const case5Data: CaseStudyData = {
   // Hero Section
-  title: "Health system key data customization for system",
+  title: "Reduce customer success tickets by 32% by creating configurable data dashboards.",
   description: "I redesigned healthy system and hospital financial and clinical intelligence interface to be mobile responsive and customizable for healthcare organizations to better track key performance indicators.",
   heroImage: "/lovable-uploads/0371b967-606a-4e28-9988-0e597407f50d.png",
   heroImageAlt: "Healthcare dashboard showing financial and clinical metrics with customizable interface",
