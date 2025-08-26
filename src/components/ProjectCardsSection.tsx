@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText, Palette } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText, Palette, BarChart } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
@@ -49,11 +49,11 @@ const projects = [
   },
   {
     id: "case5",
-    title: "Improving front end delivery and reduce technical debt with new design system",
-    company: "Healthcare",
-    description: "I built out a token based design language system based on Material UI (MUI) to ensure a cohesive product and improve front end delivery times",
-    tags: ["#Design System", "#Frontend", "#MUI", "#Tokens", "#Technical Debt"],
-    icon: Palette,
+    title: "Health system key data customization for system",
+    company: "Healthcare Data",
+    description: "I redesigned healthy system and hospital financial and clinical intelligence interface to be mobile responsive and customizable",
+    tags: ["#Healthcare Data", "#Dashboard Design", "#Mobile Responsive", "#Healthcare Analytics"],
+    icon: BarChart,
     color: "bg-indigo-500",
     path: "/cases/case5"
   }
@@ -95,10 +95,10 @@ const ProjectCardsSection = () => {
                 whileHover={{ y: -8, rotate: -1 }}
               >
                  <Card 
-                   className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
-                     project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? 'cursor-default' : 'cursor-pointer'
-                   }`}
-                   onClick={project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? undefined : () => handleCaseStudyNavigation(project.path)}
+                      className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
+                      project.id === 'case2' ? 'cursor-default' : 'cursor-pointer'
+                    }`}
+                   onClick={project.id === 'case2' ? undefined : () => handleCaseStudyNavigation(project.path)}
                  >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -173,15 +173,10 @@ const ProjectCardsSection = () => {
                      <div className="px-6 pb-4">
                        <div className="relative group/image">
                          <img 
-                           src="/lovable-uploads/9ef52977-cb39-4c7f-8810-bbd0545bcfae.png"
-                           alt="Design system foundations showing gradient tokens, brand colors, and neutral color palettes for consistent UI components"
-                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                           src="/lovable-uploads/0371b967-606a-4e28-9988-0e597407f50d.png"
+                           alt="Healthcare dashboard showing financial and clinical metrics with customizable interface"
+                           className="w-full aspect-video object-cover rounded-lg border border-border/50"
                          />
-                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                           <p className="text-white text-sm font-medium text-center px-4">
-                             Click and enter password for case details
-                           </p>
-                         </div>
                        </div>
                      </div>
                    )}
@@ -212,10 +207,10 @@ const ProjectCardsSection = () => {
                      <Button 
                        variant="outline" 
                        className="w-full" 
-                       disabled={project.id === 'case2' || project.id === 'case3' || project.id === 'case5'}
+                       disabled={project.id === 'case2'}
                      >
-                       {project.id === 'case2' || project.id === 'case3' || project.id === 'case5' ? 'Coming Soon' : 'View Case Study'}
-                       {project.id !== 'case2' && project.id !== 'case3' && project.id !== 'case5' && <ArrowRight className="ml-2 h-4 w-4" />}
+                       {project.id === 'case2' ? 'Coming Soon' : 'View Case Study'}
+                       {project.id !== 'case2' && <ArrowRight className="ml-2 h-4 w-4" />}
                      </Button>
                   </CardContent>
                 </Card>

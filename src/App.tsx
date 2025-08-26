@@ -36,6 +36,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
+import Case5 from "./pages/cases/Case5";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import { CofactorRouteWrapper } from "./components/cofactor/CofactorRouteWrapper";
 import Library from "./pages/Library";
@@ -375,6 +376,7 @@ function App() {
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
+                <Route path="/cases/case5" element={<CaseStudyRouteWrapper><Case5 /></CaseStudyRouteWrapper>} />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
