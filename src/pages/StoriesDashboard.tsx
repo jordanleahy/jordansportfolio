@@ -504,17 +504,17 @@ export default function StoriesDashboard() {
     });
     
     try {
-      console.log('📡 Using structure-theme-input to create theme from description...');
+      console.log('📡 Using generate-custom-theme to create theme from description...');
       
-      // First structure the input using the same pattern as import
-      const { data: structuredData, error: structureError } = await supabase.functions.invoke('structure-theme-input', {
+      // Generate theme using the dedicated custom theme function
+      const { data: themeData, error: themeError } = await supabase.functions.invoke('generate-custom-theme', {
         body: { 
-          text: `Please create a comprehensive theme with 10-15 posts about: ${themeDescription}` 
+          description: themeDescription
         }
       });
 
-      if (structureError || !structuredData?.success) {
-        throw new Error(structureError?.message || structuredData?.errors?.join(', ') || 'Failed to structure theme');
+      if (themeError || !themeData?.success) {
+        throw new Error(themeError?.message || themeData?.error || 'Failed to generate theme');
       }
 
       console.log('📡 Calling process-and-import-theme...');
@@ -523,7 +523,7 @@ export default function StoriesDashboard() {
         error
       } = await supabase.functions.invoke('process-and-import-theme', {
         body: {
-          rawJson: structuredData.data,
+          rawJson: themeData.themeData,
           idempotencyKey: `custom-theme-${themeId}`
         }
       });
