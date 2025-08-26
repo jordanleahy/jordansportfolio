@@ -119,6 +119,29 @@ serve(async (req) => {
       });
     }
 
+    // Validate theme_id and user_id are valid strings
+    if (typeof theme_id !== 'string' || typeof user_id !== 'string') {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'theme_id and user_id must be valid strings' 
+      }), {
+        status: HTTP_STATUS.BAD_REQUEST,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate theme_id is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(theme_id)) {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'theme_id must be a valid UUID' 
+      }), {
+        status: HTTP_STATUS.BAD_REQUEST,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Create Supabase client early to resolve category from theme_id
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     

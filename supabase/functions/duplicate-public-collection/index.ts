@@ -44,8 +44,19 @@ serve(async (req) => {
 
     const { theme_id }: DuplicationRequest = await req.json();
 
-    if (!theme_id) {
-      return new Response(JSON.stringify({ error: 'theme_id is required' }), {
+    if (!theme_id || typeof theme_id !== 'string') {
+      return new Response(JSON.stringify({ error: 'theme_id is required and must be a string' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate theme_id is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(theme_id)) {
+      return new Response(JSON.stringify({ 
+        error: 'theme_id must be a valid UUID' 
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

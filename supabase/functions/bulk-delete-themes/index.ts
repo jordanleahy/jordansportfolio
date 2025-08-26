@@ -68,6 +68,19 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate all themeIds are valid UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const invalidIds = themeIds.filter(id => !id || typeof id !== 'string' || !uuidRegex.test(id));
+    if (invalidIds.length > 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid theme IDs: All theme IDs must be valid UUIDs',
+          invalidIds 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log(`Processing bulk delete for user ${user.id}: ${themeIds.length} themes`);
 
     const results: DeleteResult[] = [];
